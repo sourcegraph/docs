@@ -42,7 +42,7 @@ export function Hero() {
 								developer experiences.
 							</p>
 							<div className="mt-8 flex gap-1 md:justify-center lg:justify-start">
-								<Button href="/getting-started">
+								<Button href="https://sourcegraph.com/sign-in?returnTo=/search" target="_blank">
 									Get started with Sourcegraph
 								</Button>
 								<Button

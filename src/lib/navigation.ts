@@ -21,24 +21,15 @@ export type NavigationItem = {
 };
 
 export const navigation: NavigationItem[] = [
-  {
-    separator: "Introduction",
-    topics: [
-      {
-        title: "Getting Started",
-        href: "/getting-started",
-        sections: [
-          { title: "Tour", href: "/getting-started/tour" },
-          {
-            title: "Cloud Instance", href: "/getting-started/cloud-instance",
-            subsections: [
-              { title: "Example", href: "/getting-started/cloud-instance/example", },
-            ]
-          },
-        ],
-      },
-    ],
-  },
+  // {
+  //   separator: "Introduction",
+  //   topics: [
+  //     {
+  //       title: "Getting Started",
+  //       href: "/getting-started",
+  //     },
+  //   ],
+  // },
   {
     separator: "Code AI",
     topics: [
