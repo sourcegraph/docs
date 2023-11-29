@@ -1,8 +1,7 @@
-import Link from 'next/link';
-import {LinkCard, LinkCards} from './LinkCards';
 import {Callout} from './Callout';
-import {QuickLink, QuickLinks} from './QuickLinks';
+import {LinkCard, LinkCards} from './LinkCards';
 import {ProductCard, ProductCards} from './ProductCards';
+import {QuickLink, QuickLinks} from './QuickLinks';
 
 const MdxComponents = {
 	QuickLinks,

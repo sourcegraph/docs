@@ -1,9 +1,9 @@
-import { Button } from '@/components/Button';
+import {Button} from '@/components/Button';
 import blurCyanImage from '@/images/blur-cyan.png';
 import blurIndigoImage from '@/images/blur-indigo.png';
-import cn from 'mxcn';
+import clsx from 'clsx';
 import Image from 'next/image';
-import { HeroBackground } from './HeroBackground';
+import {HeroBackground} from './HeroBackground';
 
 function TrafficLightsIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -31,39 +31,60 @@ export function Hero() {
 							priority
 						/>
 						<div className="relative">
-							<h1 className={cn("inline bg-gradient-to-r from-cyan-300 to-violet-300 bg-clip-text font-display text-5xl tracking-tight text-transparent", "xcody-heading bg-clip-text text-transparent")}>
+							<h1
+								className={clsx(
+									'inline bg-gradient-to-r from-cyan-300 to-violet-300 bg-clip-text font-display text-5xl tracking-tight text-transparent',
+									' bg-clip-text text-transparent'
+								)}
+							>
 								Documentation
 							</h1>
 
-							<p className={cn("mt-3 text-2xl tracking-tight text-slate-200",)}>
+							<p
+								className={clsx(
+									'mt-3 text-2xl tracking-tight text-slate-200'
+								)}
+							>
 								Sourcegraph is a Code Intelligence platform that
 								deeply understands your code, no matter how
 								large or where it’s hosted, to power modern
 								developer experiences.
 							</p>
 							<div className="mt-8 flex gap-1 md:justify-center lg:justify-start">
-								<Button href="https://sourcegraph.com/sign-in?returnTo=/search" target="_blank">
+								<Button
+									href="https://sourcegraph.com/sign-in?returnTo=/search"
+									target="_blank"
+								>
 									Get started with Sourcegraph
 								</Button>
 								<Button
-									className='-ml-2 flex items-center group'
+									className="group -ml-2 flex items-center"
 									target="_blank"
 									href="https://github.com/sourcegraph/sourcegraph"
 									variant="ghost"
 								>
 									Explore Code AI
-									<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="w-3 h-3 ml-2 transition-transform transform-gpu group-hover:translate-x-1">
-										<path stroke-linecap="round" strokeLinejoin="round" d="M11.25 4.5l7.5 7.5-7.5 7.5m-6-15l7.5 7.5-7.5 7.5" />
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke-width="1.5"
+										stroke="currentColor"
+										className="ml-2 h-3 w-3 transform-gpu transition-transform group-hover:translate-x-1"
+									>
+										<path
+											stroke-linecap="round"
+											strokeLinejoin="round"
+											d="M11.25 4.5l7.5 7.5-7.5 7.5m-6-15l7.5 7.5-7.5 7.5"
+										/>
 									</svg>
-
-
 								</Button>
 							</div>
 						</div>
 					</div>
 					<div className="relative -mb-32 -mt-16 hidden items-center justify-center sm:flex lg:static xl:pl-10">
 						<div className="inset-x-[-50vw] -bottom-48 -top-32 [mask-image:linear-gradient(transparent,white,white)] dark:[mask-image:linear-gradient(transparent,white,transparent)] lg:absolute lg:-bottom-32 lg:-top-4 lg:left-[calc(40%+1rem)] lg:right-0 lg:[mask-image:none] lg:dark:[mask-image:linear-gradient(white,white,transparent)] xl:left-[calc(49%+1rem)]">
-							<HeroBackground className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 lg:left-0 lg:translate-x-0 lg:translate-y-[-60%] filter grayscale-[40%]" />
+							<HeroBackground className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 grayscale-[40%] filter lg:left-0 lg:translate-x-0 lg:translate-y-[-60%]" />
 						</div>
 						<div className="relative">
 							<Image

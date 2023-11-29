@@ -1,11 +1,13 @@
 // contentlayer.config.ts
-import { defineDocumentType, makeSource } from 'contentlayer/source-files'
-import remarkGfm from 'remark-gfm'
-import rehypePrettyCode from 'rehype-pretty-code'
-import rehypeAutolinkHeadings from 'rehype-autolink-headings'
-import rehypeSlug from 'rehype-slug'
-const autolinkHeaderClass = `absolute opacity-40 transform -translate-x-4 right-full w-4 h-4 inline-flex`;
+import { defineDocumentType, makeSource } from 'contentlayer/source-files';
+import fs from 'fs';
 import { h, s } from 'hastscript';
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import rehypePrettyCode from 'rehype-pretty-code';
+import rehypeSlug from 'rehype-slug';
+import remarkGfm from 'remark-gfm';
+const autolinkHeaderClass = `absolute opacity-40 transform -translate-x-4 right-full w-4 h-4 inline-flex`;
+
 
 export const Post = defineDocumentType(() => ({
     name: 'Post',
@@ -21,7 +23,14 @@ export const Post = defineDocumentType(() => ({
 }))
 
 const prettyCodeOptions = {
-    theme: 'dracula',
+    // theme: 'dracula',
+    keepBackground: true,
+    theme: JSON.parse(
+        fs.readFileSync(
+            new URL('./../../../src/styles/shades-of-purple.json', import.meta.url),
+            'utf-8'
+        )
+    ),
 }
 
 const autoLinkOptions = {
