@@ -119,9 +119,9 @@ export const navigation: NavigationItem[] = [
         title: "Code Navigation",
         href: "/code_navigation",
         sections: [
-          { title: "How-to Guides", href: "/code_navigation/how-to-guides" },
+          { title: "How-to Guides", href: "/code_navigation/how-to" },
           { title: "Explanations", href: "/code_navigation/explanations" },
-          { title: "Reference", href: "/code_navigation/reference" },
+          { title: "References", href: "/code_navigation/references" },
         ],
       },
       {
@@ -130,20 +130,18 @@ export const navigation: NavigationItem[] = [
         sections: [
           { title: "Quickstart", href: "/code_monitoring/quickstart" },
           { title: "Explanations", href: "/code_monitoring/explanations" },
-          { title: "How-to Guides", href: "/code_monitoring/how-to-guides" },
+          { title: "How-to Guides", href: "/code_monitoring/how-tos" },
         ],
       },
       {
         title: "Code Ownership",
         href: "/own",
         sections: [
-          { title: "CODEOWNERS Format", href: "/own/codeowners-format" },
-          { title: "CODEOWNERS Ingestion", href: "/own/codeowners-ingestion" },
-          {
-            title: "Configuration Reference",
-            href: "/own/configuration_reference",
-          },
+          { title: "CODEOWNERS Format", href: "/own/codeowners_format" },
+          { title: "CODEOWNERS Ingestion", href: "/own/codeowners_ingestion" },
+          { title: "Configuration Reference", href: "/own/configuration_reference" },
           { title: "Assigned Ownership", href: "/own/assigned_ownership" },
+
         ],
       },
       {
@@ -152,8 +150,8 @@ export const navigation: NavigationItem[] = [
         sections: [
           { title: "Quickstart", href: "/code_insights/quickstart" },
           { title: "Explanations", href: "/code_insights/explanations" },
-          { title: "How-to Guides", href: "/code_insights/how-to-guides" },
-          { title: "Reference", href: "/code_insights/reference" },
+          { title: "How-to Guides", href: "/code_insights/how-tos" },
+          { title: "References", href: "/code_insights/references" },
         ],
       },
       {
@@ -194,10 +192,6 @@ export const navigation: NavigationItem[] = [
       {
         title: "Sourcegraph Cloud",
         href: "/cloud",
-        sections: [
-          { title: "Intro", href: "#" },
-          { title: "Examples", href: "#" },
-        ],
       },
       {
         title: "Integrations",
@@ -241,18 +235,10 @@ export const navigation: NavigationItem[] = [
       {
         title: "Sourcegraph GraphQL API",
         href: "/api/graphql",
-        sections: [
-          { title: "Intro", href: "#" },
-          { title: "Examples", href: "#" },
-        ],
       },
       {
         title: "Sourcegraph Stream API",
         href: "/api/stream_api",
-        sections: [
-          { title: "Intro", href: "#" },
-          { title: "Examples", href: "#" },
-        ],
       },
     ],
   },
@@ -262,10 +248,6 @@ export const navigation: NavigationItem[] = [
       {
         title: "SLAs & Premium Support",
         href: "/sla",
-        sections: [
-          { title: "Intro", href: "#" },
-          { title: "Examples", href: "#" },
-        ],
       },
       {
         title: "Support Center",

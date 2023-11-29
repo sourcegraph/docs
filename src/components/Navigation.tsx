@@ -1,10 +1,10 @@
-import cn from 'mxcn';
+import clsx from 'clsx';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import {usePathname} from 'next/navigation';
 
-import { NavigationItem, navigation } from '@/lib/navigation';
-import { ChevronRightIcon } from '@heroicons/react/20/solid';
-import { useEffect, useState } from 'react';
+import {NavigationItem, navigation} from '@/lib/navigation';
+import {ChevronRightIcon} from '@heroicons/react/20/solid';
+import {useEffect, useState} from 'react';
 
 export function Navigation({
 	className,
@@ -91,12 +91,11 @@ export function Navigation({
 	}, []);
 
 	return (
-		<nav className={cn('text-base lg:text-sm', className)}>
+		<nav className={clsx('text-base lg:text-sm', className)}>
 			<ul role="list" className="space-y-9">
 				{navigation.map(separator => (
 					<li key={separator.separator}>
-						{/* <h2 className={cn("text-slate-900 dark:text-slate-200 font-display text-xs uppercase tracking-wide")}> */}
-						<h2 className={cn("mb-8 lg:mb-3 font-semibold text-slate-900 dark:text-slate-200")}>
+						<h2 className="mb-8 font-semibold tracking-wide text-slate-900 dark:text-slate-200 lg:mb-3">
 							{separator.separator}
 						</h2>
 						<ul
@@ -112,11 +111,10 @@ export function Navigation({
 												onLinkClick;
 												handleTopicClick(topic.title);
 											}}
-											className={cn(
-												// 'flex w-full transition-colors',
-												'block hover:border-slate-400 dark:hover:border-slate-500 text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300',
+											className={clsx(
+												'flex w-full transition-colors',
 												topic.href === pathname
-													? 'dark:text-link text-link-light dark:before:bg-link before:bg-link-light '
+													? 'font-semibold text-link-light before:bg-link-light dark:text-link dark:before:bg-link'
 													: 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'
 											)}
 										>
@@ -124,7 +122,7 @@ export function Navigation({
 										</Link>
 										{topic.sections && (
 											<button
-												className="pointer-cursor hover:bg-slate-200 dark:hover:bg-slate-800 rounded-md p-1"
+												className="pointer-cursor rounded-md p-1 hover:bg-slate-200 dark:hover:bg-slate-800"
 												onClick={() =>
 													handleTopicClick(
 														topic.title,
@@ -133,8 +131,8 @@ export function Navigation({
 												}
 											>
 												<ChevronRightIcon
-													className={cn(
-														'pointer-cursor duration-400 text-slate-500 dark:text-slate-400 h-4 w-4 transition-transform',
+													className={clsx(
+														'pointer-cursor duration-400 h-4 w-4 text-slate-500 transition-transform dark:text-slate-400',
 														{
 															'rotate-90 transform':
 																expandedTopics.includes(
@@ -150,7 +148,7 @@ export function Navigation({
 										expandedTopics.includes(
 											topic.title
 										) && (
-											<ul className="border-slate-100 dark:border-slate-800 lg:border-slate-200 my-4 space-y-2  border-l-2">
+											<ul className="my-4 space-y-2 border-l-2 border-slate-100 dark:border-slate-800  lg:border-slate-200">
 												{topic.sections.map(section => (
 													<>
 														<li
@@ -169,12 +167,12 @@ export function Navigation({
 																			true
 																		);
 																	}}
-																	className={cn(
+																	className={clsx(
 																		'flex w-full items-center py-0.5 pl-3.5 transition-colors before:pointer-events-none before:absolute before:-left-0.5 before:h-full before:w-[2px]',
 																		section.href ===
 																			pathname
-																			? 'dark:text-link text-link-light dark:before:bg-link before:bg-link-light font-semibold'
-																			: 'text-slate-500 before:bg-slate-900 hover:text-slate-900 dark:text-slate-400 dark:before:bg-slate-100 dark:hover:text-slate-100 before:hidden hover:before:block'
+																			? 'font-semibold text-link-light before:bg-link-light dark:text-link dark:before:bg-link'
+																			: 'text-slate-500 before:hidden before:bg-slate-900 hover:text-slate-900 hover:before:block dark:text-slate-400 dark:before:bg-slate-100 dark:hover:text-slate-100'
 																	)}
 																>
 																	{
@@ -183,7 +181,7 @@ export function Navigation({
 																</Link>
 																{section.subsections && (
 																	<button
-																		className="pointer-cursor hover:bg-slate-200 dark:hover:bg-slate-800 rounded-md p-1"
+																		className="pointer-cursor rounded-md p-1 hover:bg-slate-200 dark:hover:bg-slate-800"
 																		onClick={() =>
 																			handleSectionClick(
 																				section.title
@@ -191,8 +189,8 @@ export function Navigation({
 																		}
 																	>
 																		<ChevronRightIcon
-																			className={cn(
-																				'pointer-cursor duration-400 text-slate-500 dark:text-slate-400 h-4 w-4 transition-transform',
+																			className={clsx(
+																				'pointer-cursor duration-400 h-4 w-4 text-slate-500 transition-transform dark:text-slate-400',
 																				{
 																					'rotate-90 transform':
 																						expandedSections.includes(
@@ -209,7 +207,7 @@ export function Navigation({
 															expandedSections.includes(
 																section.title
 															) && (
-																<ul className="border-slate-100 dark:border-slate-800 lg:border-slate-200 my-4 ml-4 space-y-2  border-l-2">
+																<ul className="my-4 ml-4 space-y-2 border-l-2 border-slate-100 dark:border-slate-800  lg:border-slate-200">
 																	{section.subsections.map(
 																		subsection => (
 																			<li
@@ -225,12 +223,12 @@ export function Navigation({
 																					onClick={
 																						onLinkClick
 																					}
-																					className={cn(
+																					className={clsx(
 																						'flex items-center py-0.5 pl-3.5 transition-colors before:pointer-events-none before:absolute before:-left-0.5 before:h-full before:w-[2px]',
 																						subsection.href ===
 																							pathname
-																							? 'dark:text-link text-link-light dark:before:bg-link before:bg-link-light font-semibold'
-																							: 'text-slate-500 before:bg-slate-900 hover:text-slate-900 dark:text-slate-400 dark:before:bg-slate-100 dark:hover:text-slate-100 before:hidden hover:before:block'
+																							? 'font-semibold text-link-light before:bg-link-light dark:text-link dark:before:bg-link'
+																							: 'text-slate-500 before:hidden before:bg-slate-900 hover:text-slate-900 hover:before:block dark:text-slate-400 dark:before:bg-slate-100 dark:hover:text-slate-100'
 																					)}
 																				>
 																					{

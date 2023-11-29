@@ -32,23 +32,6 @@ export default {
       },
       'link-underline': '#2a7c90',
       'link-underline-light': '#85d1db',
-      // Brand Colors
-      black: '#0F111A',
-      white: colors.white,
-      'sgray': {
-        100: '#F5F7FB',
-        200: '#DBE2F0',
-        300: '#A6B6D9',
-        500: '#343A4D',
-      },
-      'xviolet': {
-        300: '#CE9CFF',
-        400: '#6112A3',
-        500: '#A112FF',
-        600: '#6112A3',
-        700: '#270741',
-        800: '#1E0632'
-      },
       violet: {
         100: '#EEDFFF',
         200: '#E8D1FF',
@@ -60,7 +43,24 @@ export default {
         750: '#1e0632',
         800: '#160425',
       },
-      'blurple': '#DBDBFF',
+      // Brand Colors
+      black: '#0F111A',
+      white: colors.white,
+      'sggray': {
+        100: '#F5F7FB',
+        200: '#DBE2F0',
+        300: '#A6B6D9',
+        500: '#343A4D',
+      },
+      'sgviolet': {
+        300: '#CE9CFF',
+        400: '#6112A3',
+        500: '#A112FF',
+        600: '#6112A3',
+        700: '#270741',
+        800: '#1E0632'
+      },
+      blurple: '#DBDBFF',
       // Tailwind colors
       gray: colors.gray,
       amber: colors.amber,
@@ -72,6 +72,13 @@ export default {
       indigo: colors.indigo,
       slate: colors.slate,
       yellow: colors.yellow,
+      // Shades of Purple code theme,
+      sop: {
+        100: '#A599E9',
+        500: '#4D21FC',
+        700: '#2D2B55',
+        800: '#1E1E3F',
+      }
     },
     extend: {
       fontFamily: {
