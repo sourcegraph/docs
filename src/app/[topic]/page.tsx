@@ -3,7 +3,6 @@ import {allPosts} from 'contentlayer/generated';
 import {getMDXComponent} from 'next-contentlayer/hooks';
 import {Prose} from '@/components/Prose';
 import {DocsLayout} from '@/components/DocsLayout';
-import {DocsHeader} from '@/components/DocsHeader';
 import {PrevNextLinks} from '@/components/PrevNextLinks';
 import {TableOfContents} from '@/components/TableOfContents';
 import Link from 'next/link';
@@ -33,13 +32,8 @@ const PostLayout = ({params}: {params: {topic: string}}) => {
 			<div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none lg:pl-8 lg:pr-0 xl:px-16">
 				<Breadcrumbs topic={params.topic} />
 				<article>
-					{/* <DocsHeader title={'Title'} /> */}
 					<Prose>
 						<Content components={MdxComponents} />
-						{/* <div
-							className="[&>*:last-child]:mb-0 [&>*]:mb-3"
-							dangerouslySetInnerHTML={{__html: post.body.html}}
-						/> */}
 					</Prose>
 				</article>
 				<PrevNextLinks />

@@ -54242,7 +54242,8 @@ const PostLayout = ({ params }: Props) => {
                                             </p>
                                             <ul>
                                               <li>
-                                                <code>/*</code>
+                                                {/* If you want to render the text /* in JSX without it being treated as a comment, please use {'/*'}. */}
+                                                <code>{'/*'}</code>
                                   </li>
                                   <li>
                                     <code>/client/*</code>

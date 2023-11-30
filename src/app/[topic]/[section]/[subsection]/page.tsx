@@ -3,7 +3,6 @@ import {allPosts} from 'contentlayer/generated';
 import {getMDXComponent} from 'next-contentlayer/hooks';
 import {Prose} from '@/components/Prose';
 import {DocsLayout} from '@/components/DocsLayout';
-import {DocsHeader} from '@/components/DocsHeader';
 import {PrevNextLinks} from '@/components/PrevNextLinks';
 import {TableOfContents} from '@/components/TableOfContents';
 import {Breadcrumbs} from '@/components/Breadcrumbs';
@@ -47,14 +46,8 @@ const PostLayout = ({params}: Props) => {
 					subsection={params.subsection}
 				/>
 				<article>
-					{/* <DocsHeader title={'Cody Custom Commands'} /> */}
 					<Prose>
 						<Content components={MdxComponents} />
-
-						{/* <div
-							className="[&>*:last-child]:mb-0 [&>*]:mb-3"
-							dangerouslySetInnerHTML={{__html: post.body.html}}
-						/> */}
 					</Prose>
 				</article>
 				<PrevNextLinks />

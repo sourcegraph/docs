@@ -3,7 +3,6 @@ import {allPosts} from 'contentlayer/generated';
 import {getMDXComponent} from 'next-contentlayer/hooks';
 import {Prose} from '@/components/Prose';
 import {DocsLayout} from '@/components/DocsLayout';
-import {DocsHeader} from '@/components/DocsHeader';
 import {PrevNextLinks} from '@/components/PrevNextLinks';
 import {TableOfContents} from '@/components/TableOfContents';
 import {Breadcrumbs} from '@/components/Breadcrumbs';
