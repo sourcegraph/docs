@@ -4,7 +4,7 @@ import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 import clsx from 'clsx';
 
-import {navigation} from '@/lib/navigation';
+import {navigation} from '@/data/navigation';
 
 function ArrowIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (

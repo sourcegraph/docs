@@ -1,9 +1,9 @@
-import {Button} from '@/components/Button';
+import { Button } from '@/components/Button';
 import blurCyanImage from '@/images/blur-cyan.png';
 import blurIndigoImage from '@/images/blur-indigo.png';
 import clsx from 'clsx';
 import Image from 'next/image';
-import {HeroBackground} from './HeroBackground';
+import { HeroBackground } from './HeroBackground';
 
 function TrafficLightsIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -68,12 +68,12 @@ export function Hero() {
 										xmlns="http://www.w3.org/2000/svg"
 										fill="none"
 										viewBox="0 0 24 24"
-										stroke-width="1.5"
+										strokeWidth="1.5"
 										stroke="currentColor"
 										className="ml-2 h-3 w-3 transform-gpu transition-transform group-hover:translate-x-1"
 									>
 										<path
-											stroke-linecap="round"
+											strokeLinecap="round"
 											strokeLinejoin="round"
 											d="M11.25 4.5l7.5 7.5-7.5 7.5m-6-15l7.5 7.5-7.5 7.5"
 										/>

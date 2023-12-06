@@ -6,7 +6,7 @@ Create a batch change that changes wording in every repository.
 
 ### Introduction
 
-This tutorial shows you how to create [a batch spec](../explanations/introduction_to_batch_changes.md#batch-spec) that replaces the words `whitelist` and `blacklist` with `allowlist` and `denylist` in every Markdown file across your entire code base.
+This tutorial shows you how to create [a batch spec](/batch_changes/explanations/introduction_to_batch_changes#batch-spec) that replaces the words `whitelist` and `blacklist` with `allowlist` and `denylist` in every Markdown file across your entire code base.
 
 The batch spec can be easily changed to search and replace other terms in other file types.
 
@@ -16,8 +16,8 @@ The batch spec can be easily changed to search and replace other terms in other 
 
 We recommend using the latest version of Sourcegraph when working with Batch Changes and that you have a basic understanding of how to create batch specs and run them. See the following documents for more information:
 
-1. ["Quickstart"](../quickstart.md)
-1. ["Introduction to Batch Changes"](../explanations/introduction_to_batch_changes.md)
+1. ["Quickstart"](/batch_changes/quickstart)
+1. ["Introduction to Batch Changes"](/batch_changes/explanations/introduction_to_batch_changes)
 
 ### Create the batch spec
 
@@ -34,10 +34,10 @@ on:
 
 # In each repository
 steps:
-  # find all *.md or *.markdown files, that are not in a vendor or node_modules
+  # find all * or *.markdown files, that are not in a vendor or node_modules
   # folder, and replace the terms in them:
   - run: |
-      find . -type f \( -name '*.md' -or -name '*.markdown' \) -not -path "*/vendor/*" -not -path "*/node_modules/*" |\
+      find . -type f \( -name '*' -or -name '*.markdown' \) -not -path "*/vendor/*" -not -path "*/node_modules/*" |\
       xargs sed -i 's/whitelist/allowlist/g; s/blacklist/denylist/g'
     container: alpine:3
 
@@ -63,7 +63,7 @@ changesetTemplate:
 1. Examine the preview. Confirm that the changes are what you intended. If not, edit your batch spec and then rerun the command above.
     <img src="https://sourcegraphstatic.com/docs/images/batch_changes/use_allowlist_denylist_wording_preview.png" />
 1. Click the **Apply** button to create the batch change.
-1. Feel free to then publish the changesets (i.e. create pull requests and merge requests) by [modifying the `published` attribute in the batch spec](../references/batch_spec_yaml_reference.md#changesettemplate-published) and re-running the `src batch preview` command.
+1. Feel free to then publish the changesets (i.e. create pull requests and merge requests) by [modifying the `published` attribute in the batch spec](/batch_changes/references/batch_spec_yaml_reference#changesettemplate-published) and re-running the `src batch preview` command.
 
 ### Using `ruplacer` to replace terms in multiple case styles
 
@@ -74,7 +74,7 @@ The easiest way to use `ruplacer` in our batch spec would look like this:
 ```yaml
 steps:
   - run: |
-      find . -type f \( -name '*.md' -or -name '*.markdown' \) -not -path "*/vendor/*" -not -path "*/node_modules/*" >> /tmp/find_result.txt \
+      find . -type f \( -name '*' -or -name '*.markdown' \) -not -path "*/vendor/*" -not -path "*/node_modules/*" >> /tmp/find_result.txt \
       && cat /tmp/find_result.txt | while read file;
       do
         ruplacer --subvert whitelist allowlist --go ${file} || echo "nothing to replace";

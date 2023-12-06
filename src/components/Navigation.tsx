@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 
-import {NavigationItem, navigation} from '@/lib/navigation';
+import {NavigationItem, navigation} from '@/data/navigation';
 import {ChevronRightIcon} from '@heroicons/react/20/solid';
 import {useEffect, useState} from 'react';
 

@@ -4,11 +4,11 @@ import {getMDXComponent} from 'next-contentlayer/hooks';
 import {Prose} from '@/components/Prose';
 import {DocsLayout} from '@/components/DocsLayout';
 import {PrevNextLinks} from '@/components/PrevNextLinks';
-import {TableOfContents} from '@/components/TableOfContents';
 import {Breadcrumbs} from '@/components/Breadcrumbs';
 import {QuickLink, QuickLinks} from '@/components/QuickLinks';
 import MdxComponents from '@/components/MdxComponents';
 import {notFound} from 'next/navigation';
+import {TableOfContents} from '@/components/TableofContents';
 
 export const generateStaticParams = async () =>
 	allPosts.map(post => {
@@ -52,6 +52,7 @@ const PostLayout = ({params}: Props) => {
 				</article>
 				<PrevNextLinks />
 			</div>
+			<TableOfContents headings={post.headings} />
 		</>
 	);
 };

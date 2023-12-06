@@ -2,15 +2,15 @@
 
     <Callout type="note" title="Note">This is an all-new feature. We appreciate your feedback.</Callout>
 
-> NOTE: Running a batch spec [server-side](../explanations/server_side.md) with file mounts is
+> NOTE: Running a batch spec [server-side](/batch_changes/explanations/server_side) with file mounts is
 > currently only supported with <a href="https://github.com/sourcegraph/src-cli">Sourcegraph CLI</a>.
 
-File [`mounts`](../references/batch_spec_yaml_reference.md#steps-mount) are a powerful way to run custom files without
+File [`mounts`](/batch_changes/references/batch_spec_yaml_reference#steps-mount) are a powerful way to run custom files without
 directly embedding the files in your batch spec.
 
 ## Writing a batch spec
 
-In the following example, you have a Python script that appends "Hello World" to all `README.md` files.
+In the following example, you have a Python script that appends "Hello World" to all `README` files.
 
 ```python
 #!/usr/bin/env python3
@@ -18,8 +18,8 @@ import os.path
 
 
 def main():
-  if os.path.exists('README.md'):
-    with open('README.md', 'a') as f:
+  if os.path.exists('README'):
+    with open('README', 'a') as f:
       f.write('\nHello World')
 
 
@@ -28,16 +28,16 @@ if __name__ == "__main__":
 ```
 
 To use the Python script in your batch change, mount the script in a `step` using
-the [`mounts`](../references/batch_spec_yaml_reference.md#steps-mount) field. The following is an example of mounting
+the [`mounts`](/batch_changes/references/batch_spec_yaml_reference#steps-mount) field. The following is an example of mounting
 the above Python script in a `step`.
 
 ```yaml
 name: hello-world
 description: Add Hello World to READMEs
 
-# Find all repositories that contain a README.md file.
+# Find all repositories that contain a README file.
 on:
-  - repositoriesMatchingQuery: file:README.md
+  - repositoriesMatchingQuery: file:README
 
 # In each repository, run this command. Each repository's resulting diff is captured.
 steps:
@@ -53,7 +53,7 @@ changesetTemplate:
   body: My first batch change!
   branch: hello-world # Push the commit to this branch.
   commit:
-    message: Append Hello World to all README.md files
+    message: Append Hello World to all README files
   published: false # Do not publish any changes to the code hosts yet
 ```
 
@@ -70,7 +70,7 @@ Note that a `container` appropriate for the mounted file has also been chosen fo
 ## Running server-side
 
 After writing the batch spec, use the <a href="https://github.com/sourcegraph/src-cli">Sourcegraph CLI (`src`)</a>
-command [`remote`](../../cli/references/batch/remote.md) to execute the batch spec server-side.
+command [`remote`](/cli/references/batch/remote) to execute the batch spec server-side.
 
 ```shell
 src batch remote -f batch-spec.yml

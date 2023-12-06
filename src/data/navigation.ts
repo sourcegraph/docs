@@ -81,7 +81,7 @@ export const navigation: NavigationItem[] = [
             title: "Use Cases", href: "/cody/use-cases/generate-unit-tests",
             subsections: [
               { title: "Generate Unit Tests", href: "/cody/use-cases/generate-unit-tests", },
-              { title: "Build UI", href: "/cody/use-cases/build-ui", },
+              // { title: "Build UI", href: "/cody/use-cases/build-ui", },
             ]
           },
           { title: "Usage and Pricing", href: "/cody/usage-and-pricing" },
@@ -249,21 +249,17 @@ export const navigation: NavigationItem[] = [
         title: "SLAs & Premium Support",
         href: "/sla",
       },
-      {
-        title: "Support Center",
-        href: "#",
-        sections: [
-          { title: "Intro", href: "#" },
-          { title: "Examples", href: "#" },
-        ],
-      },
+      // {
+      //   title: "Support Center",
+      //   href: "#",
+      //   sections: [
+      //     { title: "Intro", href: "#" },
+      //     { title: "Examples", href: "#" },
+      //   ],
+      // },
       {
         title: "Changelog",
-        href: "/CHANGELOG",
-        sections: [
-          { title: "Intro", href: "#" },
-          { title: "Examples", href: "#" },
-        ],
+        href: "CHANGELOG",
       },
     ],
   },

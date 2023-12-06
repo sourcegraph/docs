@@ -1,6 +1,6 @@
 # batch spec YAML reference
 
-[Sourcegraph Batch Changes](../index.md) use [batch specs](../explanations/introduction_to_batch_changes.md#batch-spec) to define batch changes.
+[Sourcegraph Batch Changes](/batch_changes/) use [batch specs](/batch_changes/explanations/introduction_to_batch_changes#batch-spec) to define batch changes.
 
 This page is a reference guide to the batch spec YAML format in which batch specs are defined. If you're new to YAML and want a short introduction, see "[Learn YAML in five minutes](https://learnxinyminutes.com/docs/yaml/)."
 
@@ -57,13 +57,13 @@ A Sourcegraph search query that matches a set of repositories (and branches). Ea
 
 Your search query should answer the question "where do I want to run this batch change?". Search result matches for things like commits, symbols, or file owners will be ignored.
 
-See "[Code search](../../code_search/index.md)" for more information on Sourcegraph search queries.
+See "[Code search](/code_search/)" for more information on Sourcegraph search queries.
 
 ### Examples
 
 ```yaml
 on:
-  - repositoriesMatchingQuery: file:README.md -repo:github.com/sourcegraph/src-cli
+  - repositoriesMatchingQuery: file:README -repo:github.com/sourcegraph/src-cli
 ```
 
 ```yaml
@@ -124,7 +124,7 @@ The sequence of commands to run (for each repository branch matched in the `on` 
 
 ```yaml
 steps:
-  - run: echo "Hello World!" >> README.md
+  - run: echo "Hello World!" >> README
     container: alpine:3
 ```
 
@@ -179,7 +179,7 @@ In this case, `steps.env` is an object, where the key is the name of the environ
 
 ```yaml
 steps:
-  - run: echo $MESSAGE >> README.md
+  - run: echo $MESSAGE >> README
     container: alpine:3
     env:
       MESSAGE: Hello world!
@@ -190,8 +190,8 @@ steps:
 In this case, `steps.env` is an array. Each array item is either:
 
 1. An object with a single property, in which case the key is used as the environment variable name and the value the value, or
-2. For src-cli execution: A string that defines an environment variable to include from the environment `src` is being run within. This is useful to define secrets that you don't want to include in the spec file, but this makes the spec dependent on your environment, means that the local execution cache will be invalidated each time the environment variable changes, and means that the batch spec file is no longer [the sole source of truth intended by the Batch Changes design](../explanations/batch_changes_design.md).
-3. For server-side execution: A string that defines a secret value to expose as an environment variable. Follow [the guide on executor secrets](../../admin/executors/executor_secrets.md) to set them up. The editor will suggest available secrets. This is useful to use secret values that you don't want to include in the spec file. The execution cache will be invalidated each time the secret value changes, and means that the batch spec file is no longer [the sole source of truth intended by the Batch Changes design](../explanations/batch_changes_design.md).
+2. For src-cli execution: A string that defines an environment variable to include from the environment `src` is being run within. This is useful to define secrets that you don't want to include in the spec file, but this makes the spec dependent on your environment, means that the local execution cache will be invalidated each time the environment variable changes, and means that the batch spec file is no longer [the sole source of truth intended by the Batch Changes design](/batch_changes/explanations/batch_changes_design).
+3. For server-side execution: A string that defines a secret value to expose as an environment variable. Follow [the guide on executor secrets](/admin/executors/executor_secrets) to set them up. The editor will suggest available secrets. This is useful to use secret values that you don't want to include in the spec file. The execution cache will be invalidated each time the secret value changes, and means that the batch spec file is no longer [the sole source of truth intended by the Batch Changes design](/batch_changes/explanations/batch_changes_design).
 
 #### Examples
 
@@ -199,24 +199,24 @@ This example is functionally the same as the [object](#environment-object) examp
 
 ```yaml
 steps:
-  - run: echo $MESSAGE >> README.md
+  - run: echo $MESSAGE >> README
     container: alpine:3
     env:
       - MESSAGE: Hello world!
 ```
 
-This example pulls in the `USER` environment variable, or for server-side uses the executor secret called `USER`, and uses it to construct the line that will be appended to `README.md`:
+This example pulls in the `USER` environment variable, or for server-side uses the executor secret called `USER`, and uses it to construct the line that will be appended to `README`:
 
 ```yaml
 steps:
-  - run: echo $MESSAGE from $USER >> README.md
+  - run: echo $MESSAGE from $USER >> README
     container: alpine:3
     env:
       - MESSAGE: Hello world!
       - USER
 ```
 
-For instance, if `USER` is set to `adam`, this would append `Hello world! from adam` to `README.md`.
+For instance, if `USER` is set to `adam`, this would append `Hello world! from adam` to `README`.
 
 ## `steps.files`
 
@@ -232,7 +232,7 @@ Files to create on the host machine and mount into the container when running `s
 
 ```yaml
 steps:
-  - run: cat /tmp/my-temp-file.txt >> README.md
+  - run: cat /tmp/my-temp-file.txt >> README
     container: alpine:3
     files:
       /tmp/my-temp-file.txt: Hello world!
@@ -334,7 +334,7 @@ Possible values: `text`, `yaml`, `json`. Default is `text`.
 
 Condition to check before executing the step. If the value of the `if:` attribute is `true` (boolean) or `"true"` (string) then the step is executed in the given repository (or workspace, in case [workspaces](#workspaces) are used). Otherwise the step is skipped.
 
-As an optimization, the [Sourcegraph CLI](../../cli/index.md) tries to evaluate the condition _before_ starting to execute any `steps`. If the condition can be evaluated ahead of time and the result of the evaluation is false then the execution of the step won't be attempted for the repository, which leads to better cache utilization.
+As an optimization, the [Sourcegraph CLI](/cli/) tries to evaluate the condition _before_ starting to execute any `steps`. If the condition can be evaluated ahead of time and the result of the evaluation is false then the execution of the step won't be attempted for the repository, which leads to better cache utilization.
 
 Ahead-of-time evaluation is possible if the condition contains only static data. Example: `if: ${{ eq repository.name "github.com/my-org/my-repo" }}`. The repository name is known before the execution of the steps, so evaluation succeeds and Sourcegraph CLI will not include the given step in the list of steps to execute for repositories that don't have the matching name. That in turn allows the modification of this step's `run` attribute, for example, without invalidating the cache for the repositories in which it's never executed.
 
@@ -712,15 +712,15 @@ changesetTemplate:
     - github.com/sourcegraph/*@my-branch-name-2: false
 ```
 
-(Multiple changesets in a single repository can be produced, for example, [per project in a monorepo](../how-tos/creating_changesets_per_project_in_monorepos.md) or by [transforming large changes into multiple changesets](../how-tos/creating_multiple_changesets_in_large_repositories.md)).
+(Multiple changesets in a single repository can be produced, for example, [per project in a monorepo](/batch_changes/how-tos/creating_changesets_per_project_in_monorepos) or by [transforming large changes into multiple changesets](/batch_changes/how-tos/creating_multiple_changesets_in_large_repositories)).
 
 ## `changesetTemplate.fork`
 
 <span class="badge badge-note">Sourcegraph 5.1+</span>
 
-Whether or not each changeset should be created on a fork of the upstream repository in the namespace of the user publishing them (or the namespace of the service account if [global credentials](../how-tos/configuring_credentials.md#global-service-account-tokens) are used).
+Whether or not each changeset should be created on a fork of the upstream repository in the namespace of the user publishing them (or the namespace of the service account if [global credentials](/batch_changes/how-tos/configuring_credentials#global-service-account-tokens) are used).
 
-If the site config setting [`batchChanges.enforceForks`](../../admin/config/batch_changes.md#forks) is enabled, this value will override the setting. For example, explicitly setting `fork: false` when the site config setting is enabled will result in changesets being published directly to the target repos. If omitted, the site config setting will be used.
+If the site config setting [`batchChanges.enforceForks`](/admin/config/batch_changes#forks) is enabled, this value will override the setting. For example, explicitly setting `fork: false` when the site config setting is enabled will result in changesets being published directly to the target repos. If omitted, the site config setting will be used.
 
 The name of the fork Sourcegraph creates will be prefixed with the name of the original repo's namespace in order to prevent potential repo name collisions. For example, a batch spec targeting `github.com/my-org/project` would create or use any existing fork by the name `github.com/user/my-org-project`.
 

@@ -8,9 +8,9 @@ This feature is in beta and might change in the future.
 
 Batch changes can produce a lot of changes in a single repository. In order to make reviewing and merging the changes easier, it can be helpful to split the changes up into multiple changesets.
 
-That can be done by using [`transformChanges`](../references/batch_spec_yaml_reference.md#transformchanges) in the batch spec to group the changes produced in one single repository by directory and create a changeset for each group.
+That can be done by using [`transformChanges`](/batch_changes/references/batch_spec_yaml_reference#transformchanges) in the batch spec to group the changes produced in one single repository by directory and create a changeset for each group.
 
-> NOTE: In some monorepos it makes more sense to run the batch spec [`steps`][steps] _per project_. Take a look at "[Creating changesets per project in monorepos](./creating_changesets_per_project_in_monorepos.md)" to find out how to use the [`workspaces`][workspaces] property to do that.
+> NOTE: In some monorepos it makes more sense to run the batch spec `steps` per project. Take a look at "[Creating changesets per project in monorepos](/batch_changes/how-tos/creating_changesets_per_project_in_monorepos)" to find out how to use the `workspaces` property to do that.
 
 ## Using `transformChanges`
 
@@ -20,13 +20,13 @@ The following batch spec uses the `transformChanges` property to create up to 4 
 name: hello-world
 description: Add Hello World to READMEs
 
-# Find all repositories that contain a README.md file.
+# Find all repositories that contain a README file.
 on:
-  - repositoriesMatchingQuery: file:README.md
+  - repositoriesMatchingQuery: file:README
 
 # In each repository, run this command. Each repository's resulting diff is captured.
 steps:
-  - run: IFS=$'\n'; echo Hello World | tee -a $(find -name README.md)
+  - run: IFS=$'\n'; echo Hello World | tee -a $(find -name README)
     container: alpine:3
 
 # Transform the changes produced in each repository.
@@ -51,7 +51,7 @@ changesetTemplate:
   branch: hello-world # This branch is the default branch and will be
                       # overwritten for each additional changeset.
   commit:
-    message: Append Hello World to all README.md files
+    message: Append Hello World to all README files
   published: false # Do not publish any changes to the code hosts yet
 ```
 
@@ -68,9 +68,9 @@ In case no changes have been made in a `directory` specified in a `group`, no ad
 
 If the optional `repository` property is specified only the changes in that repository will be grouped.
 
-See the [batch spec YAML reference on `transformChanges`](../references/batch_spec_yaml_reference.md#transformchanges) for more details.
+See the [batch spec YAML reference on `transformChanges`](/batch_changes/references/batch_spec_yaml_reference#transformchanges) for more details.
 
 {/* References for easier reading of text above:
 
-[steps]: ../references/batch_spec_yaml_reference.md#steps
-[workspaces]: ../references/batch_spec_yaml_reference.md#workspaces */}
+[steps]: /batch_changes/references/batch_spec_yaml_reference#steps
+[workspaces]: /batch_changes/references/batch_spec_yaml_reference#workspaces */}

@@ -1,6 +1,6 @@
 # How `src` executes a batch spec
 
-This document is meant to help with debugging and troubleshooting the writing and execution of batch specs with [Sourcegraph CLI `src`](../../cli/index.md).
+This document is meant to help with debugging and troubleshooting the writing and execution of batch specs with [Sourcegraph CLI `src`](/cli/).
 
 It explains what happens under the hood when a user uses applies or previews a batch spec by running `src batch apply` or `src batch preview`.
 
@@ -31,7 +31,7 @@ It validates the batch spec against its [schema](https://github.com/sourcegraph/
 
 `src` resolves the given namespace in which to apply/preview the batch spec by sending a GraphQL request to the Sourcegraph instance to fetch the ID for the given namespace name.
 
-If no namespace is specified with `-namespace` (or `-n`) then the currently authenticated user is used as the namespace. See "[Connect to Sourcegraph](../../cli/quickstart.md#connect-to-sourcegraph)" in the CLI docs for details on how to authenticate.
+If no namespace is specified with `-namespace` (or `-n`) then the currently authenticated user is used as the namespace. See "[Connect to Sourcegraph](/cli/quickstart#connect-to-sourcegraph)" in the CLI docs for details on how to authenticate.
 
 ## Preparing container images
 
@@ -50,7 +50,7 @@ With an `on` property like this
 ```yaml
 on:
   - repositoriesMatchingQuery: lang:go fmt.Sprintf("%d", :[v]) patterntype:structural -file:vendor
-  - repositoriesMatchingQuery: repohasfile:README.md
+  - repositoriesMatchingQuery: repohasfile:README
   - repository: github.com/sourcegraph/sourcegraph
   - repository: github.com/sourcegraph/automation-testing
     branch: thorstens-test-branch
@@ -61,7 +61,7 @@ on:
 1. For each `repositoriesMatchingQuery` it will:
 	1. Send a request to the Sourcegraph API to execute the search query.
 	1. Collect each result's _repository_: the ID, the name, the default branch and the current revision of the default branch. If the search result _is a repository result_ (i.e. a search query of `type:repo` only produces repositories) that's used. If it's a file match the file match's repository is used.
-	1. _Optional_: if the results are file matches, then their path in the repository is also saved, so that they can be used in the `steps` with [templating](../references/batch_spec_templating.md).
+	1. _Optional_: if the results are file matches, then their path in the repository is also saved, so that they can be used in the `steps` with [templating](/batch_changes/references/batch_spec_templating).
 1. For each `repository` without a `branch` it will:
 	1. Send a request to the Sourcegraph API to get the repository's ID, name, its default branch and the current revision of the default branch.
 1. For each `repository` _with_ a `branch` it will:
@@ -153,7 +153,7 @@ A changeset spec is a description of what the changeset should look like.
 
 ## Importing changesets
 
-If the batch spec contains [`importChangesets`](../references/batch_spec_yaml_reference.md#importchangesets) then `src` goes through the list of `importChangesets` and for each entry it:
+If the batch spec contains [`importChangesets`](/batch_changes/references/batch_spec_yaml_reference#importchangesets) then `src` goes through the list of `importChangesets` and for each entry it:
 
 1. Resolves the repository name, trying to get to get an ID, base branch, and revision for the given repository name.
 1. Parses the `externalIDs`, checking that they're valid strings or numbers.

@@ -1,21 +1,21 @@
 # Quickstart for Batch Changes
 
-Get started and create your first [batch change](index.md) in 10 minutes or less.
+Get started and create your first [batch change](/batch_changes/) in 10 minutes or less.
 
 ## Introduction
 
-In this guide, you'll create a Sourcegraph batch change that appends text to `README.md` files in all of your repositories.
+In this guide, you'll create a Sourcegraph batch change that appends text to `README` files in all of your repositories.
 
 For more information about Batch Changes, watch the [Batch Changes demo video](https://www.youtube.com/watch?v=EfKwKFzOs3E).
 
 ## Requirements
 
-- A Sourcegraph instance with some repositories in it. See "[Quick install](../index.md#quick-install)" on how to set up a Sourcegraph instance.
-- A local environment matching "[Requirements](./references/requirements.md)" to create batch changes with the Sourcegraph CLI.
+- A Sourcegraph instance with some repositories in it. See "[Quick install](/#quick-install)" on how to set up a Sourcegraph instance.
+- A local environment matching "[Requirements](/batch_changes/references/requirements)" to create batch changes with the Sourcegraph CLI.
 
 ## Install the Sourcegraph CLI
 
-In order to create batch changes we need to [install the Sourcegraph CLI](../cli/index.md) (`src`).
+In order to create batch changes we need to [install the Sourcegraph CLI](/cli/) (`src`).
 
 1. Install the version of `src` that's compatible with your Sourcegraph instance:
 
@@ -43,7 +43,7 @@ Once `src login` reports that you're authenticated, we're ready for the next ste
 
 A **batch spec** is a YAML file that defines a batch change. It specifies which changes should be made in which repositories.
 
-See the ["batch spec YAML reference"](references/batch_spec_yaml_reference.md) for details.
+See the ["batch spec YAML reference"](/batch_changes/references/batch_spec_yaml_reference) for details.
 
 Save the following batch spec as `hello-world.batch.yaml`:
 
@@ -51,13 +51,13 @@ Save the following batch spec as `hello-world.batch.yaml`:
 name: hello-world
 description: Add Hello World to READMEs
 
-# Find all repositories that contain a README.md file.
+# Find all repositories that contain a README file.
 on:
-  - repositoriesMatchingQuery: file:README.md
+  - repositoriesMatchingQuery: file:README
 
 # In each repository, run this command. Each repository's resulting diff is captured.
 steps:
-  - run: IFS=$'\n'; echo Hello World | tee -a $(find -name README.md)
+  - run: IFS=$'\n'; echo Hello World | tee -a $(find -name README)
     container: alpine:3
 
 # Describe the changeset (e.g., GitHub pull request) you want for each repository.
@@ -66,10 +66,10 @@ changesetTemplate:
   body: My first batch change!
   branch: hello-world # Push the commit to this branch.
   commit:
-    message: Append Hello World to all README.md files
+    message: Append Hello World to all README files
 ```
 
-The commits you create here will use the git config values for `user.name` and `user.email` from your local environment, or "batch-changes@sourcegraph.com" if no user is set. Alternatively, you can also [specify an `author`](./references/batch_spec_yaml_reference.md#changesettemplate-commit-author) in this spec.
+The commits you create here will use the git config values for `user.name` and `user.email` from your local environment, or "batch-changes@sourcegraph.com" if no user is set. Alternatively, you can also [specify an `author`](/batch_changes/references/batch_spec_yaml_reference#changesettemplate-commit-author) in this spec.
 
 ## Create the batch change
 
@@ -99,18 +99,18 @@ Publishing causes commits, branches, and pull requests/merge requests to be writ
 
 ### Configure code host credentials
 
-Batch Changes needs permission to publish changesets on your behalf. To grant permission, you will need to [add a personal access token](how-tos/configuring_credentials.md#adding-a-token) for each code host you'll be publishing changesets on.
+Batch Changes needs permission to publish changesets on your behalf. To grant permission, you will need to [add a personal access token](/batch_changes/how-tos/configuring_credentials#adding-a-token) for each code host you'll be publishing changesets on.
 
-This is a one-time operation, so don't worry---we won't need to do this for every batch change. You can also ask the administrators of your Sourcegraph instance to [configure global credentials](how-tos/configuring_credentials.md#global-service-account-tokens) instead.
+This is a one-time operation, so don't worry---we won't need to do this for every batch change. You can also ask the administrators of your Sourcegraph instance to [configure global credentials](/batch_changes/how-tos/configuring_credentials#global-service-account-tokens) instead.
 
 ### (Optional) Modify the batch spec to only target a specific repository
 
 Before publishing, you might want to change the `repositoriesMatchingQuery` in `hello-world.batch.yaml` to target only a single, test repository that you could open a toy pull request/merge request on, such as one that you are the owner of. For example:
 
 ```yaml
-# Find all repositories that contain a README.md file and whose name matches our test repo.
+# Find all repositories that contain a README file and whose name matches our test repo.
 on:
-  - repositoriesMatchingQuery: file:README.md repo:sourcegraph-testing/batch-changes-test-repo
+  - repositoriesMatchingQuery: file:README repo:sourcegraph-testing/batch-changes-test-repo
 ```
 
 With your updated batch spec, re-run the preview command, `src batch preview -f hello-world.batch.yaml` (you should notice it's a lot quicker this time thanks to the caching!). Once again, follow the link to the *preview page*. You should now see something like this:
@@ -123,7 +123,7 @@ Once you are ready, click **Apply** again to apply the update to your batch chan
 
 ### Publish to code host
 
-There are [multiple ways to publish a changeset](how-tos/publishing_changesets.md#publishing-changesets). Let's look at how to do so from the screen you are currently on.
+There are [multiple ways to publish a changeset](/batch_changes/how-tos/publishing_changesets#publishing-changesets). Let's look at how to do so from the screen you are currently on.
 
 1. Select the changeset you would like to publish (in our case it's the only one).
     <img src="https://sourcegraphstatic.com/docs/images/batch_changes/quickstart/browser_publish_select_changesets.png" />
@@ -139,4 +139,4 @@ There are [multiple ways to publish a changeset](how-tos/publishing_changesets.m
 
 **You've published your first Batch Changes changeset!** 🎉
 
-Feel free to customize your batch spec and experiment with making other types of changes. You can also [explore the documentation](index.md) to learn what else you can do with Batch Changes!
+Feel free to customize your batch spec and experiment with making other types of changes. You can also [explore the documentation](/batch_changes/) to learn what else you can do with Batch Changes!

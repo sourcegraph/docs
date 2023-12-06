@@ -1,8 +1,8 @@
 # Managing Code Insights with the API
 
-Learn how to manage [Code Insights](../../code_insights/index.md) on private Sourcegraph instances with the API. If you haven't used the API before, learn more about [the GraphQL API and how to use it](index.md).
+Learn how to manage [Code Insights](/code_insights/) on private Sourcegraph instances with the API. If you haven't used the API before, learn more about [the GraphQL API and how to use it](/api/graphql/).
 
-This page is meant as a guide for common use cases. You can find all of GraphQL documentation in the [API Console](./index.md#api-console).
+This page is meant as a guide for common use cases. You can find all of GraphQL documentation in the [API Console](/api/graphql/#api-console).
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ Note: If Code Insights setting storage is enabled, (`ENABLE_CODE_INSIGHTS_SETTIN
 
 Note: there are no separate read/write permissions at this time, so if a user has permission to view an insight they can also edit and delete it.
 
-When a user creates a Code Insight, that user will automatically be granted permission to view that insight. Besides this one case of insight-level permissions, all permissions exist on [dashboards](../../code_insights/explanations/viewing_code_insights.md#insights-dashboards). This means that in order for another user to view an insight via the API, that insight must first be attached to a dashboard with either organization or global permissions.
+When a user creates a Code Insight, that user will automatically be granted permission to view that insight. Besides this one case of insight-level permissions, all permissions exist on [dashboards](/code_insights/explanations/viewing_code_insights#insights-dashboards). This means that in order for another user to view an insight via the API, that insight must first be attached to a dashboard with either organization or global permissions.
 
 See [Managing Dashboards](#managing-dashboards) below for more information.
 
@@ -117,11 +117,11 @@ Example variables:
 
 Use the query below to read a Code Insight by `id`. `filters` are optional, and if provided will filter the aggregated time series to specific repositories.
 
-You can find an insight's `id` if you visit the edit page for the insight. The edit page URL will be of the form `https://sourcegraph.yourcompany.com/insights/edit/aW5zaWdodF92aWV3OiIyM2hiYzNNclB2bDBtajlLTTZTUlBpWVlhZWQi?dashboardId=all` where the `id` is `aW5zaWdodF92aWV3OiIyM2hiYzNNclB2bDBtajlLTTZTUlBpWVlhZWQi`. Alternatively, you can list all insights using this graphQL API. 
+You can find an insight's `id` if you visit the edit page for the insight. The edit page URL will be of the form `https://sourcegraph.yourcompany.com/insights/edit/aW5zaWdodF92aWV3OiIyM2hiYzNNclB2bDBtajlLTTZTUlBpWVlhZWQi?dashboardId=all` where the `id` is `aW5zaWdodF92aWV3OiIyM2hiYzNNclB2bDBtajlLTTZTUlBpWVlhZWQi`. Alternatively, you can list all insights using this graphQL API.
 
 Notes on the return object:
 
-- `dataSeries.status` is useful to guage the progress of the series point generation. More information can be found in the [API Console Documentation](./index.md#api-console)
+- `dataSeries.status` is useful to guage the progress of the series point generation. More information can be found in the [API Console Documentation](/api/graphql/#api-console)
 - The `dataSeries`, `dataSeriesDefinitions` and `seriesPresentation` arrays each store different information about the same series. The `seriesId` field on each can be used to match them up.
   - `dataSeries` contains the calculated time series data
   - `dataSeriesDefinitions` contains the definition for the series, such as the query and time interval
@@ -182,12 +182,12 @@ query InsightViews($id: ID, $filters: InsightViewFiltersInput) {
 Example variables:
 
 ```json
-{ 
+{
   "id": "aW5zaWdodF92aWV3OiIyMkVIR2pXOTFkSzNOanpmM2hyWnU3WDJwMlgi",
   "filters": {
     "includeRepoRegex": "sourcegraph/sourcegraph",
     "excludeRepoRegex": "sourcegraph/handbook"
-  } 
+  }
 }
 ```
 
@@ -291,8 +291,8 @@ mutation DeleteInsightView($id: ID!) {
 Example variables:
 
 ```json
-{ 
-  "id": "aW5zaWdodF92aWV3OiIyMkVIR2pXOTFkSzNOanpmM2hyWnU3WDJwMlgi" 
+{
+  "id": "aW5zaWdodF92aWV3OiIyMkVIR2pXOTFkSzNOanpmM2hyWnU3WDJwMlgi"
 }
 ```
 
@@ -305,7 +305,7 @@ Below is a GraphQL mutation that creates a dashboard with global permissions, me
 ```gql
 mutation CreateInsightsDashboard($input: CreateInsightsDashboardInput!) {
   createInsightsDashboard(input: $input) {
-    dashboard { 
+    dashboard {
       id
     }
   }
@@ -315,7 +315,7 @@ mutation CreateInsightsDashboard($input: CreateInsightsDashboardInput!) {
 Example variables:
 
 ```json
-{ 
+{
   "input": {
     "title": "Global insights dashboard",
     "grants": {
@@ -334,7 +334,7 @@ Use the following mutations to add and remove insights from dashboards:
 ```gql
 mutation AddInsightViewToDashboard($input: AddInsightViewToDashboardInput!) {
   addInsightViewToDashboard(input: $input) {
-    dashboard { 
+    dashboard {
       id
     }
   }
@@ -344,7 +344,7 @@ mutation AddInsightViewToDashboard($input: AddInsightViewToDashboardInput!) {
 ```gql
 mutation RemoveInsightViewFromDashboard($input: RemoveInsightViewFromDashboardInput!) {
   removeInsightViewFromDashboard(input: $input) {
-    dashboard { 
+    dashboard {
       id
     }
   }
@@ -354,7 +354,7 @@ mutation RemoveInsightViewFromDashboard($input: RemoveInsightViewFromDashboardIn
 Example variables:
 
 ```json
-{ 
+{
   "input": {
     "insightViewId": "aW5zaWdodF92aWV3OiIyMkVIR2pXOTFkSzNOanpmM2hyWnU3WDJwMlgi",
     "dashboardId": "ZGFzaGJvYXJkOnsiSWRUeXBlIjoiY3VzdG9tIiwiQXJnIjoxNDV9"

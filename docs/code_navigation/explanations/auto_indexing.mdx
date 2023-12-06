@@ -2,11 +2,11 @@
 
 <Callout type="note">This feature is in beta for self-hosted customers.</Callout>
 
-With Sourcegraph deployments supporting [executors](../../admin/executors/index.md), your repository contents can be automatically analyzed to produce a code graph index file. Once [auto-indexing is enabled](../how-to/enable_auto_indexing.md) and [auto-indexing policies are configured](../how-to/configure_auto_indexing.md), repositories will be periodically cloned into an executor sandbox, analyzed, and the resulting index file will be uploaded back to the Sourcegraph instance.
+With Sourcegraph deployments supporting [executors](/admin/executors/), your repository contents can be automatically analyzed to produce a code graph index file. Once [auto-indexing is enabled](/code_navigation/how-to/enable_auto_indexing) and [auto-indexing policies are configured](/code_navigation/how-to/configure_auto_indexing), repositories will be periodically cloned into an executor sandbox, analyzed, and the resulting index file will be uploaded back to the Sourcegraph instance.
 
 ## Language support
 
-Auto-indexing is currently available for Go, TypeScript, JavaScript, Python, Ruby and JVM repositories. See also [dependency navigation](features.md#dependency-navigation) for instructions on how to setup cross-dependency navigation depending on what language ecosystem you use.
+Auto-indexing is currently available for Go, TypeScript, JavaScript, Python, Ruby and JVM repositories. See also [dependency navigation](/code_navigation/explanations/features#dependency-navigation) for instructions on how to setup cross-dependency navigation depending on what language ecosystem you use.
 
 ## Lifecycle of an indexing job
 
@@ -14,7 +14,7 @@ Index jobs are run asynchronously from a queue. Each index job has an attached _
 
 ![Index job state diagram](https://storage.googleapis.com/sourcegraph-assets/Docs/index-states.svg)
 
-The general happy-path for an index job is: `QUEUED_FOR_INDEXING`, `INDEXING`, then `INDEXING_COMPLETED`. Once uploaded, the remaining lifecycle is described in [lifecycle of an upload](uploads.md#lifecycle-of-an-upload).
+The general happy-path for an index job is: `QUEUED_FOR_INDEXING`, `INDEXING`, then `INDEXING_COMPLETED`. Once uploaded, the remaining lifecycle is described in [lifecycle of an upload](/code_navigation/explanations/uploads#lifecycle-of-an-upload).
 
 Index jobs may fail to complete due to the job configuration not aligning with the repository contents or due to transient errors related to the network (for example). An index job will enter the `INDEXING_ERRORED` state on such conditions. Errored index jobs may be retried a number of times before moving into a permanently errored state.
 
@@ -34,7 +34,7 @@ The detail page of an index job will show its current state as well as detailed 
 
 <img src="https://storage.googleapis.com/sourcegraph-assets/docs/images/code-intelligence/renamed/indexes-processing.png" class="screenshot" alt="Upload in processing state" />
 
-The stdout and stderr of each command run during pre-indexing and indexing steps are viewable as the index job is processed. This information is valuable when troubleshooting a [custom index configuration](../references/auto_indexing_configuration.md) for your repository.
+The stdout and stderr of each command run during pre-indexing and indexing steps are viewable as the index job is processed. This information is valuable when troubleshooting a [custom index configuration](/code_navigation/references/auto_indexing_configuration) for your repository.
 
 <img src="https://storage.googleapis.com/sourcegraph-assets/docs/images/code-intelligence/renamed/indexes-processing-detail.png" class="screenshot" alt="Detailed look at index job logs" />
 

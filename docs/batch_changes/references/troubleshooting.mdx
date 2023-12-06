@@ -46,19 +46,19 @@ That command will pull Docker's `hello-world` image and try to execute a contain
 
 If executing your batch spec fails and you haven't tested Batch Changes with another batch spec before, it can help to run the "Hello World" batch change to nail down what the problem is.
 
-Go through the "[Quickstart](../quickstart.md)" to run a batch change that adds "Hello World" to `README.md` files with the following batch spec:
+Go through the "[Quickstart](/batch_changes/quickstart)" to run a batch change that adds "Hello World" to `README` files with the following batch spec:
 
 ```yaml
 name: hello-world
 description: Add Hello World to READMEs
 
-# Find one repository with a README.md
+# Find one repository with a README
 on:
-  - repositoriesMatchingQuery: repohasfile:README.md count:1
+  - repositoriesMatchingQuery: repohasfile:README count:1
 
 # In each repository, run this command. Each repository's resulting diff is captured.
 steps:
-  - run: IFS=$'\n'; echo Hello World | tee -a $(find -name README.md)
+  - run: IFS=$'\n'; echo Hello World | tee -a $(find -name README)
     container: alpine:3
 
 # Describe the changeset (e.g., GitHub pull request) you want for each repository.
@@ -67,7 +67,7 @@ changesetTemplate:
   body: My first batch change!
   branch: hello-world # Push the commit to this branch.
   commit:
-    message: Append Hello World to all README.md files
+    message: Append Hello World to all README files
   published: false
 ```
 
@@ -79,9 +79,9 @@ Debugging large batch changes that make changes in hundreds of repositories is h
 
 In order to find out whether a problem is related to the _size_ or _scope_ of a batch change or with _what_ it's trying to achieve, try reducing the scope of your batch change.
 
-You can do so by changing the [`on.repositoriesMatchingQuery`](batch_spec_yaml_reference.md#on-repositoriesmatchingquery) to yield less results or by using a concrete list of repositories with [`on.repository`](batch_spec_yaml_reference.md#on-repository).
+You can do so by changing the [`on.repositoriesMatchingQuery`](/batch_changes/references/batch_spec_yaml_reference#on-repositoriesmatchingquery) to yield less results or by using a concrete list of repositories with [`on.repository`](/batch_changes/references/batch_spec_yaml_reference#on-repository).
 
-For the former you can use Sourcegraph's [search filters](../../code_search/reference/queries.md#keywords-all-searches).
+For the former you can use Sourcegraph's [search filters](/code_search/reference/queries#keywords-all-searches).
 
 For example, this query will only yield repositories that have `github.com/my-org` in their name:
 
@@ -152,7 +152,7 @@ If executing the `steps` in the batch spec fails with a message that looks simil
 
 or if you are in a locked-down environment, it's possible that Docker bind mounts won't work.
 
-Try using the `-workspace volume` flag (see [`src batch apply`](../../cli/references/batch/apply.md#flags) for a list of all flags) to make `src` use Docker volumes instead:
+Try using the `-workspace volume` flag (see [`src batch apply`](/cli/references/batch/apply#flags) for a list of all flags) to make `src` use Docker volumes instead:
 
 ```
 src batch apply -workspace volume -f my-spec.yaml
@@ -194,7 +194,7 @@ export SRC_BATCH_TMP_DIR=/tmp/rancher-desktop/batchchange
 
 ### Do you have the right credentials?
 
-When publishing changesets fails, make sure that you have [configured credentials](../how-tos/configuring_credentials.md) with all of the required scopes and from an account with write access to the changeset's repository on the code host.
+When publishing changesets fails, make sure that you have [configured credentials](/batch_changes/how-tos/configuring_credentials) with all of the required scopes and from an account with write access to the changeset's repository on the code host.
 
 ### Do you have email privacy enabled on GitHub?
 
