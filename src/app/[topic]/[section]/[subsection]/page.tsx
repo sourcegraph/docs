@@ -1,18 +1,16 @@
-import {format, parseISO} from 'date-fns';
-import {allPosts} from 'contentlayer/generated';
-import {getMDXComponent} from 'next-contentlayer/hooks';
-import {Prose} from '@/components/Prose';
-import {DocsLayout} from '@/components/DocsLayout';
-import {PrevNextLinks} from '@/components/PrevNextLinks';
-import {Breadcrumbs} from '@/components/Breadcrumbs';
-import {QuickLink, QuickLinks} from '@/components/QuickLinks';
+import { Breadcrumbs } from '@/components/Breadcrumbs';
 import MdxComponents from '@/components/MdxComponents';
-import {notFound} from 'next/navigation';
-import {TableOfContents} from '@/components/TableofContents';
+import { PrevNextLinks } from '@/components/PrevNextLinks';
+import { Prose } from '@/components/Prose';
+import { TableOfContents } from '@/components/TableOfContents';
+import { allPosts } from 'contentlayer/generated';
+import { getMDXComponent } from 'next-contentlayer/hooks';
+import { notFound } from 'next/navigation';
+
 
 export const generateStaticParams = async () =>
 	allPosts.map(post => {
-		({slug: post._raw.flattenedPath});
+		({ slug: post._raw.flattenedPath });
 	});
 
 // export const generateMetadata = ({params}) => {
@@ -28,7 +26,7 @@ interface Props {
 	};
 }
 
-const PostLayout = ({params}: Props) => {
+const PostLayout = ({ params }: Props) => {
 	const post = allPosts.find(
 		post =>
 			post._raw.flattenedPath ===

@@ -1,15 +1,16 @@
-import {allPosts} from 'contentlayer/generated';
-import {getMDXComponent} from 'next-contentlayer/hooks';
-import {Prose} from '@/components/Prose';
-import {PrevNextLinks} from '@/components/PrevNextLinks';
-import {Breadcrumbs} from '@/components/Breadcrumbs';
+import { Breadcrumbs } from '@/components/Breadcrumbs';
 import MdxComponents from '@/components/MdxComponents';
-import {notFound} from 'next/navigation';
-import {TableOfContents} from '@/components/TableofContents';
+import { PrevNextLinks } from '@/components/PrevNextLinks';
+import { Prose } from '@/components/Prose';
+import { TableOfContents } from '@/components/TableOfContents';
+import { allPosts } from 'contentlayer/generated';
+import { getMDXComponent } from 'next-contentlayer/hooks';
+import { notFound } from 'next/navigation';
+
 
 export const generateStaticParams = async () =>
 	allPosts.map(post => {
-		({slug: post._raw.flattenedPath});
+		({ slug: post._raw.flattenedPath });
 	});
 
 // export const generateMetadata = ({params}) => {
@@ -26,12 +27,11 @@ interface Props {
 	};
 }
 
-const PostLayout = ({params}: Props) => {
+const PostLayout = ({ params }: Props) => {
 	const post = allPosts.find(
 		post =>
 			post._raw.flattenedPath ===
-			`${params.topic}/${params.section}/${[params.subsection]}/${
-				params.details
+			`${params.topic}/${params.section}/${[params.subsection]}/${params.details
 			}`
 	);
 	if (!post) return notFound();

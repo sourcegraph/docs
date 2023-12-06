@@ -3,7 +3,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import Link from 'next/link';
 import clsx from 'clsx';
-import {type Section, type Subsection} from '@/lib/sections';
+// import {type Section, type Subsection} from '@/lib/sections';
 
 interface Heading {
 	level: number;
