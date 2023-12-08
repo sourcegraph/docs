@@ -2,14 +2,16 @@
 
 import clsx from 'clsx';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import {usePathname} from 'next/navigation';
+import {useEffect, useState} from 'react';
 
-import { Hero } from '@/components/Hero';
-import { Logo } from '@/components/Logo';
-import { MobileNavigation } from '@/components/MobileNavigation';
-import { Navigation } from '@/components/Navigation';
-import { ThemeSelector } from '@/components/ThemeSelector';
+import {Hero} from '@/components/Hero';
+import {Logo} from '@/components/Logo';
+import {MobileNavigation} from '@/components/MobileNavigation';
+import {Navigation} from '@/components/Navigation';
+import {ThemeSelector} from '@/components/ThemeSelector';
+import {KBarButton} from './search/KBarButton';
+import {Search} from './search/Search';
 
 function GitHubIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -27,7 +29,7 @@ function Header() {
 			setIsScrolled(window.scrollY > 0);
 		}
 		onScroll();
-		window.addEventListener('scroll', onScroll, { passive: true });
+		window.addEventListener('scroll', onScroll, {passive: true});
 		return () => {
 			window.removeEventListener('scroll', onScroll);
 		};
@@ -36,24 +38,30 @@ function Header() {
 	return (
 		<header
 			className={clsx(
-				'sticky top-0 z-50 flex flex-none flex-wrap items-center justify-between bg-white px-4 py-5 shadow-md shadow-slate-900/5 transition duration-500 dark:shadow-none sm:px-6 lg:px-8',
-				`lg:border-b lg:border-slate-900/10 dark:border-slate-50/[0.06]`,
+				'sticky top-0 z-50 flex flex-none flex-wrap items-center justify-between bg-white px-4 py-6 shadow-md shadow-slate-900/5 transition duration-500 dark:shadow-none sm:px-6 lg:px-8',
+				`dark:border-slate-50/[0.06] lg:border-b lg:border-slate-900/10`,
 				isScrolled
 					? 'dark:bg-slate-900/95 dark:backdrop-blur dark:[@supports(backdrop-filter:blur(0))]:bg-slate-900/75'
 					: 'dark:bg-transparent'
 			)}
 		>
-			<div className='mx-auto w-full max-w-8xl sm:px-2 lg:px-8'>
+			<div className="mx-auto flex w-full max-w-8xl items-center justify-between sm:px-2 lg:px-8">
 				<div className="mr-6 flex lg:hidden">
 					<MobileNavigation />
 				</div>
 				<div className="relative flex flex-grow basis-0 items-center">
-					<Link href="/" aria-label="Home page" className='relative z-10'>
+					<Link
+						href="/"
+						aria-label="Home page"
+						className="relative z-10"
+					>
 						{/* <Logomark className="h-9 w-9 lg:hidden" /> */}
 						<Logo className="hidden h-9 w-auto fill-slate-700 dark:fill-sky-100 lg:block" />
 					</Link>
 				</div>
-				<div className="-my-5 mr-6 sm:mr-8 md:mr-0">{/* <Search /> */}</div>
+				<div className="-my-5 mr-6 sm:mr-8 md:mr-0">
+					<Search />
+				</div>
 				<div className="relative flex basis-0 justify-end gap-6 sm:gap-8 md:flex-grow">
 					<ThemeSelector className="relative z-10" />
 					<Link
@@ -69,7 +77,7 @@ function Header() {
 	);
 }
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export function Layout({children}: {children: React.ReactNode}) {
 	let pathname = usePathname();
 	let isHomePage = pathname === '/';
 

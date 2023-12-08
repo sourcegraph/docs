@@ -4,8 +4,9 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypePrettyCode from 'rehype-pretty-code';
 import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
-import slugify from '@sindresorhus/slugify'
-
+import { MDXDocument, allCoreContent } from './src/utils/contentlayer';
+import { searchMetadata } from './src/data/search';
+import GithubSlugger from 'github-slugger'
 export const Post = defineDocumentType(() => ({
     name: 'Post',
     filePathPattern: `**/*.mdx`,
@@ -20,17 +21,18 @@ export const Post = defineDocumentType(() => ({
             type: "json",
             resolve: async (doc) => {
                 const regXHeader = /^ *(?<flag>#{1,6})\s+(?<content>.+)/gm;
+                const slugger = new GithubSlugger();
                 const headings = Array.from(doc.body.raw.matchAll(regXHeader)).map(
                     ({ groups }) => {
                         const flag = groups?.flag;
-                        // Handle headings with links eg:
-                        // Converts '[Getting started](/getting-started)' to 'Getting started'
+                        // Handles headings with links eg:
+                        // Converts '##[Getting started](/getting-started)' to 'Getting started'
                         const match = groups?.content?.match(/\[([^\]]+)\]\([^)]+\)/);
                         const title = match ? match[1] : groups?.content;
                         return {
                             level: flag?.length,
                             title: title,
-                            id: title ? slugify(title) : undefined
+                            id: title ? slugger.slug(title) : undefined
                         };
                     }
                 );
@@ -39,6 +41,19 @@ export const Post = defineDocumentType(() => ({
         }
     },
 }))
+
+function createSearchIndex(allPosts: MDXDocument[]) {
+    if (
+        searchMetadata?.provider === 'kbar' &&
+        searchMetadata.kbarConfig.searchDocumentsPath
+    ) {
+        fs.writeFileSync(
+            `public/search.json`,
+            JSON.stringify(allCoreContent(allPosts))
+        )
+        console.log('Search index generated...')
+    }
+}
 
 const prettyCodeOptions = {
     keepBackground: true,
@@ -54,5 +69,9 @@ export default makeSource({
     contentDirPath: 'docs', documentTypes: [Post], mdx: {
         remarkPlugins: [remarkGfm],
         rehypePlugins: [[rehypePrettyCode, prettyCodeOptions], rehypeSlug, [rehypeAutolinkHeadings]],
+    },
+    onSuccess: async (importData) => {
+        const { allPosts } = await importData()
+        createSearchIndex(allPosts);
     },
 })
