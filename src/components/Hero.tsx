@@ -33,8 +33,7 @@ export function Hero() {
 						<div className="relative">
 							<h1
 								className={clsx(
-									'inline bg-gradient-to-r from-cyan-300 to-violet-300 bg-clip-text font-display text-5xl tracking-tight text-transparent',
-									' bg-clip-text text-transparent'
+									'inline bg-gradient-to-l from-[#FF5543] to-[#A112FF] bg-clip-text font-display text-5xl tracking-tight text-transparent'
 								)}
 							>
 								Documentation
@@ -52,18 +51,18 @@ export function Hero() {
 							</p>
 							<div className="mt-8 flex gap-1 md:justify-center lg:justify-start">
 								<Button
-									href="https://sourcegraph.com/sign-in?returnTo=/search"
+									href="https://sourcegraph.com/cody"
 									target="_blank"
 								>
-									Get started with Sourcegraph
+									Get started with Cody
 								</Button>
 								<Button
 									className="group -ml-2 flex items-center"
 									target="_blank"
-									href="https://github.com/sourcegraph/sourcegraph"
+									href="https://sourcegraph.com/sign-in?returnTo=/search"
 									variant="ghost"
 								>
-									Explore Code AI
+									Explore Code Search
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
 										fill="none"

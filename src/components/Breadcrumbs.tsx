@@ -7,13 +7,15 @@ type BreadcrumbsProps = {
 	section?: string;
 	subsection?: string;
 	details?: string;
+	subdetails?: string;
 };
 
 export function Breadcrumbs({
 	topic,
 	section,
 	subsection,
-	details
+	details,
+	subdetails
 }: BreadcrumbsProps) {
 	return (
 		<nav className="mb-8 flex" aria-label="Breadcrumb">
@@ -79,7 +81,7 @@ export function Breadcrumbs({
 								aria-hidden="true"
 							/>
 							<Link
-								href={`/docs/${topic}/${section}/${subsection}`}
+								href={`/${topic}/${section}/${subsection}`}
 								className={clsx(
 									!details
 										? 'text-link-light hover:underline dark:text-link'
@@ -101,10 +103,32 @@ export function Breadcrumbs({
 								aria-hidden="true"
 							/>
 							<Link
-								href={`/docs/${topic}/${section}/${subsection}/${details}`}
-								className="ml-4 text-sm font-medium text-link-light hover:underline dark:text-link"
+								href={`/${topic}/${section}/${subsection}/${details}`}
+								className={clsx(
+									!subdetails
+										? 'text-link-light hover:underline dark:text-link'
+										: 'hover:text-link-light dark:hover:text-link',
+									'ml-4 text-sm font-medium text-gray-500'
+								)}
 							>
 								{details}
+							</Link>
+						</div>
+					</li>
+				)}
+
+				{subdetails && (
+					<li key={details}>
+						<div className="flex items-center">
+							<ChevronRightIcon
+								className="h-5 w-5 flex-shrink-0 text-gray-400"
+								aria-hidden="true"
+							/>
+							<Link
+								href={`/${topic}/${section}/${subsection}/${details}/${subdetails}`}
+								className="ml-4 text-sm font-medium text-link-light hover:underline dark:text-link"
+							>
+								{subdetails}
 							</Link>
 						</div>
 					</li>

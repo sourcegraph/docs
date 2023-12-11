@@ -24,10 +24,10 @@ export const KBarModal = ({
 
 	return (
 		<KBarPortal>
-			<KBarPositioner className="z-50 bg-slate-300/50 p-4 backdrop-blur backdrop-filter dark:bg-slate-900/50">
+			<KBarPositioner className="z-50 bg-slate-300/50 p-4 backdrop-blur backdrop-filter dark:bg-dark-bg/50">
 				<KBarAnimator className="w-full max-w-xl">
-					<div className="overflow-hidden rounded-2xl border border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-800">
-						<div className="flex items-center space-x-4 border-b border-slate-300 p-4 dark:border-slate-700">
+					<div className="border-light-border-2 dark:border-dark-border dark:bg-dark-bg-1 bg-light-bg overflow-hidden rounded-2xl border">
+						<div className="border-light-border-2 dark:border-dark-border flex items-center space-x-4 border-b p-4">
 							<span className="block w-5">
 								<SearchIcon className="text-slate-400 dark:text-slate-300" />
 							</span>
@@ -71,7 +71,7 @@ const RenderResults = () => {
 							<div
 								className={`flex cursor-pointer justify-between px-4 py-2 ${
 									active
-										? 'bg-slate-100 dark:bg-slate-700'
+										? 'dark:bg-dark-bg-2 bg-light-bg-2'
 										: 'bg-transparent text-slate-700 dark:text-slate-100'
 								}`}
 							>

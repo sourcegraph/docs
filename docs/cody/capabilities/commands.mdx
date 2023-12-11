@@ -8,13 +8,15 @@ Cody offers quick, ready-to-use **commands** for common actions to write, descri
 
 Commands are available in all Cody-supported IDE extensions (VS Code, JetBrains, and Neovim) and the Sourcegraph web app. Commands can handle tasks like:
 
-- Explaining code `/explain`
-- Code smell `/smell`
-- Generate unit tests `/test`
-- Generate code documentation `/doc`
-- Improve variable names
+- Editing and fixing code (`edit`)
+- Explaining code (`explain`)
+- Generating unit tests (`test`)
+- Writing documentation (`doc`)
+- Improving code quality (`smell`)
 
-The support for one command may vary by IDE extension. Read the [feature parity reference to learn what commands are available in your IDE](/cody/cody-clients/feature-reference#commands).
+The support for one command may vary by IDE extension. Read the [feature parity reference to learn what commands are available in your IDE](/cody/clients/feature-reference#commands).
+
+<Callout type="note">Cody's responses to commands might be better than responses to chats since they've been pre-packaged and prompt-engineered.</Callout>
 
 ## Running commands
 
@@ -26,15 +28,17 @@ The process of running a command varies from one IDE to another. For example, in
 
 Commands are also available in the JetBrains extension. To access it, navigate to the `Commands` panel (next to the `Chat` panel), and you can find each available command as a button within the UI.
 
-#### *UPDATE VIDEO WITH NEW UI*
-
-![Example of the Cody 'Explain Code' command. The user highlights a section of code, then uses the hotkey to open the commands menu, then selects the command.](https://storage.googleapis.com/sourcegraph-assets/cody/Docs/Sept2023/Explain_Code_SM.gif)
+    <video width="1920" height="1080" loop playsInline controls style={{ width: '100%', height: 'auto' }}>
+          <source src="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/commands-working.mp4" type="video/mp4" />
+          </video>
 
 ## Custom Commands
 
-<Callout type="note" title="Experimental">
+<Callout type="note">
 Custom Commands are in the experimental stage.
 </Callout>
+
+{/* <Callout type="note">Custom Commands are in the Beta stage.</Callout> */}
 
 **Custom Commands** allow you to create and define reusable prompts for Cody tailored to your development workflows. They are defined in `JSON` format and will enable you to call CLI tools, write custom prompts, and select context to be sent to Cody. This provides a flexible way to configure Cody to handle use cases like:
 
@@ -43,11 +47,7 @@ Custom Commands are in the experimental stage.
 - Read in test command failures to explain and suggest fixes
 - Explain code quality output like linter warnings
 
-> NOTE: Cody supports Custom Commands only for VS Code version 0.8 and above.
-
-#### *UPDATE IMAGE*
-
-![Cody Custom Commands in VS Code](https://storage.googleapis.com/sourcegraph-assets/Docs/create-custom-commands.png)
+<Callout type="note">Cody supports Custom Commands only for VS Code version 0.8 and above.</Callout>
 
 ### Creating a Custom Command
 
@@ -56,21 +56,20 @@ You can create a custom command by editing the configuration JSON file or using 
 - Open the Cody commands menu (`⌥C` on Mac or `Alt-C` on Windows/Linux)
 - Select **Custom commands > New Custom Command**
 - Type the slash `/` name you want to use, for example, `/my-custom-command`
-- Next, write a suitable description for the command in the sentence case
-- Provide the relevant instructions for Cody that it will follow
+- Next, write a suitable description for the command in the sentence case. For example, `Compare files in open tabs` or `Explain current directory`
+- Provide the relevant instructions for Cody that it will follow. This is the `prompt` that Cody will use to pass relevant context to the LLM
 - Then, make one or more options for the context selection for accurate responses
 - Finally, choose the location where you want to save the custom command
 - Press **Enter** to complete the process, and your custom command is successfully created
+- You can hit `esc` key at any time to discard a new custom command
 
 ### Running Custom Commands
 
-You can invoke custom commands with the same hotkey as predefined commands. Let's type `/my-custom-command` in the chat window, and it will appear. Now, you can run this new command on your code and get answers to your questions accordingly.
+You can invoke custom commands with the same hotkey as predefined commands. Once created, your custom commands will appear with the rest of the predefined commands in the list. Let's type `/my-custom-command` in the chat window, and it will appear. Now, you can run this new command on your code and get answers to your questions accordingly.
+
+![create-new-custom-command](https://storage.googleapis.com/sourcegraph-assets/Docs/custom-command.png)
 
 Alternatively, you can right-click the selected code and select **Cody > Custom Commands**.
-
-#### *UPDATE VIDEO*
-
-![Example of a user creating a custom "/Variables" command. The user creates a command that automatically makes the variable names in selected code more helpful.](https://storage.googleapis.com/sourcegraph-assets/cody/Docs/Sept2023/Custom_Command_SM.gif)
 
 ### Configuring file paths
 
@@ -78,6 +77,8 @@ Custom Commands can be defined in the following two file paths:
 
 - **User Settings (`~/.vscode/code.json`)**: Stored locally. Use this for personal commands to use across all your projects
 - **Workspace Settings (`.vscode/cody.json`)**: Stored in project’s repository. Use this to share commands with others working on the same codebase and for project-specific commands
+
+If you select **User Settings**, the new custom command will only be available to you. If you select **Workspace Settings** (as an enterprise user), the custom command will also be available to your teammates.
 
 See the [examples](#examples) and [configuration properties](#configuration-properties) below for more details on configuring custom commands.
 

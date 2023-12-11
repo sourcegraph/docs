@@ -39,14 +39,14 @@ export const navigation: NavigationItem[] = [
         sections: [
           { title: "Quickstart", href: "/cody/quickstart" },
           {
-            title: "Cody Clients", href: "/cody/cody-clients",
+            title: "Cody Clients", href: "/cody/clients",
             subsections: [
-              { title: "Cody for VS Code", href: "/cody/cody-clients/install-vscode", },
-              { title: "Cody for JetBrains", href: "/cody/cody-clients/install-jetbrains", },
-              { title: "Cody for Neovim", href: "/cody/cody-clients/install-neovim", },
-              { title: "Cody for Web App", href: "/cody/cody-clients/cody-with-sourcegraph", },
-              { title: "Cody for Enterprise", href: "/cody/cody-clients/enable-cody-enterprise", },
-              { title: "Feature Parity Reference", href: "/cody/cody-clients/feature-reference", },
+              { title: "Cody for VS Code", href: "/cody/clients/install-vscode", },
+              { title: "Cody for JetBrains", href: "/cody/clients/install-jetbrains", },
+              { title: "Cody for Neovim", href: "/cody/clients/install-neovim", },
+              { title: "Cody for Web", href: "/cody/clients/cody-with-sourcegraph", },
+              { title: "Cody for Enterprise", href: "/cody/clients/enable-cody-enterprise", },
+              { title: "Feature Parity Reference", href: "/cody/clients/feature-reference", },
 
             ]
           },
@@ -84,7 +84,7 @@ export const navigation: NavigationItem[] = [
               // { title: "Build UI", href: "/cody/use-cases/build-ui", },
             ]
           },
-          { title: "Usage and Pricing", href: "/cody/usage-and-pricing" },
+          // { title: "Usage and Pricing", href: "/cody/usage-and-pricing" },
           { title: "Troubleshooting", href: "/cody/troubleshooting" },
           { title: "FAQs", href: "/cody/faq" },
         ],

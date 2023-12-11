@@ -25,13 +25,14 @@ export default {
       transparent: 'transparent',
       current: 'currentColor',
       // Docs colors
-      'dark-bg': '#000019',
+      'dark-bg': '#14171F',
+      'light-bg': '#F9FAFB',
       'link': {
         light: '#3098aa',
         DEFAULT: '#62BECC',
       },
       'link-underline': '#2a7c90',
-      'link-underline-light': '#85d1db',
+      'link-underline-light': '#00CBEC',
       violet: {
         100: '#EEDFFF',
         200: '#E8D1FF',
@@ -46,6 +47,18 @@ export default {
       // Brand Colors
       black: '#0F111A',
       white: colors.white,
+      'dark-bg-1': '#181B26',
+      'dark-bg-2': '#1D212F',
+      'dark-bg-3': '#343A4D',
+      'light-bg-1': '#FFF',
+      'light-bg-2': '#E6EBF2',
+      'light-bg-3': '#DBE2F0',
+      'dark-border': '#262B38',
+      'dark-border-2': '#343A4C',
+      'light-border': '#E6EBF2',
+      'light-border-2': '#DBE2F0',
+      'dark-text-muted': '#A6B6D9',
+      'light-text-muted': '#5E6E8C',
       'sggray': {
         100: '#F5F7FB',
         200: '#DBE2F0',
@@ -82,8 +95,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: 'var(--font-inter)',
+        sans: ['-apple-system', 'var(--font-inter)'],
         display: ['var(--font-lexend)', { fontFeatureSettings: '"ss01"' }],
+        mono: ['SFMono-Regular', 'ui-monospace', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace']
       },
       maxWidth: {
         '8xl': '88rem',

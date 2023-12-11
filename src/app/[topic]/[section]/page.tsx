@@ -25,9 +25,8 @@ interface Props {
 }
 
 const PostLayout = ({params}: Props) => {
-	const post = allPosts.find(
-		post => post._raw.flattenedPath === `${params.topic}/${params.section}`
-	);
+	const currentUrl = `${params.topic}/${params.section}`.trim();
+	const post = allPosts.find(post => post._raw.flattenedPath === currentUrl);
 	if (!post) return notFound();
 	const Content = getMDXComponent(post.body.code);
 

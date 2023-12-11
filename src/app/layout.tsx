@@ -40,7 +40,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
 			)}
 			suppressHydrationWarning
 		>
-			<body className="flex min-h-full bg-white dark:bg-dark-bg">
+			<body className="bg-light-bg flex min-h-full dark:bg-dark-bg">
 				<Providers>
 					<Layout>{children}</Layout>
 				</Providers>

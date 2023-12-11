@@ -1481,37 +1481,62 @@ const redirectsData = [
     },
     {
         source: "/cody/autocomplete",
-        destination: "/cody/capabilities#code-autocomplete",
+        destination: "/cody/capabilities/autocomplete",
         permanent: true
     },
     {
         source: "/cody/autocomplete#code-autocomplete",
-        destination: "/cody/capabilities#code-autocomplete",
+        destination: "/cody/capabilities/autocomplete",
         permanent: true
     },
     {
         source: "/cody/autocomplete#what-is-cody-code-autocomplete",
-        destination: "/cody/capabilities#code-autocomplete",
+        destination: "/cody/capabilities/autocomplete",
+        permanent: true
+    },
+    {
+        source: "/cody/capabilities#code-autocomplete",
+        destination: "/cody/capabilities/autocomplete",
         permanent: true
     },
     {
         source: "/cody/autocomplete#enabling-autocomplete",
-        destination: "/cody/capabilities#code-autocomplete",
+        destination: "/cody/capabilities/autocomplete",
+        permanent: true
+    },
+    {
+        source: "/cody/capabilities#code-autocomplete",
+        destination: "/cody/capabilities/autocomplete",
         permanent: true
     },
     {
         source: "/cody/autocomplete#configuring-on-sourcegraph-enterprise",
-        destination: "/cody/capabilities#configure-autocomplete-on-sourcegraph-enterprise",
+        destination: "/cody/capabilities/autocomplete#configure-autocomplete-on-an-enterprise-sourcegraph-instance",
+        permanent: true
+    },
+    {
+        source: "/cody/capabilities#configure-autocomplete-on-sourcegraph-enterprise",
+        destination: "/cody/capabilities/autocomplete#configure-autocomplete-on-an-enterprise-sourcegraph-instance",
         permanent: true
     },
     {
         source: "/cody/autocomplete#accessing-autocomplete-logs",
-        destination: "/cody/capabilities#access-autocomplete-logs",
+        destination: "/cody/capabilities/autocomplete#access-autocomplete-logs",
+        permanent: true
+    },
+    {
+        source: "/cody/capabilities#access-autocomplete-logs",
+        destination: "/cody/capabilities/autocomplete#access-autocomplete-logs",
         permanent: true
     },
     {
         source: "/cody#get-cody",
-        destination: "/cody#getting-started",
+        destination: "/cody",
+        permanent: true
+    },
+    {
+        source: "/cody#getting-started",
+        destination: "/cody",
         permanent: true
     },
     {
@@ -1521,22 +1546,37 @@ const redirectsData = [
     },
     {
         source: "/cody#chatbot-that-knows-your-code",
-        destination: "/cody/capabilities#code-chatbot",
+        destination: "/cody",
         permanent: true
     },
     {
         source: "/cody#fix-code-inline",
-        destination: "/cody/capabilities#fix-code-inline",
+        destination: "/cody/capabilities",
+        permanent: true
+    },
+    {
+        source: "/cody/capabilities#fix-code-inline",
+        destination: "/cody/capabilities",
         permanent: true
     },
     {
         source: "/cody#recipes",
-        destination: "/cody/capabilities#cody-recipes",
+        destination: "/cody/capabilities/commands",
+        permanent: true
+    },
+    {
+        source: "/cody/capabilities#cody-recipes",
+        destination: "/cody/capabilities/commands",
         permanent: true
     },
     {
         source: "/cody#autocomplete",
-        destination: "/cody/capabilities#code-autocomplete",
+        destination: "/cody/capabilities/autocomplete",
+        permanent: true
+    },
+    {
+        source: "/cody/capabilities#code-autocomplete",
+        destination: "/cody/capabilities/autocomplete",
         permanent: true
     },
     {
@@ -1546,42 +1586,57 @@ const redirectsData = [
     },
     {
         source: "/cody/explanations/installing_vs_code",
-        destination: "/cody/cody-clients/install-vscode",
+        destination: "/cody/clients/install-vscode",
         permanent: true
     },
     {
         source: "/cody/overview/install-vscode",
-        destination: "/cody/cody-clients/install-vscode",
+        destination: "/cody/clients/install-vscode",
         permanent: true
     },
     {
         source: "/cody/explanations/installing_jetbrains",
-        destination: "/cody/cody-clients/install-jetbrains",
+        destination: "/cody/clients/install-jetbrains",
         permanent: true
     },
     {
         source: "/cody/overview/install-jetbrains",
-        destination: "/cody/cody-clients/install-jetbrains",
+        destination: "/cody/clients/install-jetbrains",
         permanent: true
     },
     {
         source: "/app",
-        destination: "/cody/overview/app",
+        destination: "/cody/clients/app",
+        permanent: true
+    },
+    {
+        source: "/cody/overview/app",
+        destination: "/cody/clients/app",
         permanent: true
     },
     {
         source: "/cody/explanations/enabling_cody",
-        destination: "/cody/overview/cody-with-sourcegraph",
+        destination: "/cody/clients/cody-with-sourcegraph",
+        permanent: true
+    },
+    {
+        source: "/cody/overview/cody-with-sourcegraph",
+        destination: "/cody/clients/cody-with-sourcegraph",
         permanent: true
     },
     {
         source: "/cody/explanations/enabling_cody_enterprise",
-        destination: "/cody/overview/enable-cody-enterprise",
+        destination: "/cody/clients/enable-cody-enterprise",
+        permanent: true
+    },
+    {
+        source: "/cody/overview/enable-cody-enterprise",
+        destination: "/cody/clients/enable-cody-enterprise",
         permanent: true
     },
     {
         source: "/cody/quickstart#quickstart-for-cody-in-vs-code",
-        destination: "/cody/quickstart#cody-quickstart",
+        destination: "/cody/quickstart",
         permanent: true
     },
     {
@@ -1611,52 +1666,102 @@ const redirectsData = [
     },
     {
         source: "/cody/overview/install-jetbrains#introduction",
-        destination: "/cody/overview/install-jetbrains",
+        destination: "/cody/clients/install-jetbrains",
+        permanent: true
+    },
+    {
+        source: "/cody/overview/install-jetbrains",
+        destination: "/cody/clients/install-jetbrains",
         permanent: true
     },
     {
         source: "/cody/overview/install-jetbrains#requirements",
-        destination: "/cody/overview/install-jetbrains#prerequisites",
+        destination: "/cody/clients/install-jetbrains#prerequisites",
+        permanent: true
+    },
+    {
+        source: "/cody/overview/install-jetbrains#prerequisites",
+        destination: "/cody/clients/install-jetbrains#prerequisites",
         permanent: true
     },
     {
         source: "/cody/overview/install-jetbrains#optional-enable-code-graph-context-for-context-aware-answers",
-        destination: "/cody/overview/install-jetbrains#enable-code-graph-context-for-context-aware-answers-optional",
+        destination: "/cody/clients/install-jetbrains#optional-enable-code-graph-context-for-context-aware-answers",
+        permanent: true
+    },
+    {
+        source: "/cody/overview/install-jetbrains#enable-code-graph-context-for-context-aware-answers-optional",
+        destination: "/cody/clients/install-jetbrains#optional-enable-code-graph-context-for-context-aware-answers",
         permanent: true
     },
     {
         source: "/cody/overview/install-jetbrains#get-started-with-cody",
-        destination: "/cody/overview/install-jetbrains",
+        destination: "/cody/clients/install-jetbrains",
+        permanent: true
+    },
+    {
+        source: "/cody/overview/install-jetbrains",
+        destination: "/cody/clients/install-jetbrains",
         permanent: true
     },
     {
         source: "/cody/overview/install-vscode#introduction",
-        destination: "/cody/overview/install-vscode",
+        destination: "/cody/clients/install-vscode",
+        permanent: true
+    },
+    {
+        source: "/cody/overview/install-vscode",
+        destination: "/cody/clients/install-vscode",
         permanent: true
     },
     {
         source: "/cody/overview/install-vscode#requirements",
-        destination: "/cody/overview/install-vscode#prerequisites",
+        destination: "/cody/clients/install-vscode#prerequisites",
+        permanent: true
+    },
+    {
+        source: "/cody/overview/install-vscode#prerequisites",
+        destination: "/cody/clients/install-vscode#prerequisites",
         permanent: true
     },
     {
         source: "/cody/overview/install-vscode#optional-enable-code-graph-context-for-context-aware-answers",
-        destination: "/cody/overview/install-vscode#enable-code-graph-context-for-context-aware-answers-optional",
+        destination: "/cody/clients/install-vscode#enable-code-graph-context-for-context-aware-answers-optional",
+        permanent: true
+    },
+    {
+        source: "/cody/overview/install-vscode#enable-code-graph-context-for-context-aware-answers-optional",
+        destination: "/cody/clients/install-vscode#enable-code-graph-context-for-context-aware-answers-optional",
         permanent: true
     },
     {
         source: "/cody/overview/enable-cody-enterprise#using-a-third-party-llm-provider-directly",
-        destination: "/cody/overview/enable-cody-enterprise#using-a-third-party-llm-provider",
+        destination: "/cody/clients/enable-cody-enterprise#using-a-third-party-llm-provider",
+        permanent: true
+    },
+    {
+        source: "/cody/overview/enable-cody-enterprise#using-a-third-party-llm-provider",
+        destination: "/cody/clients/enable-cody-enterprise#using-a-third-party-llm-provider",
         permanent: true
     },
     {
         source: "/cody/overview/enable-cody-enterprise#turning-cody-on-only-for-some-users",
-        destination: "/cody/overview/enable-cody-enterprise#enable-cody-only-for-some-users",
+        destination: "/cody/clients/enable-cody-enterprise#enable-cody-only-for-some-users",
+        permanent: true
+    },
+    {
+        source: "/cody/overview/enable-cody-enterprise#enable-cody-only-for-some-users",
+        destination: "/cody/clients/enable-cody-enterprise#enable-cody-only-for-some-users",
         permanent: true
     },
     {
         source: "/cody/overview/enable-cody-enterprise#turning-cody-off",
-        destination: "/cody/overview/enable-cody-enterprise#disable-cody",
+        destination: "/cody/clients/enable-cody-enterprise#disable-cody",
+        permanent: true
+    },
+    {
+        source: "/cody/overview/enable-cody-enterprise#disable-cody",
+        destination: "/cody/clients/enable-cody-enterprise#disable-cody",
         permanent: true
     },
     {
@@ -1666,162 +1771,317 @@ const redirectsData = [
     },
     {
         source: "/cody/explanations/code_graph_context#embeddings",
-        destination: "/cody/core-concepts/embeddings#embeddings",
+        destination: "/cody/embeddings",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings#embeddings",
+        destination: "/cody/embeddings",
         permanent: true
     },
     {
         source: "/cody/explanations/code_graph_context#configuring-embeddings",
-        destination: "/cody/core-concepts/embeddings/configure-embeddings",
+        destination: "/cody/embeddings/configure-embeddings",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/configure-embeddings",
+        destination: "/cody/embeddings/configure-embeddings",
         permanent: true
     },
     {
         source: "/cody/explanations/code_graph_context#filtering-files-from-embeddings",
-        destination: "/cody/core-concepts/embeddings/manage-embeddings#filter-files-from-embeddings",
+        destination: "/cody/embeddings/manage-embeddings#filter-files-from-embeddings",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/manage-embeddings#filter-files-from-embeddings",
+        destination: "/cody/embeddings/manage-embeddings#filter-files-from-embeddings",
         permanent: true
     },
     {
         source: "/cody/explanations/code_graph_context#storing-embedding-indexes",
-        destination: "/cody/core-concepts/embeddings/manage-embeddings#store-embedding-indexes",
+        destination: "/cody/embeddings/manage-embeddings#store-embedding-indexes",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/manage-embeddings#store-embedding-indexes",
+        destination: "/cody/embeddings/manage-embeddings#store-embedding-indexes",
         permanent: true
     },
     {
         source: "/cody/explanations/code_graph_context#using-s3",
-        destination: "/cody/core-concepts/embeddings/manage-embeddings#using-s3",
+        destination: "/cody/embeddings/manage-embeddings#using-s3",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/manage-embeddings#using-s3",
+        destination: "/cody/embeddings/manage-embeddings#using-s3",
         permanent: true
     },
     {
         source: "/cody/explanations/code_graph_context#using-gcs",
-        destination: "/cody/core-concepts/embeddings/manage-embeddings#using-gcs",
+        destination: "/cody/embeddings/manage-embeddings#using-gcs",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/manage-embeddings#using-gcs",
+        destination: "/cody/embeddings/manage-embeddings#using-gcs",
         permanent: true
     },
     {
         source: "/cody/explanations/code_graph_context#provisioning-buckets",
-        destination: "/cody/core-concepts/embeddings/manage-embeddings#provisioning-buckets",
+        destination: "/cody/embeddings/manage-embeddings#provisioning-buckets",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/manage-embeddings#provisioning-buckets",
+        destination: "/cody/embeddings/manage-embeddings#provisioning-buckets",
         permanent: true
     },
     {
         source: "/cody/explanations/code_graph_context#environment-variables-for-the-embeddings-service",
-        destination: "cody/core-concepts/embeddings/manage-embeddings#environment-variables-for-the-embeddings-service",
+        destination: "/cody/embeddings/manage-embeddings#environment-variables-for-the-embeddings-service",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/manage-embeddings#environment-variables-for-the-embeddings-service",
+        destination: "/cody/embeddings/manage-embeddings#environment-variables-for-the-embeddings-service",
         permanent: true
     },
     {
         source: "/cody/explanations/code_graph_context#incremental-embeddings",
-        destination: "/cody/core-concepts/embeddings#incremental-embeddings",
+        destination: "/cody/embeddings#incremental-embeddings",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings#incremental-embeddings",
+        destination: "/cody/embeddings#incremental-embeddings",
         permanent: true
     },
     {
         source: "/cody/explanations/code_graph_context#adjust-the-minimum-time-interval-between-automatically-scheduled-embeddings",
-        destination: "/cody/core-concepts/embeddings#minimum-time-interval-between-automatically-scheduled-embeddings",
+        destination: "/cody/embeddings#minimum-time-interval-between-automatically-scheduled-embeddings",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings#minimum-time-interval-between-automatically-scheduled-embeddings",
+        destination: "/cody/embeddings#minimum-time-interval-between-automatically-scheduled-embeddings",
         permanent: true
     },
     {
         source: "/cody/explanations/code_graph_context#using-a-third-party-embeddings-provider-directly",
-        destination: "/cody/core-concepts/embeddings#third-party-embeddings-provider",
+        destination: "/cody/embeddings#third-party-embeddings-provider",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings#third-party-embeddings-provider",
+        destination: "/cody/embeddings#third-party-embeddings-provider",
         permanent: true
     },
     {
         source: "/cody/explanations/code_graph_context#openai",
-        destination: "/cody/core-concepts/embeddings#openai",
+        destination: "/cody/embeddings#openai",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings#openai",
+        destination: "/cody/embeddings#openai",
         permanent: true
     },
     {
         source: "/cody/explanations/code_graph_context#azure-openai-span-class-badge-badge-experimental-experimental-span",
-        destination: "/cody/core-concepts/embeddings#azure-openai",
+        destination: "/cody/embeddings#azure-openai",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings#azure-openai",
+        destination: "/cody/embeddings#azure-openai",
         permanent: true
     },
     {
         source: "/cody/explanations/code_graph_context#disabling-embeddings",
-        destination: "/cody/core-concepts/embeddings#disable-embeddings",
+        destination: "/cody/embeddings#disable-embeddings",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings#disable-embeddings",
+        destination: "/cody/embeddings#disable-embeddings",
         permanent: true
     },
     {
         source: "/cody/explanations/code_graph_context#configuring-the-global-policy-match-limit",
-        destination: "/cody/core-concepts/embeddings/usage-and-limits#configure-global-policy-match-limit",
+        destination: "/cody/embeddings/usage-and-limits#configure-global-policy-match-limit",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/usage-and-limits#configure-global-policy-match-limit",
+        destination: "/cody/embeddings/usage-and-limits#configure-global-policy-match-limit",
         permanent: true
     },
     {
         source: "/cody/explanations/code_graph_context#limitting-the-number-of-embeddings-that-can-be-generated",
-        destination: "/cody/core-concepts/embeddings/usage-and-limits#limit-the-number-of-embeddings-that-can-be-generated",
+        destination: "/cody/embeddings/usage-and-limits#limit-the-number-of-embeddings-that-can-be-generated",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/usage-and-limits#limit-the-number-of-embeddings-that-can-be-generated",
+        destination: "/cody/embeddings/usage-and-limits#limit-the-number-of-embeddings-that-can-be-generated",
         permanent: true
     },
     {
         source: "/cody/explanations/indexing",
-        destination: "/cody/core-concepts/embeddings/embedding-index",
+        destination: "/cody/embeddings/embedding-index",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/embedding-index",
+        destination: "/cody/embeddings/embedding-index",
         permanent: true
     },
     {
         source: "/cody/explanations/indexing#generate-embeddings-index",
-        destination: "/cody/core-concepts/embeddings/embedding-index#generate-embeddings-index",
+        destination: "/cody/embeddings/embedding-index#generate-embeddings-index",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/embedding-index#generate-embeddings-index",
+        destination: "/cody/embeddings/embedding-index#generate-embeddings-index",
         permanent: true
     },
     {
         source: "/cody/explanations/indexing#sourcegraph-enterprise",
-        destination: "/cody/core-concepts/embeddings/embedding-index#sourcegraph-enterprise",
+        destination: "/cody/embeddings/embedding-index#sourcegraph-enterprise",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/embedding-index#sourcegraph-enterprise",
+        destination: "/cody/embeddings/embedding-index#sourcegraph-enterprise",
         permanent: true
     },
     {
         source: "/cody/explanations/indexing#sourcegraph-com",
-        destination: "/cody/core-concepts/embeddings/embedding-index#sourcegraph-com",
+        destination: "/cody/embeddings/embedding-index#sourcegraphcom",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/embedding-index#sourcegraph-com",
+        destination: "/cody/embeddings/embedding-index#sourcegraphcom",
         permanent: true
     },
     {
         source: "/cody/explanations/indexing#enable-codebase-aware-answers",
-        destination: "/cody/core-concepts/embeddings/embedding-index#enable-codebase-aware-answers",
+        destination: "/cody/embeddings/embedding-index#enable-codebase-aware-answers",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/embedding-index#enable-codebase-aware-answers",
+        destination: "/cody/embeddings/embedding-index#enable-codebase-aware-answers",
         permanent: true
     },
     {
         source: "/cody/explanations/indexing#extension-settings",
-        destination: "/cody/core-concepts/embeddings/embedding-index#cody-vs-code-extension-settings",
+        destination: "/cody/embeddings/embedding-index#cody-vs-code-extension-settings",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/embedding-index#cody-vs-code-extension-settings",
+        destination: "/cody/embeddings/embedding-index#cody-vs-code-extension-settings",
         permanent: true
     },
     {
         source: "/cody/explanations/indexing#manual-configuration",
-        destination: "/cody/core-concepts/embeddings/embedding-index#manual-configuration",
+        destination: "/cody/embeddings/embedding-index#manual-configuration",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/embedding-index#manual-configuration",
+        destination: "/cody/embeddings/embedding-index#manual-configuration",
         permanent: true
     },
     {
         source: "/cody/explanations/indexing#settings-json",
-        destination: "/cody/core-concepts/embeddings/embedding-index#settings-json",
+        destination: "/cody/embeddings/embedding-index#settingsjson",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/embedding-index#settings-json",
+        destination: "/cody/embeddings/embedding-index#settingsjson",
         permanent: true
     },
     {
         source: "/cody/explanations/policies",
-        destination: "/cody/core-concepts/embeddings/configure-embeddings#policies",
+        destination: "/cody/embeddings/configure-embeddings#policies",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/configure-embeddings#policies",
+        destination: "/cody/embeddings/configure-embeddings#policies",
         permanent: true
     },
     {
         source: "/cody/explanations/policies#how-to-create-an-embeddings-policy",
-        destination: "/cody/core-concepts/embeddings/configure-embeddings#create-an-embeddings-policy",
+        destination: "/cody/embeddings/configure-embeddings#create-an-embeddings-policy",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/configure-embeddings#create-an-embeddings-policy",
+        destination: "/cody/embeddings/configure-embeddings#create-an-embeddings-policy",
         permanent: true
     },
     {
         source: "/cody/explanations/policies#example-1",
-        destination: "/cody/core-concepts/embeddings/configure-embeddings#how-pattern-matching-works",
+        destination: "/cody/embeddings/configure-embeddings#how-pattern-matching-works",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/configure-embeddings#how-pattern-matching-works",
+        destination: "/cody/embeddings/configure-embeddings#how-pattern-matching-works",
         permanent: true
     },
     {
         source: "/cody/explanations/policies#example-2",
-        destination: "/cody/core-concepts/embeddings/configure-embeddings#how-pattern-matching-works",
+        destination: "/cody/embeddings/configure-embeddings#how-pattern-matching-works",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/configure-embeddings#how-pattern-matching-works",
+        destination: "/cody/embeddings/configure-embeddings#how-pattern-matching-works",
         permanent: true
     },
     {
         source: "/cody/explanations/policies#example-3",
-        destination: "/cody/core-concepts/embeddings/configure-embeddings#how-pattern-matching-works",
+        destination: "/cody/embeddings/configure-embeddings#how-pattern-matching-works",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/configure-embeddings#how-pattern-matching-works",
+        destination: "/cody/embeddings/configure-embeddings#how-pattern-matching-works",
         permanent: true
     },
     {
         source: "/cody/explanations/policies#lifecycle-of-an-embeddings-policy",
-        destination: "/cody/core-concepts/embeddings/configure-embeddings#lifecycle-of-an-embeddings-policy",
+        destination: "/cody/embeddings/configure-embeddings#lifecycle-of-an-embeddings-policy",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/configure-embeddings#lifecycle-of-an-embeddings-policy",
+        destination: "/cody/embeddings/configure-embeddings#lifecycle-of-an-embeddings-policy",
         permanent: true
     },
     {
         source: "/cody/explanations/schedule_one_off_embeddings_jobs",
-        destination: "/cody/core-concepts/embeddings/configure-embeddings#schedule-embeddings-jobs",
+        destination: "/cody/embeddings/configure-embeddings#schedule-embeddings-jobs",
+        permanent: true
+    },
+    {
+        source: "/cody/core-concepts/embeddings/configure-embeddings#schedule-embeddings-jobs",
+        destination: "/cody/embeddings/configure-embeddings#schedule-embeddings-jobs",
         permanent: true
     },
     {
         source: "/cody/explanations/code_graph_context",
-        destination: "/cody/core-concepts/code_graph_context",
+        destination: "/cody/core-concepts/code-graph",
         permanent: true
     },
     {
@@ -1836,7 +2096,12 @@ const redirectsData = [
     },
     {
         source: "/cody/core-concepts/cody_clients",
-        destination: "/cody/overview#getting-started",
+        destination: "/cody/clients",
+        permanent: true
+    },
+    {
+        source: "/cody/overview#getting-started",
+        destination: "/cody/clients",
         permanent: true
     },
     {

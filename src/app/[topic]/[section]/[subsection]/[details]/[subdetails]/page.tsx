@@ -1,4 +1,3 @@
-import {format, parseISO} from 'date-fns';
 import {allPosts} from 'contentlayer/generated';
 import {getMDXComponent} from 'next-contentlayer/hooks';
 import {Prose} from '@/components/Prose';
@@ -23,14 +22,16 @@ interface Props {
 		topic: string;
 		section: string;
 		subsection: string;
+		details: string;
+		subdetails: string;
 	};
 }
 
 const PostLayout = ({params}: Props) => {
 	const currentUrl =
-		`${params.topic}/${params.section}/${params.subsection}`.trim();
-
+		`${params.topic}/${params.section}/${params.subsection}/${params.details}/${params.subdetails}`.trim();
 	const post = allPosts.find(post => post._raw.flattenedPath === currentUrl);
+
 	if (!post) return notFound();
 	const Content = getMDXComponent(post.body.code);
 
@@ -41,6 +42,8 @@ const PostLayout = ({params}: Props) => {
 					topic={params.topic}
 					section={params.section}
 					subsection={params.subsection}
+					details={params.details}
+					subdetails={params.subdetails}
 				/>
 				<article>
 					<Prose>

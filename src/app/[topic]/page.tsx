@@ -16,8 +16,13 @@ export const generateStaticParams = async () =>
 // 	const post = allPosts.find(post => post._raw.flattenedPath === params.slug);
 // 	return {title: post.title ? post.title : 'no title'};
 // };
+interface Props {
+	params: {
+		topic: string;
+	};
+}
 
-const PostLayout = ({params}: {params: {topic: string}}) => {
+const PostLayout = ({params}: Props) => {
 	const post = allPosts.find(
 		post => post._raw.flattenedPath === params.topic
 	);
