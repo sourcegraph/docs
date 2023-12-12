@@ -39,7 +39,7 @@ export const navigation: NavigationItem[] = [
         sections: [
           { title: "Quickstart", href: "/cody/quickstart" },
           {
-            title: "Cody Clients", href: "/cody/clients",
+            title: "Installation", href: "/cody/clients",
             subsections: [
               { title: "Cody for VS Code", href: "/cody/clients/install-vscode", },
               { title: "Cody for JetBrains", href: "/cody/clients/install-jetbrains", },
