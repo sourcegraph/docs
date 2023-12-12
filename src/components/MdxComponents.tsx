@@ -1,9 +1,9 @@
-import {Callout} from './Callout';
-import {Heading} from './Heading';
-import {LinkCard, LinkCards} from './LinkCards';
-import {ProductCard, ProductCards} from './ProductCards';
-import {QuickLink, QuickLinks} from './QuickLinks';
-import {CustomLink} from './custom/link';
+import {Callout} from './mdx/Callout';
+import {Heading} from './mdx/Heading';
+import {LinkCard, LinkCards} from './mdx/LinkCards';
+import {ProductCard, ProductCards} from './mdx/ProductCards';
+import {QuickLink, QuickLinks} from './mdx/QuickLinks';
+import {CustomLink} from './mdx/CustomLink';
 
 const MdxComponents = {
 	QuickLinks,
@@ -28,6 +28,12 @@ const MdxComponents = {
 	},
 	h3: (props: any) => {
 		return <Heading level="3" id={props.id} props={props} />;
+	},
+	img: (props: any) => {
+		return <img className="rounded-xl" {...props} />;
+	},
+	video: (props: any) => {
+		return <video className="rounded-xl" {...props} />;
 	}
 };
 

@@ -6,25 +6,25 @@ Welcome to the Sourcegraph documentation! We're excited to have you contribute t
 
 To get started with this template, clone this repository to your local machine using the following command:
 
-```bash
+```sh
 git clone https://github.com/sourcegraph/sourcegraph-docs-v2.git
 ```
 
 Navigate to the project directory by typing the following command in your terminal:
 
-```bash
+```sh
 cd sourcegraph-docs-v2
 ```
 
 Once you are inside the `sourcegraph-docs-v2` root folder, install the dependencies. Type the following in terminal:
 
-```bash
+```sh
 npm install
 ```
 
 Next, run the development server:
 
-```bash
+```sh
 npm run dev
 ```
 
@@ -32,13 +32,13 @@ Finally, open [`http://localhost:3000`](http://localhost:3000) in your browser t
 
 ## Writing and contributing to Sourcegraph Docs
 
-To add new or update existing docs content. Create a new branch via:
+To add new or update existing docs content. Create a new branch and checkout by via:
 
-```
-git branch 'new-branch'
+```sh
+git checkout -b BRANCH_NAME_HERE
 ```
 
-###  Folder structure
+### Folder structure
 
 The folder structure is exactly the same here. All the docs reside within the `/docs` folder. Here you'll find separate folders for every docs section like `cody`, `code_search`, `cli`, etc.
 
@@ -74,16 +74,14 @@ This is how you add a [demo-link](https://sourcegraph.com/)
 
 The only difference with this new stack is its ability to use React components. We have a set of reusable React components located in the `src/components` directory. These components are designed to enhance the user experience and maintain consistency across our documentation.
 
-For example the cards layout appears by using the `<QuickLinks>` component:
+For example the cards layout appears by using the `<Callout>` component that can add `note`, `info`, or `warning` notices in docs.
 
-![](https://storage.googleapis.com/sourcegraph-assets/Docs/CleanShot%202023-12-11%20at%2013.32.14%402x.png)
+![](https://storage.googleapis.com/sourcegraph-assets/Docs/CleanShot%202023-12-12%20at%2012.00.29%402x.png)
 
 You can use this component within your content as follows:
 
 ```js
-<QuickLinks>
-	<QuickLink href="https://sourcegraph.com/cody" icon="cody" imgAlt="Cody" title="Get Cody!" description="Write, fix, and maintain code with the powerful & accurate AI coding assistant. " />
-</QuickLinks>
+<Callout type="note">Cody is currently in Beta stage for all users.</Callout>
 ```
 
 This snippet creates a single `<QuickLink>` titled as "Get Cody". You can add as many cards you want while filling out all the relevant details.

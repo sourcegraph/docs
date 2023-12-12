@@ -4,11 +4,6 @@ import {allPosts} from 'contentlayer/generated';
 import {getMDXComponent} from 'next-contentlayer/hooks';
 import {notFound} from 'next/navigation';
 
-// export const generateMetadata = ({params}) => {
-// 	const post = allPosts.find(post => post._raw.flattenedPath === params.slug);
-// 	return {title: post.title ? post.title : 'no title'};
-// };
-
 const PostLayout = ({params}: {params: {topic: string}}) => {
 	const post = allPosts.find(post => post._raw.flattenedPath === '');
 	if (!post) return notFound();
@@ -18,11 +13,8 @@ const PostLayout = ({params}: {params: {topic: string}}) => {
 		<>
 			<div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none lg:pl-8 lg:pr-0 xl:px-16">
 				<article>
-					<Prose>
-						<Content
-							suppressHydrationWarning
-							components={MdxComponents}
-						/>
+					<Prose suppressHydrationWarning>
+						<Content components={MdxComponents} />
 					</Prose>
 				</article>
 			</div>

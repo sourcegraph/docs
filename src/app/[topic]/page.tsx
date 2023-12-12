@@ -12,10 +12,15 @@ export const generateStaticParams = async () =>
 		({slug: post._raw.flattenedPath});
 	});
 
-// export const generateMetadata = ({params}) => {
-// 	const post = allPosts.find(post => post._raw.flattenedPath === params.slug);
-// 	return {title: post.title ? post.title : 'no title'};
-// };
+export const generateMetadata = ({params}: Props) => {
+	const post = allPosts.find(
+		post => post._raw.flattenedPath === params.topic
+	);
+	if (post && post.headings && post.headings.length > 0) {
+		return {title: post.headings[0].title};
+	}
+};
+
 interface Props {
 	params: {
 		topic: string;

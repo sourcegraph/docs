@@ -23,10 +23,10 @@ const lexend = localFont({
 
 export const metadata: Metadata = {
 	title: {
-		template: '%s - Docs',
+		template: '%s - Sourcegraph Docs',
 		default: 'Sourcegraph - Docs'
 	},
-	description: 'Sourcegraph Docs'
+	description: 'Sourcegraph Documentation'
 };
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
@@ -40,7 +40,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
 			)}
 			suppressHydrationWarning
 		>
-			<body className="bg-light-bg flex min-h-full dark:bg-dark-bg">
+			<body className="flex min-h-full bg-light-bg dark:bg-dark-bg">
 				<Providers>
 					<Layout>{children}</Layout>
 				</Providers>

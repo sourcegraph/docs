@@ -4,14 +4,14 @@ import clsx from 'clsx';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 import {useEffect, useState} from 'react';
-
+import Image from 'next/image';
 import {Hero} from '@/components/Hero';
 import {Logo} from '@/components/Logo';
 import {MobileNavigation} from '@/components/MobileNavigation';
 import {Navigation} from '@/components/Navigation';
 import {ThemeSelector} from '@/components/ThemeSelector';
-import {KBarButton} from './search/KBarButton';
 import {Search} from './search/Search';
+import {LogoMark} from './LogoMark';
 
 function GitHubIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -38,10 +38,9 @@ function Header() {
 	return (
 		<header
 			className={clsx(
-				'bg-light-bg sticky top-0 z-50 flex flex-none flex-wrap items-center justify-between px-4 py-6 shadow-md shadow-slate-900/5 transition duration-500 dark:shadow-none sm:px-6 lg:px-8',
-				`dark:border-dark-border lg:border-light-border lg:border-b`,
+				'sticky top-0 z-50 flex flex-none flex-wrap items-center justify-between bg-light-bg px-4 py-6 shadow-md shadow-slate-900/5 transition duration-500 dark:border-dark-border dark:shadow-none sm:px-6 lg:border-b lg:border-light-border lg:px-8',
 				isScrolled
-					? 'dark:bg-dark-bg-1 dark:[@supports(backdrop-filter:blur(0))]:bg-dark-bg-1/80 dark:backdrop-blur'
+					? 'dark:bg-dark-bg-1 dark:backdrop-blur dark:[@supports(backdrop-filter:blur(0))]:bg-dark-bg-1/80'
 					: 'dark:bg-transparent'
 			)}
 		>
@@ -53,23 +52,31 @@ function Header() {
 					<Link
 						href="/"
 						aria-label="Home page"
-						className="relative z-10"
+						className="relative z-10 hidden md:block"
 					>
-						{/* <Logomark className="h-9 w-9 lg:hidden" /> */}
-						<Logo className="hidden h-9 w-auto lg:block" />
+						<Logo className="h-9 w-auto" />
+					</Link>
+					<Link
+						href="/"
+						className="relative z-10 block md:hidden"
+						aria-label="Home page"
+					>
+						<LogoMark className="h-6 w-6" />
 					</Link>
 				</div>
 				<div className="-my-5 mr-6 sm:mr-8 md:mr-0">
 					<Search />
 				</div>
-				<div className="relative flex basis-0 justify-end gap-6 sm:gap-8 md:flex-grow">
+				<div className="relative flex basis-0 items-center justify-end gap-6 sm:gap-6 md:flex-grow">
 					<ThemeSelector className="relative z-10" />
 					<Link
 						href="https://github.com/sourcegraph/sourcegraph"
 						className="group"
 						aria-label="GitHub"
 					>
-						<GitHubIcon className="h-6 w-6 fill-slate-400 group-hover:fill-slate-500 dark:group-hover:fill-slate-300" />
+						<span className="flex h-7 w-7 items-center justify-center rounded-lg shadow-md shadow-black/5 ring-1 ring-light-border-2 dark:bg-dark-bg-2 dark:ring-inset dark:ring-dark-border">
+							<GitHubIcon className="h-5 w-5 fill-slate-400 group-hover:fill-slate-500 dark:group-hover:fill-slate-300" />
+						</span>
 					</Link>
 				</div>
 			</div>
