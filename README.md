@@ -95,6 +95,20 @@ Here are the list of all the supported components we have:
 
 For a better docs experience we'll continue adding more components in future.
 
+### Adding a link
+
+To add a `link` to any docs page, use the following routing syntax: `[Link text](path-to-link)`.
+
+- Do not include `/docs` in the link paths. The base URL will be `sourcegraph.com/docs`
+- There should be **no file extension** in the path name
+
+For example, if you want to link to the Cody Quickstart somewhere in the Code Search docs, you should use:
+
+```markdown
+- This is a link to [Cody Quickstart](/cody/quickstart) in Code Search docs
+- This is a way to hash-link to [Cody for VSCode installation](/cody/clients/install-vscode#verifying-the-installation) in Code Search docs
+```
+
 ## Previewing Changes
 
 As you make changes to the documentation, the development server will automatically update. Review your changes by navigating to `http://localhost:3000` in your browser.
