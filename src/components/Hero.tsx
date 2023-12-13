@@ -33,7 +33,7 @@ export function Hero() {
 									'mt-3 text-xl tracking-tight text-slate-700 dark:text-slate-200 sm:text-2xl'
 								)}
 							>
-								Sourcegraph is a Code Intelligence platform that
+								Sourcegraph is a Code AI platform that
 								deeply understands your code, no matter how
 								large or where it’s hosted, to power modern
 								developer experiences.
