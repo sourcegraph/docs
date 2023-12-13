@@ -1,15 +1,21 @@
 'use client';
 
-import {ThemeProvider} from 'next-themes';
+import { ThemeProvider } from "@/components/theme-provider";
+import { searchMetadata } from '@/data/search';
 import {
-	SearchProvider,
-	SearchConfig
+	SearchConfig,
+	SearchProvider
 } from '../components/search/SearchProvider';
-import {searchMetadata} from '@/data/search';
 
-export function Providers({children}: {children: React.ReactNode}) {
+export function Providers({ children }: { children: React.ReactNode }) {
 	return (
-		<ThemeProvider attribute="class" disableTransitionOnChange>
+		// <ThemeProvider attribute="class" disableTransitionOnChange>
+		<ThemeProvider
+			enableSystem
+			attribute="class"
+			defaultTheme="system"
+			disableTransitionOnChange
+		>
 			<SearchProvider searchConfig={searchMetadata as SearchConfig}>
 				{children}
 			</SearchProvider>
