@@ -58,7 +58,7 @@ export const KBarSearchProvider: FC<{
 									(heading: any) => heading.title
 								) || '',
 							section: 'Docs',
-							perform: () => router.push('/' + post.url)
+							perform: () => router.push(post.url)
 						});
 					}
 				} catch (e) {
