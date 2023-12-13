@@ -43,7 +43,7 @@ export function Hero() {
 									href="/cody"
 								// target="_blank"
 								>
-									Get started with Cody
+									Learn about Cody
 								</Button>
 								<Button
 									className="group flex items-center"
@@ -51,7 +51,7 @@ export function Hero() {
 									href="/code_search"
 									variant="ghost"
 								>
-									Explore Code Search
+									Learn about Code Search
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
 										fill="none"
