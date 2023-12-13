@@ -1595,6 +1595,11 @@ const redirectsData = [
         permanent: true
     },
     {
+        source: "/cody/overview/install-neovim",
+        destination: "/cody/clients/install-neovim",
+        permanent: true
+    },
+    {
         source: "/cody/explanations/installing_jetbrains",
         destination: "/cody/clients/install-jetbrains",
         permanent: true
