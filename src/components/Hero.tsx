@@ -1,10 +1,7 @@
-import {Button} from '@/components/Button';
-import blurCyanImage from '@/images/blur-cyan.png';
-import blurIndigoImage from '@/images/blur-indigo.png';
+import { Button } from '@/components/Button';
 import clsx from 'clsx';
-import Image from 'next/image';
-import {HeroBackground} from './HeroBackground';
-import {HeroGradient} from './HeroGradient';
+import { HeroBackground } from './HeroBackground';
+import { HeroGradient } from './HeroGradient';
 
 function TrafficLightsIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -43,15 +40,15 @@ export function Hero() {
 							</p>
 							<div className="mt-8 flex gap-1 md:justify-center lg:justify-start">
 								<Button
-									href="https://sourcegraph.com/cody"
-									target="_blank"
+									href="/cody"
+								// target="_blank"
 								>
 									Get started with Cody
 								</Button>
 								<Button
 									className="group flex items-center"
-									target="_blank"
-									href="https://sourcegraph.com/sign-in?returnTo=/search"
+									// target="_blank"
+									href="/code_search"
 									variant="ghost"
 								>
 									Explore Code Search
