@@ -40,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 				lexend.variable
 			)}
 		>
-			<body className="flex min-h-full dark:bg-dark-bg">
+			<body className="flex min-h-full bg-background">
 				<Providers>
 					<Layout>{children}</Layout>
 				</Providers>
