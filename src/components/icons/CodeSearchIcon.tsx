@@ -6,10 +6,10 @@ export function CodeSearchIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 			xmlns="http://www.w3.org/2000/svg"
 			xmlnsXlink="http://www.w3.org/1999/xlink"
 		>
-			<g clip-path="url(#clip0_32_3427)">
+			<g clipPath="url(#clip0_32_3427)">
 				<mask
 					id="mask0_32_3427"
-					style={{maskType: 'luminance'}}
+					style={{ maskType: 'luminance' }}
 					maskUnits="userSpaceOnUse"
 					x="0"
 					y="0"
@@ -24,7 +24,7 @@ export function CodeSearchIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 				<g mask="url(#mask0_32_3427)">
 					<mask
 						id="mask1_32_3427"
-						style={{maskType: 'luminance'}}
+						style={{ maskType: 'luminance' }}
 						maskUnits="userSpaceOnUse"
 						x="-7"
 						y="-7"

@@ -94,6 +94,9 @@ export default {
       }
     },
     extend: {
+      colors: {
+        background: 'hsl(var(--background))'
+      },
       fontFamily: {
         sans: ['-apple-system', 'var(--font-inter)'],
         display: ['var(--font-lexend)', { fontFeatureSettings: '"ss01"' }],
