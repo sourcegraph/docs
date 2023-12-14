@@ -35,7 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 			lang="en"
 			suppressHydrationWarning
 			className={clsx(
-				'h-full antialiased bg-dark-bg',
+				'h-full antialiased bg-background',
 				inter.variable,
 				lexend.variable
 			)}
