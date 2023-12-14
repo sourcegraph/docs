@@ -111,7 +111,17 @@ For example, if you want to link to the Cody Quickstart somewhere in the Code Se
 
 ## Previewing Changes
 
+### Locally
+
 As you make changes to the documentation, the development server will automatically update. Review your changes by navigating to `http://localhost:3000` in your browser.
+
+### Deployed Preview URL
+
+When you open a new PR you will get a deployed preview link from Vercel to view it. Use this link to view and share with other teammates.
+
+![](https://storage.googleapis.com/sourcegraph-assets/Docs/CleanShot%202023-12-13%20at%2016.19.14%402x.png)
+
+> NOTE: To view the docs please append `/docs` in the end of the preview URL. Otherwise you'll get a 404 error on the base URL.
 
 ## Submitting your Contribution
 
