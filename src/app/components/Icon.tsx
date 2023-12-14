@@ -1,18 +1,18 @@
-import {useId} from 'react';
 import clsx from 'clsx';
+import { useId } from 'react';
 
-import {InstallationIcon} from '@/components/icons/InstallationIcon';
-import {LightbulbIcon} from '@/components/icons/LightbulbIcon';
-import {PresetsIcon} from '@/components/icons/PresetsIcon';
-import {ThemingIcon} from '@/components/icons/ThemingIcon';
-import {WarningIcon} from '@/components/icons/WarningIcon';
-import {CodyIcon} from '@/components/icons/CodyIcon';
-import {CodeSearchIcon} from './icons/CodeSearchIcon';
-import {PluginsIcon} from './icons/PuginsIcon';
-import {CodeGraphIcon} from './icons/CodeGraphIcon';
-import {LanguageModelsIcon} from './icons/LanguageModels';
-import {SecurityIcon} from './icons/SecurityIcon';
-import {CodebaseIcon} from './icons/CodebaseIcon';
+import { CodyIcon } from '@/app/components/icons/CodyIcon';
+import { InstallationIcon } from '@/app/components/icons/InstallationIcon';
+import { LightbulbIcon } from '@/app/components/icons/LightbulbIcon';
+import { PresetsIcon } from '@/app/components/icons/PresetsIcon';
+import { ThemingIcon } from '@/app/components/icons/ThemingIcon';
+import { WarningIcon } from '@/app/components/icons/WarningIcon';
+import { CodeGraphIcon } from './icons/CodeGraphIcon';
+import { CodeSearchIcon } from './icons/CodeSearchIcon';
+import { CodebaseIcon } from './icons/CodebaseIcon';
+import { LanguageModelsIcon } from './icons/LanguageModels';
+import { PluginsIcon } from './icons/PuginsIcon';
+import { SecurityIcon } from './icons/SecurityIcon';
 
 const icons = {
 	installation: InstallationIcon,
@@ -61,13 +61,13 @@ export function Icon({
 
 const gradients = {
 	blue: [
-		{stopColor: '#A112FF', offset: '.127'},
-		{stopColor: '#FF5543', offset: '.6'},
-		{stopColor: '#00CBEC', offset: 1}
+		{ stopColor: '#A112FF', offset: '.127' },
+		{ stopColor: '#FF5543', offset: '.6' },
+		{ stopColor: '#00CBEC', offset: 1 }
 	],
 	amber: [
-		{stopColor: '#FDE68A', offset: '.08'},
-		{stopColor: '#F59E0B', offset: '.837'}
+		{ stopColor: '#FDE68A', offset: '.08' },
+		{ stopColor: '#F59E0B', offset: '.837' }
 	]
 };
 

@@ -1,6 +1,4 @@
-import Link from 'next/link';
-import {Icon} from '@/components/Icon';
-import {CustomLink} from './CustomLink';
+import { CustomLink } from './CustomLink';
 
 interface LinkCardI {
 	href: string;
@@ -14,7 +12,7 @@ interface LinkCardsI {
 	children: React.ReactNode;
 }
 
-export function LinkCards({children}: LinkCardsI) {
+export function LinkCards({ children }: LinkCardsI) {
 	return <div className="my-6 flex flex-col gap-2">{children}</div>;
 }
 

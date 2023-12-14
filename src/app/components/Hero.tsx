@@ -1,4 +1,4 @@
-import { Button } from '@/components/Button';
+import { Button } from '@/app/components/Button';
 import clsx from 'clsx';
 import { HeroBackground } from './HeroBackground';
 import { HeroGradient } from './HeroGradient';
@@ -33,10 +33,7 @@ export function Hero() {
 									'mt-3 text-xl tracking-tight text-slate-700 dark:text-slate-200 sm:text-2xl'
 								)}
 							>
-								Sourcegraph is a Code AI platform that
-								deeply understands your code, no matter how
-								large or where it’s hosted, to power modern
-								developer experiences.
+								Sourcegraph allows developers to rapidly search, write, and understand code by bringing insights from their entire codebase right into the editor.
 							</p>
 							<div className="mt-8 flex gap-1 md:justify-center lg:justify-start">
 								<Button

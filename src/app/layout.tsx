@@ -1,10 +1,10 @@
-import {type Metadata} from 'next';
-import {Inter} from 'next/font/google';
-import localFont from 'next/font/local';
 import clsx from 'clsx';
+import { type Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import localFont from 'next/font/local';
 
-import {Providers} from '@/app/providers';
-import {Layout} from '@/components/Layout';
+import { Layout } from '@/app/components/Layout';
+import { Providers } from '@/app/providers';
 
 import '@/styles/tailwind.css';
 
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 	description: 'Sourcegraph Documentation'
 };
 
-export default function RootLayout({children}: {children: React.ReactNode}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<html
 			lang="en"

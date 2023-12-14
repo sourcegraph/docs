@@ -1,23 +1,23 @@
-import {Breadcrumbs} from '@/components/Breadcrumbs';
-import MdxComponents from '@/components/MdxComponents';
-import {PrevNextLinks} from '@/components/PrevNextLinks';
-import {Prose} from '@/components/Prose';
-import {TableOfContents} from '@/components/Toc';
-import {allPosts} from 'contentlayer/generated';
-import {getMDXComponent} from 'next-contentlayer/hooks';
-import {notFound} from 'next/navigation';
+import { Breadcrumbs } from '@/app/components/Breadcrumbs';
+import MdxComponents from '@/app/components/MdxComponents';
+import { PrevNextLinks } from '@/app/components/PrevNextLinks';
+import { Prose } from '@/app/components/Prose';
+import { TableOfContents } from '@/app/components/Toc';
+import { allPosts } from 'contentlayer/generated';
+import { getMDXComponent } from 'next-contentlayer/hooks';
+import { notFound } from 'next/navigation';
 
 export const generateStaticParams = async () =>
 	allPosts.map(post => {
-		({slug: post._raw.flattenedPath});
+		({ slug: post._raw.flattenedPath });
 	});
 
-export const generateMetadata = ({params}: Props) => {
+export const generateMetadata = ({ params }: Props) => {
 	const post = allPosts.find(
 		post => post._raw.flattenedPath === params.topic
 	);
 	if (post && post.headings && post.headings.length > 0) {
-		return {title: post.headings[0].title};
+		return { title: post.headings[0].title };
 	}
 };
 
@@ -27,7 +27,7 @@ interface Props {
 	};
 }
 
-const PostLayout = ({params}: Props) => {
+const PostLayout = ({ params }: Props) => {
 	const post = allPosts.find(
 		post => post._raw.flattenedPath === params.topic
 	);

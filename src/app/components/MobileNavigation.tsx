@@ -1,10 +1,10 @@
 'use client';
 
-import {Suspense, useCallback, useEffect, useState} from 'react';
+import { Navigation } from '@/app/components/Navigation';
+import { Dialog } from '@headlessui/react';
 import Link from 'next/link';
-import {usePathname, useSearchParams} from 'next/navigation';
-import {Dialog} from '@headlessui/react';
-import {Navigation} from '@/components/Navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 
 function MenuIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -36,7 +36,7 @@ function CloseIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	);
 }
 
-function CloseOnNavigation({close}: {close: () => void}) {
+function CloseOnNavigation({ close }: { close: () => void }) {
 	let pathname = usePathname();
 	let searchParams = useSearchParams();
 
@@ -56,8 +56,8 @@ export function MobileNavigation() {
 		if (
 			link.pathname + link.search + link.hash ===
 			window.location.pathname +
-				window.location.search +
-				window.location.hash
+			window.location.search +
+			window.location.hash
 		) {
 			close();
 		}

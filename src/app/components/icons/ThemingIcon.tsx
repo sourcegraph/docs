@@ -1,4 +1,4 @@
-import {Gradient} from '@/components/Icon';
+import { Gradient } from '@/app/components/Icon';
 
 export function ThemingIcon({
 	id,

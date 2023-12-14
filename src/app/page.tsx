@@ -1,10 +1,10 @@
-import MdxComponents from '@/components/MdxComponents';
-import {Prose} from '@/components/Prose';
-import {allPosts} from 'contentlayer/generated';
-import {getMDXComponent} from 'next-contentlayer/hooks';
-import {notFound} from 'next/navigation';
+import MdxComponents from '@/app/components/MdxComponents';
+import { Prose } from '@/app/components/Prose';
+import { allPosts } from 'contentlayer/generated';
+import { getMDXComponent } from 'next-contentlayer/hooks';
+import { notFound } from 'next/navigation';
 
-const PostLayout = ({params}: {params: {topic: string}}) => {
+const PostLayout = ({ params }: { params: { topic: string } }) => {
 	const post = allPosts.find(post => post._raw.flattenedPath === '');
 	if (!post) return notFound();
 	const Content = getMDXComponent(post.body.code);

@@ -1,9 +1,9 @@
-import {useState, useEffect, FC, ReactNode} from 'react';
-import type {Action} from 'kbar';
-import {KBarProvider} from 'kbar';
-import {useRouter} from 'next/navigation.js';
-import {KBarModal} from './KBarModal';
-import {CoreContent, MDXDocument} from '../../utils/contentlayer';
+import type { Action } from 'kbar';
+import { KBarProvider } from 'kbar';
+import { useRouter } from 'next/navigation.js';
+import { FC, ReactNode, useEffect, useState } from 'react';
+import { CoreContent, MDXDocument } from '../../../utils/contentlayer';
+import { KBarModal } from './KBarModal';
 
 export interface KBarSearchProps {
 	searchDocumentsPath: string | false;
@@ -36,9 +36,9 @@ export interface KBarConfig {
 export const KBarSearchProvider: FC<{
 	children: ReactNode;
 	kbarConfig: KBarSearchProps;
-}> = ({kbarConfig, children}) => {
+}> = ({ kbarConfig, children }) => {
 	const router = useRouter();
-	const {searchDocumentsPath, defaultActions, onSearchDocumentsLoad} =
+	const { searchDocumentsPath, defaultActions, onSearchDocumentsLoad } =
 		kbarConfig;
 	const [searchActions, setSearchActions] = useState<Action[]>([]);
 	const [dataLoaded, setDataLoaded] = useState(false);
@@ -75,7 +75,7 @@ export const KBarSearchProvider: FC<{
 			if (searchDocumentsPath) {
 				const url =
 					searchDocumentsPath.indexOf('://') > 0 ||
-					searchDocumentsPath.indexOf('//') === 0
+						searchDocumentsPath.indexOf('//') === 0
 						? searchDocumentsPath
 						: new URL(searchDocumentsPath, window.location.origin);
 				const res = await fetch(url);
