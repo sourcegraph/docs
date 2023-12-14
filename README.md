@@ -117,9 +117,9 @@ As you make changes to the documentation, the development server will automatica
 
 ### Deployed Preview URL
 
-When you open a new PR you will get a deployed preview link from Vercel to view it. Use this link to view and share with other teammates.
+When you open a new PR you will get a deployed preview link from Netlify to view it. Use this link to view and share with other teammates.
 
-![](https://storage.googleapis.com/sourcegraph-assets/Docs/CleanShot%202023-12-13%20at%2016.19.14%402x.png)
+![](https://storage.googleapis.com/sourcegraph-assets/Docs/CleanShot%202023-12-14%20at%2013.33.49%402x.png)
 
 > NOTE: To view the docs please append `/docs` in the end of the preview URL. Otherwise you'll get a 404 error on the base URL.
 
