@@ -16,7 +16,18 @@ Navigate to the project directory by typing the following command in your termin
 cd sourcegraph-docs
 ```
 
-Once you are inside the `sourcegraph-docs-v2` root folder, install the dependencies. Type the following in terminal:
+Before the dependencies are install make sure your local machine has the following versions of `node` and `pnpm`:
+
+* node: `v20.8.1`
+* pnpm: `8.13.1`
+
+**Note**: If you have `asdf` available you can install the above versions for only this repository by running the following command from your terminal in the root folder:
+
+```sh
+asdf install
+```
+
+Now that the base requirements of the project have been satisfied, we can install the required dependencies to run the development server!
 
 ```sh
 pnpm install
