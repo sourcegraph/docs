@@ -7,25 +7,25 @@ Welcome to the Sourcegraph documentation! We're excited to have you contribute t
 To get started with this template, clone this repository to your local machine using the following command:
 
 ```sh
-git clone https://github.com/sourcegraph/sourcegraph-docs-v2.git
+git clone https://github.com/sourcegraph/docs.git sourcegraph-docs
 ```
 
 Navigate to the project directory by typing the following command in your terminal:
 
 ```sh
-cd sourcegraph-docs-v2
+cd sourcegraph-docs
 ```
 
 Once you are inside the `sourcegraph-docs-v2` root folder, install the dependencies. Type the following in terminal:
 
 ```sh
-npm install
+pnpm install
 ```
 
 Next, run the development server:
 
 ```sh
-npm run dev
+pnpm run dev
 ```
 
 Finally, open [`http://localhost:3000`](http://localhost:3000) in your browser to view the website.
@@ -35,7 +35,7 @@ Finally, open [`http://localhost:3000`](http://localhost:3000) in your browser t
 To add new or update existing docs content. Create a new branch and checkout by via:
 
 ```sh
-git checkout -b BRANCH_NAME_HERE
+git switch -c BRANCH_NAME_HERE
 ```
 
 ### Folder structure
