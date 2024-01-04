@@ -84,7 +84,7 @@ export const navigation: NavigationItem[] = [
               // { title: "Build UI", href: "/cody/use-cases/build-ui", },
             ]
           },
-          // { title: "Usage and Pricing", href: "/cody/usage-and-pricing" },
+          { title: "Usage and Pricing", href: "/cody/usage-and-pricing" },
           { title: "Troubleshooting", href: "/cody/troubleshooting" },
           { title: "FAQs", href: "/cody/faq" },
         ],
