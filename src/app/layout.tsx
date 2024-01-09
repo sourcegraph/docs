@@ -2,7 +2,6 @@ import {type Metadata} from 'next';
 import {Inter} from 'next/font/google';
 import localFont from 'next/font/local';
 import clsx from 'clsx';
-
 import {Providers} from '@/app/providers';
 import {Layout} from '@/components/Layout';
 
@@ -33,6 +32,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
 	return (
 		<html
 			lang="en"
+			style={{colorScheme: 'dark'}}
 			className={clsx(
 				'h-full antialiased',
 				inter.variable,
@@ -40,7 +40,10 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
 			)}
 			suppressHydrationWarning
 		>
-			<body className="flex min-h-full bg-light-bg dark:bg-dark-bg">
+			<body
+				suppressHydrationWarning
+				className="flex min-h-full bg-light-bg dark:bg-dark-bg"
+			>
 				<Providers>
 					<Layout>{children}</Layout>
 				</Providers>

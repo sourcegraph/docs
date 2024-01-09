@@ -49,15 +49,15 @@ export function ThemeSelector(
 	props: React.ComponentPropsWithoutRef<typeof Listbox<'div'>>
 ) {
 	let {theme, setTheme} = useTheme();
-	let [mounted, setMounted] = useState(false);
+	// let [mounted, setMounted] = useState(false);
 
-	useEffect(() => {
-		setMounted(true);
-	}, []);
+	// useEffect(() => {
+	// 	setMounted(true);
+	// }, [theme]);
 
-	if (!mounted) {
-		return <div className="h-6 w-6" />;
-	}
+	// if (!mounted) {
+	// 	return <div className="h-6 w-6" />;
+	// }
 
 	return (
 		<Listbox as="div" value={theme} onChange={setTheme} {...props}>
