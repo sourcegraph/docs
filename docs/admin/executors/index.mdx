@@ -17,11 +17,17 @@ Auto-indexing jobs, in particular, require the invocation of arbitrary and untru
 
 Instead of performing this work within the Sourcegraph instance, where code is available on disk and unprotected internal services are available over the local network, we move untrusted compute into a sandboxed environment, the _executor_, that has access only to the clone of a single repository on disk (its _workspace_) and to the public internet.
 
+## Sandboxing Model
+
+Executors can be deployed with [Firecracker](https://sourcegraph.com/github.com/firecracker-microvm/firecracker) isolation in accordance with our [sandboxing model](/admin/executors/#how-it-works) to isolate jobs from each other and the host.
+This requires executors to be run on machines capable of running Linux KVM extensions. On the most popular cloud providers, this either means running executors on bare-metal machines (AWS) or machines capable of nested virtualization (GCP).
+
+Optionally, executors can be run without using KVM-based isolation, which is less secure but might be easier to run on common machines.
+
 ## Deciding which executor deployment method to use
 
 Deciding how to deploy the executor depends on your use case. The following flowchart can help you decide which
 deployment option is best for your environment.
-
 
 <img src='https://storage.googleapis.com/sourcegraph-assets/executor_deployment_tree.png' alt='Executor Deployment Flowchart' />
 
