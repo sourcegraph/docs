@@ -10,7 +10,7 @@ Sourcegraph provisions each instance in an isolated and secure cloud environment
   <QuickLink title="Get single-tenant instance managed by Sourcegraph." icon='lightbulb' href="https://about.sourcegraph.com/get-started?t=enterprise" description="Sign up and get a 30 day free trial for your team." />
 </QuickLinks>
 
-Use the button above to sign up for a free 15-day trial of Sourcegraph Cloud. Please [contact us](https://about.sourcegraph.com/contact/sales) if you have specific VPN requirements or you require a large deployment with >500 users, >1,000 repos, or monorepos >5 GB.
+Use the button above to sign up for a free 15-day trial of Sourcegraph Cloud. Please [contact us](https://sourcegraph.com/contact/sales) if you have specific VPN requirements or you require a large deployment with >500 users, >1,000 repos, or monorepos >5 GB.
 
 ### Trial limitations
 
@@ -18,7 +18,7 @@ We currently have a limited capacity of single-tenant cloud instances and are pr
 
 If your organization has fewer than 100 developers, we recommend trying [Sourcegraph self-hosted](https://docs.sourcegraph.com/#self-hosted).
 
-If you're eligible for a cloud instance, you will receive a link to the instance URL once it's provisioned. This normally takes less than one hour during business hours. From there, we recommend using the [onboarding checklist](/getting-started/cloud-instance) to set up your instance quickly.
+If you're eligible for a cloud instance, you will receive a link to the instance URL once it's provisioned. This normally takes less than one hour during business hours. From there, we recommend using the [onboarding checklist](../getting-started/cloud-instance.md) to set up your instance quickly.
 
 Trials last 15 days. When the end of the trial approaches, Sourcegraph's Customer Support team will check in with you to either help you set up a Cloud subscription or end your trial.
 
@@ -79,10 +79,9 @@ To verify that your CAA records are set correctly, you can use the following com
 
 ```sh
 dig acme.com caa +short
-dig src.acme.com caa +short
 ```
 
-If the output is empty, you don't have to do anything. If the output is not empty, and it does not contain `letsencrypt.org` and `pki.goog`, you need to add them to your CAA records to the apex domain or your desired subdomain, e.g., `src.acme.com`.
+If the output is empty, you don't have to do anything. If the output is not empty, and it does not contain `letsencrypt.org` and `pki.goog`, you need to add them to your CAA records to the apex domain.
 
 #### Limitations
 
@@ -102,16 +101,20 @@ If you have specific requirements for the region, please reach out to your Sourc
 
 More details about the locations and data storage can be found in [our handbook](https://handbook.sourcegraph.com/departments/cloud/technical-docs/multi-region/)
 
-### Private Code Host support
+### Private Connectivity
 
-Public code hosts are supported by Sourcegraph Cloud out-of-the-box. They are either publically accessible or protected by IP-based firewall rules, Sourcegraph Cloud can provide static IP addresses for customers to add to their firewall allowlist. Please let your account team know.
+Sourcegraph Cloud can connect to resources that are publically accessible or protected by IP-based firewall rules out-of-the-box. Sourcegraph can provide static IP addresses for customers to add to their firewall allowlist. Please let your account team know.
 
-Private code hosts refer to code hosts that are not publicly accessible, such as self-hosted GitHub Enterprise servers or self-hosted GitLab instances deployed in a private network that are only accessible through VPN. Learn more about private code hosts support below:
+Private Connectivity enables customers to privately connect Private Resources to the Sourcegraph Cloud instance. Private Resources refer to services that are not publicly accessible, such as self-hosted GitHub Enterprise servers, self-hosted GitLab instances, self-hosted Nexus instance, or Jira Data Center deployed in a private network that are only accessible through VPN. Learn more about Private Connectvity support below:
 
-- [Code hosts on AWS without public access](/cloud/private_connectivity_aws)
-- [Code hosts on GCP without public access](/cloud/private_connectivity_gcp)
-- Code hosts on Azure is not supported yet, please reach out to your account manager if you are interested in this feature.
-- Code hosts on custom data center is not supported yet, please reach out to your account manager if you are interested in this feature.
+- [Private Resources on AWS via AWS Private Link](/cloud/private_connectivity_aws)
+- [Private Resources on GCP via GCP Private Service Connect](/cloud/private_connectivity_gcp)
+- [Private Resources on on-prem data center via Sourcegraph Connect agent](/cloud/private_connectivity_sourcegraph_connect)
+- Private Resources on Azure are not supported yet, please reach out to your account manager if you are interested in this feature.
+
+For unsupported private connectivity methods, Sourcegraph offers connectivity via customer-managed alternate public load balancers:
+
+- [Private Resources exposed via alternate public load balancers](/cloud/private_connectivity_public_lb)
 
 ### Health monitoring, support, and SLAs
 
@@ -120,7 +123,7 @@ Private code hosts refer to code hosts that are not publicly accessible, such as
 
 ### Backup and restore
 
-<span class="badge badge-note">SOC2/CI-79</span>
+<Callout type="info">`SOC2/CI-79` supported</Callout>
 
 Backup and restore capability is provided via automated snapshots.
 
@@ -156,12 +159,6 @@ To opt out of managed SMTP, please let your Sourcegraph Account team know when r
 To learn more about how the Sourcegraph team operates managed SMTP internally, refer to [our handbook](https://handbook.sourcegraph.com/departments/cloud/technical-docs/managed-smtp/).
 
 ### Cody
-
-<aside class="beta">
-<p>
-<span class="badge badge-beta">Beta</span> This feature is beta and might change in the future. We've released it to provide a preview of functionality we're working on.
-</p>
-</aside>
 
 Cody is an AI coding assistant that lives in your editor that can find, explain, and write code. Cody uses a combination of Large Language Models (LLMs), Sourcegraph search, and Sourcegraph code intelligence to provide answers that eliminate toil and keep human programmers in flow. You can think of Cody as your programmer buddy who has read through all the code in open source, all the questions on StackOverflow, and all your organization's private code, and is always there to answer questions you might have or suggest ways of doing something based on prior knowledge. Learn more from [Cody documentation](/cody/overview/) about how Cody can help you.
 
