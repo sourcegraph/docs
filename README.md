@@ -92,7 +92,7 @@ For example the cards layout appears by using the `<Callout>` component that can
 You can use this component within your content as follows:
 
 ```js
-<Callout type="note">Cody is currently in Beta stage for all users.</Callout>
+<Callout type="note">Cody is currently in Beta for all users.</Callout>
 ```
 
 This snippet creates a single `<QuickLink>` titled as "Get Cody". You can add as many cards you want while filling out all the relevant details.

@@ -1,18 +1,13 @@
 # Executors
 
-Executors are Sourcegraph's solution for running untrusted code in a secure and controllable way.
+Executors are Sourcegraph's solution for running untrusted code in a secure and controllable way. Executors provide a sandbox that can run resource-intensive or untrusted tasks on behalf of the Sourcegraph instance, such as:
+
+- [Automatically indexing a repository for precise code navigation](/code_navigation/explanations/auto_indexing)
+- [Running batch changes](/batch_changes/explanations/server_side)
 
 ## Installation
 
-To deploy executors to target your Sourcegraph instance, [follow our deployment guide](deploy_executors).
-
-The supported deployment options are,
-
-- [Binary](/admin/executors/deploy_executors_binary).
-- [Terraform on AWS or GCP](/admin/executors/deploy_executors).
-- (Beta) [Native Kubernetes](/admin/executors/deploy_executors_kubernetes).
-- (Beta) [Docker-in-Docker on Kubernetes](/admin/executors/deploy_executors_dind).
-- (Beta) [Docker-Compose](/admin/executors/deploy_executors_docker).
+To deploy executors for your Sourcegraph instance, follow our [executor deployment guide](executors/deploy_executors).
 
 ## Why use executors?
 
@@ -21,6 +16,20 @@ Running untrusted code is a core requirement of features such as precise code na
 Auto-indexing jobs, in particular, require the invocation of arbitrary and untrusted code to support the resolution of project dependencies. Invocation of post-install hooks, use of insecure [package management tools](https://github.com/golang/go/issues/29230), and package manager proxy attacks can create opportunities in which an adversary can gain unlimited use of compute or exfiltrate data. The latter outcome is particularly dangerous for on-premise installations of Sourcegraph, which is the chosen option for companies wanting to maintain strict privacy of their code property.
 
 Instead of performing this work within the Sourcegraph instance, where code is available on disk and unprotected internal services are available over the local network, we move untrusted compute into a sandboxed environment, the _executor_, that has access only to the clone of a single repository on disk (its _workspace_) and to the public internet.
+
+## Sandboxing Model
+
+Executors can be deployed with [Firecracker](https://sourcegraph.com/github.com/firecracker-microvm/firecracker) isolation in accordance with our [sandboxing model](/admin/executors/#how-it-works) to isolate jobs from each other and the host.
+This requires executors to be run on machines capable of running Linux KVM extensions. On the most popular cloud providers, this either means running executors on bare-metal machines (AWS) or machines capable of nested virtualization (GCP).
+
+Optionally, executors can be run without using KVM-based isolation, which is less secure but might be easier to run on common machines.
+
+## Deciding which executor deployment method to use
+
+Deciding how to deploy the executor depends on your use case. The following flowchart can help you decide which
+deployment option is best for your environment.
+
+<img src='https://storage.googleapis.com/sourcegraph-assets/executor_deployment_tree.png' alt='Executor Deployment Flowchart' />
 
 ## How it works
 
@@ -163,14 +172,6 @@ Read more in [Native execution](/admin/executors/native_execution).
 8.  Logs from the container are sent back to the executor.
 9.  Logs are streamed from the executor to a Sourcegraph API
 10.  The executor calls a Sourcegraph API to that "complete" the Job.
-
-## Deciding which deployment to use
-
-Deciding how to deploy the executor depends on your use case. The following flowchart can help you decide which
-deployment is best for you.
-
-
-<img src='https://storage.googleapis.com/sourcegraph-assets/executor_deployment_tree.png' alt='Executor Deployment Flowchart' />
 
 ## Troubleshooting
 Refer to the [Troubleshooting Executors](/admin/executors/executors_troubleshooting) document for common debugging operations.
