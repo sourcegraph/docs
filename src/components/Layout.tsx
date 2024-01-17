@@ -4,7 +4,6 @@ import clsx from 'clsx';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 import {useEffect, useState} from 'react';
-import Image from 'next/image';
 import {Hero} from '@/components/Hero';
 import {Logo} from '@/components/Logo';
 import {MobileNavigation} from '@/components/MobileNavigation';
@@ -12,6 +11,7 @@ import {Navigation} from '@/components/Navigation';
 import {ThemeSelector} from '@/components/ThemeSelector';
 import {Search} from './search/Search';
 import {LogoMark} from './LogoMark';
+import VersionSelect from './VersionSelect';
 
 function GitHubIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -68,6 +68,7 @@ function Header() {
 					<Search />
 				</div>
 				<div className="relative flex basis-0 items-center justify-end gap-6 sm:gap-6 md:flex-grow">
+					<VersionSelect />
 					<ThemeSelector className="relative z-10" />
 					<Link
 						href="https://github.com/sourcegraph/sourcegraph"
