@@ -11,7 +11,7 @@ import {Navigation} from '@/components/Navigation';
 import {ThemeSelector} from '@/components/ThemeSelector';
 import {Search} from './search/Search';
 import {LogoMark} from './LogoMark';
-import VersionSelect from './VersionSelect';
+import VersionSelector from './VersionSelector';
 
 function GitHubIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -68,7 +68,7 @@ function Header() {
 					<Search />
 				</div>
 				<div className="relative flex basis-0 items-center justify-end gap-6 sm:gap-6 md:flex-grow">
-					<VersionSelect />
+					<VersionSelector />
 					<ThemeSelector className="relative z-10" />
 					<Link
 						href="https://github.com/sourcegraph/sourcegraph"
