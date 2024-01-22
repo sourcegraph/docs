@@ -259,7 +259,7 @@ export const navigation: NavigationItem[] = [
       // },
       {
         title: "Changelog",
-        href: "CHANGELOG",
+        href: "/CHANGELOG",
       },
     ],
   },
