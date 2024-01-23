@@ -1,14 +1,15 @@
 # Search Jobs
 
-<Callout type="note" title="Experimental"> Search Jobs feature is in the Experimental stage.</Callout>
+<Callout type="note" title="Experimental"> Search Jobs feature is in the Experimental stage and only available for Enterprise accounts.</Callout>
 
 <p className="subtitle">Use Search Jobs to search code at scale for large-scale organizations.</p>
 
->NOTE: Search Jobs is available only on Enterprise accounts.
-
 Search Jobs allows you to run search queries across your organization's codebase (all repositories, branches, and revisions) at scale. It enhances the existing Sourcegraph's search capabilities, enabling you to run searches without query timeouts or incomplete results.
 
-With Search Jobs, you can start a search, let it run in the background, and then download the CSV file results from the Search Jobs UI when it's done. Site administrators can **enable** or **disable** the Search Jobs feature, making it accessible to all users on the Sourcegaph instance.
+With Search Jobs, you can start a search, let it run in the background, and then download the results from the Search Jobs UI when it's done. Site administrators can **enable** or **disable** the Search Jobs feature, making it accessible to all users on the Sourcegraph instance.
+
+## Search results format
+Each line of the results file is a JSON object containing matches. The JSON objects have the same format as the (event-type) matches served by the [Stream API](/api/stream_api#event-types).
 
 ## Enable Search Jobs
 
@@ -16,7 +17,7 @@ To enable Search Jobs, you need to configure a managed object storage service to
 
 ## Storing search results
 
-By default, search jobs stores results using the `blobstore` service. To target a managed object storage service, you must set a handful of environment variables for configuration and authentication to the target service.
+By default, Search Jobs stores results using our bundled `blobstore` service. If the `blobstore` service is deployed, and you want to use it to store results from Search Jobs you can skip ahead to [site administration](/code_search/how-to/search-jobs#site-administration) To target a third-party managed object storage service, you must set a handful of environment variables for configuration and authentication to the target service.
 
 - If you are running a `sourcegraph/server` deployment, set the environment variables on the server container
 - If you are running via Docker-compose or Kubernetes, set the environment variables on the `frontend` and `worker` containers
@@ -56,7 +57,7 @@ If you would like to allow your Sourcegraph instance to control the creation and
 
 - `SEARCH_JOBS_UPLOAD_MANAGE_BUCKET=true`
 
-### Site adminstration
+### Site administration
 - Login to your Sourcegraph instance and go to the site admin
 - Next, click the site configuration
 - From here, you'll see `experimentalFeatures`
