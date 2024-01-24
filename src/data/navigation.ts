@@ -121,6 +121,9 @@ export const navigation: NavigationItem[] = [
           {
             title: "Search Examples", href: "/code_search/examples",
           },
+          {
+            title: "FAQs", href: "/code_search/faq",
+          },
 
         ],
       },
