@@ -1,14 +1,15 @@
 # Search Jobs
 
-<Callout type="note" title="Beta"> Search Jobs feature is in Beta stage and only available for Enterprise accounts.</Callout>
-
 <p className="subtitle">Use Search Jobs to search code at scale for large-scale organizations.</p>
+
+<Callout type="note" title="Beta"> Search Jobs feature is in Beta stage and only available for Enterprise accounts.</Callout>
 
 Search Jobs allows you to run search queries across your organization's codebase (all repositories, branches, and revisions) at scale. It enhances the existing Sourcegraph's search capabilities, enabling you to run searches without query timeouts or incomplete results.
 
 With Search Jobs, you can start a search, let it run in the background, and then download the results from the Search Jobs UI when it's done. Site administrators can **enable** or **disable** the Search Jobs feature, making it accessible to all users on the Sourcegraph instance.
 
 ## Search results format
+
 Each line of the results file is a JSON object containing matches. The JSON objects have the same format as the (event-type) matches served by the [Stream API](/api/stream_api#event-types).
 
 ## Enable Search Jobs
@@ -17,7 +18,7 @@ To enable Search Jobs, you need to configure a managed object storage service to
 
 ## Storing search results
 
-By default, Search Jobs stores results using our bundled `blobstore` service. If the `blobstore` service is deployed, and you want to use it to store results from Search Jobs you can skip ahead to [site administration](/code_search/how-to/search-jobs#site-administration) To target a third-party managed object storage service, you must set a handful of environment variables for configuration and authentication to the target service.
+By default, Search Jobs stores results using our bundled `blobstore` service. If the `blobstore` service is deployed, and you want to use it to store results from Search Jobs you can skip ahead to [site administration](#site-administration) To target a third-party managed object storage service, you must set a handful of environment variables for configuration and authentication to the target service.
 
 - If you are running a `sourcegraph/server` deployment, set the environment variables on the server container
 - If you are running via Docker-compose or Kubernetes, set the environment variables on the `frontend` and `worker` containers
@@ -26,7 +27,7 @@ By default, Search Jobs stores results using our bundled `blobstore` service. If
 
 Set the following environment variables to target an S3 bucket you've already provisioned. Authentication can be done through [an access and secret key pair](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys) (and optionally through session token) or via the EC2 metadata API.
 
->NOTE: Never commit AWS access keys in Git. You should consider using a secret handling service offered by your cloud provider.
+<Callout type="tip"> Never commit AWS access keys in Git. You should consider using a secret handling service offered by your cloud provider.</Callout>
 
 - `SEARCH_JOBS_UPLOAD_BACKEND=S3`
 - `SEARCH_JOBS_UPLOAD_BUCKET=<my bucket name>`
@@ -37,9 +38,9 @@ Set the following environment variables to target an S3 bucket you've already pr
 - `SEARCH_JOBS_UPLOAD_AWS_USE_EC2_ROLE_CREDENTIALS=true` (optional; set to use EC2 metadata API over static credentials)
 - `SEARCH_JOBS_UPLOAD_AWS_REGION=us-east-1` (default)
 
-> NOTE: If a non-default region is supplied, ensure that the subdomain of the endpoint URL (_the `AWS_ENDPOINT` value_) matches the target region.
+<Callout type="note"> If a non-default region is supplied, ensure that the subdomain of the endpoint URL (the `AWS_ENDPOINT` value) matches the target region.</Callout>
 
-> NOTE: You don't need to set the `SEARCH_JOBS_UPLOAD_AWS_ACCESS_KEY_ID` environment variable when using `SEARCH_JOBS_UPLOAD_AWS_USE_EC2_ROLE_CREDENTIALS=true` because role credentials will be automatically resolved.
+<Callout type="note"> You don't need to set the `SEARCH_JOBS_UPLOAD_AWS_ACCESS_KEY_ID` environment variable when using `SEARCH_JOBS_UPLOAD_AWS_USE_EC2_ROLE_CREDENTIALS=true` because role credentials will be automatically resolved.</Callout>
 
 ### Using GCS
 
@@ -58,6 +59,7 @@ If you would like to allow your Sourcegraph instance to control the creation and
 - `SEARCH_JOBS_UPLOAD_MANAGE_BUCKET=true`
 
 ### Site administration
+
 - Login to your Sourcegraph instance and go to the site admin
 - Next, click the site configuration
 - From here, you'll see `experimentalFeatures`
@@ -87,4 +89,4 @@ Search Jobs supports queries of `type:file` and it automatically appends this to
 - Multiple `rev` filters
 - Queries with `index: filter`
 
->NOTE: Sourcegraph already offers an [Exhaustive Search](/code_search/how-to/exhaustive) with the `count:all` operator. However, there are certain limitations when generating results within your codebase.
+<Callout type="note"> Sourcegraph already offers an [Exhaustive Search](/code-search/types/exhaustive) with the `count:all` operator. However, there are certain limitations when generating results within your codebase.</Callout>

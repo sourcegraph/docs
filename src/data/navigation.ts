@@ -91,12 +91,40 @@ export const navigation: NavigationItem[] = [
       },
       {
         title: "Code Search",
-        href: "/code_search",
+        href: "/code-search",
         sections: [
-          { title: "Tutorials", href: "/code_search/tutorials" },
-          { title: "How-to Guides", href: "/code_search/how-to" },
-          { title: "Explanations", href: "/code_search/explanations" },
-          { title: "Reference", href: "/code_search/reference" },
+          { title: "Capabilities", href: "/code-search/features" },
+          {
+            title: "Search Types", href: "/code-search/types/exhaustive",
+            subsections: [
+              { title: "Exhaustive Search", href: "/code-search/types/exhaustive", },
+              { title: "Search Jobs", href: "/code-search/types/search-jobs", },
+              { title: "Structural Search", href: "/code-search/types/structural", },
+              { title: "Fuzzy Search", href: "/code-search/types/fuzzy", },
+            ]
+          },
+          {
+            title: "Working with Search", href: "/code-search/working/saved_searches",
+            subsections: [
+              { title: "Saved Search", href: "/code-search/working/saved_searches", },
+              { title: "Search Snippet", href: "/code-search/working/snippets", },
+              { title: "Search Contexts", href: "/code-search/working/search_contexts", },
+              { title: "Search Subexpressions", href: "/code-search/working/search_subexpressions", },
+            ]
+          },
+          {
+            title: "Search Query Syntax", href: "/code-search/queries",
+            subsections: [
+              { title: "Query Language", href: "/code-search/queries/language", },
+            ]
+          },
+          {
+            title: "Search Examples", href: "/code-search/examples",
+          },
+          {
+            title: "FAQs", href: "/code-search/faq",
+          },
+
         ],
       },
     ],
@@ -117,20 +145,20 @@ export const navigation: NavigationItem[] = [
       },
       {
         title: "Code Navigation",
-        href: "/code_navigation",
+        href: "/code-navigation",
         sections: [
-          { title: "How-to Guides", href: "/code_navigation/how-to" },
-          { title: "Explanations", href: "/code_navigation/explanations" },
-          { title: "References", href: "/code_navigation/references" },
+          { title: "How-to Guides", href: "/code-navigation/how-to" },
+          { title: "Explanations", href: "/code-navigation/explanations" },
+          { title: "References", href: "/code-navigation/references" },
         ],
       },
       {
         title: "Code Monitoring",
-        href: "/code_monitoring",
+        href: "/code-monitoring",
         sections: [
-          { title: "Quickstart", href: "/code_monitoring/quickstart" },
-          { title: "Explanations", href: "/code_monitoring/explanations" },
-          { title: "How-to Guides", href: "/code_monitoring/how-tos" },
+          { title: "Quickstart", href: "/code-monitoring/quickstart" },
+          { title: "Explanations", href: "/code-monitoring/explanations" },
+          { title: "How-to Guides", href: "/code-monitoring/how-tos" },
         ],
       },
       {
@@ -146,12 +174,12 @@ export const navigation: NavigationItem[] = [
       },
       {
         title: "Code Insights",
-        href: "/code_insights",
+        href: "/code-insights",
         sections: [
-          { title: "Quickstart", href: "/code_insights/quickstart" },
-          { title: "Explanations", href: "/code_insights/explanations" },
-          { title: "How-to Guides", href: "/code_insights/how-tos" },
-          { title: "References", href: "/code_insights/references" },
+          { title: "Quickstart", href: "/code-insights/quickstart" },
+          { title: "Explanations", href: "/code-insights/explanations" },
+          { title: "How-to Guides", href: "/code-insights/how-tos" },
+          { title: "References", href: "/code-insights/references" },
         ],
       },
       {
