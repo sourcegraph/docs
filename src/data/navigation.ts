@@ -93,10 +93,35 @@ export const navigation: NavigationItem[] = [
         title: "Code Search",
         href: "/code_search",
         sections: [
-          { title: "Tutorials", href: "/code_search/tutorials" },
-          { title: "How-to Guides", href: "/code_search/how-to" },
-          { title: "Explanations", href: "/code_search/explanations" },
-          { title: "Reference", href: "/code_search/reference" },
+          { title: "Capabilities", href: "/code_search/features" },
+          {
+            title: "Search Types", href: "/code_search/types/exhaustive",
+            subsections: [
+              { title: "Exhaustive Search", href: "/code_search/types/exhaustive", },
+              { title: "Search Jobs", href: "/code_search/types/search-jobs", },
+              { title: "Structural Search", href: "/code_search/types/structural", },
+              { title: "Fuzzy Search", href: "/code_search/types/fuzzy", },
+            ]
+          },
+          {
+            title: "Working with Search", href: "/code_search/working/saved_searches",
+            subsections: [
+              { title: "Saved Search", href: "/code_search/working/saved_searches", },
+              { title: "Search Snippet", href: "/code_search/working/snippets", },
+              { title: "Search Contexts", href: "/code_search/working/search_contexts", },
+              { title: "Search Subexpressions", href: "/code_search/working/search_subexpressions", },
+            ]
+          },
+          {
+            title: "Search Query Syntax", href: "/code_search/queries",
+            subsections: [
+              { title: "Query Language", href: "/code_search/queries/language", },
+            ]
+          },
+          {
+            title: "Search Examples", href: "/code_search/examples",
+          },
+
         ],
       },
     ],
