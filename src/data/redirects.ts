@@ -2139,6 +2139,14 @@ const redirectsData = [
         destination: "/cody/capabilities/commands#custom-commands",
         permanent: true
     },
+
+    // Code Search revamp redirects
+
+    {
+        source: "/cody/custom-commands",
+        destination: "/cody/capabilities/commands#custom-commands",
+        permanent: true
+    },
 ];
 
 const updatedRedirectsData = redirectsData.map(redirect => {
