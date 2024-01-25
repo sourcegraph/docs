@@ -1,8 +1,8 @@
 # Search Query Syntax
 
-<p className="subtitle">This page describes search pattern syntax and keywords available for Code Search.</p>
+<p className="subtitle">This page describes search pattern syntax and filters available for Code Search.</p>
 
-See the complementary [language reference](/code-search/queries/language) for a visual breakdown. A typical search pattern describes content or filenames to find across all repositories. At the most basic level, a search pattern can simply be a word like `hello`. See our [search patterns](#search-pattern-syntax) documentation for detailed usage. Queries can also include keywords. For example, a typical search query will include a `repo:` keyword that filters search results for a specific repository. See our [keywords](#keywords-all-searches) documentation for more examples.
+See the complementary [language reference](/code-search/queries/language) for a visual breakdown. A typical search pattern describes content or filenames to find across all repositories. At the most basic level, a search pattern can simply be a word like `hello`. See our [search patterns](#search-pattern-syntax) documentation for detailed usage. Queries can also include filters. For example, a typical search query will include a `repo:` filter that filters search results for a specific repository. See our [filters](#filters-all-searchers) documentation for more examples.
 
 <LinkCards>
   <LinkCard href="https://about.sourcegraph.com/get-started?t=enterprise" imgSrc="https://sourcegraph.com/.assets/img/sourcegraph-mark.svg" imgAlt="Sourcegraph" title="Get single-tenant instance managed by Sourcegraph." description="Sign up and get a 30 day free trial for your team." />
@@ -10,11 +10,28 @@ See the complementary [language reference](/code-search/queries/language) for a 
 
 ## Search pattern syntax
 
-This section documents the available search pattern syntax and interpretation in Sourcegraph. A search pattern is _required_ to match file content. A search pattern is _optional_ and may be omitted when searching for [commits](#keywords-diff-and-commit-searches-only), [filenames](#filename-search), or [repository names](#repository-name-search).
+This section documents the available search pattern syntax and interpretation in Sourcegraph. A search pattern is _required_ to match file content. A search pattern is _optional_ and may be omitted when searching for [commits](#filters-diff-and-commit-searches-only), [filenames](#filename-search), or [repository names](#repository-name-search).
 
-### Standard search (default)
 
-Standard search matches literal patterns exactly, including puncutation like quotes. Specify regular expressions inside `/./code_search/reference`.
+### Keyword search (default)
+
+<Callout type="note" title="Beta">New in version 5.3: Keyword search is in the Beta stage and enabled by default. Toggle the "Search language update" switch to off to enable Standard search. Site administrators can disable Keyword search globally by setting `experimentalFeatures.keywordSearch: false` in site settings. Users can override the setting in their user settings. </Callout>
+
+Keyword search matches individual terms anywhere in the document or the filename. Use `"..."` to match phrases exactly. Specify regular expressions inside `/.../`.
+
+|                                                              Search pattern syntax                                                               |                                                              Description                                                               |
+| ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| [`foo bar`](https://sourcegraph.com/search?q=foo+bar&patternType=keyword)                                                                       | Match documents containing both `foo` and `bar` anywhere in the document. |
+| [`"foo bar"`](https://sourcegraph.com/search?q=%22foo+bar%22&patternType=keyword)                                                               | Match the string `foo bar` exactly. The space between the terms is interpreted literally. The quotes are not matched.                                                                |
+| [`"foo \"bar\""`](https://sourcegraph.com/search?q=context:global+%22foo+%5C%22bar%5C%22%22&patternType=keyword)                                                               | Match the string `foo "bar"` exactly.                                                                |
+| [`/foo.*bar/`](https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+/foo.*bar/&patternType=keyword) | Match the **regular expression** `foo.*bar`.                      We support [RE2 syntax](https://golang.org/s/re2syntax).             |
+| [`foo OR bar`](https://sourcegraph.com/search?q=context:global+foo+OR+bar&patternType=keyword)                                            | Match documents containing `foo` _or_ `bar` anywhere in the document.                                                            |
+
+<Callout type="tip">Matching is case-insensitive by default (toggle the `Aa` button to change).</Callout>
+
+### Standard search
+
+Standard search matches literal patterns exactly, including punctuation like quotes. Specify regular expressions inside `/.../`.
 
 |                                                                **Search Syntax**                                                                 |                                         **Description**                                          |
 | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
@@ -23,22 +40,22 @@ Standard search matches literal patterns exactly, including puncutation like quo
 | [`/foo.*bar/`](https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+/foo.*bar/&patternType=standard) | Match the **regular expression** `foo.*bar` using [RE2 syntax](https://golang.org/s/re2syntax)   |
 | [`foo` `AND` `bar`](https://sourcegraph.com/search?q=context:global+foo+AND+bar&patternType=standard)                                            | Match documents containing both `foo` **and** `bar` anywhere in the document                     |
 
-<Callout type="tip">Matching is case-insensitive (toggle the `Aa` button to change).</Callout>
+<Callout type="tip">Matching is case-insensitive by default (toggle the `Aa` button to change).</Callout>
 
 ### Dedicated regular expression search with (.*) icon
 
 Clicking the (.*) toggle interprets all search patterns as regular expressions.
 
-<Callout type="note"> In the [default Standard mode](#standard-search-default), use `/./code_search/reference` to perform regular expression searches. Use this mode if you prefer writing out regular expressions without enclosing them. In this mode spaces between patterns mean **match anything**. Patterns inside quotes mean **match exactly**.</Callout>
+<Callout type="note"> In [Standard search](#standard-search) or [Keyword search](#keyword-search-default), use `/.../` to perform regular expression searches. Use this mode if you prefer writing out regular expressions without enclosing them. In this mode spaces between patterns mean **match anything**. Patterns inside quotes mean **match exactly**.</Callout>
 
 |                                                                      **Search Syntax**                                                                       |                                                                                              **Description**                                                                                               |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`foo bar`](https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+foo+bar&patternType=regexp)                     | Search for the regexp `foo(.*?)bar`. Spaces between non-whitespace strings becomes `.*?` to create a fuzzy search                                                                                          |
-| [`foo\ bar`](https://sourcegraph.com/search?q=foo%5C+bar&patternType=regexp) or [`/foo bar/`](https://sourcegraph.com/search?q=/foo+bar/&patternType=regexp) | Search for the regexp `foo bar`. The `\` escapes the space and treats the space as part of the pattern. Use `/./code_search/reference` to avoid escaping spaces                                            |
+| [`foo\ bar`](https://sourcegraph.com/search?q=foo%5C+bar&patternType=regexp) or [`/foo bar/`](https://sourcegraph.com/search?q=/foo+bar/&patternType=regexp) | Search for the regexp `foo bar`. The `\` escapes the space and treats the space as part of the pattern. Use `/.../` to avoid escaping spaces                                            |
 | [`foo\nbar`](https://sourcegraph.com/search?q=foo%5Cnbar&patternType=regexp)                                                                                 | Perform a multiline regexp search. `\n` is interpreted as a newline                                                                                                                                        |
 | [`"foo bar"`](https://sourcegraph.com/search?q=%27foo+bar%27&patternType=regexp)                                                                             | Match the string literal `"foo bar"`. Quotes interpret strings exactly, except that special characters like `"` and `\` may be escaped, and whitespace escape sequences like `\n` are interpreted normally |
 
-<Callout type="note">As in Standard search, we support [RE2 syntax](https://golang.org/s/re2syntax). Matching is case-insensitive (toggle the `Aa` button to change).</Callout>
+<Callout type="note">As in Standard search, we support [RE2 syntax](https://golang.org/s/re2syntax). Matching is case-insensitive by default (toggle the `Aa` button to change).</Callout>
 
 ## Structural Search
 
@@ -46,13 +63,13 @@ Click the **[]** toggle to activate structural search. Structural search is a wa
 
 |                                                                **Search Syntax**                                                                |                                                                                  **Description**                                                                                  |
 | ----------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`New(ctx, ...)`](https://sourcegraph.com/search?q=repo:github.com/sourcegraph/sourcegraph++New%28ctx%2C+...%29+lang:go&patternType=structural) | Match call-like syntax with `New` with two or more arguments, where the first matches `ctx`. Make it search language-aware by adding a `lang:` [keyword](#keywords-all-searches) |
+| [`New(ctx, ...)`](https://sourcegraph.com/search?q=repo:github.com/sourcegraph/sourcegraph++New%28ctx%2C+...%29+lang:go&patternType=structural) | Match call-like syntax with `New` with two or more arguments, where the first matches `ctx`. Make it search language-aware by adding a `lang:` [filter](#filters-all-searchers) |
 
-## Keywords (all searches)
+## Filters (all searches)
 
-The following keywords can be used on all searches (using [RE2 syntax](https://golang.org/s/re2syntax) any place a regex is accepted):
+The following filters can be used on all searches (using [RE2 syntax](https://golang.org/s/re2syntax) any place a regex is accepted):
 
-| **Keywords** | **Description** | **Examples** |
+| **Filters** | **Description** | **Examples** |
 |----------|----------|----------|
 |   **repo:regexp-pattern** <br /> **repo:regexp-pattern@rev** <br /> **repo:regexp-pattern rev:rev**<br />_alias: r_   |   Include results from repos whose path matches a specified regexp-pattern. The repo path is `github.com/myteam/abc` or `code.example.com/xyz` depending on your repo host. If the regexp ends in `@rev`, search that revision instead of the default `main` branch. `repo:regexp-pattern@rev` is equivalent to `repo:regexp-pattern rev:rev`   |   [`repo:gorilla/mux testroute`](https://sourcegraph.com/search?q=repo:gorilla/mux+testroute) <br/> [`repo:^github\.com/sourcegraph/sourcegraph$@v3.14.0 mux`](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24%40v3.14.0+mux&patternType=literal)   |
 |**-repo:regexp-pattern** <br /> _alias: -r_   |   Exclude results from repositories whose path matches the regexp   |   `repo:alice/ -repo:old-repo`   |
@@ -77,10 +94,10 @@ The following keywords can be used on all searches (using [RE2 syntax](https://g
 |   **file:has.contributor(...)**   |   Conditionally search files only if a file contributor's name or email matches the provided regex pattern. See [built-in predicates](/code-search/queries/language#built-in-file-predicate) for more   |   [`file:has.contributor(alice@sourcegraph.com) Sourcegraph`](https://sourcegraph.com/search?q=context:global+file:has.owner%28alice@sourcegraph.com%29+Sourcegraph&patternType=lucky)   |
 |   **count:_N_,< /> count:all**   |   Retrieve <em>N</em> results. By default, Sourcegraph stops searching early and returns if it finds a full page of results. This is desirable for most interactive searches. To wait for all results, use **count:all**   |   [`count:1000 function`](https://sourcegraph.com/search?q=count:1000+repo:sourcegraph/sourcegraph$+function) <br /> [`count:all err`](https://sourcegraph.com/search?q=repo:github.com/sourcegraph/sourcegraph+err+count:all&patternType=literal)   |
 |   **timeout:_go-duration-value_**   |   Customizes the timeout for searches. The value of the parameter is a string that can be parsed by the [Go time package's `ParseDuration`](https://golang.org/pkg/time/#ParseDuration) (e.g. 10s, 100ms). By default, the timeout is set to 10 seconds, and the search will optimize for returning results as soon as possible. The timeout value cannot be set longer than 1 minute. When provided, the search is given the full timeout to complete   |   [`repo:^github.com/sourcegraph timeout:15s func count:10000`](https://sourcegraph.com/search?q=repo:%5Egithub.com/sourcegraph/+timeout:15s+func+count:10000)   |
-|   **patterntype:literal, patterntype:regexp, patterntype:structural**   |   Configure your query to be interpreted literally, as a regular expression, or a [structural search pattern](/code-search/types/structural). Note: this keyword is available as an accessibility option in addition to the visual toggles   |   [`test. patternType:literal`](https://sourcegraph.com/search?q=test.+patternType:literal)<br/>[`(open/close)file patternType:regexp`](https://sourcegraph.com/search?q=%28open%7Cclose%29file&patternType=regexp)   |
+|   **patterntype:literal, patterntype:regexp, patterntype:structural**   |   Configure your query to be interpreted literally, as a regular expression, or a [structural search pattern](/code-search/types/structural). Note: this filter is available as an accessibility option in addition to the visual toggles   |   [`test. patternType:literal`](https://sourcegraph.com/search?q=test.+patternType:literal)<br/>[`(open/close)file patternType:regexp`](https://sourcegraph.com/search?q=%28open%7Cclose%29file&patternType=regexp)   |
 |   **visibility:any, visibility:public, visibility:private**   |   Filter results to only public or private repositories. The default is to include both private and public repositories   |   [`type:repo visibility:public`](https://sourcegraph.com/search?q=type:repo+visibility:public)   |
 
-Multiple or combined **repo:** and **file:** keywords are intersected. For example, `repo:foo repo:bar` limits your search to repositories whose path contains **both** `foo` and `bar` (such as `github.com/alice/foobar`). To include results from repositories whose path contains **either** `foo` or `bar`, use `repo:foo|bar`.
+Multiple or combined **repo:** and **file:** filters are intersected. For example, `repo:foo repo:bar` limits your search to repositories whose path contains **both** `foo` and `bar` (such as `github.com/alice/foobar`). To include results from repositories whose path contains **either** `foo` or `bar`, use `repo:foo|bar`.
 
 ## Boolean operators
 
@@ -102,7 +119,7 @@ Returns file content matching either on the left or right side, or both (set uni
 | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `not`, `NOT` | [`lang:go not file:main.go panic`](https://sourcegraph.com/search?q=lang:go+not+file:main.go+panic&patternType=literal), [`panic NOT ever`](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+panic+not+ever&patternType=literal) |
 
-`NOT` can be used in place of `-` to negate keywords, such as `file`, `content`, `lang`, `repohasfile`, and `repo`. For
+`NOT` can be used in place of `-` to negate filters, such as `file`, `content`, `lang`, `repohasfile`, and `repo`. For
 search patterns, `NOT` excludes documents that contain the term after `NOT`. For readability, you can also include the
 `AND` operator before a `NOT` (i.e. `panic NOT ever` is equivalent to `panic AND NOT ever`).
 
@@ -129,11 +146,11 @@ To apply the scope of the `file` filter to the entire subexpression, fully group
 <Callout type="tip">Browse the [search subexpressions examples](/code-search/working/search_subexpressions) to
 learn more about use cases.</Callout>
 
-## Keywords (diff and commit searches only)
+## Filters (diff and commit searches only)
 
-The following keywords are only used for **commit diff** and **commit message** searches, which show changes over time:
+The following filters are only used for **commit diff** and **commit message** searches, which show changes over time:
 
-|                  **Keyword**                  |                                                                                                                                                                                                                                                     **Description**                                                                                                                                                                                                                                                     |                                                                                                                                             **Examples**                                                                                                                                              |
+|                  **Filter**                  |                                                                                                                                                                                                                                                     **Description**                                                                                                                                                                                                                                                     |                                                                                                                                             **Examples**                                                                                                                                              |
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **repo:regexp-pattern@rev**               | Specifies which Git revisions to search for commits. See our [repository revisions](#repository-revisions) documentation to learn more about the revision syntax.                                                                                                                                                                                                                                                                                                                                                   | [`repo:vscode@*refs/heads/:^refs/heads/master type:diff task`](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/Microsoft/vscode%24%40*refs/heads/:%5Erefs/heads/master+type:diff+after:%221+month+ago%22+task#1) (unmerged commit diffs containing `task`)                                 |
 | **type:diff** <br/> **type:commit**       | Specifies the type of search. By default, searches are executed on all code at a given point in time (a branch or a commit). Specify the `type:` if you want to search over changes to code or commit messages instead (diffs or commits).                                                                                                                                                                                                                                                                          | [`type:diff func`](https://sourcegraph.com/search?q=type:diff+func+repo:sourcegraph/sourcegraph$) <br/> [`type:commit test`](https://sourcegraph.com/search?q=type:commit+test+repo:sourcegraph/sourcegraph$)                                                                                     |
