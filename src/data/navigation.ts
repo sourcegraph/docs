@@ -21,17 +21,8 @@ export type NavigationItem = {
 };
 
 export const navigation: NavigationItem[] = [
-  // {
-  //   separator: "Introduction",
-  //   topics: [
-  //     {
-  //       title: "Getting Started",
-  //       href: "/getting-started",
-  //     },
-  //   ],
-  // },
   {
-    separator: "Code AI",
+    separator: "Code Intelligence",
     topics: [
       {
         title: "Cody",
