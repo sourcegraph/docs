@@ -136,20 +136,20 @@ export const navigation: NavigationItem[] = [
       },
       {
         title: "Code Navigation",
-        href: "/code-navigation",
+        href: "/code_navigation",
         sections: [
-          { title: "How-to Guides", href: "/code-navigation/how-to" },
-          { title: "Explanations", href: "/code-navigation/explanations" },
-          { title: "References", href: "/code-navigation/references" },
+          { title: "How-to Guides", href: "/code_navigation/how-to" },
+          { title: "Explanations", href: "/code_navigation/explanations" },
+          { title: "References", href: "/code_navigation/references" },
         ],
       },
       {
         title: "Code Monitoring",
-        href: "/code-monitoring",
+        href: "/code_monitoring",
         sections: [
-          { title: "Quickstart", href: "/code-monitoring/quickstart" },
-          { title: "Explanations", href: "/code-monitoring/explanations" },
-          { title: "How-to Guides", href: "/code-monitoring/how-tos" },
+          { title: "Quickstart", href: "/code_monitoring/quickstart" },
+          { title: "Explanations", href: "/code_monitoring/explanations" },
+          { title: "How-to Guides", href: "/code_monitoring/how-tos" },
         ],
       },
       {
@@ -165,12 +165,12 @@ export const navigation: NavigationItem[] = [
       },
       {
         title: "Code Insights",
-        href: "/code-insights",
+        href: "/code_insights",
         sections: [
-          { title: "Quickstart", href: "/code-insights/quickstart" },
-          { title: "Explanations", href: "/code-insights/explanations" },
-          { title: "How-to Guides", href: "/code-insights/how-tos" },
-          { title: "References", href: "/code-insights/references" },
+          { title: "Quickstart", href: "/code_insights/quickstart" },
+          { title: "Explanations", href: "/code_insights/explanations" },
+          { title: "How-to Guides", href: "/code_insights/how-tos" },
+          { title: "References", href: "/code_insights/references" },
         ],
       },
       {
