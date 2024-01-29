@@ -113,6 +113,15 @@ export const navigation: NavigationItem[] = [
             title: "Search Examples", href: "/code-search/examples",
           },
           {
+            title: "Code Navigation", href: "/code-search/code-navigation",
+            subsections: [
+              { title: "Capabilities", href: "/code-search/code-navigation/features", },
+              { title: "Search Navigation", href: "/code-search/code-navigation/search_based_code_navigation", },
+              { title: "Precise Navigation", href: "/code-search/code-navigation/precise_code_navigation", },
+
+            ]
+          },
+          {
             title: "FAQs", href: "/code-search/faq",
           },
 
