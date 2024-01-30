@@ -2,26 +2,75 @@
 
 <p className="subtitle">Learn about some of the most commonly asked questions about Code Search.</p>
 
-## Does Code Search work with my repositories?
+## Code Search
+
+### Does Code Search work with my repositories?
 
 Code Search works with all your repositories. Likewise, you can also [search through our public code](https://sourcegraph.com/search) that has a 2 million+ open source codebase.
 
-## Who can search my code?
+### Who can search my code?
 
 Public code is searchable by anyone, but your private code can be searched only by users who have access to it.
 
-## Do I need to enable Code Navigation?
-
-No, the default search-based code navigation works out of the box without any configuration. However, for an advanced and customized navigation experience your site admin will set up precise code navigation.
-
-## What is the max file size limit for Code Search?
+### What is the max file size limit for Code Search?
 
 By default, files larger than **1 MB** are excluded from search results.
 
-## What programming languages are supported?
+### What programming languages are supported?
 
 Code Search supports almost all programming languages: Java, Python, Go, JavaScript, TypeScript, C#/C/C++, Swift, Objective-C, Kotlin, Ruby, Scala, Rust, Perl, Dart, Erlang, COBOL, Clojure, Lisp, Shell, Terraform, Lua, GraphQL, Thrift, Protobuf, YAML, JSON, Jsonnet, R, PHP, Elixir, Haskell, PowerShell, OCaml, CUDA, Pascal, Verilog, VHDL, Groovy, and Tcl.
 
-## What deployment options are available with Code Search?
+### What deployment options are available with Code Search?
 
 Code Search supports the following deployment options: Kubernetes cluster, Amazon EKS or EC2, Google GKE, Microsoft, Azure AKS, Docker Compose, and Docker Compose in GCP. Read more about our [deployment docs here](/admin/deploy).
+
+### Do I need to enable Code Navigation?
+
+No, the default search-based code navigation works out of the box without any configuration. However, for an advanced and customized navigation experience your site admin will set up precise code navigation.
+
+## Code Navigation
+
+### Search-based vs. Precise Code Navigation
+
+[Search-based code navigation](/code_navigation/explanations/search_based_code_navigation) is available by default on all Sourcegraph instances and provides fuzzy code navigation using a combination of ctags and search. It is great for immediate access to code navigation features, but due to its dependence on text-based search its results are considered imprecise.
+
+[Precise code navigation](/code_navigation/explanations/precise_code_navigation) returns metadata from a knowledge graph that is generated through code analysis. The precomputation step is used to generate the graph results in lookups that are fast and have a high degree of accuracy.
+
+To learn more about how to work with each type of code navigation, visit the [search-based](/code_navigation/explanations/search_based_code_navigation) and [precise](/code_navigation/explanations/precise_code_navigation) sections.
+
+## Search-based Code Navigation
+
+### What languages are supported?
+
+Search-based code navigation supports **40 programming languages**, including all of the most popular ones: Apex, Clojure, Cobol, C++, C#, CSS, Cuda, Dart, Elixir, Erlang, Go, GraphQL, Groovy, Haskell, Java, JavaScript, Jsonnet, Kotlin, Lisp, Lua, OCaml, Pascal, Perl, PHP, PowerShell, Protobuf, Python, R, Ruby, Rust, Scala, Shell, Starlark, Strato, Swift, Tcl, Thrift, TypeScript, Verilog, VHDL.
+
+<Callout type="tip">Are you using a language we don't support? [File a GitHub issue](https://github.com/sourcegraph/sourcegraph/issues/new/choose) or [submit a PR](https://github.com/sourcegraph/sourcegraph-basic-code-intel#adding-a-new-sourcegraphsourcegraph-lang-extension).</Callout>
+
+### Why are my results sometimes incorrect?
+
+Search-based code navigation uses search-based heuristics rather than parsing the code into an [abstract syntax tree](https://en.wikipedia.org/wiki/Abstract_syntax_tree) (AST). Incorrect results occur more often for tokens with common names (such as `Get`) than for tokens with more unique names simply because those tokens appear more often in the search index.
+
+It's recommended using precise code navigation if you require 100% confidence in accuracy for a definition or reference results for a symbol you hovered over. We describe scenarios where you may still get search-based code navigation results, even with precision enabled, in the [precise code navigation docs](/code_navigation/explanations/precise_code_navigation).
+
+### Why does it sometimes time out?
+
+The [symbol search performance](/code_navigation/explanations/features#symbol-search-behavior-and-performance) section describes query paths and performance. Consider using [Rockskip](/code_navigation/explanations/rockskip) if you're experiencing frequent timeouts.
+
+## Precise Code Navigation
+
+### Cross-repository code navigation
+
+Cross-repository code navigation works out-of-the-box when both the dependent repository and the dependency repository have indexes at the **correct commits or versions**. We are working on relaxing this constraint so that nearest-commit functionality works on a cross-repository basis as well.
+
+When the current repository has an index and a dependent doesn't, the missing precise results will be supplemented with imprecise search-based code navigation. This also applies when both repositories have indexes, but for a different set of versions.
+
+For example, if repository `A@v1` depends on `B@v2`, then we will get precise cross-repository intelligence when we have indexes for both `A@v1` and `B@v2`, but would not get a precise result we instead have indexes for `A@v1` and `B@v1`.
+
+### Why are my results sometimes incorrect?
+
+If an index is not found for a particular file in a repository, Sourcegraph will fall back to search-based code navigation. You may occasionally see results from [search-based code navigation](/code_navigation/explanations/search_based_code_navigation) even when you have uploaded an index.
+
+This can happen in the following scenarios:
+
+- The line containing the symbol was created or edited between the nearest indexed commit and the commit being browsed.
+- The _Find references_ panel may include search-based results, but only after all of the precise results have been displayed. This ensures every symbol has useful code navigation.

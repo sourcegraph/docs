@@ -1,34 +1,72 @@
-# Precise code navigation
+# Precise-based Code Navigation
 
-Precise code navigation relies on
-[SCIP](https://github.com/sourcegraph/scip) (SCIP Code Intelligence Protocol) and
-[LSIF](https://github.com/Microsoft/language-server-protocol/blob/master/indexFormat/specification)
+<p className="subtitle">Learn and understand about Precise Code Navigation.</p>
+
+Precise Code Navigation is an opt-in feature that is enabled from your admin settings and requires you to upload indexes for each repository to your Sourcegraph instance. Once setup is complete on Sourcegraph, precise code navigation is available for use across popular development tools:
+
+- On the Sourcegraph web UI
+- On code files on your code host, via [integrations](/integration/)
+- On diffs in your code review tool, via integrations
+- Via the [Sourcegraph API](/api/graphql)
+
+Sourcegraph automatically uses Precise Code Navigation whenever available, and Search-based Code Navigation is used as a fallback when precise navigation is not available.
+
+Precise code navigation relies on the following technologies:
+
+- [SCIP](https://github.com/sourcegraph/scip) (SCIP Code Intelligence Protocol) and
+- [LSIF](https://github.com/Microsoft/language-server-protocol/blob/master/indexFormat/specification)
 (Language Server Index Format) data to deliver precomputed code navigation. It provides fast and highly accurate code navigation but needs to be periodically generated and uploaded to your Sourcegraph instance. Precise code navigation is an opt-in feature: repositories for which you have not uploaded indexes will continue to use the search-based code navigation.
 
-## Getting started
+## Setting up code navigation for your codebase
 
-See the [how-to guides](/code_navigation/how-to/) to get started with precise code navigation.
+There are several options for setting up precise code navigation:
 
-## Cross-repository code navigation
+1. **Manual indexing**. Index a repository and upload it to your Sourcegraph instance:
 
-Cross-repository code navigation works out-of-the-box when both the dependent repository and the dependency repository have indexes _at the correct commits or versions_.
-We are working on relaxing this constraint so that nearest-commit functionality works on a cross-repository basis as well.
+    - [Index a Go repository](/code_navigation/how-to/index_a_go_repository#manual-indexing)
+    - [Index a TypeScript or JavaScript repository](/code_navigation/how-to/index_a_typescript_and_javascript_repository#manual-indexing)
+    - [Index a Java, Scala, or Kotlin repository](https://sourcegraph.github.io/scip-java/docs/getting-started.html)
+    - [Index a Python repository](https://sourcegraph.com/github.com/sourcegraph/scip-python)
+    - [Index a Ruby repository](https://sourcegraph.com/github.com/sourcegraph/scip-ruby)
 
-When the current repository has an index and a dependent doesn't,
-the missing precise results will be supplemented with imprecise search-based code navigation.
-This also applies when both repositories have indexes, but for a different set of versions.
-For example, if repository A@v1 depends on B@v2,
-then we will get precise cross-repository intelligence when we have indexes for both A@v1 and B@v2,
-but would not get a precise result we instead have indexes for A@v1 and B@v1.
+2. [**Automate indexing via CI**](/code_navigation/how-to/adding_lsif_to_workflows): Add indexing and uploading to your CI setup.
+3. [**Auto-indexing**](/code_navigation/how-to/enable_auto_indexing): Sourcegraph will automatically index your repositories and enable precise code navigation for them.
+4. Set up **auto-dependency indexing** to navigate and search through the dependencies your code uses:
+    - **Go**: Enable [auto-indexing](/code_navigation/explanations/auto_indexing) and Sourcegraph will start indexing your dependencies.
+    - **JavaScript, TypeScript**: Enable [auto-indexing](/code_navigation/explanations/auto_indexing) and set up an [npm dependencies code host](/integration/npm).
+    - **Java, Scala, Kotlin**: Enable [auto-indexing](/code_navigation/explanations/auto_indexing) and set up a [JVM dependencies code host](/integration/jvm).
 
-## Why are my results sometimes incorrect?
+## Supported languages and indexers
 
-If an index is not found for a particular file in a repository, Sourcegraph will fall back to search-based code navigation.
-You may occasionally see results from [search-based code navigation](/code_navigation/explanations/search_based_code_navigation) even when you have uploaded an index.
-This can happen in the following scenarios:
+Precise Code Navigation requires language-specific indexes to be generated and uploaded to your Sourcegraph instance. We currently have precise code navigation support for the languages below. See the [indexers page](/code_navigation/references/indexers) for a detailed breakdown of each indexer's status.
 
-- The line containing the symbol was created or edited between the nearest indexed commit and the commit being browsed.
-- The _Find references_ panel may include search-based results, but only after all of the precise results have been displayed. This ensures every symbol has useful code navigation.
+|        Language        |                                      Indexer                                      |        Status         |
+| ---------------------- | --------------------------------------------------------------------------------- | --------------------- |
+| Go                     | [lsif-go](https://sourcegraph.com/github.com/sourcegraph/lsif-go)                 | 🟢 Generally available |
+| TypeScript, JavaScript | [scip-typescript](https://sourcegraph.com/github.com/sourcegraph/scip-typescript) | 🟢 Generally available |
+| C, C++                 | [scip-clang](https://sourcegraph.com/github.com/sourcegraph/scip-clang)           | 🟡 Partially available |
+| Java, Kotlin, Scala    | [scip-java](https://sourcegraph.com/github.com/sourcegraph/scip-java)             | 🟢 Generally available |
+| Rust                   | [rust-analyzer](https://sourcegraph.com/github.com/rust-lang/rust-analyzer)       | 🟢 Generally available |
+| Python                 | [scip-python](https://sourcegraph.com/github.com/sourcegraph/scip-python)         | 🟢 Generally available |
+| Ruby                   | [scip-ruby](https://sourcegraph.com/github.com/sourcegraph/scip-ruby)             | 🟢 Generally available |
+| C#, Visual Basic       | [scip-dotnet](https://github.com/sourcegraph/scip-dotnet)                         | 🟡 Partially available |
+
+The easiest way to configure precise code navigation is with [auto-indexing](/code_navigation/explanations/auto_indexing). This feature uses [Sourcegraph executors](/admin/executors/) to automatically create indexes for the code, keeping precise code navigation available and up-to-date.
+
+## Precise navigation examples
+
+The following repositories have precise code navigation enabled:
+
+| **Programming Language** |                                                                                                                                                                                                                                                                                                                                                                         **Repos**                                                                                                                                                                                                                                                                                                                                                                         |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Go                       | - [`kubernetes/kubernetes`](https://sourcegraph.com/github.com/kubernetes/kubernetes@f4abde9e57cc30efcc8f79c9ebd791d15f4164c4/-/blob/cmd/cloud-controller-manager/main.go?L45:2&popover=pinned) <br /> - [`gohugoio/hugo`](https://sourcegraph.com/github.com/gohugoio/hugo@d1278f696aa062950471587bf3dc4a1604cf5d5b/-/blob/common/hugo/hugo.go?L63:15&popover=pinned) <br /> - [`gin-gonic/gin`](https://sourcegraph.com/github.com/gin-gonic/gin@6de2245e6265a077326d13cb249378b2d27ad781/-/blob/routergroup.go?L33:6&popover=pinned) |
+| Java                     | - [`netflix/hystrix`](https://sourcegraph.com/github.com/Netflix/Hystrix@3cb21589895e9f8f87cfcdbc9d96d9f63d48b848/-/blob/hystrix-core/src/main/java/com/netflix/hystrix/HystrixRequestCache.java?L77:40#tab=references) <br /> - [`jkd@v11`](https://sourcegraph.com/jdk@v11/-/blob/java.base/java/util/Iterator.java?L130:18#tab=references)                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Scala                     | - [`scalameta/metals`](https://sourcegraph.com/github.com/scalameta/metals@5bd656f19733903fc0c2ecee844548dad182f5a7/-/blob/metals/src/main/scala/scala/meta/metals/Main.scala?L46:20#tab=references)                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Kotlin                     | - [`fwcd/kotlin-language-server`](https://sourcegraph.com/github.com/fwcd/kotlin-language-server@1.3.0/-/blob/server/src/main/kotlin/org/javacs/kt/CompiledFile.kt?L22:7&popover=pinned)                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Python                     | - [`django/django`](https://sourcegraph.com/github.com/django/django@b2eff16806057095c7dd3daa9402ad615e51627f/-/blob/django/core/files/storage.py?L70:9&popover=pinned) <br /> - [`pre-commit/pre-commit`](https://sourcegraph.com/github.com/pre-commit/pre-commit@170335cbb63796761d592f8eacd66c78de8dd912/-/blob/pre_commit/languages/dart.py?L35:25&popover=pinned)                                                                                                                                                                                                                                                                                                                                                                                                             |
+| TypeScript                     | - [`vuejs/vue`](https://sourcegraph.com/github.com/vuejs/vue@bf64c4da5ca516924d940bb29f3e59b0fa5863c9/-/blob/src/core/observer/index.ts?L68:3&popover=pinned) <br /> - [`angular/angular`](https://sourcegraph.com/github.com/angular/angular@bdf57ab14a310f6e6811d9f990cbbd3612bde538/-/blob/packages/core/src/interface/simple_change.ts?L18:14&popover=pinned) <br /> - [`nestjs/nest`](https://sourcegraph.com/github.com/nestjs/nest@d5b6e489209090544a4f39c4f4a716b9800ca6a8/-/blob/packages/microservices/listeners-controller.ts?L39:9&popover=pinned) <br /> - [`puppeteer/puppeteer`](https://sourcegraph.com/github.com/puppeteer/puppeteer@79e11985ba44b72b1ad6b8cd861fe316f1945e64/-/blob/src/common/Browser.ts?L54:11#tab=references)                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Ruby                     | - [`Shopify/shopify-api-ruby`](https://sourcegraph.com/github.com/Shopify/shopify-api-ruby@v11.1.0/-/blob/lib/shopify_api/auth/auth_scopes.rb?L23:33&popover=pinned) <br /> - [`Homebrew/brew`](https://sourcegraph.com/github.com/Homebrew/brew@3.5.9/-/blob/Library/Homebrew/utils/bottles.rb?L18:18&popover=pinned)                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Rust                     | - [`rust-lang/cargo`](https://sourcegraph.com/github.com/rust-lang/cargo/-/blob/src/cargo/core/compiler/compilation.rs?L15:12&popover=pinned#tab=references) <br /> - [`rust-lang/rustlings`](https://sourcegraph.com/github.com/rust-lang/rustlings@c923e7af73a91970d2e63e03babbca9cc0817551/-/blob/src/verify.rs?L147:15&popover=pinned)                                                                                                                                                                                                                                                                                                                                                                                                             |
 
 ## More about SCIP
 

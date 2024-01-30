@@ -10,25 +10,6 @@ We are working on creating language specific guides for use with different index
 
 Setting up a source code indexing job in your CI build provides you with fast code navigation that gives you more control on when source code gets indexed, and ensures accuracy of your code navigation by keeping in sync with changes in your repository. Due to the large number of CI frameworks and languages we may not have specific documentation for your use case. Feel free to [file an issue](https://github.com/sourcegraph/sourcegraph/issues/new) if you're having difficulties and we can help troubleshoot your setup.
 
-## Index
-
-- [Adding precise code navigation to CI/CD workflows](#adding-precise-code-navigation-to-cicd-workflows)
-  - [Language-specific guides](#language-specific-guides)
-  - [Benefits of CI integration](#benefits-of-ci-integration)
-  - [Index](#index)
-  - [Using indexer containers](#using-indexer-containers)
-    - [Basic usage](#basic-usage)
-    - [Sub-projects](#sub-projects)
-    - [Custom build environments](#custom-build-environments)
-    - [GitHub Action Examples](#github-action-examples)
-    - [Circle CI Examples](#circle-ci-examples)
-    - [Travis CI Examples](#travis-ci-examples)
-  - [CI from scratch](#ci-from-scratch)
-    - [Set up your CI machines](#set-up-your-ci-machines)
-    - [Add steps to your CI](#add-steps-to-your-ci)
-  - [Recommended upload frequency](#recommended-upload-frequency)
-  - [Uploading indexes to Sourcegraph.com](#uploading-indexes-to-sourcegraphcom)
-
 ## Using indexer containers
 
 We're working on creating containers that bundle indexers and the [Sourcegraph CLI (`src`)](https://github.com/sourcegraph/src-cli). All the languages in our [language-specific guides](/code_navigation/how-to/) are supported, and this section provides a general guide to using those containers. We've pinned the containers to the `latest` tag in these samples so they stay up to date, but make sure you pin them before going live to ensure reproducibility.
@@ -40,7 +21,7 @@ Some indexers will work out of the box by just running them in your project root
 ```yaml
 jobs:
   lsif-go:
-    # this line will prevent forks of this repo from uploading lsif indexes
+    // this line will prevent forks of this repo from uploading lsif indexes
     if: github.repository == '<insert your repo name>'
     runs-on: ubuntu-latest
     container: sourcegraph/lsif-go:latest
@@ -49,8 +30,8 @@ jobs:
       - name: Generate index
         run: lsif-go
       - name: Upload index
-        # this will upload to Sourcegraph.com, you may need to substitute a different command
-        # by default, we ignore failures to avoid disrupting CI pipelines with non-critical errors.
+        //this will upload to Sourcegraph.com, you may need to substitute a different command
+        //by default, we ignore failures to avoid disrupting CI pipelines with non-critical errors.
         run: src code-intel upload -github-token=${{ secrets.GITHUB_TOKEN }} -ignore-upload-failure
 ```
 
@@ -61,7 +42,7 @@ If your repository contains multiple code projects in different folders, your CI
 ```yaml
 jobs:
   lsif-go:
-    # this line will prevent forks of this repo from uploading lsif indexes
+    //this line will prevent forks of this repo from uploading lsif indexes
     if: github.repository == '<insert your repo name>'
     runs-on: ubuntu-latest
     container: sourcegraph/lsif-go:latest
@@ -71,10 +52,10 @@ jobs:
         working-directory: backend/
         run: lsif-go
       - name: Upload index
-        # note that the upload command also needs to happen in the same directory!
+        //note that the upload command also needs to happen in the same directory!
         working-directory: backend/
-        # this will upload to Sourcegraph.com, you may need to substitute a different command
-        # by default, we ignore failures to avoid disrupting CI pipelines with non-critical errors.
+        //this will upload to Sourcegraph.com, you may need to substitute a different command
+        //by default, we ignore failures to avoid disrupting CI pipelines with non-critical errors.
         run: src code-intel upload -github-token=${{ secrets.GITHUB_TOKEN }} -ignore-upload-failure
 ```
 
@@ -90,7 +71,7 @@ This second step is easy in GitHub actions because our container can be used as 
 ```yaml
 jobs:
   scip-typescript:
-    # this line will prevent forks of this repo from uploading lsif indexes
+    //this line will prevent forks of this repo from uploading lsif indexes
     if: github.repository == '<insert your repo name>'
     runs-on: ubuntu-latest
     container: my-awesome-container
@@ -105,13 +86,13 @@ jobs:
       - name: Upload index
         uses: docker://sourcegraph/src-cli:latest
         with:
-          # this will upload to Sourcegraph.com, you may need to substitute a different command
-          # by default, we ignore failures to avoid disrupting CI pipelines with non-critical errors.
+          //this will upload to Sourcegraph.com, you may need to substitute a different command
+          //by default, we ignore failures to avoid disrupting CI pipelines with non-critical errors.
           args: lsif upload -github-token=${{ secrets.GITHUB_TOKEN }} -ignore-upload-failure
 ```
 
-
 ### GitHub Action Examples
+
 The following projects have example GitHub Action workflows to generate and upload indexes.
 
 - [elastic/kibana](https://github.com/sourcegraph-codeintel-showcase/kibana/blob/7ed559df0e2036487ae6d606e9ffa29d90d49e38/.github/workflows/lsif.yml)
@@ -121,8 +102,8 @@ The following projects have example GitHub Action workflows to generate and uplo
 - [moby/moby](https://github.com/sourcegraph-codeintel-showcase/moby/blob/380429abb05846de773d5aa07de052f40c9e8208/.github/workflows/lsif.yml)
 - [ReactiveX/IxJS](https://github.com/sourcegraph-codeintel-showcase/IxJS/blob/e53d323314043afb016b6deceaeb068d8d23c303/.github/workflows/lsif.yml)
 
-
 ### Circle CI Examples
+
 Certain frameworks like Circle CI may require you to explicitly cache artifacts between jobs. In CircleCI this might look like the following:
 
 ```yaml
@@ -150,8 +131,8 @@ jobs:
           keys:
             - dependencies
       - run: scip-typescript index
-        # this will upload to Sourcegraph.com, you may need to substitute a different command
-        # by default, we ignore failures to avoid disrupting CI pipelines with non-critical errors.
+        //this will upload to Sourcegraph.com, you may need to substitute a different command
+        //by default, we ignore failures to avoid disrupting CI pipelines with non-critical errors.
       - run: src code-intel upload -github-token=<<parameters.github-token>> -ignore-upload-failure
 
 workflows:
@@ -174,6 +155,7 @@ The following projects have example CircleCI configurations to generate and uplo
 - [ReactiveX/rxjs](https://github.com/sourcegraph-codeintel-showcase/rxjs/blob/c9d3c1a76a68273863fc59075a71b4cc43c06114/.circleci/config.yml)
 
 ### Travis CI Examples
+
 The following projects have example Travis CI configurations to generate and upload indexes.
 
 - [aws/aws-sdk-go](https://github.com/sourcegraph-codeintel-showcase/aws-sdk-go/blob/92f67a061fcdd46d6a418b28838b10b6ac63a880/.travis.yml)
