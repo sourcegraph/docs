@@ -1,11 +1,33 @@
-import {Fragment} from 'react';
+'use client';
+
+import {Fragment, useEffect, useState} from 'react';
 import {Menu, Transition} from '@headlessui/react';
 import {ArrowUpRightIcon, ChevronDownIcon} from '@heroicons/react/20/solid';
 import clsx from 'clsx';
 import Link from 'next/link';
-import {latestVersion, versions} from '@/data/versions';
+import {VersionI, versions} from '@/data/versions';
+import {usePathname} from 'next/navigation';
 
 export default function VersionSelector() {
+	const path = usePathname();
+	const [selectedVersion, setSelectedVersion] = useState<VersionI>(
+		versions[0]
+	);
+
+	useEffect(() => {
+		// Extract the version segment from the URL path, if any
+		const segments = path.split('/');
+		const versionIndex = segments.findIndex(segment => segment === 'v');
+		const versionSegment = versionIndex >= 0 && segments[versionIndex + 1];
+		if (!versionSegment) return;
+
+		const matchedVersion = versions.find(version =>
+			version.url.includes(versionSegment)
+		);
+
+		if (matchedVersion) setSelectedVersion(matchedVersion);
+	}, [path]);
+
 	return (
 		<Menu as="div" className="relative inline-block text-left">
 			<div>
@@ -13,7 +35,7 @@ export default function VersionSelector() {
 					className="inline-flex w-full items-center justify-center gap-x-1.5
 				rounded-md px-2 py-2 text-xs font-medium text-slate-500 shadow-sm ring-1 ring-inset ring-light-border-2 hover:bg-slate-100 dark:bg-dark-bg-2 dark:text-slate-400 dark:ring-inset dark:ring-dark-border"
 				>
-					v5.2.3
+					{selectedVersion.name}
 					<ChevronDownIcon
 						className="-mr-1 h-4 w-4"
 						aria-hidden="true"
@@ -38,6 +60,9 @@ export default function VersionSelector() {
 								{({active}) => (
 									<Link
 										href={version.url}
+										onClick={() =>
+											setSelectedVersion(version)
+										}
 										className={clsx(
 											active &&
 												'bg-light-bg-2 text-slate-900 dark:bg-dark-bg-3 dark:text-white',
