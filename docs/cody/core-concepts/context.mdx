@@ -6,14 +6,14 @@ Context refers to any additional information provided to help Cody understand an
 
 ## Why is context important?
 
-Context awareness is the key to Cody's ability to deliver high-quality responses to users. When Cody has access to the most relevant context about your codebase, it can:
+Context and [methods of retrieving context](#context-selection) are crucial to the quality and accuracy of AI. Cody relies on its ability to retrieve context from user codebases in order to provide reliable and accurate answers to developers’ questions. When Cody has access to the most relevant context about your codebase, it can:
 
 - Answer questions about your codebase
 - Produce unit tests and documentation
 - Generate code that aligns with the libraries and style of your codebase
 - Significantly reduce your work that's required to translate LLM-provided answers into actionable value for your users
 
-## Context Selection
+## Context selection
 
 Cody employs various methods to gather context relevant to user input, ensuring the quality of the information provided. These methods include:
 
@@ -24,6 +24,39 @@ Cody employs various methods to gather context relevant to user input, ensuring 
 - **Code Graph**: Analyzing the structure of the code, Cody examines how components are interconnected and used, finding context based on code elements' relationships
 
 All these methods collectively ensure Cody's ability to provide relevant and high-quality context to enhance your coding experience.
+
+## Context fetching mechanism
+
+Enterprise users on Cody [Web](/cody/clients/cody-with-sourcegraph), [VS Code](/cody/clients/install-vscode) and [JetBrains](/cody/clients/install-jetbrains) can leverage the full power of the Sourcegraph search engine as the primary context provider to Cody. This means access to more repos and files from across your codebase and a system that is more scalable and easier to configure.
+
+Users on Cody Free or Pro plans leverage context depending on the type of [clients](/cody/clients) they use.
+
+Here's a detailed breakdown of the context fetching mechanism for each client for Cody Free, Pro, and Enterprise users:
+
+|    **Tier**    | **Client** | **Symf** | **Search** |     **Embeddings**      |
+| -------------- | ---------- | -------- | ---------- | ----------------------- |
+| **Free/Pro**   | VS Code    | ✅        | ❌          | ✅ Local <br /> ❌ Remote |
+|                | JetBrains  | ✅        | ❌          | ❌ Local <br /> ❌ Remote |
+| **Enterprise** | Cody Web   | ❌        | ✅          | ❌                       |
+|                | VS Code    | ❌        | ✅          | ❌                       |
+|                | JetBrains  | ❌        | ✅          | ❌                       |
+
+## Context scope
+
+The scope primarily outlines the extent of the codebase Cody can access to fetch context. Typically, it is referenced by the number of repositories Cody can access. The context scope is determined by the client used and the pricing tier of the user. There are two different types:
+
+- **Single-repo context**: Users can only access a single repo for context fetching
+- **Multi-repo context**: Users have the option to explicitly specify up to **10 repos** they would like Cody to use for context fetching
+
+Here's a detailed breakdown of the context scope for each client for Cody Free, Pro, and Enterprise users:
+
+|    **Tier**    | **Client** | **Single-repo context** | **Multi-repo context** |
+| -------------- | ---------- | ----------------------- | ---------------------- |
+| **Free/Pro**   | VS Code    | ✅                       | ❌                      |
+|                | JetBrains  | ✅                       | ❌                      |
+| **Enterprise** | Cody Web   | ✅                       | ✅                      |
+|                | VS Code    | ✅                       | ✅                      |
+|                | JetBrains  | ✅                       | ✅                      |
 
 ## How does context work with Cody prompts?
 
