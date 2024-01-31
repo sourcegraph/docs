@@ -5,16 +5,16 @@ Also checkout the [FAQ](/dev/background-information/bazel/faq) for common issues
 ## TL;DR
 
 - Commands:
-  - `CARGO_BAZEL_REPIN=1 bazel sync --only=crate_index` after changing workspace members or dependencies.
+  - `sg bazel configure rustdeps` after changing workspace members or dependencies.
     - Setting `CARGO_BAZEL_ISOLATED=0` can be set if repinning is too slow, if doing it frequently in local development.
-  - `CARGO_BAZEL_REPIN=<crate name> bazel sync --only=crate_index` after adding/updating a dependency.
+  - `CARGO_BAZEL_REPIN=<crate name> sg bazel configure rustdeps` after adding/updating a dependency.
 
 ## Overview
 
 The rules interfacing Rust are named [`rules_rust`](https://github.com/bazelbuild/rules_rust/) and they provide all the plumbing to call the Rust compiler and run the tests.
 
-Bazel and Rust works slightly differently to Bazel and Go. Unlike with Go, `BUILD.bazel` files are not updated with `bazel configure` (they must be updated/configured/created by hand), and instead of there being one `BUILD.bazel` file per directory, it's one per workspace member.
-There exists [gazelle_rust](https://github.com/Calsign/gazelle_rust), a plugin for [Gazelle](https://github.com/bazelbuild/bazel-gazelle) which is invoked via `bazel configure`, that may address the first point but we have decided not to invest in using it at the time of writing.
+Bazel and Rust works slightly differently to Bazel and Go. Unlike with Go, `BUILD.bazel` files are not updated with `sg bazel configure` (they must be updated/configured/created by hand), and instead of there being one `BUILD.bazel` file per directory, it's one per workspace member.
+There exists [gazelle_rust](https://github.com/Calsign/gazelle_rust), a plugin for [Gazelle](https://github.com/bazelbuild/bazel-gazelle) which is invoked via `sg bazel configure`, that may address the first point but we have decided not to invest in using it at the time of writing.
 
 ## Rules for Rust
 
