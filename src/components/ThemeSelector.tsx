@@ -1,4 +1,3 @@
-import {useEffect, useState} from 'react';
 import {useTheme} from 'next-themes';
 import {Listbox} from '@headlessui/react';
 import clsx from 'clsx';
@@ -49,15 +48,6 @@ export function ThemeSelector(
 	props: React.ComponentPropsWithoutRef<typeof Listbox<'div'>>
 ) {
 	let {theme, setTheme} = useTheme();
-	let [mounted, setMounted] = useState(false);
-
-	useEffect(() => {
-		setMounted(true);
-	}, []);
-
-	if (!mounted) {
-		return <div className="h-6 w-6" />;
-	}
 
 	return (
 		<Listbox as="div" value={theme} onChange={setTheme} {...props}>

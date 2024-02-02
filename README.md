@@ -92,7 +92,7 @@ For example the cards layout appears by using the `<Callout>` component that can
 You can use this component within your content as follows:
 
 ```js
-<Callout type="note">Cody is currently in Beta stage for all users.</Callout>
+<Callout type="note">Cody is currently in Beta for all users.</Callout>
 ```
 
 This snippet creates a single `<QuickLink>` titled as "Get Cody". You can add as many cards you want while filling out all the relevant details.
@@ -128,11 +128,9 @@ As you make changes to the documentation, the development server will automatica
 
 ### Deployed Preview URL
 
-When you open a new PR you will get a deployed preview link from Netlify to view it. Use this link to view and share with other teammates.
+When you open a new PR you will get a deployed preview link from Vercel to view it. Use this link to view and share with other teammates. To view the docs please append `/docs` in the end of the preview URL. Otherwise you'll get a 404 error on the base URL.
 
-![](https://storage.googleapis.com/sourcegraph-assets/Docs/CleanShot%202023-12-14%20at%2013.33.49%402x.png)
-
-> NOTE: To view the docs please append `/docs` in the end of the preview URL. Otherwise you'll get a 404 error on the base URL.
+![](https://storage.googleapis.com/sourcegraph-assets/Docs/CleanShot%202023-12-13%20at%2016.19.14%402x.png)
 
 ## Submitting your Contribution
 

@@ -1,12 +1,14 @@
 # Bazel for Go
 
-See also: [How-to use `go:generate` with Bazel](/dev/background-information/bazel/go_generate)
+See also: [How-to use `go:generate` with Bazel](/dev/background-information/bazel/go_generate).
+
+Also checkout the [FAQ](/dev/background-information/bazel/faq) for common issues and solutions.
 
 ## TL;DR
 
 - Commands:
-  - `bazel configure` to update buildfiles after changing imports, adding or deleting files.
-  - `bazel run :gazelle-update-repos` to reflect changes made to `go.mod`.
+  - `sg bazel configure` to update buildfiles after changing imports, adding or deleting files.
+  - `sg bazel configure godeps` to reflect changes made to `go.mod`.
   - `bazel test //... --config go-short` to run all Go unit tests.
     - 💡 Run `ibazel test //... --config go-short` in another terminal to have Bazel detect your changes and re-run the tests automatically when you save your modifications.
 - Rules:
@@ -20,10 +22,10 @@ See also: [How-to use `go:generate` with Bazel](/dev/background-information/baze
 
 ## Overview
 
-Bazel and Go is pretty straightforward. With a few minor exceptions, you can still use your normal Go tooling and only care about Bazel
-in CI, as long as you remember to run `bazel configure` before pushing your changes.
+Bazel and Go is pretty straightforward. With a few minor exceptions, you can still use your normal Go tooling and only care about Bazel 
+in CI, as long as you remember to run `sg bazel configure` before pushing your changes.
 
-The rules interfacing Go are named `rules_go` and they provide all the plumbing to call the Go compiler and run the tests. Gazelle is the tool that parses you Go code and the `go.mod` file to scaffold the build files for you. It's tempting to think about it as a generator that could be fully automated in CI: it is not the case.
+The rules interfacing Go are named [`rules_go`](https://github.com/bazelbuild/rules_go) and they provide all the plumbing to call the Go compiler and run the tests. [Gazelle](https://github.com/bazelbuild/bazel-gazelle) is the tool that parses your Go code and the `go.mod` file to scaffold the build files for you. It's tempting to think about it as a generator that could be fully automated in CI - it is not the case.
 
 Instead, it's there to do the grunt work for you, and in 95% of the cases, it does a great job at it, which gives this wrong idea that it could be automated and hidden away. It cannot know for example if your Go tests are very long and should be given a long timeout, nor if your tests are flaky and should be retried until you fix the problem. Or that you're constructing files being emdedded from another program being run.
 
@@ -51,7 +53,7 @@ Read more [about the test tags and timeout attributes in the Bazel documentation
 
 Given the following `go_test`
 
-```
+```python
 go_test(
     name = "errors_test",
     timeout = "short",
@@ -70,7 +72,7 @@ go_test(
 
 The above default conventions will expand it to:
 
-```
+```python
 go_test(
     name = "errors_test",
     # ------ default attributes which are injected -----------------
