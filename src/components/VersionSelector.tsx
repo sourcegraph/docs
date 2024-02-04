@@ -10,21 +10,27 @@ import {usePathname} from 'next/navigation';
 
 export default function VersionSelector() {
 	const path = usePathname();
+
 	const [selectedVersion, setSelectedVersion] = useState<VersionI>(
 		versions[0]
 	);
 
 	useEffect(() => {
-		// Extract the version segment from the URL path, if any
+		// Extract the version name from the URL path, if any
 		const segments = path.split('/');
 		const versionIndex = segments.findIndex(segment => segment === 'v');
-		const versionSegment = versionIndex >= 0 && segments[versionIndex + 1];
-		if (!versionSegment) return;
+		// Versioned link example:
+		// docs/v/5.1.2/ where versionName = 5.1.2
+		const versionName = versionIndex >= 0 && segments[versionIndex + 1];
+		if (!versionName) {
+			setSelectedVersion(versions[0]);
+			return;
+		}
 
+		// If version exists, select it
 		const matchedVersion = versions.find(version =>
-			version.url.includes(versionSegment)
+			version.url.includes(versionName)
 		);
-
 		if (matchedVersion) setSelectedVersion(matchedVersion);
 	}, [path]);
 
