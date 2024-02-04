@@ -29,7 +29,6 @@ interface Props {
 
 const PostLayout = ({params}: Props) => {
 	const path = params.slug.join('/');
-	console.log(path);
 	const post = allPosts.find(post => post._raw.flattenedPath === path);
 	if (!post) return notFound();
 	const Content = getMDXComponent(post.body.code);
@@ -40,7 +39,7 @@ const PostLayout = ({params}: Props) => {
 				<Breadcrumbs path={params.slug} />
 				<article>
 					<Prose>
-						<Content components={MdxComponents} />
+						<Content components={MdxComponents()} />
 					</Prose>
 				</article>
 				<PrevNextLinks />

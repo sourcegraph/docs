@@ -33,7 +33,6 @@ interface Props {
 
 const PostLayout = ({params}: Props) => {
 	const path = params.slug.join('/');
-	console.log(path);
 	const post = allPosts.find(
 		post =>
 			post._raw.flattenedPath === `versioned/${params.version}/${path}`
@@ -47,7 +46,7 @@ const PostLayout = ({params}: Props) => {
 				<Breadcrumbs path={params.slug} />
 				<article>
 					<Prose>
-						<Content components={MdxComponents} />
+						<Content components={MdxComponents(params.version)} />
 					</Prose>
 				</article>
 				<PrevNextLinks />
