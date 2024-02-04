@@ -1,17 +1,42 @@
+'use client';
+
 import Link from 'next/link';
 import clsx from 'clsx';
 import {ChevronRightIcon} from '@heroicons/react/20/solid';
+import {useEffect, useState} from 'react';
+import {usePathname} from 'next/navigation';
 
 export function Breadcrumbs({path}: {path: string[]}) {
+	let pathname = usePathname();
+	const [version, setVersion] = useState<string | null>(null);
+
 	const createLink = ({path, index}: {path: string[]; index: number}) => {
-		// For the first index, return the slug itself, otherwise return the joined path
-		return index === 0
-			? `/${encodeURIComponent(path[0])}`
-			: `/${path
-					.slice(0, index + 1)
-					.map(encodeURIComponent)
-					.join('/')}`;
+		let linkPath = `/${path
+			.slice(0, index + 1)
+			.map(encodeURIComponent)
+			.join('/')}`;
+		return prependVersion(linkPath);
 	};
+
+	// Prepends version (if any) to the link path
+	const prependVersion = (path: string) => {
+		return version ? `/v/${version}${path}` : path;
+	};
+
+	// Handle versions
+	useEffect(() => {
+		// Extract the version name from the URL path, if any
+		const segments = pathname.split('/');
+		const versionIndex = segments.findIndex(segment => segment === 'v');
+		// Versioned link example:
+		// docs/v/5.1.2/ where versionName = 5.1.2
+		const versionName = versionIndex >= 0 && segments[versionIndex + 1];
+		if (!versionName) {
+			setVersion(null);
+			return;
+		}
+		setVersion(versionName);
+	}, [pathname]);
 
 	return (
 		<nav className="mb-8 flex" aria-label="Breadcrumb">
@@ -19,7 +44,7 @@ export function Breadcrumbs({path}: {path: string[]}) {
 				<li>
 					<div>
 						<Link
-							href="/"
+							href={prependVersion('/')}
 							className="text-sm font-medium text-gray-500 hover:text-link-light dark:hover:text-link"
 						>
 							Docs
