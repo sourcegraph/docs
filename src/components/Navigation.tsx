@@ -14,6 +14,7 @@ export function Navigation({
 	onLinkClick?: React.MouseEventHandler<HTMLAnchorElement>;
 }) {
 	let pathname = usePathname();
+	const [version, setVersion] = useState<string | null>(null);
 	const [expandedTopics, setExpandedTopics] = useState<string[]>([]);
 	const [expandedSections, setExpandedSections] = useState<string[]>([]);
 	const [expandUsingPath, setExpandUsingPath] = useState<boolean>(true);
@@ -88,7 +89,28 @@ export function Navigation({
 			updateExpansion(navigation);
 			setExpandUsingPath(false);
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
+
+	// Prepends version (if any) to the link path
+	const prependVersion = (path: string) => {
+		return version ? `/v/${version}${path}` : path;
+	};
+
+	// Handle versions
+	useEffect(() => {
+		// Extract the version name from the URL path, if any
+		const segments = pathname.split('/');
+		const versionIndex = segments.findIndex(segment => segment === 'v');
+		// Versioned link example:
+		// docs/v/5.1.2/ where versionName = 5.1.2
+		const versionName = versionIndex >= 0 && segments[versionIndex + 1];
+		if (!versionName) {
+			setVersion(null);
+			return;
+		}
+		setVersion(versionName);
+	}, [pathname]);
 
 	return (
 		<nav className={clsx('text-base lg:text-sm', className)}>
@@ -106,7 +128,7 @@ export function Navigation({
 								<li key={topic.title} className="relative">
 									<div className="flex w-full items-center justify-between">
 										<Link
-											href={topic.href}
+											href={prependVersion(topic.href)}
 											onClick={() => {
 												onLinkClick;
 												handleTopicClick(topic.title);
@@ -157,9 +179,9 @@ export function Navigation({
 														>
 															<div className="flex w-full items-center justify-between">
 																<Link
-																	href={
+																	href={prependVersion(
 																		section.href
-																	}
+																	)}
 																	onClick={() => {
 																		onLinkClick;
 																		handleSectionClick(
@@ -217,9 +239,9 @@ export function Navigation({
 																				className="relative"
 																			>
 																				<Link
-																					href={
+																					href={prependVersion(
 																						subsection.href
-																					}
+																					)}
 																					onClick={
 																						onLinkClick
 																					}
