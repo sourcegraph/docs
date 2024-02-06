@@ -1,8 +1,10 @@
 # Private network configuration
-When deploying self-hosted Sourcegraph instances in private networks with specific compliance and policy requirements, additional configuration may be required to ensure all networking features are functioning correctly. The reasons for applying the following configuration options depend on the specific functionality of the Sourcegraph service and the unique network and infrastructure requirements of the organization. The following Sourcegraph services typically initiate outbound connections to external services:
-- **sourcegraph-frontend**: The frontend service is responsible for connecting to external [auth providers](../auth), sending [telemetry data](../pings), testing code host connections, and connecting to [externally hosted](../external_services) Sourcegraph services
+A "private network" refers to a secure network environment that is segregated from the public internet, designed to facilitate internal communications and operations within an organization. This network setup restricts external access, thereby enhancing security and control over data flow by limiting exposure to external threats and unauthorized access.
+
+When deploying self-hosted Sourcegraph instances in private networks with specific compliance and policy requirements, additional configuration may be required to ensure all networking features are functioning correctly. The reasons for applying the following configuration options depend on the specific functionality of the Sourcegraph service and the unique network and infrastructure requirements of the organization. The following is a list of Sourcegraph services and how and when each initiates outbound connections to external services:
+- **frontend**: The frontend service communicates externally when connecting to external [auth providers](../auth), sending [telemetry data](../pings), testing code host connections, and connecting to [externally hosted](../external_services) Sourcegraph services
 - **gitserver**: Executes git commands against externally hosted [code hosts](../external_service)
-- **repo-updater**: Communicates with [code hosts](../external_service) APIs to coordinate the repository synchronize
+- **repo-updater**: Communicates with [code hosts](../external_service) APIs to coordinate repository synchronization
 - **migrator**: Connects to Postgres instances (which may be [externally hosted](../external_services/postgres)) to process database migrations
 - **executor**: Sourcegraph [Executor](../executors) batch change or precise indexing jobs may need to connect to services hosted within an organization's private network
 
@@ -26,7 +28,7 @@ frontend|gitserver|repo-updater:
 <Callout type="warning">Failure to configure `NO_PROXY` correctly can cause proxy configuration to interfere with local networking between internal Sourcegraph services</Callout>
 
 ## Using private CA root certificates
-Some organizations maintain a private Certificate Authority (CA) for issuing certificates within their private network. When Sourcegraph connects to TLS encrypted service using a self-signed certificate that it does not trust, it will throw the `x509: certificate signed by unknown authority` error message in logs.
+Some organizations maintain a private Certificate Authority (CA) for issuing certificates within their private network. When Sourcegraph connects to TLS encrypted service using a self-signed certificate that it does not trust, you will observe a `x509: certificate signed by unknown authority` error message in logs.
 
 In order for Sourcegraph to respect an organization's self-signed certificates, the private CA root certificate(s) will need to be appended to Sourcegraph's trusted CA root certificate list in `/etc/ssl/certs/ca-certificates.crt`. 
 
