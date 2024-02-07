@@ -137,7 +137,7 @@ When you open a new PR you will get a deployed preview link from Vercel to view 
 Once you're satisfied with your changes, follow these steps:
 
 - Commit your changes
-- Create a pull request to the [Sourcegraph documentation repository](https://github.com/sourcegraph/sourcegraph-docs).
+- Create a pull request to the [Sourcegraph documentation repository](https://github.com/sourcegraph/docs).
 - Tag `@maedahbatool` in `#docs` channel through Slack to get a quick review
 
 Thank you for contributing to Sourcegraph documentation! Your efforts help us provide top-notch learning experiences for our users. If you have any questions or need assistance, feel free to reach out.
