@@ -8,6 +8,7 @@ interface LinkCardI {
 	imgAlt: string;
 	title: string;
 	description: string;
+	version?: string;
 }
 
 interface LinkCardsI {
@@ -23,7 +24,8 @@ export function LinkCard({
 	imgSrc,
 	imgAlt,
 	title,
-	description
+	description,
+	version
 }: LinkCardI) {
 	return (
 		<div className="not-prose group relative rounded-xl border border-light-border-2 dark:border-dark-border">
@@ -37,7 +39,7 @@ export function LinkCard({
 					<p className="font-normal text-slate-700 dark:text-slate-400">
 						{description}
 					</p>
-					<CustomLink href={href}>
+					<CustomLink version={version} href={href}>
 						<span className="absolute -inset-px rounded-xl" />
 					</CustomLink>
 				</div>

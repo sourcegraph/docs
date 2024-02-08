@@ -14,13 +14,15 @@ export function ProductCard({
 	description,
 	href,
 	imgSrc,
-	imgAlt
+	imgAlt,
+	version
 }: {
 	title: string;
 	description: string;
 	href: string;
 	imgSrc: string;
 	imgAlt: string;
+	version?: string;
 }) {
 	return (
 		<div className="group relative rounded-xl border border-light-border-2 dark:border-dark-border">
@@ -29,7 +31,7 @@ export function ProductCard({
 				<img className="not-prose h-8 w-8" alt={imgAlt} src={imgSrc} />
 				<div>
 					<h2 className="font-display text-base text-slate-900 dark:text-white">
-						<CustomLink href={href}>
+						<CustomLink version={version} href={href}>
 							<span className="absolute -inset-px rounded-xl" />
 							{title}
 						</CustomLink>

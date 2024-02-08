@@ -56,17 +56,9 @@ export function ThemeSelector(
 				className="flex h-7 w-7 items-center justify-center rounded-lg shadow-md shadow-black/5 ring-1 ring-light-border-2 dark:bg-dark-bg-2 dark:ring-inset dark:ring-dark-border"
 				aria-label="Theme"
 			>
-				<LightIcon
-					className={clsx(
-						'h-4 w-4 dark:hidden',
-						theme === 'system' ? 'fill-slate-400' : 'fill-link'
-					)}
-				/>
+				<LightIcon className={clsx('h-4 w-4 fill-link dark:hidden')} />
 				<DarkIcon
-					className={clsx(
-						'hidden h-4 w-4 dark:block',
-						theme === 'system' ? 'fill-slate-400' : 'fill-link'
-					)}
+					className={clsx('hidden h-4 w-4 fill-link dark:block')}
 				/>
 			</Listbox.Button>
 			<Listbox.Options className="absolute left-1/2 top-full mt-3 w-36 -translate-x-1/2 space-y-1 rounded-xl bg-light-bg-1 p-3 text-sm font-medium shadow-md shadow-black/5 ring-1 ring-black/5 dark:bg-dark-bg-2 dark:ring-white/5">

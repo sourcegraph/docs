@@ -283,6 +283,10 @@ export const navigation: NavigationItem[] = [
         title: "SLAs & Premium Support",
         href: "/sla",
       },
+      {
+        title: "Sourcegraph Accounts",
+        href: "/sourcegraph-accounts"
+      },
       // {
       //   title: "Support Center",
       //   href: "#",

@@ -182,15 +182,15 @@ See the [examples](#examples) and [configuration properties](#configuration-prop
 
 - The slash name used for the command
 - Type: `string`
-- Example: `"summarize-git-changes"`
+- Example: `"summarize"`
 
-#### `commands.<id>.description` (required)
+#### `commands.<id>.description`
 
 - A short, sentence-case string description of what the command does
 - Type: `string`
 - Example: `"Summarize recent git changes"`
 
-#### `commands.<id>.prompt`
+#### `commands.<id>.prompt` (required)
 
 - The set of instructions for Cody
 - Type: `string`
@@ -203,21 +203,23 @@ See the [examples](#examples) and [configuration properties](#configuration-prop
 - Default: `"ask"`
 
   Values:
-  - `"ask"` — Focus the chat view and add to the current chat
-  - `"insert"` — Insert the response above the code
-  - `"edit"` — Edit selected code with the response
+  - `"ask"` — Start a new chat session with the command
+  - `"edit"` — Replace the selected code with the response
+  - `"insert"` — Insert the response above the selected code
 
 #### `commands.<id>.context`
 
 - Optional context data to generate and pass to Cody
 - Type: `object`
-- Default: `{ "codebase": true }`
+- Default: `{}`
 
 #### `commands.<id>.context.codebase`
 
-- Include embeddings and/or keyword code search (depending on availability)
+<Callout type="note">This option is experimental and might change or be removed in the future.</Callout>
+
+- Include contextual information from code search based on the prompt of the command
 - Type: `boolean`
-- Default: `true`
+- Default: `false`
 
 #### `commands.<id>.context.command`
 
@@ -247,7 +249,7 @@ See the [examples](#examples) and [configuration properties](#configuration-prop
 
 #### `commands.<id>.context.filePath`
 
-- Include snippets from the given file path relative to the codebase. If the file is too long, content will be truncated
+- Include snippets from the given file path relative to the current workspace. If the file is too long, content will be truncated
 - Type: `string`
 - Default: `""`
 - Example: `"CHANGELOG.md", "test/unit/example.test.ts"`
