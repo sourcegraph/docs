@@ -1,19 +1,48 @@
 import Link from 'next/link';
+import React from 'react';
 
-export function CustomLink(props: any) {
-	let href = props.href;
-	const cleanedHref = href.replace(/\.mdx?$/, '');
+interface CustomLinkProps
+	extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+	version?: string;
+}
 
+export const CustomLink: React.FC<CustomLinkProps> = ({
+	href,
+	version,
+	children,
+	...rest
+}) => {
+	if (!href) return null; // Safeguard against undefined href
+
+	// Cleaning and potentially versioning the href
+	let cleanedHref = href.replace(/\.mdx?$/, '');
+	if (cleanedHref.startsWith('/') && version) {
+		cleanedHref = `/v/${version}${cleanedHref}`;
+	}
+
+	// Handling external links
 	if (href.startsWith('http')) {
-		return <a target="_blank" rel="noopener noreferrer" {...props} />;
+		return (
+			<a href={href} target="_blank" rel="noopener noreferrer" {...rest}>
+				{children}
+			</a>
+		);
 	}
 
+	// Handling anchor links
 	if (href.startsWith('#')) {
-		return <a {...props} />;
+		return (
+			<a href={href} {...rest}>
+				{children}
+			</a>
+		);
 	}
+
+	// Internal links handled by Next.js Link component
 	return (
-		<Link href={cleanedHref} {...props}>
-			{props.children}
+		<Link href={cleanedHref} {...rest}>
+			{children}
+			{/* Ensuring <a> is used inside <Link> for custom attributes like 'className' */}
 		</Link>
 	);
-}
+};

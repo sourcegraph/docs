@@ -2,25 +2,12 @@ import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { PrevNextLinks } from '@/components/PrevNextLinks';
 import { Prose } from '@/components/Prose';
 
-
-interface Props {
-  params: {
-    topic: string;
-    section: string;
-    subsection: string;
-  };
-}
-
-const PostLayout = ({ params }: Props) => {
+const PostLayout = () => {
 
   return (
     <>
       <div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none lg:pl-8 lg:pr-0 xl:px-16">
-        <Breadcrumbs
-          topic={params.topic}
-          section={params.section}
-          subsection={params.subsection}
-        />
+        <Breadcrumbs path={['api', 'graphql', 'api-docs']} />
         <article>
           <Prose>
             <>
