@@ -7,15 +7,15 @@ import {allPosts} from 'contentlayer/generated';
 import {getMDXComponent} from 'next-contentlayer/hooks';
 import {notFound} from 'next/navigation';
 
-export const generateStaticParams = async () =>
-	allPosts.map(post => {
-		({slug: post._raw.flattenedPath});
-	});
+export const generateStaticParams = async () => {
+	return allPosts.map(post => ({
+		params: {slug: post._raw.flattenedPath.split('/')}
+	}));
+};
 
 export const generateMetadata = ({params}: Props) => {
-	const post = allPosts.find(
-		post => post._raw.flattenedPath === params.topic
-	);
+	const path = params.slug.join('/');
+	const post = allPosts.find(post => post._raw.flattenedPath === path);
 	if (post && post.headings && post.headings.length > 0) {
 		return {title: post.headings[0].title};
 	}
@@ -23,24 +23,23 @@ export const generateMetadata = ({params}: Props) => {
 
 interface Props {
 	params: {
-		topic: string;
+		slug: string[];
 	};
 }
 
 const PostLayout = ({params}: Props) => {
-	const post = allPosts.find(
-		post => post._raw.flattenedPath === params.topic
-	);
+	const path = params.slug.join('/');
+	const post = allPosts.find(post => post._raw.flattenedPath === path);
 	if (!post) return notFound();
 	const Content = getMDXComponent(post.body.code);
 
 	return (
 		<>
 			<div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none lg:pl-8 lg:pr-0 xl:px-16">
-				<Breadcrumbs topic={params.topic} />
+				<Breadcrumbs path={params.slug} />
 				<article>
 					<Prose>
-						<Content components={MdxComponents} />
+						<Content components={MdxComponents()} />
 					</Prose>
 				</article>
 				<PrevNextLinks />
