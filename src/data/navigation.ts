@@ -98,6 +98,7 @@ export const navigation: NavigationItem[] = [
             title: "Working with Search", href: "/code-search/working/saved_searches",
             subsections: [
               { title: "Saved Search", href: "/code-search/working/saved_searches", },
+              { title: "Search Filters", href: "/code-search/working/search_filters", },
               { title: "Search Snippet", href: "/code-search/working/snippets", },
               { title: "Search Contexts", href: "/code-search/working/search_contexts", },
               { title: "Search Subexpressions", href: "/code-search/working/search_subexpressions", },
