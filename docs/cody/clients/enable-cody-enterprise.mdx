@@ -1,17 +1,32 @@
 # Enabling Cody on Sourcegraph Enterprise
 
-<p className="subtitle">Learn how to use Cody and its features with Sourcegraph enterpise.</p>
+<p className="subtitle">This guide will walk you through the steps to install and set up Cody with your Sourcegraph Enterprise instance.</p>
 
-Cody enhances your coding experience by providing intelligent code suggestions, context-aware completions, and advanced code analysis. This guide will walk you through the steps to install and set up Cody with your Sourcegraph enterprise instance via:
-
-- [Self-hosted Sourcegraph](#cody-on-self-hosted-sourcegraph-enterprise)
-- [Sourcegraph Cloud](#cody-on-sourcegraph-cloud)
+Cody enhances your coding experience by providing intelligent code suggestions, context-aware completions, and advanced code analysis.
 
 <LinkCards>
    <LinkCard href="https://about.sourcegraph.com/cody/pricing" imgSrc="https://sourcegraph.com/.assets/img/sourcegraph-mark.svg" imgAlt="Cody Enterprise" title="Cody Enterprise" description="Get in touch with our team to try Cody for Sourcegraph Enterprise." />
 </LinkCards>
 
-## Cody on self-hosted Sourcegraph enterprise
+## Cody Enterprise features
+
+To cater to your Enterprise requirements, Cody Enterprise offers the following features:
+
+- **Multi-repo context**: Cody can fetch information from multiple repositories, enabling users to ask broader questions across a codebase. You can select of upto **10 repos** from the [Enhanced Context Selection](/cody/clients/install-vscode#enhanced-context-selector) window in VS Code
+- **Cody ignore**: Teams can flag repositories and files to exclude them from Cody's context, safeguarding sensitive information
+- **Guardrails for public code**: Cody scans suggestions to detect code similar to public indexes, preventing its return to users or highlighting it in chat responses
+- **Enterprise analytics**: Teams have direct access to analytics for Cody usage data, gaining insights into AI usage and value delivered
+- **Improved autocomplete with StarCoder**: StarCoder, a dedicated language model for code, enhances autocomplete speed and accuracy on Cody Enterprise
+- **Admin controls**: Sourcegraph account admins now have selective control over user access to Cody
+
+## Setting up Cody Enterprise
+
+You can set up Cody for your Enterprise instance in one of the following ways:
+
+- [Self-hosted Sourcegraph](#cody-on-self-hosted-sourcegraph-enterprise)
+- [Sourcegraph Cloud](#cody-on-sourcegraph-cloud)
+
+## Cody on self-hosted Sourcegraph Enterprise
 
 ### Prerequisites
 
@@ -102,7 +117,6 @@ Next, go to **Site admin > Users & Auth > Roles** (`/site-admin/roles`) on your 
 - Control whether users _by default_ have access to Cody (expand `User [System]` and toggle **Cody** > **Access** as desired)
 - Control whether groups of users have access to Cody (`+Create role` and enable the **Cody** > **Access** toggle as desired)
 
-
 ### Sourcegraph 5.2 and earlier
 
 In Sourcegraph 5.2 and earlier, you should use the feature flag `cody` to turn Cody on selectively for some users. To do so:
@@ -122,21 +136,16 @@ In Sourcegraph 5.2 and earlier, you should use the feature flag `cody` to turn C
 - Select the `boolean` type and set it to `false`
 - Once added, click on the feature flag and use **add overrides** to pick users that will have access to Cody
 
-<img
-  width={979}
-  alt="Add overides"
-  src="https://user-images.githubusercontent.com/25070988/235454594-9f1a6b27-6882-44d9-be32-258d6c244880.png"
-/>
-
+![add-overrides](https://user-images.githubusercontent.com/25070988/235454594-9f1a6b27-6882-44d9-be32-258d6c244880.png)
 
 ## Using a third-party LLM provider
 
 Instead of [Sourcegraph Cody Gateway](/cody/core-concepts/cody-gateway), you can also configure Sourcegraph to use a third-party provider directly, like:
 
-- Anthropic
-- OpenAI
-- Azure OpenAI (Experimental)
-- AWS Bedrock (Experimental)
+- [Anthropic](#anthropic)
+- [OpenAI](#openai)
+- [Azure OpenAI](#azure-openai)
+- [AWS Bedrock](#anthropic-claude-through-aws-bedrock)
 
 ### Anthropic
 
@@ -168,18 +177,15 @@ Create your own key with OpenAI <a href="https://beta.openai.com/account/api-key
     "provider": "openai",
     "chatModel": "gpt-4", // Or any other model you would like to use
     "fastChatModel": "gpt-3.5-turbo", // Or any other model you would like to use
-    "completionModel": "gpt-3.5-turbo-instruct", // Or any other model that supports the legacy completions endpoint 
+    "completionModel": "gpt-3.5-turbo-instruct", // Or any other model that supports the legacy completions endpoint
     "accessToken": "<key>"
   }
 }
 ```
+
 <a href="https://platform.openai.com/docs/model" target="_blank">Read and learn more about the supported OpenAI models here →</a>
 
 ### Azure OpenAI
-
-<Callout type="note" title="Experimental">
-Azure OpenAI support is in the experimental stage.
-</Callout>
 
 Create a project in the Azure OpenAI portal. Go to **Keys and Endpoint** from the project overview and get **one of the keys** on that page and the **endpoint**.
 
@@ -208,10 +214,6 @@ For the access token, you can either:
 - Set it to `<API_KEY>` if directly configuring the credentials using the API key specified in the Azure portal
 
 ### Anthropic Claude through AWS Bedrock
-
-<Callout type="note" title="Experimental">
-AWS Bedrock support is in the experimental stage.
-</Callout>
 
 First, make sure you can access AWS Bedrock. Then, request access to the Anthropic Claude models in Bedrock.
 This may take some time to provision.
