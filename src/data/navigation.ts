@@ -65,7 +65,6 @@ export const navigation: NavigationItem[] = [
               { title: "Generate Embeddings Index", href: "/cody/embeddings/embedding-index", },
               { title: "Configure Embeddings", href: "/cody/embeddings/configure-embeddings", },
               { title: "Manage Embeddings", href: "/cody/embeddings/manage-embeddings", },
-              { title: "Usage and Limits", href: "/cody/embeddings/usage-and-limits", },
             ]
           },
           {
