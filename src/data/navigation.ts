@@ -48,6 +48,7 @@ export const navigation: NavigationItem[] = [
               { title: "Autocomplete", href: "/cody/capabilities/autocomplete", },
               { title: "Commands", href: "/cody/capabilities/commands", },
               { title: "Debug Code", href: "/cody/capabilities/debug-code", },
+              { title: "Cody Ignore", href: "/cody/capabilities/ignore-context", },
             ]
           },
           {
