@@ -95,7 +95,7 @@ With GitHub, only the default **branch** is searchable (though GitHub is plannin
 
 GitHub code search supports searching across issues, pull requests, and discussions. In addition to searching your private code, GitHub has indexed over 7 million public GitHub repositories which are also searchable.
 
-Sourcegraph allows you to search indexed and [unindexed](https://docs.sourcegraph.com/code_search/how-to/exhaustive#non-indexed-backends) code. Sourcegraph’s [current limitations](https://docs.sourcegraph.com/admin/search) on indexed code are:
+Sourcegraph allows you to search indexed and [unindexed](/code-search/types/exhaustive#non-indexed-backends) code. Sourcegraph’s [current limitations](https://docs.sourcegraph.com/admin/search) on indexed code are:
 
 * Files larger than 1 MB are excluded unless you explicitly specify them in [search.largeFiles](https://docs.sourcegraph.com/admin/config/site_config#search-largeFile) to be indexed and searched regardless of size
 * Binary files are excluded
@@ -115,17 +115,17 @@ In addition to searching your organization’s private code, you can use Sourceg
 
 ### Search syntax
 
-Sourcegraph offers [structural search](https://docs.sourcegraph.com/code_search/reference/structural), and GitHub code search does not offer this search method. Structural search lets you match richer syntax patterns, specifically in code and structured data formats like JSON. Sourcegraph offers structural search on indexed code and uses [Comby syntax](https://comby.dev/docs/syntax-reference) for structural matching of code blocks or nested expressions. For example, the `fmt.Sprintf` function is a popular print function in Go. [Here](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+fmt.Sprintf%28...%29&patternType=structural&_ga=2.204781593.827352295.1667227568-1057140468.1661198534&_gac=1.118615675.1665776224.CjwKCAjwkaSaBhA4EiwALBgQaJCOc6GlhIDQyg6HQScgfSBQpoFTUf7T_NNqEX5JaobtCS08GUEJuRoCIlIQAvD_BwE&_gl=1*1r2u5zs*_ga*MTA1NzE0MDQ2OC4xNjYxMTk4NTM0*_ga_E82CCDYYS1*MTY2NzUwODExNC4xMTQuMS4xNjY3NTA5NjUyLjAuMC4w) is a pattern that matches all of the arguments in `fmt.Sprintf` in our code using structural search compared to the [search](https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+fmt.Sprintf%28...%29&patternType=regexp) using regex.
+Sourcegraph offers [structural search](/code-search/types/structural), and GitHub code search does not offer this search method. Structural search lets you match richer syntax patterns, specifically in code and structured data formats like JSON. Sourcegraph offers structural search on indexed code and uses [Comby syntax](https://comby.dev/docs/syntax-reference) for structural matching of code blocks or nested expressions. For example, the `fmt.Sprintf` function is a popular print function in Go. [Here](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+fmt.Sprintf%28...%29&patternType=structural&_ga=2.204781593.827352295.1667227568-1057140468.1661198534&_gac=1.118615675.1665776224.CjwKCAjwkaSaBhA4EiwALBgQaJCOc6GlhIDQyg6HQScgfSBQpoFTUf7T_NNqEX5JaobtCS08GUEJuRoCIlIQAvD_BwE&_gl=1*1r2u5zs*_ga*MTA1NzE0MDQ2OC4xNjYxMTk4NTM0*_ga_E82CCDYYS1*MTY2NzUwODExNC4xMTQuMS4xNjY3NTA5NjUyLjAuMC4w) is a pattern that matches all of the arguments in `fmt.Sprintf` in our code using structural search compared to the [search](https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+fmt.Sprintf%28...%29&patternType=regexp) using regex.
 
-Both GitHub code search and Sourcegraph support regular expression and literal search. [Regular expression](https://docs.sourcegraph.com/code_search/reference/queries#standard-search-default) helps you find code that matches a pattern (including classes of characters like letters, numbers, and whitespace) and can restrict the results to anchors like the start of a line, the end of a line, or word boundary. Literal (standard) search matches literal patterns exactly, including punctuation, like quotes.
+Both GitHub code search and Sourcegraph support regular expression and literal search. [Regular expression](/code-search/queries#standard-search) helps you find code that matches a pattern (including classes of characters like letters, numbers, and whitespace) and can restrict the results to anchors like the start of a line, the end of a line, or word boundary. Literal (standard) search matches literal patterns exactly, including punctuation, like quotes.
 
-GitHub’s search syntax can be found [here](https://cs.github.com/about/syntax), and Sourcegraph’s search syntax can be found [here](https://docs.sourcegraph.com/code_search/reference/queries).
+GitHub’s search syntax can be found [here](https://cs.github.com/about/syntax), and Sourcegraph’s search syntax can be found [here](/code-search/queries).
 
 Regardless of the type of search method you use, GitHub’s search is line-oriented, and Sourcegraph supports multi-line search. This means that Sourcegraph’s search queries can find results that cross multiple lines. For example, here is an [example](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/Parsely/pykafka%24+Not+leader+for+partition&patternType=regexp&_ga=2.114069518.827352295.1667227568-1057140468.1661198534&_gac=1.47310293.1665776224.CjwKCAjwkaSaBhA4EiwALBgQaJCOc6GlhIDQyg6HQScgfSBQpoFTUf7T_NNqEX5JaobtCS08GUEJuRoCIlIQAvD_BwE&_gl=1*zwylx9*_ga*MTA1NzE0MDQ2OC4xNjYxMTk4NTM0*_ga_E82CCDYYS1*MTY2NzU3NDA3OC4xMTcuMS4xNjY3NTc2NjIyLjAuMC4w) of matching multiple text strings in a file using regex, and here is a second explicit multi-line search [example](https://sourcegraph.com/search?q=context:global+app.terraform.io/example_corp+%5Cn+version+%3D%28.*%290.9.%5Cd+lang:Terraform&patternType=regexp) for terraform module verisions.
 
 ### Commit diff search and commit message search
 
-Commit diff and commit message searches help you see how your codebase has changed over time. With Sourcegraph, you can search within [commit diffs](https://docs.sourcegraph.com/code_search/explanations/features#commit-diff-search) to find changes to particular functions, classes, or specific areas of the codebase, and you can search over [commit messages](https://docs.sourcegraph.com/code_search/explanations/features#commit-message-search) and narrow down searches with additional filters such as author or time.
+Commit diff and commit message searches help you see how your codebase has changed over time. With Sourcegraph, you can search within [commit diffs](/code-search/features#commit-diff-search) to find changes to particular functions, classes, or specific areas of the codebase, and you can search over [commit messages](/code-search/features#commit-message-search) and narrow down searches with additional filters such as author or time.
 
 GitHub code search does not offer commit diff search or commit message search.
 
@@ -135,7 +135,7 @@ Symbol search makes it easier to find specific functions, variables, and more by
 
 Both GitHub code search and Sourcegraph support symbol searching. GitHub supports symbol search in 10 languages, including C#, Python, Go, Java, JavaScript, TypeScript, PHP, Protocol Buffers, Ruby, and Rust.
 
-Sourcegraph’s [symbol search](https://docs.sourcegraph.com/code_navigation/explanations/features#symbol-search) is available for more than [75 languages](https://about.sourcegraph.com/blog/introducing-sourcegraph-server-2-6).
+Sourcegraph’s [symbol search](/code_navigation/explanations/features#symbol-search) is available for more than [75 languages](https://about.sourcegraph.com/blog/introducing-sourcegraph-server-2-6).
 
 |              **Features**               |                                             **GitHub**                                             | **Sourcegraph** |
 | --------------------------------------- | -------------------------------------------------------------------------------------------------- | --------------- |
@@ -158,7 +158,7 @@ Sourcegraph can retrieve all search results. By default, Sourcegraph returns 500
 
 Souregraph's Smart Search is a query assistant that activates when a search returns no results. It helps you find search results by trying slight variations of your original query when a search shows "no results," and the alternative results are shown automatically once Smart Search is enabled.
 
-GitHub code search includes suggestions, completions, and the ability to save your searches. Sourcegraph offers suggestions through search query examples and [saved searches](https://docs.sourcegraph.com/code_search/how-to/saved_searches#creating-saved-searches).
+GitHub code search includes suggestions, completions, and the ability to save your searches. Sourcegraph offers suggestions through search query examples and [saved searches](/code-search/working/saved_searches#creating-saved-searches).
 
 GitHub code search returns a list of repositories and files. Sourcegraph results can include repositories, files, diffs, commits, and symbols; however, you must use the ‘type’ filter to return anything outside of repositories and files.
 
@@ -213,7 +213,7 @@ Search contexts are an alternative way to narrow down the scope of your search t
 
 You can create custom search contexts to be simple or advanced with GitHub. Simple search contexts are things such as repository or organization name, and advanced search contexts can mix multiple attributes, including languages. GitHub’s search contexts allow for more personalization than Sourcegraph.
 
-With Sourcegraph, a [search context](https://docs.sourcegraph.com/code_search/how-to/search_contexts) represents the body of code that will be searched. Search contexts can be private to the user who creates it or shared with other users on the same Sourcegraph instance. [Query-based ](https://docs.sourcegraph.com/code_search/how-to/search_contexts#beta-query-based-search-contexts)search contexts (beta) are an additional way to create search contexts based on variables like repository, rev, file, lang, case, fork, and visibility. Both [OR] and [AND] expressions are allowed to help further narrow the scope of query-based search contexts.
+With Sourcegraph, a [search context](/code-search/working/search_contexts) represents the body of code that will be searched. Search contexts can be private to the user who creates it or shared with other users on the same Sourcegraph instance. [Query-based ](/code-search/working/search_contexts#beta-query-based-search-contexts)search contexts (beta) are an additional way to create search contexts based on variables like repository, rev, file, lang, case, fork, and visibility. Both [OR] and [AND] expressions are allowed to help further narrow the scope of query-based search contexts.
 
 |  **Features**   |       **GitHub**        |           **Sourcegraph**            |
 | --------------- | ----------------------- | ------------------------------------ |

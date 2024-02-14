@@ -2139,6 +2139,109 @@ const redirectsData = [
         destination: "/cody/capabilities/commands#custom-commands",
         permanent: true
     },
+
+    // Code Search revamp redirects
+
+    {
+        source: "/code_search",
+        destination: "/code-search",
+        permanent: true
+    },
+    {
+        source: "/code_search/tutorials",
+        destination: "/code-search/working/saved_searches",
+        permanent: true
+    },
+    {
+        source: "/code_search/tutorials/examples",
+        destination: "/code-search/examples",
+        permanent: true
+    },
+
+    {
+        source: "/code_search/tutorials/search_subexpressions",
+        destination: "/code-search/working/search_subexpressions",
+        permanent: true
+    },
+
+    {
+        source: "/code_search/how-to",
+        destination: "/code-search/working/saved_searches",
+        permanent: true
+    },
+
+    {
+        source: "/code_search/how-to/saved_searches",
+        destination: "/code-search/working/saved_searches",
+        permanent: true
+    },
+
+    {
+        source: "/code_search/how-to/snippets",
+        destination: "/code-search/working/snippets",
+        permanent: true
+    },
+
+    {
+        source: "/code_search/how-to/search_contexts",
+        destination: "/code-search/working/search_contexts",
+        permanent: true
+    },
+
+    {
+        source: "/code_search/how-to/exhaustive",
+        destination: "/code-search/types/exhaustive",
+        permanent: true
+    },
+
+    {
+        source: "/code_search/how-to/search-jobs",
+        destination: "/code-search/types/search-jobs",
+        permanent: true
+    },
+
+    {
+        source: "/code_search/explanations",
+        destination: "/code-search/working/saved_searches",
+        permanent: true
+    },
+
+    {
+        source: "/code_search/explanations/features",
+        destination: "/code-search/features",
+        permanent: true
+    },
+
+    {
+        source: "/code_search/explanations/search_details",
+        destination: "/code-search/features",
+        permanent: true
+    },
+
+    {
+        source: "/code_search/explanations/tips",
+        destination: "/code-search/features",
+        permanent: true
+    },
+
+    {
+        source: "/code_search/reference/queries",
+        destination: "/code-search/queries",
+        permanent: true
+    },
+
+    {
+        source: "/code_search/reference/queries#search-pattern-syntax",
+        destination: "/code-search/queries#search-pattern-syntax",
+        permanent: true
+    },
+
+    {
+        source: "/code_search/reference/language",
+        destination: "/code-search/queries/language",
+        permanent: true
+    },
+
 ];
 
 const updatedRedirectsData = redirectsData.map(redirect => {

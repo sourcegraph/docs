@@ -15,12 +15,14 @@ export function QuickLink({
 	title,
 	description,
 	href,
-	icon
+	icon,
+	version
 }: {
 	title: string;
 	description: string;
 	href: string;
 	icon: React.ComponentProps<typeof Icon>['icon'];
+	version?: string;
 }) {
 	return (
 		<div className="group relative rounded-xl border border-light-border-2 dark:border-dark-border">
@@ -28,7 +30,7 @@ export function QuickLink({
 			<div className="relative overflow-hidden rounded-xl p-6">
 				<Icon icon={icon} className="h-8 w-8" />
 				<h2 className="mt-4 font-display text-base text-slate-900 dark:text-white">
-					<CustomLink href={href}>
+					<CustomLink version={version} href={href}>
 						<span className="absolute -inset-px rounded-xl" />
 						{title}
 					</CustomLink>
