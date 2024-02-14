@@ -872,6 +872,7 @@ permissions.syncUsersMaxConcurrency
 
 If you are having trouble accessing the web UI, you can make edits to your site configuration by editing the configuration directly.
 
+
 ### Sourcegraph with Docker Compose and single-server Sourcegraph with Docker
 
 Set `FRONTEND_CONTAINER` to:
@@ -929,4 +930,21 @@ You can check the container logs to see if you have made any typos or mistakes i
 		}
 	],
 }
+```
+
+## Accessing global settings
+
+Global settings should rarely need to be accessed. You will need to direct database access to change this setting.
+
+To find the current global settings, use the following SQL query:
+
+```sql
+SELECT * FROM settings WHERE user_id IS null and org_id IS null ORDER BY id DESC;
+```
+
+This will return a history of all global settings changes, the highest id being the latest
+Next, you can update the `content` column to either `{}` to reset global settings or to the desired JSON object.
+
+```sql
+UPDATE settings SET content = '{}' WHERE id IS <id>;
 ```
