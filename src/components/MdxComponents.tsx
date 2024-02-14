@@ -4,9 +4,11 @@ import {LinkCard, LinkCards} from './mdx/LinkCards';
 import {ProductCard, ProductCards} from './mdx/ProductCards';
 import {QuickLink, QuickLinks} from './mdx/QuickLinks';
 import {CustomLink} from './mdx/CustomLink';
+import TabsCard from './mdx/TabsCard';
 
 const MdxComponents = (version?: string) => {
 	return {
+		TabsCard,
 		QuickLinks,
 		QuickLink: (props: React.ComponentProps<typeof QuickLink>) => (
 			<QuickLink {...props} version={version} />
