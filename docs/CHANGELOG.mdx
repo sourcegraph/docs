@@ -2,24 +2,48 @@
 
 All notable changes to Sourcegraph are documented in this file.
 
-## Unreleased 5.3.0 (planned release date: February, 2024)
+## Unreleased
 
 ### Added
 
+- GitHub app installations can now be refreshed from the Batch Changes Site Admin page. [#60125](https://github.com/sourcegraph/sourcegraph/pull/60125)
+
+### Changed
+
+- GitHub apps installation records will only be deleted from the database if the GitHub App has been uninstalled or if the GitHub app has been deleted. [#60460](https://github.com/sourcegraph/sourcegraph/pull/60460)
+
+### Fixed
+
+- Code Monitors now properly ignores monitors associated with soft-deleted users, which previously would have led to an error on the overview page. [#60405](https://github.com/sourcegraph/sourcegraph/pull/60405)
+- Links in codeintel popovers respect the revision from the URL. [#60545](https://github.com/sourcegraph/sourcegraph/pull/60545)
+
+### Removed
+
+-
+
+## 5.3.0
+
+### Added
+
+- The search bar now supports keyword search by default, which ANDs terms together instead of searching literally as before. The behavior can be disabled through a toggle on the search results page. [#58815](https://github.com/sourcegraph/sourcegraph/issues/58815)
 - The `has.topic` filter now supports filtering by Gitlab topics. [#57649](https://github.com/sourcegraph/sourcegraph/pull/57649)
 - Batch Changes now allows changesets to be exported in CSV and JSON format. [#56721](https://github.com/sourcegraph/sourcegraph/pull/56721)
 - Supports custom ChatCompletion models in Cody clients for dotcom users. [#58158](https://github.com/sourcegraph/sourcegraph/pull/58158)
 - Topics synced from GitHub and GitLab are now displayed for repository matches in the search results and on the repository tree page. [#58927](https://github.com/sourcegraph/sourcegraph/pull/58927)
 - Added a new column "Repository metadata JSON" to the CSV export of repository search results, which includes the JSON encoded object of metadata key-value pairs. [#59334](https://github.com/sourcegraph/sourcegraph/pull/59334)
-- Expiry to access tokens. Users can now select a maximum timespan for which a token is valid. Tokens will automatically lose access after this period. Default timeframes and an override to allow access tokens without expiration can be configured in the `auth.accessTokens` section of the site configuration. [#59565](https://github.com/sourcegraph/sourcegraph/pull/59565)
+- Expiry to access tokens. Users can now select a maximum timespan for which a token is valid. Tokens will automatically lose access after this period. Default timeframes and an override to disable access tokens without expiration can be configured in the `auth.accessTokens` section of the site configuration. [#59565](https://github.com/sourcegraph/sourcegraph/pull/59565)
+- Gerrit code host connections now support an 'exclude' field that prevents repos in this list from being synced. [#59739](https://github.com/sourcegraph/sourcegraph/pull/59739)
+- Limit the number of active access tokens for a user. By default users are able to have 25 active access tokens. This limit can be configured using the `maxTokensPerUser` setting in the `auth.accessTokens` section of the site configuration. [#59731](https://github.com/sourcegraph/sourcegraph/pull/59731)
+- Add experimental support for .cody/ignore when retrieving remote context. To enable it, set `experimentalFeatures.codyContextIgnore: true` in the site configuration. [#59836](https://github.com/sourcegraph/sourcegraph/pull/59836), [#59907](https://github.com/sourcegraph/sourcegraph/pull/59907)
+- Site admin, link to the Cody Analytics service. [#60371](https://github.com/sourcegraph/sourcegraph/pull/60371)
+- Added a reimagined filter panel to the search result page, facilitating a workflow centered around iterative refinement.
+- Search results were treated to a design refresh, improving information density of results. [#59834](https://github.com/sourcegraph/sourcegraph/pull/59834)
+- Added a preview pane to file search results so you can view the full file without navigating away from the search results. [#58311](https://github.com/sourcegraph/sourcegraph/pull/58311)
 
 ### Changed
 
 - `cody.restrictUsersFeatureFlag` has been deprecated and replaced by role based access control instead. Until the old configuration value is removed from your site config, it will be respected just as before but with a warning displayed at the top of Sourcegraph. Once removed, the old feature flag will not be respected and instead the Cody access will be managed via role based access controls, see [the docs](https://docs.sourcegraph.com/cody/overview/enable-cody-enterprise#enable-cody-only-for-some-users) for more information. [#58831](https://github.com/sourcegraph/sourcegraph/pull/58831)
 - The setting `experimentalFeatures.searchQueryInput` now refers to the new query input as `v2` (not `experimental`).
-
-{/* NOTE: If v2 becomes the default before this release is cut, then update this entry to mention that instead of adding a separate entry. */}
-
 - Search-based code intel doesn't include the currently selected search context anymore. It was possible to get into a situation where search-based code intel wouldn't find any information due to being restricted by the current search context. [#58010](https://github.com/sourcegraph/sourcegraph/pull/58010)
 - The last commit which changed a file/directory is now shown in the files panel on the repo and file pages. To avoid duplicating information and confusion, the commits panel was removed. [58328](https://github.com/sourcegraph/sourcegraph/pull/58328)
 - Clicking on a search result now opens the blob view at the same commit as the search result. Before, blob views were opened at the tip of the default branch, which sometimes caused inconsistencies in line numbers if the index was out of date. [#58381](https://github.com/sourcegraph/sourcegraph/pull/58381)
@@ -30,6 +54,10 @@ All notable changes to Sourcegraph are documented in this file.
   - For `size` the supported units are `B`, `b`, `kB`, `KB`, `kiB`, `KiB`, `MiB`, `MB`, `GiB`, `GB`. No decimals points are supported.
 - Structural Search is now disabled by default. To enable it, set `experimentalFeatures.structuralSearch: "enabled"` in the site configuration. [#57584](https://github.com/sourcegraph/sourcegraph/pull/57584)
 - Search Jobs switches the format of downloaded results from CSV to JSON. [#59619](https://github.com/sourcegraph/sourcegraph/pull/59619)
+- [Search Jobs](https://docs.sourcegraph.com/code_search/how-to/search-jobs) is now in beta and enabled by default. It can be disabled in the site configuration by setting `experimentalFeatures.searchJobs: false`.
+- The search input on the search homepage is now automatically focused when the page loads.
+- gRPC is now the only method for our internal APIs, and can not be disabled. All of corresponding the REST implementations have been removed. The vast majority of customers upgrading to 5.3 don't need to take any action - the change should be invisible. However, if you have restrictions on Sourcegraph’s internal (service to service) traffic, some firewall or security configurations may be necessary. You can downgrade to Sourcegraph 5.2 and disable gRPC while you troubleshoot / reach out to our customer support team. See [https://sourcegraph.com/docs/admin/updates/grpc](https://sourcegraph.com/docs/admin/updates/grpc) for more details. [#59093](https://github.com/sourcegraph/sourcegraph/pull/59093)
+- The default `count:` for search has been increased to 10000, significantly increasing the number of searches that are exhaustive by default. [#60114](https://github.com/sourcegraph/sourcegraph/pull/60114)
 
 ### Fixed
 
@@ -41,6 +69,10 @@ All notable changes to Sourcegraph are documented in this file.
 - Long lines now wrap correctly in the diff view. [#58138](https://github.com/sourcegraph/sourcegraph/pull/58138)
 - Fixed an issue in the search input where pressing Enter after selecting a suggestion would sometimes insert another suggestions instead of submitting the query. [#58186](https://github.com/sourcegraph/sourcegraph/pull/58186)
 - Fixed an issue where having sub-repo permissions enabled could cause repositories with a large number of files in directories to become unviewable. [#59420](https://github.com/sourcegraph/sourcegraph/pull/59420)
+- On the search context, code monitoring, code insights, saved searches or notebook pages, when selecting a repository or file suggestion in the query input with Enter the suggestion is now properly appended to the query instead of navigating away to the corresponding repository or file page. [#59941](https://github.com/sourcegraph/sourcegraph/pull/59941)
+- Perforce email matching for user permissions is now case insensitive, matching Perforce behavior. [#60252](https://github.com/sourcegraph/sourcegraph/pull/60252)
+- A bug with syncing GitHub App installations that caused installations to be truncated after the first 30 orgs. [#60383](https://github.com/sourcegraph/sourcegraph/pull/60383)
+- Various significant performance optimizations in the search and code navigation user flows.
 
 ### Removed
 
@@ -55,8 +87,22 @@ All notable changes to Sourcegraph are documented in this file.
 - The notepad UI, notebook creation feature. [#58217](https://github.com/sourcegraph/sourcegraph/pull/58217)
 - The experimental `indexRepositoryName` option for the rust packages code host connection has been removed. [#59176](https://github.com/sourcegraph/sourcegraph/pull/59176)
 - The column "Repository metadata" in the CSV export of repository search results is now deprecated and will be removed in a future release. Use "Repository metadata JSON" instead [#59334](https://github.com/sourcegraph/sourcegraph/pull/59334)
+- Remote embeddings as context source for Cody has been removed. [#59493](https://github.com/sourcegraph/sourcegraph/pull/59493)
 
-## Unreleased 5.2.6
+## 5.2.7
+
+### Added
+
+### Fixed
+
+- The reference panel correctly shows definition and reference information instead of a "Could not find token" error for MATLAB. [#59636](https://github.com/sourcegraph/sourcegraph/pull/59636)
+- The auto-index configuration page correctly shows any auto-inference errors instead of a nil pointer exception. [#59756](https://github.com/sourcegraph/sourcegraph/pull/59756)
+
+### Removed
+
+### Changed
+
+## 5.2.6
 
 ### Added
 
@@ -66,10 +112,6 @@ All notable changes to Sourcegraph are documented in this file.
 
 - Fix executors auth header `installSrc` [#59391](https://github.com/sourcegraph/sourcegraph/pull/59391)
 - Avoid constantly rerunning failed embeddings jobs. [#58980](https://github.com/sourcegraph/sourcegraph/pull/58980)
-
-### Changed
-
-### Removed
 
 ## 5.2.5
 
@@ -89,19 +131,17 @@ All notable changes to Sourcegraph are documented in this file.
 
 ### Removed
 
-## Unreleased 5.2.4
+## 5.2.4
 
 ### Added
 
 - Added the ability to use Workload Identity, Managed Identity and Environmental credentials when using the Azure OpenAI completions and embeddings providers [#58289](https://github.com/sourcegraph/sourcegraph/pull/58289)
+- Added support for cloning via SSH from Azure DevOps. [#58655](https://github.com/sourcegraph/sourcegraph/pull/58655)
 
 ### Fixed
 
 - Fixed two issues in Zoekt that could cause out of memory errors during search indexing. [sourcegraph/zoekt#686](https://github.com/sourcegraph/zoekt/pull/686), [sourcegraph/zoekt#689](https://github.com/sourcegraph/zoekt/pull/689)
-
-### Changed
-
-### Removed
+- Fixed performance issue with embeddings job scheduling. (#58651)[https://github.com/sourcegraph/sourcegraph/pull/58651]
 
 ## 5.2.3
 
@@ -211,7 +251,7 @@ All notable changes to Sourcegraph are documented in this file.
 
 ### Fixed
 
-- Fixed a bug in the `deploy-sourcegraph-helm` deployment of Sourcegraph, for sufficiantly large scip indexes uploads will fail when the precise-code-intel worker attempts to write to `/tmp` and doesn't have a volume mounted for this purpose. See [kubernetes release notes](./admin/updates/kubernetes#v516-➔-v517) for more details [#342](https://github.com/sourcegraph/deploy-sourcegraph-helm/pull/343)
+- Fixed a bug in the `deploy-sourcegraph-helm` deployment of Sourcegraph, for sufficiantly large scip indexes uploads will fail when the precise-code-intel worker attempts to write to `/tmp` and doesn't have a volume mounted for this purpose. See [kubernetes release notes](./admin/updates/kubernetes.md#v516-➔-v517) for more details [#342](https://github.com/sourcegraph/deploy-sourcegraph-helm/pull/343)
 
 ## 5.1.6
 
@@ -313,7 +353,7 @@ All notable changes to Sourcegraph are documented in this file.
 
 > **Note**: As of 5.1.0, the `rsa-sha` signature algorithm is no longer supported when connecting to code hosts over SSH. If you encounter the error `sign_and_send_pubkey: no mutual signature supported` when syncing repositories, see [Repository authentication](https://docs.sourcegraph.com/admin/repo/auth#error-sign_and_send_pubkey-no-mutual-signature-supported) for more information and steps to resolve the issue.
 
-### [Known issues](KNOWN-ISSUES)
+### [Known issues](KNOWN-ISSUES.md)
 
 - There is an issue with Sourcegraph instances configured to use explicit permissions using permissions.userMapping in Site configuration, where repository permissions are not enforced. Customers using the explicit permissions API are advised to upgrade to v5.1.1 directly.
 - There is an issue with creating and updating existing Bitbucket.org (Cloud) code host connections due to problem with JSON schema validation which prevents the JSON editor from loading and surfaces as an error in the UI.
@@ -2680,7 +2720,7 @@ API docs is a new experimental feature of Sourcegraph ([learn more](https://docs
   - `campaigns.readAccess.enabled` replaces the deprecated site configuration property `automation.readAccess.enabled`.
   - The experimental feature flag was not renamed (because it will go away soon) and remains `{"experimentalFeatures": {"automation": "enabled"}}`.
 - The [Kubernetes deployment](https://github.com/sourcegraph/deploy-sourcegraph) for **existing** installations requires a
-  [migration step](https://github.com/sourcegraph/deploy-sourcegraph/blob/master/docs/migrate) when upgrading
+  [migration step](https://github.com/sourcegraph/deploy-sourcegraph/blob/master/docs/migrate.md) when upgrading
   past commit [821032e2ee45f21f701](https://github.com/sourcegraph/deploy-sourcegraph/commit/821032e2ee45f21f701caac624e4f090c59fd259) or when upgrading to 3.14.
   New installations starting with the mentioned commit or with 3.14 do not need this migration step.
 - Aggregated search latencies (in ms) of search queries are now included in [pings](https://docs.sourcegraph.com/admin/pings).
@@ -2752,7 +2792,7 @@ API docs is a new experimental feature of Sourcegraph ([learn more](https://docs
 - The GraphQL field `CampaignPlan.changesets` has been deprecated and will be removed in 3.15. A new field called `CampaignPlan.changesetPlans` has been introduced to make the naming more consistent with the `Campaign.changesetPlans` field. Please use that instead. [#7966](https://github.com/sourcegraph/sourcegraph/pull/7966)
 - Long lines (>2000 bytes) are no longer highlighted, in order to prevent performance issues in browser rendering. [#6489](https://github.com/sourcegraph/sourcegraph/issues/6489)
 - No longer requires `read:org` permissions for GitHub OAuth if `allowOrgs` is not enabled in the site configuration. [#8163](https://github.com/sourcegraph/sourcegraph/issues/8163)
-- [Documentation](https://github.com/sourcegraph/deploy-sourcegraph/blob/master/configure/jaeger/README) in github.com/sourcegraph/deploy-sourcegraph for deploying Jaeger in Kubernetes clusters running Sourcegraph has been updated to use the [Jaeger Operator](https://www.jaegertracing.io/docs/1.16/operator/), the recommended standard way of deploying Jaeger in a Kubernetes cluster. We recommend existing customers that use Jaeger adopt this new method of deployment. Please reach out to support@sourcegraph.com if you'd like assistance updating.
+- [Documentation](https://github.com/sourcegraph/deploy-sourcegraph/blob/master/configure/jaeger/README.md) in github.com/sourcegraph/deploy-sourcegraph for deploying Jaeger in Kubernetes clusters running Sourcegraph has been updated to use the [Jaeger Operator](https://www.jaegertracing.io/docs/1.16/operator/), the recommended standard way of deploying Jaeger in a Kubernetes cluster. We recommend existing customers that use Jaeger adopt this new method of deployment. Please reach out to support@sourcegraph.com if you'd like assistance updating.
 
 ### Fixed
 
@@ -2907,7 +2947,7 @@ This is `3.12.8` release with internal infrastructure fixes to publish the docke
 
 ## 3.11.0
 
-**Important:** If you use `SITE_CONFIG_FILE` or `CRITICAL_CONFIG_FILE`, please be sure to follow the steps in: [migration notes for Sourcegraph v3.11+](https://docs.sourcegraph.com/admin/migration/3_11) after upgrading.
+**Important:** If you use `SITE_CONFIG_FILE` or `CRITICAL_CONFIG_FILE`, please be sure to follow the steps in: [migration notes for Sourcegraph v3.11+](https://docs.sourcegraph.com/admin/migration/3_11.md) after upgrading.
 
 ### Added
 
@@ -2943,7 +2983,7 @@ This is `3.12.8` release with internal infrastructure fixes to publish the docke
 
 ### Removed
 
-- The management console has been removed. All critical configuration previously stored in the management console will be automatically migrated to your site configuration. For more information about this change, or if you use `SITE_CONFIG_FILE` / `CRITICAL_CONFIG_FILE`, please see the [migration notes for Sourcegraph v3.11+](https://docs.sourcegraph.com/admin/migration/3_11).
+- The management console has been removed. All critical configuration previously stored in the management console will be automatically migrated to your site configuration. For more information about this change, or if you use `SITE_CONFIG_FILE` / `CRITICAL_CONFIG_FILE`, please see the [migration notes for Sourcegraph v3.11+](https://docs.sourcegraph.com/admin/migration/3_11.md).
 
 ## 3.10.4
 
@@ -2986,7 +3026,7 @@ This is `3.12.8` release with internal infrastructure fixes to publish the docke
 
 ### Added
 
-- Indexed Search supports horizontally scaling. Instances with large number of repositories can update the `replica` field of the `indexed-search` StatefulSet. See [configure indexed-search replica count](https://github.com/sourcegraph/deploy-sourcegraph/blob/master/docs/configure#configure-indexed-search-replica-count). [#5725](https://github.com/sourcegraph/sourcegraph/issues/5725)
+- Indexed Search supports horizontally scaling. Instances with large number of repositories can update the `replica` field of the `indexed-search` StatefulSet. See [configure indexed-search replica count](https://github.com/sourcegraph/deploy-sourcegraph/blob/master/docs/configure.md#configure-indexed-search-replica-count). [#5725](https://github.com/sourcegraph/sourcegraph/issues/5725)
 - Bitbucket Cloud external service supports `exclude` config option. [#6035](https://github.com/sourcegraph/sourcegraph/issues/6035)
 - `sourcegraph/server` Docker deployments now support the environment variable `IGNORE_PROCESS_DEATH`. If set to true the container will keep running, even if a subprocess has died. This is useful when manually fixing problems in the container which the container refuses to start. For example a bad database migration.
 - Search input now offers filter type suggestions [#6105](https://github.com/sourcegraph/sourcegraph/pull/6105).
@@ -2995,7 +3035,7 @@ This is `3.12.8` release with internal infrastructure fixes to publish the docke
 
 ### Changed
 
-- **Required Kubernetes Migration:** The [Kubernetes deployment](https://github.com/sourcegraph/deploy-sourcegraph) manifest for indexed-search services has changed from a Normal Service to a Headless Service. This is to enable Sourcegraph to individually resolve indexed-search pods. Services are immutable, so please follow the [migration guide](https://github.com/sourcegraph/deploy-sourcegraph/blob/master/docs/migrate#310).
+- **Required Kubernetes Migration:** The [Kubernetes deployment](https://github.com/sourcegraph/deploy-sourcegraph) manifest for indexed-search services has changed from a Normal Service to a Headless Service. This is to enable Sourcegraph to individually resolve indexed-search pods. Services are immutable, so please follow the [migration guide](https://github.com/sourcegraph/deploy-sourcegraph/blob/master/docs/migrate.md#310).
 - Fields of type `String` in our GraphQL API that contain [JSONC](https://komkom.github.io/) now have the custom scalar type `JSONCString`. [#6209](https://github.com/sourcegraph/sourcegraph/pull/6209)
 - `ZOEKT_HOST` environment variable has been deprecated. Please use `INDEXED_SEARCH_SERVERS` instead. `ZOEKT_HOST` will be removed in 3.12.
 - Directory names on the repository tree page are now shown in bold to improve readability.
@@ -3063,7 +3103,7 @@ This is `3.12.8` release with internal infrastructure fixes to publish the docke
 
 ### Changed
 
-- **Recommended Kubernetes Migration:** The [Kubernetes deployment](https://github.com/sourcegraph/deploy-sourcegraph) manifest for indexed-search pods has changed from a Deployment to a StatefulSet. This is to enable future work on horizontally scaling indexed search. To retain your existing indexes there is a [migration guide](https://github.com/sourcegraph/deploy-sourcegraph/blob/master/docs/migrate#39).
+- **Recommended Kubernetes Migration:** The [Kubernetes deployment](https://github.com/sourcegraph/deploy-sourcegraph) manifest for indexed-search pods has changed from a Deployment to a StatefulSet. This is to enable future work on horizontally scaling indexed search. To retain your existing indexes there is a [migration guide](https://github.com/sourcegraph/deploy-sourcegraph/blob/master/docs/migrate.md#39).
 - Allow single trailing hyphen in usernames and org names [#5680](https://github.com/sourcegraph/sourcegraph/pull/5680)
 - Indexed search won't spam the logs on startup if the frontend API is not yet available. [zoekt#30](https://github.com/sourcegraph/zoekt/pull/30), [#5866](https://github.com/sourcegraph/sourcegraph/pull/5866)
 - Search query fields are now case insensitive. For example `repoHasFile:` will now be recognized, not just `repohasfile:`. [#5168](https://github.com/sourcegraph/sourcegraph/issues/5168)
@@ -3116,12 +3156,12 @@ This is `3.12.8` release with internal infrastructure fixes to publish the docke
 
 ### Added
 
-- A [migration guide for Sourcegraph v3.7+](https://docs.sourcegraph.com/admin/migration/3_7).
+- A [migration guide for Sourcegraph v3.7+](https://docs.sourcegraph.com/admin/migration/3_7.md).
 
 ### Fixed
 
 - Fixed an issue where some repositories with very long symbol names would fail to index after v3.7.
-- We now retain one prior search index version after an upgrade, meaning upgrading AND downgrading from v3.6.2 to v3.7.2 is now 100% seamless and involves no downtime or negated search performance while repositories reindex. Please refer to the [v3.7+ migration guide](https://docs.sourcegraph.com/admin/migration/3_7) for details.
+- We now retain one prior search index version after an upgrade, meaning upgrading AND downgrading from v3.6.2 to v3.7.2 is now 100% seamless and involves no downtime or negated search performance while repositories reindex. Please refer to the [v3.7+ migration guide](https://docs.sourcegraph.com/admin/migration/3_7.md) for details.
 
 ## 3.7.1
 
@@ -3495,7 +3535,7 @@ This is `3.12.8` release with internal infrastructure fixes to publish the docke
 
 ### Fixed
 
-- Jaeger tracing, once enabled, can now be configured via standard [environment variables](https://github.com/jaegertracing/jaeger-client-go/blob/v2.14.0/README#environment-variables).
+- Jaeger tracing, once enabled, can now be configured via standard [environment variables](https://github.com/jaegertracing/jaeger-client-go/blob/v2.14.0/README.md#environment-variables).
 - Fixed an issue where some search and zoekt errors would not be logged.
 
 ## 3.2.0
@@ -3553,7 +3593,7 @@ This is `3.12.8` release with internal infrastructure fixes to publish the docke
 
 - Added Docker-specific help text when running the Sourcegraph docker image in an environment with an sufficient open file descriptor limit.
 - Added syntax highlighting for Kotlin and Dart.
-- Added a management console environment variable to disable HTTPS, see [the docs](https://docs.sourcegraph.com/admin/management_console#can-i-disable-https-on-the-management-console) for more information.
+- Added a management console environment variable to disable HTTPS, see [the docs](https://docs.sourcegraph.com/admin/management_console.md#can-i-disable-https-on-the-management-console) for more information.
 - Added `auth.disableUsernameChanges` to critical configuration to prevent users from changing their usernames.
 - Site admins can query a user by email address or username from the GraphQL API.
 - Added a search query builder to the main search page. Click "Use search query builder" to open the query builder, which is a form with separate inputs for commonly used search keywords.
@@ -3565,7 +3605,7 @@ This is `3.12.8` release with internal infrastructure fixes to publish the docke
 
 ### Fixed
 
-- Fixed an issue where the management console would improperly regenerate the TLS cert/key unless `CUSTOM_TLS=true` was set. See the documentation for [how to use your own TLS certificate with the management console](https://docs.sourcegraph.com/admin/management_console#how-can-i-use-my-own-tls-certificates-with-the-management-console).
+- Fixed an issue where the management console would improperly regenerate the TLS cert/key unless `CUSTOM_TLS=true` was set. See the documentation for [how to use your own TLS certificate with the management console](https://docs.sourcegraph.com/admin/management_console.md#how-can-i-use-my-own-tls-certificates-with-the-management-console).
 
 ## 3.0.1
 
@@ -3585,7 +3625,7 @@ This is `3.12.8` release with internal infrastructure fixes to publish the docke
 
 ## 3.0.0
 
-See the changelog entries for 3.0.0 beta releases and our [3.0](https://docs.sourcegraph.com/admin/migration/3_0) upgrade guide if you are upgrading from 2.x.
+See the changelog entries for 3.0.0 beta releases and our [3.0](https://docs.sourcegraph.com/admin/migration/3_0.md) upgrade guide if you are upgrading from 2.x.
 
 ## 3.0.0-beta.4
 
