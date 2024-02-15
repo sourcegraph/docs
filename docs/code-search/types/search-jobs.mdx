@@ -10,7 +10,16 @@ With Search Jobs, you can start a search, let it run in the background, and then
 
 ## Search results format
 
-Each line of the results file is a JSON object containing matches. The JSON objects have the same format as the (event-type) matches served by the [Stream API](/api/stream_api#event-types).
+The downloaded results are formatted as [JSON lines](https://jsonlines.org).
+The JSON objects have the same format as the (event-type) matches served by the [Stream API](/api/stream_api#event-types).
+
+Here is an example of a JSON lines results file for a search job that ran the query `r:github.com/sourcegraph/sourcegraph handlePanic`.
+The search returned 4 results in 2 files:
+
+```json lines
+{"type":"content","path":"cmd/symbols/shared/main.go","repositoryID":399,"repository":"github.com/sourcegraph/sourcegraph","branches":["HEAD"],"commit":"9b47c6430cc3c9cb16695b4fa0a1a277cbbdb327","hunks":null,"chunkMatches":[{"content":"func handlePanic(logger log.Logger, next http.Handler) http.Handler {","contentStart":{"offset":4526,"line":129,"column":0},"ranges":[{"start":{"offset":4531,"line":129,"column":5},"end":{"offset":4542,"line":129,"column":16}}]},{"content":"\thandler = handlePanic(logger, handler)","contentStart":{"offset":3570,"line":98,"column":0},"ranges":[{"start":{"offset":3581,"line":98,"column":11},"end":{"offset":3592,"line":98,"column":22}}]}],"language":"Go"}
+{"type":"content","path":"cmd/embeddings/shared/main.go","repositoryID":399,"repository":"github.com/sourcegraph/sourcegraph","branches":["HEAD"],"commit":"9b47c6430cc3c9cb16695b4fa0a1a277cbbdb327","hunks":null,"chunkMatches":[{"content":"func handlePanic(logger log.Logger, next http.Handler) http.Handler {","contentStart":{"offset":6585,"line":190,"column":0},"ranges":[{"start":{"offset":6590,"line":190,"column":5},"end":{"offset":6601,"line":190,"column":16}}]},{"content":"\thandler = handlePanic(logger, handler)","contentStart":{"offset":2844,"line":81,"column":0},"ranges":[{"start":{"offset":2855,"line":81,"column":11},"end":{"offset":2866,"line":81,"column":22}}]}],"language":"Go"}
+```
 
 ## Enable Search Jobs
 
@@ -83,10 +92,31 @@ To use Search Jobs, you need to:
 
 Search Jobs supports queries of `type:file` and it automatically appends this to the search query. Other result types (like `diff`, `commit`, `path`, and `repo`) will be ignored. However, there are some limitations on the supported query syntax. These include:
 
-- `OR`, `AND` operators
 - file predicates, such as `file:has.content`, `file:has.owner`, `file:has.contributor`, `file:contains.content`
 - `.*` regexp search
 - Multiple `rev` filters
 - Queries with `index: filter`
 
 <Callout type="note"> Sourcegraph already offers an [Exhaustive Search](/code-search/types/exhaustive) with the `count:all` operator. However, there are certain limitations when generating results within your codebase.</Callout>
+
+## FAQ
+
+### How can I run a search job against all branches and all repositories?
+
+You can use a combination of the `repo:` and `rev:` filter to search across all branches and repositories.
+For example, `r: rev:*/refs/heads/* foo` will search for `foo` across all branches and all repositories.
+See the [search syntax documentation](/code-search/queries#repository-revisions) for more details.
+
+### Is there a time limit for a search job?
+
+We break down a search job into smaller tasks and run them in parallel.
+Each task is limited to a single revision and a single repository.
+This allows us to run searches across large codebases.
+The chance of hitting timeouts is very low, but it's not impossible.
+If you do hit a timeout, please reach out to support and we will help you troubleshoot the issue. As an immediate measure, you can break down your search query into smaller queries and run them separately.
+
+### A search job failed, how can I find out what went wrong?
+
+We mark a search job as failed if any of the tasks fail.
+You can access the log of a search job from the search jobs UI.
+The log contains one line per task. If a task fails, the log will contain the error message.

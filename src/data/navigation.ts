@@ -55,18 +55,10 @@ export const navigation: NavigationItem[] = [
             title: "Core Concepts", href: "/cody/core-concepts/context",
             subsections: [
               { title: "Context", href: "/cody/core-concepts/context", },
+              { title: "Embeddings", href: "/cody/core-concepts/embeddings", },
               { title: "Keyword Search", href: "/cody/core-concepts/keyword-search", },
               { title: "Code Graph", href: "/cody/core-concepts/code-graph", },
               { title: "Cody Gateway", href: "/cody/core-concepts/cody-gateway", },
-            ]
-          },
-          {
-            title: "Embeddings", href: "/cody/embeddings",
-            subsections: [
-              { title: "Generate Embeddings Index", href: "/cody/embeddings/embedding-index", },
-              { title: "Configure Embeddings", href: "/cody/embeddings/configure-embeddings", },
-              { title: "Manage Embeddings", href: "/cody/embeddings/manage-embeddings", },
-              { title: "Usage and Limits", href: "/cody/embeddings/usage-and-limits", },
             ]
           },
           {
@@ -99,6 +91,7 @@ export const navigation: NavigationItem[] = [
             title: "Working with Search", href: "/code-search/working/saved_searches",
             subsections: [
               { title: "Saved Search", href: "/code-search/working/saved_searches", },
+              { title: "Search Filters", href: "/code-search/working/search_filters", },
               { title: "Search Snippet", href: "/code-search/working/snippets", },
               { title: "Search Contexts", href: "/code-search/working/search_contexts", },
               { title: "Search Subexpressions", href: "/code-search/working/search_subexpressions", },
