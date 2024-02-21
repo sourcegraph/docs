@@ -5,11 +5,11 @@ export const searchMetadata = {
     },
     // For Algolia
     // provider: 'algolia',
-    // algoliaConfig: {
-    //   // The application ID provided by Algolia
-    //   appId: 'you-app-id',
-    //   // Public API key: it is safe to commit it
-    //   apiKey: 'your-api-key',
-    //   indexName: 'docsearch',
-    // },
+    algoliaConfig: {
+      // The application ID provided by Algolia
+      appId: '0EBA2NRQU3',
+      // Public API key: it is safe to commit it
+      apiKey: '1b6e51c1d4ef24bef0a5f1ab00dad80a',
+      indexName: 'sourcegraph',
+    },
 }
