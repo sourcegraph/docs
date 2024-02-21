@@ -1,3 +1,6 @@
+import config from 'docs.config';
+
+
 export interface VersionI {
     name: string;
     label?: string; // Optional - Shown in the version dropdown
@@ -7,9 +10,9 @@ export interface VersionI {
 // Ensure the first entry is the latest active version
 export const versions: VersionI[] = [
     {
-        name: 'v5.3',
+        name: `v${config.DOCS_LATEST_VERSION}`,
         label: 'latest',
-        url: '/'
+        url: '/',
     },
     {
         name: 'v5.2',
