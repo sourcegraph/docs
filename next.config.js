@@ -16,8 +16,8 @@ const nextConfig = {
 		return [
 			...updatedRedirectsData,
 			{
-				source: `/v/${config.DOCS_LATEST_VERSION}/:slug`,
-				destination: '/:slug',
+				source: `/v/${config.DOCS_LATEST_VERSION}/:slug*`,
+				destination: '/:slug*',
 				permanent: false
 			}
 		];
