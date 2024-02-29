@@ -1,6 +1,4 @@
 import {useEffect, useState} from 'react';
-import {KBarButton} from './KBarButton';
-import {SearchIcon} from '../icons/SearchIcon';
 
 import { DocSearch } from '@docsearch/react';
 
