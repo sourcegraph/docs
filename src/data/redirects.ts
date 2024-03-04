@@ -401,7 +401,12 @@ const redirectsData = [
     },
     {
         source: "/@v5.3.0/admin/observability/alerts",
-        destination: "https://docs.sourcegraph.com/@v5.3.0/admin/observability/alerts#worker-perms-syncer-sync-errors",
+        destination: "https://docs.sourcegraph.com/@v5.3.0/admin/observability/alerts",
+        permanent: false
+    },
+    {
+        source: "/@v5.3.0/admin/observability/dashboards",
+        destination: "https://docs.sourcegraph.com/@v5.3.0/admin/observability/dashboards",
         permanent: false
     },
     {
