@@ -50,22 +50,22 @@ Use `bazel info output_base` to find the output base directory. From there go to
 
 ### How do I build a container on MacOS
 
-Our containers are only built for `linux/amd64`, therefore we need to cross-compile on MacOS to produce correct images. To simplify this process, a configuration flag is available: `--config darwin-docker` to swap the toolchains for you.
+Our containers are only built for `linux/amd64`, therefore we need to cross-compile on MacOS to produce correct images. This is automatically handled by Bazel, so there should be no difference between the command to build containers on Linux and MacOS.
 
 Example:
 
 ```
 # Create a tarball that can be loaded in Docker of the worker service:
-bazel build //cmd/worker:image_tarball --config darwin-docker
+bazel build //cmd/worker:image_tarball
 
 # Load the image in Docker:
-docker load --input $(bazel cquery //cmd/worker:image_tarball  --config darwin-docker --output=files)
+docker load --input $(bazel cquery //cmd/worker:image_tarball  --output=files)
 ```
 
 You can also use the same configuration flag to run the container tests on MacOS:
 
 ```
-bazel test //cmd/worker:image_test --config darwin-docker
+bazel test //cmd/worker:image_test
 ```
 
 ### Can I run integration tests (`bazel test //testing/...`) locally?

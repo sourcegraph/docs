@@ -140,7 +140,7 @@ commandTests:
     exitCode: 0
 ```
 
-We can now build this image _locally_ and run those tests as well (please note that if you're working locally on a Linux/amd64 machine, you don't need the `--config darwin-docker` flag).
+We can now build this image _locally_ and run those tests as well.
 
 💡 The image building process is much faster than the old Docker build scripts, and because most actions are cached, this makes it very easy to iterate locally on both the image definition and the container structure tests.
 
@@ -148,13 +148,13 @@ Example:
 
 ```
 # Create a tarball that can be loaded in Docker of the worker service:
-bazel build //cmd/worker:image_tarball --config darwin-docker
+bazel build //cmd/worker:image_tarball
 
 # Load the image in Docker:
-docker load --input $(bazel cquery //cmd/worker:image_tarball  --config darwin-docker --output=files)
+docker load --input $(bazel cquery //cmd/worker:image_tarball  --output=files)
 
 # Run the container structure tests
-bazel test //cmd/worker:image_test --config darwin-docker
+bazel test //cmd/worker:image_test
 ```
 
 Finally, _if and only if_ we want our image to be released on registries, we need to add the `oci_push` rule. It will take care of definining which registry to push on, as well as tagging the image, through a process referred as `stamping` that we will cover a bit further.
