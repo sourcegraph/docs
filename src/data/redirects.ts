@@ -400,6 +400,11 @@ const redirectsData = [
         permanent: true
     },
     {
+        source: "/@v5.3.0/admin/observability/alerts",
+        destination: "https://docs.sourcegraph.com/@v5.3.0/admin/observability/alerts#worker-perms-syncer-sync-errors",
+        permanent: false
+    },
+    {
         source: "/admin/monitoring_and_tracing",
         destination: "/admin/observability",
         permanent: true
