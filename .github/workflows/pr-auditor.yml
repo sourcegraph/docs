@@ -1,6 +1,6 @@
 name: pr-auditor
 on:
-  pull_request:
+  pull_request_target:
     types: [ closed, edited, opened, synchronize, ready_for_review ]
   workflow_dispatch:
 
@@ -11,19 +11,16 @@ jobs:
       - uses: actions/checkout@v3
         with:
           repository: 'sourcegraph/pr-auditor'
-          ref: 'jsm/skip-check-reviews-for-users'
       - uses: actions/setup-go@v4
         with: { go-version: '1.21' }
 
-      - run: cat ${{ env.GITHUB_EVENT_PATH }}
-        name: Dump event payload
       - run: './check-pr.sh'
         env:
           GITHUB_EVENT_PATH: ${{ env.GITHUB_EVENT_PATH }}
           GITHUB_TOKEN: ${{ secrets.PR_AUDITOR_TOKEN }}
           GITHUB_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           SKIP_CHECK_TEST_PLAN: true
-          SKIP_CHECK_REVIEWS_FOR_USERS: MaedahBatool,jamesmcnamara
+          SKIP_CHECK_REVIEWS_FOR_USERS: MaedahBatool
 
   report_failure:
     needs: check-pr
