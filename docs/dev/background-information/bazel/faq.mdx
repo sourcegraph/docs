@@ -68,6 +68,18 @@ You can also use the same configuration flag to run the container tests on MacOS
 bazel test //cmd/worker:image_test
 ```
 
+### I am not able to run image tests locally as Docker is not detected
+
+If you get an error like:
+
+```
+time="2024-02-28T06:31:07Z" level=fatal msg="error loading oci layout into daemon: error loading image: Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?, %!s(MISSING)"
+```
+
+It might be because Docker Desktop was configured to use a different Docker socket during installation.
+
+To fix this error, enable the checkbox under **Docker Desktop > Settings > Advanced > Allow the default Docker socket to be used (requires password)** and then restart Docker.
+
 ### Can I run integration tests (`bazel test //testing/...`) locally?
 
 At the time of writing this documentation, it's not possible to do so, because we need to cross compile to produce `linux/amd64` container images, but the test runners need to run against your host architecture. If your host isn't `linux/amd64` you won't be able to run those tests.
