@@ -7,11 +7,29 @@ management design. Subsequently additions have been made. The docs initial aim w
 relationship of our migrator service to our deployment types and
 migrator's dependencies during the release process.*
 
-## Migrator Functionality
+## Migrator Overview
 
-The `migrator` service is a short lived container responsible for creating a handle on Sourcegraphs databases (`pgsql` (*also refered to as frontend*), `codeintel-db`, and `codeinsights-db`), and running schema migrations during startup and upgrades.
+The `migrator` service is a short lived container responsible for managing 
+Sourcegraph's databases (`pgsql` (*also refered to as frontend*), `codeintel-db`, 
+and `codeinsights-db`), and running schema migrations during startup and upgrades.
 
-The migrator code and its relevant artifacts have two notable special functions --
+Its design accounts for a variety of unique characteristics of 
+versioning and database management at Sourcegraph. Specifically graphical 
+schema migrations, out of band migrations, and periodic schema migration squashing.
+
+Sourcegraph utilizes a [directed acyclic graph](https://github.com/sourcegraph/sourcegraph/pull/30664) 
+of migration definitions, rather than a linear chain. In Sourcegraphs early days when schema migrations 
+were applied linearly, schema changes were frequent enough that schema changes generally conflicted with
+the master branch by the time a PR passed CI. Moving to a graph of migrations means, devs won't need to 
+worry about other teammates concurrent schema changes unless they are working on the same table.
+
+Similarly [squashing](#squashing-migrations) of schema migrations into a root definition reduced the number of migrations run on startup,
+alleviating a common issue in which frequent transaction locks caused failed migration on Sourcegraph startup. 
+You can learn more in our [migrations overview docs](./migrations_overview.mdx#in-band-migrations). 
+Information on Out of bound migrations can also be found there.
+
+
+Migrator with its relevant artifacts in the sourcegraph/sourcegraph repo can be viewed as an orchestrator with two special functions --
 
 1.  Migrator constructs migration plans given version ranges and a table
     of migrations which have been successfully applied (each schema has
@@ -30,7 +48,7 @@ The migrator code and its relevant artifacts have two notable special functions 
 
 ### CLI design
 
-Migrator is designed as a CLI tool -- taking various commands to alter
+Migrator is designed with a CLI tool interface -- taking various commands to alter
 the state of the database and apply necessary schema changes. This
 design was initially implemented as a tool for TS team members to assist
 in multiversion upgrades and because it could easily be included over
@@ -43,12 +61,13 @@ containerized as if it was another application which allows it to be run
 as an initContainer (in Kubernetes deployments) or as a dependent
 service (for Docker Compose deployments) to ensure that the necessary
 migrations are applied before startup of the application proper.
+Check out [RFC 469](https://docs.google.com/document/d/1_wqvNbEGhMzu45CHZNrLQYys7gl0AtVpLluGp4cbQKk/edit#heading=h.ddeuyk4t99yx) to learn more.
 
 ### Important Commands
 
-The most important migrator commands are `up` and `upgrade`:
+The most important migrator commands are `up` and `upgrade`, with a notable mention to `drift`:
 
--   Up : This ensures that, for a given version of the migrator, every
+-   **Up** : This ensures that, for a given version of the migrator, every
     migration defined at that build has been successfully applied in the
     connected database, this is specifically important to ensure *patch
     version migrations are run*. ***This must be run with the target
@@ -57,24 +76,32 @@ The most important migrator commands are `up` and `upgrade`:
     required by the frontend will be successfully applied prior to boot.
     This is a syntactic sugar over a more internal upto command.
 
--   Upgrade: This runs all migrations defined between two minor versions
+-   **Upgrade**: This runs all migrations defined between two minor versions
     of Sourcegraph and requires that other services which may access the
     database are brought down. Before running, the database is checked
     for and schema drifts in order to prevent a failure while attempting
     a migration.
 
-In general, the up command can be thought of as a **standard** upgrade
+-   **Drift**: This command pulls runs a diff between the current database
+    schema and an expected definition packaged in migrator during the
+    release process. Many migrator operations run this check before 
+    proceeding to ensure the database is in the expected state.
+
+In general, the `up` command can be thought of as a **standard** upgrade
 (rolling upgrades with no downtime) while the upgrade command is what
-enables **multiversion** upgrades. In part, up was designed to maintain
+enables **multiversion** upgrades. In part, `up` was designed to maintain
 our previous upgrade policy and is thus run as an initContainer (or
 initContainer-like mechanism) of the frontend, i.e. between two versions
 of Sourcegraph, the antecedent sourcegraph services will continue to
 work after the consequent version's migrations have been applied.
-![](media/image2.png){width="4.539231189851269in"
-height="5.48619094488189in"}
 
 ## Current Startup Dependency
 
+<div style="display: flex; flex-direction: row; align-items: flex-start;">
+<div style="margin-right: 20px; max-width: 100%; min-width: 375px;">
+<img src="https://storage.googleapis.com/sourcegraph-assets/Docs/migrator-startup.png" alt="Migrator Startup Dependency" class="screenshot";/>
+</div>
+<div>
 All of our deployment types currently utilize migrator during startup.
 The frontend service won't start until migrator has been run with the
 default up command. The frontend service will also validate the expected
@@ -96,12 +123,15 @@ given pods startup.**
 -   [Kustomize
     Ex](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/blob/base/sourcegraph/frontend/sourcegraph-frontend.Deployment.yaml?L30-48)
 
+</div>
+</div>
+
 ## Auto-upgrade
 
 Migrator has been incrementally improved over the last year in an
 attempt to get closer and closer to auto-upgrades. After migrator v5.0.0
-logic was added to the database to attempt an automatic upgrade to the
-latest version of Sourcegraph on the startup of the frontend.
+logic was added to the `pgsql` database and `frontend`/`frontend-internal` service to 
+attempt an automatic upgrade to the latest version of Sourcegraph on the startup of the frontend.
 
 For more information about how this works see the
 [docs](https://docs.sourcegraph.com/admin/updates/automatic#automatic-multi-version-upgrades).
@@ -116,7 +146,7 @@ Some notable points:
 -   Migrator [looks
     for](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@cf85b5803d32a91425f243930a4f50364625bcd2/-/blob/internal/database/migration/cliutil/up.go?L125-128)
     the existence of the env var SRC_AUTOUPGRADE=true on services
-    sourcegraph-frontend, sourcegraph-frontend-internal, and migrator.
+    `sourcegraph-frontend`, `sourcegraph-frontend-internal`, and `migrator`.
     Otherwise it [looks in the frontend
     db](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@cf85b5803d32a91425f243930a4f50364625bcd2/-/blob/internal/database/migration/cliutil/up.go?L120-123)
     for the value of the autoupgrade column. These checks are performed
@@ -131,6 +161,8 @@ Some notable points:
     [served](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@cf85b5803d32a91425f243930a4f50364625bcd2/-/blob/cmd/frontend/internal/cli/autoupgrade.go?L78-88)
     by the frontend during an autoupgrade, displaying progress of the
     upgrade and any drift encountered.
+
+-   All autoupgrades hit the multiversion upgrade endpoint and assume downtime for all Sourcegraph services besides the migrator and dbs.
 
 ## [Migrator Release Artifacts](#migrator-release-artifacts)
 
@@ -165,38 +197,35 @@ generated depending on the release type --
 
 -   **Patch**
 
-```{=html}
-<!-- -->
-```
--   [Git_versions](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/cmd/migrator/generate.sh?L69-79):
-    Defined in generate.sh this string array contains versions of
-    Sourcegraph whose schemas should be embedded in migrator during a
-    migrator build to enable drift detection without having to pull them
-    directly from GitHub or, for older versions, from a pre-prepared GCS
-    bucket (this is necessary in air gapped environments). This should
-    be kept up to date with maxVersionString. [Learn
-    more](https://github.com/sourcegraph/sourcegraph/issues/49813).
+    -   [Git_versions](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/cmd/migrator/generate.sh?L69-79):
+        Defined in generate.sh this string array contains versions of
+        Sourcegraph whose schemas should be embedded in migrator during a
+        migrator build to enable drift detection without having to pull them
+        directly from GitHub or, for older versions, from a pre-prepared GCS
+        bucket (this is necessary in air gapped environments). This should
+        be kept up to date with maxVersionString. [Learn
+        more](https://github.com/sourcegraph/sourcegraph/issues/49813).
 
--   [Squashed.sql](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@v5.2.0/-/blob/migrations/frontend/squashed.sql):
-    for each database we
-    [[generate]{.underline}](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/internal/database/gen.sh?L18-20)
-    a new squashed.sql file. It is
-    [used](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@v5.2.0/-/blob/internal/database/migration/drift/util_search.go?L12-31)
-    to help suggest fixes for certain types of database drift. For
-    example for a missing database column [this
-    search](https://sourcegraph.com/search?patternType=regexp&q=repo%3A%5Egithub%5C.com%2Fsourcegraph%2Fsourcegraph%24%40v5.0.6+file%3A%5Emigrations%2Ffrontend%2Fsquashed%5C.sql%24+%28%5E%7C%5Cb%29CREATE%5CsTABLE%5Csexternal_service_sync_jobs%28%24%7C%5Cb%29+OR+%28%5E%7C%5Cb%29ALTER%5CsTABLE%5CsONLY%5Csexternal_service_sync_jobs%28%24%7C%5Cb%29&groupBy=path)
-    is used to suggest a definition.
+    -   [Squashed.sql](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@v5.2.0/-/blob/migrations/frontend/squashed.sql):
+        for each database we
+        [generate](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/internal/database/gen.sh?L18-20)
+        a new squashed.sql file. It is
+        [used](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@v5.2.0/-/blob/internal/database/migration/drift/util_search.go?L12-31)
+        to help suggest fixes for certain types of database drift. For
+        example for a missing database column [this
+        search](https://sourcegraph.com/search?patternType=regexp&q=repo%3A%5Egithub%5C.com%2Fsourcegraph%2Fsourcegraph%24%40v5.0.6+file%3A%5Emigrations%2Ffrontend%2Fsquashed%5C.sql%24+%28%5E%7C%5Cb%29CREATE%5CsTABLE%5Csexternal_service_sync_jobs%28%24%7C%5Cb%29+OR+%28%5E%7C%5Cb%29ALTER%5CsTABLE%5CsONLY%5Csexternal_service_sync_jobs%28%24%7C%5Cb%29&groupBy=path)
+        is used to suggest a definition.
 
--   [Schema
-    descriptions](https://raw.githubusercontent.com/sourcegraph/sourcegraph/v5.2.0/internal/database/schema.json):
-    schema descriptions are
-    [embedded](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@v5.2.0/-/blob/cmd/migrator/generate.sh?L64-66)
-    in migrator on each new build as a reference for the expected schema
-    state during drift checking.
+    -   [Schema
+        descriptions](https://raw.githubusercontent.com/sourcegraph/sourcegraph/v5.2.0/internal/database/schema.json):
+        schema descriptions are
+        [embedded](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@v5.2.0/-/blob/cmd/migrator/generate.sh?L64-66)
+        in migrator on each new build as a reference for the expected schema
+        state during drift checking.
 
 ### Stitched Migration JSON and Squashing Migrations
 
-### ![](media/image1.png){width="6.5in" height="2.7083333333333335in"}
+<img src="https://storage.googleapis.com/sourcegraph-assets/Docs/migration%20graph.png" class="screenshot" alt="migration graph" />
 
 *\^\^ Generated with sg migrations visualize --db frontend on v5.2.0*
 
@@ -205,17 +234,19 @@ generated depending on the release type --
 [Periodically we
 squash](https://github.com/sourcegraph/sourcegraph/pull/41819)
 all migrations from two versions behind the current version into a
-single migration using sg migration squash.This reduces the time
+single migration using sg migration squash. This reduces the time
 required to initialize a new database. This means that the migrator
 image is built with a set of definitions embedded that doesn't reflect
 the definition set in older versions. For multiversion upgrades this
 presents a problem. To get around this, on minor releases we generate a
-stitched-migration-graph.json file. Reference links:
+`stitched-migration-graph.json` file. Reference links:
 [Bazel](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/dev/release/src/util.ts?L293-327),
 [Embed](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/internal/database/migration/shared/embed.go?L15-22),
 [Generator](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/internal/database/migration/shared/data/cmd/generator/main.go)
 
-####  Stitched Migration Graph stitched-migrations-graph.json [[stitches]{.underline}](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@v5.2.0/-/blob/internal/database/migration/stitch/stitch.go) (can think of this as unsquashing) historic migrations using git magic, enabling the migrator to have a reference of older migrations. This serves a few purposes:
+####  Stitched Migration Graph 
+
+`stitched-migrations-graph.json` [stitches](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@v5.2.0/-/blob/internal/database/migration/stitch/stitch.go) (you can think of this as unsquashing) historic migrations using git magic, enabling the migrator to have a reference of older migrations. This serves a few purposes:
 
 1.  When jumping across multiple versions we do not have access to a
     full record of migration definitions on migrator disk because some
@@ -231,15 +262,15 @@ stitched-migration-graph.json file. Reference links:
     unsquashed migration definitions to know which migrations must have
     run at the time the oob migration is triggered.
 
-In standard/up upgrades stitched-migrations.json isn't necessary. This
-is because up determines migrations to run by [comparing
+In standard/`up` upgrades `stitched-migrations.json` isn't necessary. This
+is because `up` determines migrations to run by [comparing
 migrations](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/internal/database/migration/definition/definition.go?L214-244)
-listed as already run in the relevant db's migration_logs table directly
+listed as already run in the relevant db's `migration_logs` table directly
 to those migration definitions
 [embedded](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/migrations/embed.go)
 in the migrator disk at build time for the current version, and running
 any which haven't been run. We never squash away the previous minor
-version of Sourcegraph, in this way we can guarantee the migration_logs
+version of Sourcegraph, in this way we can guarantee the `migration_logs`
 table migrations always has migrations in common with the migration
 definitions on disk.
 
@@ -278,7 +309,7 @@ release process:
 Database drift existing at the time of a migration can cause migrations
 to fail when they try to reference some table property that is not in
 the expected state. Not to mention the application may not behave as
-expected if drift is present. Migrator includes a drift command intended
+expected if drift is present. Migrator includes a `drift` command intended
 to help admins and CS team members to diagnose and resolve drift in
 customer instances. Multiversion upgrades in particular check for drift
-before starting unless the \--skip-drift-check argument is supplied.
+before starting unless the `--skip-drift-check argument` is supplied.
