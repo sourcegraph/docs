@@ -55,7 +55,7 @@ export function Footer({ translations = {} }: FooterProps) {
 
   return (
     <>
-      <div className="DocSearch-Logo opacity-20 text-zinc-700 text-xs">
+      <div className="DocSearch-Logo opacity-40 text-slate-500 text-xs">
         Search by Algolia
         {/* <AlgoliaLogo translations={{ searchByText }} /> */}
       </div>
