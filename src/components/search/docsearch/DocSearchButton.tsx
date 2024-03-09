@@ -60,3 +60,5 @@ export const DocSearchButton = React.forwardRef<
         </button>
     );
 });
+
+DocSearchButton.displayName = 'DocSearchButton';

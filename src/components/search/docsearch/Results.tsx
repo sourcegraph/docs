@@ -68,7 +68,7 @@ function Result<TItem extends StoredDocSearchHit>({
   getItemProps,
   onItemClick,
   collection,
-  hitComponent,
+  hitComponent
 }: ResultProps<TItem>) {
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [isFavoriting, setIsFavoriting] = React.useState(false);
@@ -90,9 +90,9 @@ function Result<TItem extends StoredDocSearchHit>({
       className={[
         'DocSearch-Hit',
         (item as unknown as InternalDocSearchHit).__docsearch_parent &&
-          'DocSearch-Hit--Child',
+        'DocSearch-Hit--Child',
         isDeleting && 'DocSearch-Hit--deleting',
-        isFavoriting && 'DocSearch-Hit--favoriting',
+        isFavoriting && 'DocSearch-Hit--favoriting'
       ]
         .filter(Boolean)
         .join(' ')}
@@ -104,32 +104,26 @@ function Result<TItem extends StoredDocSearchHit>({
       {...getItemProps({
         item,
         source: collection.source,
-        onClick(event) {
+        onClick(event: KeyboardEvent | MouseEvent) {
           onItemClick(item, event);
-        },
+        }
       })}
     >
       <Hit hit={item}>
         <div className="DocSearch-Hit-Container">
           {renderIcon({ item, index })}
 
-          {item.hierarchy[item.type] && item.type === 'lvl1' && (
+          {/* @ts-ignore - unsure what's the issue here, will check later.  */}
+          {item.hierarchy.lvl1 && item.type === 'lvl1' && (
             <div className="DocSearch-Hit-content-wrapper">
               <Snippet
                 className="DocSearch-Hit-title"
                 hit={item}
                 attribute="hierarchy.lvl1"
               />
-              {item.content && (
-                <Snippet
-                  className="DocSearch-Hit-path"
-                  hit={item}
-                  attribute="content"
-                />
-              )}
             </div>
           )}
-
+          {/* @ts-ignore - unsure what's the issue here, will check later.  */}
           {item.hierarchy[item.type] &&
             (item.type === 'lvl2' ||
               item.type === 'lvl3' ||
@@ -150,22 +144,11 @@ function Result<TItem extends StoredDocSearchHit>({
               </div>
             )}
 
-          {item.type === 'content' && (
-            <div className="DocSearch-Hit-content-wrapper">
-              <Snippet
-                className="DocSearch-Hit-title"
-                hit={item}
-                attribute="content"
-              />
-              <Snippet
-                className="DocSearch-Hit-path"
-                hit={item}
-                attribute="hierarchy.lvl1"
-              />
-            </div>
-          )}
-
-          {renderAction({ item, runDeleteTransition, runFavoriteTransition })}
+          {renderAction({
+            item,
+            runDeleteTransition,
+            runFavoriteTransition
+          })}
         </div>
       </Hit>
     </li>

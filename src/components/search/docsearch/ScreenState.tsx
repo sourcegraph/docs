@@ -87,3 +87,5 @@ export const ScreenState = React.memo(
     );
   }
 );
+
+ScreenState.displayName = 'ScreenState';
