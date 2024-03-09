@@ -4,6 +4,8 @@ import localFont from 'next/font/local';
 import clsx from 'clsx';
 import {Providers} from '@/app/providers';
 import {Layout} from '@/components/Layout';
+import config from 'docs.config';
+
 
 import '@/styles/tailwind.css';
 
@@ -25,7 +27,12 @@ export const metadata: Metadata = {
 		template: '%s - Sourcegraph Docs',
 		default: 'Sourcegraph - Docs'
 	},
-	description: 'Sourcegraph Documentation'
+	description: 'Sourcegraph Documentation',
+	other: {
+		"docsearch:language": "en",
+		"docsearch:version": `v${config.DOCS_LATEST_VERSION}`
+
+	}
 };
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
