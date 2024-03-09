@@ -1,8 +1,9 @@
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 
-import { DocSearch } from '@docsearch/react';
+import { DocSearch } from './docsearch/DocSearch';
+import './docsearch/docsearch.css';
 
-import '@docsearch/css';
+// import '@docsearch/css';
 
 export const Search = () => {
 	let [modifierKey, setModifierKey] = useState<string>();
@@ -14,9 +15,9 @@ export const Search = () => {
 
 	return (
 		<DocSearch
-		  appId="0EBA2NRQU3"
-		  indexName="sourcegraph"
-		  apiKey="1b6e51c1d4ef24bef0a5f1ab00dad80a"
+			appId="0EBA2NRQU3"
+			indexName="sourcegraph"
+			apiKey="1b6e51c1d4ef24bef0a5f1ab00dad80a"
 		/>
-	  );
+	);
 };
