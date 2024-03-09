@@ -67,20 +67,20 @@ Check out [RFC 469](https://docs.google.com/document/d/1_wqvNbEGhMzu45CHZNrLQYys
 
 The most important migrator commands are `up` and `upgrade`, with a notable mention to `drift`:
 
--   **Up** : This ensures that, for a given version of the migrator, every
-    migration defined at that build has been successfully applied in the
-    connected database, this is specifically important to ensure *patch
-    version migrations are run*. ***This must be run with the target
-    version migrator image/build**.* If migrator and frontend pods are
-    deployed in version lockstep, this ensures that ALL migrations
-    required by the frontend will be successfully applied prior to boot.
-    This is a syntactic sugar over a more internal upto command.
+-   **Up** : The default command of `migrator`, `up` ensures that
+    for a given version of the migrator, every migration defined at 
+    that build has been successfully applied in the connected database, 
+    this is specifically important to ensure *patch version migrations are run*. 
+    ***This must be run with the target version migrator image/build**.* 
+    If migrator and frontend pods are deployed in version lockstep, `up` 
+    ensures that ALL migrations required by the frontend will be successfully applied prior to boot.
+    This is a syntactic sugar over a more internal `upto` command.
 
--   **Upgrade**: This runs all migrations defined between two minor versions
+-   **Upgrade**: `upgrade` runs all migrations defined between two minor versions
     of Sourcegraph and requires that other services which may access the
     database are brought down. Before running, the database is checked
     for and schema drifts in order to prevent a failure while attempting
-    a migration.
+    a migration. `upgrade` relies on `stitched-migration-graph.json`.
 
 -   **Drift**: This command pulls runs a diff between the current database
     schema and an expected definition packaged in migrator during the
@@ -164,7 +164,7 @@ Some notable points:
 
 -   All autoupgrades hit the multiversion upgrade endpoint and assume downtime for all Sourcegraph services besides the migrator and dbs.
 
-## [Migrator Release Artifacts](#migrator-release-artifacts)
+## Migrator Release Artifacts
 
 During the release of migrator we construct and build some artifacts
 used by migrator to support its operations. Different artifacts must be
@@ -227,7 +227,7 @@ generated depending on the release type --
 
 <img src="https://storage.googleapis.com/sourcegraph-assets/Docs/migration%20graph.png" class="screenshot" alt="migration graph" />
 
-*\^\^ Generated with sg migrations visualize --db frontend on v5.2.0*
+*\^\^ Generated with `sg migrations visualize --db frontend` on v5.2.0*
 
 #### Squashing Migrations
 
@@ -313,3 +313,51 @@ expected if drift is present. Migrator includes a `drift` command intended
 to help admins and CS team members to diagnose and resolve drift in
 customer instances. Multiversion upgrades in particular check for drift
 before starting unless the `--skip-drift-check argument` is supplied.
+
+### Implementation Details 
+
+#### Versions & Runner
+
+Migrator is implemented via a function programming pattern, and creates a 
+[runner](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@30d4d1dd457cde87c863a6d05cbcc0444025ed96/-/blob/cmd/migrator/shared/main.go?L31-36) 
+on startup which [infers](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@4728edb797bc9affdbac940821c9e98c3fde2430/-/blob/internal/database/migration/schemas/schemas.go) the expected state of the database from schema definitions 
+[embeded in migrator](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@30d4d1dd457cde87c863a6d05cbcc0444025ed96/-/blob/migrations/embed.go) 
+when a migrator image is compiled. What this means is that migrator's concept of version, 
+ is the set of migrations defined in the `migrations` at compile time.
+
+The `runner` is responsible for connecting to the given databases and 
+[running](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@4728edb797bc9affdbac940821c9e98c3fde2430/-/blob/internal/database/migration/runner/run.go) 
+any schema migrations defined in the embedded `migrations` directory
+via the `up` entry command. 
+
+In this way the `up` command easily facilitates dev versions of the databse schema.
+This also tightly binds migrators concept of "version" to a given tag of Sourcegraph.
+The `up` will only initialize a version of Sourcegraph, when the `migrator`
+used to run `up` is the tagged version associated with the desired Sourcegraph version.
+For this reason a later version of `migrator` cannot be used to initialize an earlier
+version of Sourcegraph.
+
+#### Migration Plan
+
+While the `up` command's concept of version is a set of embedded definitions --
+the `upgrade` command does have a concept of schema migrations associated to 
+version. This is the `stitched-migration-graph.json`. This file is generated on
+minor releases of Sourcegraph, and defines migrations expected to have been run
+at each minor version. This is necessary for two reasons --
+
+1.  The root migration defined in the `migration` directory is a squashed 
+    migration, meaning, it represents many migrations composed into a single
+    sql statement.
+
+2.  Out of Bound migrations are triggered at a given version, and must complete
+    before the schema is changed in some subsequent version.
+
+This means that when applying migrations defined accross multiple versions, migrator
+must stop and wait for OOB migrations to complete. To do this it needs to 
+know which migrations should have run at a given stopping point, which may have been 
+obscured by a subsequent squashing operation. This is where the `stitched-migration-graph.json`
+file comes into play. It defines the set of migrations that should have been run at
+a given minor version. Helping to construct a "[migration plan](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@4728edb797bc9affdbac940821c9e98c3fde2430/-/blob/internal/database/migration/multiversion/plan.go)" or path for `runner` to traverse. 
+
+The `stitched-migration.json` file is [generated](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@4728edb797bc9affdbac940821c9e98c3fde2430/-/blob/internal/database/migration/stitch/stitch.go) on every minor release, and is informed 
+by the state of the acyclic graph of migrations defined in the `migration` directory.
