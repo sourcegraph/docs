@@ -144,6 +144,21 @@ function Result<TItem extends StoredDocSearchHit>({
               </div>
             )}
 
+          {item.type === 'content' && (
+            <div className="DocSearch-Hit-content-wrapper">
+              <Snippet
+                className="DocSearch-Hit-title"
+                hit={item}
+                attribute="content"
+              />
+              <Snippet
+                className="DocSearch-Hit-path"
+                hit={item}
+                attribute="hierarchy.lvl1"
+              />
+            </div>
+          )}
+
           {renderAction({
             item,
             runDeleteTransition,
