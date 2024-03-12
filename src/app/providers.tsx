@@ -1,10 +1,6 @@
 'use client';
 
 import {ThemeProvider, useTheme} from 'next-themes';
-import {
-	SearchProvider,
-	SearchConfig
-} from '../components/search/SearchProvider';
 import {searchMetadata} from '@/data/search';
 import {useEffect} from 'react';
 
@@ -36,9 +32,7 @@ export function Providers({children}: {children: React.ReactNode}) {
 	return (
 		<ThemeProvider attribute="class" disableTransitionOnChange>
 			<ThemeWatcher />
-			<SearchProvider searchConfig={searchMetadata as SearchConfig}>
-				{children}
-			</SearchProvider>
+			{children}
 		</ThemeProvider>
 	);
 }
