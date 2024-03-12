@@ -1,32 +1,32 @@
 # Upgrades and Migrator Design
 
-*This doc is based on a preface for [RFC 850 WIP: Improving The Upgrade
+<p className="subtitle">This doc is based on a preface for [RFC 850 WIP: Improving The Upgrade
 Experience](https://docs.google.com/document/d/1ne8ai60iQnZfaYuB7QLDMIWgU5188Vn4_HBeUQ3GASY/edit)
 and acts as a summary of the current design of our upgrade and database schema
 management design. Subsequently additions have been made. The docs initial aim was to provide general information about the
 relationship of our migrator service to our deployment types and
-migrator's dependencies during the release process.*
+migrator's dependencies during the release process.</p>
 
 ## Migrator Overview
 
-The `migrator` service is a short lived container responsible for managing 
-Sourcegraph's databases (`pgsql` (*also refered to as frontend*), `codeintel-db`, 
+The `migrator` service is a short-lived container responsible for managing 
+Sourcegraph's databases (`pgsql` (*also referred to as frontend*), `codeintel-db`, 
 and `codeinsights-db`), and running schema migrations during startup and upgrades.
 
-Its design accounts for a variety of unique characteristics of 
+Its design accounts for  various unique characteristics of 
 versioning and database management at Sourcegraph. Specifically graphical 
 schema migrations, out of band migrations, and periodic schema migration squashing.
 
 Sourcegraph utilizes a [directed acyclic graph](https://github.com/sourcegraph/sourcegraph/pull/30664) 
-of migration definitions, rather than a linear chain. In Sourcegraphs early days when schema migrations 
+of migration definitions, rather than a linear chain. In Sourcegraph's early days when schema migrations 
 were applied linearly, schema changes were frequent enough that schema changes generally conflicted with
 the master branch by the time a PR passed CI. Moving to a graph of migrations means, devs won't need to 
 worry about other teammates concurrent schema changes unless they are working on the same table.
 
 Similarly [squashing](#squashing-migrations) of schema migrations into a root definition reduced the number of migrations run on startup,
 alleviating a common issue in which frequent transaction locks caused failed migration on Sourcegraph startup. 
-You can learn more in our [migrations overview docs](./migrations_overview.mdx#in-band-migrations). 
-Information on Out of bound migrations can also be found there.
+You can learn more in our [migrations overview docs](/migrations_overview#in-band-migrations). 
+Information on out of bound migrations can also be found there.
 
 
 Migrator with its relevant artifacts in the sourcegraph/sourcegraph repo can be viewed as an orchestrator with two special functions --
@@ -75,13 +75,11 @@ The most important migrator commands are `up` and `upgrade`, with a notable ment
     If migrator and frontend pods are deployed in version lockstep, `up` 
     ensures that ALL migrations required by the frontend will be successfully applied prior to boot.
     This is a syntactic sugar over a more internal `upto` command.
-
 -   **Upgrade**: `upgrade` runs all migrations defined between two minor versions
     of Sourcegraph and requires that other services which may access the
     database are brought down. Before running, the database is checked
     for and schema drifts in order to prevent a failure while attempting
     a migration. `upgrade` relies on `stitched-migration-graph.json`.
-
 -   **Drift**: This command pulls runs a diff between the current database
     schema and an expected definition packaged in migrator during the
     release process. Many migrator operations run this check before 
@@ -98,7 +96,7 @@ work after the consequent version's migrations have been applied.
 ## Current Startup Dependency
 
 
-<img src="https://storage.googleapis.com/sourcegraph-assets/Docs/migrator-startup.png" alt="Migrator Startup Dependency" className="screenshot"/>
+![Migrator Startup Dependency](https://storage.googleapis.com/sourcegraph-assets/Docs/migrator-startup.png)
 
 All of our deployment types currently utilize migrator during startup.
 The frontend service won't start until migrator has been run with the
@@ -108,7 +106,7 @@ validation pass fails. This ensures that the expected migrations for the
 version in question have been run.
 
 In docker-compose (*see diagram)*, this is accomplished via a chain of
-depends_on clauses in the docker-compose.yaml
+`depends_on` clauses in the docker-compose.yaml
 ([link](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-docker/-/blob/docker-compose/docker-compose.yaml?L217-223)).
 
 **For our k8s based deployments (including the AMIs) migrator is run as
@@ -116,7 +114,6 @@ an initContainer within the frontend utilizing the up command on the
 given pods startup.**
 
 -   [Helm Ex](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-helm/-/blob/charts/sourcegraph/templates/frontend/sourcegraph-frontend.Deployment.yaml?L49-76)
-
 -   [Kustomize Ex](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/blob/base/sourcegraph/frontend/sourcegraph-frontend.Deployment.yaml?L30-48)
 
 
@@ -209,7 +206,6 @@ generated depending on the release type --
         example for a missing database column [this
         search](https://sourcegraph.com/search?patternType=regexp&q=repo%3A%5Egithub%5C.com%2Fsourcegraph%2Fsourcegraph%24%40v5.0.6+file%3A%5Emigrations%2Ffrontend%2Fsquashed%5C.sql%24+%28%5E%7C%5Cb%29CREATE%5CsTABLE%5Csexternal_service_sync_jobs%28%24%7C%5Cb%29+OR+%28%5E%7C%5Cb%29ALTER%5CsTABLE%5CsONLY%5Csexternal_service_sync_jobs%28%24%7C%5Cb%29&groupBy=path)
         is used to suggest a definition.
-
     -   [Schema
         descriptions](https://raw.githubusercontent.com/sourcegraph/sourcegraph/v5.2.0/internal/database/schema.json):
         schema descriptions are
@@ -219,7 +215,7 @@ generated depending on the release type --
 
 ### Stitched Migration JSON and Squashing Migrations
 
-<img src="https://storage.googleapis.com/sourcegraph-assets/Docs/migration%20graph.png" alt="migration graph" className="screenshot"/>
+![migration graph](https://storage.googleapis.com/sourcegraph-assets/Docs/migration%20graph.png)
 
 *\^\^ Generated with `sg migrations visualize --db frontend` on v5.2.0*
 
@@ -279,20 +275,16 @@ release process:
 -   **A backup/restore process that didn't include all objects**: This
     notably happened to Reddit causing their database to have no
     indexes, primary keys, or unique constraints defined.
-
 -   **Modifying the database explicitly**: These are untracked manual
     changes to the database schema, observed occasionally in the wild,
     and in our dotcom deployment.
-
 -   **Migration failures:** that occur during multi-version upgrade or
     the up command will cause the set of *successfully applied
     migrations* to be between two versions, where drift is well-defined.
-
 -   **Site Admins Error:** Errors in git-ops like deploying to
     production on the wrong version of Sourcegraph manifests have
     introduced drift. Another source is the incorrect procedure in
     downgrading.
-
 -   **Historic Bugs**: We, at one point, [too eagerly backfilled
     records that we should've instead
     applied](https://github.com/sourcegraph/sourcegraph/pull/55650).
@@ -342,7 +334,6 @@ at each minor version. This is necessary for two reasons --
 1.  The root migration defined in the `migration` directory is a squashed 
     migration, meaning, it represents many migrations composed into a single
     sql statement.
-
 2.  Out of Bound migrations are triggered at a given version, and must complete
     before the schema is changed in some subsequent version.
 
