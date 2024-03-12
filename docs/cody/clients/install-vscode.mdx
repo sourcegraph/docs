@@ -189,7 +189,7 @@ For customization and advanced use cases, you can create **Custom Commands** tai
 
 ## Cody Natural Language Search
 
-    <Callout type="note">Cody Natural Language Search is currently available in Beta for all users on VS Code extension.</Callout>
+<Callout type="note">Cody Natural Language Search is currently available in Beta for all users on VS Code extension.</Callout>
 
 Cody's **Natural Language Search** is an AI-powered code search that allows users to input a natural language search query and look for it within their project. For example, "password hashing" or "connection retries".
 
@@ -202,3 +202,46 @@ VS Code will typically notify you when updates are available for installed exten
 ## Authenticating Cody with VS Code forks
 
 Cody also works with Cursor, Gitpod, IDX, and other similar VS Code forks. To access VS Code forks like Cursor, select **Sign in with URL and access token** and generate an access token. Next, copy and paste into the allocated field, using `https://sourcegraph.com` as the URL.
+
+## Using Ollama with Cody
+
+<Callout type="info">Support with Ollama is currently in the Experimental stage and is available for Cody Free and Pro plans.</Callout>
+
+### Cody Autocomplete with Ollama
+
+To generate autocomplete suggestions with Ollama locally, follow these steps:
+
+- Install and run [Ollama](https://ollama.ai/)
+- Download one of the support local models:
+  - `ollama pull deepseek-coder:6.7b-base-q4_K_M` for [deepseek-coder](https://ollama.ai/library/deepseek-coder)
+  - `ollama pull codellama:7b-code` for [codellama](https://ollama.ai/library/codellama)
+- Update Cody's VS Code settings to use the `experimental-ollama` autocomplete provider and configure the right model:
+
+```json
+
+   {
+     "cody.autocomplete.advanced.provider": "experimental-ollama",
+     "cody.autocomplete.experimental.ollamaOptions": {
+       "url": "http://localhost:11434",
+       "model": "deepseek-coder:6.7b-base-q4_K_M"
+     }
+   }
+```
+
+- Confirm Cody uses Ollama by looking at the Cody output channel or the autocomplete trace view (in the command palette)
+
+#### Cody chat and commands with Ollama
+
+To generate chat and commands with Ollama locally, follow these steps:
+
+- Download [Ollama](https://ollama.com/download)
+- Start Ollama (make sure the Ollama logo is showing up in your menu bar)
+- Select a chat model (model that includes instruct or chat, for example, [gemma:7b-instruct-q4_K_M](https://ollama.com/library/gemma:7b-instruct-q4_K_M)) from the [Ollama Library](https://ollama.com/library)
+- Pull the chat model locally (for example, `ollama pull gemma:7b-instruct-q4_K_M`)
+- Once the chat model is downloaded successfully, open Cody in VS Code
+- Enable the `cody.experimental.ollamaChat` configuration
+- Open a new Cody chat
+- In the new chat panel, you should see the chat model you've pulled in the dropdown list
+- Currently, you will need to restart VS Code to see the new models
+
+<Callout type="note">You can run `curl http://localhost:11434/api/tags` in your terminal to see what models are currently available on your machine.</Callout>
