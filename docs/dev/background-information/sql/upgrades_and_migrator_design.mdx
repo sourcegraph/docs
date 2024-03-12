@@ -15,7 +15,7 @@ and `codeinsights-db`), and running schema migrations during startup and upgrade
 
 Its design accounts for  various unique characteristics of 
 versioning and database management at Sourcegraph. Specifically graphical 
-schema migrations, out of band migrations, and periodic schema migration squashing.
+schema migrations, out-of-band migrations, and periodic schema migration squashing.
 
 Sourcegraph utilizes a [directed acyclic graph](https://github.com/sourcegraph/sourcegraph/pull/30664) 
 of migration definitions, rather than a linear chain. In Sourcegraph's early days when schema migrations 
@@ -38,7 +38,7 @@ Migrator with its relevant artifacts in the sourcegraph/sourcegraph repo can be 
     depends on the parent/child metadata of migrations generated via the
     sg migration tool.
 
-2.  Migrator manages out of band migrations. These are data migrations
+2.  Migrator manages out-of-band migrations. These are data migrations
     that must be run within specific schema boundaries. Running OOB
     migrations at/after the deprecated version is unsupported. Migrator
     ensures that the necessary OOB migrations are run at [stopping
@@ -273,8 +273,8 @@ number of reasons, both due to admin tampering and problems in our own
 release process:
 
 -   **A backup/restore process that didn't include all objects**: This
-    notably happened to Reddit causing their database to have no
-    indexes, primary keys, or unique constraints defined.
+    notably happened in a customer production instance causing their 
+    database to have no indexes, primary keys, or unique constraints defined.
 -   **Modifying the database explicitly**: These are untracked manual
     changes to the database schema, observed occasionally in the wild,
     and in our dotcom deployment.
@@ -322,6 +322,10 @@ This "version" definition at compile time also tightly binds migrators concept o
 used to run `up` is the tagged version associated with the desired Sourcegraph version.**
 For this reason a later version of `migrator` cannot be used to initialize an earlier
 version of Sourcegraph.
+
+For example, you use the latest migrator release `v5.6.9` to run the `upgrade` command bringing your databases from
+`v4.2.0` to `v5.6.3`, rather than `v5.6.9`. Your security team hasn't approved images past this point. The upgrade command will have applied OOB migrations and schema migrations defined up to `v5.6.0`, the last minor release. To start your image you'll need to run migrator
+`up` using the `v5.6.3` image, this will apply any schema migrations which may have been defined in the patch releases up to `v5.6.3` and thus existent in the embeded from `migrations` directory at the time of migrators compilation. 
 
 #### Migration Plan
 
