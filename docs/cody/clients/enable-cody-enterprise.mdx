@@ -56,29 +56,6 @@ To enable Cody Analytics:
 - Users without a Sourcegraph.com account, please get in touch with one of our teammates. They can help with both the account setup and assigning instances to specific users
 - Map your user account to a Sourcegraph instance, and this gives you access to Cody's analytics
 
-### Use StarCoder for Autocomplete
-
-When tested with other coder models for the autocomplete use case, [StarCoder](https://huggingface.co/blog/starcoder) offered significant improvements in quality and latency compared to our control groups for users on Sourcegraph.com. You can read more about the improvements in our [October 2023 release notes](https://sourcegraph.com/blog/feature-release-october-2023) and the [GA release notes](https://sourcegraph.com/blog/cody-is-generally-available).
-
-Since Sourcegraph 5.3, every Cody Enterprise setup that uses [Cody Gateway](/cody/core-concepts/cody-gateway) can opt-in to using StarCoder as an alternative to Claude Instant for autocomplete. To ensure a fast and reliable experience, we are partnering with [Fireworks](https://fireworks.ai/) and have set up a dedicated dedicated hardware deployment for our Enterprise users.
-
-To enable StarCoder go to **Site admin > Site configuration** (`/site-admin/configuration`) and change the `completionModel`:
-
-```json
-{
-  // [...]
-  "cody.enabled": true,
-  "completions": {
-    "provider": "sourcegraph",
-    "completionModel": "fireworks/starcoder"
-  }
-}
-```
-
-Cody Extension will automatically pick up this change when they connect to your Enterprise instance.
-
-It's recommended that every instance admin not using a third-party LLM provider makes this change and we are planning to make this the default in a future release.
-
 ### Multi-repo context
 
 <Callout type= "info">Multi-repo context for Sourcegraph Enterprise is supported with VS Code and JetBrains IDEs extensions.</Callout>
@@ -221,6 +198,7 @@ Instead of [Sourcegraph Cody Gateway](/cody/core-concepts/cody-gateway), you can
 - [OpenAI](#openai)
 - [Azure OpenAI](#azure-openai)
 - [AWS Bedrock](#anthropic-claude-through-aws-bedrock)
+- [StarCoder](#use-starcoder-for-autocomplete)
 
 ### Anthropic
 
@@ -316,3 +294,26 @@ For the access token, you can either:
 - Leave it empty and rely on instance role bindings or other AWS configurations in the `frontend` service
 - Set it to `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>` if directly configuring the credentials
 - Set it to `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>:<SESSION_TOKEN>` if a session token is also required
+
+### Use StarCoder for Autocomplete
+
+When tested with other coder models for the autocomplete use case, [StarCoder](https://huggingface.co/blog/starcoder) offered significant improvements in quality and latency compared to our control groups for users on Sourcegraph.com. You can read more about the improvements in our [October 2023 release notes](https://sourcegraph.com/blog/feature-release-october-2023) and the [GA release notes](https://sourcegraph.com/blog/cody-is-generally-available).
+
+To ensure a fast and reliable experience, we are partnering with [Fireworks](https://fireworks.ai/) and have set up a dedicated hardware deployment for our Enterprise users. Sourcegraph supports StarCoder using the [Cody Gateway](/cody/core-concepts/cody-gateway.
+
+To enable StarCoder go to **Site admin > Site configuration** (`/site-admin/configuration`) and change the `completionModel`:
+
+```json
+{
+  // [...]
+  "cody.enabled": true,
+  "completions": {
+    "provider": "sourcegraph",
+    "completionModel": "fireworks/starcoder"
+  }
+}
+```
+
+Users of the Cody Extensions will automatically pick up this change when connected to your Enterprise instance.
+
+It's recommended that every instance admin not using a third-party LLM provider makes this change and we are planning to make this the default in a future release.
