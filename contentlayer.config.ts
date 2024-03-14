@@ -21,8 +21,13 @@ export const Post = defineDocumentType(() => ({
             type: "json",
             resolve: async (doc) => {
                 const regXHeader = /^ *(?<flag>#{1,6})\s+(?<content>.+)/gm;
+                const regXCodeBlock = /```[\s\S]*?```/g;
                 const slugger = new GithubSlugger();
-                const headings = Array.from(doc.body.raw.matchAll(regXHeader)).map(
+
+                // Ignore content within code blocks – No headings there
+                const bodyWithoutCodeBlocks = doc.body.raw.replace(regXCodeBlock, '');
+
+                const headings = Array.from(bodyWithoutCodeBlocks.matchAll(regXHeader)).map(
                     ({ groups }) => {
                         const flag = groups?.flag;
                         // Handles headings with links eg:
