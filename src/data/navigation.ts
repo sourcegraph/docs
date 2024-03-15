@@ -263,6 +263,10 @@ export const navigation: NavigationItem[] = [
         href: "/sla",
       },
       {
+        title: "Tutorials",
+        href: "/tutorials",
+      },
+      {
         title: "Sourcegraph Accounts",
         href: "/sourcegraph-accounts"
       },
