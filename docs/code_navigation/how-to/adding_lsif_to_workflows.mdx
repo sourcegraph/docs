@@ -39,15 +39,20 @@ Some indexers will work out of the box by just running them in your project root
 
 ```yaml
 jobs:
-  lsif-go:
+  scip-go:
     # this line will prevent forks of this repo from uploading lsif indexes
     if: github.repository == '<insert your repo name>'
     runs-on: ubuntu-latest
-    container: sourcegraph/lsif-go:latest
+    container: sourcegraph/scip-go:latest
     steps:
       - uses: actions/checkout@v1
       - name: Generate index
-        run: lsif-go
+        working-directory: backend/
+        run: scip-go 
+      - name: Upload index
+        uses: docker://sourcegraph/src-cli:latest
+        # note that the upload command also needs to happen in the same directory!
+        working-directory: backend/
       - name: Upload index
         # this will upload to Sourcegraph.com, you may need to substitute a different command
         # by default, we ignore failures to avoid disrupting CI pipelines with non-critical errors.
@@ -60,17 +65,18 @@ If your repository contains multiple code projects in different folders, your CI
 
 ```yaml
 jobs:
-  lsif-go:
-    # this line will prevent forks of this repo from uploading lsif indexes
+  scip-go:
+    # this line will prevent forks of this repo from uploading scip indexes
     if: github.repository == '<insert your repo name>'
     runs-on: ubuntu-latest
-    container: sourcegraph/lsif-go:latest
+    container: sourcegraph/scip-go:latest
     steps:
       - uses: actions/checkout@v1
       - name: Generate index
         working-directory: backend/
-        run: lsif-go
+        run: scip-go 
       - name: Upload index
+        uses: docker://sourcegraph/src-cli:latest
         # note that the upload command also needs to happen in the same directory!
         working-directory: backend/
         # this will upload to Sourcegraph.com, you may need to substitute a different command
@@ -90,7 +96,7 @@ This second step is easy in GitHub actions because our container can be used as 
 ```yaml
 jobs:
   scip-typescript:
-    # this line will prevent forks of this repo from uploading lsif indexes
+    # this line will prevent forks of this repo from uploading scip indexes
     if: github.repository == '<insert your repo name>'
     runs-on: ubuntu-latest
     container: my-awesome-container
@@ -107,7 +113,7 @@ jobs:
         with:
           # this will upload to Sourcegraph.com, you may need to substitute a different command
           # by default, we ignore failures to avoid disrupting CI pipelines with non-critical errors.
-          args: lsif upload -github-token=${{ secrets.GITHUB_TOKEN }} -ignore-upload-failure
+          args: src code-intel upload -github-token=${{ secrets.GITHUB_TOKEN }} -ignore-upload-failure
 ```
 
 

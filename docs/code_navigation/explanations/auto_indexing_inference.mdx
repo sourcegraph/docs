@@ -4,7 +4,7 @@
 
 When a commit of a repository is selected as a candidate for [auto-indexing](/code_navigation/explanations/auto_indexing) but does not have an explicitly supplied index job configuration, index jobs are inferred from the content of the repository at that commit.
 
-The site-config setting `codeIntelAutoIndexing.indexerMap` can be used to update the indexer image that is (globally) used on inferred jobs. For example, `"codeIntelAutoIndexing.indexerMap": {"go": "lsif-go:alternative-tag"}` will cause inferred jobs indexing Go code to use the specified container (with an alternative tag). This can also be useful for specifying alternative Docker registries.
+The site-config setting `codeIntelAutoIndexing.indexerMap` can be used to update the indexer image that is (globally) used on inferred jobs. For example, `"codeIntelAutoIndexing.indexerMap": {"go": "scip-go:alternative-tag"}` will cause inferred jobs indexing Go code to use the specified container (with an alternative tag). This can also be useful for specifying alternative Docker registries.
 
 This document describes the heuristics used to determine the set of index jobs to schedule. See [configuration reference](/code_navigation/references/auto_indexing_configuration) for additional documentation on how index jobs are configured.
 
@@ -16,22 +16,22 @@ For each directory containing a `go.mod` file, the following index job is schedu
 
 ```json
 {
-  "indexing_jobs": [
+  "index_jobs": [
     {
       "steps": [
         {
           "root": "<dir>",
-          "image": "sourcegraph/lsif-go",
+          "image": "sourcegraph/scip-go",
           "commands": [
             "go mod download"
           ]
         }
       ],
       "root": "<dir>",
-      "indexer": "sourcegraph/lsif-go",
+      "indexer": "sourcegraph/scip-go",
       "indexer_args": [
-        "lsif-go",
-        "--no-animation"
+        "scip-go",
+        "--animation"
       ]
     }
   ]
@@ -43,11 +43,11 @@ For every _other_ directory excluding `vendor/` directories and their children c
 ```json
 {
   "root": "<dir>",
-  "indexer": "sourcegraph/lsif-go",
+  "indexer": "sourcegraph/scip-go",
   "indexer_args": [
     "GO111MODULE=off",
-    "lsif-go",
-    "--no-animation"
+    "scip-go",
+    "--animation"
   ]
 }
 ```

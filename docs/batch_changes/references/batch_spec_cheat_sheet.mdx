@@ -189,19 +189,21 @@ steps:
 
       mkdir -p .github/workflows
 
-      cat <<EOF >.github/workflows/lsif.yml
+      cat <<EOF >.github/workflows/scip.yml
       name: Index
       on:
         - push
       jobs:
-        lsif-go:
+        scip-go:
           runs-on: ubuntu-latest
-          container: sourcegraph/lsif-go
+          container: sourcegraph/scip-go
           steps:
             - uses: actions/checkout@v1
-            - name: Generate LSIF data
-              run: lsif-go
-            - name: Upload LSIF data
+            - name: Generate SCIP data
+              run: scip-go
+            - name: Install SG CLI
+              run: curl -L https://sourcegraph.com/.api/src-cli/src_linux_amd64 -o /usr/local/bin/src; chmod +x /usr/local/bin/src;
+            - name: Upload SCIP data
               run: src code-intel upload -github-token=${{ "\\${{secrets.GITHUB_TOKEN}}" }}
       EOF
 ```
