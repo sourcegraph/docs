@@ -1,0 +1,1 @@
+/Users/tech/work/sourcegraph/doc/cli/references/extsvc/create.md
