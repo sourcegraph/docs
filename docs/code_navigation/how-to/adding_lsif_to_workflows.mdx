@@ -46,13 +46,12 @@ jobs:
     container: sourcegraph/scip-go:latest
     steps:
       - uses: actions/checkout@v1
-      - name: Generate index
-        working-directory: backend/
+      - name: Generate index 
         run: scip-go 
-      - name: Upload index
-        uses: docker://sourcegraph/src-cli:latest
-        # note that the upload command also needs to happen in the same directory!
-        working-directory: backend/
+      - name: Install src CLI
+        run: | 
+          curl -L https://sourcegraph.com/.api/src-cli/src_linux_amd64 -o /usr/local/bin/src
+          chmod +x /usr/local/bin/src
       - name: Upload index
         # this will upload to Sourcegraph.com, you may need to substitute a different command
         # by default, we ignore failures to avoid disrupting CI pipelines with non-critical errors.
@@ -75,8 +74,12 @@ jobs:
       - name: Generate index
         working-directory: backend/
         run: scip-go 
+      - name: Install src CLI 
+        working-directory: backend/
+        run: | 
+          curl -L https://sourcegraph.com/.api/src-cli/src_linux_amd64 -o /usr/local/bin/src
+          chmod +x /usr/local/bin/src
       - name: Upload index
-        uses: docker://sourcegraph/src-cli:latest
         # note that the upload command also needs to happen in the same directory!
         working-directory: backend/
         # this will upload to Sourcegraph.com, you may need to substitute a different command

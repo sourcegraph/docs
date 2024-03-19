@@ -24,8 +24,10 @@ jobs:
       - uses: actions/checkout@v1
       - name: Generate SCIP data
         run: scip-go
-      - name: Install SG CLI
-        run: curl -L https://sourcegraph.com/.api/src-cli/src_linux_amd64 -o /usr/local/bin/src; chmod +x /usr/local/bin/src;
+      - name: Install src CLI
+        run: | 
+          curl -L https://sourcegraph.com/.api/src-cli/src_linux_amd64 -o /usr/local/bin/src
+          chmod +x /usr/local/bin/src
       - name: Upload SCIP data
         # this will upload to Sourcegraph.com, you may need to substitute a different command.
         # by default, we ignore failures to avoid disrupting CI pipelines with non-critical errors.
@@ -50,7 +52,9 @@ jobs:
     steps:
       - checkout
       - run: scip-go 
-      - run: curl -L https://sourcegraph.com/.api/src-cli/src_linux_amd64 -o /usr/local/bin/src; chmod +x /usr/local/bin/src;
+      - run: | 
+          curl -L https://sourcegraph.com/.api/src-cli/src_linux_amd64 -o /usr/local/bin/src
+          chmod +x /usr/local/bin/src;
         # this will upload to Sourcegraph.com, you may need to substitute a different command.
         # by default, we ignore failures to avoid disrupting CI pipelines with non-critical errors.
       - run: src code-intel upload -github-token=<<parameters.github-token>> -ignore-upload-failure
