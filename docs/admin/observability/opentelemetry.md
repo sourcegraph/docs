@@ -1,0 +1,1 @@
+/Users/tech/work/sourcegraph/doc/admin/observability/opentelemetry.md
