@@ -16,7 +16,7 @@ function AnchorIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	);
 }
 
-function Anchor({id, children}: {id: string; children: React.ReactNode}) {
+function Anchor({ id, children }: { id: string; children: React.ReactNode }) {
 	return (
 		<Link
 			href={`#${id}`}
@@ -36,10 +36,10 @@ interface HeadingProps {
 	props: any;
 }
 
-export function Heading({level = '2', id, props}: HeadingProps) {
+export function Heading({ level = '2', id, props }: HeadingProps) {
 	let Component = `h${level}` as 'h2' | 'h3';
 	return (
-		<Component {...props}>
+		<Component {...props} style={{ overflow: "auto" }}>
 			<Anchor id={id}>{props.children}</Anchor>
 		</Component>
 	);
