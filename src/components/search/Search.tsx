@@ -8,7 +8,7 @@ import './docsearch/docsearch.css';
 const getInitialQuery = () => {
 	if (typeof window !== 'undefined' && window?.location?.href) {
 		const url = new URL(window.location.href);
-		const [_, hashQuery] = url.hash?.split('#');
+		const hashQuery = url.hash?.slice(1);
 		const params = new URLSearchParams(hashQuery);
 		const query = params.get('q');
 		return query ?? undefined;
