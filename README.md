@@ -120,6 +120,12 @@ For example, if you want to link to the Cody Quickstart somewhere in the Code Se
 - This is a way to hash-link to [Cody for VSCode installation](/cody/clients/install-vscode#verifying-the-installation) in Code Search docs
 ```
 
+### Adding images and binary assets
+
+For large images and other binary assets, upload them to the `sourcegraph-assets` Google Cloud Storage bucket instead with `gsutil cp -a public-read local/path/to/myasset.png gs://sourcegraph-assets/` (and refer to them as `https://sourcegraphstatic.com/myasset.png`). For a more detailed instructions visit [this page](../../../handbook/editing/handbook-images-video.md).
+
+> Note: Make sure to use [ImageOptim.app](https://imageoptim.com/mac) to reduce the size of the images before uploading, since large images degrade page loading speed.
+
 ## Previewing Changes
 
 ### Locally
