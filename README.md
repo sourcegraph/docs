@@ -72,9 +72,7 @@ This is an introductory paragraph.
 
 ### This is heading 3
 
-These are the details for heading three. And this how you add an image.
-
-![demo-image](https://storage.googleapis.com/sourcegraph-assets/Docs/cody-sign-in.png)
+These are the details for heading three. 
 
 This is how you add a [demo-link](https://sourcegraph.com/)
 
@@ -121,6 +119,12 @@ For example, if you want to link to the Cody Quickstart somewhere in the Code Se
 - This is a link to [Cody Quickstart](/cody/quickstart) in Code Search docs
 - This is a way to hash-link to [Cody for VSCode installation](/cody/clients/install-vscode#verifying-the-installation) in Code Search docs
 ```
+
+### Adding images and binary assets
+
+For large images and other binary assets, upload them to the `sourcegraph-assets` Google Cloud Storage bucket instead with `gsutil cp -a public-read local/path/to/myasset.png gs://sourcegraph-assets/` (and refer to them as `https://sourcegraphstatic.com/myasset.png`). For a more detailed instructions visit [this page](https://handbook.sourcegraph.com/handbook/editing/handbook-images-video/).
+
+> Note: Make sure to use [ImageOptim.app](https://imageoptim.com/mac) to reduce the size of the images before uploading, since large images degrade page loading speed.
 
 ## Previewing Changes
 
