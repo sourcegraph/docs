@@ -54,6 +54,7 @@ You can easily update existing docs pages using [GitHub's file editor](https://d
 6. Click on the green "Propose changes" button to create a PR.
 7. Add a PR reviewer to the Reviewers panel by clicking on the gear icon.
 8. Tag `@maedahbatool` in the `#docs` Slack channel and link to your PR to get a quick review.
+> NOTE: "Edit from GitHub" is generally recommended for text-based edits. For more structural-based contributions like adding React components and code blocks, it's always better to go with a local setup. This way, you can preview changes before you commit.
 
 ### (Advanced) Local dev environment
 To add new or update existing docs content. Create a new branch and checkout by via:
