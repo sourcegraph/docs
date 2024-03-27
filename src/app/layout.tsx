@@ -25,6 +25,7 @@ const lexend = localFont({
 });
 
 export const metadata: Metadata = {
+	metadataBase: new URL('https://sourcegraph.com'),
 	title: {
 		template: '%s - Sourcegraph Docs',
 		default: 'Sourcegraph - Docs'
@@ -33,7 +34,9 @@ export const metadata: Metadata = {
 	other: {
 		"docsearch:language": "en",
 		"docsearch:version": `v${config.DOCS_LATEST_VERSION}`
-
+	},
+	alternates: {
+		canonical: '/docs'
 	}
 };
 
