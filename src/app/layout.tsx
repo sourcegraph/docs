@@ -26,10 +26,10 @@ const lexend = localFont({
 
 export const metadata: Metadata = {
 	title: {
-		template: '%s - Sourcegraph Docs',
-		default: 'Sourcegraph - Docs'
+		template: '%s - Sourcegraph docs',
+		default: 'Sourcegraph docs'
 	},
-	description: 'Sourcegraph Documentation',
+	description: 'Delve into Sourcegraph Docs to transform your coding workflow. With features like AI-assisted code comprehension with Cody, robust code search across branches, and code intelligence for navigation and insights, streamline your development process for efficiency and accuracy',
 	other: {
 		"docsearch:language": "en",
 		"docsearch:version": `v${config.DOCS_LATEST_VERSION}`
