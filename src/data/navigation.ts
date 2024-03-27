@@ -57,7 +57,7 @@ export const navigation: NavigationItem[] = [
               { title: "Context", href: "/cody/core-concepts/context", },
               // { title: "Embeddings", href: "/cody/core-concepts/embeddings", },
               { title: "Keyword Search", href: "/cody/core-concepts/keyword-search", },
-              { title: "Code Graph", href: "/cody/core-concepts/code-graph", },
+              // { title: "Code Graph", href: "/cody/core-concepts/code-graph", },
               { title: "Cody Gateway", href: "/cody/core-concepts/cody-gateway", },
             ]
           },
@@ -261,6 +261,10 @@ export const navigation: NavigationItem[] = [
       {
         title: "SLAs & Premium Support",
         href: "/sla",
+      },
+      {
+        title: "Tutorials",
+        href: "/tutorials",
       },
       {
         title: "Sourcegraph Accounts",

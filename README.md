@@ -43,6 +43,20 @@ Finally, open [`http://localhost:3000`](http://localhost:3000) in your browser t
 
 ## Writing and contributing to Sourcegraph Docs
 
+### (Easy) Using GitHub to edit existing files
+You can easily update existing docs pages using [GitHub's file editor](https://docs.github.com/en/repositories/working-with-files/managing-files/editing-files). All you need to do is:
+
+1. Find the corresponding `.mdx` file in the [folder structure](#folder-structure).
+2. Click the pencil icon to open the file editor.
+3. Make your changes.
+4. Click on the green "Commit changes..." button.
+5. Provide a Commit message and an Extended description.
+6. Click on the green "Propose changes" button to create a PR.
+7. Add a PR reviewer to the Reviewers panel by clicking on the gear icon.
+8. Tag `@maedahbatool` in the `#docs` Slack channel and link to your PR to get a quick review.
+> NOTE: "Edit from GitHub" is generally recommended for text-based edits. For more structural-based contributions like adding React components and code blocks, it's always better to go with a local setup. This way, you can preview changes before you commit.
+
+### (Advanced) Local dev environment
 To add new or update existing docs content. Create a new branch and checkout by via:
 
 ```sh
@@ -70,9 +84,7 @@ This is an introductory paragraph.
 
 ### This is heading 3
 
-These are the details for heading three. And this how you add an image.
-
-![demo-image](https://storage.googleapis.com/sourcegraph-assets/Docs/cody-sign-in.png)
+These are the details for heading three. 
 
 This is how you add a [demo-link](https://sourcegraph.com/)
 
@@ -119,6 +131,12 @@ For example, if you want to link to the Cody Quickstart somewhere in the Code Se
 - This is a link to [Cody Quickstart](/cody/quickstart) in Code Search docs
 - This is a way to hash-link to [Cody for VSCode installation](/cody/clients/install-vscode#verifying-the-installation) in Code Search docs
 ```
+
+### Adding images and binary assets
+
+For large images and other binary assets, upload them to the `sourcegraph-assets` Google Cloud Storage bucket instead with `gsutil cp -a public-read local/path/to/myasset.png gs://sourcegraph-assets/` (and refer to them as `https://sourcegraphstatic.com/myasset.png`). For a more detailed instructions visit [this page](https://handbook.sourcegraph.com/handbook/editing/handbook-images-video/).
+
+> Note: Make sure to use [ImageOptim.app](https://imageoptim.com/mac) to reduce the size of the images before uploading, since large images degrade page loading speed.
 
 ## Previewing Changes
 
