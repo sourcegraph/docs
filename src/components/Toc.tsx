@@ -1,8 +1,9 @@
 'use client';
 
-import {useCallback, useEffect, useState} from 'react';
-import Link from 'next/link';
 import clsx from 'clsx';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 
 interface Heading {
 	level: number;
@@ -14,7 +15,8 @@ interface Props {
 	headings: Heading[];
 }
 
-export function TableOfContents({headings}: Props) {
+export function TableOfContents({ headings }: Props) {
+	const router = useRouter();
 	let [currentSection, setCurrentSection] = useState(headings[0]?.id);
 
 	let getHeadings = useCallback((headings: Heading[]) => {
@@ -31,10 +33,10 @@ export function TableOfContents({headings}: Props) {
 						window.scrollY +
 						el.getBoundingClientRect().top -
 						scrollMt;
-					return {id: heading.id, top};
+					return { id: heading.id, top };
 				}
 			})
-			.filter((x): x is {id: string; top: number} => x !== null);
+			.filter((x): x is { id: string; top: number } => x !== null);
 	}, []);
 
 	useEffect(() => {
@@ -57,7 +59,7 @@ export function TableOfContents({headings}: Props) {
 			setCurrentSection(current);
 		}
 
-		window.addEventListener('scroll', onScroll, {passive: true});
+		window.addEventListener('scroll', onScroll, { passive: true });
 		onScroll();
 
 		return () => {
@@ -68,6 +70,8 @@ export function TableOfContents({headings}: Props) {
 	function isActive(heading: Heading) {
 		return heading.id === currentSection;
 	}
+
+	const currentPath = router.asPath;
 
 	return (
 		<div className="hidden xl:sticky xl:top-[4.75rem] xl:-mr-6 xl:block xl:h-[calc(100vh-4.75rem)] xl:flex-none xl:overflow-y-auto xl:py-16 xl:pr-6">
@@ -119,6 +123,56 @@ export function TableOfContents({headings}: Props) {
 								</li>
 							))}
 						</ol>
+						<ol role="list" className="mt-4 space-y-3 text-sm">
+							{headings.map(heading => (
+								<li key={heading.id}>
+									{heading.level === 1 && (
+										<h3>
+											<Link
+												href={`#${heading.id}`}
+												className={clsx(
+													isActive(heading)
+														? 'font-semibold text-link-light dark:text-link'
+														: 'font-normal text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
+												)}
+											>
+												{heading.title}
+											</Link>
+										</h3>
+									)}
+									{heading.level === 2 && (
+										<ol
+											role="list"
+											className="mt-2 space-y-3 pl-5 text-slate-500 dark:text-slate-400"
+										>
+											<li key={heading.id}>
+												<Link
+													href={`#${heading.id}`}
+													className={clsx(
+														isActive(heading)
+															? 'font-semibold text-link-light dark:text-link'
+															: 'hover:text-slate-600 dark:hover:text-slate-300'
+													)}
+												>
+													{heading.title}
+												</Link>
+											</li>
+										</ol>
+									)}
+								</li>
+							))}
+						</ol>
+						{/* Add the GitHub edit button */}
+						<div className="flex items-center mt-4">
+							<a
+								href={`https://github.com/sourcegraph/docs/edit/main${currentPath}`}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+							>
+								Edit this page on GitHub
+							</a>
+						</div>
 					</>
 				)}
 			</nav>
