@@ -1,10 +1,12 @@
-import {type Metadata} from 'next';
-import {Inter} from 'next/font/google';
-import localFont from 'next/font/local';
+import { Providers } from '@/app/providers';
+import { Layout } from '@/components/Layout';
+import { GoogleAnalytics } from '@next/third-parties/google';
 import clsx from 'clsx';
-import {Providers} from '@/app/providers';
-import {Layout} from '@/components/Layout';
 import config from 'docs.config';
+import { type Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import localFont from 'next/font/local';
+
 
 
 import '@/styles/tailwind.css';
@@ -35,11 +37,11 @@ export const metadata: Metadata = {
 	}
 };
 
-export default function RootLayout({children}: {children: React.ReactNode}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<html
 			lang="en"
-			style={{colorScheme: 'dark'}}
+			style={{ colorScheme: 'dark' }}
 			className={clsx(
 				'h-full antialiased',
 				inter.variable,
@@ -55,6 +57,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
 					<Layout>{children}</Layout>
 				</Providers>
 			</body>
+			<GoogleAnalytics gaId="GTM-TB4NLS7" />
 		</html>
 	);
 }
