@@ -71,8 +71,6 @@ export function TableOfContents({ headings }: Props) {
 		return heading.id === currentSection;
 	}
 
-	const currentPath = router.asPath;
-
 	return (
 		<div className="hidden xl:sticky xl:top-[4.75rem] xl:-mr-6 xl:block xl:h-[calc(100vh-4.75rem)] xl:flex-none xl:overflow-y-auto xl:py-16 xl:pr-6">
 			<nav aria-labelledby="on-this-page-title" className="w-56">
@@ -163,9 +161,9 @@ export function TableOfContents({ headings }: Props) {
 							))}
 						</ol>
 						{/* Add the GitHub edit button */}
-						<div className="flex items-center mt-4">
+						<div className="flex items-center mt-4 text-sm">
 							<a
-								href={`https://github.com/sourcegraph/docs/edit/main${currentPath}`}
+								href={`https://github.com/sourcegraph/docs/edit/main/docs${location.pathname}.mdx`}
 								target="_blank"
 								rel="noopener noreferrer"
 								className="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
