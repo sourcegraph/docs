@@ -4,6 +4,8 @@ The [documentation guidelines](https://handbook.sourcegraph.com/engineering/prod
 
 ## Documentation directory structure
 
+<!-- Needs Review -->
+
 The documentation is broken down into 3 different areas:
 
 1. User
@@ -21,26 +23,64 @@ This structure is inspired by the [Divio documentation system](https://documenta
 
 ## Previewing changes locally
 
-You can preview the documentation site at http://localhost:5080 when running Sourcegraph in [local development](/dev/setup/) (using `sg start`). It uses content, templates, and assets from the local disk. There is no caching or background build process, so you'll see all changes reflected immediately after you reload the page in your browser.
+Our docs are managed in the [sourcegraph/docs](https://github.com/sourcegraph/docs) repository. To preview changes locally, you can run the docs app locally:
+```sh
+git clone https://github.com/sourcegraph/docs.git sourcegraph-docs
+```
 
-You can also run the docsite on its own with the following command:
+Navigate to the project directory by typing the following command in your terminal:
 
 ```sh
-sg run docsite
+cd sourcegraph-docs
 ```
+
+Before the dependencies are install make sure your local machine has the following versions of `node` and `pnpm`:
+
+* node: `v20.8.1`
+* pnpm: `8.13.1`
+
+**Note**: If you have `asdf` available you can install the above versions for only this repository by running the following command from your terminal in the root folder:
+
+```sh
+asdf install
+```
+
+Now that the base requirements of the project have been satisfied, we can install the required dependencies to run the development server!
+
+```sh
+pnpm install
+```
+
+Next, run the development server:
+
+```sh
+pnpm run dev
+```
+Finally, open [`http://localhost:3000`](http://localhost:3000) in your browser to view the website.
 
 ## Linking to documentation in-product
 
-In-product documentation links should point to `/help/PATH` instead of using an absolute URL of the form https://docs.sourcegraph.com/PATH. This ensures they link to the documentation for the current product version. There is a redirect (when using either `<a>` or react-router `<Link>`) from `/help/PATH` to the versioned docs.sourcegraph.com URL (https://docs.sourcegraph.com/@VERSION/PATH).
+To add a `link` to any docs page, use the following routing syntax: `[Link text](path-to-link)`.
+
+- Do not include `/docs` in the link paths. The base URL will be `sourcegraph.com/docs`
+- There should be **no file extension** in the path name
+
+For example, if you want to link to the Cody Quickstart somewhere in the Code Search docs, you should use:
+
+```markdown
+- This is a link to [Cody Quickstart](/cody/quickstart) in Code Search docs
+- This is a way to hash-link to [Cody for VSCode installation](/cody/clients/install-vscode#verifying-the-installation) in Code Search docs
+```
 
 ## Adding images to the documentation
 
-We generally try to avoid adding large binary files to our repository. Images to be used in documentation fall under that category, but there can be exceptions if the images are small.
+For large images and other binary assets, upload them to the `sourcegraph-assets` Google Cloud Storage bucket instead with `gsutil cp -a public-read local/path/to/myasset.png gs://sourcegraph-assets/` (and refer to them as `https://sourcegraphstatic.com/myasset.png`). For a more detailed instructions visit [this page](https://handbook.sourcegraph.com/handbook/editing/handbook-images-video/).
 
-- If the image is less than 100kb in size, it can be added to the `./doc` folder.
-- If it is bigger than 100kb, upload it to the [sourcegraph-assets/docs/images](https://console.cloud.google.com/storage/browser/sourcegraph-assets/docs/images/?project=sourcegraph-de&folder=true&organizationId=true) on Google Cloud storage and link to it.
+> Note: Make sure to use [ImageOptim.app](https://imageoptim.com/mac) to reduce the size of the images before uploading, since large images degrade page loading speed.
 
 ## Updating documentation
+
+<!-- Needs Review -->
 
 To update documentation content, templates, or assets on https://docs.sourcegraph.com, push changes in the `doc/` directory to this repository's `main` branch, then wait up to 5 minutes. Every 5 minutes, docs.sourcegraph.com reloads all content, templates, and assets from `main`.
 
@@ -50,13 +90,9 @@ To update documentation content, templates, or assets on https://docs.sourcegrap
 
 Updates to the redirects in `doc/_resources/assets/redirects` require a full reload of the service, which involves deleting the relevant Kubernetes pods. See ["Forcing immediate reload of data"](#forcing-immediate-reload-of-data) for more details.
 
-## Advanced documentation site
-
-Our documentation site (https://docs.sourcegraph.com) runs [docsite](https://github.com/sourcegraph/docsite).
-
-See "[Updating documentation](#updating-documentation)" and "[Previewing changes locally](#previewing-changes-locally)" for the most common workflows involving the documentation site.
-
 ## SEO
+
+<!-- Needs Review -->
 
 Every markdown document can be prefixed with front matter, which comes with a specific set of fields that are used
 to generate metatags and opengraph tags that improve our ranking. The excerpt below highlights all available fields, which are all optional. Invalid fields will raise an error at runtime but can be caught ahead by running `docsite check`
@@ -83,6 +119,8 @@ See [the Open Graph protocl](https://ogp.me) to learn more about these tags.
 
 ## Forcing immediate reload of data
 
+<!-- Needs Review -->
+
 The docs.sourcegraph.com site reloads content, templates, and assets every 5 minutes. After you push a [documentation update](#updating-documentation), just wait up to 5 minutes to see your changes reflected on docs.sourcegraph.com.
 
 If you need to force a reload — either because your change is _extremely_ urgent and can't wait 5 minutes, or because you've updated redirects — you can delete the `docs-sourcegraph-com-*` Kubernetes pod on the Sourcegraph.com Kubernetes cluster. Once done, it will restart and come back online with the latest data.
@@ -93,11 +131,15 @@ To do this, follow the ["Restarting sourcegraph.com and docs.sourcegraph.com" pl
 
 ## Other ways of previewing changes locally (very rare)
 
+<!-- Needs Review -->
+
 The [local documentation server](#previewing-changes-locally) on http://localhost:5080 only serves a single version of the documentation (from the `doc/` directory of your working tree). This usually suffices.
 
 In very rare cases, you may want to run a local documentation server with a different configuration (described in the following sections).
 
 ### Running a local server that mimics prod configuration
+
+<!-- Needs Review -->
 
 If you want to run the doc site *exactly* as it's deployed (reading templates and assets from the remote Git repository, too), consult the current Kubernetes deployment spec and invoke `docsite serve` with the deployment's `DOCSITE_CONFIG` env var, the end result looking something like:
 
