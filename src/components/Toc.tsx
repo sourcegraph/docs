@@ -2,7 +2,6 @@
 
 import clsx from 'clsx';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 interface Heading {
@@ -16,7 +15,11 @@ interface Props {
 }
 
 export function TableOfContents({ headings }: Props) {
-	const router = useRouter();
+	const [path, setPath] = useState(location.pathname);
+
+	useEffect(() => {
+		setPath(location.pathname);
+	}, [])
 	let [currentSection, setCurrentSection] = useState(headings[0]?.id);
 
 	let getHeadings = useCallback((headings: Heading[]) => {
@@ -118,57 +121,19 @@ export function TableOfContents({ headings }: Props) {
 											</li>
 										</ol>
 									)}
-								</li>
-							))}
-						</ol>
-						<ol role="list" className="mt-4 space-y-3 text-sm">
-							{headings.map(heading => (
-								<li key={heading.id}>
-									{heading.level === 1 && (
-										<h3>
-											<Link
-												href={`#${heading.id}`}
-												className={clsx(
-													isActive(heading)
-														? 'font-semibold text-link-light dark:text-link'
-														: 'font-normal text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
-												)}
-											>
-												{heading.title}
-											</Link>
-										</h3>
-									)}
-									{heading.level === 2 && (
-										<ol
-											role="list"
-											className="mt-2 space-y-3 pl-5 text-slate-500 dark:text-slate-400"
-										>
-											<li key={heading.id}>
-												<Link
-													href={`#${heading.id}`}
-													className={clsx(
-														isActive(heading)
-															? 'font-semibold text-link-light dark:text-link'
-															: 'hover:text-slate-600 dark:hover:text-slate-300'
-													)}
-												>
-													{heading.title}
-												</Link>
-											</li>
-										</ol>
-									)}
+
 								</li>
 							))}
 						</ol>
 						{/* Add the GitHub edit button */}
 						<div className="flex items-center mt-4 text-sm">
 							<a
-								href={`https://github.com/sourcegraph/docs/edit/main/docs${location.pathname}.mdx`}
+								href={`https://github.com/sourcegraph/docs/edit/edit-this-page/docs${path}.mdx`}
 								target="_blank"
 								rel="noopener noreferrer"
 								className="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
 							>
-								Edit this page on GitHub
+								Edit this page
 							</a>
 						</div>
 					</>
