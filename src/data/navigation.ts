@@ -49,6 +49,7 @@ export const navigation: NavigationItem[] = [
               { title: "Commands", href: "/cody/capabilities/commands", },
               { title: "Debug Code", href: "/cody/capabilities/debug-code", },
               { title: "Cody Ignore", href: "/cody/capabilities/ignore-context", },
+              { title: "Supported Models", href: "/cody/capabilities/supported-models", },
             ]
           },
           {

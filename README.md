@@ -45,6 +45,20 @@ Finally, open [`http://localhost:3000`](http://localhost:3000) in your browser t
 
 ## Writing and contributing to Sourcegraph Docs
 
+### (Easy) Using GitHub to edit existing files
+You can easily update existing docs pages using [GitHub's file editor](https://docs.github.com/en/repositories/working-with-files/managing-files/editing-files). All you need to do is:
+
+1. Find the corresponding `.mdx` file in the [folder structure](#folder-structure).
+2. Click the pencil icon to open the file editor.
+3. Make your changes.
+4. Click on the green "Commit changes..." button.
+5. Provide a Commit message and an Extended description.
+6. Click on the green "Propose changes" button to create a PR.
+7. Add a PR reviewer to the Reviewers panel by clicking on the gear icon.
+8. Tag `@maedahbatool` in the `#docs` Slack channel and link to your PR to get a quick review.
+> NOTE: "Edit from GitHub" is generally recommended for text-based edits. For more structural-based contributions like adding React components and code blocks, it's always better to go with a local setup. This way, you can preview changes before you commit.
+
+### (Advanced) Local dev environment
 To add new or update existing docs content. Create a new branch and checkout by via:
 
 ```sh
