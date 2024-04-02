@@ -1,10 +1,10 @@
-# Go LSIF indexing
+# Go SCIP indexing
 
-<p className="subtitle">This page describes how you can automate data indexing in LSIF for Go codebases or index data manually.</p>
+<p className="subtitle">This page describes how you can automate data indexing in SCIP for Go codebases or index data manually.</p>
 
 ## Automated indexing
 
-Sourcegraph provides the Docker images `sourcegraph/lsif-go` and `sourcegraph/src-cli` so that you can easily automate indexing in your favorite CI framework. Note that the `lsif-go` image bundles `src-cli`, so the second image may not be necessary.
+Sourcegraph provides the Docker images `sourcegraph/scip-go` and `sourcegraph/src-cli` so that you can easily automate indexing in your favorite CI framework. Note that the `scip-go` image bundles `src-cli`, so the second image may not be necessary.
 
 The following examples show you how to set up automated indexing in a few popular frameworks. You'll need to substitute the indexer and upload commands with what works for your project locally. If you implement automated indexing in a different framework, feel free to edit this page with instructions!
 
@@ -15,16 +15,20 @@ on:
   - push
 
 jobs:
-  lsif-go:
+  scip-go:
     # this line will prevent forks of this repo from uploading lsif indexes
     if: github.repository == '<insert your repo name>'
     runs-on: ubuntu-latest
-    container: sourcegraph/lsif-go:latest
+    container: sourcegraph/scip-go:latest
     steps:
       - uses: actions/checkout@v1
-      - name: Generate LSIF data
-        run: lsif-go
-      - name: Upload LSIF data
+       - name: Generate SCIP data
+        run: scip-go
+      - name: Install src CLI
+        run: |
+          curl -L https://sourcegraph.com/.api/src-cli/src_linux_amd64 -o /usr/local/bin/src
+          chmod +x /usr/local/bin/src
+      - name: Upload SCIP data
         # this will upload to Sourcegraph.com, you may need to substitute a different command.
         # by default, we ignore failures to avoid disrupting CI pipelines with non-critical errors.
         run: src code-intel upload -github-token=${{ secrets.GITHUB_TOKEN }} -ignore-upload-failure
@@ -42,12 +46,15 @@ The following projects have example GitHub Actions workflows to generate and upl
 version: 2.1
 
 jobs:
-  lsif-go:
+  scip-go:
     docker:
-      - image: sourcegraph/lsif-go:latest
+      - image: sourcegraph/scip-go:latest
     steps:
       - checkout
-      - run: lsif-go
+      - run: scip-go
+      - run: |
+          curl -L https://sourcegraph.com/.api/src-cli/src_linux_amd64 -o /usr/local/bin/src
+          chmod +x /usr/local/bin/src;
         # this will upload to Sourcegraph.com, you may need to substitute a different command.
         # by default, we ignore failures to avoid disrupting CI pipelines with non-critical errors.
       - run: src code-intel upload -github-token=<<parameters.github-token>> -ignore-upload-failure
@@ -58,7 +65,7 @@ workflows:
       - scip-typescript
 ```
 
-The following projects have example CircleCI configurations to generate and upload LSIF indexes.
+The following projects have example CircleCI configurations to generate and upload SCIP indexes.
 
 - [grafana](https://github.com/sourcegraph-codeintel-showcase/grafana/blob/master/.circleci/config.yml)
 - [helm](https://github.com/sourcegraph-codeintel-showcase/helm/blob/62c38f152d0802719aad1ec4c1c281f01dc75173/.circleci/config.yml)
@@ -72,16 +79,16 @@ services:
 
 jobs:
   include:
-    - stage: lsif-go
+    - stage: scip-go
       # this will upload to Sourcegraph.com, you may need to substitute a different command.
       # by default, we ignore failures to avoid disrupting CI pipelines with non-critical errors.
       script:
       - |
-        docker run --rm -v $(pwd):/src -w /src sourcegraph/lsif-go:latest /bin/sh -c \
-          "lsif-go; src code-intel upload -github-token=$GITHUB_TOKEN -ignore-upload-failure"
+        docker run --rm -v $(pwd):/src -w /src sourcegraph/scip-go:latest /bin/sh -c \
+          "scip-go; curl -L https://sourcegraph.com/.api/src-cli/src_linux_amd64 -o /usr/local/bin/src; chmod +x /usr/local/bin/src; src code-intel upload -github-token=$GITHUB_TOKEN -ignore-upload-failure"
 ```
 
-The following projects have example Travis CI configurations to generate and upload LSIF indexes.
+The following projects have example Travis CI configurations to generate and upload SCIP indexes.
 
 - [aws/aws-sdk-go](https://github.com/sourcegraph-codeintel-showcase/aws-sdk-go/blob/92f67a061fcdd46d6a418b28838b10b6ac63a880/.travis.yml)
 - [etcd-io/etcd](https://github.com/sourcegraph-codeintel-showcase/etcd/blob/eae726706fe8ebf7e08b45ba29a70388595db31b/.travis.yml)
@@ -89,7 +96,7 @@ The following projects have example Travis CI configurations to generate and upl
 
 ## Manual indexing
 
-1. Install the [Go LSIF indexer](https://github.com/sourcegraph/lsif-go).
+1. Install the [Go SCIP indexer](https://github.com/sourcegraph/scip-go).
 
 1. Install the [Sourcegraph CLI](https://github.com/sourcegraph/src-cli) with the following command:
 
@@ -104,14 +111,14 @@ The following projects have example Travis CI configurations to generate and upl
 1. `cd` into your Go project's root (where the `go.mod` file lives, if you have one) and run:
 
 ```sh
-   lsif-go # generates a file named dump.lsif
+   scip-go # generates a file named index.scip
 ```
 
 1. Upload the data to a Sourcegraph instance with:
 
 ``` sh
    # for private instances
-   src -endpoint=<your sourcegraph endpoint> lsif upload
+   src -endpoint=<your sourcegraph endpoint> code-intel upload
    # for public instances
    src code-intel upload -github-token=<your github token>
 ```
