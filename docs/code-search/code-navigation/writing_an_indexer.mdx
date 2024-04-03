@@ -116,18 +116,27 @@ Language support is an ever-evolving feature of Sourcegraph. Some languages may 
 
 This table is maintained as an authoritative resource for users, Sales, and Customer Engineers. Any major changes to the development of our indexers will be reflected here.
 
-| **Language** |   **Indexer**   | **Status** | **Hover docs** | **Go to definition** | **Find references** | **Cross-file** | **Cross-repository** | **Find implementations** |                                          **Build tooling**                                           |
-| ------------ | --------------- | ---------- | -------------- | -------------------- | ------------------- | -------------- | -------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------- |
-| Go           | lsif-go         | 🟢          | ✓              | ✓                    | ✓                   | ✓              | ✓                    | ✓                        | -                                                                                                    |
-| TS/JS        | scip-typescript | 🟢          | ✓              | ✓                    | ✓                   | ✓              | ✓                    | ✓                        | -                                                                                                    |
-| C/C++        | scip-clang      | 🟡          | ✓              | ✓                    | ✓                   | ✓              | ✓                    | ✗                        | [See notes](https://github.com/sourcegraph/scip-clang#supported-platforms)                           |
-| Java         | scip-java       | 🟢          | ✓              | ✓                    | ✓                   | ✓*             | ✓                    | ✓                        | [See notes](https://sourcegraph.github.io/scip-java/docs/getting-started.html#supported-build-tools) |
-| Scala        | scip-java       | 🟢          | ✓              | ✓                    | ✓                   | ✓*             | ✓                    | ✓                        | [See notes](https://sourcegraph.github.io/scip-java/docs/getting-started.html#supported-build-tools) |
-| Kotlin       | scip-java       | 🟢          | ✓              | ✓                    | ✓                   | ✓*             | ✗                    | ✓                        | [See notes](https://sourcegraph.github.io/scip-java/docs/getting-started.html#supported-build-tools) |
-| Rust         | rust-analyzer   | 🟢          | ✓              | ✓                    | ✓                   | ✓*             | ✗                    | ✓                        | [See notes](https://rust-analyzer.github.io/)                                                        |
-| Python       | scip-python     | 🟢          | ✓              | ✓                    | ✓                   | ✓              | ✓                    | ✓                        | [See notes](https://github.com/sourcegraph/scip-python)                                              |
-| Ruby         | scip-ruby       | 🟢          | ✓              | ✓                    | ✓                   | ✓              | ✗                    | ✓                        | [See notes](https://github.com/sourcegraph/scip-ruby#scip-ruby)                                      |
-| C#           | scip-dotnet     | 🟠          | ✓              | ✓                    | ✓                   | ✗              | ✓                    | ✓                        | `.sln` and `.csproj`                                                                                 |
+|       **Language**        |      **Indexer**      | **Status** | **Hover docs** | **Go to definition** | **Find references** | **Cross-file** | **Cross-repository** | **Find implementations** |
+| --------------------- | ----------------- | ------ | ---------- | ---------------- | --------------- | ---------- | ---------------- | -------------------- |
+| Go                    | [scip-go]         | 🟢      | ✓          | ✓                | ✓               | ✓          | ✓                | ✓                    |
+| TypeScript/ <br /> JavaScript | [scip-typescript] | 🟢      | ✓          | ✓                | ✓               | ✓          | ✓                | ✓                    |
+| C/C++                 | [scip-clang]      | 🟡      | ✓          | ✓                | ✓               | ✓          | ✓                | ✗                    |
+| Java                  | [scip-java]       | 🟢      | ✓          | ✓                | ✓               | ✓*         | ✓                | ✓                    |
+| Scala                 | [scip-java]       | 🟢      | ✓          | ✓                | ✓               | ✓*         | ✓                | ✓                    |
+| Kotlin                | [scip-java]       | 🟢      | ✓          | ✓                | ✓               | ✓*         | ✗                | ✓                    |
+| Rust                  | [rust-analyzer]   | 🟢      | ✓          | ✓                | ✓               | ✓*         | ✗                | ✓                    |
+| Python                | [scip-python]     | 🟢      | ✓          | ✓                | ✓               | ✓          | ✓                | ✓                    |
+| Ruby                  | [scip-ruby]       | 🟢      | ✓          | ✓                | ✓               | ✓          | ✗                | ✓                    |
+| C#                    | [scip-dotnet] Build tools (`.sln`, `.csproj`)     | 🟠      | ✓          | ✓                | ✓               | ✗          | ✓                | ✓                    |
+
+[scip-go]: https://github.com/sourcegraph/scip-go
+[scip-typescript]: https://github.com/sourcegraph/scip-typescript
+[scip-clang]: https://github.com/sourcegraph/scip-clang
+[scip-java]: https://github.com/sourcegraph/scip-java
+[scip-ruby]: https://github.com/sourcegraph/scip-ruby
+[scip-python]: https://github.com/sourcegraph/scip-python
+[scip-dotnet]: https://github.com/sourcegraph/scip-dotnet
+[rust-analyzer]: https://rust-analyzer.github.io/
 
 <Callout type="info">Requires enabling and setting up Sourcegraph's auto-indexing feature. Read more about [Auto-indexing](/code_navigation/explanations/auto_indexing).</Callout>
 
@@ -154,7 +163,7 @@ At this point, the indexer may be generally considered **ready**. Some languages
 
 ### Common build tool integration
 
-The next milestone integrates the indexer with a common build tool or framework for the language and surrounding ecosystem. The priority and applicability of this milestone will vary wildly by languages. For example, `lsif-go` uses the standard library and the language has a built-in dependency manager; all of our customers use Gradle, making `scip-java` effectively unusable without native Gradle support.
+The next milestone integrates the indexer with a common build tool or framework for the language and surrounding ecosystem. The priority and applicability of this milestone will vary wildly by languages. For example, `scip-go` uses the standard library and the language has a built-in dependency manager; all of our customers use Gradle, making `scip-java` effectively unusable without native Gradle support.
 
 The indexer integrates natively with common mainstream build tools. We should aim to cover at least the majority of build tools used by existing enterprise customers.
 
