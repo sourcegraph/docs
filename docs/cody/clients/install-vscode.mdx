@@ -128,14 +128,18 @@ The chat interface is designed intuitively, which makes it easier to edit chat m
   <source src="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/Chat_%20Redesigned%20chat%20editing.mp4" type="video/mp4" />
 </video>
 
-### Selecting Context
+### Selecting Context with @-mentions
 
 Cody's chat allows you to add files and symbols as context in your messages.
 
 - Type `@-file` and then a filename to include a file as context
 - Type `@#` and then a symbol name to include the symbol's definition as context. Functions, methods, classes, types, etc., are all symbols
 
-The `@-file` also supports line numbers. You can specify line numbers when you `@-mention` files in chat by appending `:line-range` after the file name. This allows you to `@-mention` parts of large files and clarifies what Cody commands you refer to.
+The `@-file` also supports line numbers to query the context of large files. You can add ranges of large files to your context by @-mentioning a large file and appending a number range to the filename, for example, `@filepath/filename:1-10`.
+
+When you `@-mention` files to add to Cody’s context window, the file lookup takes `files.exclude`, `search.exclude`, and `.gitgnore` files into account. This makes the file search faster as a result up to 100ms.
+
+Moreover, when you `@-mention` files, Cody will track the number of characters in those files against the context window limit of the selected chat model. As you `@-mention` multiple files, Cody will calculate how many tokens of the context window remain. When the remaining context window size becomes too small, you get **File too large** errors for further more `@-mention` files.
 
 ![Specifying line numbers in @-mentions in Cody for VS Code](https://storage.googleapis.com/sourcegraph-assets/blog/cody-vscode-1.8.0/@file-line-numbers.gif)
 
@@ -212,11 +216,11 @@ Cody also works with Cursor, Gitpod, IDX, and other similar VS Code forks. To ac
 
 ## Supported LLM models
 
-Cody offers a native support for Anthropic and Starcoder for Chat, Commands on the **Free** tier. Users on Cody **Pro** have the ability to choose from a list of supported LLM models for Chat, Commands, and Autocomplete. These LLMs are Claude Instant, Claude 2.0, Claude 2.1, Claude 3 (Haiku, Opus and Sonnet), ChatGPT 3.5 Turbo, ChatGPT 4 Turbo Preview, and Mixtral.
+Claude 3 Sonnet is the default LLM model for Cody Free users for Chat and Commands. Users on Cody **Pro** can choose from a list of supported LLM models for Chat, Commands, and Autocomplete. These LLMs are Claude Instant, Claude 2.0, Claude 2.1, Claude 3 (Haiku, Opus and Sonnet), ChatGPT 3.5 Turbo, ChatGPT 4 Turbo Preview, and Mixtral.
 
 ![llm-selection-cody-pro](https://storage.googleapis.com/sourcegraph-assets/blog/cody-vscode-1.8.0/claude3-2.png)
 
-Cody Enterprise users get additional capabilities like BYOLLM (Bring Your Own LLM) key. Your site administrator determines the LLM, and cannot be changed within the editor. However, Cody Enterprise users when using Cody Gateway have the ability to [configure custom models](/cody/core-concepts/cody-gateway#configuring-custom-models) Anthropic (like Claude 2.0 and Claude Instant) and OpenAI (GPT 3.5 and GPT 4).
+Cody Enterprise users get Claude 2 as the default LLM model without extra cost. In addition, Enterprise users also get capabilities like BYOLLM (Bring Your Own LLM) key. Your site administrator determines the LLM; you cannot change it from the editor. However, when using Cody Gateway, you can [configure custom models](/cody/core-concepts/cody-gateway#configuring-custom-models) Anthropic (like Claude 2.0 and Claude Instant) and OpenAI (GPT 3.5 and GPT 4).
 
 ## Supported local Ollama models with Cody
 

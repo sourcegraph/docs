@@ -37,8 +37,6 @@ export const navigation: NavigationItem[] = [
               { title: "Cody for Neovim", href: "/cody/clients/install-neovim", },
               { title: "Cody for Web", href: "/cody/clients/cody-with-sourcegraph", },
               { title: "Cody for Enterprise", href: "/cody/clients/enable-cody-enterprise", },
-              { title: "Feature Parity Reference", href: "/cody/clients/feature-reference", },
-
             ]
           },
           {
@@ -50,6 +48,7 @@ export const navigation: NavigationItem[] = [
               { title: "Debug Code", href: "/cody/capabilities/debug-code", },
               { title: "Cody Ignore", href: "/cody/capabilities/ignore-context", },
               { title: "Supported Models", href: "/cody/capabilities/supported-models", },
+              { title: "Feature Parity Reference", href: "/cody/clients/feature-reference", },
             ]
           },
           {
