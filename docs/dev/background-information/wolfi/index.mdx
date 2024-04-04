@@ -22,13 +22,11 @@ For full details, see [RFC 768: Harden container images by switching from Alpine
 
 In our Alpine images, most of the work is done in the Dockerfile: packages are installed; third-party dependencies are fetched, built, and installed; users and directories are created; and binaries are copied.
 
-When building Wolfi images, most of this work is done **outside** of the Dockerfile:
+When building Wolfi images, there is no Dockerfile:
 
 - All third-party dependencies are [packaged](/dev/how-to/wolfi/add_update_packages) as APKs (Alpine Packages, a format that Wolfi uses).
-- Dependencies, user accounts, directory structure, and permissions are combined into a pre-built [base image](/dev/how-to/wolfi/add_update_images).
-- The Dockerfile then only copies over Sourcegraph Go binaries, any configuration, and sets the entrypoint.
-
-In short, all dependencies are pre-installed in a Wolfi base image. The Dockerfile is the final step that just adds on the Sourcegraph code.
+- Dependencies, user accounts, directory structure, and permissions are combined into a [base image](/dev/how-to/wolfi/add_update_images) that's built by Bazel using the rules_apko ruleset.
+- Any Sourcegraph binaries and configuration are then built by Bazel and layered on top of the base image to create a final image.
 
 ## More Information
 
