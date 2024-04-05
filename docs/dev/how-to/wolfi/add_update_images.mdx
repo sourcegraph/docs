@@ -8,7 +8,7 @@ Wolfi base images are built _from scratch_ using [apko](https://github.com/chain
 
 Base images are defined using an apko YAML configuration file, found under [wolfi-images](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/tree/wolfi-images).
 
-To make this YAML file declarative for Bazel, we generate a lockfile from the YAML similar to Go's `go.mod` or NPM's `package-lock.json`. This lockfile captures the exact package versions and hashes that will be included in the base image.
+To make this YAML file declarative for Bazel, we generate a lockfile from the YAML similar to Go's `go.mod` or NPM's `package-lock.json`. This lockfile captures the exact versions and hashes of packages that will be included in the base image.
 
 These lockfiles files are processed by the rules_apko Bazel ruleset, which outputs a base image.
 
@@ -20,7 +20,7 @@ You can see how this works locally:
   - The lockfile may also include updated versions for other packages
 - Run `sg wolfi image gitserver`
   - This uses Bazel to build the gitserver base image using the exact set of package versions defined in `gitserver.lock.json`.
-  - As a convenience, `sg wolfi image` will automatically run `sg wolfi lock` whenever the YAML is changed.
+  - This wraps `bazel run //<image>:base_tarball`, but will automatically run `sg wolfi lock` whenever the YAML is changed.
 
 ## How to...
 
@@ -55,9 +55,8 @@ If the automation fails and a manual update is needed, follow these steps:
 
 To modify a base image, for example to add packages, users, or directories:
 
-- Update its apko YAML configuration file, which can be found under [`wolfi-images/`](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/wolfi-images/)
-- To build the **base image** (all depencencies listed in the YAML file, *without Sourcegraph binaries*) run `sg wolfi image <image-name>`
-  - This wraps `bazel run //<image>:base_tarball`, but will automatically run `sg wolfi lock` if it detects the YAML file has changed. 
+- Update the image's apko YAML configuration file, which can be found under [`wolfi-images/`](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/wolfi-images/)
+- To build the **base image** (all depencencies listed in the YAML file, *without* Sourcegraph binaries) run `sg wolfi image <image-name>`
 - To build the **full image** (all dependencies *and* Sourcegraph binaries):
   - Run `sg wolfi lock <image-name>`
   - Use Bazel to build the full image e.g. `bazel run //cmd/gitserver:image_tarball`
