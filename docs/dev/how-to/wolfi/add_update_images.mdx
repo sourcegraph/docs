@@ -56,12 +56,11 @@ If the automation fails and a manual update is needed, follow these steps:
 To modify a base image, for example to add packages, users, or directories:
 
 - Update its apko YAML configuration file, which can be found under [`wolfi-images/`](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/wolfi-images/)
-- To build the **base image** (all depencencies listed in the YAML file, *without Sourcegraph binaries*):
-  - To build locally, use `sg wolfi image <image-name>` (this automatically runs `sg wolfi lock` for you).
-  - To build on CI, run `sg wolfi lock <image-name>` and push your changes. Buildkite will build your image - instructions for pulling this will be shown at the top of the Buildkite page.
+- To build the **base image** (all depencencies listed in the YAML file, *without Sourcegraph binaries*) run `sg wolfi image <image-name>`
+  - This wraps `bazel run //<image>:base_tarball`, but will automatically run `sg wolfi lock` if it detects the YAML file has changed. 
 - To build the **full image** (all dependencies *and* Sourcegraph binaries):
   - Run `sg wolfi lock <image-name>`
-  - Run the Bazel command to build the full image e.g. `bazel run //cmd/gitserver:image_tarball`
+  - Use Bazel to build the full image e.g. `bazel run //cmd/gitserver:image_tarball`
 - Once happy, commit any changes in `wolfi-images/` and push. Your changes changes to the image will be reflected in the Buildkite pipeline, and in the production images once merged to `main`.
 
 ### Create a new base image
