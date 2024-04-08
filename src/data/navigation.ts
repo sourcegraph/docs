@@ -55,6 +55,7 @@ export const navigation: NavigationItem[] = [
             title: "Core Concepts", href: "/cody/core-concepts/context",
             subsections: [
               { title: "Context", href: "/cody/core-concepts/context", },
+              { title: "Token Limits", href: "/cody/core-concepts/token-limits", },
               // { title: "Embeddings", href: "/cody/core-concepts/embeddings", },
               { title: "Keyword Search", href: "/cody/core-concepts/keyword-search", },
               // { title: "Code Graph", href: "/cody/core-concepts/code-graph", },
