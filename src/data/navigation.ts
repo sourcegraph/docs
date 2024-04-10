@@ -37,8 +37,6 @@ export const navigation: NavigationItem[] = [
               { title: "Cody for Neovim", href: "/cody/clients/install-neovim", },
               { title: "Cody for Web", href: "/cody/clients/cody-with-sourcegraph", },
               { title: "Cody for Enterprise", href: "/cody/clients/enable-cody-enterprise", },
-              { title: "Feature Parity Reference", href: "/cody/clients/feature-reference", },
-
             ]
           },
           {
@@ -49,15 +47,18 @@ export const navigation: NavigationItem[] = [
               { title: "Commands", href: "/cody/capabilities/commands", },
               { title: "Debug Code", href: "/cody/capabilities/debug-code", },
               { title: "Cody Ignore", href: "/cody/capabilities/ignore-context", },
+              { title: "Supported Models", href: "/cody/capabilities/supported-models", },
+              { title: "Feature Parity Reference", href: "/cody/clients/feature-reference", },
             ]
           },
           {
             title: "Core Concepts", href: "/cody/core-concepts/context",
             subsections: [
               { title: "Context", href: "/cody/core-concepts/context", },
+              { title: "Token Limits", href: "/cody/core-concepts/token-limits", },
               // { title: "Embeddings", href: "/cody/core-concepts/embeddings", },
               { title: "Keyword Search", href: "/cody/core-concepts/keyword-search", },
-              { title: "Code Graph", href: "/cody/core-concepts/code-graph", },
+              // { title: "Code Graph", href: "/cody/core-concepts/code-graph", },
               { title: "Cody Gateway", href: "/cody/core-concepts/cody-gateway", },
             ]
           },

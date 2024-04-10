@@ -1,12 +1,12 @@
 # Installing Cody in VS Code
 
-    <p className="subtitle">Learn how to use Cody and its features with the VS Code editor.</p>
+<p className="subtitle">Learn how to use Cody and its features with the VS Code editor.</p>
 
 The Cody extension by Sourcegraph enhances your coding experience in VS Code by providing intelligent code suggestions, context-aware autocomplete, and advanced code analysis. This guide will walk you through the steps to install and set up Cody within your VS Code environment.
 
-    <LinkCards>
-          <LinkCard href="https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-ai" imgSrc="https://storage.googleapis.com/sourcegraph-assets/docs/images/cody/vscode.svg" imgAlt="Cody for VS Code" title="Cody for VS Code" description="Install Cody's free extension for VS Code." />
-          </LinkCards>
+<LinkCards>
+  <LinkCard href="https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-ai" imgSrc="https://storage.googleapis.com/sourcegraph-assets/docs/images/cody/vscode.svg" imgAlt="Cody for VS Code" title="Cody for VS Code" description="Install Cody's free extension for VS Code." />
+</LinkCards>
 
 ## Prerequisites
 
@@ -124,9 +124,24 @@ There is a **Chat History** button at the top of your chat tabs, so you can navi
 
 The chat interface is designed intuitively, which makes it easier to edit chat messages or start a new chat quickly. You can hit **Enter** to edit your message immediately without waiting for the stream to finish. This allows for quicker experimentation and iteration and less dependence on sending follow-up messages to clarify your question (which can also fill up your chat's context window).
 
-    <video width="1920" height="1080" loop playsInline controls style={{ width: '100%', height: 'auto' }}>
-          <source src="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/Chat_%20Redesigned%20chat%20editing.mp4" type="video/mp4" />
-          </video>
+<video width="1920" height="1080" loop playsInline controls style={{ width: '100%', height: 'auto' }}>
+  <source src="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/Chat_%20Redesigned%20chat%20editing.mp4" type="video/mp4" />
+</video>
+
+### Selecting Context with @-mentions
+
+Cody's chat allows you to add files and symbols as context in your messages.
+
+- Type `@-file` and then a filename to include a file as context
+- Type `@#` and then a symbol name to include the symbol's definition as context. Functions, methods, classes, types, etc., are all symbols
+
+The `@-file` also supports line numbers to query the context of large files. You can add ranges of large files to your context by @-mentioning a large file and appending a number range to the filename, for example, `@filepath/filename:1-10`.
+
+When you `@-mention` files to add to Cody’s context window, the file lookup takes `files.exclude`, `search.exclude`, and `.gitgnore` files into account. This makes the file search faster as a result up to 100ms.
+
+Moreover, when you `@-mention` files, Cody will track the number of characters in those files against the context window limit of the selected chat model. As you `@-mention` multiple files, Cody will calculate how many tokens of the context window remain. When the remaining context window size becomes too small, you get **File too large** errors for further more `@-mention` files.
+
+![Specifying line numbers in @-mentions in Cody for VS Code](https://storage.googleapis.com/sourcegraph-assets/blog/cody-vscode-1.8.0/@file-line-numbers.gif)
 
 ## Context fetching mechanism
 
@@ -155,12 +170,6 @@ The following tables shows what happens when Enhanced Context Selection is enabl
 | Enhanced Context Enabled  | ✅            | ✅                | ✅                         | ✅                  |     |
 | Enhanced Context Disabled | ❌            | ❌                | ❌                         | ❌                  |     |
 
-### LLM Selection
-
-Cody Free users get chat responses supported by Claude 2.0. Cody Pro users can choose the LLM from a drop-down list they'd like Cody to use for chats. For Enterprise users, the administrator determines the LLM, and cannot be changed within the editor.
-
-![](https://storage.googleapis.com/sourcegraph-assets/Docs/llm-select.png)
-
 ## Commands
 
 Cody offers quick, ready-to-use [Commands](/cody/capabilities/commands) for common actions to write, describe, fix, and smell code. These allow you to run predefined actions with smart context-fetching anywhere in the editor, like:
@@ -175,17 +184,19 @@ Cody offers quick, ready-to-use [Commands](/cody/capabilities/commands) for comm
 
 Let's understand how the `/doc` command generates code documentation for a function.
 
-    <video width="1920" height="1080" loop playsInline controls style={{ width: '100%', height: 'auto' }}>
-          <source src="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/code-comments-cody.mp4" type="video/mp4" />
-          </video>
+<video width="1920" height="1080" loop playsInline controls style={{ width: '100%', height: 'auto' }}>
+  <source src="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/code-comments-cody.mp4" type="video/mp4" />
+</video>
 
 ### Custom Commands
 
-    <Callout type="note">Custom Commands are currently available in Beta for all users.</Callout>
+<Callout type="note">Custom Commands are currently available in Beta for all users and are currently supported by Cody for the VS Code extension version 0.8 and above.</Callout>
 
-For customization and advanced use cases, you can create **Custom Commands** tailored to your requirements. Custom Commands are currently supported by Cody for the VS Code extension version 0.8 and above.
+For customization and advanced use cases, you can create **Custom Commands** tailored to your requirements. You can also bind keyboard shortcuts to run your custom commands quickly. To bind a keyboard shortcut, open the Keyboard Shortcuts editor and search for `cody.command.custom.` to see the list of your custom commands.
 
-[Learn more about Custom Commands here →](/cody/capabilities/commands#custom-commands)
+![keybinding-custom-command](https://storage.googleapis.com/sourcegraph-assets/blog/cody-vscode-1.8.0/keybindings.png)
+
+<Callout type="info">Learn more about Custom Commands [here](/cody/capabilities/commands#custom-commands)</Callout>
 
 ## Cody Natural Language Search
 
@@ -203,7 +214,17 @@ VS Code will typically notify you when updates are available for installed exten
 
 Cody also works with Cursor, Gitpod, IDX, and other similar VS Code forks. To access VS Code forks like Cursor, select **Sign in with URL and access token** and generate an access token. Next, copy and paste into the allocated field, using `https://sourcegraph.com` as the URL.
 
-## Using Ollama with Cody
+## Supported LLM models
+
+Claude 3 Sonnet is the default LLM model for Cody Free users for Chat and Commands. Users on Cody **Pro** can choose from a list of supported LLM models for Chat, Commands, and Autocomplete. These LLMs are Claude Instant, Claude 2.0, Claude 2.1, Claude 3 (Haiku, Opus and Sonnet), ChatGPT 3.5 Turbo, ChatGPT 4 Turbo Preview, and Mixtral.
+
+![llm-selection-cody-pro](https://storage.googleapis.com/sourcegraph-assets/blog/cody-vscode-1.8.0/claude3-2.png)
+
+Cody Enterprise users get Claude 3 (Opus and Sonnet) as the default LLM models without extra cost. In addition, Enterprise users also get capabilities like BYOLLM (Bring Your Own LLM) key. Your site administrator determines the LLM; you cannot change it from the editor. However, when using Cody Gateway, you can [configure custom models](/cody/core-concepts/cody-gateway#configuring-custom-models) Anthropic (like Claude 2.0 and Claude Instant) and OpenAI (GPT 3.5 and GPT 4).
+
+<Callout type="note">To use Claude 3 (Opus and Sonnets) models with Cody Enterprise, make sure you've upgraded your Sourcegraph instance to the latest version.</Callout>
+
+## Supported local Ollama models with Cody
 
 <Callout type="info">Support with Ollama is currently in the Experimental stage and is available for Cody Free and Pro plans.</Callout>
 
@@ -230,7 +251,9 @@ To generate autocomplete suggestions with Ollama locally, follow these steps:
 
 - Confirm Cody uses Ollama by looking at the Cody output channel or the autocomplete trace view (in the command palette)
 
-#### Cody chat and commands with Ollama
+#### Cody Chat and Commands with Ollama
+
+![ollama-cody](https://storage.googleapis.com/sourcegraph-assets/blog/cody-vscode-1.8.0/localollama.png)
 
 To generate chat and commands with Ollama locally, follow these steps:
 

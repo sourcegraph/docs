@@ -2,7 +2,7 @@
 
 <p className="subtitle">Use Search Jobs to search code at scale for large-scale organizations.</p>
 
-<Callout type="note" title="Beta"> Search Jobs feature is in Beta stage and only available for Enterprise accounts.</Callout>
+<Callout type="note" title="Beta"> Search Jobs feature is in Beta stage and only available for Enterprise accounts. It is enabled by default since 5.3.0.</Callout>
 
 Search Jobs allows you to run search queries across your organization's codebase (all repositories, branches, and revisions) at scale. It enhances the existing Sourcegraph's search capabilities, enabling you to run searches without query timeouts or incomplete results.
 
@@ -21,13 +21,13 @@ The search returned 4 results in 2 files:
 {"type":"content","path":"cmd/embeddings/shared/main.go","repositoryID":399,"repository":"github.com/sourcegraph/sourcegraph","branches":["HEAD"],"commit":"9b47c6430cc3c9cb16695b4fa0a1a277cbbdb327","hunks":null,"chunkMatches":[{"content":"func handlePanic(logger log.Logger, next http.Handler) http.Handler {","contentStart":{"offset":6585,"line":190,"column":0},"ranges":[{"start":{"offset":6590,"line":190,"column":5},"end":{"offset":6601,"line":190,"column":16}}]},{"content":"\thandler = handlePanic(logger, handler)","contentStart":{"offset":2844,"line":81,"column":0},"ranges":[{"start":{"offset":2855,"line":81,"column":11},"end":{"offset":2866,"line":81,"column":22}}]}],"language":"Go"}
 ```
 
-## Enable Search Jobs
+## Configure Search Jobs
 
-To enable Search Jobs, you need to configure a managed object storage service to store the results of your search jobs and then enable the feature in the site administration.
+Search Jobs requires an object storage to store the results of your search jobs.
+By default, Search Jobs stores results using our bundled `blobstore` service.
+If the `blobstore` service is deployed, and you want to use it to store results from Search Jobs, you don't need to configure anything.
 
-## Storing search results
-
-By default, Search Jobs stores results using our bundled `blobstore` service. If the `blobstore` service is deployed, and you want to use it to store results from Search Jobs you can skip ahead to [site administration](#site-administration) To target a third-party managed object storage service, you must set a handful of environment variables for configuration and authentication to the target service.
+To use a third party managed object storage service, you must set a handful of environment variables for configuration and authentication to the target service.
 
 - If you are running a `sourcegraph/server` deployment, set the environment variables on the server container
 - If you are running via Docker-compose or Kubernetes, set the environment variables on the `frontend` and `worker` containers
@@ -67,13 +67,6 @@ If you would like to allow your Sourcegraph instance to control the creation and
 
 - `SEARCH_JOBS_UPLOAD_MANAGE_BUCKET=true`
 
-### Site administration
-
-- Login to your Sourcegraph instance and go to the site admin
-- Next, click the site configuration
-- From here, you'll see `experimentalFeatures`
-- Set `searchJobs` to `true` and then refresh the page
-
 ## Using Search Jobs
 
 To use Search Jobs, you need to:
@@ -88,9 +81,22 @@ To use Search Jobs, you need to:
 
 ![view-search-jobs](https://storage.googleapis.com/sourcegraph-assets/Docs/view-search-jobs.png)
 
+
+## Supported result types
+
+Search jobs supports the following result types:
+- `file`
+- `path`
+- `diff`
+- `commit`
+
+The following result types are not supported:
+- `symbol`
+- `repo`
+
 ## Limitations
 
-Search Jobs supports queries of `type:file` and it automatically appends this to the search query. Other result types (like `diff`, `commit`, `path`, and `repo`) will be ignored. However, there are some limitations on the supported query syntax. These include:
+The following elements of our query language are not supported:
 
 - file predicates, such as `file:has.content`, `file:has.owner`, `file:has.contributor`, `file:contains.content`
 - `.*` regexp search
@@ -98,6 +104,15 @@ Search Jobs supports queries of `type:file` and it automatically appends this to
 - Queries with `index: filter`
 
 <Callout type="note"> Sourcegraph already offers an [Exhaustive Search](/code-search/types/exhaustive) with the `count:all` operator. However, there are certain limitations when generating results within your codebase.</Callout>
+
+## Disable Search Jobs
+
+Follow these steps to disable Search Jobs and to hide the feature in the Sourcegraph UI:
+
+- Login to your Sourcegraph instance and go to the site admin
+- Next, click the site configuration
+- From here, you'll see `experimentalFeatures`
+- Set `searchJobs` to `false` and then refresh the page
 
 ## FAQ
 

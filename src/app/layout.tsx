@@ -1,10 +1,12 @@
-import {type Metadata} from 'next';
-import {Inter} from 'next/font/google';
-import localFont from 'next/font/local';
+import { Providers } from '@/app/providers';
+import { Layout } from '@/components/Layout';
+import { GoogleAnalytics } from '@next/third-parties/google';
 import clsx from 'clsx';
-import {Providers} from '@/app/providers';
-import {Layout} from '@/components/Layout';
 import config from 'docs.config';
+import { type Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import localFont from 'next/font/local';
+
 
 
 import '@/styles/tailwind.css';
@@ -23,23 +25,26 @@ const lexend = localFont({
 });
 
 export const metadata: Metadata = {
+	metadataBase: new URL('https://sourcegraph.com'),
 	title: {
-		template: '%s - Sourcegraph Docs',
-		default: 'Sourcegraph - Docs'
+		template: '%s - Sourcegraph docs',
+		default: 'Sourcegraph docs'
 	},
-	description: 'Sourcegraph Documentation',
+	description: 'Delve into Sourcegraph Docs to transform your coding workflow. With features like AI-assisted code comprehension with Cody, robust code search across branches, and code intelligence for navigation and insights, streamline your development process for efficiency and accuracy.',
 	other: {
 		"docsearch:language": "en",
 		"docsearch:version": `v${config.DOCS_LATEST_VERSION}`
-
+	},
+	alternates: {
+		canonical: '/docs'
 	}
 };
 
-export default function RootLayout({children}: {children: React.ReactNode}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<html
 			lang="en"
-			style={{colorScheme: 'dark'}}
+			style={{ colorScheme: 'dark' }}
 			className={clsx(
 				'h-full antialiased',
 				inter.variable,
@@ -55,6 +60,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
 					<Layout>{children}</Layout>
 				</Providers>
 			</body>
+			<GoogleAnalytics gaId="GTM-TB4NLS7" />
 		</html>
 	);
 }
