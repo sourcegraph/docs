@@ -222,15 +222,6 @@ export const navigation: NavigationItem[] = [
           },
         ],
       },
-      {
-        title: "Development",
-        href: "/dev",
-        sections: [
-          { title: "Setup", href: "/dev/setup" },
-          { title: "How-to Guides", href: "/dev/how-to" },
-          { title: "Contributing", href: "/dev/contributing" },
-        ],
-      },
     ],
   },
   {
