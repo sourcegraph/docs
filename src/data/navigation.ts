@@ -117,9 +117,6 @@ export const navigation: NavigationItem[] = [
               { title: "Auto-indexing", href: "/code-search/code-navigation/auto_indexing", },
               { title: "Environment Variables", href: "/code-search/code-navigation/envvars", },
               { title: "Troubleshooting", href: "/code-search/code-navigation/troubleshooting", },
-
-
-
             ]
           },
           {
