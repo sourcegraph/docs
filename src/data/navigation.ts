@@ -86,6 +86,8 @@ export const navigation: NavigationItem[] = [
               { title: "Search Jobs", href: "/code-search/types/search-jobs", },
               { title: "Structural Search", href: "/code-search/types/structural", },
               { title: "Fuzzy Search", href: "/code-search/types/fuzzy", },
+              { title: "Symbol Search", href: "/code-search/types/symbol", },
+
             ]
           },
           {
