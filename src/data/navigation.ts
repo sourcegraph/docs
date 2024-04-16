@@ -78,7 +78,7 @@ export const navigation: NavigationItem[] = [
         title: "Code Search",
         href: "/code-search",
         sections: [
-          { title: "Capabilities", href: "/code-search/features" },
+          { title: "Features", href: "/code-search/features" },
           {
             title: "Search Types", href: "/code-search/types/exhaustive",
             subsections: [
@@ -112,7 +112,7 @@ export const navigation: NavigationItem[] = [
           {
             title: "Code Navigation", href: "/code-search/code-navigation",
             subsections: [
-              { title: "Capabilities", href: "/code-search/code-navigation/features", },
+              { title: "Features", href: "/code-search/code-navigation/features", },
               { title: "Search-based code navigation", href: "/code-search/code-navigation/search_based_code_navigation", },
               { title: "Precise code navigation", href: "/code-search/code-navigation/precise_code_navigation", },
               { title: "Indexers", href: "/code-search/code-navigation/writing_an_indexer", },
