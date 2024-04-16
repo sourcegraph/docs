@@ -55,6 +55,7 @@ export const navigation: NavigationItem[] = [
             title: "Core Concepts", href: "/cody/core-concepts/context",
             subsections: [
               { title: "Context", href: "/cody/core-concepts/context", },
+              { title: "Token Limits", href: "/cody/core-concepts/token-limits", },
               // { title: "Embeddings", href: "/cody/core-concepts/embeddings", },
               { title: "Keyword Search", href: "/cody/core-concepts/keyword-search", },
               // { title: "Code Graph", href: "/cody/core-concepts/code-graph", },
@@ -234,15 +235,6 @@ export const navigation: NavigationItem[] = [
             title: "Browser Search Engine",
             href: "/integration/browser_extension/how-tos/browser_search_engine",
           },
-        ],
-      },
-      {
-        title: "Development",
-        href: "/dev",
-        sections: [
-          { title: "Setup", href: "/dev/setup" },
-          { title: "How-to Guides", href: "/dev/how-to" },
-          { title: "Contributing", href: "/dev/contributing" },
         ],
       },
     ],
