@@ -144,15 +144,6 @@ export const navigation: NavigationItem[] = [
         ],
       },
       {
-        title: "Code Navigation",
-        href: "/code_navigation",
-        sections: [
-          { title: "How-to Guides", href: "/code_navigation/how-to" },
-          { title: "Explanations", href: "/code_navigation/explanations" },
-          { title: "References", href: "/code_navigation/references" },
-        ],
-      },
-      {
         title: "Code Monitoring",
         href: "/code_monitoring",
         sections: [
