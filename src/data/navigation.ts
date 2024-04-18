@@ -78,7 +78,7 @@ export const navigation: NavigationItem[] = [
         title: "Code Search",
         href: "/code-search",
         sections: [
-          { title: "Capabilities", href: "/code-search/features" },
+          { title: "Features", href: "/code-search/features" },
           {
             title: "Search Types", href: "/code-search/types/exhaustive",
             subsections: [
@@ -86,6 +86,8 @@ export const navigation: NavigationItem[] = [
               { title: "Search Jobs", href: "/code-search/types/search-jobs", },
               { title: "Structural Search", href: "/code-search/types/structural", },
               { title: "Fuzzy Search", href: "/code-search/types/fuzzy", },
+              { title: "Symbol Search", href: "/code-search/types/symbol", },
+
             ]
           },
           {
@@ -108,6 +110,18 @@ export const navigation: NavigationItem[] = [
             title: "Search Examples", href: "/code-search/examples",
           },
           {
+            title: "Code Navigation", href: "/code-search/code-navigation",
+            subsections: [
+              { title: "Features", href: "/code-search/code-navigation/features", },
+              { title: "Search-based code navigation", href: "/code-search/code-navigation/search_based_code_navigation", },
+              { title: "Precise code navigation", href: "/code-search/code-navigation/precise_code_navigation", },
+              { title: "Indexers", href: "/code-search/code-navigation/writing_an_indexer", },
+              { title: "Auto-indexing", href: "/code-search/code-navigation/auto_indexing", },
+              { title: "Environment Variables", href: "/code-search/code-navigation/envvars", },
+              { title: "Troubleshooting", href: "/code-search/code-navigation/troubleshooting", },
+            ]
+          },
+          {
             title: "FAQs", href: "/code-search/faq",
           },
 
@@ -127,15 +141,6 @@ export const navigation: NavigationItem[] = [
           { title: "Tutorials", href: "/batch_changes/tutorials" },
           { title: "How-to Guides", href: "/batch_changes/how-tos" },
           { title: "Reference", href: "/batch_changes/references" },
-        ],
-      },
-      {
-        title: "Code Navigation",
-        href: "/code_navigation",
-        sections: [
-          { title: "How-to Guides", href: "/code_navigation/how-to" },
-          { title: "Explanations", href: "/code_navigation/explanations" },
-          { title: "References", href: "/code_navigation/references" },
         ],
       },
       {
