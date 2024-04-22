@@ -2252,6 +2252,566 @@ const redirectsData = [
         permanent: true
     },
 
+    // Code Navigation redirects
+    {
+        source: "/code_navigation",
+        destination: "/code-search/code-navigation",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/configure_data_retention",
+        destination: "/code-search/code-navigation/auto_indexing#configure-auto-indexing-policies",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/configure_data_retention#applying-data-retention-policies-globally",
+        destination: "/code-search/code-navigation/auto_indexing#applying-indexing-policies-globally",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/index_a_go_repository",
+        destination: "/code-search/code-navigation/how-to/index_a_go_repository",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/index_a_go_repository#automated-indexing",
+        destination: "/code-search/code-navigation/how-to/index_a_go_repository#automated-indexing",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/index_a_go_repository#github-actions",
+        destination: "/code-search/code-navigation/how-to/index_a_go_repository#github-actions",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/index_a_go_repository#circleci",
+        destination: "/code-search/code-navigation/how-to/index_a_go_repository#circleci",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/index_a_go_repository#travis-ci",
+        destination: "/code-search/code-navigation/how-to/index_a_go_repository#travis-ci",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/index_a_go_repository#manual-indexing",
+        destination: "/code-search/code-navigation/how-to/index_a_go_repository#manual-indexing",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/index_a_typescript_and_javascript_repository",
+        destination: "/code-search/code-navigation/how-to/index_a_typescript_and_javascript_repository",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/index_a_typescript_and_javascript_repository#indexing-in-ci-using-scip-typescript-directly",
+        destination: "/code-search/code-navigation/how-to/index_a_typescript_and_javascript_repository#indexing-in-ci-using-scip-typescript-directly",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/index_a_typescript_and_javascript_repository#optional-scip-typescript-flags",
+        destination: "/code-search/code-navigation/how-to/index_a_typescript_and_javascript_repository#optional-scip-typescript-flags",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/index_a_typescript_and_javascript_repository#indexing-in-ci-using-the-scip-typescript-docker-image",
+        destination: "/code-search/code-navigation/how-to/index_a_typescript_and_javascript_repository#indexing-in-ci-using-the-scip-typescript-docker-image",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/index_a_typescript_and_javascript_repository#one-off-indexing-using-scip-typescript-locally",
+        destination: "/code-search/code-navigation/how-to/index_a_typescript_and_javascript_repository#one-off-indexing-using-scip-typescript-locally",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/adding_lsif_to_many_repos",
+        destination: "/code-search/code-navigation/precise_code_navigation",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/adding_lsif_to_workflows",
+        destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/adding_lsif_to_workflows#language-specific-guides",
+        destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#language-specific-guides",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/adding_lsif_to_workflows#benefits-of-ci-integration",
+        destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#benefits-of-ci-integration",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/adding_lsif_to_workflows#using-indexer-containers",
+        destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#using-indexer-containers",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/adding_lsif_to_workflows#github-action-examples",
+        destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#github-action-examples",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/adding_lsif_to_workflows#circle-ci-examples",
+        destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#circle-ci-examples",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/adding_lsif_to_workflows#travis-ci-examples",
+        destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#travis-ci-examples",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/adding_lsif_to_workflows#ci-from-scratch",
+        destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#ci-from-scratch",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/adding_lsif_to_workflows#uploading-indexes-to-sourcegraphcom",
+        destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#uploading-indexes-to-sourcegraphcom",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/enable_auto_indexing",
+        destination: "/code-search/code-navigation/auto_indexing#enable-auto-indexing",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/enable_auto_indexing#deploy-executors",
+        destination: "/code-search/code-navigation/auto_indexing#enable-auto-indexing#deploy-executors",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/enable_auto_indexing#enable-index-job-scheduling",
+        destination: "/code-search/code-navigation/auto_indexing#enable-auto-indexing#enable-index-job-scheduling",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/enable_auto_indexing#tune-the-index-scheduler",
+        destination: "/code-search/code-navigation/auto_indexing#enable-auto-indexing#tune-the-index-scheduler",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/configure_auto_indexing",
+        destination: "/code-search/code-navigation/auto_indexing#configure-auto-indexing",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/configure_auto_indexing#configure-auto-indexing-policies",
+        destination: "/code-search/code-navigation/auto_indexing#configure-auto-indexing-policies",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/configure_auto_indexing#applying-indexing-policies-globally",
+        destination: "/code-search/code-navigation/auto_indexing#applying-indexing-policies-globally",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/configure_auto_indexing#applying-indexing-policies-to-a-specific-repository",
+        destination: "/code-search/code-navigation/auto_indexing#applying-indexing-policies-to-a-specific-repository",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/configure_auto_indexing#explicit-index-job-configuration",
+        destination: "/code-search/code-navigation/auto_indexing#explicit-index-job-configuration",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/configure_auto_indexing#private-repositories-and-packages-configuration",
+        destination: "/code-search/code-navigation/auto_indexing#private-repositories-and-packages-configuration",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/configure_auto_indexing#go",
+        destination: "/code-search/code-navigation/auto_indexing#go",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/configure_auto_indexing#typescriptjavascript",
+        destination: "/code-search/code-navigation/auto_indexing#typescriptjavascript",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/policies_resource_usage_best_practices",
+        destination: "/code-search/code-navigation/how-to/policies_resource_usage_best_practices",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/combining_scip_uploads_from_ci_cd_and_auto_indexing",
+        destination: "/code-search/code-navigation/how-to/combining_scip_uploads_from_ci_cd_and_auto_indexing",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/introduction_to_code_navigation",
+        destination: "/code-search/code-navigation",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/introduction_to_code_navigation#search-based-vs-precise",
+        destination: "/code-search/code-navigation#code-navigation-types",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/precise_code_navigation",
+        destination: "/code-search/code-navigation/precise_code_navigation",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/precise_code_navigation#why-are-my-results-sometimes-incorrect",
+        destination: "/code-search/code-navigation/troubleshooting#why-are-my-results-sometimes-incorrect",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/uploads",
+        destination: "/code-search/code-navigation/explanations/uploads",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/uploads#lifecycle-of-an-upload",
+        destination: "/code-search/code-navigation/explanations/uploads#lifecycle-of-an-upload",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/uploads#lifecycle-of-an-upload-via-ui",
+        destination: "/code-search/code-navigation/explanations/uploads#lifecycle-of-an-upload-via-ui",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/uploads#repository-commit-graph",
+        destination: "/code-search/code-navigation/explanations/uploads#repository-commit-graph",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/search_based_code_navigation",
+        destination: "/code-search/code-navigation/search_based_code_navigation",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/search_based_code_navigation#how-does-it-work",
+        destination: "/code-search/code-navigation/search_based_code_navigation#how-does-it-work",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/search_based_code_navigation#what-configuration-settings-can-i-apply",
+        destination: "/code-search/code-navigation/search_based_code_navigation#what-configuration-settings-can-i-apply",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/features",
+        destination: "/code-search/code-navigation/features",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/features#popover",
+        destination: "/code-search/code-navigation/features#popover",
+        permanent: true
+    },
+    {
+        source: "/code_navigation/explanations/features#go-to-definition",
+        destination: "/code-search/code-navigation/features#go-to-definition",
+        permanent: true
+    },
+    {
+        source: "/code_navigation/explanations/features#find-references",
+        destination: "/code-search/code-navigation/features#find-references",
+        permanent: true
+    },
+    {
+        source: "/code_navigation/explanations/features#dependency-navigation",
+        destination: "/code-search/code-navigation/features#dependency-navigation",
+        permanent: true
+    },
+    {
+        source: "/code_navigation/explanations/features#find-implementations",
+        destination: "/code-search/code-navigation/features#find-implementations",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/features#perform-an-action",
+        destination: "/code-search/code-navigation/features#perform-an-action",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/features#symbol-search",
+        destination: "/code-search/types/symbol",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/rockskip",
+        destination: "/code-search/code-navigation/rockskip",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/rockskip#when-should-i-use-rockskip",
+        destination: "/code-search/code-navigation/rockskip#when-should-i-use-rockskip",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/rockskip#how-do-i-enable-rockskip",
+        destination: "/code-search/code-navigation/rockskip#how-do-i-enable-rockskip",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/rockskip#how-long-does-indexing-take",
+        destination: "/code-search/code-navigation/rockskip#how-long-does-indexing-take",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/rockskip#what-resources-does-rockskip-use",
+        destination: "/code-search/code-navigation/rockskip#what-resources-does-rockskip-use",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/rockskip#how-do-i-check-the-indexing-status",
+        destination: "/code-search/code-navigation/rockskip#how-do-i-check-the-indexing-status",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/rockskip#when-is-indexing-triggered",
+        destination: "/code-search/code-navigation/rockskip#when-is-indexing-triggered",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/writing_an_indexer",
+        destination: "/code-search/code-navigation/writing_an_indexer#writing-an-indexer",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/writing_an_indexer#understanding-the-scip-protobuf-schema",
+        destination: "/code-search/code-navigation/writing_an_indexer#understanding-the-scip-protobuf-schema",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/writing_an_indexer#importing-or-generating-scip-bindings",
+        destination: "/code-search/code-navigation/writing_an_indexer#importing-or-generating-scip-bindings",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/writing_an_indexer#generating-minimal-index-with-occurrence-information",
+        destination: "/code-search/code-navigation/writing_an_indexer#generating-minimal-index-with-occurrence-information",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/writing_an_indexer#snapshot-testing-with-scip-cli",
+        destination: "/code-search/code-navigation/writing_an_indexer#snapshot-testing-with-scip-cli",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/writing_an_indexer#progressively-adding-support-for-language-features",
+        destination: "/code-search/code-navigation/writing_an_indexer#progressively-adding-support-for-language-features",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/auto_indexing",
+        destination: "/code-search/code-navigation/auto_indexing",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/auto_indexing#lifecycle-of-an-indexing-job",
+        destination: "/code-search/code-navigation/auto_indexing#lifecycle-of-an-indexing-job",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/configure_auto_indexing#lifecycle-of-an-indexing-job",
+        destination: "/code-search/code-navigation/auto_indexing#lifecycle-of-an-indexing-job",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/how-to/configure_auto_indexing#lifecycle-of-an-indexing-job-via-ui",
+        destination: "/code-search/code-navigation/auto_indexing#lifecycle-of-an-indexing-job-via-ui",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/auto_indexing_inference",
+        destination: "/code-search/code-navigation/explanations/auto_indexing_inference",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/auto_indexing_inference#go",
+        destination: "/code-search/code-navigation/explanations/auto_indexing_inference#go",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/auto_indexing_inference#typescript",
+        destination: "/code-search/code-navigation/explanations/auto_indexing_inference#typescript",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/auto_indexing_inference#java",
+        destination: "/code-search/code-navigation/explanations/auto_indexing_inference#java",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/explanations/auto_indexing_inference#rust",
+        destination: "/code-search/code-navigation/explanations/auto_indexing_inference#rust",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/references/troubleshooting",
+        destination: "/code-search/code-navigation/troubleshooting",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/references/troubleshooting#when-are-issues-related-to-code-intelligence",
+        destination: "/code-search/code-navigation/troubleshooting#when-are-issues-related-to-code-intelligence",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/references/troubleshooting#gathering-evidence",
+        destination: "/code-search/code-navigation/troubleshooting#gathering-evidence",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/references/indexers",
+        destination: "/code-search/code-navigation/writing_an_indexer#sourcegraph-recommended-indexers",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/references/indexers#quick-reference",
+        destination: "/code-search/code-navigation/writing_an_indexer#quick-reference",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/references/precise_examples",
+        destination: "/code-search/code-navigation/precise_code_navigation#precise-navigation-examples",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/references/envvars",
+        destination: "/code-search/code-navigation/envvars",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/references/envvars#frontend",
+        destination: "/code-search/code-navigation/envvars#frontend",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/references/envvars#worker",
+        destination: "/code-search/code-navigation/envvars#worker",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/references/envvars#precise-code-intel-worker",
+        destination: "/code-search/code-navigation/envvars#precise-code-intel-worker",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/references/auto_indexing_configuration",
+        destination: "/code-search/code-navigation/auto_indexing_configuration",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/references/auto_indexing_configuration#keys",
+        destination: "/code-search/code-navigation/auto_indexing_configuration#keys",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/references/auto_indexing_configuration#index-job-object",
+        destination: "/code-search/code-navigation/auto_indexing_configuration#index-job-object",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/references/auto_indexing_configuration#docker-step-object",
+        destination: "/code-search/code-navigation/auto_indexing_configuration#docker-step-object",
+        permanent: true
+    },
+
+    {
+        source: "/code_navigation/references/inference_configuration",
+        destination: "/code-search/code-navigation/inference_configuration",
+        permanent: true
+    },
 ];
 
 const updatedRedirectsData = redirectsData.map(redirect => {
