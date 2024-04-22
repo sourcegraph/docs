@@ -60,6 +60,7 @@ export const navigation: NavigationItem[] = [
               { title: "Keyword Search", href: "/cody/core-concepts/keyword-search", },
               // { title: "Code Graph", href: "/cody/core-concepts/code-graph", },
               { title: "Cody Gateway", href: "/cody/core-concepts/cody-gateway", },
+              { title: "Enterprise Architecture", href: "/cody/core-concepts/enterprise-architecture", },
             ]
           },
           // {
