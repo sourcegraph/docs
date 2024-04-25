@@ -1,4 +1,5 @@
 import AWSOneClickLaunchForm from './AWSOneClickLaunchForm';
+import ResourceEstimator from './ResourceEstimator';
 import Accordion from './mdx/Accordion';
 import { Callout } from './mdx/Callout';
 import { CustomLink } from './mdx/CustomLink';
@@ -10,6 +11,7 @@ import { Tab, Tabs } from './mdx/Tabs';
 
 const MdxComponents = (version?: string) => {
 	return {
+		ResourceEstimator,
 		AWSOneClickLaunchForm,
 		Accordion,
 		Tabs: (props: any) => <Tabs {...props} />,
