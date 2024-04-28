@@ -135,6 +135,25 @@ export const navigation: NavigationItem[] = [
     topics: [
       {
         title: "Batch Changes",
+        href: "/batch-changes",
+        sections: [
+          { title: "Quickstart", href: "/batch-changes/quickstart" },
+          {
+            title: "How it works?", href: "/batch-changes/working/creating-a-batch-change",
+            subsections: [
+              { title: "Create a Batch Change", href: "/batch-changes/working/create-a-batch-change", },
+              { title: "Update a Batch Change", href: "/batch-changes/working/update-a-batch-change", },
+              { title: "Close a Batch Change", href: "/batch-changes/working/delete-a-batch-change", },
+
+
+            ]
+          },
+
+          { title: "FAQs", href: "/batch-changes/faq" },
+        ],
+      },
+      {
+        title: "Batch Changes",
         href: "/batch_changes",
         sections: [
           { title: "Quickstart", href: "/batch_changes/quickstart" },
