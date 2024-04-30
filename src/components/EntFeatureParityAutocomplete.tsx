@@ -8,7 +8,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { useState } from 'react';
+
+import React, { useState } from 'react';
 
 const options = {
     initial: [
