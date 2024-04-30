@@ -1,4 +1,6 @@
 import AWSOneClickLaunchForm from './AWSOneClickLaunchForm';
+import EntFeatureParityAutocomplete from './EntFeatureParityAutocomplete';
+import EntFeatureParityChat from './EntFeatureParityChat';
 import Accordion from './mdx/Accordion';
 import { Callout } from './mdx/Callout';
 import { CustomLink } from './mdx/CustomLink';
@@ -11,6 +13,8 @@ import ResourceEstimator from './resource-estimator/ResourceEstimator';
 
 const MdxComponents = (version?: string) => {
 	return {
+		EntFeatureParityChat,
+		EntFeatureParityAutocomplete,
 		ResourceEstimator,
 		AWSOneClickLaunchForm,
 		Accordion,
