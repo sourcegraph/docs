@@ -1,10 +1,151 @@
 # Cody Ignore
 
-<Callout type="note">This feature is currently in the Experimental stage and only supported with VS Code extension.</Callout>
+## Enterprise
 
-This guide will walk you through the process of ignoring specific files or folders in your codebase when using Cody. 
+<Callout type="note">
+Client Support for Cody Context Filters
 
-## Enabling Unstable Features
+-   Cody context filters are currently supported only by Cody Web.
+-   Starting from May 27, support for Cody context filters will also be available on the Cody VS Code Extension and the Cody JetBrains Extension.
+-   A minimum required client version is enforced for these extensions: `>=1.20.0` for the VS Code extension and `>=6.0.0` for the JetBrains extension.
+-   If Cody context filters are defined in the site configuration, other Cody clients will not function as they do not support this feature.
+-   The feature is disabled by default until the required extensions versions are released. Administrators wishing to enable Cody context filters must activate the "cody-context-filters-enabled" feature flag. Be aware that enabling this feature may prevent VS Code and JetBrains clients that do not meet the version constraint from working.
+
+</Callout>
+
+Enterprise instances admins can define specific rules to determine which repositories Cody is allowed to utilize for context in its requests to third-party LLMs.
+
+To establish these rules, administrators should configure the `cody.contextFilters` field in the site configuration.
+
+The field structure is as follows:
+
+```json
+{
+	"cody.contextFilters": {
+		"include": [
+			{
+				"repoNamePattern": "^github\\.com\\/sourcegraph\\/.*"
+			}
+		],
+		"exclude": [
+			{
+				"repoNamePattern": ".*analytics.*"
+			}
+		]
+	}
+}
+```
+
+### Field validation
+
+-   The `cody.contextFilters` field is optional.
+-   If specified, it must include at least one of the following fields: `include` or `exclude`.
+-   Only the `include` and `exclude` properties are permitted; no additional properties are allowed.
+-   Each defined `include` or `exclude` field must contain at least one item.
+-   Every item within the `include` and `exclude` fields must specify a `repoNamePattern`.
+-   The `repoNamePattern` must conform to the regular expression syntax supported by [RE2](https://golang.org/s/re2syntax).
+
+### Interaction between include and exclude rules
+
+1.  **`cody.contextFilters` field is not defined**
+
+    By default, there are no restrictions on the repositories Cody can use for context in requests to third-party LLMs.
+    All repositories are included and none are excluded.
+
+2.  **Only `include` rules are specified**
+
+    Cody is restricted to using content from repositories whose names match any of the specified patterns in the include field.
+
+    Since no exclude rules are specified, no repositories are explicitly excluded.
+
+    Note: An include field might contain a catch-all pattern (e.g., a regexp matching any string). In this scenario,
+    Cody can access content from any repository, as a single match in the include rules is sufficient for inclusion.
+
+    Example:
+
+```json
+{
+	"cody.contextFilters": {
+		"include": [
+			{"repoNamePattern": "^github\\.com\\/sourcegraph\\/.+"},
+			{"repoNamePattern": ".*cody.*"}
+		]
+	}
+}
+```
+
+In the example above, in its requests to third-part LLMs Cody can use content from repositories whose names either start with 'github.com/sourcegraph/' or contain 'cody'.
+
+3.  **Only `exclude` rules are specified**
+
+    In the absence of include rules, all repositories are considered included by default.
+
+    Cody is prohibited from using content from any repository whose name matches at least one pattern specified in the exclude field.
+
+    Note: An exclude field may also contain a catch-all condition (e.g., a regexp matching any string).
+    If such a match occurs, Cody is restricted from using content from any repository.
+
+Example:
+
+```json
+{
+	"cody.contextFilters": {
+		"exclude": [
+			{
+				"repoNamePattern": "^github\\.com\\/sourcegraph\\/cody-analytics$"
+			},
+			{
+				"repoNamePattern": ".*secret.*"
+			}
+		]
+	}
+}
+```
+
+In this example, in its requests to third-part LLMs Cody is barred from using repositories named "github.com/sourcegraph/cody-analytics" or those containing the substring "secret".
+
+4. **Both `include` and `exclude` rules are specified**
+
+Cody in requests to third-party LLMs can use content from a repository if its name matches any of the include patterns
+and does not match any of the exclude patterns.
+
+Thus, the exclude rules filter only the repositories allowed by the include rules.
+
+Example:
+
+```json
+{
+	"cody.contextFilters": {
+		"include": [
+			{
+				"repoNamePattern": "^github\\.com\\/sourcegraph\\/.+"
+			}
+		],
+		"exclude": [
+			{
+				"repoNamePattern": "^github\\.com\\/sourcegraph\\/cody-analytics$"
+			},
+			{
+				"repoNamePattern": ".*cody.*"
+			}
+		]
+	}
+}
+```
+
+For the provided configuration, in its requests to third-party LLms Cody can use content from repositories starting with
+"github.com/sourcegraph/" but not from those named "github.com/sourcegraph/cody-analytics" or containing the substring "cody".
+
+## sourcegraph.com
+
+<Callout type="note">
+	This feature is currently in the Experimental stage and only supported with
+	VS Code extension.
+</Callout>
+
+This guide will walk you through the process of ignoring specific files or folders in your codebase when using Cody.
+
+### Enabling Unstable Features
 
 To use the ignore context feature, you first need to enable unstable features in Cody. Here's how:
 
@@ -14,7 +155,7 @@ To use the ignore context feature, you first need to enable unstable features in
 
 This will enable experimental features, including the ignore context feature.
 
-## Using the Ignore Context Feature
+### Using the Ignore Context Feature
 
 To ignore specific files or folders from the context taken by Cody, you need to create a `ignore` file in your project. Here's how:
 
