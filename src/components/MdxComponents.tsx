@@ -7,9 +7,11 @@ import { LinkCard, LinkCards } from './mdx/LinkCards';
 import { ProductCard, ProductCards } from './mdx/ProductCards';
 import { QuickLink, QuickLinks } from './mdx/QuickLinks';
 import { Tab, Tabs } from './mdx/Tabs';
+import ResourceEstimator from './resource-estimator/ResourceEstimator';
 
 const MdxComponents = (version?: string) => {
 	return {
+		ResourceEstimator,
 		AWSOneClickLaunchForm,
 		Accordion,
 		Tabs: (props: any) => <Tabs {...props} />,
