@@ -1,0 +1,85 @@
+# Error Handling of Changesets
+
+<p className="subtitle"> Learn how to fix errors when you run a changeset.</p>
+
+Publishing a changeset can result in an error, and there can be different reasons. Sometimes, the error can be fixed by automatically retrying to publish the changeset, but other errors require the user to take some action.
+
+Errored changesets that are marked as **Retrying** are automatically retried:
+
+![retrying-changesets](https://sourcegraphstatic.com/docs/images/batch_changes/retrying_changeset.png)
+
+Changesets that are marked as **Failed** can be [retried manually](#manual-retrying-of-errored-changesets):
+
+![failed_changeset_retry](https://sourcegraphstatic.com/docs/images/batch_changes/failed_changeset_retry.png)
+
+## Types of errors
+
+Two types of errors can occur when running a changeset:
+
+- [Automatic retrying](#automatic-retrying-of-errored-changesets)
+- [Manual retrying](#manual-retrying-of-errored-changesets)
+
+## Automatic retrying of errored changesets
+
+If an operation on a changeset results in an error that looks like it could be transient or resolvable if retried, Sourcegraph will automatically retry that operation. Only internal errors and errors from the code host with HTTP status codes in the `500` range will typically be retried.
+
+This will be indicated by the changeset entering a **Retrying** state. Sourcegraph will automatically retry the operation up to ten times.
+
+Examples of errors that can be fixed by [automatically retrying](#automatic-retrying-of-errored-changesets) are as follows:
+
+- Connecting to the code host failed
+- Code host responds with an error when trying to open a pull request
+- Internal network errors
+
+## Manual retrying of errored changesets
+
+Changesets that are marked as **Failed** won't be retried automatically. That's either because the number of automatic retries has been exhausted or because retrying won't fix the error without user intervention.
+
+When a changeset fails to publish, the user can click **Retry** on the error message. No re-applying is needed.
+
+Additionally, to retry all **Failed** (or even **Retrying**) changesets manually, you can re-apply the batch spec via the following two ways:
+
+1. Preview and re-apply the batch spec in the UI by running the following command and then click the printed URL to apply the uploaded batch spec
+
+```bash
+src batch preview -f YOUR_BATCH_SPEC.batch.yaml
+```
+
+2. Re-apply directly by running the following command.
+
+```bash
+src batch apply -f YOUR_BATCH_SPEC.batch.yaml
+```
+
+<Callout type="tip">Read [Creating a batch change](/batch_changes/how-tos/creating_a_batch_change) for more information on these commands.</Callout>
+
+Examples of errors that requires [manual retrying](#manual-retrying-by-re-applying-the-batch-change-spec) are as follows:
+
+- No [Batch Changes credentials](/batch_changes/how-tos/configuring_credentials) have been set up for the affected code host
+- The configured code host connection needs a different type of credentials (for example, with SSH keys)
+- A pull request for the specified branch already exists in another batch change
+
+## Handling changeset YAML formatting errors
+
+You may encounter `Format YAML` errors when running a changeset. These are often a result of misconfiguration or formatting errors. Some common YAML errors can look like the following:
+
+### Published value error
+
+```json
+cannot publish a changeset that has a published value set in its changesetTemplate
+```
+
+This YAML error occurs when you have a `published:` field in the spec and then try to run the Publish bulk action on a batch change. For example:
+
+```json
+format-yaml
+  commit:
+    message: Format all YAML
+  published: false
+```
+
+To fix this error, you can:
+
+- Change `published: false` to `published: true` in your spec and re-apply or
+- Remove the `published` field altogether. Doing so will allow you to control the publication state from the UI
+

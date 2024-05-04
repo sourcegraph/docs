@@ -139,16 +139,21 @@ export const navigation: NavigationItem[] = [
         sections: [
           { title: "Quickstart", href: "/batch-changes/quickstart" },
           {
-            title: "How it works?", href: "/batch-changes/working/creating-a-batch-change",
+            title: "Create a Batch Change", href: "/batch-changes/create-a-batch-change",
             subsections: [
-              { title: "Create a Batch Change", href: "/batch-changes/working/create-a-batch-change", },
-              { title: "Update a Batch Change", href: "/batch-changes/working/update-a-batch-change", },
-              { title: "Close a Batch Change", href: "/batch-changes/working/delete-a-batch-change", },
-
-
+              { title: "Update a Batch Change", href: "/batch-changes/update-a-batch-change", },
+              { title: "Close a Batch Change", href: "/batch-changes/delete-a-batch-change", },
             ]
           },
-
+          {
+            title: "Bulk Operations", href: "/batch-changes/bulk-operations-on-changesets",
+            subsections: [
+              { title: "Publishing Changesets", href: "/batch-changes/publishing-changesets", },
+              { title: "Tracking Changesets", href: "/batch-changes/tracking-existing-changesets", },
+            ]
+          },
+          { title: "Access Permissions", href: "/batch-changes/permissions-in-batch-changes" },
+          { title: "Error Handling", href: "/batch-changes/handling-errored-changesets" },
           { title: "FAQs", href: "/batch-changes/faq" },
         ],
       },
