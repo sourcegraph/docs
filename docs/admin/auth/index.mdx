@@ -1,19 +1,23 @@
 # User authentication
 
-Sourcegraph supports the following ways for users to sign in:
+In order to use a Sourcegraph instance, users need an account on the instance. Accounts are used to store settings and preferences, but also to identify a person to make decisions about repository visibility.
 
-- [Builtin password authentication](#builtin-password-authentication)
-- [GitHub](#github)
-- [GitLab](#gitlab)
-- [Bitbucket Cloud](#bitbucket-cloud)
+For that, various authentication providers can be configured. Multiple options can be provided.
+
+<Callout type="note">If you want to make use of repository permissions, auth providers are also used to prove the identity of the user on the code hosts. For example: To be able to see private repositories from a GitHub instance, users need to tell Sourcegraph who they are on the code host. Thus, it might make sense to configure multiple auth providers, depending on your needs. For example, you might want to use your SSO provider as the main signup/signin source, but you will also want to configure a GitHub OAuth connection so that users can prove their GitHub identity to Sourcegraph.</Callout>
+
+The following methods are supported for sign up and sign in:
+
+- [Builtin password authentication](/admin/auth/builtin)
+- [GitHub OAuth](#github)
+- [GitLab OAuth](#gitlab)
+- [Bitbucket Cloud OAuth](#bitbucket-cloud)
 - [Gerrit](#gerrit) (Beta)
 - [SAML](/admin/auth/saml)
 - [OpenID Connect](#openid-connect)
   - [Google Workspace (Google accounts)](#google-workspace-google-accounts)
 - [HTTP authentication proxies](#http-authentication-proxies)
   - [Username header prefixes](#username-header-prefixes)
-- [Username normalization](#username-normalization)
-- [Troubleshooting](#troubleshooting)
 
 The authentication providers are configured in the [`auth.providers`](/admin/config/site_config#authentication-providers) site configuration option.
 
@@ -54,87 +58,6 @@ external identity provider.
 
 > NOTE: If OAuth is the only sign-in method available on sign-out, a new OAuth sign-in will be attempted immediately upon a redirect to the sign-in page. If it is necessary to sign-out and have persistent access to the sign-in page, enable `builtin` sign-in in addition to your OAuth sign-in.
 
-## Builtin password authentication
-
-The [`builtin` auth provider](/admin/config/site_config#builtin-password-authentication) manages user accounts internally in its own database. It supports user signup, login, and password reset (via email if configured, or else via a site admin).
-
-Password reset links expire after 4 hours by default - this can be configured in site configuration with the [`auth.passwordResetLinkExpiry`](/admin/config/site_config#auth-passwordResetLinkExpiry) field.
-
-### Creating builtin authentication users
-
-Users can be created with builtin password authentication in several ways:
-
-- through the site admin page `/site-admin/users/new`
-- through users [signing up](#how-to-control-user-sign-up)
-- through the `createUser` mutation in the GraphQL API
-- through [`src users create`](/cli/references/users/create)
-
-When [SMTP is enabled](/admin/config/email), special behaviours apply to whether a builtin authentication user's email is marked as verified by default - refer to [email verification](/admin/config/email#user-email-verification) for more details.
-
-### How to control user sign-up
-
-You can use the filter `allowSignup`, available in the builtin configuration, to control who can create an account in your Sourcegraph instance.
-
-**allowSignup**
-
-  If set to `true`, users will see a sign-up link under the login form and will have access to the sign-up page, where they can create their accounts without restriction.
-
-  When not set, it will default to `false` -- in this case, users will see request account link. Unauthenticated users can submit request account forms and admins will get notification on the instance which they can approve or reject. Account request feature can be disabled by setting `auth.accessRequest: {enabled: false}`, and in this case new user accounts should be created by the site admin manually.
-
-  If you choose to block sign-ups by using the `allowSignup` filter available in another auth provider (eg., [GitHub](#how-to-control-user-sign-up-and-sign-in-with-github-auth-provider) or [GitLab](#how-to-control-user-sign-up-and-sign-in-with-gitlab-auth-provider)), make sure this builtin filter is removed or set to `false`. Otherwise, users will have a way to bypass the restriction.
-
-  During the initial setup, the builtin sign-up will be available for the first user so they can create an account and become admin.
-
-  ```json
-  {
-    // ...,
-    "auth.providers": [{ "type": "builtin", "allowSignup": true }]
-  }
-```
-> NOTE: If Sourcegraph is running on a free license all users will be created as site admins. Learn more about license settings on our [pricing page](https://about.sourcegraph.com/pricing).
-
-
-
-### Account lockout
-
-<span class="badge badge-note">Sourcegraph 3.39+</span>
-
-Account will be locked out for 30 minutes after 5 consecutive failed sign-in attempts within one hour for the builtin authentication provider. The threshold and duration of lockout and consecutive periods can be customized via `"auth.lockout"` in the site configuration:
-
-```json
-{
-  // ...
-  "auth.lockout": {
-    // The number of seconds to be considered as a consecutive period
-    "consecutivePeriod": 3600,
-    // The threshold of failed sign-in attempts in a consecutive period
-    "failedAttemptThreshold": 5,
-    // The number of seconds for the lockout period
-    "lockoutPeriod": 1800
-  }
-}
-```
-
-To enabled self-serve account unlock through emails, add the following lines to your site configuration:
-
-```json
-{
-  // Validity expressed in minutes of the unlock account token
-  "auth.unlockAccountLinkExpiry": 30,
-  // Base64-encoded HMAC signing key to sign the JWT token for account unlock URLs
-  "auth.unlockAccountLinkSigningKey": "your-signing-key",
-}
-```
-
-The `ssh-keygen` command can be used to generate and encode the signing key, for example:
-
-```bash
-$ ssh-keygen -t ed25519 -a 128 -f auth.unlockAccountLinkSigningKey
-$ base64 auth.unlockAccountLinkSigningKey | tr -d '\n'
-LS0tLS1CRUdJTiBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0KYjNCbGJu...
-```
-
-Copy the result of the `base64` command as the value of the `"auth.unlockAccountLinkSigningKey"`.
 
 ## GitHub
 
@@ -412,9 +335,15 @@ The [`openidconnect` auth provider](/admin/config/site_config#openid-connect-inc
 - [Ping Identity](https://www.pingidentity.com/en/resources/client-library/articles/openid-connect.html)
 - [Auth0](https://auth0.com/docs/protocols/oidc)
 - [Salesforce Identity](https://developer.salesforce.com/page/Inside_OpenID_Connect_on_Force.com)
-- [Microsoft Entra ID](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-protocols-openid-connect-code)
+- [Microsoft Entra ID (Azure Active Directory)](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-protocols-openid-connect-code)
 - [Google Identity Platform](https://developers.google.com/identity/)
 - Known issue: [OneLogin](https://www.onelogin.com/openid-connect) OpenID Connect is not supported (use SAML for OneLogin instead)
+
+If the OpenID Connect provider requires specifying scopes, the following scopes are required:
+
+- `openid`
+- `email`
+- `profile`
 
 To configure Sourcegraph to authenticate users via OpenID Connect:
 
@@ -548,13 +477,14 @@ Using only a username to match a Sourcegraph account to an auth provider account
 Usernames in Sourcegraph are mutable, so a malicious user could change a username, elevating their privileges.
 
 ## Linking accounts from multiple auth providers
+
 Sourcegraph will automatically link accounts from multiple external auth providers, resulting in a single user account on Sourcegraph. That way a user can login with multiple auth methods and end up being logged in with the same Sourcegraph account. In general, to link accounts, the following condition needs to be met:
 
 At the time of signing in with the new account, any of the email addresses configured on the user account on the auth provider must match any of the **verified** email addresses on the user account on the Sourcegraph side. If there is a match, the accounts are linked, [otherwise a new user account is created if auth provider is configured to support user sign ups](#how-to-control-user-sign-up).
 
 ## Username normalization
 
-Usernames on Sourcegraph are normalized according to the following rules.
+Usernames provided from external authentication providers are normalized in Sourcegraph according to the following rules:
 
 - Any characters not in `[a-zA-Z0-9-._]` are replaced with `-`
 - Usernames with exactly one `@` character are interpreted as an email address, so the username will be extracted by truncating at the `@` character.
@@ -567,4 +497,4 @@ Usernames from authentication providers are normalized before being used in Sour
 
 For example, a user whose external username (according the authentication provider) is `alice_smith@example.com` would have the Sourcegraph username `alice-smith`.
 
-If multiple accounts normalize into the same username, only the first user account is created. Other users won't be able to sign in. This is a rare occurrence; contact support if this is a blocker.
+If multiple accounts normalize into the same username, separate accounts are still created, but Sourcegraph will add a randomized suffix to the username to ensure uniqueness.
