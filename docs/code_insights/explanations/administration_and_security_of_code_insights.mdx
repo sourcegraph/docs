@@ -59,3 +59,41 @@ The following setting(s) apply to adding new data to a previously backfilled Cod
 
 The following setting(s) apply to both backfilling data and adding new data
 - `insights.query.worker.rateLimit` - Maximum number of Code Insights queries initiated per second on a worker node.
+
+## Language Stats Performance Configuration
+
+<Callout type="note">This feature is supported for Sourcegraph versions 5.4 or more.</Callout>
+
+To create language stats for a repository the Sourcegraph instance analyzes all files from the target repository. Depending
+on the repository's size this can take from a few seconds to multiple minutes. If you need to analyze a repository that's
+larger than 10GB feel free to reach out to Sourcegraph support.
+
+If a query completes the result is stored in an API-level cache and subsequent queries complete within one second. If the query
+does not complete in time, an internal cache is stays partially populated. This cache will be reused on subsequent queries which
+then have less work to do and may resolve faster.
+
+With the May 2024 Release we increased the default number of concurrent requests to the gitserver from 1 to 4, and raised
+the timeout for each language stats query from 3 minutes to 5 minutes.
+
+### Concurrent Requests
+
+This concurrent requests to the gitserver are configurable through the `GET_INVENTORY_GIT_SERVER_CONCURRENCY` environment variable ([#62011](https://github.com/sourcegraph/sourcegraph/pull/62011)).
+We recommend increasing this carefully, as an increase in concurrency may cause the gitserver to become overloaded and slow down responses.
+
+Example:
+
+```
+GET_INVENTORY_GIT_SERVER_CONCURRENCY=4
+```
+
+To understand how this configuration impacts your language stats queries you can use [tracing](/admin/observability/tracing).
+
+### Language Stats Timeout
+
+The timeout in minutes for language stats queries is configurable through the `GET_INVENTORY_TIMEOUT` environment variable ([#62011](https://github.com/sourcegraph/sourcegraph/pull/62011)).
+
+Example:
+
+```
+GET_INVENTORY_TIMEOUT=5
+```

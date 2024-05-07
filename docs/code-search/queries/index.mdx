@@ -15,7 +15,7 @@ This section documents the available search pattern syntax and interpretation in
 
 ### Keyword search (default)
 
-<Callout type="note" title="Beta">New in version 5.3: Keyword search is in the Beta stage and enabled by default. Toggle the "Keyword Search" switch to off to enable Standard search. Site administrators can disable Keyword search globally by setting `experimentalFeatures.keywordSearch: false` in site settings. Users can override the setting in their user settings. </Callout>
+<Callout type="note" title="Beta">New in version 5.3: Keyword search is in the Beta stage and enabled by default. Toggle the "Keyword Search" switch to off to enable Standard search. Site administrators can disable Keyword search globally by setting `experimentalFeatures.keywordSearch: false` in site settings. Users can override the setting in their user settings. With the keyword search feature enabled, use [patternType:keyword](/code-search/queries/language#pattern-type) in a search to turn that search into a keyword search.</Callout>
 
 Keyword search matches individual terms anywhere in the document or the filename. Use `"..."` to match phrases exactly. Specify regular expressions inside `/.../`.
 
@@ -28,6 +28,10 @@ Keyword search matches individual terms anywhere in the document or the filename
 | [`foo OR bar`](https://sourcegraph.com/search?q=context:global+foo+OR+bar&patternType=keyword)                                            | Match documents containing `foo` _or_ `bar` anywhere in the document.                                                            |
 
 <Callout type="tip">Matching is case-insensitive by default (toggle the `Aa` button to change).</Callout>
+
+<Callout type="tip">Keyword search can be enabled for a Batch Change by adding [patternType:keyword](/code-search/queries/language#pattern-type) to the query in [a batch spec](/batch_changes/quickstart#write-a-batch-spec).</Callout>
+
+<Callout type="tip">[patternType:keyword](/code-search/queries/language#pattern-type) is supported in [Code Monitors](/code_monitoring/quickstart) and [Code Insights](/code_insights/quickstart). When creating a monitor or an insight from a search, it will be automatically populated with `patternType:keyword`. When building one by hand, be sure to include `patternType:keyword` if you want keyword search.</Callout>
 
 ### Standard search
 
@@ -89,6 +93,7 @@ The following filters can be used on all searches (using [RE2 syntax](https://go
 |   **repo:has.path(...)**   |   Conditionally search inside repositories only if they contain a file path matching the regular expression. See [built-in predicates](/code-search/queries/language#built-in-repo-predicate) for more   |   [`repo:has.path(\.py) file:Dockerfile pip`](https://sourcegraph.com/search?q=context:global+repo:has.path%28%5C.py%29+file:Dockerfile+pip&patternType=lucky)   |
 |   **repo:has.topic(...)**   |   Search only in repos repositories if they have the given GitHub or GitLab topic. See [built-in predicates](/code-search/queries/language#built-in-repo-predicate) for more   |   [`repo:has.topic(code-search) rank`](https://sourcegraph.com/search?q=context:global+repo:sourcegraph/sourcegraph%24+rank&patternType=standard&sm=1&groupBy=repo)   |
 |   **repo:has.commit.after(...)**   |   Filter out stale repositories that don't contain commits past the specified time frame. See [built-in predicates](/code-search/queries/language#built-in-repo-predicate) for more   |   [`repo:has.commit.after(yesterday)`](https://sourcegraph.com/search?q=context:global+repo:.*sourcegraph.*+repo:has.commit.after%28yesterday%29&patternType=lucky) <br /> [`repo:has.commit.after(june 25 2017)`](https://sourcegraph.com/search?q=context:global+repo:.*sourcegraph.*+repo:has.commit.after%28june+25+2017%29&patternType=lucky)   |
+|   **rev:at.time(...)**   |  Search a repo or a branch at a specific point in time.  |   [`rev:at.time(1 year ago)`](https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+rev:at.time%281+year+ago%29+&patternType=keyword&sm=0) <br /> [`rev:at.time(2021-01-01)`](https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+rev:at.time%282021-01-01%2C+v5.0.0%29+&patternType=keyword&sm=0)   |
 |   **file:has.content(...)**   |   Conditionally search files only if they contain contents that match the provided regex pattern. See [built-in predicates](/code-search/queries/language#built-in-repo-predicate) for more   |   [`file:has.content(Copyright) Sourcegraph`](https://sourcegraph.com/search?q=context:global+file:has.content%28Copyright%29+Sourcegraph&patternType=lucky)   |
 |   **file:has.owners(...)**   |   **Beta** Conditionally search files only if they are owned by the given owner. Empty means _any owner_. See [code ownership documentation](/own) for more   |   [`file:has.owner(alice@sourcegraph.com) Sourcegraph`](https://sourcegraph.com/search?q=context:global+file:has.owner%28alice@sourcegraph.com%29+Sourcegraph&patternType=lucky)   |
 |   **file:has.contributor(...)**   |   Conditionally search files only if a file contributor's name or email matches the provided regex pattern. See [built-in predicates](/code-search/queries/language#built-in-file-predicate) for more   |   [`file:has.contributor(alice@sourcegraph.com) Sourcegraph`](https://sourcegraph.com/search?q=context:global+file:has.owner%28alice@sourcegraph.com%29+Sourcegraph&patternType=lucky)   |
@@ -98,6 +103,8 @@ The following filters can be used on all searches (using [RE2 syntax](https://go
 |   **visibility:any, visibility:public, visibility:private**   |   Filter results to only public or private repositories. The default is to include both private and public repositories   |   [`type:repo visibility:public`](https://sourcegraph.com/search?q=type:repo+visibility:public)   |
 
 Multiple or combined **repo:** and **file:** filters are intersected. For example, `repo:foo repo:bar` limits your search to repositories whose path contains **both** `foo` and `bar` (such as `github.com/alice/foobar`). To include results from repositories whose path contains **either** `foo` or `bar`, use `repo:foo|bar`.
+
+<Callout type="info">The `rev:at.time(...)` filter is only supported for Sourcegraph versions 5.4 or more.</Callout>
 
 ## Boolean operators
 

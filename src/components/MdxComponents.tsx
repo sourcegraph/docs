@@ -1,14 +1,18 @@
-import {Callout} from './mdx/Callout';
-import {Heading} from './mdx/Heading';
-import {LinkCard, LinkCards} from './mdx/LinkCards';
-import {ProductCard, ProductCards} from './mdx/ProductCards';
-import {QuickLink, QuickLinks} from './mdx/QuickLinks';
-import {CustomLink} from './mdx/CustomLink';
-import {Tab, Tabs} from './mdx/Tabs';
+import AWSOneClickLaunchForm from './AWSOneClickLaunchForm';
 import Accordion from './mdx/Accordion';
+import { Callout } from './mdx/Callout';
+import { CustomLink } from './mdx/CustomLink';
+import { Heading } from './mdx/Heading';
+import { LinkCard, LinkCards } from './mdx/LinkCards';
+import { ProductCard, ProductCards } from './mdx/ProductCards';
+import { QuickLink, QuickLinks } from './mdx/QuickLinks';
+import { Tab, Tabs } from './mdx/Tabs';
+import ResourceEstimator from './resource-estimator/ResourceEstimator';
 
 const MdxComponents = (version?: string) => {
 	return {
+		ResourceEstimator,
+		AWSOneClickLaunchForm,
 		Accordion,
 		Tabs: (props: any) => <Tabs {...props} />,
 		Tab: (props: any) => <Tab {...props} />,

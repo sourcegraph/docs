@@ -16,6 +16,7 @@ Cody supports a variety of cutting edge large language models for use in Chat an
 | Anthropic| [claude-3 Sonnet](https://docs.anthropic.com/claude/docs/models-overview#model-comparison) | ✅ | ✅ | ✅ |
 | Anthropic| [claude-3 Opus](https://docs.anthropic.com/claude/docs/models-overview#model-comparison) | - | ✅ | ✅ |
 | Mistral| [mixtral 8x7b](https://mistral.ai/technology/#models:~:text=of%20use%20cases.-,Mixtral%208x7B,-Currently%20the%20best) | - | ✅ | - |
+| Mistral| [mixtral 8x22b](https://mistral.ai/technology/#models:~:text=of%20use%20cases.-,Mixtral%208x7B,-Currently%20the%20best) | - | ✅ | - |
 | Ollama* | [variety](https://ollama.com/) | *experimental*| *experimental* | - |
 ||||||
 
@@ -25,13 +26,34 @@ Cody supports a variety of cutting edge large language models for use in Chat an
 
 Cody uses a set of models for autocomplete which are suited for the low latency use case.
 
-| **Provider** | **Model** | **Free** | **Pro** | **Enterprise** |
-|:--|:--|:--|:--|:--|
-| Fireworks.ai | [StarCoder](https://arxiv.org/abs/2305.06161) | ✅ | ✅ | ✅ |
-| Anthropic| [claude Instant](https://docs.anthropic.com/claude/docs/models-overview#model-comparison) | - | - | ✅ |
-| Ollama* | [variety](https://ollama.com/) | *experimental*| *experimental* | - |
-||||||
-
-
+| **Provider** |                                         **Model**                                         |    **Free**    |    **Pro**     | **Enterprise** |
+| :----------- | :---------------------------------------------------------------------------------------- | :------------- | :------------- | :------------- |
+| Fireworks.ai | [StarCoder](https://arxiv.org/abs/2305.06161)                                             | ✅              | ✅              | ✅              |
+| Anthropic    | [claude Instant](https://docs.anthropic.com/claude/docs/models-overview#model-comparison) | -              | -              | ✅              |
+| Ollama*      | [variety](https://ollama.com/)                                                            | *experimental* | *experimental* | -              |
+|              |                                                                                           |                |                |                |
 
 <Callout type="note">[See here for Ollama setup instructions](https://sourcegraph.com/docs/cody/clients/install-vscode#supported-local-ollama-models-with-cody)</Callout>
+
+## Input and output token limits
+
+For all models, Cody allows up to **4,000 tokens of output**, which is approximately **500-600** lines of code.
+
+For Claude 3 Sonnet or Opus models users, Cody supports up to **30,000 tokens (~4,000 lines of code)** of user-defined context through `@-mention` syntax and **15,000 tokens** of continued chat history (user queries + system responses). All other models are currently capped at **7,000 tokens** of shared context between user-defined context and chat history.
+
+Here's a detailed breakdown of the token limits by model:
+
+|      **Model**      | **User Defined** | **Chat** **History** | **Output** |
+| ------------------- | ---------------- | -------------------- | ---------- |
+| gpt-3.5-turbo       | 7,000            | shared               | 4,000      |
+| gpt-4               | 7,000            | shared               | 4,000      |
+| gpt-4-turbo         | 7,000            | shared               | 4,000      |
+| claude instant      | 7,000            | shared               | 4,000      |
+| claude-2.0          | 7,000            | shared               | 4,000      |
+| claude-2.1          | 7,000            | shared               | 4,000      |
+| claude-3 Haiku      | 7,000            | shared               | 4,000      |
+| **claude-3 Sonnet** | **200,000**      | **15,000**           | **4,000**  |
+| **claude-3 Opus**   | **200,000**      | **15,000**           | **4,000**  |
+| mixtral 8x7b        | 7,000            | shared               | 4,000      |
+
+For more information on how Cody builds context, see our [documentation here](/cody/core-concepts/context).
