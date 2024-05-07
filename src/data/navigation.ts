@@ -154,6 +154,16 @@ export const navigation: NavigationItem[] = [
           },
           { title: "Access Permissions", href: "/batch-changes/permissions-in-batch-changes" },
           { title: "Error Handling", href: "/batch-changes/handling-errored-changesets" },
+          {
+            title: "Examples", href: "/batch-changes/examples",
+            subsections: [
+              { title: "Refactor Go Code via Comby", href: "/batch-changes/refactor-go-comby", },
+              { title: "Update Go Import Statements via Comby", href: "/batch-changes/updating-go-import-statements", },
+              { title: "Update Base Images in Dockerfiles", href: "/batch-changes/update-base-images-in-dockerfiles", },
+              { title: "Search and Replace Specific Terms", href: "/batch-changes/search-and-replace-specific-terms", },
+            ]
+          },
+
           { title: "FAQs", href: "/batch-changes/faq" },
         ],
       },

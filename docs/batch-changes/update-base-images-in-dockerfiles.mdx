@@ -1,30 +1,28 @@
-# Updating base images in Dockerfiles
+# Updating Base Images in Dockerfiles
 
-<p className="subtitle">
-Create a batch change to update Dockerfiles in every one of your repositories.
+<p className="subtitle">
+Create a batch change to update Dockerfiles in each repository.
 </p>
 
-### Introduction
+In this example, Batch Changes will allow you to update the base images used in your Dockerfiles across many repositories in just a few commands. First you will create [a batch spec](/batch-changes/create-a-batch-change) that:
 
-Batch Changes allow us to update the base images used in our Dockerfiles, across many repositories, in just a few commands.
-
-This tutorial shows you how to create [a batch spec](/batch_changes/explanations/introduction_to_batch_changes#batch-spec) that
-
-1. finds `Dockerfile`s that make use of `google/dart:2.x` base images and
-2. changes those `Dockerfiles` to use `google/dart:2.10`
+- Finds `Dockerfile` that make use of `google/dart:2.x` base images, and
+- Changes those `Dockerfiles` to use `google/dart:2.10`
 
 The batch spec and instructions here can [easily be adapted to update other base images](#updating-other-base-images).
 
-<img src="https://sourcegraphstatic.com/docs/images/batch_changes/update_base_images_in_dockerfiles_teaser.png" />
+![update_base_images_in_dockerfiles_teaser](https://sourcegraphstatic.com/docs/images/batch_changes/update_base_images_in_dockerfiles_teaser.png)
 
-### Prerequisites
+## Prerequisites
 
-We recommend using the latest version of Sourcegraph when working with Batch Changes and that you have a basic understanding of how to create batch specs and run them. See the following documents for more information:
+<Callout type="tip">It's recommended to use the latest version of Sourcegraph when working with Batch Changes.</Callout>
 
-1. ["Quickstart"](/batch_changes/quickstart)
-1. ["Introduction to Batch Changes"](/batch_changes/explanations/introduction_to_batch_changes)
+Before you start, it's better to read the following docs:
 
-### Create the batch spec
+- [Batch Changes Quickstart](/batch-changes/quickstart)
+- [How to create and run a Batch Spec?](/batch-changes/create-a-batch-change)
+
+## Create the batch spec
 
 Save the following batch spec YAML as `update-dart-base-images-2-10.batch.yaml`:
 
@@ -66,23 +64,32 @@ changesetTemplate:
   published: false
 ```
 
-### Create the batch change
+## Create the batch change
 
-1. In your terminal, run this command:
+- In your terminal, run the following command:
 
-    <pre>src batch preview -f update-dart-base-images-2-10.batch.yaml</pre>
-1. Wait for it to run and compute the changes for each repository.
-    <img src="https://sourcegraphstatic.com/docs/images/batch_changes/update_base_images_in_dockerfiles_wait_run.png" />
-1. Open the preview URL that the command printed out.
-    <img src="https://sourcegraphstatic.com/docs/images/batch_changes/update_base_images_in_dockerfiles_click_url.png" />
-1. Examine the preview. Confirm that the changesets are the ones you intended to track. If not, edit the batch spec and then rerun the command above.
-    <img src="https://sourcegraphstatic.com/docs/images/batch_changes/update_base_images_in_dockerfiles_preview.png" />
-1. Click the **Apply** button to create the batch change.
-1. Feel free to then publish the changesets (i.e. create pull requests and merge requests) by [modifying the `published` attribute in the batch spec](/batch_changes/references/batch_spec_yaml_reference#changesettemplate-published) and re-running the `src batch preview` command.
+```shell
+src batch preview -f update-dart-base-images-2-10.batch.yaml
+```
 
-### Updating other base images
+- Wait for it to run and compute the changes for each repository
 
-In order to update other base images in `Dockerfile`s you can either extend the batch spec or create another batch spec in which you change the `repositoriesMatchingQuery` and the `steps.run` properties.
+![update_base_images_in_dockerfiles_wait_run](https://sourcegraphstatic.com/docs/images/batch_changes/update_base_images_in_dockerfiles_wait_run.png)
+
+- Open the preview URL that the command printed out
+
+![update_base_images_in_dockerfiles_click_url](https://sourcegraphstatic.com/docs/images/batch_changes/update_base_images_in_dockerfiles_click_url.png)
+
+- Examine the preview. Confirm that the changesets are the ones you intended to track. If not, edit the batch spec and then re-run the command above
+
+![batch_changes/update_base_images_in_dockerfiles_preview](https://sourcegraphstatic.com/docs/images/batch_changes/update_base_images_in_dockerfiles_preview.png)
+
+- Click the **Apply** button to create the batch change
+- Feel free to then publish the changesets (i.e., create pull requests and merge requests) by [modifying the `published` attribute in the batch spec](/batch_changes/references/batch_spec_yaml_reference#changesettemplate-published) and re-running the `src batch preview` command.
+
+## Updating other base images
+
+In order to update other base images in Dockerfiles you can either extend the batch spec or create another batch spec in which you change the `repositoriesMatchingQuery` and the `steps.run` properties.
 
 You can keep using regexp-based search and `sed`, or you can use [structural search](/code-search/types/structural) combined with [comby](https://comby.dev) to update base images.
 
