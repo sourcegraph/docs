@@ -95,6 +95,58 @@ Now, only the users specified in the `userPermissions` parameter will be allowed
 
 You can call `setRepositoryPermissionsForUsers` repeatedly to set permissions for each repository, and whenever you want to change the list of authorized users.
 
+## Setting sub-repository permissions for users
+
+Sourcegraph supports permissions on a per-file/directory basis. 
+
+To enable the sub-repo permissions API, add the following to the [site configuration](/admin/config/site_config):
+
+```json
+"experimentalFeatures": {
+    "subRepoPermissions": {"enabled": true}
+}
+```
+
+Sub-repo permissions can be set for a repository via the following GraphQL API:
+
+```graphql
+mutation {
+  setSubRepositoryPermissionsForUsers(
+    repository: "<repo ID>",
+    userPermissions:  [
+      {
+        bindID: "alice",
+        paths: ["-/**", "/README.md"]
+      }
+    ]
+  ) {
+    alwaysNil
+  }
+}
+```
+
+This query denies the user `alice` access to all files in the repository, except for the file `README.md`.
+The paths are specified in the [glob syntax](https://en.wikipedia.org/wiki/Glob_(programming)), and a `-` prefix indicates that the path should be denied.
+Permissions are applied in the order they are specified. If we were to want to provide `alice` access to all files except for the `README.md` file, we could specify the following:
+
+```graphql
+mutation {
+  setSubRepositoryPermissionsForUsers(
+    repository: "<repo ID>",
+    userPermissions:  [
+      {
+        bindID: "alice",
+        paths: ["/**", "-/README.md"]
+      }
+    ]
+  ) {
+    alwaysNil
+  }
+}
+```
+
+The default permission if a path is not specified is to deny access.
+
 ### Listing a user's authorized repositories
 
 You may query the set of repositories visible to a particular user with the `authorizedUserRepositories` [GraphQL API](/api/graphql) query, which accepts a `username` or `email` parameter to specify the user:

@@ -384,13 +384,13 @@ Please consult [this page](/admin/config/webhooks/incoming) in order to configur
 
 GitHub connections support the following configuration options, which are specified in the JSON editor in the site admin "Manage code hosts" area.
 
-{/* <div markdown-func=jsonschemadoc jsonschemadoc:path="admin/external_service/github.schema.json">[View page on docs.sourcegraph.com](https://docs.sourcegraph.com/admin/external_service/github) to see rendered content.</div> */}
+{/* <div markdown-func=jsonschemadoc jsonschemadoc:path="admin/external_service/github.schema.json">[View page on our docs](/admin/external_service/github) to see rendered content.</div> */}
 
 ### admin/external_service/github.schema.json
 
 ```json
 {
-	// If non-null, enforces GitHub repository permissions. This requires that there is an item in the [site configuration json](https://docs.sourcegraph.com/admin/config/site_config#auth-providers) `auth.providers` field, of type "github" with the same `url` field as specified in this `GitHubConnection`.
+	// If non-null, enforces GitHub repository permissions. This requires that there is an item in the [site configuration json](https://sourcegraph.com/docs/admin/config/site_config#auth-providers) `auth.providers` field, of type "github" with the same `url` field as specified in this `GitHubConnection`.
 	"authorization": null,
 
 	// TLS certificate of the GitHub Enterprise instance. This is only necessary if the certificate is self-signed or signed by an internal CA. To get the certificate run `openssl s_client -connect HOST:443 -showcerts < /dev/null 2> /dev/null | openssl x509 -outform PEM`. To escape the value into a JSON string, you may want to use a tool like https://json-escape-text.now.sh.
@@ -445,7 +445,7 @@ GitHub connections support the following configuration options, which are specif
 	//
 	// If "http", Sourcegraph will access GitHub repositories using Git URLs of the form http(s)://github.com/myteam/myproject.git (using https: if the GitHub instance uses HTTPS).
 	//
-	// If "ssh", Sourcegraph will access GitHub repositories using Git URLs of the form git@github.com:myteam/myproject.git. See the documentation for how to provide SSH private keys and known_hosts: https://docs.sourcegraph.com/admin/repo/auth#repositories-that-need-http-s-or-ssh-authentication.
+	// If "ssh", Sourcegraph will access GitHub repositories using Git URLs of the form git@github.com:myteam/myproject.git. See the documentation for how to provide SSH private keys and known_hosts: https://sourcegraph.com/docs/admin/repo/auth#repositories-that-need-http-s-or-ssh-authentication.
 	"gitURLType": "http",
 
 	// DEPRECATED: The installation ID of the GitHub App.
@@ -494,6 +494,8 @@ GitHub connections support the following configuration options, which are specif
 	//
 	// - `public` mirrors all public repositories for GitHub Enterprise and is the equivalent of `none` for GitHub
 	//
+	// - `internal` mirrors all internal repositories for GitHub Enterprise and is the equivalent of `none` for GitHub
+	//
 	// - `affiliated` mirrors all repositories affiliated with the configured token's user:
 	// 	- Private repositories with read access
 	// 	- Public repositories owned by the user or their orgs
@@ -510,7 +512,7 @@ GitHub connections support the following configuration options, which are specif
 		"none"
 	],
 
-	// A GitHub personal access token. Create one for GitHub.com at https://github.com/settings/tokens/new?description=Sourcegraph (for GitHub Enterprise, replace github.com with your instance's hostname). See https://docs.sourcegraph.com/admin/external_service/github#github-api-token-and-access for which scopes are required for which use cases.
+	// A GitHub personal access token. Create one for GitHub.com at https://github.com/settings/tokens/new?description=Sourcegraph (for GitHub Enterprise, replace github.com with your instance's hostname). See https://sourcegraph.com/docs/admin/external_service/github#github-api-token-and-access for which scopes are required for which use cases.
 	"token": null,
 
 	// URL of a GitHub instance, such as https://github.com or https://github-enterprise.example.com.
@@ -533,14 +535,14 @@ GitHub connections support the following configuration options, which are specif
 
 ## Default branch
 
-Sourcegraph displays search results from the default branch of a repository when no `revision:` [parameter](https://docs.sourcegraph.com/code-search/queries#repository-revisions) is specified. If you'd like the search results to be displayed from another branch by default, you may [change a repo's default branch on the github repo settings page](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-branches-in-your-repository/changing-the-default-branch). If this is not an option, consider using [search contexts](/code-search/working/search_contexts) instead.
+Sourcegraph displays search results from the default branch of a repository when no `revision:` [parameter](/code-search/queries#repository-revisions) is specified. If you'd like the search results to be displayed from another branch by default, you may [change a repo's default branch on the github repo settings page](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-branches-in-your-repository/changing-the-default-branch). If this is not an option, consider using [search contexts](/code-search/working/search_contexts) instead.
 
 ## Troubleshooting
 
 ### Hitting GitHub Search API rate limit with repositoryQuery
-When Sourcegraph syncs repositories configured  via `repositoryQuery`, it consumes GitHub API search rate limit, which is lower than the normal rate limit. The `affiliated`, `public` and `none` special values, however, trigger normal API requests instead of search API requests.
+When Sourcegraph syncs repositories configured  via `repositoryQuery`, it consumes GitHub API search rate limit, which is lower than the normal rate limit. The `affiliated`, `public`, and `none` special values, however, trigger normal API requests instead of search API requests. `internal` is also a special value that uses the GitHub Search API to list all internal repositories.
 
-When the search rate limit quota is exhausted, an error like `failed to list GitHub repositories for search: page=..., searchString=\"...\"` can be found in logs. To work around this try reducing the frequency with which repository syncing happens by setting a higher value (in minutes) of `repoListUpdateInterval` in your Sourcegraph [site config](https://docs.sourcegraph.com/admin/config/site_config).
+When the search rate limit quota is exhausted, an error like `failed to list GitHub repositories for search: page=..., searchString=\"...\"` can be found in logs. To work around this try reducing the frequency with which repository syncing happens by setting a higher value (in minutes) of `repoListUpdateInterval` in your Sourcegraph [site config](/admin/config/site_config).
 
 `repositoryQuery` is the only repo syncing method that consumes GitHub search API quota, so if setting `repoListUpdateInterval` doesn't work consider switching your syncing method to use another option, like `orgs`, or using one of the special values described above.
 
