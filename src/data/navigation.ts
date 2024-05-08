@@ -153,6 +153,12 @@ export const navigation: NavigationItem[] = [
             ]
           },
           { title: "Access Permissions", href: "/batch-changes/permissions-in-batch-changes" },
+          {
+            title: "Changesets in Monorepo", href: "/batch-changes/creating-changesets-per-project-in-monorepos",
+            subsections: [
+              { title: "Changesets in Large Repos", href: "/batch-changes/creating-multiple-changesets-in-large-repositories", },
+            ]
+          },
           { title: "Error Handling", href: "/batch-changes/handling-errored-changesets" },
           {
             title: "Examples", href: "/batch-changes/examples",
