@@ -163,7 +163,14 @@ export const navigation: NavigationItem[] = [
               { title: "Search and Replace Specific Terms", href: "/batch-changes/search-and-replace-specific-terms", },
             ]
           },
-
+          {
+            title: "Batch Spec Reference", href: "/batch-changes/batch-spec-yaml-reference",
+            subsections: [
+              { title: "Batch Spec Templating", href: "/batch-changes/batch-spec-templating", },
+              { title: "Batch Spec Cheatsheet", href: "/batch-changes/batch-spec-cheat-sheet", },
+            ]
+          },
+          { title: "Troubleshooting", href: "/batch-changes/troubleshooting" },
           { title: "FAQs", href: "/batch-changes/faq" },
         ],
       },

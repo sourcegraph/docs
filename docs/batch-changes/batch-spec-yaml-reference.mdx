@@ -1,12 +1,10 @@
-# batch spec YAML reference
+# Batch Spec YAML Reference
 
-[Sourcegraph Batch Changes](/batch_changes/) use [batch specs](/batch_changes/explanations/introduction_to_batch_changes#batch-spec) to define batch changes.
-
-This page is a reference guide to the batch spec YAML format in which batch specs are defined. If you're new to YAML and want a short introduction, see "[Learn YAML in five minutes](https://learnxinyminutes.com/docs/yaml/)."
+<p className="subtitle">Sourcegraph Batch Changes use [batch specs](/batch-changes/create-a-batch-change#writing-a-batch-spec) to define batch changes. This page is a reference guide to the batch spec YAML format in which batch specs are defined.</p>
 
 ## `name`
 
-The name of the batch change, which is unique among all batch changes in the namespace. A batch change's name is case-preserving.
+The `name` of the batch change, which is unique among all batch changes in the namespace. A batch change's name is case-preserving.
 
 ### Examples
 
@@ -20,7 +18,7 @@ name: update-node.js
 
 ## `description`
 
-The description of the batch change. It's rendered as Markdown.
+The `description` of the batch change. It's rendered as Markdown.
 
 ### Examples
 
@@ -41,7 +39,7 @@ description: |
 
 ## `on`
 
-The set of repositories (and branches) to run the batch change on, specified as a list of search queries (that match repositories) and/or specific repositories.
+The set of repositories (and branches) on which the batch change would run. It's specified as a list of search queries (that match repositories) and specific repositories.
 
 ### Examples
 
@@ -53,11 +51,11 @@ on:
 
 ## `on.repositoriesMatchingQuery`
 
-A Sourcegraph search query that matches a set of repositories (and branches). Each matched repository branch is added to the list of repositories that the batch change will be run on.
+A Sourcegraph search query that matches a set of repositories (and branches). Each matched repository branch is added to the list of repositories on which the batch change will run.
 
-Your search query should answer the question "where do I want to run this batch change?". Search result matches for things like commits, symbols, or file owners will be ignored.
+Your search query should answer the question, "Where do I want to run this batch change?". Search result matches for things like commits, symbols, or file owners will be ignored.
 
-See "[Code search](/code-search/)" for more information on Sourcegraph search queries.
+<Callout type="tip">See [Code Search Queries](/code-search/queries/) docs for more information.</Callout>
 
 ### Examples
 
@@ -73,13 +71,13 @@ on:
 
 ## `on.repository`
 
-A specific repository (and, optionally, one or more branches) to be added to the list of repositories that the batch change will be run on.
+A specific repository (and, optionally, one or more branches) that's added to the list of repositories on which the batch change will run.
 
-> NOTE: Before Sourcegraph 3.35, only the last named branch would be used if multiple branches were specified, and only a single `branch` could be provided. In Sourcegraph 3.35 and later versions, all branches are used.
+<Callout type= "note">For Sourcegraph version 3.35 or less, if multiple branches are specified, then only the last-named branch will be used, and only a single `branch` could be provided. For Sourcegraph version 3.35 or more, all branches are used.</Callout>
 
 To match a branch other than the default, `branch` or `branches` can be used to specify one or multiple branches, respectively. Only one of `branch` or `branches` can be set.
 
-> WARNING: If multiple branches are matched for the same repository, then [`changesetTemplate.branch`](#changesettemplate-branch) will need to have a different value for each branch.
+<Callout type= "warning">If multiple branches are matched for the same repository, then [`changesetTemplate.branch`](#changesettemplate-branch) will need to have a different value for each branch.</Callout>
 
 ### Examples
 
@@ -115,16 +113,15 @@ on:
       - 3.23
 ```
 
-
 ## `steps`
 
-The sequence of commands to run (for each repository branch matched in the `on` property) to produce the batch change's changes.
+The sequence of commands to run (for each repository branch matched in the `on` property) to produce the batch change.
 
 ### Examples
 
 ```yaml
 steps:
-  - run: echo "Hello World!" >> README
+  - run: echo "Hello World!">> README
     container: alpine:3
 ```
 
@@ -149,29 +146,25 @@ steps:
 
 The shell command to run in the container. It can also be a multi-line shell script. The working directory is the root directory of the repository checkout.
 
-<Callout type="note">`steps.run` can include [template variables](batch_spec_templating).</Callout>
+<Callout type="note">`steps.run` can include [template variables](/batch_changes/batch_spec_templating).</Callout>
 
 ## `steps.container`
 
-The Docker image used to launch the Docker container in which the shell command is run.
+The Docker image used to launch the Docker container in which the shell command is run. The image has to have either the `/bin/sh` or the `/bin/bash` shell.
 
-The image has to have either the `/bin/sh` or the `/bin/bash` shell.
-
-It is executed using `docker` on the machine on which the [Sourcegraph CLI (`src`)](https://sourcegraph.com/github.com/sourcegraph/src-cli) is executed. If the image exists locally, that is used. Otherwise it's pulled using `docker pull`.
+It is executed using `docker` on the machine on which the [Sourcegraph CLI (`src`)](https://sourcegraph.com/github.com/sourcegraph/src-cli) is executed. If the image exists locally, that is used. Otherwise, it's pulled using `docker pull.`
 
 ## `steps.env`
 
-Environment variables to set in the environment when running this command.
+Environment variables to set in the environment when running this command. These may be defined either as an [object](#environment-object) or as an [array](#environment-array).
 
-These may be defined either as an [object](#environment-object) or as an [array](#environment-array).
-
-<Callout type="note">`steps.env` can include [template variables](batch_spec_templating).</Callout>
+<Callout type="note">`steps.env` can include [template variables](/batch_changes/batch_spec_templating).</Callout>
 
 ### Environment object
 
-In this case, `steps.env` is an object, where the key is the name of the environment variable and the value is the value.
+In this case, `steps.env` is an object, where the key is the environment variable's name and the value is the value.
 
-#### Examples
+### Examples
 
 ```yaml
 steps:
@@ -185,11 +178,11 @@ steps:
 
 In this case, `steps.env` is an array. Each array item is either:
 
-1. An object with a single property, in which case the key is used as the environment variable name and the value the value, or
-2. For src-cli execution: A string that defines an environment variable to include from the environment `src` is being run within. This is useful to define secrets that you don't want to include in the spec file, but this makes the spec dependent on your environment, means that the local execution cache will be invalidated each time the environment variable changes, and means that the batch spec file is no longer [the sole source of truth intended by the Batch Changes design](/batch_changes/explanations/batch_changes_design).
-3. For server-side execution: A string that defines a secret value to expose as an environment variable. Follow [the guide on executor secrets](/admin/executors/executor_secrets) to set them up. The editor will suggest available secrets. This is useful to use secret values that you don't want to include in the spec file. The execution cache will be invalidated each time the secret value changes, and means that the batch spec file is no longer [the sole source of truth intended by the Batch Changes design](/batch_changes/explanations/batch_changes_design).
+- An object with a single property, in which case the key is used as the environment variable name and the value the value, or
+- **For src-cli execution**: A string that defines an environment variable to include from the environment `src` is being run within. This is useful to define secrets that you don't want to include in the spec file, but this makes the spec dependent on your environment, which means that the local execution cache will be invalidated each time the environment variable changes, and means that the batch spec file is no longer [the sole source of truth intended by the Batch Changes design](/batch_changes/explanations/batch_changes_design)
+- **For server-side execution**: A string that defines a secret value to expose as an environment variable. Follow [the guide on executor secrets](/admin/executors/executor_secrets) to set them up. The editor will suggest available secrets. This is useful to use secret values you don't want to include in the spec file. The execution cache will be invalidated each time the secret value changes, and this means that the batch spec file is no longer [the sole source of truth intended by the Batch Changes design](/batch_changes/explanations/batch_changes_design)
 
-#### Examples
+### Examples
 
 This example is functionally the same as the [object](#environment-object) example above:
 
@@ -201,7 +194,7 @@ steps:
       - MESSAGE: Hello world!
 ```
 
-This example pulls in the `USER` environment variable, or for server-side uses the executor secret called `USER`, and uses it to construct the line that will be appended to `README`:
+This example pulls in the `USER` environment variable, or for server-side, uses the executor secret called `USER`, and uses it to construct the line that will be appended to `README`:
 
 ```yaml
 steps:
@@ -216,11 +209,9 @@ For instance, if `USER` is set to `adam`, this would append `Hello world! from a
 
 ## `steps.files`
 
-Files to create on the host machine and mount into the container when running `steps.run`.
+Files to create on the host machine and mount into the container when running `steps.run`. `steps.files` is an object, where the key is the name of the file _inside the container_ and the value is the content of the file.
 
-`steps.files` is an object, where the key is the name of the file _inside the container_ and the value is the content of the file.
-
-<Callout type="note">`steps.files` can include [template variables](batch_spec_templating).</Callout>
+<Callout type="note">`steps.files` can include [template variables](/batch_changes/batch_spec_templating).</Callout>
 
 ### Examples
 
@@ -324,13 +315,13 @@ Possible values: `text`, `yaml`, `json`. Default is `text`.
 
 ## `steps.if`
 
-Condition to check before executing the step. If the value of the `if:` attribute is `true` (boolean) or `"true"` (string) then the step is executed in the given repository (or workspace, in case [workspaces](#workspaces) are used). Otherwise the step is skipped.
+Condition to check before executing the step. If the value of the `if:` attribute is `true` (boolean) or `"true``` (string), then the step is executed in the given repository (or workspace, in case [workspaces](#workspaces) are used). Otherwise, the step is skipped.
 
-As an optimization, the [Sourcegraph CLI](/cli/) tries to evaluate the condition _before_ starting to execute any `steps`. If the condition can be evaluated ahead of time and the result of the evaluation is false then the execution of the step won't be attempted for the repository, which leads to better cache utilization.
+As an optimization, the [Sourcegraph CLI](/cli/) tries to evaluate the condition _before_ starting to execute any `steps`. If the condition can be evaluated ahead of time and the result of the evaluation is false, then the execution of the step won't be attempted for the repository, which leads to better cache utilization.
 
-Ahead-of-time evaluation is possible if the condition contains only static data. Example: `if: ${{ eq repository.name "github.com/my-org/my-repo" }}`. The repository name is known before the execution of the steps, so evaluation succeeds and Sourcegraph CLI will not include the given step in the list of steps to execute for repositories that don't have the matching name. That in turn allows the modification of this step's `run` attribute, for example, without invalidating the cache for the repositories in which it's never executed.
+Ahead-of-time evaluation is possible if the condition contains only static data. Example: `if: ${{ eq repository.name "github.com/my-org/my-repo" }}`. The repository name is known before the execution of the steps, so evaluation succeeds. Sourcegraph CLI will not include the given step in the list of steps to execute for repositories that don't have the matching name. That, in turn, allows the modification of this step's `run` attribute, for example, without invalidating the cache for the repositories in which it's never executed.
 
-<Callout type="note">`steps.if` can include [templating](batch_spec_templating).</Callout>
+<Callout type="note">`steps.if` can include [templating](/batch_spec_templating).</Callout>
 
 ### Examples
 
@@ -354,7 +345,7 @@ steps:
 steps:
   # `if:` uses templating to check for repository name and produce a "true". Only runs in github.com/sourcegraph/automation-testing
   - if: ${{ eq repository.name "github.com/sourcegraph/automation-testing" }}
-    run: echo "hello from automation-testing" >> message.txt
+    run: echo "hello from automation-testing">> message.txt
     container: alpine:3
 ```
 
@@ -362,7 +353,7 @@ steps:
 steps:
   # `if:` uses glob pattern to match repository name and produce "true" on match.
   - if: ${{ matches repository.name "*sourcegraph-testing*" }}
-    run: echo "name contains sourcegraph-testing" >> message.txt
+    run: echo "name contains sourcegraph-testing">> message.txt
     container: alpine:3
 ```
 
@@ -384,25 +375,21 @@ steps:
 ```yaml
 steps:
   # `if:` checks for path, in case steps are executed in workspace.
-  - if: ${{ eq steps.path "sub/directory/in/repo" }}
-    run: echo "hello workspace" >> workspace.txt
+  - if: ${{ eq steps.path "sub/directory/in/repo"}}
+    run: echo "hello workspace">> workspace.txt
     container: golang
 ```
 
 ## `steps.mount`
 
-<Callout type="note">`mount` is a new feature. Using `mount` locally is supported in Sourcegraph 3.41 and [Sourcegraph CLI 3.41](https://sourcegraph.com/github.com/sourcegraph/src-cli). Using `mount` in batch changes server-side is supported in Sourcegraph 4.1 and [Sourcegraph CLI 4.0.1](https://sourcegraph.com/github.com/sourcegraph/src-cli). It's a preview of functionality we're currently exploring to make running custom scripts/binaries easier. If you have any feedback, please let us know!</Callout>
+<Callout type="note">This feature is available only for <a href="https://sourcegraph.com/github.com/sourcegraph/src-cli">Sourcegraph CLI</a>. Using `mount` locally is supported in Sourcegraph v3.41 and [Sourcegraph CLI 3.41](https://sourcegraph.com/github.com/sourcegraph/src-cli). Using `mount` in batch changes server-side is supported in Sourcegraph v4.1 and [Sourcegraph CLI 4.0.1](https://sourcegraph.com/github.com/sourcegraph/src-cli).</Callout>
 
-> NOTE: This feature is currently only available for <a href="https://sourcegraph.com/github.com/sourcegraph/src-cli">Sourcegraph CLI</a>.
+`steps.mount` functionality makes running custom scripts/binaries easier. It mounts a local `path` to a `path` in a Docker container. Mounted paths are accessible to the step's `run` command.
 
-Mounts a local path to a path in a Docker container. Mounted paths are accessible to the step's `run` command.
-
-A `path` can point to a file or a directory. The `path` can be an absolute path or a relative path. Regardless if the
-path is absolute or relative, the path must be within the same directory as the batch spec that is being run (the batch
-spec directory is considered the "working directory"). If the batch spec is provided using standard input, the current
+A `path` can point to a file or a directory. The `path` can be **absolute** or **relative**. Regardless of the type, the path must be within the same directory as the batch spec being run (the batch spec directory is considered the **working directory**). If the batch spec is provided using standard input, the current
 directory is used as the working directory.
 
-Individual files are restricted to a max size of 10MB. Do not include any sensitive information in files being uploaded.
+Individual files are restricted to a **max size of 10MB**. Do not include any sensitive information in the files being uploaded.
 
 ### Examples
 
@@ -468,13 +455,13 @@ The repository name as configured on your Sourcegraph instance.
 
 ## `importChangesets.externalIDs`
 
-The changesets to import from the code host. For GitHub this is the pull request number, for GitLab this is the merge request number, and for Bitbucket Server, Bitbucket Data Center, or Bitbucket Cloud this is the pull request number.
+The changesets to import from the code host. For GitHub, this is the pull request number; for GitLab, this is the merge request number; and for Bitbucket Server, Bitbucket Data Center, or Bitbucket Cloud, this is the pull request number.
 
 ## `changesetTemplate`
 
 A template describing how to create (and update) changesets with the file changes produced by the command steps.
 
-This defines what the changesets on the code hosts (pull requests on GitHub, merge requests on Gitlab, ...) will look like.
+This defines what the changesets on the code hosts (pull requests on GitHub, merge requests on Gitlab, etc.) will look like.
 
 ### Examples
 
@@ -521,19 +508,19 @@ changesetTemplate:
 
 The title of the changeset on the code host.
 
-<Callout type="note">`changesetTemplate.title` can include [template variables](batch_spec_templating).</Callout>
+<Callout type="note">`changesetTemplate.title` can include [template variables](/batch_changes/batch_spec_templating).</Callout>
 
 ## `changesetTemplate.body`
 
 The body (description) of the changeset on the code host. If the code supports Markdown you can use it here.
 
-<Callout type="note">`changesetTemplate.body` can include [template variables](batch_spec_templating).</Callout>
+<Callout type="note">`changesetTemplate.body` can include [template variables](/batch_changes/batch_spec_templating).</Callout>
 
 ## `changesetTemplate.branch`
 
-The name of the Git branch to create or update on each repository with the changes.
+The name of the Git branch to create or update each repository with the changes.
 
-If multiple branches within the same repository are matched in [`on.repository`](#on-repository), then this value must be dynamic, since it is impossible to create multiple branches with the same name in the same repository. This is often most easily accomplished with the `repository.branch` template variable. For example, this will create `new-feature-3.34` and `new-feature-3.35` branches:
+If multiple branches within the same repository are matched in [`on.repository`](#on-repository), then this value must be dynamic since creating multiple branches with the same name in the same repository is impossible. This is often most easily accomplished with the `repository.branch` template variable. For example, this will create `new-feature-3.34` and `new-feature-3.35` branches:
 
 ```yaml
 on:
@@ -546,23 +533,23 @@ changesetTemplate:
   branch: new-feature-${{ repository.branch }}
 ```
 
-<Callout type="note">`changesetTemplate.branch` can include [template variables](batch_spec_templating).</Callout>
+<Callout type="note">`changesetTemplate.branch` can include [template variables](/batch_changes/batch_spec_templating).</Callout>
 
 ## `changesetTemplate.commit`
 
-The Git commit to create with the changes.
+The Git commit to create with the batch changes.
 
 ## `changesetTemplate.commit.message`
 
 The Git commit message.
 
-<Callout type="note">`changesetTemplate.commit.message` can include [template variables](batch_spec_templating).</Callout>
+<Callout type= "note">`changesetTemplate.commit.message` can include [template variables](/batch_changes/batch_spec_templating).</Callout>
 
 ## `changesetTemplate.commit.author`
 
 The `name` and `email` of the Git commit author.
 
-<Callout type="note">`changesetTemplate.commit.author` can include [template variables](batch_spec_templating).</Callout>
+<Callout type= "note">`changesetTemplate.commit.author` can include [template variables](/batch_changes/batch_spec_templating).</Callout>
 
 ### Examples
 
@@ -576,19 +563,19 @@ changesetTemplate:
 
 ## `changesetTemplate.published`
 
-Whether to publish the changesets as soon as the spec is applied. This may be a boolean value (ie `true` or `false`), `'draft'`, or [an array to only publish some changesets within the batch change](#publishing-only-specific-changesets). This may also be omitted, in which case the publication state will be controlled through the Sourcegraph UI, and will default to unpublished (that is, the same as specifying `false`).
+`changesetTemplate.published` tells whether to publish the changesets as soon as the spec is applied. This may be a boolean value (i.e., `true` or `false`), "draft", or [an array to only publish some changesets within the batch change](#publishing-only-specific-changesets). This may also be omitted, in which case the publication state will be controlled through the Sourcegraph UI and default to unpublished (the same as specifying `false`).
 
-An unpublished changeset can be previewed on Sourcegraph by any person who can view the batch change, but its commit, branch, and pull request aren't created on the code host.
+An unpublished changeset can be previewed on Sourcegraph by any user who can view the batch change, but its commit, branch, and pull requests aren't created on the code host.
 
-When `published` is set to `draft` a commit, branch, and pull request / merge request are being created on the code host **in draft mode**. This means:
+When `published` is set to `draft`, a commit, branch, and pull request/merge request are created on the code host **in draft mode**. This means:
 
 - On GitHub the changeset will be a [draft pull request](https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/about-pull-requests#draft-pull-requests).
-- On GitLab the changeset will be a merge request whose title is be prefixed with `'WIP: '` to [flag it as a draft merge request](https://docs.gitlab.com/ee/user/project/merge_requests/work_in_progress_merge_requests.html#adding-the-draft-flag-to-a-merge-request).
-- On Bitbucket Server, Bitbucket Data Center, and Bitbucket Cloud draft pull requests are not supported and changesets published as `draft` won't be created.
+- On GitLab, the changeset will be a merge request whose title is prefixed with "WIP:" to [flag it as a draft merge request](https://docs.gitlab.com/ee/user/project/merge_requests/work_in_progress_merge_requests.html#adding-the-draft-flag-to-a-merge-request).
+- On Bitbucket Server, Bitbucket Data Center, and Bitbucket Cloud, draft pull requests are not supported, and changesets published as `draft` won't be created.
 
-> NOTE: Changesets that have already been published on a code host as a non-draft (`published: true`) cannot be converted into drafts. Changesets can only go from unpublished to draft to published, but not from published to draft. That also allows you to take it out of draft mode on your code host, without risking Sourcegraph to revert to draft mode.
+<Callout type= "note">Changesets that have already been published on a code host as a non-draft (`published: true`) cannot be converted to drafts. Changesets can only go from **unpublished** to **draft** to **published**, but not from **published** to **draft**. That also allows you to take it out of draft mode on your code host without risking Sourcegraph to revert to draft mode.</Callout>
 
-A published changeset results in a commit, branch, and pull request being created on the code host.
+A published changeset creates a commit, branch, and pull request on the code host.
 
 ### Publishing only specific changesets
 
@@ -603,7 +590,7 @@ published:
 
 Each key will be matched against the repository name using [glob](https://godoc.org/github.com/gobwas/glob#Compile) syntax. The [gobwas/glob library](https://godoc.org/github.com/gobwas/glob#Compile) is used for matching, with the key operators being:
 
-|    Term     |                      Meaning                       |
+|  **Term**   |                    **Meaning**                     |
 | ----------- | -------------------------------------------------- |
 | `*`         | Match any sequence of characters                   |
 | `?`         | Match any single character                         |
@@ -611,7 +598,7 @@ Each key will be matched against the repository name using [glob](https://godoc.
 | `[a-z]`     | Match any character between `a` and `z`, inclusive |
 | `{abc,def}` | Match either `abc` or `def`                        |
 
-If multiple entries match a repository, then the last entry will be used. For example, `github.com/a/b` will _not_ be published given this configuration:
+If multiple entries match a repository, the last entry will be used. For example, `github.com/a/b` will **not** be published given this configuration:
 
 ```yaml
 published:
@@ -627,7 +614,7 @@ published:
   - github.com/*: false
 ```
 
-> NOTE: The standalone `"*"` is quoted in the key to avoid ambiguity in the YAML document.
+<Callout type= "note">The standalone `"*``` is quoted in the key to avoid ambiguity in the YAML document.</Callout>
 
 By adding a `@<branch>` at the end of a match-rule, the rule is only matched against changesets with that branch:
 
@@ -697,11 +684,11 @@ changesetTemplate:
 
 Whether or not each changeset should be created on a fork of the upstream repository in the namespace of the user publishing them (or the namespace of the service account if [global credentials](/batch_changes/how-tos/configuring_credentials#global-service-account-tokens) are used).
 
-If the site config setting [`batchChanges.enforceForks`](/admin/config/batch_changes#forks) is enabled, this value will override the setting. For example, explicitly setting `fork: false` when the site config setting is enabled will result in changesets being published directly to the target repos. If omitted, the site config setting will be used.
+This value will override the setting if the site config setting [`batchChanges.enforceForks`](/admin/config/batch_changes#forks) is enabled. For example, explicitly setting `fork: false` when the site config setting is enabled will publish changesets directly to the target repos. If omitted, the site config setting will be used.
 
-The name of the fork Sourcegraph creates will be prefixed with the name of the original repo's namespace in order to prevent potential repo name collisions. For example, a batch spec targeting `github.com/my-org/project` would create or use any existing fork by the name `github.com/user/my-org-project`.
+The name of the fork Sourcegraph creates will be prefixed with the name of the original repo's namespace to prevent potential repo name collisions. For example, a batch spec targeting `github.com/my-org/project` would create or use any existing fork named `github.com/user/my-org-project`.
 
-> NOTE: If your code host does not support forking (e.g. Gerrit), trying to publish a changeset with `fork: true` will result in an error.
+<Callout type= "warning">If your code host does not support forking (e.g., Gerrit), trying to publish a changeset with `fork: true` will result in an error.</Callout>
 
 ### Examples
 
@@ -741,7 +728,6 @@ transformChanges:
       repository: github.com/sourcegraph/src-cli # optional: only apply the rule in this repository
 ```
 
-
 ```yaml
 transformChanges:
   group:
@@ -756,35 +742,31 @@ transformChanges:
 
 ## `transformChanges.group`
 
-A list of groups to define which file diffs to group together to create an additional changeset in the given repository.
+A list of groups to define which file diffs to group together to create an additional changeset in the given repository. The **order of the list matters**, since each file diff's `filepath` is matched against the `directory` of a group, and the **last match** is used.
 
-The **order of the list matters**, since each file diff's filepath is matched against the `directory` of a group and the **last match** is used.
-
-If no changes have been produced in a `directory` then no changeset will be created.
+If no changes have been produced in a `directory`, no changeset will be created.
 
 ## `transformChanges.group.directory`
 
-The name of the directory in which file diffs should be grouped together.
-
-The name is relative to the root of the repository.
+The name of the directory in which file diffs should be grouped together. The name is relative to the root of the repository.
 
 ## `transformChanges.group.branch`
 
 The branch that should be used for this additional changeset. This **overwrites the [`changesetTemplate.branch`](#changesettemplate-branch)** when creating the additional changeset.
 
-**Important**: the branch can _not_ be nested under the [`changesetTemplate.branch`](#changesettemplate-branch), i.e. if the `changesetTemplate.branch` is `my-batch-change` then this can _not_ be `my-batch-change/my-subdirectory` since [git doesn't allow that](https://stackoverflow.com/a/22630664). Additionally branch names must be unique and cannot be used as arguments for multiple `directory` fields.
+<Callout type= "info">The branch cannot be nested under the [`changesetTemplate.branch`](#changesettemplate-branch), i.e. if the `changesetTemplate.branch` is `my-batch-change` then this can _not_ be `my-batch-change/my-subdirectory` since [git doesn't allow that](https://stackoverflow.com/a/22630664). Additionally, branch names must be unique and cannot be used as arguments for multiple `directory` fields.</Callout>
 
 ## `transformChanges.group.repository`
 
-Optional: the file diffs matching the given directory will only be grouped in a repository with that name, as configured on your Sourcegraph instance.
+(Optional) The file diffs matching the given directory will only be grouped in a repository with that name, as configured on your Sourcegraph instance.
 
 ## `workspaces`
 
-The optional `workspaces` property allows users to define where projects are located in repositories and cause the [`steps`](#steps) to be executed for each project, instead of once per repository. That allows easier creation of multiple changesets in large repositories.
+The optional `workspaces` property allows users to define where projects are located in repositories and cause the [`steps`](#steps) to be executed for each project instead of once per repository. That allows easier creation of multiple changesets in large repositories.
 
-For each repository that's yielded by [`on`](#on), Sourcegraph search is used to get the locations of the `rootAtLocationOf` file. Each location then serves as a workspace for the execution of the `steps`, instead of the root of the repository. Use the [`workspaces.in`](#workspaces-in) property to scope the workspaces definitions. Omitting it is treated as `*`.
+For each repository yielded by [`on`](#on), a Sourcegraph search is used to get the locations of the `rootAtLocationOf` file. Each location serves as a workspace for executing the `steps` instead of the repository's root. Use the [`workspaces.in`](#workspaces-in) property to scope the definitions of workspaces. Omitting it is treated as `*`.
 
-**Important**: Since multiple workspaces in the same repository can produce multiple changesets, it's **required** to use templating to produce a unique [`changesetTemplate.branch`](#changesettemplate-branch) for each produced changeset. See the [examples](#workspaces-examples) below.
+<Callout type= "info">Since multiple workspaces in the same repository can produce multiple changesets, it's **required** to use templating to produce a unique [`changesetTemplate.branch`](#changesettemplate-branch) for each produced changeset. See the [examples](#workspaces-examples) below.</Callout>
 
 ### Examples
 
@@ -806,10 +788,10 @@ changesetTemplate:
 
   # We can use templating and helper functions get the `path` in which
   # the `steps` executed and turn that into a branch name:
-  branch: my-multi-workspace-batch-change-${{ replace steps.path "/" "-" }}
+  branch: my-multi-workspace-batch-change-${{ replace steps.path "/" "-"}}
 ```
 
-Using templating to produce a unique branch name in repositories _with_ workspaces and repositories without workspaces:
+Using templating to produce a unique branch name in repositories with workspaces and repositories without workspaces:
 
 ```yaml
 on:
@@ -824,7 +806,7 @@ changesetTemplate:
   # [...]
 
   # Since the steps in `github.com/sourcegraph/src-cli` are executed in the
-  # root, where path is "", we can use `join_if` to drop it from the branch name
+  # root, where path is"", we can use `join_if` to drop it from the branch name
   # if it's a blank string:
   branch: ${{ join_if "-" "my-multi-workspace-batch-change" (replace steps.path "/" "-") }}
 ```
@@ -910,9 +892,7 @@ changesetTemplate:
 
 ## `workspaces.rootAtLocationOf`
 
-The full name of the file that sits at the root of one or more workspaces in a given repository.
-
-Sourcegraph code search is used to find the location of files with this name in the repositories returned by [`on`](#on).
+The full name of the file that sits at the root of one or more workspaces in a given repository. Sourcegraph [Code Search](/code-search) is used to find the location of files with this name in the repositories returned by [`on`](#on).
 
 For example, in a repository with the following files:
 
@@ -927,13 +907,11 @@ workspaces:
     in: "*"
 ```
 
-would create _two changesets_ in the repository, one in `packages/sourcegraph-ui` and one in `packages/sourcegraph-test-helper`.
+Would create **two changesets** in the repository, one in `packages/sourcegraph-ui` and one in `packages/sourcegraph-test-helper`.
 
 ## `workspaces.in`
 
-The repositories in which the workspace should be discovered.
-
-This field supports **globbing** by using [glob](https://godoc.org/github.com/gobwas/glob#Compile) syntax. See "[Publishing only specific changesets](#publishing-only-specific-changesets)" for more information on globbing.
+The repositories in which the workspace should be discovered. This field supports **globbing** by using [glob](https://godoc.org/github.com/gobwas/glob#Compile) syntax. See "[Publishing only specific changesets](#publishing-only-specific-changesets)" for more information on globbing.
 
 A repository matching multiple entries results in an error.
 
@@ -957,13 +935,9 @@ workspaces:
 
 ## `workspaces.onlyFetchWorkspace`
 
-When set to `true`, only the folder containing the workspace is downloaded to execute the `steps`.
+When set to `true`, only the folder containing the workspace is downloaded to execute the `steps`. This field is not required; when not set, the default is `false`.
 
-This field is not required and when not set the default is `false`.
-
-Additional files — `.gitignore` and `.gitattributes` as of now — are downloaded from the location of the workspace up to the root of the repository.
-
-For example, with the following file layout in a repository
+Additional files — `.gitignore` and `.gitattributes` — are downloaded from the workspace location up to the repository's root. For example, with the following file layout in a repository
 
 ```
 .
@@ -994,7 +968,7 @@ then
 
 - the `steps` will be executed in `b`
 - the complete contents of `b` will be downloaded and are available to the steps
-- the `.gitattributes` and `.gitignore` files in `a` will be downloaded and put in `a`, **but only those**
+- the `.gitattributes` and `.gitignore` files in `a' will be downloaded and put in `a', **but only those**
 - the `.gitignore` files in the root will be downloaded and put in the root folder, **but only that file**
 
 ### Examples

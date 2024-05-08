@@ -1,12 +1,12 @@
-# Batch spec cheat sheet
+# Batch Spec Cheatsheet
 
-## Overview
+<p className="subtitle">This cheatsheet is a quick reference for common batch change use cases.</p>
 
-There are some common patterns that we reuse all the time when writing [batch specs](/batch_changes/references/batch_spec_yaml_reference). In this document we collect these patterns to make it easy for others to copy and reuse them. See our own curated collection of [batch change examples](https://github.com/sourcegraph/batch-change-examples) for even more complete examples of batch specs.
+Some common patterns are reused every time when writing [batch specs](/batch_changes/references/batch_spec_yaml_reference). This documentation lists these patterns to make it easy for you to copy and reuse them. You can also refer to the [batch change examples repo](https://github.com/sourcegraph/batch-change-examples) for more consolidated examples of batch specs.
 
-Since most of the examples here make use of [batch spec templating](/batch_changes/references/batch_spec_templating), be sure to also take a look at that page.
+It's also recommended to see [batch spec templating](/batch_changes/references/batch_spec_templating) since most of these examples use templating.
 
-### Loop over search result paths in shell script
+## Loop over search result paths in shell script
 
 ```yaml
 on:
@@ -21,7 +21,7 @@ steps:
     container: alpine:3
 ```
 
-### Put search result paths in file and loop over them
+## Put search result paths in file and loop over them
 
 ```yaml
 on:
@@ -38,7 +38,7 @@ steps:
       /tmp/search-results: ${{ join repository.search_result_paths "\n" }}
 ```
 
-### Use search result paths as arguments for single command
+## Use search result paths as arguments for single command
 
 ```yaml
 on:
@@ -49,7 +49,7 @@ steps:
     container: comby/comby
 ```
 
-### Format files modified by previous step
+## Format files modified by previous step
 
 ```yaml
 steps:
@@ -59,7 +59,7 @@ steps:
     container: unibeautify/goimports
 ```
 
-### Dynamically set branch name based on workspace
+## Dynamically set branch name based on workspace
 
 ```yaml
 workspaces:
@@ -88,7 +88,7 @@ changesetTemplate:
     ${{ end }}
 ```
 
-### Process search result paths with script
+## Process search result paths with script
 
 ```yaml
 steps:
@@ -107,7 +107,7 @@ steps:
         puts YAML.dump(content)
 ```
 
-### Use separate file as config file for command
+## Use separate file as config file for command
 
 ```yaml
 steps:
@@ -124,7 +124,7 @@ steps:
         rewrite :[args] { ":[arg~[a-zA-Z0-9.()]+]" -> "\":[arg]\", :[arg]" }'
 ```
 
-### Publish only changesets on specific branches
+## Publish only changesets on specific branches
 
 ```yaml
 changesetTemplate:
@@ -133,7 +133,7 @@ changesetTemplate:
     - github.com/my-org/my-repo@my-branch-name: draft
 ```
 
-### Create new files in repository
+## Create new files in repository
 
 ```yaml
 steps:
@@ -154,7 +154,7 @@ steps:
         .dir-locals.el
 ```
 
-### Execute steps only in repositories matching name
+## Execute steps only in repositories matching name
 
 ```yaml
 steps:
@@ -164,7 +164,7 @@ steps:
     container: alpine:3
 ```
 
-### Execute steps based on output of previous command
+## Execute steps based on output of previous command
 
 ```yaml
 steps:
@@ -179,7 +179,7 @@ steps:
     if: ${{ outputs.goModExists }}
 ```
 
-### Write a GitHub Actions workflow that includes [GitHub expression syntax](https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions)
+## Write a GitHub Actions workflow that includes [GitHub expression syntax](https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions)
 
 ```yaml
 steps:
@@ -210,13 +210,15 @@ steps:
       EOF
 ```
 
-Since GitHub expression syntax conflicts with Sourcegraph's own template expression syntax, including the expression again as a quoted string within a template expression means that the inner expression will be output as a string (effectively, "ignoring" the contents of the inner expression). For `run:` fields specifically, to avoid the shell also interpreting the GitHub expression as a variable when executing the script, we need to escape the quoted `$` with two backslashes: firstly for the shell script itself, and secondly to escape the backslash within the template expression string.
+Since GitHub expression syntax conflicts with Sourcegraph's own template expression syntax, including the expression again as a quoted string within a template expression means that the inner expression will be output as a string (effectively, **ignoring** the contents of the inner expression).
+
+For `run:` fields specifically, to avoid the shell also interpreting the GitHub expression as a variable when executing the script, you need to escape the quoted `$` with two backslashes: first for the shell script itself, and second to escape the backslash within the template expression string.
 
 To use the literal sequence `${{ }}` in non-`run:` fields of the batch spec that [supports templating](/batch_changes/references/batch_spec_templating#fields-with-template-support), quoted strings are normally sufficient: `${{ "${{ leave me alone! }}" }}`
 
-### List what files were modified by the batch change in the changeset
+## List what files were modified by the batch change in the changeset
 
-```
+```yaml
 changesetTemplate:
   title: A batch change
   body: |
