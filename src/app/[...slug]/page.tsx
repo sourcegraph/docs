@@ -7,6 +7,8 @@ import {allPosts} from 'contentlayer/generated';
 import {getMDXComponent} from 'next-contentlayer/hooks';
 import {notFound} from 'next/navigation';
 
+export const maxDuration = 300;
+
 export const generateStaticParams = async () => {
 	return allPosts.map(post => ({
 		params: {slug: post._raw.flattenedPath.split('/')}
