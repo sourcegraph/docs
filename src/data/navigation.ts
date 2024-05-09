@@ -176,6 +176,12 @@ export const navigation: NavigationItem[] = [
               { title: "Batch Spec Cheatsheet", href: "/batch-changes/batch-spec-cheat-sheet", },
             ]
           },
+          {
+            title: "Working with CLI", href: "/batch-changes/how-src-executes-a-batch-spec",
+            subsections: [
+              { title: "Re-executing Batch Specs", href: "/batch-changes/reexecuting-batch-specs-multiple-times", },
+            ]
+          },
           { title: "Troubleshooting", href: "/batch-changes/troubleshooting" },
           { title: "FAQs", href: "/batch-changes/faq" },
         ],
