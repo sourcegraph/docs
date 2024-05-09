@@ -15,10 +15,6 @@ export const versions: VersionI[] = [
         url: '/',
     },
     {
-        name: 'v5.3',
-        url: '/v/5.3'
-    },
-    {
         name: 'v5.2',
         url: '/v/5.2'
     },
