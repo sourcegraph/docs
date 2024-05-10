@@ -195,17 +195,6 @@ export const navigation: NavigationItem[] = [
         ],
       },
       {
-        title: "Batch Changes",
-        href: "/batch_changes",
-        sections: [
-          { title: "Quickstart", href: "/batch_changes/quickstart" },
-          { title: "Explanations", href: "/batch_changes/explanations" },
-          { title: "Tutorials", href: "/batch_changes/tutorials" },
-          { title: "How-to Guides", href: "/batch_changes/how-tos" },
-          { title: "Reference", href: "/batch_changes/references" },
-        ],
-      },
-      {
         title: "Code Monitoring",
         href: "/code_monitoring",
         sections: [
