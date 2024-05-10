@@ -21,10 +21,10 @@ export default function AWSOneClickLaunchForm() {
   };
   return (
     // <div>
-    //   {/* Embed https://docs.sourcegraph.com/admin/deploy/resource_estimator as frame */}
+    //   {/* Embed https://sourcegraph.com/docs/admin/deploy/resource_estimator as frame */}
     //   <iframe
     //     className="w-full h-full min-h-[500px]"
-    //     src="https://docs.sourcegraph.com/admin/deploy/resource_estimator"
+    //     src="https://sourcegraph.com/docs/admin/deploy/resource_estimator"
     //     frameBorder="0"
     //     allowFullScreen
     //   />
