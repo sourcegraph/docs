@@ -143,6 +143,8 @@ export const navigation: NavigationItem[] = [
             subsections: [
               { title: "Update a Batch Change", href: "/batch-changes/update-a-batch-change", },
               { title: "Close a Batch Change", href: "/batch-changes/delete-a-batch-change", },
+              { title: "Run Server Side", href: "/batch-changes/server-side", },
+
             ]
           },
           {
@@ -150,6 +152,12 @@ export const navigation: NavigationItem[] = [
             subsections: [
               { title: "Publishing Changesets", href: "/batch-changes/publishing-changesets", },
               { title: "Tracking Changesets", href: "/batch-changes/tracking-existing-changesets", },
+            ]
+          },
+          {
+            title: "Configuring Credentials", href: "/batch-changes/configuring-credentials",
+            subsections: [
+              { title: "Site Admin Config", href: "/batch-changes/site-admin-configuration", },
             ]
           },
           { title: "Access Permissions", href: "/batch-changes/permissions-in-batch-changes" },
