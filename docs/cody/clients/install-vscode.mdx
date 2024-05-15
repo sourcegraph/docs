@@ -268,3 +268,73 @@ To generate chat and commands with Ollama locally, follow these steps:
 - Currently, you will need to restart VS Code to see the new models
 
 <Callout type="note">You can run `ollama list` in your terminal to see what models are currently available on your machine.</Callout>
+
+## Experimental models
+
+<Callout type="info">Support for the following models is currently in the Experimental stage, and available for Cody Free and Pro plans.</Callout>
+
+The following experimental model providers can be configured in Cody's extension settings JSON:
+
+- Google (requires [Google AI Studio API key](https://aistudio.google.com/app/apikey))
+- Groq (requires [GroqCloud API key](https://console.groq.com/docs/api-keys))
+- OpenAI & OpenAI-Compatible API (requires [OpenAI API key](https://platform.openai.com/account/api-keys))
+- Ollama (remote)
+
+Once configured, and VS Code has been restarted, you can select the configured model from the dropdown both for chat and for edits.
+
+Example VS Code user settings JSON configuration:
+
+```json
+{
+  "cody.dev.models": [
+    // Google (e.g. Gemini 1.5 Pro)
+    {
+      "provider": "google",
+      "model": "gemini-1.5-pro-latest",
+      "tokens": 1000000,
+      "apiKey": "xyz"
+    },
+    // Groq (e.g. llama2 70b)
+    {
+      "provider": "groq",
+      "model": "llama2-70b-4096",
+      "tokens": 4096,
+      "apiKey": "xyz"
+    },
+    // OpenAI & OpenAI-compatible APIs
+    {
+      "provider": "groq", // keep groq as provider
+      "model": "some-model-id",
+      "apiKey": "xyz",
+      "apiEndpoint": "https://host.domain/path"
+    },
+    // Ollama (remote)
+    {
+      "provider": "ollama",
+      "model": "some-model-id",
+      "apiEndpoint": "https://host.domain/path"
+    }
+  ]
+}
+```
+
+### Provider configuration options
+
+- `provider`: `"google"`, `"grok"` or `"ollama"`
+  - The LLM provider type.
+- `model`: `string`
+  - The ID of the model, e.g. `"gemini-1.5-pro-latest"`
+- `tokens`: `number` - optional
+  - The context window size of the model. Default: `7000`.
+- `apiKey`: `string` - optional
+  - The API key for the endpoint. Required if the provider is `"google"` or `"groq"`.
+- `apiEndpoint`: `string` - optional
+  - The endpoint URL, if you don't want to use the provider’s default endpoint.
+
+### Debugging experimental models
+
+To debug problems with the experimental models, use the VS Code output panel which can be opened using the following steps:
+
+- Open the Cody Sidebar
+- Next to "Settings and Support" click the "..." icon
+- Click "Open Output Channel"
