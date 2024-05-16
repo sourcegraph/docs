@@ -24,6 +24,50 @@ You can read more about this case in our [limitations](/code_insights/explanatio
 
 If the data is available, the error alert will inform you which times the search has timed out.
 
+## Strategies for very large repositories
+
+When dealing with large repositories, several strategies can help identify and manage search limitations effectively.
+
+The goal is to find a query that can execute successfully, and then ramp up complexity until we find the breaking point.
+
+### Use Code Search to test your query
+
+You can use Code Search to test the query against a particular timestamp in a given repository.
+
+Since Code Insights computes data points for twelve datapoints in the give time range,
+you must add a commit in the past to the `repo` parameter to achieve comparable results.
+
+For example the Code Insights query `file:.*\.md hello repo:^github\.com/my_org/my_repo` should be written as
+`context:global file:.*\.md hello repo:^github\.com/my_org/my_repo$@my_commit_sha` in Code Search.
+
+If the query fails with a timeout before one minute has passed, add the parameter `timeout:1m`.
+
+Once a query was executed the results may be indexed and you need to choose a different commit sha to achieve comparable results to Code Insights.
+
+### Precise queries compute faster
+
+If your query is not able to compute results in a reasonable time, you can try to reduce the number of results returned by the query.
+
+For example, if you want to track the version of a NPM dependency in your code base, searching for `my_library file:package.json` will compute much faster because there are less files to look at and fewer results to return.
+
+We recommend to make your query as precise as possible (and even omit results that may be relevant) until you reach a query that is able to compute fast enough.
+
+To learn more about writing precise queries, see our [search query syntax](/code-search/queries).
+
+### Increase the timeout
+
+By default, search queries have a one minute timeout. This value is capped by the setting `search.limits.maxTimeoutSeconds` which by default is also one minute.
+
+Your site admin can change this value to increase the maximum timeout. Once it is increased, you can use the search parameter `timeout:` to give the query more time to run.
+
+Example:
+
+```
+timeout:10m
+```
+
+Note that very long searches can have a negative impact on performance, so it's important to use this parameter with caution.
+
 ## Other errors
 
 For other errors, please reach out to our support team through your usual channels or at support@sourcegraph.com.
