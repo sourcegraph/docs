@@ -6,6 +6,8 @@ import { TableOfContents } from '@/components/Toc';
 import { allPosts } from 'contentlayer/generated';
 import { getMDXComponent } from 'next-contentlayer/hooks';
 import { notFound } from 'next/navigation';
+import { CopyButton } from '@/components/CopyButton';
+import React, { DetailedHTMLProps, HTMLAttributes } from 'react';
 
 export const maxDuration = 300;
 
@@ -22,6 +24,10 @@ export const generateMetadata = ({ params }: Props) => {
 		return { title: post.headings[0].title };
 	}
 };
+
+interface PreProps extends DetailedHTMLProps<HTMLAttributes<HTMLPreElement>, HTMLPreElement> {
+  raw?: string;
+}
 
 interface Props {
 	params: {
@@ -41,7 +47,29 @@ const PostLayout = ({ params }: Props) => {
 				<Breadcrumbs path={params.slug} />
 				<article>
 					<Prose>
-						<Content components={MdxComponents()} />
+            <Content components={{
+              ...MdxComponents,
+              pre: function ({ children, ...props }: PreProps) {
+                const propsObj = { ...props };
+                const propsValues = Object.values(propsObj);
+                const [, , dataLanguage, dataTheme] = propsValues;
+                const lang = dataLanguage || "shell";
+								
+								let codeContent = '';
+                React.Children.forEach(children, child => {
+                  if (typeof child === 'string') codeContent += child;
+                });
+
+                return (
+                  <pre data-language={lang} data-theme={dataTheme} className={"py-4"}>
+                    <div className='relative'>
+                      <CopyButton text={props?.raw || ''}  />
+                      <div className={"p-2"}>{children}</div>
+                    </div>
+                  </pre>
+                );
+              }
+            }} />
 					</Prose>
 				</article>
 				<PrevNextLinks />
