@@ -6,6 +6,10 @@ In all of these cases, if data is returned at all, it will be an undercount.
 
 See the below situations for tips on avoiding and troubleshooting these errors.
 
+## Search Queries
+
+This guide applies to all types of Code Insights that use search queries. Language Stats Insights do not use search queries.
+
 ## Timeout errors
 
 For searches that take a long time to complete, it's possible for them to timeout before the search ends, and before we can record the data value.
@@ -32,17 +36,33 @@ The goal is to find a query that can execute successfully, and then ramp up comp
 
 ### Use Code Search to test your query
 
-You can use Code Search to test the query against a particular timestamp in a given repository.
+You can use Code Search to verify if the query is able to complete within the given timeout.
 
-Since Code Insights computes data points for twelve datapoints in the give time range,
-you must add a commit in the past to the `repo` parameter to achieve comparable results.
+Once a query was executed the results may be indexed and you need to choose a different commit or date to achieve comparable results to Code Insights.
 
-For example the Code Insights query `file:.*\.md hello repo:^github\.com/my_org/my_repo` should be written as
-`context:global file:.*\.md hello repo:^github\.com/my_org/my_repo$@my_commit_sha` in Code Search.
+#### Unlimited results
+
+Code Search limits the number of results by default. Code Insights however needs to count through all the results.
+
+Add `count:all` to your query to get comparable results.
+
+#### Picking the right commit
+
+When Code Insights runs a search query, it will do so for 12 commits spread out over the configured time range. This
+unindexed search can take longer the further back in time the search goes.
+
+To test that the slowest search will succeed in time, we recommend using the `rev:at.time(...)` (available from version 5.4.0)
+with the time range that you selected. E.g. if your Code Insight looks at the last 2 years you should use `rev:at.time(2y)`.
+
+For example the Code Insights query `file:.*\.md hello repo:^github\.com/my_org/my_repo count:all` should be written as
+`context:global file:.*\.md hello repo:^github\.com/my_org/my_repo count:all rev:at.time(2y)` in Code Search.
+
+If your Sourcegraph instance is on a version older than 5.4.0, you can pick a commit sha from e.g. 2 years ago. Here the query
+`file:.*\.md hello repo:^github\.com/my_org/my_repo count:all` becomes `context:global file:.*\.md hello repo:^github\.com/my_org/my_repo@my_commit_sha count:all`.
+
+#### Timeout
 
 If the query fails with a timeout before one minute has passed, add the parameter `timeout:1m`.
-
-Once a query was executed the results may be indexed and you need to choose a different commit sha to achieve comparable results to Code Insights.
 
 ### Precise queries compute faster
 
@@ -50,7 +70,14 @@ If your query is not able to compute results in a reasonable time, you can try t
 
 For example, if you want to track the version of a NPM dependency in your code base, searching for `my_library file:package.json` will compute much faster because there are less files to look at and fewer results to return.
 
-We recommend to make your query as precise as possible (and even omit results that may be relevant) until you reach a query that is able to compute fast enough.
+We recommend to make your query as precise as possible and reduce the number of results until you reach a query that is able to compute fast enough.
+
+Here are some tips:
+- Search only files with a particular ending. E.g. use `file:.*\.md` to search for files with the `.md` ending.
+- Search for files with a certain language. E.g. use `lang:javascript` to search for all JavaScript files. Please note
+  that this can be slower than the file ending filter, but may be necessary for ambiguous file endings (e.g. `.m` is used for Objective-C and Matlab).
+- Put quotes around literal terms, unless you want to search for multiple keywords. E.g. searching for `"hello world"` will only
+  yield results where both words are connected by a whitespace, but `hello world` will yield results where either word appears.
 
 To learn more about writing precise queries, see our [search query syntax](/code-search/queries).
 
