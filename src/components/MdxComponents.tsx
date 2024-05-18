@@ -52,7 +52,12 @@ const MdxComponents = (version?: string) => {
 		video: (props: any) => {
 			return <video className="rounded-xl" {...props} />;
 		},
-		pre: (props: any) => <PreCodeBlock {...props} />
+		pre: (props: any) => <PreCodeBlock {...props} />,
+		table: (props: any) => (
+			<div {...props} className="table-auto w-full overflow-x-auto">
+				<table>{props.children}</table>
+			</div>
+		)
 	};
 };
 
