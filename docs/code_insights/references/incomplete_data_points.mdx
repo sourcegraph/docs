@@ -6,6 +6,10 @@ In all of these cases, if data is returned at all, it will be an undercount.
 
 See the below situations for tips on avoiding and troubleshooting these errors.
 
+## Search Queries
+
+This guide applies to all types of Code Insights that use search queries. Language Stats Insights do not use search queries.
+
 ## Timeout errors
 
 For searches that take a long time to complete, it's possible for them to timeout before the search ends, and before we can record the data value.
@@ -23,6 +27,73 @@ In addition:
 You can read more about this case in our [limitations](/code_insights/explanations/current_limitations_of_code_insights#accuracy-considerations-for-an-insight-query-returning-a-large-result-set).
 
 If the data is available, the error alert will inform you which times the search has timed out.
+
+## Strategies for very large repositories
+
+When dealing with large repositories, several strategies can help identify and manage search limitations effectively.
+
+The goal is to find a query that can execute successfully, and then ramp up complexity until we find the breaking point.
+
+### Use Code Search to test your query
+
+You can use Code Search to verify if the query is able to complete within the given timeout.
+
+Once a query was executed the results may be indexed and you need to choose a different commit or date to achieve comparable results to Code Insights.
+
+#### Unlimited results
+
+Code Search limits the number of results by default. Code Insights however needs to count through all the results.
+
+Add `count:all` to your query to get comparable results.
+
+#### Picking the right commit
+
+When Code Insights runs a search query, it will do so for 12 commits spread out over the configured time range. This
+unindexed search can take longer the further back in time the search goes.
+
+To test that the slowest search will succeed in time, we recommend using the `rev:at.time(...)` (available from version 5.4.0)
+with the time range that you selected. E.g. if your Code Insight looks at the last 2 years you should use `rev:at.time(2y)`.
+
+For example the Code Insights query `file:.*\.md hello repo:^github\.com/my_org/my_repo count:all` should be written as
+`context:global file:.*\.md hello repo:^github\.com/my_org/my_repo count:all rev:at.time(2y)` in Code Search.
+
+If your Sourcegraph instance is on a version older than 5.4.0, you can pick a commit sha from e.g. 2 years ago. Here the query
+`file:.*\.md hello repo:^github\.com/my_org/my_repo count:all` becomes `context:global file:.*\.md hello repo:^github\.com/my_org/my_repo@my_commit_sha count:all`.
+
+#### Timeout
+
+If the query fails with a timeout before one minute has passed, add the parameter `timeout:1m`.
+
+### Precise queries compute faster
+
+If your query is not able to compute results in a reasonable time, you can try to reduce the number of results returned by the query.
+
+For example, if you want to track the version of a NPM dependency in your code base, searching for `my_library file:package.json` will compute much faster because there are less files to look at and fewer results to return.
+
+We recommend to make your query as precise as possible and reduce the number of results until you reach a query that is able to compute fast enough.
+
+Here are some tips:
+- Search only files with a particular ending. E.g. use `file:.*\.md` to search for files with the `.md` ending.
+- Search for files with a certain language. E.g. use `lang:javascript` to search for all JavaScript files. Please note
+  that this can be slower than the file ending filter, but may be necessary for ambiguous file endings (e.g. `.m` is used for Objective-C and Matlab).
+- Put quotes around literal terms, unless you want to search for multiple keywords. E.g. searching for `"hello world"` will only
+  yield results where both words are connected by a whitespace, but `hello world` will yield results where either word appears.
+
+To learn more about writing precise queries, see our [search query syntax](/code-search/queries).
+
+### Increase the timeout
+
+By default, search queries have a one minute timeout. This value is capped by the setting `search.limits.maxTimeoutSeconds` which by default is also one minute.
+
+Your site admin can change this value to increase the maximum timeout. Once it is increased, you can use the search parameter `timeout:` to give the query more time to run.
+
+Example:
+
+```
+timeout:10m
+```
+
+Note that very long searches can have a negative impact on performance, so it's important to use this parameter with caution.
 
 ## Other errors
 
