@@ -2,6 +2,39 @@
 
 All notable changes to Sourcegraph are documented in this file.
 
+## 5.4.0
+
+### Added
+
+- Added rate and latency instrumentation for git / package repository syncing operations. These are visible in the gitserver dashboards (VCS "Clone/Fetch/IsCloneable" Metrics). [#61708](https://github.com/sourcegraph/sourcegraph/pull/61708)
+- Added syntax highlighting for the [Pkl](https://pkl-lang.org/) configuration language. [#61478](https://github.com/sourcegraph/sourcegraph/pull/61478)
+- New `rev:at.time()` search filter that allows you to search a branch at a point in time. [#61513](https://github.com/sourcegraph/sourcegraph/pull/61513)
+- "cody.contextFilters" field to the site config. Admins can set include and exclude rules to define which repositories Cody can use as context in its requests to third-party LLMs. [#61101](https://github.com/sourcegraph/sourcegraph/pull/61101), [#61641](https://github.com/sourcegraph/sourcegraph/pull/61641)
+- Added whether "cody.contextFilters" field is configured in the site config to pings. [#62080](https://github.com/sourcegraph/sourcegraph/pull/62080)
+- Added exhaustive logging for all gRPC requests sent to gitserver. This feature is off by default, and can be enabled by setting the `SRC_GITSERVER_EXHAUSTIVE_LOGGING_ENABLED` environment variable to `true`. [#61270](https://github.com/sourcegraph/sourcegraph/pull/61270)
+- Added an `internal` option for the `repositoryQuery` field for GitHub Enterprise code host connections. This will mirror all internal repositories on the code host. [#61924](https://github.com/sourcegraph/sourcegraph/pull/61924)
+
+### Changed
+
+- Improved syntax highlighting for Dart. [#58480](https://github.com/sourcegraph/sourcegraph/pull/58480)
+- The default noop Event type in the honey package has been replaced with a new type that aggregates fields in memory for testing and logging purposes. [#61854](https://github.com/sourcegraph/sourcegraph/pull/61854)
+- Improved the performance of Language Stats Insights by 50-70% by increasing the concurrent requests from the frontend to the gitserver from 1 to 4. You can override the concurrency with the `GET_INVENTORY_GIT_SERVER_CONCURRENCY` environment variable. [#62011](https://github.com/sourcegraph/sourcegraph/pull/62011)
+- Raised the backend timeout for Language Stats Insights from 3 minutes to 5 minutes. You can override this with the `GET_INVENTORY_TIMEOUT` environment variable. [#62011](https://github.com/sourcegraph/sourcegraph/pull/62011)
+- Code insights drilldown behavior has been changed from a diff search to a point-in-time search with the new `rev:at.time()`. [#61953](https://github.com/sourcegraph/sourcegraph/pull/61953)
+- The `FirstEverCommit` gitserver client method has been changed to use a new bespoke gRPC endpoint instead of the legacy `exec` endpoint. [#62173](https://github.com/sourcegraph/sourcegraph/pull/62173)
+- The `GetBehindAhead` gitserver client method has been changed to use a new bespoke gRPC endpoint instead of the legacy `exec` endpoint. [#62217](https://github.com/sourcegraph/sourcegraph/pull/62217)
+- All uses of the `DiffSymbols` gitserver client method have been replaced with the new `ChangedFiles` method. As such, the `DiffSymbos` method has been removed [#62355](https://github.com/sourcegraph/sourcegraph/pull/62355)
+
+### Fixed
+
+- Updated the Docker-in-Docker image to 26.0.0 to resolve several vulnerabilities. [#61735](https://github.com/sourcegraph/sourcegraph/pull/61735)
+- The GetCommit() RPC in the gitserver service now uses the correct protobuf type that allows for non-utf8 byte sequences in commit messages, author names, and author emails. [#61940](https://github.com/sourcegraph/sourcegraph/pull/61940)
+- The ArchiveReader() RPC in the gitserver service now uses the correct protobuf type that allows for non-utf8 byte sequences in file paths. [#61970](https://github.com/sourcegraph/sourcegraph/pull/61970)
+- Pinned code intel popovers and popovers opened via the keyboard are properly shown again. [#61966](https://github.com/sourcegraph/sourcegraph/pull/61966)
+- Syntax highlighting works correctly for JSX files. [#62027](https://github.com/sourcegraph/sourcegraph/pull/62027)
+- Changesets with a skipped CI check now have their CI status correctly displayed in the Batch Changes UI. [#62204](https://github.com/sourcegraph/sourcegraph/pull/62204)
+- Fixed the Sourcegraph login page auto-redirecting to the single auth provider when request access is enabled. [#62376](https://github.com/sourcegraph/sourcegraph/pull/62376)
+
 ## 5.3.12303
 
 ### Added
@@ -330,7 +363,7 @@ All notable changes to Sourcegraph are documented in this file.
 
 ### Fixed
 
-- Fixed a bug in the `deploy-sourcegraph-helm` deployment of Sourcegraph, for sufficiantly large scip indexes uploads will fail when the precise-code-intel worker attempts to write to `/tmp` and doesn't have a volume mounted for this purpose. See [kubernetes release notes](./admin/updates/kubernetes.md#v516-➔-v517) for more details [#342](https://github.com/sourcegraph/deploy-sourcegraph-helm/pull/343)
+- Fixed a bug in the `deploy-sourcegraph-helm` deployment of Sourcegraph, for sufficiantly large scip indexes uploads will fail when the precise-code-intel worker attempts to write to `/tmp` and doesn't have a volume mounted for this purpose. See kubernetes release notes for more details [#342](https://github.com/sourcegraph/deploy-sourcegraph-helm/pull/343)
 
 ## 5.1.6
 
@@ -432,7 +465,7 @@ All notable changes to Sourcegraph are documented in this file.
 
 > **Note**: As of 5.1.0, the `rsa-sha` signature algorithm is no longer supported when connecting to code hosts over SSH. If you encounter the error `sign_and_send_pubkey: no mutual signature supported` when syncing repositories, see [Repository authentication](/admin/repo/auth#error-sign_and_send_pubkey-no-mutual-signature-supported) for more information and steps to resolve the issue.
 
-### [Known issues](KNOWN-ISSUES.md)
+### Known issues
 
 - There is an issue with Sourcegraph instances configured to use explicit permissions using permissions.userMapping in Site configuration, where repository permissions are not enforced. Customers using the explicit permissions API are advised to upgrade to v5.1.1 directly.
 - There is an issue with creating and updating existing Bitbucket.org (Cloud) code host connections due to problem with JSON schema validation which prevents the JSON editor from loading and surfaces as an error in the UI.
@@ -829,7 +862,7 @@ All notable changes to Sourcegraph are documented in this file.
 - [search.largeF[iles](/admin/config/site_config#search-largeFiles) accepts an optional prefix `!` to negate a pattern. The o)rder of the patterns within search.largeFiles is honored such that the last pattern matching overrides preceding patterns. For patterns that begin with a literal `!` prefix with a backslash, for example, `\!fileNameStartsWithExcl!.txt`. Previously indexed files that become excluded due to this change will remain in the index until the next reindex [#45318](https://github.com/sourcegraph/sourcegraph/pull/45318)
 - [Webh[ooks](/admin/config/webhooks/incoming) have been overhauled completely and can now be found under **Site admin >) Repositories > Incoming webhooks**. Webhooks that were added via code host configuration are [deprec[ated](/admin/config/webhooks/incoming#deprecation-notice) and will be removed in 5.1.0.
 - Added support fo)r receiving webhook `push` events from GitHub which will trigger Sourcegraph to fetch the latest commit rather than relying on polling.
-- Added support for private container registries in Sourcegraph executors. [Using private regist[ries](/admin/deploy_executors#using-private-registries))
+- Added support for private container registries in Sourcegraph executors. [Using private registries](/admin/executors/deploy_executors#using-private-registries)
 
 ### Changed
 
