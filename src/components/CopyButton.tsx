@@ -22,12 +22,12 @@ export function CopyButton({ text }: { text: string }) {
   }
 
   return (
-    <div className="relative inline-flex items-center float-right">
+    <div className="absolute inline-flex items-center top-2 right-2">
       <button
         onClick={handleCopy}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
-        className="relative flex items-center justify-center p-2 border border-white-500 text-white-500 rounded transition duration-300 ease-in-out hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white-400"
+        className="relative flex items-center justify-center p-2 text-white-500 rounded transition duration-300 ease-in-out hover:scale-125 focus:outline-none"
       >
         {copied ? (
           <CheckIcon className="h-5 w-5 text-green-400" aria-hidden="true" />

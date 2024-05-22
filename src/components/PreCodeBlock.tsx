@@ -17,11 +17,11 @@ export function PreCodeBlock ({ children, ...props }: PreProps) {
   })
 
   return (
-    <pre data-language={lang} data-theme={dataTheme} className={"py-4"}>
-      <div className='relative'>
-        <CopyButton text={props?.raw || ''}  />
-        <div className={"p-2"}>{children}</div>
-      </div>
-    </pre>
+    <div className="relative">
+      <pre className="pt-12" data-language={lang} data-theme={dataTheme}>
+        <CopyButton text={props?.raw || ''}/>
+        {children}
+      </pre>
+    </div>
   )
 }
