@@ -7,6 +7,8 @@ import remarkGfm from 'remark-gfm';
 import { MDXDocument, allCoreContent } from './src/utils/contentlayer';
 import { searchMetadata } from './src/data/search';
 import GithubSlugger from 'github-slugger'
+import { visit } from "unist-util-visit"
+
 export const Post = defineDocumentType(() => ({
     name: 'Post',
     filePathPattern: `**/*.mdx`,
@@ -70,13 +72,39 @@ const prettyCodeOptions = {
     ),
 }
 
+const rehypePlugins:any = [
+  // Extract raw code content from code elements within pre elements
+  () => (tree: any) => {
+    visit(tree, (node: any) => {
+      if (node?.type === "element" && node?.tagName === "pre") {
+        const [codeEl] = node.children;
+        if (codeEl.tagName !== "code") return
+
+        node.raw = codeEl.children?.[0].value
+      }
+    });
+  },
+  [rehypePrettyCode, prettyCodeOptions],
+  // Add raw code content as a property to pre elements within div elements containing data-rehype-pretty-code-fragment attribute
+  () => (tree: any) => {
+    visit(tree, (node: any) => {
+      if (node?.type === "element" && node?.tagName === "div") {
+        if (!("data-rehype-pretty-code-fragment" in node.properties)) return
+
+        for (const child of node.children)
+          if (child.tagName === "pre") child.properties["raw"] = node.raw;
+      }
+    })
+  },rehypeSlug, [rehypeAutolinkHeadings]
+]
+
 export default makeSource({
     contentDirPath: 'docs', documentTypes: [Post], mdx: {
-        remarkPlugins: [remarkGfm],
-        rehypePlugins: [[rehypePrettyCode, prettyCodeOptions], rehypeSlug, [rehypeAutolinkHeadings]],
+      remarkPlugins: [remarkGfm],
+      rehypePlugins: rehypePlugins,
     },
     onSuccess: async (importData) => {
-        const { allPosts } = await importData()
-        createSearchIndex(allPosts);
+      const { allPosts } = await importData()
+      createSearchIndex(allPosts);
     },
 })

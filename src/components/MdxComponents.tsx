@@ -8,6 +8,7 @@ import { ProductCard, ProductCards } from './mdx/ProductCards';
 import { QuickLink, QuickLinks } from './mdx/QuickLinks';
 import { Tab, Tabs } from './mdx/Tabs';
 import ResourceEstimator from './resource-estimator/ResourceEstimator';
+import { PreCodeBlock } from './PreCodeBlock';
 
 const MdxComponents = (version?: string) => {
 	return {
@@ -50,7 +51,13 @@ const MdxComponents = (version?: string) => {
 		},
 		video: (props: any) => {
 			return <video className="rounded-xl" {...props} />;
-		}
+		},
+		pre: (props: any) => <PreCodeBlock {...props} />,
+		table: (props: any) => (
+			<div {...props} className="table-auto w-full overflow-x-auto">
+				<table>{props.children}</table>
+			</div>
+		)
 	};
 };
 
