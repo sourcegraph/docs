@@ -3,6 +3,9 @@
 import {useCallback, useEffect, useState} from 'react';
 import Link from 'next/link';
 import clsx from 'clsx';
+import {ArrowUpRightIcon} from '@heroicons/react/24/solid'
+import {useParams} from 'next/navigation'
+import {allPosts} from 'contentlayer/generated'
 
 interface Heading {
 	level: number;
@@ -14,9 +17,16 @@ interface Props {
 	headings: Heading[];
 }
 
+type ParamsType = {
+	version?: string;
+	slug: string[];
+}
+
 export function TableOfContents({headings}: Props) {
 	let [currentSection, setCurrentSection] = useState(headings[0]?.id);
-
+	const [path, setPath] = useState('')
+	const params: ParamsType = useParams()
+	
 	let getHeadings = useCallback((headings: Heading[]) => {
 		return headings
 			.map(heading => {
@@ -36,6 +46,19 @@ export function TableOfContents({headings}: Props) {
 			})
 			.filter((x): x is {id: string; top: number} => x !== null);
 	}, []);
+	
+	useEffect(() => {
+		const path = params.slug.join('/');
+		
+		if (allPosts) {
+			const post = allPosts.find(post => post._raw.flattenedPath === path);
+			if (post) {
+				let currentPath = post._id;
+				if (params?.version) currentPath = `versioned/${params.version}/${currentPath}`;
+				setPath(currentPath);
+			}
+		}
+	}, [params])
 
 	useEffect(() => {
 		if (headings.length === 0) return;
@@ -119,6 +142,18 @@ export function TableOfContents({headings}: Props) {
 								</li>
 							))}
 						</ol>
+						{/* Edit doc with GitHub button */}
+						<div className="flex items-center mt-4 text-sm">
+							<a
+								href={`https://github.com/sourcegraph/docs/edit/main/docs/${path}`}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+							>
+								Edit this page on GitHub
+								<ArrowUpRightIcon className="ml-1 h-3 w-3" /> 
+							</a>
+						</div>
 					</>
 				)}
 			</nav>
