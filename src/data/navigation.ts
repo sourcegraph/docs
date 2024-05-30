@@ -271,17 +271,13 @@ export const navigation: NavigationItem[] = [
         title: "Sourcegraph Accounts",
         href: "/sourcegraph-accounts"
       },
-      // {
-      //   title: "Support Center",
-      //   href: "#",
-      //   sections: [
-      //     { title: "Intro", href: "#" },
-      //     { title: "Examples", href: "#" },
-      //   ],
-      // },
       {
         title: "Changelog",
         href: "/CHANGELOG",
+      },
+      {
+        title: "Releases",
+        href: "/releases",
       },
     ],
   },
