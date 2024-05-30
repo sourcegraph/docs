@@ -1,12 +1,12 @@
 'use client';
 
-import {Fragment, useEffect, useState} from 'react';
-import {Menu, Transition} from '@headlessui/react';
-import {ArrowUpRightIcon, ChevronDownIcon} from '@heroicons/react/20/solid';
+import { VersionI, versions } from '@/data/versions';
+import { Menu, Transition } from '@headlessui/react';
+import { ArrowUpRightIcon, ChevronDownIcon } from '@heroicons/react/20/solid';
 import clsx from 'clsx';
 import Link from 'next/link';
-import {VersionI, versions} from '@/data/versions';
-import {usePathname} from 'next/navigation';
+import { usePathname } from 'next/navigation';
+import { Fragment, useEffect, useState } from 'react';
 
 export default function VersionSelector() {
 	const path = usePathname();
@@ -63,15 +63,16 @@ export default function VersionSelector() {
 					{versions.length > 0 &&
 						versions.map((version, count) => (
 							<Menu.Item key={version.name}>
-								{({active}) => (
-									<Link
+								{({ active }) => (
+									<a
 										href={version.url}
+										target="_blank"
 										onClick={() =>
 											setSelectedVersion(version)
 										}
 										className={clsx(
 											active &&
-												'bg-light-bg-2 text-slate-900 dark:bg-dark-bg-3 dark:text-white',
+											'bg-light-bg-2 text-slate-900 dark:bg-dark-bg-3 dark:text-white',
 											count === 0 && 'rounded-t-md',
 											'flex w-full items-center justify-between px-3 py-2'
 										)}
@@ -82,18 +83,18 @@ export default function VersionSelector() {
 												{version.label}
 											</span>
 										)}
-									</Link>
+									</a>
 								)}
 							</Menu.Item>
 						))}
 					{/* Legacy versions */}
 					<Menu.Item>
-						{({active}) => (
+						{({ active }) => (
 							<Link
 								href="/legacy"
 								className={clsx(
 									active &&
-										'bg-light-bg-2 text-slate-900 dark:bg-dark-bg-3 dark:text-white',
+									'bg-light-bg-2 text-slate-900 dark:bg-dark-bg-3 dark:text-white',
 									'flex items-center justify-between rounded-b-md px-3 py-2'
 								)}
 							>

@@ -270,17 +270,13 @@ export const navigation: NavigationItem[] = [
         title: "Sourcegraph Accounts",
         href: "/sourcegraph-accounts"
       },
-      // {
-      //   title: "Support Center",
-      //   href: "#",
-      //   sections: [
-      //     { title: "Intro", href: "#" },
-      //     { title: "Examples", href: "#" },
-      //   ],
-      // },
       {
         title: "Changelog",
         href: "/CHANGELOG",
+      },
+      {
+        title: "Releases",
+        href: "/releases",
       },
     ],
   },
@@ -313,7 +309,6 @@ const navigation_5_2: NavigationItem[] = [
               { title: "Commands", href: "/cody/capabilities/commands", },
               { title: "Debug Code", href: "/cody/capabilities/debug-code", },
               { title: "Cody Ignore", href: "/cody/capabilities/ignore-context", },
-              { title: "Supported Models", href: "/cody/capabilities/supported-models", },
               { title: "Feature Parity Reference", href: "/cody/clients/feature-reference", },
             ]
           },
@@ -321,10 +316,8 @@ const navigation_5_2: NavigationItem[] = [
             title: "Core Concepts", href: "/cody/core-concepts/context",
             subsections: [
               { title: "Context", href: "/cody/core-concepts/context", },
-              { title: "Token Limits", href: "/cody/core-concepts/token-limits", },
               { title: "Keyword Search", href: "/cody/core-concepts/keyword-search", },
               { title: "Cody Gateway", href: "/cody/core-concepts/cody-gateway", },
-              { title: "Enterprise Architecture", href: "/cody/core-concepts/enterprise-architecture", },
             ]
           },
           { title: "Usage and Pricing", href: "/cody/usage-and-pricing" },
@@ -344,7 +337,6 @@ const navigation_5_2: NavigationItem[] = [
               { title: "Search Jobs", href: "/code-search/types/search-jobs", },
               { title: "Structural Search", href: "/code-search/types/structural", },
               { title: "Fuzzy Search", href: "/code-search/types/fuzzy", },
-              { title: "Symbol Search", href: "/code-search/types/symbol", },
 
             ]
           },
@@ -792,5 +784,4 @@ export const versionNavigations: VersionNavigations = {
   navigation, // latest version
   '5.2': navigation_5_2,
   '5.3': navigation_5_3,
-
 }
