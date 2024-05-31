@@ -8,9 +8,9 @@ interface PreProps extends DetailedHTMLProps<HTMLAttributes<HTMLPreElement>, HTM
 export function PreCodeBlock ({ children, ...props }: PreProps) {
   const propsObj = { ...props }
   const propsValues = Object.values(propsObj)
-  const [, , dataLanguage, dataTheme] = propsValues
+  const [, , , dataLanguage, dataTheme] = propsValues
   const lang = dataLanguage || "shell"
-  
+
   let codeContent = ''
   Children.forEach(children, child => {
     if (typeof child === 'string') codeContent += child
@@ -19,7 +19,7 @@ export function PreCodeBlock ({ children, ...props }: PreProps) {
   return (
     <div className="relative">
       <pre className="pt-12" data-language={lang} data-theme={dataTheme}>
-        <CopyButton text={props?.raw || ''}/>
+        <CopyButton lang={lang} text={props?.raw || ''}/>
         {children}
       </pre>
     </div>
