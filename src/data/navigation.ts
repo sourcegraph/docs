@@ -48,7 +48,8 @@ export const navigation: NavigationItem[] = [
               { title: "Autocomplete", href: "/cody/capabilities/autocomplete", },
               { title: "Commands", href: "/cody/capabilities/commands", },
               { title: "Debug Code", href: "/cody/capabilities/debug-code", },
-              { title: "Cody Ignore", href: "/cody/capabilities/ignore-context", },
+              { title: "Context Filters", href: "/cody/capabilities/ignore-context", },
+              { title: "Proxy Setup", href: "/cody/capabilities/proxy-setup", },
               { title: "Supported Models", href: "/cody/capabilities/supported-models", },
               { title: "Feature Parity Reference", href: "/cody/clients/feature-reference", },
             ]
@@ -308,7 +309,7 @@ const navigation_5_2: NavigationItem[] = [
               { title: "Autocomplete", href: "/cody/capabilities/autocomplete", },
               { title: "Commands", href: "/cody/capabilities/commands", },
               { title: "Debug Code", href: "/cody/capabilities/debug-code", },
-              { title: "Cody Ignore", href: "/cody/capabilities/ignore-context", },
+              { title: "Manage Context", href: "/cody/capabilities/ignore-context", },
               { title: "Feature Parity Reference", href: "/cody/clients/feature-reference", },
             ]
           },
