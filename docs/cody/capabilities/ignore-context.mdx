@@ -19,25 +19,26 @@ Administrators can configure the `cody.contextFilters` field in the site configu
 
 ```json
 {
- // Optional. If defined, it must have at least one
- // field set (either `include` or `exclude`).
- 'cody.contextFilters': {
- // Optional. If defined, it must have at least one item.
- include: [
- {
- // Required. Should follow the RE2 syntax.
- repoNamePattern: '^github\\.com\\/sourcegraph\\/.*'
- }
- ],
- // Optional. If defined, it must have at least one item.
- exclude: [
- {
- // Required. Should follow the RE2 syntax.
- repoNamePattern: '.*analytics.*'
- }
- ]
- }
+  // Optional. If defined, it must have at least one
+  // field set (either `include` or `exclude`).
+  'cody.contextFilters': {
+    // Optional. If defined, it must have at least one item.
+    include: [
+      {
+        // Required. Should follow the RE2 syntax.
+        repoNamePattern: '^github\\.com\\/sourcegraph\\/.*'
+      }
+    ],
+    // Optional. If defined, it must have at least one item.
+    exclude: [
+      {
+        // Required. Should follow the RE2 syntax.
+        repoNamePattern: '.*analytics.*'
+      }
+    ]
+  }
 }
+
 ```
 
 ### How include and exclude rules work
@@ -54,15 +55,16 @@ Cody is restricted from using content from repositories whose names match any sp
 
 ```json
 {
- 'cody.contextFilters': {
- // Only repositories whose names either start with 'github.com/sourcegraph/'
- // or contain 'cody' are allowed.
- include: [
- {repoNamePattern: '^github\\.com\\/sourcegraph\\/.+'},
- {repoNamePattern: '.*cody.*'}
- ]
- }
+  'cody.contextFilters': {
+    // Only repositories whose names either start with 'github.com/sourcegraph/'
+    // or contain 'cody' are allowed.
+    include: [
+      { repoNamePattern: '^github\\.com\\/sourcegraph\\/.+' },
+      { repoNamePattern: '.*cody.*' }
+    ]
+  }
 }
+
 ```
 
 <video width="1920" height="1080" loop playsInline controls style={{ width: '100%', height: 'auto' }}>
@@ -77,15 +79,16 @@ All repositories are considered included by default without the `include` rules.
 
 ```json
 {
- 'cody.contextFilters': {
- // All repositories are allowed except for "github.com/sourcegraph/cody-analytics"
- // or the ones containing "secret" in their name.
- exclude: [
- {repoNamePattern: '^github\\.com\\/sourcegraph\\/cody-analytics$'},
- {repoNamePattern: '.*secret.*'}
- ]
- }
+  'cody.contextFilters': {
+    // All repositories are allowed except for "github.com/sourcegraph/cody-analytics"
+    // or the ones containing "secret" in their name.
+    exclude: [
+      { repoNamePattern: '^github\\.com\\/sourcegraph\\/cody-analytics$' },
+      { repoNamePattern: '.*secret.*' }
+    ]
+  }
 }
+
 ```
 
 In this case, Cody's commands are disabled, and you cannot use them for context fetching. If you try running any of these, you'll be prompted with an error message. However, Cody chat will still work, and you can use it to ask questions.
@@ -104,17 +107,20 @@ When making requests to third-party LLMs, Cody can use content from a repository
 
 ```json
 {
- 'cody.contextFilters': {
- // All repositories starting with "github.com/sourcegraph/" are allowed
- include: [{repoNamePattern: '^github\\.com\\/sourcegraph\\/.+'}],
- // except for "github.com/sourcegraph/cody-analytics"
- // and the ones containing "cody" in their name.
- exclude: [
- {repoNamePattern: '^github\\.com\\/sourcegraph\\/cody-analytics$'},
- {repoNamePattern: '.*cody.*'}
- ]
- }
+  'cody.contextFilters': {
+    // All repositories starting with "github.com/sourcegraph/" are allowed
+    include: [
+      { repoNamePattern: '^github\\.com\\/sourcegraph\\/.+' }
+    ],
+    // except for "github.com/sourcegraph/cody-analytics"
+    // and the ones containing "cody" in their name.
+    exclude: [
+      { repoNamePattern: '^github\\.com\\/sourcegraph\\/cody-analytics$' },
+      { repoNamePattern: '.*cody.*' }
+    ]
+  }
 }
+
 ```
 
 In this case, Cody can access content from repositories whose names start with `github.com/sourcegraph/`. However, it excludes files from repositories with `cody` in their name.
