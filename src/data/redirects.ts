@@ -370,7 +370,7 @@ const redirectsData = [
         permanent: true
     },
     {
-        source: "/admin/code_hosts/bitbucketserver",
+        source: "/admin/external_service/bitbucketserver",
         destination: "/integration/bitbucket_server",
         permanent: true
     },
@@ -2812,6 +2812,284 @@ const redirectsData = [
         destination: "/code-search/code-navigation/inference_configuration",
         permanent: true
     },
+
+    // Batch Changes Redirects
+    {
+        source: "/batch_changes",
+        destination: "/batch-changes",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/quickstart",
+        destination: "/batch-changes/quickstart",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/quickstart#requirements",
+        destination: "/batch-changes/quickstart#requirements",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/quickstart#install-the-sourcegraph-cli",
+        destination: "/batch-changes/quickstart#install-the-sourcegraph-cli",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/quickstart#write-a-batch-spec",
+        destination: "/batch-changes/quickstart#write-a-batch-spec",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/quickstart#create-the-batch-change",
+        destination: "/batch-changes/quickstart#create-the-batch-change",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/quickstart#publish-a-changeset",
+        destination: "/batch-changes/quickstart#publish-a-changeset",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/quickstart#configure-code-host-credentials",
+        destination: "/batch-changes/quickstart#configure-code-host-credentials",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/quickstart#optional-modify-the-batch-spec-to-only-target-a-specific-repository",
+        destination: "/batch-changes/quickstart#optional-modify-the-batch-spec-to-only-target-a-specific-repository",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/quickstart#publish-to-code-host",
+        destination: "/batch-changes/quickstart#publish-to-code-host",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations",
+        destination: "/batch-changes/",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/introduction_to_batch_changes",
+        destination: "/batch-changes/",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/introduction_to_batch_changes#supported-code-hosts-and-changeset-types",
+        destination: "/batch-changes#supported-code-hosts-and-changeset-types",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/introduction_to_batch_changes#concepts",
+        destination: "/batch-changes#key-concepts",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/introduction_to_batch_changes#ownership",
+        destination: "/batch-changes/delete-a-batch-change#ownership",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/introduction_to_batch_changes#known-issues",
+        destination: "/batch-changes/faq#are-there-any-limitations-with-the-batch-changes-feature",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/permissions_in_batch_changes",
+        destination: "/batch-changes/permissions-in-batch-changes",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/permissions_in_batch_changes#permission-levels-for-batch-changes",
+        destination: "/batch-changes/permissions-in-batch-changes#permission-levels-for-batch-changes",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/permissions_in_batch_changes#namespaces",
+        destination: "/batch-changes/permissions-in-batch-changes#namespaces",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/permissions_in_batch_changes#batch-change-access-for-each-permission-level",
+        destination: "/batch-changes/permissions-in-batch-changes#batch-change-access-for-each-permission-level",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/permissions_in_batch_changes#setting-and-viewing-permissions-in-batch-changes",
+        destination: "/batch-changes/permissions-in-batch-changes#setting-and-viewing-permissions-in-batch-changes",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/permissions_in_batch_changes#code-host-interactions-in-batch-changes",
+        destination: "/batch-changes/permissions-in-batch-changes#code-host-interactions-in-batch-changes",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/permissions_in_batch_changes#repository-permissions-for-batch-changes",
+        destination: "/batch-changes/permissions-in-batch-changes#repository-permissions-for-batch-changes",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/permissions_in_batch_changes#disabling-batch-changes",
+        destination: "/batch-changes/permissions-in-batch-changes#disabling-batch-changes",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/permissions_in_batch_changes#disabling-batch-changes-for-non-site-admin-users",
+        destination: "/batch-changes/permissions-in-batch-changes#disabling-batch-changes-for-non-site-admin-users",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/batch_changes_design",
+        destination: "/batch-changes/design",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/batch_changes_design#principles",
+        destination: "/batch-changes/design#principles",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/how_src_executes_a_batch_spec",
+        destination: "/batch-changes/how-src-executes-a-batch-spec",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/how_src_executes_a_batch_spec#overview",
+        destination: "/batch-changes/how-src-executes-a-batch-spec#overview",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/how_src_executes_a_batch_spec#parse-the-batch-spec",
+        destination: "/batch-changes/how-src-executes-a-batch-spec#parse-the-batch-spec",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/how_src_executes_a_batch_spec#resolving-namespace",
+        destination: "/batch-changes/how-src-executes-a-batch-spec#resolving-namespace",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/how_src_executes_a_batch_spec#preparing-container-images",
+        destination: "/batch-changes/how-src-executes-a-batch-spec#preparing-container-images",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/how_src_executes_a_batch_spec#resolving-repositories",
+        destination: "/batch-changes/how-src-executes-a-batch-spec#resolving-repositories",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/how_src_executes_a_batch_spec#executing-steps",
+        destination: "/batch-changes/how-src-executes-a-batch-spec#executing-steps",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/how_src_executes_a_batch_spec#1-download-archive-and-prepare",
+        destination: "/batch-changes/how-src-executes-a-batch-spec#download-archive-and-prepare",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/how_src_executes_a_batch_spec#2-run-the-steps",
+        destination: "/batch-changes/how-src-executes-a-batch-spec#run-the-steps",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/how_src_executes_a_batch_spec#3-create-final-diff",
+        destination: "/batch-changes/how-src-executes-a-batch-spec#create-final-diff",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/how_src_executes_a_batch_spec#4-saving-a-changeset-spec",
+        destination: "/batch-changes/how-src-executes-a-batch-spec#saving-a-changeset-spec",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/how_src_executes_a_batch_spec#importing-changesets",
+        destination: "/batch-changes/how-src-executes-a-batch-spec#importing-changesets",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/how_src_executes_a_batch_spec#sending-changeset-specs",
+        destination: "/batch-changes/how-src-executes-a-batch-spec#sending-changeset-specs",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/how_src_executes_a_batch_spec#sending-the-batch-spec",
+        destination: "/batch-changes/how-src-executes-a-batch-spec#sending-the-batch-spec",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/how_src_executes_a_batch_spec#preview-or-apply-the-batch-spec",
+        destination: "/batch-changes/how-src-executes-a-batch-spec#preview-or-apply-the-batch-spec",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/reexecuting_batch_specs_multiple_times",
+        destination: "/batch-changes/reexecuting-batch-specs-multiple-times",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/reexecuting_batch_specs_multiple_times#idempotency-as-goal",
+        destination: "/batch-changes/reexecuting-batch-specs-multiple-times#idempotency-as-goal",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/reexecuting_batch_specs_multiple_times#exceptions",
+        destination: "/batch-changes/reexecuting-batch-specs-multiple-times#exceptions",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/reexecuting_batch_specs_multiple_times#local-caching",
+        destination: "/batch-changes/reexecuting-batch-specs-multiple-times#local-caching",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/server_side",
+        destination: "/batch-changes/server-side",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/server_side#setup",
+        destination: "/batch-changes/server-side#setup",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/server_side#limitations",
+        destination: "/batch-changes/server-side#limitations",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/server_side#can-large-batch-changes-execution-be-distributed-on-multiple-executors",
+        destination: "/batch-changes/faq#can-large-batch-changes-execution-be-distributed-on-multiple-executors",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/server_side#what-additional-resources-do-i-need-to-provision-to-run-batch-changes-server-side",
+        destination: "/batch-changes/faq#what-additional-resources-do-i-need-to-provision-to-run-batch-changes-server-side",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/server_side#can-someone-accidentally-take-down-the-sourcegraph-instance-if-they-run-too-big-a-batch-change",
+        destination: "/batch-changes/faq#can-someone-accidentally-take-down-the-sourcegraph-instance-if-they-run-too-big-a-batch-change",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/server_side#i-have-several-machines-configured-as-executors-and-they-dont-have-the-same-specs-eg-memory-can-i-submit-some-batch-changes-specifically-to-a-given-machine",
+        destination: "/batch-changes/faq#i-have-several-machines-configured-as-executors-and-they-dont-have-the-same-specs-eg-memory-can-i-submit-some-batch-changes-specifically-to-a-given-machine",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/server_side#what-happens-if-the-execution-of-a-step-fails",
+        destination: "/batch-changes/faq#what-happens-if-the-execution-of-a-step-fails",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/explanations/server_side#how-do-executors-interact-with-code-hosts-will-they-clone-repos-directly",
+        destination: "/batch-changes/faq#how-do-executors-interact-with-code-hosts-will-they-clone-repos-directly",
+        permanent: true
+    },
+
 ];
 
 const updatedRedirectsData = redirectsData.map(redirect => {
