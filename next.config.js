@@ -15,10 +15,25 @@ const nextConfig = {
 	async redirects() {
 		return [
 			...updatedRedirectsData,
+			// Redirect any path with pattern /docs/v/latest_sg/cody for example to /docs/cody
 			{
 				source: `/v/${config.DOCS_LATEST_VERSION}/:slug*`,
 				destination: '/:slug*',
 				permanent: false
+			},
+			// Redirect for docs for version 5.3 hosted at https://5.3.sourcegraph.com/
+			{
+				source: '/docs/v/5.3/:slug',
+				destination: 'https://5.3.sourcegraph.com/docs/:slug', // Static transformation as example
+				permanent: false,
+				basePath: false
+			},
+			// Redirect for docs for version 5.2 hosted at https://5.2.sourcegraph.com/
+			{
+				source: '/docs/v/5.2/:slug',
+				destination: 'https://5.2.sourcegraph.com/docs/:slug', // Static transformation as example
+				permanent: false,
+				basePath: false
 			}
 		];
 	}

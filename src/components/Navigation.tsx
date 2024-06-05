@@ -1,8 +1,8 @@
 import clsx from 'clsx';
 import Link from 'next/link';
-import {usePathname} from 'next/navigation';
+import {usePathname, useParams} from 'next/navigation';
 
-import {NavigationItem, navigation} from '@/data/navigation';
+import {NavigationItem, versionNavigations} from '@/data/navigation';
 import {ChevronRightIcon} from '@heroicons/react/20/solid';
 import {useEffect, useState} from 'react';
 
@@ -14,10 +14,14 @@ export function Navigation({
 	onLinkClick?: React.MouseEventHandler<HTMLAnchorElement>;
 }) {
 	let pathname = usePathname();
+	const params = useParams()
+
 	const [version, setVersion] = useState<string | null>(null);
 	const [expandedTopics, setExpandedTopics] = useState<string[]>([]);
 	const [expandedSections, setExpandedSections] = useState<string[]>([]);
 	const [expandUsingPath, setExpandUsingPath] = useState<boolean>(true);
+
+	const navigation = versionNavigations[params.version as string || 'navigation']
 
 	const handleTopicClick = (topicTitle: string, maximize?: boolean) => {
 		setExpandedTopics(prevExpandedTopics => {
