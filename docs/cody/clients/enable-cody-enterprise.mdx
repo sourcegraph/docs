@@ -275,15 +275,22 @@ Once ready, go to **Site admin > Site configuration** (`/site-admin/configuratio
   "cody.enabled": true,
   "completions": {
     "provider": "aws-bedrock",
-    "chatModel": "anthropic.claude-v2",
-    "fastChatModel": "anthropic.claude-instant-v1",
-    "endpoint": "<AWS-Region>", // For example: us-west-2.
+    "chatModel": "anthropic.claude-3-opus-20240229-v1:0",
+    "completionsModel": "anthropic.claude-instant-v1",
+    "endpoint": "<See below>",
     "accessToken": "<See below>"
   }
 }
 ```
 
-For the access token, you can either:
+For the `chatModel` and `completionsModel` fields, see [Amazon's Bedrock documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html) for an up-to-date list of supported model IDs, and cross reference against Sourcegraph's [supported LLM list](/cody/capabilities/supported-models) to verify compatibility with Cody.
+
+For `endpoint`, you can either:
+
+- For Pay-as-you-go, set it to an AWS region code (e.g., `us-west-2`) when using a public AWS Bedrock endpoint
+- For Provisioned Throughput, set it to the provisioned VPC endpoint for the `bedrock-runtime` API (e.g., `"https://vpce-0a10b2345cd67e89f-abc0defg.bedrock-runtime.us-west-2.vpce.amazonaws.com"`)
+
+For `accessToken`, you can either:
 
 - Leave it empty and rely on instance role bindings or other AWS configurations in the `frontend` service
 - Set it to `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>` if directly configuring the credentials
