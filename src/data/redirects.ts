@@ -3089,6 +3089,386 @@ const redirectsData = [
         destination: "/batch-changes/faq#how-do-executors-interact-with-code-hosts-will-they-clone-repos-directly",
         permanent: true
     },
+    {
+        source: "/batch_changes/tutorials",
+        destination: "/batch-changes/examples",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/tutorials/refactor_go_comby",
+        destination: "/batch-changes/refactor-go-comby",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/tutorials/updating_go_import_statements",
+        destination: "/batch-changes/updating-go-import-statements",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/tutorials/update_base_images_in_dockerfiles",
+        destination: "/batch-changes/update-base-images-in-dockerfiles",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/tutorials/search_and_replace_specific_terms",
+        destination: "/batch-changes/search-and-replace-specific-terms",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/creating_a_batch_change",
+        destination: "/batch-changes/create-a-batch-change",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/creating_a_batch_change#requirements",
+        destination: "/batch-changes/create-a-batch-change#requirements",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/creating_a_batch_change#writing-a-batch-spec",
+        destination: "/batch-changes/create-a-batch-change#writing-a-batch-spec",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/creating_a_batch_change#creating-a-batch-change-after-previewing",
+        destination: "/batch-changes/create-a-batch-change#creating-a-batch-change-after-previewing",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/creating_a_batch_change#applying-a-batch-spec-without-preview",
+        destination: "/batch-changes/create-a-batch-change#applying-a-batch-spec-without-preview",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/creating_a_batch_change#creating-a-batch-change-in-a-different-namespace",
+        destination: "/batch-changes/create-a-batch-change#creating-a-batch-change-in-a-different-namespace",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/creating_a_batch_change#administration",
+        destination: "/batch-changes/create-a-batch-chang#administration",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/publishing_changesets",
+        destination: "/batch-changes/publishing-changesets",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/publishing_changesets#requirements",
+        destination: "/batch-changes/publishing-changesets#requirements",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/publishing_changesets#publishing-changesets",
+        destination: "/batch-changes/publishing-changesets#publishing-changesets",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/publishing_changesets#within-the-spec",
+        destination: "/batch-changes/publishing-changesets#within-the-spec",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/publishing_changesets#within-the-ui",
+        destination: "/batch-changes/publishing-changesets#within-the-ui",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/publishing_changesets#specifying-git-commit-details",
+        destination: "/batch-changes/publishing-changesets#specifying-git-commit-details",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/updating_a_batch_change",
+        destination: "/batch-changes/update-a-batch-change",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/updating_a_batch_change#requirements",
+        destination: "/batch-changes/update-a-batch-change#requirements",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/updating_a_batch_change#preview-and-apply-a-new-batch-spec",
+        destination: "/batch-changes/update-a-batch-change#preview-and-apply-a-new-batch-spec",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/updating_a_batch_change#apply-a-new-batch-spec-directly",
+        destination: "/batch-changes/update-a-batch-change#apply-a-new-batch-spec-directly",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/updating_a_batch_change#how-batch-change-updates-are-processed",
+        destination: "/batch-changes/update-a-batch-change#how-batch-change-updates-are-processed",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/updating_a_batch_change#updating-a-batch-change-to-change-its-scope",
+        destination: "/batch-changes/update-a-batch-change#updating-a-batch-change-to-change-its-scope",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/updating_a_batch_change#adding-changesets",
+        destination: "/batch-changes/update-a-batch-change#adding-changesets",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/updating_a_batch_change#removing-changesets",
+        destination: "/batch-changes/update-a-batch-change#removing-changesets",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/viewing_batch_changes",
+        destination: "/batch-changes/create-a-batch-change#viewing-batch-changes",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/viewing_batch_changes#filtering-batch-changes",
+        destination: "/batch-changes/create-a-batch-change#filtering-batch-changes",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/viewing_batch_changes#filtering-changesets",
+        destination: "/batch-changes/create-a-batch-change#filtering-changesets",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/tracking_existing_changesets",
+        destination: "/batch-changes/tracking-existing-changesets",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/tracking_existing_changesets#requirements",
+        destination: "/batch-changes/tracking-existing-changesets#requirements",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/tracking_existing_changesets#importing-changesets-into-a-batch-change",
+        destination: "/batch-changes/tracking-existing-changesets#importing-changesets-into-a-batch-change",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/closing_or_deleting_a_batch_change",
+        destination: "/batch-changes/delete-a-batch-change",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/closing_or_deleting_a_batch_change#closing-a-batch-change",
+        destination: "/batch-changes/delete-a-batch-change#close-a-batch-change",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/closing_or_deleting_a_batch_change#delete-a-batch-change",
+        destination: "/batch-changes/delete-a-batch-change#delete-a-batch-change",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/opting_out_of_batch_changes",
+        destination: "/batch-changes/delete-a-batch-change#opt-out-of-batch-changes",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/configuring_credentials",
+        destination: "/batch-changes/configuring-credentials",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/configuring_credentials#requirements",
+        destination: "/batch-changes/configuring-credentials#requirements",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/configuring_credentials#types-of-access-tokens-used-by-batch-changes",
+        destination: "/batch-changes/configuring-credentials#types-of-access-tokens-used-by-batch-changes",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/configuring_credentials#personal-access-tokens",
+        destination: "/batch-changes/configuring-credentials#personal-access-tokens",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/configuring_credentials#adding-a-token",
+        destination: "/batch-changes/configuring-credentials#adding-personal-access-token",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/configuring_credentials#removing-a-token",
+        destination: "/batch-changes/configuring-credentials#removing-personal-access-token",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/configuring_credentials#global-service-account-tokens",
+        destination: "/batch-changes/configuring-credentials#global-service-account-tokens",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/configuring_credentials#adding-a-token-1",
+        destination: "/batch-changes/configuring-credentials#adding-global-service-token",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/configuring_credentials#removing-a-token-1",
+        destination: "/batch-changes/configuring-credentials#removing-global-service-token",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/configuring_credentials#creating-a-code-host-token",
+        destination: "/batch-changes/configuring-credentials#creating-a-code-host-token",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/configuring_credentials#github",
+        destination: "/batch-changes/configuring-credentials#github",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/configuring_credentials#gitlab",
+        destination: "/batch-changes/configuring-credentials#gitlab",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/configuring_credentials#bitbucket-server--bitbucket-data-center",
+        destination: "/batch-changes/configuring-credentials#bitbucket-serverbitbucket-data-center",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/configuring_credentials#bitbucket-cloud",
+        destination: "/batch-changes/configuring-credentials#bitbucket-cloud",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/configuring_credentials#azure-devops",
+        destination: "/batch-changes/configuring-credentials#azure-devops",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/configuring_credentials#gerrit",
+        destination: "/batch-changes/configuring-credentials#gerrit",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/configuring_credentials#ssh-access-to-code-host",
+        destination: "/batch-changes/configuring-credentials#ssh-access-to-code-host",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/handling_errored_changesets",
+        destination: "/batch-changes/handling-errored-changesets",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/handling_errored_changesets#types-of-errors",
+        destination: "/batch-changes/handling-errored-changesets#types-of-errors",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/handling_errored_changesets#automatic-retrying-of-errored-changesets",
+        destination: "/batch-changes/handling-errored-changesets#automatic-retrying-of-errored-changesets",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/handling_errored_changesets#manual-retrying-of-errored-changesets",
+        destination: "/batch-changes/handling-errored-changesets#manual-retrying-of-errored-changesets",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/yaml_changeset_errors",
+        destination: "/batch-changes/handling-errored-changesets#handling-changeset-yaml-formatting-errors",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/yaml_changeset_errors#published-value-error",
+        destination: "/batch-changes/handling-errored-changesets#handling-changeset-yaml-formatting-errors#published-value-error",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/bulk_operations_on_changesets",
+        destination: "/batch-changes/bulk-operations-on-changesets",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/bulk_operations_on_changesets#selecting-changesets-for-a-bulk-operation",
+        destination: "/batch-changes/bulk-operations-on-changesets#selecting-changesets-for-a-bulk-operation",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/bulk_operations_on_changesets#supported-types-of-bulk-operations",
+        destination: "/batch-changes/bulk-operations-on-changesets#supported-types-of-bulk-operations",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/bulk_operations_on_changesets#monitoring-bulk-operations",
+        destination: "/batch-changes/bulk-operations-on-changesets#monitoring-bulk-operations",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/server_side_file_mounts",
+        destination: "/batch-changes/server-side#using-file-mounts-with-server-side-execution",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/server_side_file_mounts#writing-a-batch-spec",
+        destination: "/batch-changes/server-side#using-file-mounts-with-server-side-execution",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/server_side_file_mounts#running-server-side",
+        destination: "/batch-changes/server-side#using-file-mounts-with-server-side-execution",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/creating_changesets_per_project_in_monorepos",
+        destination: "/batch-changes/creating-changesets-per-project-in-monorepos",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/creating_changesets_per_project_in_monorepos#overview",
+        destination: "/batch-changes/creating-changesets-per-project-in-monorepos",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/creating_changesets_per_project_in_monorepos#1-define-project-locations-with-workspaces",
+        destination: "/batch-changes/creating-changesets-per-project-in-monorepos#define-project-locations-with-workspaces",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/creating_changesets_per_project_in_monorepos#2-produce-unique-changesettemplatebranch-names",
+        destination: "/batch-changes/creating-changesets-per-project-in-monorepos#produce-unique-changesettemplatebranch-names",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/creating_changesets_per_project_in_monorepos#dynamic-discovery-of-workspaces",
+        destination: "/batch-changes/creating-changesets-per-project-in-monorepos#dynamic-discovery-of-workspaces",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/creating_changesets_per_project_in_monorepos#only-downloading-workspace-data-in-large-repositories",
+        destination: "/batch-changes/creating-changesets-per-project-in-monorepos#only-downloading-workspace-data-in-large-repositories",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/creating_multiple_changesets_in_large_repositories",
+        destination: "/batch-changes/creating-multiple-changesets-in-large-repositories",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/creating_multiple_changesets_in_large_repositories#using-transformchanges",
+        destination: "/batch-changes/creating-multiple-changesets-in-large-repositories#using-transformchanges",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/how-tos/site_admin_configuration",
+        destination: "/batch-changes/site-admin-configuration",
+        permanent: true
+    },
+
+
+
+
+
 
 ];
 
