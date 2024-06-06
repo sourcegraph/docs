@@ -3464,11 +3464,432 @@ const redirectsData = [
         destination: "/batch-changes/site-admin-configuration",
         permanent: true
     },
+    {
+        source: "/batch_changes/references/requirements",
+        destination: "/batch-changes/requirements",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/requirements#sourcegraph-server",
+        destination: "/batch-changes/requirements#sourcegraph-server",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/requirements#code-hosts",
+        destination: "/batch-changes/requirements#code-hosts",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/requirements#batch-changes-effect-on-code-host-rate-limits",
+        destination: "/batch-changes/requirements#batch-changes-effect-on-code-host-rate-limits",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/requirements#batch-changes-effect-on-ci-systems",
+        destination: "/batch-changes/requirements#batch-changes-effect-on-ci-systems",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/requirements#requirements-for-batch-change-creators",
+        destination: "/batch-changes/requirements#requirements-for-batch-change-creators",
+        permanent: true
+    },
 
-
-
-
-
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference",
+        destination: "/batch-changes/batch-spec-yaml-reference",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#name",
+        destination: "/batch-changes/batch-spec-yaml-reference#name",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#description",
+        destination: "/batch-changes/batch-spec-yaml-reference#description",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#on",
+        destination: "/batch-changes/batch-spec-yaml-reference#on",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#onrepositoriesmatchingquery",
+        destination: "/batch-changes/batch-spec-yaml-reference#onrepositoriesmatchingquery",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#onrepository",
+        destination: "/batch-changes/batch-spec-yaml-reference#onrepository",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#steps",
+        destination: "/batch-changes/batch-spec-yaml-reference#steps",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#stepsrun",
+        destination: "/batch-changes/batch-spec-yaml-reference#stepsrun",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#stepscontainer",
+        destination: "/batch-changes/batch-spec-yaml-reference#stepscontainer",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#stepsenv",
+        destination: "/batch-changes/batch-spec-yaml-reference#stepsenv",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#stepsfiles",
+        destination: "/batch-changes/batch-spec-yaml-reference#stepsfiles",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#stepsoutputs",
+        destination: "/batch-changes/batch-spec-yaml-reference#stepsoutputs",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#stepsoutputsnamevalue",
+        destination: "/batch-changes/batch-spec-yaml-reference#stepsoutputsnamevalue",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#stepsoutputsnameformat",
+        destination: "/batch-changes/batch-spec-yaml-reference#stepsoutputsnameformat",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#stepsif",
+        destination: "/batch-changes/batch-spec-yaml-reference#stepsif",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#stepsmount",
+        destination: "/batch-changes/batch-spec-yaml-reference#stepsmount",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#importchangesets",
+        destination: "/batch-changes/batch-spec-yaml-reference#importchangesets",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#importchangesetsrepository",
+        destination: "/batch-changes/batch-spec-yaml-reference#importchangesetsrepository",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#importchangesetsexternalids",
+        destination: "/batch-changes/batch-spec-yaml-reference#importchangesetsexternalids",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#changesettemplate",
+        destination: "/batch-changes/batch-spec-yaml-reference#changesettemplate",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#changesettemplatetitle",
+        destination: "/batch-changes/batch-spec-yaml-reference#changesettemplatetitle",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#changesettemplatebody",
+        destination: "/batch-changes/batch-spec-yaml-reference#changesettemplatebody",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#changesettemplatebranch",
+        destination: "/batch-changes/batch-spec-yaml-reference#changesettemplatebranch",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#changesettemplatecommit",
+        destination: "/batch-changes/batch-spec-yaml-reference#changesettemplatecommit",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#changesettemplatecommitmessage",
+        destination: "/batch-changes/batch-spec-yaml-reference#changesettemplatecommitmessage",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#changesettemplatecommitauthor",
+        destination: "/batch-changes/batch-spec-yaml-reference#changesettemplatecommitauthor",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#changesettemplatepublished",
+        destination: "/batch-changes/batch-spec-yaml-reference#changesettemplatepublished",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#changesettemplatefork",
+        destination: "/batch-changes/batch-spec-yaml-reference#changesettemplatefork",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#transformchanges",
+        destination: "/batch-changes/batch-spec-yaml-reference#transformchanges",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#transformchangesgroup",
+        destination: "/batch-changes/batch-spec-yaml-reference#transformchangesgroup",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#transformchangesgroupdirectory",
+        destination: "/batch-changes/batch-spec-yaml-reference#transformchangesgroupdirectory",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#transformchangesgroupbranch",
+        destination: "/batch-changes/batch-spec-yaml-reference#transformchangesgroupbranch",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#transformchangesgrouprepository",
+        destination: "/batch-changes/batch-spec-yaml-reference#transformchangesgrouprepository",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#workspaces",
+        destination: "/batch-changes/batch-spec-yaml-reference#workspaces",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#workspacesrootatlocationof",
+        destination: "/batch-changes/batch-spec-yaml-reference#workspacesrootatlocationof",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#workspacesin",
+        destination: "/batch-changes/batch-spec-yaml-reference#workspacesin",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_yaml_reference#workspacesonlyfetchworkspace",
+        destination: "/batch-changes/batch-spec-yaml-reference#workspacesonlyfetchworkspace",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_templating",
+        destination: "/batch-changes/batch-spec-templating",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_templating#example-batch-spec",
+        destination: "/batch-changes/batch-spec-templating#example-batch-spec-with-templating",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_templating#fields-with-template-support",
+        destination: "/batch-changes/batch-spec-templating#fields-with-template-support",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_templating#template-variables",
+        destination: "/batch-changes/batch-spec-templating#template-variables",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_templating#steps-context",
+        destination: "/batch-changes/batch-spec-templating#steps-context",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_templating#changesettemplate-context",
+        destination: "/batch-changes/batch-spec-templating#changesettemplate-context",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_templating#template-helper-functions",
+        destination: "/batch-changes/batch-spec-templating#template-helper-functions",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_cheat_sheet",
+        destination: "/batch-changes/batch-spec-cheat-sheet",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_cheat_sheet#loop-over-search-result-paths-in-shell-script",
+        destination: "/batch-changes/batch-spec-cheat-sheet#loop-over-search-result-paths-in-shell-script",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_cheat_sheet#put-search-result-paths-in-file-and-loop-over-them",
+        destination: "/batch-changes/batch-spec-cheat-sheet#put-search-result-paths-in-file-and-loop-over-them",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_cheat_sheet#use-search-result-paths-as-arguments-for-single-command",
+        destination: "/batch-changes/batch-spec-cheat-sheet#use-search-result-paths-as-arguments-for-single-command",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_cheat_sheet#format-files-modified-by-previous-step",
+        destination: "/batch-changes/batch-spec-cheat-sheet#format-files-modified-by-previous-step",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_cheat_sheet#dynamically-set-branch-name-based-on-workspace",
+        destination: "/batch-changes/batch-spec-cheat-sheet#dynamically-set-branch-name-based-on-workspace",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_cheat_sheet#process-search-result-paths-with-script",
+        destination: "/batch-changes/batch-spec-cheat-sheet#process-search-result-paths-with-script",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_cheat_sheet#use-separate-file-as-config-file-for-command",
+        destination: "/batch-changes/batch-spec-cheat-sheet#use-separate-file-as-config-file-for-command",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_cheat_sheet#publish-only-changesets-on-specific-branches",
+        destination: "/batch-changes/batch-spec-cheat-sheet#publish-only-changesets-on-specific-branches",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_cheat_sheet#create-new-files-in-repository",
+        destination: "/batch-changes/batch-spec-cheat-sheet#create-new-files-in-repository",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_cheat_sheet#execute-steps-only-in-repositories-matching-name",
+        destination: "/batch-changes/batch-spec-cheat-sheet#execute-steps-only-in-repositories-matching-name",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_cheat_sheet#execute-steps-based-on-output-of-previous-command",
+        destination: "/batch-changes/batch-spec-cheat-sheet#execute-steps-based-on-output-of-previous-command",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_cheat_sheet#write-a-github-actions-workflow-that-includes-github-expression-syntax",
+        destination: "/batch-changes/batch-spec-cheat-sheet#write-a-github-actions-workflow-that-includes-github-expression-syntax",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/batch_spec_cheat_sheet#list-what-files-were-modified-by-the-batch-change-in-the-changeset",
+        destination: "/batch-changes/batch-spec-cheat-sheet#list-what-files-were-modified-by-the-batch-change-in-the-changeset",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/troubleshooting",
+        destination: "/batch-changes/troubleshooting",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/troubleshooting#executing-batch-change-steps",
+        destination: "/batch-changes/troubleshooting#executing-batch-change-steps",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/troubleshooting#is-src-connected-to-the-right-sourcegraph-instance",
+        destination: "/batch-changes/troubleshooting#is-src-connected-to-the-right-sourcegraph-instance",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/troubleshooting#are-dependencies-installed",
+        destination: "/batch-changes/troubleshooting#are-dependencies-installed",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/troubleshooting#does-hello-world-work",
+        destination: "/batch-changes/troubleshooting#does-hello-world-work",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/troubleshooting#does-it-work-with-a-single-repository-five-ten",
+        destination: "/batch-changes/troubleshooting#does-it-work-with-a-single-repository-five-ten",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/troubleshooting#can-you-download-a-repository-archive",
+        destination: "/batch-changes/troubleshooting#can-you-download-a-repository-archive",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/troubleshooting#can-you-manually-execute-the-stepsrun-command-in-a-container",
+        destination: "/batch-changes/troubleshooting#can-you-manually-execute-the-stepsrun-command-in-a-container",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/troubleshooting#does-it-work-if-you-switch-to-using-the-workspace-mode-using-docker-volumes",
+        destination: "/batch-changes/troubleshooting#does-it-work-if-you-switch-to-using-the-workspace-mode-using-docker-volumes",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/troubleshooting#are-the-docker-images-running-as-different-users",
+        destination: "/batch-changes/troubleshooting#are-the-docker-images-running-as-different-users",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/troubleshooting#are-you-on-the-latest-version-of-docker",
+        destination: "/batch-changes/troubleshooting#are-you-on-the-latest-version-of-docker",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/troubleshooting#have-you-pruned-your-docker-build-cache-and-restarted-the-docker-daemon",
+        destination: "/batch-changes/troubleshooting#have-you-pruned-your-docker-build-cache-and-restarted-the-docker-daemon",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/troubleshooting#using-rancher-desktop-or-colima",
+        destination: "/batch-changes/troubleshooting#using-rancher-desktop-or-colima",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/troubleshooting#publishing-changesets",
+        destination: "/batch-changes/troubleshooting#publishing-changesets",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/troubleshooting#do-you-have-email-privacy-enabled-on-github",
+        destination: "/batch-changes/troubleshooting#do-you-have-email-privacy-enabled-on-github",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/faq",
+        destination: "/batch-changes/faq",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/faq#what-happens-if-my-batch-change-creation-breaks-down-at-900-changesets-out-of-1000-do-i-have-to-re-run-it-all-again",
+        destination: "/batch-changes/faq#what-happens-if-my-batch-change-creation-breaks-down-at-900-changesets-out-of-1000-do-i-have-to-re-run-it",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/faq#can-we-close-a-batch-change-and-still-leave-the-changesets-open",
+        destination: "/batch-changes/faq#can-i-close-a-batch-change-and-leave-the-changesets-open",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/faq#how-scalable-is-batch-changes-how-many-changesets-can-i-create",
+        destination: "/batch-changes/faq#how-scalable-are-batch-changes-how-many-changesets-can-i-create",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/faq#how-long-does-it-take-to-create-a-batch-change",
+        destination: "/batch-changes/faq#how-long-does-it-take-to-create-a-batch-change",
+        permanent: true
+    },
+    {
+        source: "/batch_changes/references/faq#my-batch-change-does-not-open-changesets-on-all-the-repositories-it-should-why",
+        destination: "/batch-changes/faq#why-does-my-batch-change-not-open-changesets-on-all-the-repositories-it-should",
+        permanent: true
+    },
 
 ];
 
