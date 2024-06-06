@@ -22,7 +22,7 @@ export function CopyButton({ text, lang }: { text: string, lang: string }) {
   }
 
   return (
-    <div className="absolute inline-flex items-center top-0 pt-1 right-0 left-0 w-full bg-[#1c1b44] rounded-t-lg shadow">
+    <div className="absolute inline-flex items-center top-0 pt-1 right-0 left-0 w-full border-b-0.1 border-gray-500 rounded-t-lg shadow">
       <div className="relative flex justify-between items-center w-full">
         <div className="text-white text-sm pl-2">{lang.toUpperCase()}</div>
         <div className="relative">
