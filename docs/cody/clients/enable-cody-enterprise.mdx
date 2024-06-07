@@ -64,8 +64,47 @@ To enable Cody Analytics:
 
 Cody Enterprise supports searching up to 10 repositories to find relevant context in chat.
 
-* In VS Code, open a new Cody chat, type `@`, and select `Remote Repositories` to search other repositories for context.
-* In JetBrains, use the enhanced context selector.
+* In VS Code, open a new Cody chat, type `@`, and select `Remote Repositories` to search other repositories for context
+* In JetBrains, use the enhanced context selector
+
+### Smart Context Window
+
+<Callout type="note">The `smartContextWindow` configuration is available with Sourcegraph `v>=5.4.3643` for VS Code (`v>=1.20.0`) and JetBrains (`v>=6.0.0`) Cody clients.</Callout>
+
+Sourcegraph Enterprise versions >= 5.4.3643 have the `smartContextWindow` configuration enabled by default. You can access this configuration from the **Site Admin > Site configuration** panel.
+
+Once enabled, your Cody IDE extension will follow the most optimized context window settings for the selected models and ignore the value configured in the `chatModelMaxTokens` field.
+
+This feature allows you to configure the context window size based on the selected model and has separate context bandwidths for chat input and user-added context. The `smartContextWindow` configuration is currently supported for the Claude-3 Opus, Claude-3 Sonnet, GPT-4o, and GPT Turbo LLM models.
+
+Cody will revert to the value configured on `chatModelMaxTokens` or the default value of **7000** token limit if one of these conditions is met:
+
+- If `smartContextWindow` is enabled on the instance and you run an unsupported Cody plugin version. In this case, the `smartContextWindow` field will be ignored, and the value configured on `chatModelMaxTokens` or the default value of **7000** token limit will be applied
+- If the `smartContextWindow` configuration is set to `disabled`, Cody will again revert to the default value of **7000** token limit
+
+Let's see how enabling `smartContextWindow` would work:
+
+- Make sure you are on the latest Sourcegraph Enterprise version and have the latest Cody extension installed
+- You have one of the supported LLM models (Claude-3 Opus, Claude-3 Sonnet, GPT-4o, or GPT Turbo) selected for chat
+- Open your codebase in your IDE, for example, VS Code
+- Start a new chat and `@-mention` a file that's large enough to trigger the `smartContextWindow` feature
+- To double-check `@-mention` another large file in the same chat
+- Type your question in the chat window and hit Enter
+- With the `smartContextWindow` configuration enabled, Cody will be able to answer your question without triggering the `File too large` warning
+
+![smart-context-enabled](https://storage.googleapis.com/sourcegraph-assets/Docs/smart-context-enabled.png)
+
+If your site admin has disabled the `smartContextWindow` configuration and has configured the `chatModelMaxTokens` limit, Cody will now use the `chatModelMaxTokens` limit for your selected chat models. If the `@-mention` file size does not adhere to the predefined `chatModelMaxTokens` limit, you get the usual `File too large` warning.
+
+![smart-context-disabled](https://storage.googleapis.com/sourcegraph-assets/Docs/smart-context-disabled.png)
+
+A few considerations to keep in view:
+
+- For BYOK customers, there may be a financial impact because the number of tokens per request may increase, resulting in the LLM usage costs
+- Cody Gateway customers will not have any financial implications as Sourcegraph is responsible for the LLM usage cost
+- For customers who wish to consume the expanded context window without upgrading their instance, they may set the `“chatModelMaxTokens: 45000”`
+
+<Callout type="info">You can read and learn more about [Cody's input and output token limits here](/cody/core-concepts/token-limits).</Callout>
 
 ## Setting up Cody Enterprise
 
