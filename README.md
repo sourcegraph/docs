@@ -1,5 +1,7 @@
 # Sourcegraph Docs
 
+<!-- Working branch for June Release -->
+
 Welcome to the Sourcegraph documentation! We're excited to have you contribute to our docs. We've recently rearchitectured our docs tech stack — powered by Next.js, TailwindCSS and deployed on Vercel. This guide will walk you through the process of contributing to our documentation using the new tech stack.
 
 ## Get started
@@ -84,7 +86,7 @@ This is an introductory paragraph.
 
 ### This is heading 3
 
-These are the details for heading three. 
+These are the details for heading three.
 
 This is how you add a [demo-link](https://sourcegraph.com/)
 
