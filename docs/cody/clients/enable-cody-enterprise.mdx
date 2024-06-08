@@ -118,7 +118,7 @@ You can set up Cody for your Enterprise instance in one of the following ways:
 ### Prerequisites
 
 - You have Sourcegraph version 5.1.0 or above
-- A Sourcegraph Enterprise subscription with [Cody Gateway access](/cody/core-concepts/cody-gateway) or [an account with a third-party LLM provider](#using-a-third-party-llm-provider)
+- A Sourcegraph Enterprise subscription with [Cody Gateway access](/cody/core-concepts/cody-gateway) or [an account with a third-party LLM provider](#supported-models-and-model-providers)
 
 ### Enable Cody on your Sourcegraph instance
 
@@ -126,7 +126,7 @@ Cody uses one or more third-party LLM (Large Language Model) providers. Make sur
 
 This requires site-admin privileges. To do so,
 
-1. First, configure your desired LLM provider either by [Using Sourcegraph Cody Gateway](/cody/core-concepts/cody-gateway#using-cody-gateway-in-sourcegraph-enterprise) (recommended) or [Using a third-party LLM provider directly](#using-a-third-party-llm-provider)
+1. First, configure your desired LLM provider either by [Using Sourcegraph Cody Gateway](/cody/core-concepts/cody-gateway#using-cody-gateway-in-sourcegraph-enterprise) (recommended) or [Using a third-party LLM provider directly](#supported-models-and-model-providers)
 
 <Callout type="note"> If you are a Sourcegraph Cloud customer, skip directly to step 3.</Callout>
 
@@ -149,18 +149,6 @@ Cody is now fully enabled on your self-hosted Sourcegraph enterprise instance!
 - After which, you are all set to use Cody with Sourcegraph Cloud
 
 [Learn more about running Cody on Sourcegraph Cloud](/cloud/#cody).
-
-## Enabling codebase-aware answers
-
-<Callout type="note"> To enable codebase-aware answers for Cody, you must first [configure the code graph context](/cody/core-concepts/code-graph).</Callout>
-
-The `Cody: Codebase` setting in VS Code enables codebase-aware answers for the Cody extension.
-
-- Open your VS Code workspace settings via <kbd>Cmd/Ctrl+,</kbd>, (or File > Preferences (Settings) on Windows & Linux)
-- Search for the `Cody: Codebase` setting
-- Enter the repository name as listed in your Sourcegraph instance, for example, `github.com/sourcegraph/sourcegraph` without the `https` protocol
-
-By setting this configuration to the repository name, Cody can provide more accurate and relevant answers to your coding questions based on the context of your current codebase.
 
 ## Disable Cody
 
@@ -223,19 +211,24 @@ In Sourcegraph 5.2 and earlier, you should use the feature flag `cody` to turn C
 
 ![add-overrides](https://user-images.githubusercontent.com/25070988/235454594-9f1a6b27-6882-44d9-be32-258d6c244880.png)
 
-## Using a third-party LLM provider
+## Supported models and model providers
 
-Instead of [Sourcegraph Cody Gateway](/cody/core-concepts/cody-gateway), you can also configure Sourcegraph to use a third-party provider directly, like:
+[Cody Enterprise](https://sourcegraph.com/pricing?product=cody) supports many models and model providers. You can configure Cody Enterprise to access models via Sourcegraph Cody Gateway or directly using your own model provider account or infrastructure.
 
-- [Anthropic](#anthropic)
-- [OpenAI](#openai)
-- [Azure OpenAI](#azure-openai)
-- [AWS Bedrock](#anthropic-claude-through-aws-bedrock)
-- [StarCoder](#use-starcoder-for-autocomplete)
+- Using [Sourcegraph Cody Gateway](/cody/core-concepts/cody-gateway):
+  - Recommended for most organizations.
+  - Supports [state-of-the-art models](/cody/capabilities/supported-models) from Anthropic, OpenAI, and more, without needing a separate account or incurring separate charges.
+- Using your organization's account with a model provider:
+  - [Use your organization's Anthropic account](#use-your-organizations-anthropic-account)
+  - [Use your organization's OpenAI account](#use-your-organizations-openai-account)
+- Using your organization's public cloud infrastructure:
+  - [Use Amazon Bedrock (AWS)](#use-amazon-bedrock-aws)
+  - [Use Azure OpenAI Service](#use-azure-openai-service)
+  - *Use Vertex AI on Google Cloud (coming soon)*
 
-### Anthropic
+### Use your organization's Anthropic account
 
-Create your own key with Anthropic [here](https://console.anthropic.com/account/keys). Once you have the key, go to **Site admin > Site configuration** (`/site-admin/configuration`) on your instance and set:
+First, [create your own key with Anthropic](https://console.anthropic.com/account/keys). Once you have the key, go to **Site admin > Site configuration** (`/site-admin/configuration`) on your instance and set:
 
 ```json
 {
@@ -251,9 +244,9 @@ Create your own key with Anthropic [here](https://console.anthropic.com/account/
 }
 ```
 
-### OpenAI
+### Use your organization's OpenAI account
 
-Create your own key with OpenAI <a href="https://beta.openai.com/account/api-keys" target="_blank">here</a>. Once you have the key, go to **Site admin > Site configuration** (`/site-admin/configuration`) on your instance and set:
+First, [create your own key with OpenAI](https://beta.openai.com/account/api-keys). Once you have the key, go to **Site admin > Site configuration** (`/site-admin/configuration`) on your instance and set:
 
 ```json
 {
@@ -269,11 +262,49 @@ Create your own key with OpenAI <a href="https://beta.openai.com/account/api-key
 }
 ```
 
-<a href="https://platform.openai.com/docs/models" target="_blank">Read and learn more about OpenAI models here →</a>
+[Learn more about OpenAI models.](https://platform.openai.com/docs/models)
 
-### Azure OpenAI
+### Use Amazon Bedrock (AWS)
 
-Create a project in the Azure OpenAI portal. Go to **Keys and Endpoint** from the project overview and get **one of the keys** on that page and the **endpoint**.
+You can use Anthropic Claude models on [Amazon Bedrock](https://aws.amazon.com/bedrock/).
+
+First, make sure you can access Amazon Bedrock. Then, request access to the Anthropic Claude models in Bedrock.
+This may take some time to provision.
+
+Next, create an IAM user with programmatic access in your AWS account. Depending on your AWS setup, different ways may be required to provide access. All completion requests are made from the `frontend` service, so this service needs to be able to access AWS. You can use instance role bindings or directly configure the IAM user credentials in the configuration.
+
+Once ready, go to **Site admin > Site configuration** (`/site-admin/configuration`) on your instance and set:
+
+```json
+{
+  // [...]
+  "cody.enabled": true,
+  "completions": {
+    "provider": "aws-bedrock",
+    "chatModel": "anthropic.claude-3-opus-20240229-v1:0",
+    "completionsModel": "anthropic.claude-instant-v1",
+    "endpoint": "<See below>",
+    "accessToken": "<See below>"
+  }
+}
+```
+
+For the `chatModel` and `completionsModel` fields, see [Amazon's Bedrock documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html) for an up-to-date list of supported model IDs, and cross reference against Sourcegraph's [supported LLM list](/cody/capabilities/supported-models) to verify compatibility with Cody.
+
+For `endpoint`, you can either:
+
+- For Pay-as-you-go, set it to an AWS region code (e.g., `us-west-2`) when using a public Amazon Bedrock endpoint
+- For Provisioned Throughput, set it to the provisioned VPC endpoint for the `bedrock-runtime` API (e.g., `"https://vpce-0a10b2345cd67e89f-abc0defg.bedrock-runtime.us-west-2.vpce.amazonaws.com"`)
+
+For `accessToken`, you can either:
+
+- Leave it empty and rely on instance role bindings or other AWS configurations in the `frontend` service
+- Set it to `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>` if directly configuring the credentials
+- Set it to `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>:<SESSION_TOKEN>` if a session token is also required
+
+### Use Azure OpenAI Service
+
+Create a project in the Azure OpenAI Service portal. Go to **Keys and Endpoint** from the project overview and get **one of the keys** on that page and the **endpoint**.
 
 Next, under **Model deployments**, click "manage deployments" and ensure you deploy the models you want, for example, `gpt-35-turbo`. Take note of the **deployment name**.
 
@@ -299,47 +330,11 @@ For the access token, you can either:
 - As of 5.2.4 the access token can be left empty and it will rely on Environmental, Workload Identity or Managed Identity credentials configured for the `frontend` and `worker` services
 - Set it to `<API_KEY>` if directly configuring the credentials using the API key specified in the Azure portal
 
-### Anthropic Claude through AWS Bedrock
-
-First, make sure you can access AWS Bedrock. Then, request access to the Anthropic Claude models in Bedrock.
-This may take some time to provision.
-
-Next, create an IAM user with programmatic access in your AWS account. Depending on your AWS setup, different ways may be required to provide access. All completion requests are made from the `frontend` service, so this service needs to be able to access AWS. You can use instance role bindings or directly configure the IAM user credentials in the configuration.
-
-Once ready, go to **Site admin > Site configuration** (`/site-admin/configuration`) on your instance and set:
-
-```json
-{
-  // [...]
-  "cody.enabled": true,
-  "completions": {
-    "provider": "aws-bedrock",
-    "chatModel": "anthropic.claude-3-opus-20240229-v1:0",
-    "completionsModel": "anthropic.claude-instant-v1",
-    "endpoint": "<See below>",
-    "accessToken": "<See below>"
-  }
-}
-```
-
-For the `chatModel` and `completionsModel` fields, see [Amazon's Bedrock documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html) for an up-to-date list of supported model IDs, and cross reference against Sourcegraph's [supported LLM list](/cody/capabilities/supported-models) to verify compatibility with Cody.
-
-For `endpoint`, you can either:
-
-- For Pay-as-you-go, set it to an AWS region code (e.g., `us-west-2`) when using a public AWS Bedrock endpoint
-- For Provisioned Throughput, set it to the provisioned VPC endpoint for the `bedrock-runtime` API (e.g., `"https://vpce-0a10b2345cd67e89f-abc0defg.bedrock-runtime.us-west-2.vpce.amazonaws.com"`)
-
-For `accessToken`, you can either:
-
-- Leave it empty and rely on instance role bindings or other AWS configurations in the `frontend` service
-- Set it to `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>` if directly configuring the credentials
-- Set it to `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>:<SESSION_TOKEN>` if a session token is also required
-
 ### Use StarCoder for Autocomplete
 
 When tested with other coder models for the autocomplete use case, [StarCoder](https://huggingface.co/blog/starcoder) offered significant improvements in quality and latency compared to our control groups for users on Sourcegraph.com. You can read more about the improvements in our [October 2023 release notes](https://sourcegraph.com/blog/feature-release-october-2023) and the [GA release notes](https://sourcegraph.com/blog/cody-is-generally-available).
 
-To ensure a fast and reliable experience, we are partnering with [Fireworks](https://fireworks.ai/) and have set up a dedicated hardware deployment for our Enterprise users. Sourcegraph supports StarCoder using the [Cody Gateway](/cody/core-concepts/cody-gateway.
+To ensure a fast and reliable experience, we are partnering with [Fireworks](https://fireworks.ai/) and have set up a dedicated hardware deployment for our Enterprise users. Sourcegraph supports StarCoder using the [Cody Gateway](/cody/core-concepts/cody-gateway).
 
 To enable StarCoder go to **Site admin > Site configuration** (`/site-admin/configuration`) and change the `completionModel`:
 
