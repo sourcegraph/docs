@@ -163,6 +163,9 @@ export default {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      borderWidth: {
+        '0.1': '0.1px',
+      },
     },
   },
   plugins: [typographyPlugin, require("tailwindcss-animate")],
