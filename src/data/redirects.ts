@@ -1740,23 +1740,18 @@ const redirectsData = [
     permanent: true
   },
   {
-    source: "/cody/overview/install-vscode#optional-enable-code-graph-context-for-context-aware-answers",
-    destination: "/cody/clients/install-vscode#enable-code-graph-context-for-context-aware-answers-optional",
-    permanent: true
-  },
-  {
-    source: "/cody/overview/install-vscode#enable-code-graph-context-for-context-aware-answers-optional",
-    destination: "/cody/clients/install-vscode#enable-code-graph-context-for-context-aware-answers-optional",
-    permanent: true
+      source: "/cody/clients/enable-cody-enterprise#using-a-third-party-llm-provider",
+      destination: "/cody/clients/enable-cody-enterprise#supported-models-and-model-providers",
+      permanent: true
   },
   {
     source: "/cody/overview/enable-cody-enterprise#using-a-third-party-llm-provider-directly",
-    destination: "/cody/clients/enable-cody-enterprise#using-a-third-party-llm-provider",
+    destination: "/cody/clients/enable-cody-enterprise#supported-models-and-model-providers",
     permanent: true
   },
   {
     source: "/cody/overview/enable-cody-enterprise#using-a-third-party-llm-provider",
-    destination: "/cody/clients/enable-cody-enterprise#using-a-third-party-llm-provider",
+    destination: "/cody/clients/enable-cody-enterprise#supported-models-and-model-providers",
     permanent: true
   },
   {
