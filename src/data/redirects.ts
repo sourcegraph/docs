@@ -3903,366 +3903,366 @@ const redirectsData = [
   // },
 
 
-  {
-    source: "/dev/roadmap",
-    destination: "https://sourcegraph.com/direction",
-    permanent: true
-  },
-  {
-    source: "/dev/code_reviews",
-    destination: "https://docs.sourcegraph.com/dev/background-information/code_reviews",
-    permanent: true
-  },
-  {
-    source: "/dev/conduct",
-    destination: "https://sourcegraph.com/community/code_of_conduct",
-    permanent: true
-  },
-  {
-    source: "/dev/devrel_release_issue_template",
-    destination: "https://sourcegraph.com/handbook/marketing/developer-relations/release_issue_template",
-    permanent: true
-  },
-  {
-    source: "/dev/documentation/separate_website",
-    destination: "https://sourcegraph.com/handbook/engineering/distribution/separate_website",
-    permanent: true
-  },
-  {
-    source: "/dev/documentation/site",
-    destination: "https://sourcegraph.com/handbook/engineering/distribution/update_sourcegraph_website",
-    permanent: true
-  },
-  {
-    source: "/dev/documentation/structure",
-    destination: "https://sourcegraph.com/handbook/engineering/product_documentation",
-    permanent: true
-  },
-  {
-    source: "/dev/documentation/style_guide",
-    destination: "https://sourcegraph.com/handbook/engineering/product_documentation",
-    permanent: true
-  },
-  {
-    source: "/dev/faq",
-    destination: "https://sourcegraph.com/community/faq",
-    permanent: true
-  },
-  {
-    source: "/dev/go_style_guide",
-    destination: "https://docs.sourcegraph.com/dev/background-information/languages/go",
-    permanent: true
-  },
-  {
-    source: "/dev/incidents",
-    destination: "https://sourcegraph.com/handbook/engineering/incidents",
-    permanent: true
-  },
-  {
-    source: "/dev/open_source_open_company",
-    destination: "https://sourcegraph.com/company#sourcegraph-open-product-open-company-open-source",
-    permanent: true
-  },
-  {
-    source: "/dev/patch_release_issue_template",
-    destination: "https://sourcegraph.com/handbook/engineering/releases/patch_release_issue_template",
-    permanent: true
-  },
-  {
-    source: "/dev/product",
-    destination: "https://sourcegraph.com/handbook/product",
-    permanent: true
-  },
-  {
-    source: "/dev/product/personas",
-    destination: "https://sourcegraph.com/handbook/marketing/personas",
-    permanent: true
-  },
-  {
-    source: "/dev/release_issue_template",
-    destination: "https://sourcegraph.com/handbook/engineering/releases/release_issue_template",
-    permanent: true
-  },
-  {
-    source: "/dev/releases",
-    destination: "https://sourcegraph.com/handbook/engineering/releases",
-    permanent: true
-  },
-  {
-    source: "/dev/retrospectives/3_0",
-    destination: "https://sourcegraph.com/handbook/retrospectives/3_0",
-    permanent: true
-  },
-  {
-    source: "/dev/retrospectives/3_0_beta",
-    destination: "https://sourcegraph.com/handbook/retrospectives/3_0_beta",
-    permanent: true
-  },
-  {
-    source: "/dev/retrospectives/3_2",
-    destination: "https://sourcegraph.com/retrospectives/3_2",
-    permanent: true
-  },
-  {
-    source: "/dev/retrospectives/3_3",
-    destination: "https://sourcegraph.com/retrospectives/3_3",
-    permanent: true
-  },
-  {
-    source: "/dev/retrospectives/3_4",
-    destination: "https://sourcegraph.com/retrospectives/3_4",
-    permanent: true
-  },
-  {
-    source: "/dev/retrospectives/3_5",
-    destination: "https://sourcegraph.com/retrospectives/3_5",
-    permanent: true
-  },
-  {
-    source: "/dev/retrospectives/3_6",
-    destination: "https://sourcegraph.com/retrospectives/3_6",
-    permanent: true
-  },
-  {
-    source: "/dev/retrospectives/3_7",
-    destination: "https://sourcegraph.com/retrospectives/3_7",
-    permanent: true
-  },
-  {
-    source: "/dev/retrospectives/3_8",
-    destination: "https://sourcegraph.com/retrospectives/3_8",
-    permanent: true
-  },
-  {
-    source: "/dev/retrospectives/3_9",
-    destination: "https://sourcegraph.com/retrospectives/3_9",
-    permanent: true
-  },
-  {
-    source: "/dev/retrospectives/customer_license_expiration",
-    destination: "https://sourcegraph.com/retrospectives/customer_license_expiration",
-    permanent: true
-  },
-  {
-    source: "/dev/retrospectives",
-    destination: "https://sourcegraph.com/retrospectives",
-    permanent: true
-  },
-  {
-    source: "/dev/retrospectives/postgresql_upgrade",
-    destination: "https://sourcegraph.com/retrospectives/postgresql_upgrade",
-    permanent: true
-  },
-  {
-    source: "/dev/rfcs",
-    destination: "https://sourcegraph.com/handbook/communication/rfcs",
-    permanent: true
-  },
-  {
-    source: "/dev/style_guide",
-    destination: "https://sourcegraph.com/handbook/communication/style_guide",
-    permanent: true
-  },
-  {
-    source: "/direction",
-    destination: "https://sourcegraph.com/direction",
-    permanent: true
-  },
-  {
-    source: "/direction/secure",
-    destination: "https://sourcegraph.com/direction",
-    permanent: true
-  },
-  {
-    source: "/graphbook/communication",
-    destination: "https://sourcegraph.com/handbook",
-    permanent: true
-  },
-  {
-    source: "/graphbook",
-    destination: "https://sourcegraph.com/handbook",
-    permanent: true
-  },
-  {
-    source: "/team/graphbook",
-    destination: "https://sourcegraph.com/handbook",
-    permanent: true
-  },
-  {
-    source: "/team/graphbook/team_meeting",
-    destination: "https://sourcegraph.com/handbook/communication/company_meeting",
-    permanent: true
-  },
-  {
-    source: "/team/graphbook/travel",
-    destination: "https://sourcegraph.com/handbook/people-ops/travel",
-    permanent: true
-  },
-  {
-    source: "/team/gtm/devrel",
-    destination: "https://sourcegraph.com/handbook/marketing/developer-relations",
-    permanent: true
-  },
-  {
-    source: "/team/gtm",
-    destination: "https://sourcegraph.com/handbook/sales",
-    permanent: true
-  },
-  {
-    source: "/team/gtm/support/diagnostics",
-    destination: "https://sourcegraph.com/handbook/support/diagnostics",
-    permanent: true
-  },
-  {
-    source: "/team/gtm/support",
-    destination: "https://sourcegraph.com/handbook/support",
-    permanent: true
-  },
-  {
-    source: "/team",
-    destination: "https://sourcegraph.com/handbook",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/documentation",
-    destination: "https://sourcegraph.com/handbook/engineering/product_documentation",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/documentation/separate_website",
-    destination: "https://sourcegraph.com/handbook/engineering/distribution/separate_website",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/documentation/site",
-    destination: "https://sourcegraph.com/handbook/engineering/distribution/update_sourcegraph_website",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/documentation/structure",
-    destination: "https://sourcegraph.com/handbook/engineering/product_documentation",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/documentation/style_guide",
-    destination: "https://sourcegraph.com/handbook/communication/style_guide",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/incidents",
-    destination: "https://sourcegraph.com/handbook/engineering/incidents",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev",
-    destination: "https://sourcegraph.com/handbook/engineering",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/open_source_open_company",
-    destination: "https://sourcegraph.com/company#sourcegraph-open-product-open-company-open-source",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/product",
-    destination: "https://sourcegraph.com/handbook/product",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/product/personas",
-    destination: "https://sourcegraph.com/handbook/marketing/personas",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/releases",
-    destination: "https://sourcegraph.com/handbook/engineering/releases",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/retrospectives/3_0",
-    destination: "https://sourcegraph.com/retrospectives/3_0",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/retrospectives/3_0_beta",
-    destination: "https://sourcegraph.com/retrospectives/3_0_beta",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/retrospectives/3_2",
-    destination: "https://sourcegraph.com/retrospectives/3_2",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/retrospectives/3_3",
-    destination: "https://sourcegraph.com/retrospectives/3_3",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/retrospectives/3_4",
-    destination: "https://sourcegraph.com/retrospectives/3_4",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/retrospectives/3_5",
-    destination: "https://sourcegraph.com/retrospectives/3_5",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/retrospectives/3_6",
-    destination: "https://sourcegraph.com/retrospectives/3_6",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/retrospectives/3_7",
-    destination: "https://sourcegraph.com/retrospectives/3_7",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/retrospectives/3_8",
-    destination: "https://sourcegraph.com/retrospectives/3_8",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/retrospectives/3_9",
-    destination: "https://sourcegraph.com/retrospectives/3_9",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/retrospectives/customer_license_expiration",
-    destination: "https://sourcegraph.com/retrospectives/customer_license_expiration",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/retrospectives",
-    destination: "https://sourcegraph.com/retrospectives",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/retrospectives/postgresql_upgrade",
-    destination: "https://sourcegraph.com/retrospectives/postgresql_upgrade",
-    permanent: true
-  },
-  {
-    source: "/team/product-dev/rfcs",
-    destination: "https://sourcegraph.com/handbook/communication/rfcs",
-    permanent: true
-  },
-  {
-    source: "/team/roadmap",
-    destination: "https://sourcegraph.com/direction",
-    permanent: true
-  },
-  {
-    source: "/team/style_guide",
-    destination: "https://sourcegraph.com/handbook/communication/style_guide",
-    permanent: true
-  },
-  {
-    source: "/adopt/comp",
-    destination: "https://sourcegraph.com/workflow",
-    permanent: true
-  },
+  // {
+  //   source: "/dev/roadmap",
+  //   destination: "https://sourcegraph.com/direction",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/code_reviews",
+  //   destination: "https://docs.sourcegraph.com/dev/background-information/code_reviews",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/conduct",
+  //   destination: "https://sourcegraph.com/community/code_of_conduct",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/devrel_release_issue_template",
+  //   destination: "https://sourcegraph.com/handbook/marketing/developer-relations/release_issue_template",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/documentation/separate_website",
+  //   destination: "https://sourcegraph.com/handbook/engineering/distribution/separate_website",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/documentation/site",
+  //   destination: "https://sourcegraph.com/handbook/engineering/distribution/update_sourcegraph_website",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/documentation/structure",
+  //   destination: "https://sourcegraph.com/handbook/engineering/product_documentation",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/documentation/style_guide",
+  //   destination: "https://sourcegraph.com/handbook/engineering/product_documentation",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/faq",
+  //   destination: "https://sourcegraph.com/community/faq",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/go_style_guide",
+  //   destination: "https://docs.sourcegraph.com/dev/background-information/languages/go",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/incidents",
+  //   destination: "https://sourcegraph.com/handbook/engineering/incidents",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/open_source_open_company",
+  //   destination: "https://sourcegraph.com/company#sourcegraph-open-product-open-company-open-source",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/patch_release_issue_template",
+  //   destination: "https://sourcegraph.com/handbook/engineering/releases/patch_release_issue_template",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/product",
+  //   destination: "https://sourcegraph.com/handbook/product",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/product/personas",
+  //   destination: "https://sourcegraph.com/handbook/marketing/personas",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/release_issue_template",
+  //   destination: "https://sourcegraph.com/handbook/engineering/releases/release_issue_template",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/releases",
+  //   destination: "https://sourcegraph.com/handbook/engineering/releases",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/retrospectives/3_0",
+  //   destination: "https://sourcegraph.com/handbook/retrospectives/3_0",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/retrospectives/3_0_beta",
+  //   destination: "https://sourcegraph.com/handbook/retrospectives/3_0_beta",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/retrospectives/3_2",
+  //   destination: "https://sourcegraph.com/retrospectives/3_2",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/retrospectives/3_3",
+  //   destination: "https://sourcegraph.com/retrospectives/3_3",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/retrospectives/3_4",
+  //   destination: "https://sourcegraph.com/retrospectives/3_4",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/retrospectives/3_5",
+  //   destination: "https://sourcegraph.com/retrospectives/3_5",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/retrospectives/3_6",
+  //   destination: "https://sourcegraph.com/retrospectives/3_6",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/retrospectives/3_7",
+  //   destination: "https://sourcegraph.com/retrospectives/3_7",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/retrospectives/3_8",
+  //   destination: "https://sourcegraph.com/retrospectives/3_8",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/retrospectives/3_9",
+  //   destination: "https://sourcegraph.com/retrospectives/3_9",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/retrospectives/customer_license_expiration",
+  //   destination: "https://sourcegraph.com/retrospectives/customer_license_expiration",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/retrospectives",
+  //   destination: "https://sourcegraph.com/retrospectives",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/retrospectives/postgresql_upgrade",
+  //   destination: "https://sourcegraph.com/retrospectives/postgresql_upgrade",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/rfcs",
+  //   destination: "https://sourcegraph.com/handbook/communication/rfcs",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/style_guide",
+  //   destination: "https://sourcegraph.com/handbook/communication/style_guide",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/direction",
+  //   destination: "https://sourcegraph.com/direction",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/direction/secure",
+  //   destination: "https://sourcegraph.com/direction",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/graphbook/communication",
+  //   destination: "https://sourcegraph.com/handbook",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/graphbook",
+  //   destination: "https://sourcegraph.com/handbook",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/graphbook",
+  //   destination: "https://sourcegraph.com/handbook",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/graphbook/team_meeting",
+  //   destination: "https://sourcegraph.com/handbook/communication/company_meeting",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/graphbook/travel",
+  //   destination: "https://sourcegraph.com/handbook/people-ops/travel",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/gtm/devrel",
+  //   destination: "https://sourcegraph.com/handbook/marketing/developer-relations",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/gtm",
+  //   destination: "https://sourcegraph.com/handbook/sales",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/gtm/support/diagnostics",
+  //   destination: "https://sourcegraph.com/handbook/support/diagnostics",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/gtm/support",
+  //   destination: "https://sourcegraph.com/handbook/support",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team",
+  //   destination: "https://sourcegraph.com/handbook",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/documentation",
+  //   destination: "https://sourcegraph.com/handbook/engineering/product_documentation",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/documentation/separate_website",
+  //   destination: "https://sourcegraph.com/handbook/engineering/distribution/separate_website",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/documentation/site",
+  //   destination: "https://sourcegraph.com/handbook/engineering/distribution/update_sourcegraph_website",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/documentation/structure",
+  //   destination: "https://sourcegraph.com/handbook/engineering/product_documentation",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/documentation/style_guide",
+  //   destination: "https://sourcegraph.com/handbook/communication/style_guide",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/incidents",
+  //   destination: "https://sourcegraph.com/handbook/engineering/incidents",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev",
+  //   destination: "https://sourcegraph.com/handbook/engineering",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/open_source_open_company",
+  //   destination: "https://sourcegraph.com/company#sourcegraph-open-product-open-company-open-source",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/product",
+  //   destination: "https://sourcegraph.com/handbook/product",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/product/personas",
+  //   destination: "https://sourcegraph.com/handbook/marketing/personas",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/releases",
+  //   destination: "https://sourcegraph.com/handbook/engineering/releases",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/retrospectives/3_0",
+  //   destination: "https://sourcegraph.com/retrospectives/3_0",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/retrospectives/3_0_beta",
+  //   destination: "https://sourcegraph.com/retrospectives/3_0_beta",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/retrospectives/3_2",
+  //   destination: "https://sourcegraph.com/retrospectives/3_2",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/retrospectives/3_3",
+  //   destination: "https://sourcegraph.com/retrospectives/3_3",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/retrospectives/3_4",
+  //   destination: "https://sourcegraph.com/retrospectives/3_4",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/retrospectives/3_5",
+  //   destination: "https://sourcegraph.com/retrospectives/3_5",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/retrospectives/3_6",
+  //   destination: "https://sourcegraph.com/retrospectives/3_6",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/retrospectives/3_7",
+  //   destination: "https://sourcegraph.com/retrospectives/3_7",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/retrospectives/3_8",
+  //   destination: "https://sourcegraph.com/retrospectives/3_8",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/retrospectives/3_9",
+  //   destination: "https://sourcegraph.com/retrospectives/3_9",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/retrospectives/customer_license_expiration",
+  //   destination: "https://sourcegraph.com/retrospectives/customer_license_expiration",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/retrospectives",
+  //   destination: "https://sourcegraph.com/retrospectives",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/retrospectives/postgresql_upgrade",
+  //   destination: "https://sourcegraph.com/retrospectives/postgresql_upgrade",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/product-dev/rfcs",
+  //   destination: "https://sourcegraph.com/handbook/communication/rfcs",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/roadmap",
+  //   destination: "https://sourcegraph.com/direction",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/team/style_guide",
+  //   destination: "https://sourcegraph.com/handbook/communication/style_guide",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/adopt/comp",
+  //   destination: "https://sourcegraph.com/workflow",
+  //   permanent: true
+  // },
   {
     source: "/admin/auth/saml_with_microsoft_adfs",
     destination: "/admin/auth/saml/microsoft_adfs",
@@ -4323,476 +4323,476 @@ const redirectsData = [
     destination: "/integration/google_workspace",
     permanent: true
   },
-  {
-    source: "/dev/architecture/life-of-a-search-query",
-    destination: "/dev/background-information/architecture/life-of-a-search-query",
-    permanent: true
-  },
-  {
-    source: "/dev/architecture/architecture.dot",
-    destination: "/dev/background-information/architecture/architecture.dot",
-    permanent: true
-  },
-  {
-    source: "/dev/architecture/life-of-a-ping",
-    destination: "/dev/background-information/architecture/life-of-a-ping",
-    permanent: true
-  },
-  {
-    source: "/dev/architecture/life-of-a-repository",
-    destination: "/dev/background-information/architecture/life-of-a-repository",
-    permanent: true
-  },
-  {
-    source: "/dev/architecture/search-pagination",
-    destination: "/dev/background-information/architecture/search-pagination",
-    permanent: true
-  },
-  {
-    source: "/dev/architecture/architecture.dot",
-    destination: "/dev/background-information/architecture/architecture.dot",
-    permanent: true
-  },
-  {
-    source: "/dev/architecture/architecture.svg",
-    destination: "/dev/background-information/architecture/architecture.svg",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/architecture",
-    destination: "/dev/background-information/codeintel/architecture",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/deployment",
-    destination: "/dev/background-information/codeintel/deployment",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/diagrams/architecture.dot",
-    destination: "/dev/background-information/codeintel/diagrams/architecture.dot",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/diagrams/architecture.svg",
-    destination: "/dev/background-information/codeintel/diagrams/architecture.svg",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/diagrams/definitions.mermaid",
-    destination: "/dev/background-information/codeintel/diagrams/definitions.mermaid",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/diagrams/definitions.svg",
-    destination: "/dev/background-information/codeintel/diagrams/definitions.svg",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/diagrams/extension-definitions.mermaid",
-    destination: "/dev/background-information/codeintel/diagrams/extension-definitions.mermaid",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/diagrams/extension-definitions.svg",
-    destination: "/dev/background-information/codeintel/diagrams/extension-definitions.svg",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/diagrams/extension-hover.mermaid",
-    destination: "/dev/background-information/codeintel/diagrams/extension-hover.mermaid",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/diagrams/extension-hover.svg",
-    destination: "/dev/background-information/codeintel/diagrams/extension-hover.svg",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/diagrams/extension-references.mermaid",
-    destination: "/dev/background-information/codeintel/diagrams/extension-references.mermaid",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/diagrams/extension-references.svg",
-    destination: "/dev/background-information/codeintel/diagrams/extension-references.svg",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/diagrams/hover.mermaid",
-    destination: "/dev/background-information/codeintel/diagrams/hover.mermaid",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/diagrams/hover.svg",
-    destination: "/dev/background-information/codeintel/diagrams/hover.svg",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/diagrams/references.mermaid",
-    destination: "/dev/background-information/codeintel/diagrams/references.mermaid",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/diagrams/references.svg",
-    destination: "/dev/background-information/codeintel/diagrams/references.svg",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/diagrams/resolve-page.mermaid",
-    destination: "/dev/background-information/codeintel/diagrams/resolve-page.mermaid",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/diagrams/resolve-page.svg",
-    destination: "/dev/background-information/codeintel/diagrams/resolve-page.svg",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/diagrams/upload.mermaid",
-    destination: "/dev/background-information/codeintel/diagrams/upload.mermaid",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/diagrams/upload.svg",
-    destination: "/dev/background-information/codeintel/diagrams/upload.svg",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/extensions",
-    destination: "/dev/background-information/codeintel/extensions",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/index",
-    destination: "/dev/background-information/codeintel/index",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/queries",
-    destination: "/dev/background-information/codeintel/queries",
-    permanent: true
-  },
-  {
-    source: "/dev/codeintel/uploads",
-    destination: "/dev/background-information/codeintel/uploads",
-    permanent: true
-  },
-  {
-    source: "/dev/graphql_api",
-    destination: "/dev/background-information/graphql_api",
-    permanent: true
-  },
-  {
-    source: "/dev/observability",
-    destination: "/dev/background-information/observability",
-    permanent: true
-  },
-  {
-    source: "/dev/postgresql",
-    destination: "/dev/background-information/postgresql",
-    permanent: true
-  },
-  {
-    source: "/dev/renovate",
-    destination: "/dev/background-information/renovate",
-    permanent: true
-  },
-  {
-    source: "/dev/tech_stack",
-    destination: "/dev/background-information/tech_stack",
-    permanent: true
-  },
-  {
-    source: "/dev/telemetry",
-    destination: "/dev/background-information/telemetry",
-    permanent: true
-  },
-  {
-    source: "/dev/testing",
-    destination: "/dev/background-information/testing",
-    permanent: true
-  },
-  {
-    source: "/dev/web/build",
-    destination: "/dev/background-information/web/build",
-    permanent: true
-  },
-  {
-    source: "/dev/code_host_integrations",
-    destination: "/dev/background-information/web/code_host_integrations",
-    permanent: true
-  },
-  {
-    source: "/dev/web/graphql",
-    destination: "/dev/background-information/web/graphql",
-    permanent: true
-  },
-  {
-    source: "/dev/web/index",
-    destination: "/dev/background-information/web/index",
-    permanent: true
-  },
-  {
-    source: "/dev/web/web_app",
-    destination: "/dev/background-information/web/web_app",
-    permanent: true
-  },
-  {
-    source: "/dev/phabricator_gitolite",
-    destination: "/dev/how-to/configure_phabricator_gitolite",
-    permanent: true
-  },
-  {
-    source: "/dev/documentation",
-    destination: "/dev/how-to/documentation_implementation",
-    permanent: true
-  },
-  {
-    source: "/dev/zoekt",
-    destination: "/dev/how-to/zoekt_local_dev",
-    permanent: true
-  },
-  {
-    source: "/user/search/examples",
-    destination: "/code_search/tutorials/examples",
-    permanent: true
-  },
-  {
-    source: "/user/search/queries",
-    destination: "/code_search/reference/queries",
-    permanent: true
-  },
-  {
-    source: "/user/search/language",
-    destination: "/code_search/reference/language",
-    permanent: true
-  },
-  {
-    source: "/user/search/structural",
-    destination: "/code_search/reference/structural",
-    permanent: true
-  },
-  {
-    source: "/user/search/opengrok",
-    destination: "/code_search/how-to/opengrok",
-    permanent: true
-  },
-  {
-    source: "/user/search/saved_searches",
-    destination: "/code_search/how-to/saved_searches",
-    permanent: true
-  },
-  {
-    source: "/user/search/scopes",
-    destination: "/code_search/how-to/scopes",
-    permanent: true
-  },
-  {
-    source: "/user/code_intelligence/lsif_quickstart",
-    destination: "/user/code_intelligence/how-to/index_other_languages",
-    permanent: true
-  },
-  {
-    source: "/user/code_intelligence/basic_code_intelligence",
-    destination: "/user/code_intelligence/explanations/search_based_code_intelligence",
-    permanent: true
-  },
-  {
-    source: "/user/code_intelligence/features",
-    destination: "/user/code_intelligence/explanations/features",
-    permanent: true
-  },
-  {
-    source: "/user/code_intelligence/lsif",
-    destination: "/user/code_intelligence/explanations/precise_code_intelligence",
-    permanent: true
-  },
-  {
-    source: "/user/code_intelligence/precise_code_intelligence",
-    destination: "/user/code_intelligence/explanations/precise_code_intelligence",
-    permanent: true
-  },
-  {
-    source: "/user/code_intelligence/writing_an_indexer",
-    destination: "/user/code_intelligence/explanations/writing_an_indexer",
-    permanent: true
-  },
-  {
-    source: "/user/code_intelligence/adding_lsif_to_many_repos",
-    destination: "/user/code_intelligence/how-to/adding_lsif_to_many_repos",
-    permanent: true
-  },
-  {
-    source: "/user/code_intelligence/adding_lsif_to_workflows",
-    destination: "/user/code_intelligence/how-to/adding_lsif_to_workflows",
-    permanent: true
-  },
-  {
-    source: "/user/code_intelligence/languages/go",
-    destination: "/user/code_intelligence/how-to/index_a_go_repository",
-    permanent: true
-  },
-  {
-    source: "/user/code_intelligence/languages/typescript_and_javascript",
-    destination: "/user/code_intelligence/how-to/index_a_typescript_and_javascript_repository",
-    permanent: true
-  },
-  {
-    source: "/user/code_intelligence/explanations/basic_code_intelligence",
-    destination: "/code_intelligence/explanations/search_based_code_intelligence",
-    permanent: true
-  },
-  {
-    source: "/user/code_intelligence/explanations/features",
-    destination: "/code_intelligence/explanations/features",
-    permanent: true
-  },
-  {
-    source: "/user/code_intelligence/explanations/precise_code_intelligence",
-    destination: "/code_intelligence/explanations/precise_code_intelligence",
-    permanent: true
-  },
-  {
-    source: "/user/code_intelligence/explanations/writing_an_indexer",
-    destination: "/code_intelligence/explanations/writing_an_indexer",
-    permanent: true
-  },
-  {
-    source: "/user/code_intelligence/how-to/adding_lsif_to_many_repos",
-    destination: "/code_intelligence/how-to/adding_lsif_to_many_repos",
-    permanent: true
-  },
-  {
-    source: "/user/code_intelligence/how-to/adding_lsif_to_workflows",
-    destination: "/code_intelligence/how-to/adding_lsif_to_workflows",
-    permanent: true
-  },
-  {
-    source: "/user/code_intelligence/how-to/index_a_go_repository",
-    destination: "/code_intelligence/how-to/index_a_go_repository",
-    permanent: true
-  },
-  {
-    source: "/user/code_intelligence/how-to/index_a_typescript_and_javascript_repository",
-    destination: "/code_intelligence/how-to/index_a_typescript_and_javascript_repository",
-    permanent: true
-  },
-  {
-    source: "/user/markdown",
-    destination: "/admin/markdown",
-    permanent: true
-  },
-  {
-    source: "/user/organizations",
-    destination: "/admin/organizations",
-    permanent: true
-  },
-  {
-    source: "/user/organizations/index",
-    destination: "/admin/organizations",
-    permanent: true
-  },
-  {
-    source: "/user/usage_statistics",
-    destination: "/admin/usage_statistics",
-    permanent: true
-  },
-  {
-    source: "/user/user_surveys",
-    destination: "/admin/user_surveys",
-    permanent: true
-  },
-  {
-    source: "/user/repository/badges",
-    destination: "/user/personalization/badges",
-    permanent: true
-  },
-  {
-    source: "/user/quick_links",
-    destination: "/user/personalization/quick_links",
-    permanent: true
-  },
-  {
-    source: "/user/themes",
-    destination: "/user/personalization/themes",
-    permanent: true
-  },
-  {
-    source: "/user/search",
-    destination: "/code_search",
-    permanent: true
-  },
-  {
-    source: "/user/code_intelligence",
-    destination: "/code_intelligence",
-    permanent: true
-  },
-  {
-    source: "/user",
-    destination: "/getting-started",
-    permanent: true
-  },
-  {
-    source: "/user/automation",
-    destination: "/batch_changes",
-    permanent: true
-  },
-  {
-    source: "/user/campaigns",
-    destination: "/batch_changes",
-    permanent: true
-  },
-  {
-    source: "/user/campaigns/examples",
-    destination: "/batch_changes/tutorials",
-    permanent: true
-  },
-  {
-    source: "/user/campaigns/managing_access",
-    destination: "/batch_changes/explanations/permissions_in_batch_changes",
-    permanent: true
-  },
-  {
-    source: "/dev/campaigns_database_layout.dot",
-    destination: "/dev/background-information/batch_changes/batch_changes_database_layout.dot",
-    permanent: true
-  },
-  {
-    source: "/dev/campaigns_database_layout.svg",
-    destination: "/dev/background-information/batch_changes/batch_changes_database_layout.svg",
-    permanent: true
-  },
-  {
-    source: "/dev/campaigns_design",
-    destination: "/dev/background-information/batch_changes/batch_changes_design",
-    permanent: true
-  },
-  {
-    source: "/dev/campaigns_development",
-    destination: "/dev/background-information/batch_changes/index",
-    permanent: true
-  },
-  {
-    source: "/dev/automation_development",
-    destination: "/dev/background-information/batch_changes/index",
-    permanent: true
-  },
-  {
-    source: "/campaigns/campaign_spec_yaml_reference",
-    destination: "/campaigns/references/batch_spec_yaml_reference",
-    permanent: true
-  },
-  {
-    source: "/dev/background-information/campaigns/campaigns_database_layout.svg",
-    destination: "/dev/background-information/batch_changes/batch_changes_database_layout.svg",
-    permanent: true
-  },
-  {
-    source: "/dev/background-information/campaigns/campaigns_database_layout.dot",
-    destination: "/dev/background-information/batch_changes/batch_changes_database_layout.dot",
-    permanent: true
-  },
+  // {
+  //   source: "/dev/architecture/life-of-a-search-query",
+  //   destination: "/dev/background-information/architecture/life-of-a-search-query",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/architecture/architecture.dot",
+  //   destination: "/dev/background-information/architecture/architecture.dot",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/architecture/life-of-a-ping",
+  //   destination: "/dev/background-information/architecture/life-of-a-ping",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/architecture/life-of-a-repository",
+  //   destination: "/dev/background-information/architecture/life-of-a-repository",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/architecture/search-pagination",
+  //   destination: "/dev/background-information/architecture/search-pagination",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/architecture/architecture.dot",
+  //   destination: "/dev/background-information/architecture/architecture.dot",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/architecture/architecture.svg",
+  //   destination: "/dev/background-information/architecture/architecture.svg",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/architecture",
+  //   destination: "/dev/background-information/codeintel/architecture",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/deployment",
+  //   destination: "/dev/background-information/codeintel/deployment",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/diagrams/architecture.dot",
+  //   destination: "/dev/background-information/codeintel/diagrams/architecture.dot",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/diagrams/architecture.svg",
+  //   destination: "/dev/background-information/codeintel/diagrams/architecture.svg",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/diagrams/definitions.mermaid",
+  //   destination: "/dev/background-information/codeintel/diagrams/definitions.mermaid",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/diagrams/definitions.svg",
+  //   destination: "/dev/background-information/codeintel/diagrams/definitions.svg",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/diagrams/extension-definitions.mermaid",
+  //   destination: "/dev/background-information/codeintel/diagrams/extension-definitions.mermaid",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/diagrams/extension-definitions.svg",
+  //   destination: "/dev/background-information/codeintel/diagrams/extension-definitions.svg",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/diagrams/extension-hover.mermaid",
+  //   destination: "/dev/background-information/codeintel/diagrams/extension-hover.mermaid",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/diagrams/extension-hover.svg",
+  //   destination: "/dev/background-information/codeintel/diagrams/extension-hover.svg",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/diagrams/extension-references.mermaid",
+  //   destination: "/dev/background-information/codeintel/diagrams/extension-references.mermaid",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/diagrams/extension-references.svg",
+  //   destination: "/dev/background-information/codeintel/diagrams/extension-references.svg",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/diagrams/hover.mermaid",
+  //   destination: "/dev/background-information/codeintel/diagrams/hover.mermaid",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/diagrams/hover.svg",
+  //   destination: "/dev/background-information/codeintel/diagrams/hover.svg",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/diagrams/references.mermaid",
+  //   destination: "/dev/background-information/codeintel/diagrams/references.mermaid",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/diagrams/references.svg",
+  //   destination: "/dev/background-information/codeintel/diagrams/references.svg",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/diagrams/resolve-page.mermaid",
+  //   destination: "/dev/background-information/codeintel/diagrams/resolve-page.mermaid",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/diagrams/resolve-page.svg",
+  //   destination: "/dev/background-information/codeintel/diagrams/resolve-page.svg",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/diagrams/upload.mermaid",
+  //   destination: "/dev/background-information/codeintel/diagrams/upload.mermaid",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/diagrams/upload.svg",
+  //   destination: "/dev/background-information/codeintel/diagrams/upload.svg",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/extensions",
+  //   destination: "/dev/background-information/codeintel/extensions",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/index",
+  //   destination: "/dev/background-information/codeintel/index",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/queries",
+  //   destination: "/dev/background-information/codeintel/queries",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/codeintel/uploads",
+  //   destination: "/dev/background-information/codeintel/uploads",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/graphql_api",
+  //   destination: "/dev/background-information/graphql_api",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/observability",
+  //   destination: "/dev/background-information/observability",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/postgresql",
+  //   destination: "/dev/background-information/postgresql",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/renovate",
+  //   destination: "/dev/background-information/renovate",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/tech_stack",
+  //   destination: "/dev/background-information/tech_stack",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/telemetry",
+  //   destination: "/dev/background-information/telemetry",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/testing",
+  //   destination: "/dev/background-information/testing",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/web/build",
+  //   destination: "/dev/background-information/web/build",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/code_host_integrations",
+  //   destination: "/dev/background-information/web/code_host_integrations",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/web/graphql",
+  //   destination: "/dev/background-information/web/graphql",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/web/index",
+  //   destination: "/dev/background-information/web/index",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/web/web_app",
+  //   destination: "/dev/background-information/web/web_app",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/phabricator_gitolite",
+  //   destination: "/dev/how-to/configure_phabricator_gitolite",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/documentation",
+  //   destination: "/dev/how-to/documentation_implementation",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/zoekt",
+  //   destination: "/dev/how-to/zoekt_local_dev",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/search/examples",
+  //   destination: "/code_search/tutorials/examples",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/search/queries",
+  //   destination: "/code_search/reference/queries",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/search/language",
+  //   destination: "/code_search/reference/language",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/search/structural",
+  //   destination: "/code_search/reference/structural",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/search/opengrok",
+  //   destination: "/code_search/how-to/opengrok",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/search/saved_searches",
+  //   destination: "/code_search/how-to/saved_searches",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/search/scopes",
+  //   destination: "/code_search/how-to/scopes",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/code_intelligence/lsif_quickstart",
+  //   destination: "/user/code_intelligence/how-to/index_other_languages",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/code_intelligence/basic_code_intelligence",
+  //   destination: "/user/code_intelligence/explanations/search_based_code_intelligence",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/code_intelligence/features",
+  //   destination: "/user/code_intelligence/explanations/features",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/code_intelligence/lsif",
+  //   destination: "/user/code_intelligence/explanations/precise_code_intelligence",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/code_intelligence/precise_code_intelligence",
+  //   destination: "/user/code_intelligence/explanations/precise_code_intelligence",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/code_intelligence/writing_an_indexer",
+  //   destination: "/user/code_intelligence/explanations/writing_an_indexer",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/code_intelligence/adding_lsif_to_many_repos",
+  //   destination: "/user/code_intelligence/how-to/adding_lsif_to_many_repos",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/code_intelligence/adding_lsif_to_workflows",
+  //   destination: "/user/code_intelligence/how-to/adding_lsif_to_workflows",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/code_intelligence/languages/go",
+  //   destination: "/user/code_intelligence/how-to/index_a_go_repository",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/code_intelligence/languages/typescript_and_javascript",
+  //   destination: "/user/code_intelligence/how-to/index_a_typescript_and_javascript_repository",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/code_intelligence/explanations/basic_code_intelligence",
+  //   destination: "/code_intelligence/explanations/search_based_code_intelligence",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/code_intelligence/explanations/features",
+  //   destination: "/code_intelligence/explanations/features",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/code_intelligence/explanations/precise_code_intelligence",
+  //   destination: "/code_intelligence/explanations/precise_code_intelligence",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/code_intelligence/explanations/writing_an_indexer",
+  //   destination: "/code_intelligence/explanations/writing_an_indexer",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/code_intelligence/how-to/adding_lsif_to_many_repos",
+  //   destination: "/code_intelligence/how-to/adding_lsif_to_many_repos",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/code_intelligence/how-to/adding_lsif_to_workflows",
+  //   destination: "/code_intelligence/how-to/adding_lsif_to_workflows",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/code_intelligence/how-to/index_a_go_repository",
+  //   destination: "/code_intelligence/how-to/index_a_go_repository",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/code_intelligence/how-to/index_a_typescript_and_javascript_repository",
+  //   destination: "/code_intelligence/how-to/index_a_typescript_and_javascript_repository",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/markdown",
+  //   destination: "/admin/markdown",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/organizations",
+  //   destination: "/admin/organizations",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/organizations/index",
+  //   destination: "/admin/organizations",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/usage_statistics",
+  //   destination: "/admin/usage_statistics",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/user_surveys",
+  //   destination: "/admin/user_surveys",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/repository/badges",
+  //   destination: "/user/personalization/badges",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/quick_links",
+  //   destination: "/user/personalization/quick_links",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/themes",
+  //   destination: "/user/personalization/themes",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/search",
+  //   destination: "/code_search",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/code_intelligence",
+  //   destination: "/code_intelligence",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user",
+  //   destination: "/getting-started",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/automation",
+  //   destination: "/batch_changes",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/campaigns",
+  //   destination: "/batch_changes",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/campaigns/examples",
+  //   destination: "/batch_changes/tutorials",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/user/campaigns/managing_access",
+  //   destination: "/batch_changes/explanations/permissions_in_batch_changes",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/campaigns_database_layout.dot",
+  //   destination: "/dev/background-information/batch_changes/batch_changes_database_layout.dot",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/campaigns_database_layout.svg",
+  //   destination: "/dev/background-information/batch_changes/batch_changes_database_layout.svg",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/campaigns_design",
+  //   destination: "/dev/background-information/batch_changes/batch_changes_design",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/campaigns_development",
+  //   destination: "/dev/background-information/batch_changes/index",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/automation_development",
+  //   destination: "/dev/background-information/batch_changes/index",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/campaigns/campaign_spec_yaml_reference",
+  //   destination: "/campaigns/references/batch_spec_yaml_reference",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/background-information/campaigns/campaigns_database_layout.svg",
+  //   destination: "/dev/background-information/batch_changes/batch_changes_database_layout.svg",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/dev/background-information/campaigns/campaigns_database_layout.dot",
+  //   destination: "/dev/background-information/batch_changes/batch_changes_database_layout.dot",
+  //   permanent: true
+  // },
   {
     source: "/campaigns/explanations/how_src_executes_a_campaign_spec",
     destination: "/batch_changes/explanations/how_src_executes_a_batch_spec",
