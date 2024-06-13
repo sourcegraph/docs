@@ -6308,23 +6308,23 @@ const redirectsData = [
     permanent: true
   },
 
-  {
-    source: "/code_navigation/how-to/enable_auto_indexing#enable-index-job-scheduling",
-    destination: "/code-search/code-navigation/auto_indexing#enable-auto-indexing#enable-index-job-scheduling",
-    permanent: true
-  },
+  // {
+  //   source: "/code_navigation/how-to/enable_auto_indexing#enable-index-job-scheduling",
+  //   destination: "/code-search/code-navigation/auto_indexing#enable-auto-indexing#enable-index-job-scheduling",
+  //   permanent: true
+  // },
 
-  {
-    source: "/code_navigation/how-to/enable_auto_indexing#tune-the-index-scheduler",
-    destination: "/code-search/code-navigation/auto_indexing#enable-auto-indexing#tune-the-index-scheduler",
-    permanent: true
-  },
+  // {
+  //   source: "/code_navigation/how-to/enable_auto_indexing#tune-the-index-scheduler",
+  //   destination: "/code-search/code-navigation/auto_indexing#enable-auto-indexing#tune-the-index-scheduler",
+  //   permanent: true
+  // },
 
-  {
-    source: "/code_navigation/how-to/configure_auto_indexing",
-    destination: "/code-search/code-navigation/auto_indexing#configure-auto-indexing",
-    permanent: true
-  },
+  // {
+  //   source: "/code_navigation/how-to/configure_auto_indexing",
+  //   destination: "/code-search/code-navigation/auto_indexing#configure-auto-indexing",
+  //   permanent: true
+  // },
 
   // {
   //   source: "/code_navigation/how-to/configure_auto_indexing#configure-auto-indexing-policies",
