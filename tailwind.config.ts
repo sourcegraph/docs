@@ -103,8 +103,8 @@ export default {
     extend: {
       fontFamily: {
         sans: ['-apple-system', 'var(--font-inter)'],
-        display: ['var(--font-lexend)', { fontFeatureSettings: '"ss01"' }],
-        mono: ['SFMono-Regular', 'ui-monospace', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace']
+        display: ['var(--font-inter)', { fontFeatureSettings: '"ss01"' }],
+        mono: ['Roboto-Mono', 'ui-monospace', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace']
       },
       maxWidth: {
         '8xl': '88rem',
