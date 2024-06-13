@@ -2825,46 +2825,46 @@ const redirectsData = [
     destination: "/batch-changes/quickstart",
     permanent: true
   },
-  {
-    source: "/batch_changes/quickstart#requirements",
-    destination: "/batch-changes/quickstart#requirements",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/quickstart#install-the-sourcegraph-cli",
-    destination: "/batch-changes/quickstart#install-the-sourcegraph-cli",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/quickstart#write-a-batch-spec",
-    destination: "/batch-changes/quickstart#write-a-batch-spec",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/quickstart#create-the-batch-change",
-    destination: "/batch-changes/quickstart#create-the-batch-change",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/quickstart#publish-a-changeset",
-    destination: "/batch-changes/quickstart#publish-a-changeset",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/quickstart#configure-code-host-credentials",
-    destination: "/batch-changes/quickstart#configure-code-host-credentials",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/quickstart#optional-modify-the-batch-spec-to-only-target-a-specific-repository",
-    destination: "/batch-changes/quickstart#optional-modify-the-batch-spec-to-only-target-a-specific-repository",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/quickstart#publish-to-code-host",
-    destination: "/batch-changes/quickstart#publish-to-code-host",
-    permanent: true
-  },
+  // {
+  //   source: "/batch_changes/quickstart#requirements",
+  //   destination: "/batch-changes/quickstart#requirements",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/quickstart#install-the-sourcegraph-cli",
+  //   destination: "/batch-changes/quickstart#install-the-sourcegraph-cli",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/quickstart#write-a-batch-spec",
+  //   destination: "/batch-changes/quickstart#write-a-batch-spec",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/quickstart#create-the-batch-change",
+  //   destination: "/batch-changes/quickstart#create-the-batch-change",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/quickstart#publish-a-changeset",
+  //   destination: "/batch-changes/quickstart#publish-a-changeset",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/quickstart#configure-code-host-credentials",
+  //   destination: "/batch-changes/quickstart#configure-code-host-credentials",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/quickstart#optional-modify-the-batch-spec-to-only-target-a-specific-repository",
+  //   destination: "/batch-changes/quickstart#optional-modify-the-batch-spec-to-only-target-a-specific-repository",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/quickstart#publish-to-code-host",
+  //   destination: "/batch-changes/quickstart#publish-to-code-host",
+  //   permanent: true
+  // },
   {
     source: "/batch_changes/explanations",
     destination: "/batch-changes/",
@@ -2875,36 +2875,36 @@ const redirectsData = [
     destination: "/batch-changes/",
     permanent: true
   },
-  {
-    source: "/batch_changes/explanations/introduction_to_batch_changes#supported-code-hosts-and-changeset-types",
-    destination: "/batch-changes#supported-code-hosts-and-changeset-types",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/explanations/introduction_to_batch_changes#concepts",
-    destination: "/batch-changes#key-concepts",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/explanations/introduction_to_batch_changes#ownership",
-    destination: "/batch-changes/delete-a-batch-change#ownership",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/explanations/introduction_to_batch_changes#known-issues",
-    destination: "/batch-changes/faq#are-there-any-limitations-with-the-batch-changes-feature",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/explanations/permissions_in_batch_changes",
-    destination: "/batch-changes/permissions-in-batch-changes",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/explanations/permissions_in_batch_changes#permission-levels-for-batch-changes",
-    destination: "/batch-changes/permissions-in-batch-changes#permission-levels-for-batch-changes",
-    permanent: true
-  },
+  // {
+  //   source: "/batch_changes/explanations/introduction_to_batch_changes#supported-code-hosts-and-changeset-types",
+  //   destination: "/batch-changes#supported-code-hosts-and-changeset-types",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/explanations/introduction_to_batch_changes#concepts",
+  //   destination: "/batch-changes#key-concepts",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/explanations/introduction_to_batch_changes#ownership",
+  //   destination: "/batch-changes/delete-a-batch-change#ownership",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/explanations/introduction_to_batch_changes#known-issues",
+  //   destination: "/batch-changes/faq#are-there-any-limitations-with-the-batch-changes-feature",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/explanations/permissions_in_batch_changes",
+  //   destination: "/batch-changes/permissions-in-batch-changes",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/explanations/permissions_in_batch_changes#permission-levels-for-batch-changes",
+  //   destination: "/batch-changes/permissions-in-batch-changes#permission-levels-for-batch-changes",
+  //   permanent: true
+  // },
   // {
   //   source: "/batch_changes/explanations/permissions_in_batch_changes#namespaces",
   //   destination: "/batch-changes/permissions-in-batch-changes#namespaces",
@@ -2947,11 +2947,11 @@ const redirectsData = [
     destination: "/batch-changes/design",
     permanent: true
   },
-  {
-    source: "/batch_changes/explanations/batch_changes_design#principles",
-    destination: "/batch-changes/design#principles",
-    permanent: true
-  },
+  // {
+  //   source: "/batch_changes/explanations/batch_changes_design#principles",
+  //   destination: "/batch-changes/design#principles",
+  //   permanent: true
+  // },
   {
     source: "/batch_changes/explanations/how_src_executes_a_batch_spec",
     destination: "/batch-changes/how-src-executes-a-batch-spec",
@@ -3032,66 +3032,66 @@ const redirectsData = [
     destination: "/batch-changes/reexecuting-batch-specs-multiple-times",
     permanent: true
   },
-  {
-    source: "/batch_changes/explanations/reexecuting_batch_specs_multiple_times#idempotency-as-goal",
-    destination: "/batch-changes/reexecuting-batch-specs-multiple-times#idempotency-as-goal",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/explanations/reexecuting_batch_specs_multiple_times#exceptions",
-    destination: "/batch-changes/reexecuting-batch-specs-multiple-times#exceptions",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/explanations/reexecuting_batch_specs_multiple_times#local-caching",
-    destination: "/batch-changes/reexecuting-batch-specs-multiple-times#local-caching",
-    permanent: true
-  },
+  // {
+  //   source: "/batch_changes/explanations/reexecuting_batch_specs_multiple_times#idempotency-as-goal",
+  //   destination: "/batch-changes/reexecuting-batch-specs-multiple-times#idempotency-as-goal",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/explanations/reexecuting_batch_specs_multiple_times#exceptions",
+  //   destination: "/batch-changes/reexecuting-batch-specs-multiple-times#exceptions",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/explanations/reexecuting_batch_specs_multiple_times#local-caching",
+  //   destination: "/batch-changes/reexecuting-batch-specs-multiple-times#local-caching",
+  //   permanent: true
+  // },
   {
     source: "/batch_changes/explanations/server_side",
     destination: "/batch-changes/server-side",
     permanent: true
   },
-  {
-    source: "/batch_changes/explanations/server_side#setup",
-    destination: "/batch-changes/server-side#setup",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/explanations/server_side#limitations",
-    destination: "/batch-changes/server-side#limitations",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/explanations/server_side#can-large-batch-changes-execution-be-distributed-on-multiple-executors",
-    destination: "/batch-changes/faq#can-large-batch-changes-execution-be-distributed-on-multiple-executors",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/explanations/server_side#what-additional-resources-do-i-need-to-provision-to-run-batch-changes-server-side",
-    destination: "/batch-changes/faq#what-additional-resources-do-i-need-to-provision-to-run-batch-changes-server-side",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/explanations/server_side#can-someone-accidentally-take-down-the-sourcegraph-instance-if-they-run-too-big-a-batch-change",
-    destination: "/batch-changes/faq#can-someone-accidentally-take-down-the-sourcegraph-instance-if-they-run-too-big-a-batch-change",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/explanations/server_side#i-have-several-machines-configured-as-executors-and-they-dont-have-the-same-specs-eg-memory-can-i-submit-some-batch-changes-specifically-to-a-given-machine",
-    destination: "/batch-changes/faq#i-have-several-machines-configured-as-executors-and-they-dont-have-the-same-specs-eg-memory-can-i-submit-some-batch-changes-specifically-to-a-given-machine",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/explanations/server_side#what-happens-if-the-execution-of-a-step-fails",
-    destination: "/batch-changes/faq#what-happens-if-the-execution-of-a-step-fails",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/explanations/server_side#how-do-executors-interact-with-code-hosts-will-they-clone-repos-directly",
-    destination: "/batch-changes/faq#how-do-executors-interact-with-code-hosts-will-they-clone-repos-directly",
-    permanent: true
-  },
+  // {
+  //   source: "/batch_changes/explanations/server_side#setup",
+  //   destination: "/batch-changes/server-side#setup",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/explanations/server_side#limitations",
+  //   destination: "/batch-changes/server-side#limitations",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/explanations/server_side#can-large-batch-changes-execution-be-distributed-on-multiple-executors",
+  //   destination: "/batch-changes/faq#can-large-batch-changes-execution-be-distributed-on-multiple-executors",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/explanations/server_side#what-additional-resources-do-i-need-to-provision-to-run-batch-changes-server-side",
+  //   destination: "/batch-changes/faq#what-additional-resources-do-i-need-to-provision-to-run-batch-changes-server-side",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/explanations/server_side#can-someone-accidentally-take-down-the-sourcegraph-instance-if-they-run-too-big-a-batch-change",
+  //   destination: "/batch-changes/faq#can-someone-accidentally-take-down-the-sourcegraph-instance-if-they-run-too-big-a-batch-change",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/explanations/server_side#i-have-several-machines-configured-as-executors-and-they-dont-have-the-same-specs-eg-memory-can-i-submit-some-batch-changes-specifically-to-a-given-machine",
+  //   destination: "/batch-changes/faq#i-have-several-machines-configured-as-executors-and-they-dont-have-the-same-specs-eg-memory-can-i-submit-some-batch-changes-specifically-to-a-given-machine",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/explanations/server_side#what-happens-if-the-execution-of-a-step-fails",
+  //   destination: "/batch-changes/faq#what-happens-if-the-execution-of-a-step-fails",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/explanations/server_side#how-do-executors-interact-with-code-hosts-will-they-clone-repos-directly",
+  //   destination: "/batch-changes/faq#how-do-executors-interact-with-code-hosts-will-they-clone-repos-directly",
+  //   permanent: true
+  // },
   {
     source: "/batch_changes/tutorials",
     destination: "/batch-changes/examples",
@@ -3122,36 +3122,36 @@ const redirectsData = [
     destination: "/batch-changes/create-a-batch-change",
     permanent: true
   },
-  {
-    source: "/batch_changes/how-tos/creating_a_batch_change#requirements",
-    destination: "/batch-changes/create-a-batch-change#requirements",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/how-tos/creating_a_batch_change#writing-a-batch-spec",
-    destination: "/batch-changes/create-a-batch-change#writing-a-batch-spec",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/how-tos/creating_a_batch_change#creating-a-batch-change-after-previewing",
-    destination: "/batch-changes/create-a-batch-change#creating-a-batch-change-after-previewing",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/how-tos/creating_a_batch_change#applying-a-batch-spec-without-preview",
-    destination: "/batch-changes/create-a-batch-change#applying-a-batch-spec-without-preview",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/how-tos/creating_a_batch_change#creating-a-batch-change-in-a-different-namespace",
-    destination: "/batch-changes/create-a-batch-change#creating-a-batch-change-in-a-different-namespace",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/how-tos/creating_a_batch_change#administration",
-    destination: "/batch-changes/create-a-batch-chang#administration",
-    permanent: true
-  },
+  // {
+  //   source: "/batch_changes/how-tos/creating_a_batch_change#requirements",
+  //   destination: "/batch-changes/create-a-batch-change#requirements",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/how-tos/creating_a_batch_change#writing-a-batch-spec",
+  //   destination: "/batch-changes/create-a-batch-change#writing-a-batch-spec",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/how-tos/creating_a_batch_change#creating-a-batch-change-after-previewing",
+  //   destination: "/batch-changes/create-a-batch-change#creating-a-batch-change-after-previewing",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/how-tos/creating_a_batch_change#applying-a-batch-spec-without-preview",
+  //   destination: "/batch-changes/create-a-batch-change#applying-a-batch-spec-without-preview",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/how-tos/creating_a_batch_change#creating-a-batch-change-in-a-different-namespace",
+  //   destination: "/batch-changes/create-a-batch-change#creating-a-batch-change-in-a-different-namespace",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/how-tos/creating_a_batch_change#administration",
+  //   destination: "/batch-changes/create-a-batch-chang#administration",
+  //   permanent: true
+  // },
   {
     source: "/batch_changes/how-tos/publishing_changesets",
     destination: "/batch-changes/publishing-changesets",
@@ -3259,21 +3259,21 @@ const redirectsData = [
     destination: "/batch-changes/delete-a-batch-change",
     permanent: true
   },
-  {
-    source: "/batch_changes/how-tos/closing_or_deleting_a_batch_change#closing-a-batch-change",
-    destination: "/batch-changes/delete-a-batch-change#close-a-batch-change",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/how-tos/closing_or_deleting_a_batch_change#delete-a-batch-change",
-    destination: "/batch-changes/delete-a-batch-change#delete-a-batch-change",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/how-tos/opting_out_of_batch_changes",
-    destination: "/batch-changes/delete-a-batch-change#opt-out-of-batch-changes",
-    permanent: true
-  },
+  // {
+  //   source: "/batch_changes/how-tos/closing_or_deleting_a_batch_change#closing-a-batch-change",
+  //   destination: "/batch-changes/delete-a-batch-change#close-a-batch-change",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/how-tos/closing_or_deleting_a_batch_change#delete-a-batch-change",
+  //   destination: "/batch-changes/delete-a-batch-change#delete-a-batch-change",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/how-tos/opting_out_of_batch_changes",
+  //   destination: "/batch-changes/delete-a-batch-change#opt-out-of-batch-changes",
+  //   permanent: true
+  // },
   {
     source: "/batch_changes/how-tos/configuring_credentials",
     destination: "/batch-changes/configuring-credentials",
@@ -3366,31 +3366,31 @@ const redirectsData = [
     destination: "/batch-changes/handling-errored-changesets",
     permanent: true
   },
-  {
-    source: "/batch_changes/how-tos/handling_errored_changesets#types-of-errors",
-    destination: "/batch-changes/handling-errored-changesets#types-of-errors",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/how-tos/handling_errored_changesets#automatic-retrying-of-errored-changesets",
-    destination: "/batch-changes/handling-errored-changesets#automatic-retrying-of-errored-changesets",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/how-tos/handling_errored_changesets#manual-retrying-of-errored-changesets",
-    destination: "/batch-changes/handling-errored-changesets#manual-retrying-of-errored-changesets",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/how-tos/yaml_changeset_errors",
-    destination: "/batch-changes/handling-errored-changesets#handling-changeset-yaml-formatting-errors",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/how-tos/yaml_changeset_errors#published-value-error",
-    destination: "/batch-changes/handling-errored-changesets#handling-changeset-yaml-formatting-errors#published-value-error",
-    permanent: true
-  },
+  // {
+  //   source: "/batch_changes/how-tos/handling_errored_changesets#types-of-errors",
+  //   destination: "/batch-changes/handling-errored-changesets#types-of-errors",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/how-tos/handling_errored_changesets#automatic-retrying-of-errored-changesets",
+  //   destination: "/batch-changes/handling-errored-changesets#automatic-retrying-of-errored-changesets",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/how-tos/handling_errored_changesets#manual-retrying-of-errored-changesets",
+  //   destination: "/batch-changes/handling-errored-changesets#manual-retrying-of-errored-changesets",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/how-tos/yaml_changeset_errors",
+  //   destination: "/batch-changes/handling-errored-changesets#handling-changeset-yaml-formatting-errors",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/how-tos/yaml_changeset_errors#published-value-error",
+  //   destination: "/batch-changes/handling-errored-changesets#handling-changeset-yaml-formatting-errors#published-value-error",
+  //   permanent: true
+  // },
   {
     source: "/batch_changes/how-tos/bulk_operations_on_changesets",
     destination: "/batch-changes/bulk-operations-on-changesets",
@@ -3416,16 +3416,16 @@ const redirectsData = [
     destination: "/batch-changes/server-side#using-file-mounts-with-server-side-execution",
     permanent: true
   },
-  {
-    source: "/batch_changes/how-tos/server_side_file_mounts#writing-a-batch-spec",
-    destination: "/batch-changes/server-side#using-file-mounts-with-server-side-execution",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/how-tos/server_side_file_mounts#running-server-side",
-    destination: "/batch-changes/server-side#using-file-mounts-with-server-side-execution",
-    permanent: true
-  },
+  // {
+  //   source: "/batch_changes/how-tos/server_side_file_mounts#writing-a-batch-spec",
+  //   destination: "/batch-changes/server-side#using-file-mounts-with-server-side-execution",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/how-tos/server_side_file_mounts#running-server-side",
+  //   destination: "/batch-changes/server-side#using-file-mounts-with-server-side-execution",
+  //   permanent: true
+  // },
   {
     source: "/batch_changes/how-tos/creating_changesets_per_project_in_monorepos",
     destination: "/batch-changes/creating-changesets-per-project-in-monorepos",
@@ -3694,37 +3694,37 @@ const redirectsData = [
     destination: "/batch-changes/batch-spec-templating",
     permanent: true
   },
-  {
-    source: "/batch_changes/references/batch_spec_templating#example-batch-spec",
-    destination: "/batch-changes/batch-spec-templating#example-batch-spec-with-templating",
-    permanent: true
-  },
+  // {
+  //   source: "/batch_changes/references/batch_spec_templating#example-batch-spec",
+  //   destination: "/batch-changes/batch-spec-templating#example-batch-spec-with-templating",
+  //   permanent: true
+  // },
   // Do not comment
   {
     source: "/batch_changes/references/batch_spec_templating#fields-with-template-support",
     destination: "/batch-changes/batch-spec-templating#fields-with-template-support",
     permanent: true
   },
-  {
-    source: "/batch_changes/references/batch_spec_templating#template-variables",
-    destination: "/batch-changes/batch-spec-templating#template-variables",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/references/batch_spec_templating#steps-context",
-    destination: "/batch-changes/batch-spec-templating#steps-context",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/references/batch_spec_templating#changesettemplate-context",
-    destination: "/batch-changes/batch-spec-templating#changesettemplate-context",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/references/batch_spec_templating#template-helper-functions",
-    destination: "/batch-changes/batch-spec-templating#template-helper-functions",
-    permanent: true
-  },
+  // {
+  //   source: "/batch_changes/references/batch_spec_templating#template-variables",
+  //   destination: "/batch-changes/batch-spec-templating#template-variables",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/references/batch_spec_templating#steps-context",
+  //   destination: "/batch-changes/batch-spec-templating#steps-context",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/references/batch_spec_templating#changesettemplate-context",
+  //   destination: "/batch-changes/batch-spec-templating#changesettemplate-context",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/references/batch_spec_templating#template-helper-functions",
+  //   destination: "/batch-changes/batch-spec-templating#template-helper-functions",
+  //   permanent: true
+  // },
   {
     source: "/batch_changes/references/batch_spec_cheat_sheet",
     destination: "/batch-changes/batch-spec-cheat-sheet",
@@ -3801,106 +3801,106 @@ const redirectsData = [
     destination: "/batch-changes/troubleshooting",
     permanent: true
   },
-  {
-    source: "/batch_changes/references/troubleshooting#executing-batch-change-steps",
-    destination: "/batch-changes/troubleshooting#executing-batch-change-steps",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/references/troubleshooting#is-src-connected-to-the-right-sourcegraph-instance",
-    destination: "/batch-changes/troubleshooting#is-src-connected-to-the-right-sourcegraph-instance",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/references/troubleshooting#are-dependencies-installed",
-    destination: "/batch-changes/troubleshooting#are-dependencies-installed",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/references/troubleshooting#does-hello-world-work",
-    destination: "/batch-changes/troubleshooting#does-hello-world-work",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/references/troubleshooting#does-it-work-with-a-single-repository-five-ten",
-    destination: "/batch-changes/troubleshooting#does-it-work-with-a-single-repository-five-ten",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/references/troubleshooting#can-you-download-a-repository-archive",
-    destination: "/batch-changes/troubleshooting#can-you-download-a-repository-archive",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/references/troubleshooting#can-you-manually-execute-the-stepsrun-command-in-a-container",
-    destination: "/batch-changes/troubleshooting#can-you-manually-execute-the-stepsrun-command-in-a-container",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/references/troubleshooting#does-it-work-if-you-switch-to-using-the-workspace-mode-using-docker-volumes",
-    destination: "/batch-changes/troubleshooting#does-it-work-if-you-switch-to-using-the-workspace-mode-using-docker-volumes",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/references/troubleshooting#are-the-docker-images-running-as-different-users",
-    destination: "/batch-changes/troubleshooting#are-the-docker-images-running-as-different-users",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/references/troubleshooting#are-you-on-the-latest-version-of-docker",
-    destination: "/batch-changes/troubleshooting#are-you-on-the-latest-version-of-docker",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/references/troubleshooting#have-you-pruned-your-docker-build-cache-and-restarted-the-docker-daemon",
-    destination: "/batch-changes/troubleshooting#have-you-pruned-your-docker-build-cache-and-restarted-the-docker-daemon",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/references/troubleshooting#using-rancher-desktop-or-colima",
-    destination: "/batch-changes/troubleshooting#using-rancher-desktop-or-colima",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/references/troubleshooting#publishing-changesets",
-    destination: "/batch-changes/troubleshooting#publishing-changesets",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/references/troubleshooting#do-you-have-email-privacy-enabled-on-github",
-    destination: "/batch-changes/troubleshooting#do-you-have-email-privacy-enabled-on-github",
-    permanent: true
-  },
+  // {
+  //   source: "/batch_changes/references/troubleshooting#executing-batch-change-steps",
+  //   destination: "/batch-changes/troubleshooting#executing-batch-change-steps",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/references/troubleshooting#is-src-connected-to-the-right-sourcegraph-instance",
+  //   destination: "/batch-changes/troubleshooting#is-src-connected-to-the-right-sourcegraph-instance",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/references/troubleshooting#are-dependencies-installed",
+  //   destination: "/batch-changes/troubleshooting#are-dependencies-installed",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/references/troubleshooting#does-hello-world-work",
+  //   destination: "/batch-changes/troubleshooting#does-hello-world-work",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/references/troubleshooting#does-it-work-with-a-single-repository-five-ten",
+  //   destination: "/batch-changes/troubleshooting#does-it-work-with-a-single-repository-five-ten",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/references/troubleshooting#can-you-download-a-repository-archive",
+  //   destination: "/batch-changes/troubleshooting#can-you-download-a-repository-archive",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/references/troubleshooting#can-you-manually-execute-the-stepsrun-command-in-a-container",
+  //   destination: "/batch-changes/troubleshooting#can-you-manually-execute-the-stepsrun-command-in-a-container",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/references/troubleshooting#does-it-work-if-you-switch-to-using-the-workspace-mode-using-docker-volumes",
+  //   destination: "/batch-changes/troubleshooting#does-it-work-if-you-switch-to-using-the-workspace-mode-using-docker-volumes",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/references/troubleshooting#are-the-docker-images-running-as-different-users",
+  //   destination: "/batch-changes/troubleshooting#are-the-docker-images-running-as-different-users",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/references/troubleshooting#are-you-on-the-latest-version-of-docker",
+  //   destination: "/batch-changes/troubleshooting#are-you-on-the-latest-version-of-docker",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/references/troubleshooting#have-you-pruned-your-docker-build-cache-and-restarted-the-docker-daemon",
+  //   destination: "/batch-changes/troubleshooting#have-you-pruned-your-docker-build-cache-and-restarted-the-docker-daemon",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/references/troubleshooting#using-rancher-desktop-or-colima",
+  //   destination: "/batch-changes/troubleshooting#using-rancher-desktop-or-colima",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/references/troubleshooting#publishing-changesets",
+  //   destination: "/batch-changes/troubleshooting#publishing-changesets",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/references/troubleshooting#do-you-have-email-privacy-enabled-on-github",
+  //   destination: "/batch-changes/troubleshooting#do-you-have-email-privacy-enabled-on-github",
+  //   permanent: true
+  // },
   {
     source: "/batch_changes/references/faq",
     destination: "/batch-changes/faq",
     permanent: true
   },
-  {
-    source: "/batch_changes/references/faq#what-happens-if-my-batch-change-creation-breaks-down-at-900-changesets-out-of-1000-do-i-have-to-re-run-it-all-again",
-    destination: "/batch-changes/faq#what-happens-if-my-batch-change-creation-breaks-down-at-900-changesets-out-of-1000-do-i-have-to-re-run-it",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/references/faq#can-we-close-a-batch-change-and-still-leave-the-changesets-open",
-    destination: "/batch-changes/faq#can-i-close-a-batch-change-and-leave-the-changesets-open",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/references/faq#how-scalable-is-batch-changes-how-many-changesets-can-i-create",
-    destination: "/batch-changes/faq#how-scalable-are-batch-changes-how-many-changesets-can-i-create",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/references/faq#how-long-does-it-take-to-create-a-batch-change",
-    destination: "/batch-changes/faq#how-long-does-it-take-to-create-a-batch-change",
-    permanent: true
-  },
-  {
-    source: "/batch_changes/references/faq#my-batch-change-does-not-open-changesets-on-all-the-repositories-it-should-why",
-    destination: "/batch-changes/faq#why-does-my-batch-change-not-open-changesets-on-all-the-repositories-it-should",
-    permanent: true
-  },
+  // {
+  //   source: "/batch_changes/references/faq#what-happens-if-my-batch-change-creation-breaks-down-at-900-changesets-out-of-1000-do-i-have-to-re-run-it-all-again",
+  //   destination: "/batch-changes/faq#what-happens-if-my-batch-change-creation-breaks-down-at-900-changesets-out-of-1000-do-i-have-to-re-run-it",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/references/faq#can-we-close-a-batch-change-and-still-leave-the-changesets-open",
+  //   destination: "/batch-changes/faq#can-i-close-a-batch-change-and-leave-the-changesets-open",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/references/faq#how-scalable-is-batch-changes-how-many-changesets-can-i-create",
+  //   destination: "/batch-changes/faq#how-scalable-are-batch-changes-how-many-changesets-can-i-create",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/references/faq#how-long-does-it-take-to-create-a-batch-change",
+  //   destination: "/batch-changes/faq#how-long-does-it-take-to-create-a-batch-change",
+  //   permanent: true
+  // },
+  // {
+  //   source: "/batch_changes/references/faq#my-batch-change-does-not-open-changesets-on-all-the-repositories-it-should-why",
+  //   destination: "/batch-changes/faq#why-does-my-batch-change-not-open-changesets-on-all-the-repositories-it-should",
+  //   permanent: true
+  // },
 
 
   {
