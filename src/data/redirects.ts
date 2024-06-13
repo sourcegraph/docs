@@ -6326,47 +6326,47 @@ const redirectsData = [
     permanent: true
   },
 
-  {
-    source: "/code_navigation/how-to/configure_auto_indexing#configure-auto-indexing-policies",
-    destination: "/code-search/code-navigation/auto_indexing#configure-auto-indexing-policies",
-    permanent: true
-  },
+  // {
+  //   source: "/code_navigation/how-to/configure_auto_indexing#configure-auto-indexing-policies",
+  //   destination: "/code-search/code-navigation/auto_indexing#configure-auto-indexing-policies",
+  //   permanent: true
+  // },
 
-  {
-    source: "/code_navigation/how-to/configure_auto_indexing#applying-indexing-policies-globally",
-    destination: "/code-search/code-navigation/auto_indexing#applying-indexing-policies-globally",
-    permanent: true
-  },
+  // {
+  //   source: "/code_navigation/how-to/configure_auto_indexing#applying-indexing-policies-globally",
+  //   destination: "/code-search/code-navigation/auto_indexing#applying-indexing-policies-globally",
+  //   permanent: true
+  // },
 
-  {
-    source: "/code_navigation/how-to/configure_auto_indexing#applying-indexing-policies-to-a-specific-repository",
-    destination: "/code-search/code-navigation/auto_indexing#applying-indexing-policies-to-a-specific-repository",
-    permanent: true
-  },
+  // {
+  //   source: "/code_navigation/how-to/configure_auto_indexing#applying-indexing-policies-to-a-specific-repository",
+  //   destination: "/code-search/code-navigation/auto_indexing#applying-indexing-policies-to-a-specific-repository",
+  //   permanent: true
+  // },
 
-  {
-    source: "/code_navigation/how-to/configure_auto_indexing#explicit-index-job-configuration",
-    destination: "/code-search/code-navigation/auto_indexing#explicit-index-job-configuration",
-    permanent: true
-  },
+  // {
+  //   source: "/code_navigation/how-to/configure_auto_indexing#explicit-index-job-configuration",
+  //   destination: "/code-search/code-navigation/auto_indexing#explicit-index-job-configuration",
+  //   permanent: true
+  // },
 
-  {
-    source: "/code_navigation/how-to/configure_auto_indexing#private-repositories-and-packages-configuration",
-    destination: "/code-search/code-navigation/auto_indexing#private-repositories-and-packages-configuration",
-    permanent: true
-  },
+  // {
+  //   source: "/code_navigation/how-to/configure_auto_indexing#private-repositories-and-packages-configuration",
+  //   destination: "/code-search/code-navigation/auto_indexing#private-repositories-and-packages-configuration",
+  //   permanent: true
+  // },
 
-  {
-    source: "/code_navigation/how-to/configure_auto_indexing#go",
-    destination: "/code-search/code-navigation/auto_indexing#go",
-    permanent: true
-  },
+  // {
+  //   source: "/code_navigation/how-to/configure_auto_indexing#go",
+  //   destination: "/code-search/code-navigation/auto_indexing#go",
+  //   permanent: true
+  // },
 
-  {
-    source: "/code_navigation/how-to/configure_auto_indexing#typescriptjavascript",
-    destination: "/code-search/code-navigation/auto_indexing#typescriptjavascript",
-    permanent: true
-  },
+  // {
+  //   source: "/code_navigation/how-to/configure_auto_indexing#typescriptjavascript",
+  //   destination: "/code-search/code-navigation/auto_indexing#typescriptjavascript",
+  //   permanent: true
+  // },
 
   {
     source: "/code_navigation/how-to/policies_resource_usage_best_practices",
@@ -6398,11 +6398,11 @@ const redirectsData = [
     permanent: true
   },
 
-  {
-    source: "/code_navigation/explanations/precise_code_navigation#why-are-my-results-sometimes-incorrect",
-    destination: "/code-search/code-navigation/troubleshooting#why-are-my-results-sometimes-incorrect",
-    permanent: true
-  },
+  // {
+  //   source: "/code_navigation/explanations/precise_code_navigation#why-are-my-results-sometimes-incorrect",
+  //   destination: "/code-search/code-navigation/troubleshooting#why-are-my-results-sometimes-incorrect",
+  //   permanent: true
+  // },
 
   {
     source: "/code_navigation/explanations/uploads",
