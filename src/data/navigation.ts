@@ -138,64 +138,13 @@ export const navigation: NavigationItem[] = [
     topics: [
       {
         title: "Batch Changes",
-        href: "/batch-changes",
+        href: "/batch_changes",
         sections: [
-          { title: "Quickstart", href: "/batch-changes/quickstart" },
-          {
-            title: "Create a Batch Change", href: "/batch-changes/create-a-batch-change",
-            subsections: [
-              { title: "Update a Batch Change", href: "/batch-changes/update-a-batch-change", },
-              { title: "Close a Batch Change", href: "/batch-changes/delete-a-batch-change", },
-              { title: "Run Server Side", href: "/batch-changes/server-side", },
-
-            ]
-          },
-          {
-            title: "Bulk Operations", href: "/batch-changes/bulk-operations-on-changesets",
-            subsections: [
-              { title: "Publishing Changesets", href: "/batch-changes/publishing-changesets", },
-              { title: "Tracking Changesets", href: "/batch-changes/tracking-existing-changesets", },
-            ]
-          },
-          {
-            title: "Configuring Credentials", href: "/batch-changes/configuring-credentials",
-            subsections: [
-              { title: "Site Admin Config", href: "/batch-changes/site-admin-configuration", },
-            ]
-          },
-          { title: "Access Permissions", href: "/batch-changes/permissions-in-batch-changes" },
-          {
-            title: "Changesets in Monorepo", href: "/batch-changes/creating-changesets-per-project-in-monorepos",
-            subsections: [
-              { title: "Changesets in Large Repos", href: "/batch-changes/creating-multiple-changesets-in-large-repositories", },
-            ]
-          },
-          { title: "Error Handling", href: "/batch-changes/handling-errored-changesets" },
-          {
-            title: "Examples", href: "/batch-changes/examples",
-            subsections: [
-              { title: "Refactor Go Code via Comby", href: "/batch-changes/refactor-go-comby", },
-              { title: "Update Go Import Statements via Comby", href: "/batch-changes/updating-go-import-statements", },
-              { title: "Update Base Images in Dockerfiles", href: "/batch-changes/update-base-images-in-dockerfiles", },
-              { title: "Search and Replace Specific Terms", href: "/batch-changes/search-and-replace-specific-terms", },
-            ]
-          },
-          {
-            title: "Batch Spec Reference", href: "/batch-changes/batch-spec-yaml-reference",
-            subsections: [
-              { title: "Batch Spec Templating", href: "/batch-changes/batch-spec-templating", },
-              { title: "Batch Spec Cheatsheet", href: "/batch-changes/batch-spec-cheat-sheet", },
-            ]
-          },
-          {
-            title: "Working with CLI", href: "/batch-changes/how-src-executes-a-batch-spec",
-            subsections: [
-              { title: "Re-executing Batch Specs", href: "/batch-changes/reexecuting-batch-specs-multiple-times", },
-              { title: "CLI Subcommands", href: "/cli/references/batch", },
-            ]
-          },
-          { title: "Troubleshooting", href: "/batch-changes/troubleshooting" },
-          { title: "FAQs", href: "/batch-changes/faq" },
+          { title: "Quickstart", href: "/batch_changes/quickstart" },
+          { title: "Explanations", href: "/batch_changes/explanations" },
+          { title: "Tutorials", href: "/batch_changes/tutorials" },
+          { title: "How-to Guides", href: "/batch_changes/how-tos" },
+          { title: "Reference", href: "/batch_changes/references" },
         ],
       },
       {
@@ -691,63 +640,13 @@ const navigation_5_3: NavigationItem[] = [
     topics: [
       {
         title: "Batch Changes",
-        href: "/batch-changes",
+        href: "/batch_changes",
         sections: [
-          { title: "Quickstart", href: "/batch-changes/quickstart" },
-          {
-            title: "Create a Batch Change", href: "/batch-changes/create-a-batch-change",
-            subsections: [
-              { title: "Update a Batch Change", href: "/batch-changes/update-a-batch-change", },
-              { title: "Close a Batch Change", href: "/batch-changes/delete-a-batch-change", },
-              { title: "Run Server Side", href: "/batch-changes/server-side", },
-
-            ]
-          },
-          {
-            title: "Bulk Operations", href: "/batch-changes/bulk-operations-on-changesets",
-            subsections: [
-              { title: "Publishing Changesets", href: "/batch-changes/publishing-changesets", },
-              { title: "Tracking Changesets", href: "/batch-changes/tracking-existing-changesets", },
-            ]
-          },
-          {
-            title: "Configuring Credentials", href: "/batch-changes/configuring-credentials",
-            subsections: [
-              { title: "Site Admin Config", href: "/batch-changes/site-admin-configuration", },
-            ]
-          },
-          { title: "Access Permissions", href: "/batch-changes/permissions-in-batch-changes" },
-          {
-            title: "Changesets in Monorepo", href: "/batch-changes/creating-changesets-per-project-in-monorepos",
-            subsections: [
-              { title: "Changesets in Large Repos", href: "/batch-changes/creating-multiple-changesets-in-large-repositories", },
-            ]
-          },
-          { title: "Error Handling", href: "/batch-changes/handling-errored-changesets" },
-          {
-            title: "Examples", href: "/batch-changes/examples",
-            subsections: [
-              { title: "Refactor Go Code via Comby", href: "/batch-changes/refactor-go-comby", },
-              { title: "Update Go Import Statements via Comby", href: "/batch-changes/updating-go-import-statements", },
-              { title: "Update Base Images in Dockerfiles", href: "/batch-changes/update-base-images-in-dockerfiles", },
-              { title: "Search and Replace Specific Terms", href: "/batch-changes/search-and-replace-specific-terms", },
-            ]
-          },
-          {
-            title: "Batch Spec Reference", href: "/batch-changes/batch-spec-yaml-reference",
-            subsections: [
-              { title: "Batch Spec Templating", href: "/batch-changes/batch-spec-templating", },
-              { title: "Batch Spec Cheatsheet", href: "/batch-changes/batch-spec-cheat-sheet", },
-            ]
-          },
-          {
-            title: "Working with CLI", href: "/batch-changes/how-src-executes-a-batch-spec",
-            subsections: [
-              { title: "Re-executing Batch Specs", href: "/batch-changes/reexecuting-batch-specs-multiple-times", },
-            ]
-          },
-          { title: "Troubleshooting", href: "/batch-changes/troubleshooting" },
-          { title: "FAQs", href: "/batch-changes/faq" },
+          { title: "Quickstart", href: "/batch_changes/quickstart" },
+          { title: "Explanations", href: "/batch_changes/explanations" },
+          { title: "Tutorials", href: "/batch_changes/tutorials" },
+          { title: "How-to Guides", href: "/batch_changes/how-tos" },
+          { title: "Reference", href: "/batch_changes/references" },
         ],
       },
       {
