@@ -16,10 +16,10 @@ However, if the user deletion is permanent, deleting both account and data, then
 ## Are there any limitations with the Batch Changes feature?
 
 - **Code hosts**: Batch Changes currently support **GitHub**, **GitLab** and **Bitbucket Server and Bitbucket Data Center** repositories. If you want to use Batch Changes on other code hosts, [let us know](https://about.sourcegraph.com/contact).
-- **Server-side execution**: Batch change steps are run locally (in the [Sourcegraph CLI](https://github.com/sourcegraph/src-cli)) or [server-side](/batch_changes/explanations/server_side) `Beta`. For this reason, the APIs for creating and updating a batch change require you to upload all of the changeset specs (which are produced by executing the batch spec locally). Also, see [how scalable Batch Changes](/batch_changes/references/faq#how-scalable-is-batch-changes-how-many-changesets-can-i-create).
+- **Server-side execution**: Batch change steps are run locally (in the [Sourcegraph CLI](https://github.com/sourcegraph/src-cli)) or [server-side](/batch-changes/server-side) `Beta`. For this reason, the APIs for creating and updating a batch change require you to upload all of the changeset specs (which are produced by executing the batch spec locally). Also, see [how scalable Batch Changes](/batch-changes/faq#how-scalable-are-batch-changes-how-many-changesets-can-i-create).
 - **Multi-user access**: It is yet to be possible for multiple users to edit the same batch change that was created under an organization.
 - It is yet to be possible to reuse a branch in a repository across multiple batch changes.
-- The only type of user credential supported by Sourcegraph right now is a [personal access token](/batch_changes/how-tos/configuring_credentials), either per user, or via a global service account. Further credential types may be supported in the future.
+- The only type of user credential supported by Sourcegraph right now is a [personal access token](/batch-changes/configuring-credentials), either per user, or via a global service account. Further credential types may be supported in the future.
 
 ## What happens if my batch change creation breaks down at 900 changesets out of 1,000? Do I have to re-run it?
 
@@ -29,13 +29,13 @@ The default behavior of Batch Changes is to stop creating the diff on repo error
 
 Yes. A confirmation page shows you all the actions that will occur on the various changesets in the batch change after you close it. Open changesets will be marked 'Kept open', meaning batch change won't alter them.
 
-See [closing a batch change](/batch_changes/how-tos/closing_or_deleting_a_batch_change#closing-a-batch-change).
+See [closing a batch change](/batch-changes/delete-a-batch-change#close-a-batch-change).
 
 ## How scalable are Batch Changes? How many changesets can I create?
 
 Batch Changes can create tens of thousands of changesets. This is something we run testing on internally. Some known limitations include:
 
-- Since diffs are created locally by running a docker container, performance depends on the capacity of your machine. See [How `src` executes a batch spec](/batch_changes/explanations/how_src_executes_a_batch_spec)
+- Since diffs are created locally by running a docker container, performance depends on the capacity of your machine. See [How `src` executes a batch spec](/batch-changes/how-src-executes-a-batch-spec)
 - Batch Changes create changesets in parallel locally. You can set up the maximum number of parallel jobs with [`-j`](/cli/references/batch/apply)
 - Manipulating (commenting, notifying users, etc.) changesets at that scale can be clumsy.
 
@@ -51,14 +51,14 @@ There's a rule of thumb:
 
 ## Why does my batch change, not open changesets on all the repositories it should?
 
-- Do you have enough permissions? Batch Changes will give you an error on the repositories you cannot access. See [Repository permissions for Batch Changes](/batch_changes/explanations/permissions_in_batch_changes)
+- Do you have enough permissions? Batch Changes will give you an error on the repositories you cannot access. See [Repository permissions for Batch Changes](/batch-changes/permissions-in-batch-changes)
 - Does your `repositoriesMatchingQuery` contain all the necessary flags? If you copied the query from the Sourcegraph UI, note that some flags are represented as buttons (case sensitivity, regex, structural search) and do not appear in the query unless you use the copy query button
 - Are the files you are trying to change in your repository's `.gitignore`? Batch Changes respects .gitignore files when creating the diff
 
 ## Can I create tickets or issues along with Batch Changes?
 
 Batch Changes does not support a declarative syntax for issues or tickets.
-However, [steps](/batch_changes/references/batch_spec_yaml_reference#steps-run) can run any container. Some users have built scripts to create tickets for each apply:
+However, [steps](/batch-changes/batch-spec-yaml-reference#steps-run) can run any container. Some users have built scripts to create tickets for each apply:
 
 - [Jira tickets](https://github.com/sourcegraph/batch-change-examples/blob/main/ticketing-systems/jira-tickets/README)
 - [GitHub issues](https://github.com/sourcegraph/batch-change-examples/blob/main/ticketing-systems/github-issues/README)
@@ -69,9 +69,9 @@ Unapplied batch specs are removed from the database after **seven days**.
 
 ## Can I pull containers from private container registries in a batch change?
 
-Yes. When [executing a batch spec](/batch_changes/explanations/how_src_executes_a_batch_spec), `src` will attempt to pull missing docker images. If you are logged into the private container registry, it will pull from it.
+Yes. When [executing a batch spec](/batch-changes/how-src-executes-a-batch-spec), `src` will attempt to pull missing docker images. If you are logged into the private container registry, it will pull from it.
 
-Also, see [`steps.container`](/batch_changes/references/batch_spec_yaml_reference#steps-container). Within the spec, it will work as expected if `docker pulls` points to your private registry from the command line.
+Also, see [`steps.container`](/batch-changes/batch-spec-yaml-reference#steps-container). Within the spec, it will work as expected if `docker pulls` points to your private registry from the command line.
 
 However, outside the spec, `src` pulls an image from Docker Hub when running in volume workspace mode. This is the default on macOS, so you will need to use one of the following three workarounds:
 
@@ -91,7 +91,7 @@ Common language agnostic starting points:
 
 ## Why can't I run steps with different container user IDs in the same batch change?
 
-This is an artifact of [how Batch Changes executes batch specs](/batch_changes/explanations/how_src_executes_a_batch_spec). Consider this partial spec:
+This is an artifact of [how Batch Changes executes batch specs](/batch-changes/how-src-executes-a-batch-spec). Consider this partial spec:
 
 ```yaml
 steps:
@@ -113,24 +113,24 @@ In theory, it's possible to run the first `n` steps in a batch spec as an unpriv
 
 ## How can I use [GitHub expression syntax](https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions) (`${{ }}` literally) in my batch spec?
 
-To tell Sourcegraph not to evaluate `${{ }}` like a regular [template delimiter](/batch_changes/references/batch_spec_templating), you can quote it and wrap it in a second set of `${{ }}` like so:
+To tell Sourcegraph not to evaluate `${{ }}` like a regular [template delimiter](/batch-changes/batch-spec-templating), you can quote it and wrap it in a second set of `${{ }}` like so:
 
 ```bash
 ${{ "${{ leave me alone! }}" }}
 ```
 
-Remember the context in which the inner `${{ }}` will be evaluated, and be sure to escape characters as appropriate. Check out the cheat sheet for an [example](/batch_changes/references/batch_spec_cheat_sheet#write-a-github-actions-workflow-that-includes-github-expression-syntax) within a shell script.
+Remember the context in which the inner `${{ }}` will be evaluated, and be sure to escape characters as appropriate. Check out the cheat sheet for an [example](/batch-changes/batch-spec-cheat-sheet#write-a-github-actions-workflow-that-includes-github-expression-syntax) within a shell script.
 
 ## How is commit author determined for commits produced from Batch Changes?
 
-Commit author is determined when running `src batch [apply|preview]`. If no [author](/batch_changes/references/batch_spec_yaml_reference#changesettemplate-commit-author) key is defined in the batch spec, `src` will try to use the git config values for `user.name` and `user.email` from your local environment, or `batch-changes@sourcegraph.com` if no user is set.
+Commit author is determined when running `src batch [apply|preview]`. If no [author](/batch-changes/batch-spec-yaml-reference#changesettemplate-commit-author) key is defined in the batch spec, `src` will try to use the git config values for `user.name` and `user.email` from your local environment, or `batch-changes@sourcegraph.com` if no user is set.
 
 ## Why is the checkbox on my changeset disabled when previewing a batch change?
 
-Since Sourcegraph 3.31, it is possible to publish many types of changesets when previewing a batch change by modifying the publication state for the changeset directly from the UI (see ["Publishing changesets"](/batch_changes/how-tos/publishing_changesets#from-the-preview)). However, not every changeset can be published by Sourcegraph. By hovering over your changeset's disabled checkbox, you can see why that specific changeset is not currently publishable. The most common reasons include:
+Since Sourcegraph 3.31, it is possible to publish many types of changesets when previewing a batch change by modifying the publication state for the changeset directly from the UI (see ["Publishing changesets"](/batch-changes/publishing-changesets#from-the-preview)). However, not every changeset can be published by Sourcegraph. By hovering over your changeset's disabled checkbox, you can see why that specific changeset is not currently publishable. The most common reasons include:
 
 - The changeset is already published (we cannot unpublish a changeset or convert it back to a draft)
-- The changeset's publication state is being controlled from your batch spec file (i.e., you have the [`published` flag set in your batch spec](/batch_changes/references/batch_spec_yaml_reference#changesettemplate-published)); the batch spec takes precedence over the UI
+- The changeset's publication state is being controlled from your batch spec file (i.e., you have the [`published` flag set in your batch spec](/batch-changes/batch-spec-yaml-reference#changesettemplate-published)); the batch spec takes precedence over the UI
 - You do not have permission to publish to the repository the changeset would be opened against
 - The changeset was imported (and was therefore already published by someone or something else)
 
@@ -138,7 +138,7 @@ The changeset may also be in a state that we cannot currently publish from: for 
 
 ## Why do my changesets take a long time to sync?
 
-Have you [set up webhooks](/batch_changes/references/requirements#batch-changes-effect-on-code-host-rate-limits)?
+Have you [set up webhooks](/batch-changes/requirements#batch-changes-effect-on-code-host-rate-limits)?
 
 ### Why has my changeset been archived?
 
@@ -148,7 +148,7 @@ If the new batch spec no longer matches a repository for which Sourcegraph has a
 
 You can see these actions from the preview screen before you apply the batch spec. Archived changesets are still associated with the batch change but will appear under the "Archived" tab on the batch change page instead.
 
-See [how to remove changesets](/batch_changes/how-tos/updating_a_batch_change#removing-changesets) to learn more about archiving changesets, including how to unarchive a changeset and how to remove a changeset from the batch change entirely.
+See [how to remove changesets](/batch-changes/update-a-batch-change#removing-changesets) to learn more about archiving changesets, including how to unarchive a changeset and how to remove a changeset from the batch change entirely.
 
 ## Why is my changeset read-only?
 
@@ -160,7 +160,7 @@ If the repository is unarchived, Batch Changes will move the changeset back into
 
 By default, a normal Sourcegraph search will return the total number of matches for a given query, counting matches in the same file or repository as separate results.
 
-However, when you use the search query in your batch spec, the results are grouped based on the repository (or "workspace", if you're [working with monorepos](/batch_changes/how-tos/creating_changesets_per_project_in_monorepos))  they belong to, giving you the total number of **repositories** (or **workspaces**) that match the query. This is because Batch Changes produces one changeset for each matching repository (or workspace).
+However, when you use the search query in your batch spec, the results are grouped based on the repository (or "workspace", if you're [working with monorepos](/batch-changes/creating-changesets-per-project-in-monorepos))  they belong to, giving you the total number of **repositories** (or **workspaces**) that match the query. This is because Batch Changes produces one changeset for each matching repository (or workspace).
 
 So, if you have a search query that returns ten results in a single repo, the batch spec will only return one result for that repo. This is the equivalent of supplying the `select:repo` aggregator parameter to your search query.
 
@@ -168,7 +168,7 @@ So, if you have a search query that returns ten results in a single repo, the ba
 
 Sourcegraph search shows you results on any repositories that you have read access to. However, Sourcegraph and Batch Changes need to know which repositories you have **write** access to.
 
-This disparity most often stems from needing write access to one or more of the repositories where your search query returns results. Consider asking an admin to set up a [global service account token](/batch_changes/how-tos/configuring_credentials#global-service-account-tokens) if your batch change must update all matching repositories.
+This disparity most often stems from needing write access to one or more of the repositories where your search query returns results. Consider asking an admin to set up a [global service account token](/batch-changes/configuring-credentials#global-service-account-tokens) if your batch change must update all matching repositories.
 
 ## Why is my batch change preview hanging?
 
@@ -212,7 +212,7 @@ If the execution of a step on a given repository fails, that repository will be 
 
 ### How do executors interact with code hosts? Will they clone repos directly?
 
-Executors do not interact directly with code hosts. They behave in a way [similar to src CLI](/batch_changes/explanations/how_src_executes_a_batch_spec) today: executors interact with the Sourcegraph instance, the Sourcegraph instance interacts with the code host. In particular, executors download code from the Sourcegraph instance and executors do not need to access code hosts credentials directly.
+Executors do not interact directly with code hosts. They behave in a way [similar to src CLI](/batch-changes/how-src-executes-a-batch-spec) today: executors interact with the Sourcegraph instance, the Sourcegraph instance interacts with the code host. In particular, executors download code from the Sourcegraph instance and executors do not need to access code hosts credentials directly.
 
 ## From Campaigns to Batch Changes
 

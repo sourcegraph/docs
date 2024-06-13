@@ -2,7 +2,7 @@
 
 <p className="subtitle">Understand how to use templating to make your batch changes more powerful.</p>
 
-[Certain fields](#fields-with-template-support) in a [batch spec YAML](/batch_changes/references/batch_spec_yaml_reference) support templating to create even more powerful and performant batch changes. Templating in a batch spec uses the delimiters `${{` and `}}`. Inside the delimiters, [template variables](#template-variables) and [template helper functions](#template-helpers-functions) may be used to produce a text value.
+[Certain fields](#fields-with-template-support) in a [batch spec YAML](/batch-changes/batch-spec-yaml-reference) support templating to create even more powerful and performant batch changes. Templating in a batch spec uses the delimiters `${{` and `}}`. Inside the delimiters, [template variables](#template-variables) and [template helper functions](#template-helpers-functions) may be used to produce a text value.
 
 ## Example batch spec with templating
 
@@ -43,17 +43,17 @@ run: goimports -w cmd/src/main.go internal/fmt/fmt.go
 
 Templating is supported in the following fields:
 
-- [`steps.run`](/batch_changes/references/batch_spec_yaml_reference#steps-run)
-- [`steps.env`](/batch_changes/references/batch_spec_yaml_reference#steps-run) values
-- [`steps.files`](/batch_changes/references/batch_spec_yaml_reference#steps-run) values
-- [`steps.outputs.<name>.value`](/batch_changes/references/batch_spec_yaml_reference#steps-outputs)
-- [`steps.if`](/batch_changes/references/batch_spec_yaml_reference#steps-if)
-- [`changesetTemplate.title`](/batch_changes/references/batch_spec_yaml_reference#changesettemplate-title)
-- [`changesetTemplate.body`](/batch_changes/references/batch_spec_yaml_reference#changesettemplate-body)
-- [`changesetTemplate.branch`](/batch_changes/references/batch_spec_yaml_reference#changesettemplate-branch)
-- [`changesetTemplate.commit.message`](/batch_changes/references/batch_spec_yaml_reference#changesettemplate-commit-message)
-- [`changesetTemplate.commit.author.name`](/batch_changes/references/batch_spec_yaml_reference#changesettemplate-commit-author)
-- [`changesetTemplate.commit.author.email`](/batch_changes/references/batch_spec_yaml_reference#changesettemplate-commit-author)
+- [`steps.run`](/batch-changes/batch-spec-yaml-reference#steps-run)
+- [`steps.env`](/batch-changes/batch-spec-yaml-reference#steps-env) values
+- [`steps.files`](/batch-changes/batch-spec-yaml-reference#steps-files) values
+- [`steps.outputs.<name>.value`](/batch-changes/batch-spec-yaml-reference#steps-outputs)
+- [`steps.if`](/batch-changes/batch-spec-yaml-reference#steps-if)
+- [`changesetTemplate.title`](/batch-changes/batch-spec-yaml-reference#changesettemplate-title)
+- [`changesetTemplate.body`](/batch-changes/batch-spec-yaml-reference#changesettemplate-body)
+- [`changesetTemplate.branch`](/batch-changes/batch-spec-yaml-reference#changesettemplate-branch)
+- [`changesetTemplate.commit.message`](/batch-changes/batch-spec-yaml-reference#changesettemplate-commit-message)
+- [`changesetTemplate.commit.author.name`](/batch-changes/batch-spec-yaml-reference#changesettemplate-commit-author)
+- [`changesetTemplate.commit.author.email`](/batch-changes/batch-spec-yaml-reference#changesettemplate-commit-author)
 
 ## Template variables
 
@@ -102,7 +102,7 @@ The following template variables are available in the fields under `changesetTem
 | `steps.added_files`              | `list of strings`                                     | List of files that have been added by the `steps`. Empty list if no files have been added                                                                                                                                                                                                                                                                             |
 | `steps.deleted_files`            | `list of strings`                                     | List of files deleted by the `steps`. Empty list if no files have been deleted                                                                                                                                                                                                                                                                                        |
 | `steps.path`                     | `string`                                              | Path (relative to the root of the directory, no leading `/` or `.`) in which the `steps` have been executed. Empty if no workspaces have been used and the `steps` were executed in the root of the repository                                                                                                                                                        |
-| `outputs.<name>`                 | depends on `outputs.<name>.format`, default: `string` | Value of an [`output`](/batch_changes/references/batch_spec_yaml_reference#steps-outputs) set by `steps`. If the [`outputs.<name>.format`](batch_spec_yaml_reference#steps-outputs-format) is `yaml` or `json` and the `value` a data structure (i.e., array, object, ...), then subfields can be accessed too. See [Templating Examples](#templating-examples) below |
+| `outputs.<name>`                 | depends on `outputs.<name>.format`, default: `string` | Value of an [`output`](/batch-changes/batch-spec-yaml-reference#steps-outputs) set by `steps`. If the [`outputs.<name>.format`](batch_spec_yaml_reference#steps-outputs-format) is `yaml` or `json` and the `value` a data structure (i.e., array, object, ...), then subfields can be accessed too. See [Templating Examples](#templating-examples) below |
 | `batch_change_link`              | `string`                                              | <strong><small>Only available in `changesetTemplate.body`</small></strong><br />Link back to the batch change that produced the changeset on Sourcegraph. If omitted, the link will be automatically appended to the end of the body. <br />Requires [Sourcegraph CLI](/cli/) 3.40.9 or later                                                                         |
 
 ## Template helper functions
@@ -112,7 +112,7 @@ The following template variables are available in the fields under `changesetTem
 - `${{ replace "a/b/c/d" "/" "-" }}` - Replaces occurrences of the second argument in the first one with the last one
 - `${{ split repository.name "/" }}` - Splits the first argument into a list of strings at each occurrence of the last argument
 - `${{ matches repository.name "github.com/my-org/terra*" }}` - Matches the first argument against the glob pattern in the second argument, returning true/false
-- `${{ "${{ repository.name }}" }}` - Outputs the inner expression as a literal string, for example, to [ignore the inner set of `${{ }}`](/batch_changes/references/faq#how-can-i-use-github-expression-syntax-literally-in-my-batch-spec)
+- `${{ "${{ repository.name }}" }}` - Outputs the inner expression as a literal string, for example, to [ignore the inner set of `${{ }}`](/batch-changes/faq#how-can-i-use-github-expression-syntax---literally-in-my-batch-spec)
 
 The features of Go's [`text/template`](https://golang.org/pkg/text/template/) package are also available, including conditionals and loops, since it is the underlying templating engine.
 
@@ -212,7 +212,7 @@ changesetTemplate:
     The second step left this one: ${{ outputs.otherMessage }}
 ```
 
-Using the [`steps.outputs.<name>.format`](/batch_changes/references/batch_spec_yaml_reference#steps-outputs-name-format) field, it's possible to parse the value of output as JSON or YAML and access it as a data structure instead of just text:
+Using the [`steps.outputs.<name>.format`](/batch-changes/batch-spec-yaml-reference#steps-outputs-name-format) field, it's possible to parse the value of output as JSON or YAML and access it as a data structure instead of just text:
 
 ```yaml
 steps:
@@ -244,7 +244,7 @@ changesetTemplate:
     ${{ end }}
 ```
 
-Using the [`steps.if`](/batch_changes/references/batch_spec_yaml_reference#steps-if) field to conditionally execute different steps in different repositories:
+Using the [`steps.if`](/batch-changes/batch-spec-yaml-reference#steps-if) field to conditionally execute different steps in different repositories:
 
 ```yaml
 steps:

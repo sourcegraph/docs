@@ -146,7 +146,7 @@ steps:
 
 The shell command to run in the container. It can also be a multi-line shell script. The working directory is the root directory of the repository checkout.
 
-<Callout type="note">`steps.run` can include [template variables](/batch_changes/batch_spec_templating).</Callout>
+<Callout type="note">`steps.run` can include [template variables](/batch-changes/batch-spec-templating).</Callout>
 
 ## `steps.container`
 
@@ -158,7 +158,7 @@ It is executed using `docker` on the machine on which the [Sourcegraph CLI (`src
 
 Environment variables to set in the environment when running this command. These may be defined either as an [object](#environment-object) or as an [array](#environment-array).
 
-<Callout type="note">`steps.env` can include [template variables](/batch_changes/batch_spec_templating).</Callout>
+<Callout type="note">`steps.env` can include [template variables](/batch-changes/batch-spec-templating).</Callout>
 
 ### Environment object
 
@@ -179,8 +179,8 @@ steps:
 In this case, `steps.env` is an array. Each array item is either:
 
 - An object with a single property, in which case the key is used as the environment variable name and the value the value, or
-- **For src-cli execution**: A string that defines an environment variable to include from the environment `src` is being run within. This is useful to define secrets that you don't want to include in the spec file, but this makes the spec dependent on your environment, which means that the local execution cache will be invalidated each time the environment variable changes, and means that the batch spec file is no longer [the sole source of truth intended by the Batch Changes design](/batch_changes/explanations/batch_changes_design)
-- **For server-side execution**: A string that defines a secret value to expose as an environment variable. Follow [the guide on executor secrets](/admin/executors/executor_secrets) to set them up. The editor will suggest available secrets. This is useful to use secret values you don't want to include in the spec file. The execution cache will be invalidated each time the secret value changes, and this means that the batch spec file is no longer [the sole source of truth intended by the Batch Changes design](/batch_changes/explanations/batch_changes_design)
+- **For src-cli execution**: A string that defines an environment variable to include from the environment `src` is being run within. This is useful to define secrets that you don't want to include in the spec file, but this makes the spec dependent on your environment, which means that the local execution cache will be invalidated each time the environment variable changes, and means that the batch spec file is no longer [the sole source of truth intended by the Batch Changes design](/batch-changes/design)
+- **For server-side execution**: A string that defines a secret value to expose as an environment variable. Follow [the guide on executor secrets](/admin/executors/executor_secrets) to set them up. The editor will suggest available secrets. This is useful to use secret values you don't want to include in the spec file. The execution cache will be invalidated each time the secret value changes, and this means that the batch spec file is no longer [the sole source of truth intended by the Batch Changes design](/batch-changes/design)
 
 ### Examples
 
@@ -211,7 +211,7 @@ For instance, if `USER` is set to `adam`, this would append `Hello world! from a
 
 Files to create on the host machine and mount into the container when running `steps.run`. `steps.files` is an object, where the key is the name of the file _inside the container_ and the value is the content of the file.
 
-<Callout type="note">`steps.files` can include [template variables](/batch_changes/batch_spec_templating).</Callout>
+<Callout type="note">`steps.files` can include [template variables](/batch-changes/batch-spec-templating).</Callout>
 
 ### Examples
 
@@ -508,13 +508,13 @@ changesetTemplate:
 
 The title of the changeset on the code host.
 
-<Callout type="note">`changesetTemplate.title` can include [template variables](/batch_changes/batch_spec_templating).</Callout>
+<Callout type="note">`changesetTemplate.title` can include [template variables](/batch-changes/batch-spec-templating).</Callout>
 
 ## `changesetTemplate.body`
 
 The body (description) of the changeset on the code host. If the code supports Markdown you can use it here.
 
-<Callout type="note">`changesetTemplate.body` can include [template variables](/batch_changes/batch_spec_templating).</Callout>
+<Callout type="note">`changesetTemplate.body` can include [template variables](/batch-changes/batch-spec-templating).</Callout>
 
 ## `changesetTemplate.branch`
 
@@ -533,7 +533,7 @@ changesetTemplate:
   branch: new-feature-${{ repository.branch }}
 ```
 
-<Callout type="note">`changesetTemplate.branch` can include [template variables](/batch_changes/batch_spec_templating).</Callout>
+<Callout type="note">`changesetTemplate.branch` can include [template variables](/batch-changes/batch-spec-templating).</Callout>
 
 ## `changesetTemplate.commit`
 
@@ -543,13 +543,13 @@ The Git commit to create with the batch changes.
 
 The Git commit message.
 
-<Callout type= "note">`changesetTemplate.commit.message` can include [template variables](/batch_changes/batch_spec_templating).</Callout>
+<Callout type= "note">`changesetTemplate.commit.message` can include [template variables](/batch-changes/batch-spec-templating).</Callout>
 
 ## `changesetTemplate.commit.author`
 
 The `name` and `email` of the Git commit author.
 
-<Callout type= "note">`changesetTemplate.commit.author` can include [template variables](/batch_changes/batch_spec_templating).</Callout>
+<Callout type= "note">`changesetTemplate.commit.author` can include [template variables](/batch-changes/batch-spec-templating).</Callout>
 
 ### Examples
 
@@ -676,13 +676,13 @@ changesetTemplate:
     - github.com/sourcegraph/*@my-branch-name-2: false
 ```
 
-(Multiple changesets in a single repository can be produced, for example, [per project in a monorepo](/batch_changes/how-tos/creating_changesets_per_project_in_monorepos) or by [transforming large changes into multiple changesets](/batch_changes/how-tos/creating_multiple_changesets_in_large_repositories)).
+(Multiple changesets in a single repository can be produced, for example, [per project in a monorepo](/batch-changes/creating-changesets-per-project-in-monorepos) or by [transforming large changes into multiple changesets](/batch-changes/creating-multiple-changesets-in-large-repositories)).
 
 ## `changesetTemplate.fork`
 
 <Callout type="info">It is supported on Sourcegraph versions 5.1 or more.</Callout>
 
-Whether or not each changeset should be created on a fork of the upstream repository in the namespace of the user publishing them (or the namespace of the service account if [global credentials](/batch_changes/how-tos/configuring_credentials#global-service-account-tokens) are used).
+Whether or not each changeset should be created on a fork of the upstream repository in the namespace of the user publishing them (or the namespace of the service account if [global credentials](/batch-changes/configuring-credentials#global-service-account-tokens) are used).
 
 This value will override the setting if the site config setting [`batchChanges.enforceForks`](/admin/config/batch_changes#forks) is enabled. For example, explicitly setting `fork: false` when the site config setting is enabled will publish changesets directly to the target repos. If omitted, the site config setting will be used.
 

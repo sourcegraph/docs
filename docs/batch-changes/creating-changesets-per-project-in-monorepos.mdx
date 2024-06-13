@@ -2,9 +2,9 @@
 
 <p className="subtitle">Learn how to create changesets per project in monorepos.</p>
 
-Large repositories often contain multiple projects, hence named as **Monorepos**. It can make sense to run the batch spec [`steps`](/batch_changes/references/batch_spec_yaml_reference#steps) separately in each project and create one changeset per project.
+Large repositories often contain multiple projects, hence named as **Monorepos**. It can make sense to run the batch spec [`steps`](/batch-changes/batch-spec-yaml-reference#steps) separately in each project and create one changeset per project.
 
-This can be done by using [`workspaces`](/batch_changes/references/batch_spec_yaml_reference#workspaces) in the batch specs via two steps:
+This can be done by using [`workspaces`](/batch-changes/batch-spec-yaml-reference#workspaces) in the batch specs via two steps:
 
 1. Define the project locations with the `workspaces` property
 2. Produce unique `changesetTemplate.branch` names
@@ -31,7 +31,7 @@ examples/project3/src/...
 
 The location of the `package.json` files tells us that the TypeScript projects are in `project1`, `project2`, and `examples/project3`. You want to run the `npm update` command in each of these and produce an individual changeset per project.
 
-The [`workspaces`](/batch_changes/references/batch_spec_yaml_reference#workspaces) property in batch specs allows you to do that:
+The [`workspaces`](/batch-changes/batch-spec-yaml-reference#workspaces) property in batch specs allows you to do that:
 
 ```yaml
 name: update-typescript-monorepo
@@ -59,7 +59,7 @@ When executed with `src batch [apply|preview]`, this would produce up to 3 chang
 
 Since changesets are uniquely identified by their repository and branch, you **must** ensure that multiple changesets in the same repository will have different branches.
 
-To do that, we make use of [templating][templating] in the [`changesetTemplate.branch`][branch] field
+To do that, we make use of [templating](/batch-changes/batch-spec-templating) in the [`changesetTemplate.branch`](/batch-changes/batch-spec-templating#changesettemplate-context) field
 
 ```yaml
 # [...]
@@ -74,7 +74,7 @@ changesetTemplate:
   branch: batch-changes/update-typescript-${{ replace steps.path "/" "-" }}
 ```
 
-The `steps.path` [templating variable](/batch_changes/references/batch_spec_templating) contains the path in which the `steps` were executed relative to the root of the repository.
+The `steps.path` [templating variable](/batch-changes/batch-spec-templating) contains the path in which the `steps` were executed relative to the root of the repository.
 
 With the file and directory structure above, that means you'd end up with the following branch names:
 
@@ -112,12 +112,12 @@ You only need to run `src batch [apply|preview]` to execute your batch spec.
 
 ## Dynamic discovery of workspaces
 
-The `workspace` property leverages Sourcegraph search to find the location of the defined workspaces in the repositories yielded by the [`on`](/batch_changes/references/batch_spec_yaml_reference#on) property of the batch spec.
+The `workspace` property leverages Sourcegraph search to find the location of the defined workspaces in the repositories yielded by the [`on`](/batch-changes/batch-spec-yaml-reference#on) property of the batch spec.
 
 That has the advantage that it's dynamic: whenever `src batch [apply|preview]` is re-executed, Sourcegraph search is used again to find workspaces, automatically picking up new ones and removing workspaces that no longer exist.
 
 ## Only downloading workspace data in large repositories
 
-If the repository containing the workspaces is really large and it's not feasible to download to make it available for the `steps` execution, the [`workspaces.onlyFetchWorkspaces`](/batch_changes/references/batch_spec_yaml_reference#workspaces-onlyfetchworkspace) field can be set to `true` to only download the workspaces, without the rest of the repository.
+If the repository containing the workspaces is really large and it's not feasible to download to make it available for the `steps` execution, the [`workspaces.onlyFetchWorkspaces`](/batch-changes/batch-spec-yaml-reference#workspacesonlyfetchworkspace) field can be set to `true` to only download the workspaces, without the rest of the repository.
 
-<Callout type="info">To learn more about `workspaces`, read in the [batch spec YAML reference](/batch_changes/references/batch_spec_yaml_reference#workspaces).</Callout>
+<Callout type="info">To learn more about `workspaces`, read in the [batch spec YAML reference](/batch-changes/batch-spec-yaml-reference#workspaces).</Callout>
