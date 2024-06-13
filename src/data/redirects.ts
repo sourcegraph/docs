@@ -3163,9 +3163,9 @@ const redirectsData = [
   //     permanent: true
   // },
   {
-      source: "/batch_changes/how-tos/publishing_changesets#publishing-changesets",
-      destination: "/batch-changes/publishing-changesets#publishing-changesets",
-      permanent: true
+    source: "/batch_changes/how-tos/publishing_changesets#publishing-changesets",
+    destination: "/batch-changes/publishing-changesets#publishing-changesets",
+    permanent: true
   },
   // {
   //     source: "/batch_changes/how-tos/publishing_changesets#within-the-spec",
@@ -6224,17 +6224,17 @@ const redirectsData = [
     permanent: true
   },
 
-  {
-    source: "/code_navigation/how-to/index_a_typescript_and_javascript_repository#indexing-in-ci-using-the-scip-typescript-docker-image",
-    destination: "/code-search/code-navigation/how-to/index_a_typescript_and_javascript_repository#indexing-in-ci-using-the-scip-typescript-docker-image",
-    permanent: true
-  },
+  // {
+  //   source: "/code_navigation/how-to/index_a_typescript_and_javascript_repository#indexing-in-ci-using-the-scip-typescript-docker-image",
+  //   destination: "/code-search/code-navigation/how-to/index_a_typescript_and_javascript_repository#indexing-in-ci-using-the-scip-typescript-docker-image",
+  //   permanent: true
+  // },
 
-  {
-    source: "/code_navigation/how-to/index_a_typescript_and_javascript_repository#one-off-indexing-using-scip-typescript-locally",
-    destination: "/code-search/code-navigation/how-to/index_a_typescript_and_javascript_repository#one-off-indexing-using-scip-typescript-locally",
-    permanent: true
-  },
+  // {
+  //   source: "/code_navigation/how-to/index_a_typescript_and_javascript_repository#one-off-indexing-using-scip-typescript-locally",
+  //   destination: "/code-search/code-navigation/how-to/index_a_typescript_and_javascript_repository#one-off-indexing-using-scip-typescript-locally",
+  //   permanent: true
+  // },
 
   {
     source: "/code_navigation/how-to/adding_lsif_to_many_repos",
@@ -6248,59 +6248,59 @@ const redirectsData = [
     permanent: true
   },
 
-  {
-    source: "/code_navigation/how-to/adding_lsif_to_workflows#language-specific-guides",
-    destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#language-specific-guides",
-    permanent: true
-  },
+  // {
+  //   source: "/code_navigation/how-to/adding_lsif_to_workflows#language-specific-guides",
+  //   destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#language-specific-guides",
+  //   permanent: true
+  // },
 
-  {
-    source: "/code_navigation/how-to/adding_lsif_to_workflows#benefits-of-ci-integration",
-    destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#benefits-of-ci-integration",
-    permanent: true
-  },
+  // {
+  //   source: "/code_navigation/how-to/adding_lsif_to_workflows#benefits-of-ci-integration",
+  //   destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#benefits-of-ci-integration",
+  //   permanent: true
+  // },
 
-  {
-    source: "/code_navigation/how-to/adding_lsif_to_workflows#using-indexer-containers",
-    destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#using-indexer-containers",
-    permanent: true
-  },
+  // {
+  //   source: "/code_navigation/how-to/adding_lsif_to_workflows#using-indexer-containers",
+  //   destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#using-indexer-containers",
+  //   permanent: true
+  // },
 
-  {
-    source: "/code_navigation/how-to/adding_lsif_to_workflows#github-action-examples",
-    destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#github-action-examples",
-    permanent: true
-  },
+  // {
+  //   source: "/code_navigation/how-to/adding_lsif_to_workflows#github-action-examples",
+  //   destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#github-action-examples",
+  //   permanent: true
+  // },
 
-  {
-    source: "/code_navigation/how-to/adding_lsif_to_workflows#circle-ci-examples",
-    destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#circle-ci-examples",
-    permanent: true
-  },
+  // {
+  //   source: "/code_navigation/how-to/adding_lsif_to_workflows#circle-ci-examples",
+  //   destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#circle-ci-examples",
+  //   permanent: true
+  // },
 
-  {
-    source: "/code_navigation/how-to/adding_lsif_to_workflows#travis-ci-examples",
-    destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#travis-ci-examples",
-    permanent: true
-  },
+  // {
+  //   source: "/code_navigation/how-to/adding_lsif_to_workflows#travis-ci-examples",
+  //   destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#travis-ci-examples",
+  //   permanent: true
+  // },
 
-  {
-    source: "/code_navigation/how-to/adding_lsif_to_workflows#ci-from-scratch",
-    destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#ci-from-scratch",
-    permanent: true
-  },
+  // {
+  //   source: "/code_navigation/how-to/adding_lsif_to_workflows#ci-from-scratch",
+  //   destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#ci-from-scratch",
+  //   permanent: true
+  // },
 
-  {
-    source: "/code_navigation/how-to/adding_lsif_to_workflows#uploading-indexes-to-sourcegraphcom",
-    destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#uploading-indexes-to-sourcegraphcom",
-    permanent: true
-  },
+  // {
+  //   source: "/code_navigation/how-to/adding_lsif_to_workflows#uploading-indexes-to-sourcegraphcom",
+  //   destination: "/code-search/code-navigation/how-to/adding_lsif_to_workflows#uploading-indexes-to-sourcegraphcom",
+  //   permanent: true
+  // },
 
-  {
-    source: "/code_navigation/how-to/enable_auto_indexing",
-    destination: "/code-search/code-navigation/auto_indexing#enable-auto-indexing",
-    permanent: true
-  },
+  // {
+  //   source: "/code_navigation/how-to/enable_auto_indexing",
+  //   destination: "/code-search/code-navigation/auto_indexing#enable-auto-indexing",
+  //   permanent: true
+  // },
 
   {
     source: "/code_navigation/how-to/enable_auto_indexing#deploy-executors",
