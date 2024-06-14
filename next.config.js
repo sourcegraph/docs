@@ -33,7 +33,7 @@ const nextConfig = {
 				destination: 'https://5.3.sourcegraph.com/:slug*',
 				permanent: false,
 				basePath: false
-			}
+			},
 
 			// Redirect for docs for version 5.2 hosted at https://5.2.sourcegraph.com/
 			{
