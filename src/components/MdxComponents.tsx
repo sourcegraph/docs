@@ -9,12 +9,15 @@ import { QuickLink, QuickLinks } from './mdx/QuickLinks';
 import { Tab, Tabs } from './mdx/Tabs';
 import ResourceEstimator from './resource-estimator/ResourceEstimator';
 import { PreCodeBlock } from './PreCodeBlock';
+import { ContentTabs, ContentTab } from './ContentTabs';
 
 const MdxComponents = (version?: string) => {
 	return {
 		ResourceEstimator,
 		AWSOneClickLaunchForm,
 		Accordion,
+		ContentTabs: (props: any) => <ContentTabs {...props} />,
+    ContentTab: (props: any) => <ContentTab {...props} />,
 		Tabs: (props: any) => <Tabs {...props} />,
 		Tab: (props: any) => <Tab {...props} />,
 		QuickLinks,

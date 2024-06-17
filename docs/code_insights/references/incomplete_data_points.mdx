@@ -10,6 +10,59 @@ See the below situations for tips on avoiding and troubleshooting these errors.
 
 This guide applies to all types of Code Insights that use search queries. Language Stats Insights do not use search queries.
 
+## Identify affected repositories
+
+Through the Code Insights you can only see an aggregated warning for incomplete datapoints. If you're running the Code Insight
+with more than one repository, you may want to identify which repositories are causing incomplete datapoints.
+
+To identify affected repositories you first need the series ID. Go to your insights dashboard, and click on the hamburger menu
+in the top right of your insight's widget. Click on "Get shareable link". It may look like the one below. The last part is the ID.
+
+```
+https://test.sourcegraph.com/insights/aW5zaWdodF92aWV3OiIyZ1ZmQzMxMjEwRGhKVkxvc1YybnBqbEduYnUi
+```
+
+With the ID, you can now use the GraphQL API Console through your user settings page, or navigate to `/api/console` on your Sourcegraph instance.
+
+Paste the GraphQL query below into the query field, and replace `MY_SERIES_ID` with the ID you copied from above.
+
+```
+{
+  insightViews(id: "MY_SERIES_ID") {
+    nodes {
+      repositoryDefinition {
+        ...on RepositorySearchScope {
+        	search
+        }
+      }
+      dataSeries {
+        status {
+          incompleteDatapoints {
+            time
+            ...on TimeoutDatapointAlert {
+              __typename
+              repositories {
+                name
+              }
+            }
+            ...on GenericIncompleteDatapointAlert {
+              __typename
+              repositories {
+                name
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Running this query will give you a list of incomplete datapoints along with the repositories that are causing them.
+
+You can then follow the other recommendations on this page to address issues for those repositories.
+
 ## Timeout errors
 
 For searches that take a long time to complete, it's possible for them to timeout before the search ends, and before we can record the data value.

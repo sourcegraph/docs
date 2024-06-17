@@ -1,67 +1,48 @@
-# Deploying Sourcegraph executors natively on Kubernetes
+# Deploying Sourcegraph Executors natively on Kubernetes
 
 <Callout type="note">This feature is in beta and is available in Sourcegraph 5.1.0 and later.</Callout>
 
-[Kubernetes manifests](https://github.com/sourcegraph/deploy-sourcegraph-k8s) are provided to deploy Sourcegraph Executors on a running Kubernetes cluster. If you are deploying Sourcegraph with helm, charts are available [here](https://github.com/sourcegraph/deploy-sourcegraph-helm).
+The native Kubernetes Executors have a master Executor pod that schedules worker pods via the Kubernetes API. The master Executor pod manages the lifecycle of jobs, while the worker pods process the actual [batch change](/batch_changes/explanations/server_side) or [precise auto indexing](/code-search/code-navigation/auto_indexing) job specs. For more details, see [how it works](/admin/executors#native-kubernetes).
 
 ## Requirements
 
-### Feature flag
-To instruct Sourcegraph to use Kubernetes-deployed executors, you will need to enable the `native-ssbc-execution` [feature flag](/admin/executors/native_execution#enable).
-
-### RBAC Roles
-
-Executors interact with the Kubernetes API to handle jobs. The following are the RBAC Roles needed to run Executors on
-Kubernetes.
+Executors interact with the Kubernetes API to manage the lifecycle of individual executor jobs. The following are the RBAC Roles needed to run Executors natively on Kubernetes.
 
 | API Groups |     Resources      |         Verbs          |                                          Reason                                           |
 | ---------- | ------------------ | ---------------------- | ----------------------------------------------------------------------------------------- |
 | `batch`    | `jobs`             | `create`, `delete`     | Executors create Job pods to run processes. Once Jobs are completed, they are cleaned up. |
 |            | `pods`, `pods/log` | `get`, `list`, `watch` | Executors need to look up and steam logs from the Job Pods.                               |
 
-See the [example Role YAML](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@main/-/blob/cmd/executor/kubernetes/batches/executor-batches.Role.yml)
-for details.
+See the [example Role YAML](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@main/-/blob/cmd/executor/kubernetes/batches/executor-batches.Role.yml) for more details on the exact RBAC requirements for native Kubernetes Executors.
 
-### Docker Image
+## Deployment
 
-The Executor Docker image is available on Docker Hub
-at [`sourcegraph/executor-kubernetes`](https://hub.docker.com/r/sourcegraph/executor-kubernetes/tags).
+Native Kubernetes Executors can be deployed via either the `sourcegraph-executor-k8s` [Helm chart](https://github.com/sourcegraph/deploy-sourcegraph-helm/tree/main/charts/sourcegraph-executor/k8s) or by using the `executors/k8s` [Kustomize component](https://github.com/sourcegraph/deploy-sourcegraph-k8s/tree/main/components/executors/k8s).
 
-### Environment Variables
+### Steps
 
-The following are Environment Variables that are specific to the Kubernetes deployment method. These environment variables can be
-set on the Executor `Deployment` and will configure the `Job`s that it spawns. Executor environment variables can also be defined on a Kubernetes `ConfigMap` or `Secret` that is [mounted to the executor deployment](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables).
+1. If you are deploying Executors for processing Batch Changes, set the `native-ssbc-execution` [feature flag](/admin/executors/native_execution#enable)
+2. Configure the following environment variables on the Executor Deployment:
+    1. `EXECUTOR_FRONTEND_URL` should match the URL of your Sourcegraph instance
+    2. `EXECUTOR_FRONTEND_PASSWORD` should match the `executors.accessToken` key in the Sourcegraph instance's site configuration
+    3. Either `EXECUTOR_QUEUE_NAMES` or `EXECUTOR_QUEUE_NAME` should be set depending on whether the Executor will process batch change or precise auto indexing jobs
+    4. `EXECUTOR_KUBERNETES_NAMESPACE` should be set to the Kubernetes namespace where you intend to run the worker pods. This should generally match the namesapce where you deploy the Executor resources in the next step.
 
-|                             Name                             |   Default Value   |                                                                                              Description                                                                                               |
-| ------------------------------------------------------------ | :---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `EXECUTOR_KUBERNETES_CONFIG_PATH`                              | N/A               | The path to the Kubernetes configuration file. If not specified, the in cluster config is used.                                                                                                        |
-| `EXECUTOR_KUBERNETES_NODE_NAME`                                | N/A               | The name of the Kubernetes Node to create Jobs in. If not specified, the Pods are created in the first available node.                                                                                 |
-| `EXECUTOR_KUBERNETES_NODE_SELECTOR`                            | N/A               | A comma separated list of values to use as a node selector for Kubernetes Jobs. e.g. `foo=bar,app=my-app`                                                                                              |
-| `EXECUTOR_KUBERNETES_NODE_REQUIRED_AFFINITY_MATCH_EXPRESSION` | N/A               | The JSON encoded required affinity match expressions for Kubernetes Jobs. e.g. `[{"key": "foo", "operator": "In", "values": ["bar"]}]`                                                                 |
-| `EXECUTOR_KUBERNETES_NODE_REQUIRED_AFFINITY_MATCH_FIELDS`      | N/A               | The JSON encoded required affinity match fields for Kubernetes Jobs. e.g. `[{"key": "foo", "operator": "In", "values": ["bar"]}]`                                                                      |
-| `EXECUTOR_KUBERNETES_POD_AFFINITY`                             | N/A               | The JSON encoded pod affinity for Kubernetes Jobs. e.g. `[{"labelSelector": {"matchExpressions": [{"key": "foo", "operator": "In", "values": ["bar"]}]}, "topologyKey": "kubernetes.io/hostname"}]`      |
-| `EXECUTOR_KUBERNETES_POD_ANTI_AFFINITY`                        | N/A               | The JSON encoded pod anti-affinity for Kubernetes Jobs. e.g. `[{"labelSelector": {"matchExpressions": [{"key": "foo", "operator": "In", "values": ["bar"]}]}, "topologyKey": "kubernetes.io/hostname"}]` |
-| `EXECUTOR_KUBERNETES_NODE_TOLERATIONS`                         | N/A               | The JSON encoded tolerations for Kubernetes Jobs. e.g. `[{"key": "foo", "operator": "Equal", "value": "bar", "effect": "NoSchedule"}]`                                                                   |
-| `EXECUTOR_KUBERNETES_NAMESPACE`                                | `default`         | The Kubernetes namespace in which the executor service will spawn executor jobs (K8s Jobs) in.                                                                                                                                                                   |
-| `EXECUTOR_KUBERNETES_PERSISTENCE_VOLUME_NAME`                  | `sg-executor-pvc` | The name of the Executor Persistence Volume. Must match the `PersistentVolumeClaim` configured for the instance.                                                                                       |
-| `EXECUTOR_KUBERNETES_RESOURCE_LIMIT_CPU`                       | N/A               | The maximum CPU resource for Kubernetes Jobs.                                                                                                                                                          |
-| `EXECUTOR_KUBERNETES_RESOURCE_LIMIT_MEMORY`                    | `12Gi`            | The maximum memory resource for Kubernetes Jobs.                                                                                                                                                       |
-| `EXECUTOR_KUBERNETES_RESOURCE_REQUEST_CPU`                     | N/A               | The minimum CPU resource for Kubernetes Jobs.                                                                                                                                                          |
-| `EXECUTOR_KUBERNETES_RESOURCE_REQUEST_MEMORY`                  | `12Gi`            | The minimum memory resource for Kubernetes Jobs.                                                                                                                                                       |
-| `KUBERNETES_JOB_DEADLINE`                                      | `1200`            | The number of seconds after which a Kubernetes job will be terminated.                                                                                                                                 |
-| `KUBERNETES_RUN_AS_USER`                                       | N/A               | The user ID to run Kubernetes jobs as.                                                                                                                                                                 |
-| `KUBERNETES_RUN_AS_GROUP`                                      | N/A               | The group ID to run Kubernetes jobs as.                                                                                                                                                                |
-| `KUBERNETES_FS_GROUP`                                          | `1000`            | The group ID to run all containers in the Kubernetes jobs as.                                                                                                                                          |
-| `KUBERNETES_KEEP_JOBS`                                         | `false`           | If true, Kubernetes jobs will not be deleted after they complete. Useful for debugging.                                                                                                                |
-| `KUBERNETES_JOB_ANNOTATIONS`                                   | N/A               | The JSON encoded annotations to add to the Kubernetes Jobs. e.g. `{"foo": "bar", "faz": "baz"}`                                                                                                        |
-| `KUBERNETES_JOB_POD_ANNOTATIONS`                               | N/A               | The JSON encoded annotations to add to the Kubernetes Job Pods. e.g. `{"foo": "bar", "faz": "baz"}`                                                                                                    |
-| `KUBERNETES_IMAGE_PULL_SECRETS`                                | N/A               | The names of Kubernetes image pull secrets to use for pulling images. e.g. my-secret,my-other-secret                                                                                                   |
+    <Callout type="note">Additional environment variables may need to be configured for your Executors deployment. See [here](/admin/executors/executors_config) for a complete list.</Callout>
 
-<Callout type="note">Note: `EXECUTOR_KUBERNETES_NAMESPACE` should be set to either "default" or the specific namespace where your Executor is deployed.</Callout>
+3. Deploy the native Kubernetes Executor resources to your Kubernetes cluster via either the `sourcegraph-executor-k8s` [Helm chart](https://github.com/sourcegraph/deploy-sourcegraph-helm/tree/main/charts/sourcegraph-executor/k8s) or the `executors/k8s` [Kustomize component](https://github.com/sourcegraph/deploy-sourcegraph-k8s/tree/main/components/executors/k8s).
+    1. For more details on how to work with the Sourcegraph Helm chart, see the [Helm chart docs](/admin/deploy/kubernetes#configuration) (_Note: The same Helm values `override.yaml` file can be used for both the main `sourcegraph` Helm chart as well as the `sourcegraph-executor-k8s` chart_)
+    2. For more details on how to configure the `executors/k8s` component for your Kustomize deployment, see the [Kustomize configuration docs](/admin/deploy/kubernetes/configure#overview)
+4. Once all the native Kubernetes Executor resources have been deployed to your cluster, confirm that the Executors are online by checking the _Executors_ page under **Site admin > Executors > Instances**
 
-<Callout type="note">Note: `executor.frontendUrl` must be set in the Site configuration for Executors to work correctly.</Callout>
+## Additional Notes
 
-See other possible executor configuration environment variables [here](/admin/executors/executors_config).
+### Firecracker
+
+Executors deployed on Kubernetes do not use [Firecracker](/admin/executors/#how-it-works).
+
+If you have security concerns, consider deploying via [terraform](/admin/executors/deploy_executors_terraform)
+or [installing the binary](/admin/executors/deploy_executors_binary) directly.
 
 ### Job Scheduling
 
@@ -103,49 +84,15 @@ Environment.
 
 ### Batch Changes
 
-To run [Batch Changes](/batch_changes/) on
-Kubernetes, [Native Server-Side Batch Changes](/admin/executors/native_execution) must be enabled.
+To run [Batch Changes](/batch-changes/) on
+Kubernetes, [native Server-Side Batch Changes](/admin/executors/native_execution) must be enabled.
+
+### Docker Image
+
+The Executor Docker image is available on Docker Hub at [`sourcegraph/executor-kubernetes`](https://hub.docker.com/r/sourcegraph/executor-kubernetes/tags).
 
 ### Example Configuration YAML
 
 See
 the [local development YAMLs](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@main/-/blob/cmd/executor/kubernetes)
 for an example of how to configure the Executor in Kubernetes.
-
-## Deployment
-
-Executors on Kubernetes require specific RBAC rules to be configured in order to operate correctly.
-See [RBAC Roles](#rbac-roles) for more information.
-
-### Step-by-step Guide
-
-Ensure you have the following tools installed:
-
-- [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
-- [Helm](https://helm.sh/) if you're installing Sourcegraph with `helm`.
-
-#### Deployment via Kustomize
-
-Please refer to the [Sourcegraph Kustomize docs](/admin/deploy/kubernetes/kustomize) for the latest instructions.
-
-To include Native Kubernetes Executors, see [configure Sourcegraph with Kustomize](/admin/deploy/kubernetes/configure) on how to specify the component (`components/executors/k8s`).
-
-#### Deployment via Helm
-
-Please refer to the [Sourcegraph Helm docs](/admin/deploy/kubernetes/helm#quickstart) for the latest instructions.
-
-To specifically deploy Executors,
-1. Create an overrides file, `override.yaml`, with any other customizations you may require.
-    1. See [details on configurations](/admin/deploy/kubernetes/helm#configuration).
-2. Run the following command:
-    ```bash
-    helm upgrade --install --values ./override.yaml --version <your Sourcegraph Version> sg-executor sourcegraph/sourcegraph-executor-k8s
-    ```
-3. Confirm executors are working by checking the _Executors_ page under **Site admin > Executors > Instances** .
-
-## Note
-
-Executors deployed on Kubernetes do not use [Firecracker](/admin/executors/#how-it-works).
-
-If you have security concerns, consider deploying via [terraform](/admin/executors/deploy_executors_terraform)
-or [installing the binary](/admin/executors/deploy_executors_binary) directly.
