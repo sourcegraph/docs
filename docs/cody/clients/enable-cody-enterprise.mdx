@@ -69,9 +69,9 @@ Cody Enterprise supports searching up to 10 repositories to find relevant contex
 
 ### Smart Context Window
 
-<Callout type="note">The `smartContextWindow` configuration is available with Sourcegraph `v>=5.5.0` for VS Code (`v>=1.20.0`) and JetBrains (`v>=6.0.0`) Cody clients.</Callout>
+<Callout type="note">The `smartContextWindow` configuration is available with Sourcegraph `v>=v5.4.5099` for VS Code (`v>=1.20.0`) and JetBrains (`v>=6.0.0`) Cody clients.</Callout>
 
-Sourcegraph Enterprise versions >= 5.5.0 have the `smartContextWindow` configuration enabled by default. You can access this configuration from the **Site Admin > Site configuration** panel.
+Sourcegraph Enterprise versions >=5.4.5099 have the `smartContextWindow` configuration enabled by default. You can access this configuration from the **Site Admin > Site configuration** panel.
 
 Once enabled, your Cody IDE extension will follow the most optimized context window settings for the selected models and ignore the value configured in the `chatModelMaxTokens` field.
 
@@ -271,7 +271,7 @@ You can use Anthropic Claude models on [Amazon Bedrock](https://aws.amazon.com/b
 First, make sure you can access Amazon Bedrock. Then, request access to the Anthropic Claude models in Bedrock.
 This may take some time to provision.
 
-Next, create an IAM user with programmatic access in your AWS account. Depending on your AWS setup, different ways may be required to provide access. All completion requests are made from the `frontend` service, so this service needs to be able to access AWS. You can use instance role bindings or directly configure the IAM user credentials in the configuration.
+Next, create an IAM user with programmatic access in your AWS account. Depending on your AWS setup, different ways may be required to provide access. All completion requests are made from the `frontend` service, so this service needs to be able to access AWS. You can use instance role bindings or directly configure the IAM user credentials in the configuration. Additionally, the `AWS_REGION` environment variable will need to be set in the `frontend` container for scoping the IAM credentials to the AWS region hosting the Bedrock endpoint.
 
 Once ready, go to **Site admin > Site configuration** (`/site-admin/configuration`) on your instance and set:
 
@@ -282,14 +282,14 @@ Once ready, go to **Site admin > Site configuration** (`/site-admin/configuratio
   "completions": {
     "provider": "aws-bedrock",
     "chatModel": "anthropic.claude-3-opus-20240229-v1:0",
-    "completionsModel": "anthropic.claude-instant-v1",
+    "completionModel": "anthropic.claude-instant-v1",
     "endpoint": "<See below>",
     "accessToken": "<See below>"
   }
 }
 ```
 
-For the `chatModel` and `completionsModel` fields, see [Amazon's Bedrock documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html) for an up-to-date list of supported model IDs, and cross reference against Sourcegraph's [supported LLM list](/cody/capabilities/supported-models) to verify compatibility with Cody.
+For the `chatModel` and `completionModel` fields, see [Amazon's Bedrock documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html) for an up-to-date list of supported model IDs, and cross reference against Sourcegraph's [supported LLM list](/cody/capabilities/supported-models) to verify compatibility with Cody.
 
 For `endpoint`, you can either:
 
