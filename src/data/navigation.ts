@@ -32,14 +32,14 @@ export const navigation: NavigationItem[] = [
         sections: [
           { title: "Quickstart", href: "/cody/quickstart" },
           {
-            title: "Installation", href: "/cody/clients",
-            subsections: [
-              { title: "Cody for VS Code", href: "/cody/clients/install-vscode", },
-              { title: "Cody for JetBrains", href: "/cody/clients/install-jetbrains", },
-              { title: "Cody for Neovim", href: "/cody/clients/install-neovim", },
-              { title: "Cody for Web", href: "/cody/clients/cody-with-sourcegraph", },
-              { title: "Cody for Enterprise", href: "/cody/clients/enable-cody-enterprise", },
-            ]
+            title: "Install Cody for Free & Pro", href: "/cody/clients",
+            // subsections: [
+            //   { title: "Cody for VS Code", href: "/cody/clients/install-vscode", },
+            //   { title: "Cody for JetBrains", href: "/cody/clients/install-jetbrains", },
+            //   { title: "Cody for Neovim", href: "/cody/clients/install-neovim", },
+            //   { title: "Cody for Web", href: "/cody/clients/cody-with-sourcegraph", },
+            //   { title: "Cody for Enterprise", href: "/cody/clients/enable-cody-enterprise", },
+            // ]
           },
           {
             title: "Capabilities", href: "/cody/capabilities",
