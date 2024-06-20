@@ -5,6 +5,14 @@ import { allPosts } from 'contentlayer/generated';
 import { getMDXComponent } from 'next-contentlayer/hooks';
 import { notFound } from 'next/navigation';
 
+export const generateMetadata = () => {
+	return {
+		openGraph: {
+			images: [{url: 'https://sourcegraph.com/docs/sourcegraph-docs-c.png'}]
+		}
+	}
+}
+
 const PostLayout = () => {
 	const post = allPosts.find(post => post._raw.flattenedPath === '');
 	if (!post) return notFound();

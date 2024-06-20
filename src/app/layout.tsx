@@ -37,6 +37,9 @@ export const metadata: Metadata = {
 	},
 	alternates: {
 		canonical: '/docs'
+	},
+	openGraph: {
+		images: [{url: 'https://sourcegraph.com/docs/sourcegraph-docs-c.png'}]
 	}
 };
 
