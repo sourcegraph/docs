@@ -3,9 +3,10 @@
 import {useCallback, useEffect, useState} from 'react';
 import Link from 'next/link';
 import clsx from 'clsx';
-import {ArrowUpRightIcon} from '@heroicons/react/24/solid'
 import {useParams} from 'next/navigation'
 import {allPosts} from 'contentlayer/generated'
+import { PencilIcon } from './icons/PencilIcon';
+import { BugIcon } from './icons/BugIcon';
 
 interface Heading {
 	level: number;
@@ -143,6 +144,7 @@ export function TableOfContents({headings}: Props) {
 							))}
 						</ol>
 						{/* Edit doc with GitHub button */}
+						<hr className='mt-4' />
 						<div className="flex items-center mt-4 text-sm">
 							<a
 								href={`https://github.com/sourcegraph/docs/edit/main/docs/${path}`}
@@ -150,8 +152,19 @@ export function TableOfContents({headings}: Props) {
 								rel="noopener noreferrer"
 								className="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
 							>
+								<PencilIcon className="mr-1 h-4 w-4" />
 								Edit this page on GitHub
-								<ArrowUpRightIcon className="ml-1 h-3 w-3" /> 
+							</a>
+						</div>
+						<div className="flex items-center mt-2 text-sm">
+							<a
+								href="https://community.sourcegraph.com"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+							>
+								<BugIcon className="mr-1 h-4 w-4" />
+								Questions? Give us feedback
 							</a>
 						</div>
 					</>
