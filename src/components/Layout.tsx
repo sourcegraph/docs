@@ -5,6 +5,7 @@ import { Logo } from '@/components/Logo';
 import { MobileNavigation } from '@/components/MobileNavigation';
 import { Navigation } from '@/components/Navigation';
 import { ThemeSelector } from '@/components/ThemeSelector';
+import SourceGraphIcon from '@/components/icons/SourceGraphIcon';
 import clsx from 'clsx';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -68,6 +69,10 @@ function Header() {
 					<Search />
 				</div>
 				<div className="relative flex basis-0 items-center justify-end gap-6 sm:gap-6 md:flex-grow">
+					<Link href="/ask-source" className="flex items-center gap-2 whitespace-nowrap">
+						<SourceGraphIcon className="h-6 w-6" />
+						<span className="font-semibold">Ask Source</span>
+					</Link>
 					<VersionSelector />
 					<ThemeSelector className="relative z-10" />
 					<Link
