@@ -47,6 +47,7 @@ export const navigation: NavigationItem[] = [
               { title: "Chat", href: "/cody/capabilities/chat", },
               { title: "Autocomplete", href: "/cody/capabilities/autocomplete", },
               { title: "Commands", href: "/cody/capabilities/commands", },
+              { title: "OpenCtx" , href: "/cody/capabilities/openctx", },
               { title: "Debug Code", href: "/cody/capabilities/debug-code", },
               { title: "Context Filters", href: "/cody/capabilities/ignore-context", },
               { title: "Proxy Setup", href: "/cody/capabilities/proxy-setup", },
