@@ -18,7 +18,7 @@ At a basic level, a query consists of [search patterns](#search-pattern) and [pa
 
 For example,
 
-- [`repo:github.com/sourcegraph/sourcegraph file:schema.graphql The result`](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+file:schema.graphql+The+result&patternType=literal)
+- [`repo:github.com/sourcegraph/sourcegraph file:schema.graphql The result`](https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+file:schema.graphql+%22The+result%22&patternType=keyword)
 
 ## Expression
 
@@ -28,7 +28,7 @@ Build query expressions by combining [basic queries](#basic-query) and operators
 
 For example,
 
-- [`repo:github.com/sourcegraph/sourcegraph rtr AND newRouter`](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+rtr+AND+newRouter&patternType=literal)
+- [`repo:github.com/sourcegraph/sourcegraph rtr AND newRouter`](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+rtr+AND+newRouter&patternType=keyword)
 
 ## Search pattern
 
@@ -42,12 +42,6 @@ For example,
 
 - [`foo.*bar.*baz`](https://sourcegraph.com/search?q=foo.*bar.*baz&patternType=regexp)
 - [`"foo bar"`](https://sourcegraph.com/search?q=%22foo+bar%22&patternType=regexp)
-
-Perform a structural search. See our [dedicated documentation](/code-search/types/structural) to learn more about structural search.
-
-For example,
-
-- [`fmt.Sprintf(":[format]", :[args])`](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+fmt.Sprintf%28%22:%5Bformat%5D%22%2C+:%5Bargs%5D%29&patternType=structural)
 
 ## Parameter
 
@@ -74,15 +68,15 @@ Search a repository at a given revision, for example, a branch name, commit hash
 
 For example,
 
-- [`repo:^github\.com/sourcegraph/sourcegraph$@75ba004 get_embeddings`](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24%4075ba004+get_embeddings+&patternType=literal)
-- [`repo:^github\.com/sourcegraph/sourcegraph$ rev:v5.0.0 get_embeddings`](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+rev:v5.0.0+get_embeddings&patternType=literal)
+- [`repo:^github\.com/sourcegraph/sourcegraph$@75ba004 get_embeddings`](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24%4075ba004+get_embeddings+&patternType=keyword)
+- [`repo:^github\.com/sourcegraph/sourcegraph$ rev:v5.0.0 get_embeddings`](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+rev:v5.0.0+get_embeddings&patternType=keyword)
 
 You can search multiple revisions by separating the revisions with `:`. Specify `HEAD` for the default branch.
 
 For example,
 
-- [`repo:^github\.com/sourcegraph/sourcegraph$ rev:v4.5.0:v5.0.0 disableNonCriticalTelemetry`](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+rev:v4.5.0:v5.0.0+disableNonCriticalTelemetry&patternType=literal)
-- [`repo:^github\.com/sourcegraph/sourcegraph$@v4.5.0:v5.0.0 disableNonCriticalTelemetry`](https://sourcegraph.com/search?q=context%3Aglobal+repo%3A%5Egithub%5C.com%2Fsourcegraph%2Fsourcegraph%24%40v4.5.0%3Av5.0.0+disableNonCriticalTelemetry&patternType=literal)
+- [`repo:^github\.com/sourcegraph/sourcegraph$ rev:v4.5.0:v5.0.0 disableNonCriticalTelemetry`](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+rev:v4.5.0:v5.0.0+disableNonCriticalTelemetry&patternType=keyword)
+- [`repo:^github\.com/sourcegraph/sourcegraph$@v4.5.0:v5.0.0 disableNonCriticalTelemetry`](https://sourcegraph.com/search?q=context%3Aglobal+repo%3A%5Egithub%5C.com%2Fsourcegraph%2Fsourcegraph%24%40v4.5.0%3Av5.0.0+disableNonCriticalTelemetry&patternType=keyword)
 
 ### Revision at time
 
@@ -132,7 +126,7 @@ Set the search pattern to search using a dedicated parameter. Useful, for exampl
 
 For example,
 
-- [`repo:sourcegraph content:"repo:sourcegraph"`](https://sourcegraph.com/search?q=repo:sourcegraph+content:%22repo:sourcegraph%22&patternType=literal)
+- [`repo:sourcegraph content:"repo:sourcegraph"`](https://sourcegraph.com/search?q=repo:sourcegraph+content:%22repo:sourcegraph%22&patternType=keyword)
 
 ### Select
 
@@ -146,8 +140,8 @@ A query like `type:commit example select:symbol` will return no results because 
 
 For example,
 
-- [`fmt.Errorf select:repo`](https://sourcegraph.com/search?q=fmt.Errorf+select:repo&patternType=literal)
-- [`zoektSearch select:file`](https://sourcegraph.com/search?q=zoektSearch+select:file&patternType=literal)
+- [`fmt.Errorf select:repo`](https://sourcegraph.com/search?q=fmt.Errorf+select:repo&patternType=keyword)
+- [`zoektSearch select:file`](https://sourcegraph.com/search?q=zoektSearch+select:file&patternType=keyword)
 
 #### Symbol kind
 
@@ -157,7 +151,7 @@ Select a specific kind of symbol. For example `type:symbol select:symbol.functio
 
 For example,
 
-- [`type:symbol zoektSearch select:symbol.function`](https://sourcegraph.com/search?q=type:symbol+zoektSearch+select:symbol.function&patternType=literal)
+- [`type:symbol zoektSearch select:symbol.function`](https://sourcegraph.com/search?q=type:symbol+zoektSearch+select:symbol.function&patternType=keyword)
 
 #### Modified lines
 
@@ -169,7 +163,7 @@ When searching commit diffs, select only diffs where the pattern matches on `add
 
 For example,
 
-- [`repo:^github\.com/sourcegraph/sourcegraph$ type:diff TODO select:commit.diff.removed`](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+type:diff+TODO+select:commit.diff.removed+&patternType=literal)
+- [`repo:^github\.com/sourcegraph/sourcegraph$ type:diff TODO select:commit.diff.removed`](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+type:diff+TODO+select:commit.diff.removed+&patternType=keyword)
 
 #### File kind
 
@@ -181,7 +175,7 @@ Select only directory paths of file results with `select:file.directory`. This i
 
 For example,
 
-- [`file:package\.json select:file.directory`](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+file:package%5C.json+select:file.directory&patternType=literal)
+- [`file:package\.json select:file.directory`](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+file:package%5C.json+select:file.directory&patternType=keyword)
 
 #### File owners
 
@@ -241,7 +235,7 @@ Retrieve N results. By default, Sourcegraph stops searching early and returns if
 For example,
 
 - [`count:1000 function`](https://sourcegraph.com/search?q=count:1000+repo:sourcegraph/sourcegraph%24+function&patternType=regexp)
-- [`count:all err`](https://sourcegraph.com/search?q=repo:github.com/sourcegraph/sourcegraph+err+count:all&patternType=literal)
+- [`count:all err`](https://sourcegraph.com/search?q=repo:github.com/sourcegraph/sourcegraph+err+count:all&patternType=keyword)
 
 ### Timeout
 
@@ -268,7 +262,7 @@ For example,
 
 ![pattern-type](https://storage.googleapis.com/sourcegraph-assets/Docs/CS-LANG/pattern-type.png)
 
-Set whether the pattern should run a [keyword search](/code-search/queries#keyword-search), literal search, regular expression search, or structural search. This parameter is available as a command-line and accessibility option and is synonymous with the visual [search pattern](#search-pattern) toggles.
+Set whether the pattern should run a [keyword search](/code-search/queries#keyword-search-default) or [regular expression search](/code-search/queries#regular-expression-search). This parameter is available as a command-line and accessibility option and is synonymous with the visual [search pattern](#search-pattern) toggles.
 
 ## Built-in repo predicate
 
@@ -295,7 +289,7 @@ Search only inside repositories that contain a file matching the `path:` with `c
 
 For example,
 
-- [`repo:has.file(path:CHANGELOG content:fix)`](https://sourcegraph.com/search?q=context:global+repo:github%5C.com/sourcegraph/.*+repo:has.file%28path:CHANGELOG+content:fix%29&patternType=standard)
+- [`repo:has.file(path:CHANGELOG content:fix)`](https://sourcegraph.com/search?q=context:global+repo:github%5C.com/sourcegraph/.*+repo:has.file%28path:CHANGELOG+content:fix%29&patternType=keyword)
 
 <Callout type="note">`repo:contains.file(...)` is an alias for `repo:has.file(...)` and behaves identically.</Callout>
 
@@ -307,7 +301,7 @@ Search only inside repositories that contain a file path matching the regular ex
 
 For example,
 
-- [`repo:has.path(README)`](https://sourcegraph.com/search?q=context:global+repo:github%5C.com/sourcegraph/.*+repo:has.path%28README%29&patternType=standard)
+- [`repo:has.path(README)`](https://sourcegraph.com/search?q=context:global+repo:github%5C.com/sourcegraph/.*+repo:has.path%28README%29&patternType=keyword)
 
 <Callout type="note"> `repo:contains.path(...)` is an alias for `repo:has.path(..)` and behaves identically.</Callout>
 
@@ -319,7 +313,7 @@ Search only inside repositories that contain file content matching the regular e
 
 For example,
 
-- [`repo:github\.com/sourcegraph/.*$ repo:has.content(TODO)`](https://sourcegraph.com/search?q=repo:github%5C.com/sourcegraph/.*%24+repo:has.content%28TODO%29&patternType=standard)
+- [`repo:github\.com/sourcegraph/.*$ repo:has.content(TODO)`](https://sourcegraph.com/search?q=repo:github%5C.com/sourcegraph/.*%24+repo:has.content%28TODO%29&patternType=keyword)
 
 <Callout type="note">`repo:contains.content(...)` is an alias for `repo:has.content(...)` and behaves identically.</Callout>
 
@@ -331,7 +325,7 @@ Search only inside repositories that have the given GitHub/GitLab topic.
 
 For example,
 
-- [`repo:has.topic(code-search)`](https://sourcegraph.com/search?q=context%3Aglobal+repo%3Ahas.topic%28code-search%29&patternType=standard&sm=1&groupBy=repo)
+- [`repo:has.topic(code-search)`](https://sourcegraph.com/search?q=context%3Aglobal+repo%3Ahas.topic%28code-search%29&patternType=keyword&groupBy=repo)
 
 <Callout type="note"> Topic search is currently only supported for GitHub and GitLab repos.</Callout>
 
@@ -343,7 +337,7 @@ Search only inside repositories that contain a commit after some specified time.
 
 For example,
 
-- [`repo:has.commit.after(1 month ago)`](https://sourcegraph.com/search?q=context:global+repo:.*sourcegraph.*+repo:has.commit.after%281+month+ago%29&patternType=standard)
+- [`repo:has.commit.after(1 month ago)`](https://sourcegraph.com/search?q=context:global+repo:.*sourcegraph.*+repo:has.commit.after%281+month+ago%29&patternType=keyword)
 
 <Callout type="note"> `repo:contains.commit.after(...)` is an alias for `repo:has.commit.after(...)` and behaves identically.</Callout>
 
@@ -355,7 +349,7 @@ Search only inside repositories having a description matching the given regular 
 
 For example,
 
-- [`repo:has.description(go package)`](https://sourcegraph.com/search?q=context:global+repo:has.description%28go.*package%29+&patternType=literal)
+- [`repo:has.description(go package)`](https://sourcegraph.com/search?q=context:global+repo:has.description%28go.*package%29+&patternType=keyword)
 
 ## Built-in file predicate
 
@@ -369,7 +363,7 @@ Search only inside files that contain content matching the provided regexp patte
 
 For example,
 
-- [`file:has.content(test)`](https://sourcegraph.com/search?q=context:global+repo:github%5C.com/sourcegraph/.*+file:has.content%28test%29&patternType=standard)
+- [`file:has.content(test)`](https://sourcegraph.com/search?q=context:global+repo:github%5C.com/sourcegraph/.*+file:has.content%28test%29&patternType=keyword)
 
 <Callout type="note"> `file:contains.content(...)` is an alias for `file:has.content(...)` and behaves identically.</Callout>
 
@@ -472,7 +466,7 @@ Include results having a commit date after the specified time frame. Times are i
 
 For example,
 
-- [`after:"6 weeks ago"`](https://sourcegraph.com/search?q=repo:sourcegraph/sourcegraph%24+type:diff+after:%226+weeks+ago%22&patternType=standard)
+- [`after:"6 weeks ago"`](https://sourcegraph.com/search?q=repo:sourcegraph/sourcegraph%24+type:diff+after:%226+weeks+ago%22&patternType=keyword)
 - [`after:"november 1 2019"`](https://sourcegraph.com/search?q=repo:sourcegraph/sourcegraph$+type:diff+author:nick+after:%22november+1+2019%22)
 
 ### Message

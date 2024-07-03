@@ -2165,7 +2165,7 @@ const redirectsData = [
   },
   {
     source: "/code_search/tutorials/examples",
-    destination: "/code-search/examples",
+    destination: "/code-search/queries/examples",
     permanent: true
   },
 
@@ -2208,6 +2208,12 @@ const redirectsData = [
   {
     source: "/code_search/how-to/search-jobs",
     destination: "/code-search/types/search-jobs",
+    permanent: true
+  },
+
+  {
+    source: "/code_search/examples",
+    destination: "/code-search/queries/examples",
     permanent: true
   },
 
@@ -6063,7 +6069,7 @@ const redirectsData = [
   },
   {
     source: "/code_search/tutorials/examples",
-    destination: "/code-search/examples",
+    destination: "/code-search/queries/examples",
     permanent: true
   },
 
