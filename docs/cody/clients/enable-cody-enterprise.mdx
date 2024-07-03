@@ -312,6 +312,54 @@ For `accessToken`, you can either:
 - Set it to `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>` if directly configuring the credentials
 - Set it to `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>:<SESSION_TOKEN>` if a session token is also required
 
+
+### Using GCP Vertex AI
+
+Right now, We only support Anthropic Claude models on [GCP Vertex](https://cloud.google.com/vertex-ai/generative-ai/docs/partner-models/use-claude).
+
+1. Enable the [Vertex AI API](https://console.cloud.google.com/marketplace/product/google/aiplatform.googleapis.com) in the GCP console. Once Vertex has been enabled in your project, navigate to the [Vertex Model Garden](https://console.cloud.google.com/vertex-ai/model-garden) to select & enable the Anthropic Claude model(s) which you wish to use with Cody. See [Supported LLM Models](../capabilities/supported-models) for an up-to-date list of Anthropic Claude models supported by Cody.
+
+<Callout type="note">It may take some time to enable Vertex and provision access to the models you plan to use</Callout>
+
+2. **Create a Service Account**: 
+   - Create a [service account](https://cloud.google.com/iam/docs/service-account-overview).
+   - Assign the `Vertex AI User` role to the service account.
+   - Generate a JSON key for the service account and download it.
+
+3. **Convert JSON Key to Base64** by doing:
+```python
+cat <downloaded-json-key> | base64
+```
+
+Once ready, go to **Site admin > Site configuration** (`/site-admin/configuration`) on your instance and set:
+
+
+```json
+{
+  // [...]
+  "cody.enabled": true,
+  "completions": {
+    "chatModel": "claude-3-opus@20240229",
+    "completionModel": "claude-3-haiku@20240307",
+    "provider": "google",
+    "endpoint": "<See below>",
+    "accessToken": "<Base64 string from step 3>"
+  }
+}
+
+```
+
+For the `Endpoint`, you can
+1. Navigate to the Documentation Page:
+   Go to the Claude 3 Haiku Documentation on the GCP Console Model garden
+2. Locate the Example: if you scroll enough through the page to find the example that shows how to use the cURL command with the Claude 3 Haiku model. The example will include a sample request JSON body and the necessary endpoint URL. Copy the URL in the site-admin config:
+     The endpoint URL will look something like this:
+   `https://LOCATION-aiplatform.googleapis.com/v1/projects/PROJECT_ID/locations/LOCATION/publishers/anthropic/models/` 
+   
+3. Example URL:
+`https://us-east5-aiplatform.googleapis.com/v1/projects/sourcegraph-vertex-staging/locations/us-east5/publishers/anthropic/models`
+
+
 ### Use Azure OpenAI Service
 
 Create a project in the Azure OpenAI Service portal. Go to **Keys and Endpoint** from the project overview and get **one of the keys** on that page and the **endpoint**.
