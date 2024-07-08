@@ -2,6 +2,28 @@
 
 <p className="subtitle">Sourcegraph Batch Changes use [batch specs](/batch-changes/create-a-batch-change#writing-a-batch-spec) to define batch changes. This page is a reference guide to the batch spec YAML format in which batch specs are defined.</p>
 
+## `version`
+
+The `version` of the batch spec. Defaults to 1 if not specified. New batch specs should use version 2.
+We recommend to always specify the version.
+
+### Version 1
+
+default
+
+### Version 2 (recommended)
+
+Introduced in Sourcegraph version 5.5.
+Queries defined under [`on.repositoriesMatchingQuery`](#onrepositoriesmatchingquery) default to keyword search instead of standard search.
+Authors can override the default by specifying the pattern type explicitly.
+Refer to the [search syntax docs](/code-search/queries) for more information about pattern types.
+
+### Example
+
+```yaml
+version: 2
+```
+
 ## `name`
 
 The `name` of the batch change, which is unique among all batch changes in the namespace. A batch change's name is case-preserving.
@@ -45,7 +67,7 @@ The set of repositories (and branches) on which the batch change would run. It's
 
 ```yaml
 on:
-  - repositoriesMatchingQuery: lang:go fmt.Sprintf("%d", :[v]) patterntype:structural
+  - repositoriesMatchingQuery: lang:go fmt.Sprintf\("%d", \w+\) patterntype:regexp
   - repository: github.com/sourcegraph/sourcegraph
 ```
 
@@ -54,6 +76,8 @@ on:
 A Sourcegraph search query that matches a set of repositories (and branches). Each matched repository branch is added to the list of repositories on which the batch change will run.
 
 Your search query should answer the question, "Where do I want to run this batch change?". Search result matches for things like commits, symbols, or file owners will be ignored.
+
+It's good practice to explicitly specify the pattern type. If you don't specify a pattern type, the default is determined by the [batch spec version](#version).
 
 <Callout type="tip">See [Code Search Queries](/code-search/queries/) docs for more information.</Callout>
 
@@ -66,7 +90,7 @@ on:
 
 ```yaml
 on:
-  - repositoriesMatchingQuery: lang:typescript file:web const changesetStatsFragment
+  - repositoriesMatchingQuery: lang:typescript file:web \"const changesetStatsFragment\" patterntype:keyword
 ```
 
 ## `on.repository`
