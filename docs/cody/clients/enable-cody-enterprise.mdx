@@ -95,7 +95,7 @@ Cody will revert to the value configured on `chatModelMaxTokens` or the default 
 Let's see how enabling `smartContextWindow` would work:
 
 - Make sure you are on the latest Sourcegraph Enterprise version and have the latest Cody extension installed
-- You have one of the supported LLM models (Claude-3 Opus, Claude-3 Sonnet, GPT-4o, or GPT Turbo) selected for chat
+- You have one of the supported LLM models (Claude-3.5 Sonnet, Claude-3 Opus, Claude-3 Sonnet, GPT-4o, or GPT Turbo) selected for chat
 - Open your codebase in your IDE, for example, VS Code
 - Start a new chat and `@-mention` a file that's large enough to trigger the `smartContextWindow` feature
 - To double-check `@-mention` another large file in the same chat
@@ -115,6 +115,26 @@ A few considerations to keep in view:
 - For customers who wish to consume the expanded context window without upgrading their instance, they may set the `“chatModelMaxTokens: 45000”`
 
 <Callout type="info">You can read and learn more about [Cody's input and output token limits here](/cody/core-concepts/token-limits).</Callout>
+
+## LLM Selection
+
+Enterprise users can choose from a list of supported LLM models for Chat. Admins must enable the LLM selection dropdown. Once enabled, they can choose which models will be available for end users in their chat.
+
+## Supported LLM models
+
+Enterprise users get Claude 3 (Opus and Sonnet) as the default LLM models without extra cost. Moreover, Enterprise users can use Claude 3.5 models through Cody Gateway, Anthropic BYOK, AWS Bedrock (limited availability), and GCP Vertex.
+
+<Callout type="info">For enterprise users on AWS Bedrock: 3.5 Sonnet is unavailable in `us-west-2` but available in `us-east-1`. Check the current model availability on AWS and your customer's instance location before switching. Provisioned throughput via AWS is not supported for 3.5 Sonnet.</Callout>
+
+You also get additional capabilities like BYOLLM (Bring Your Own LLM), supporting Single-Tenant and Self Hosted setups for flexible coding environments. Your site administrator determines the LLM, and cannot be changed within the editor. However, Cody Enterprise users when using Cody Gateway have the ability to [configure custom models](/cody/core-concepts/cody-gateway#configuring-custom-models) Anthropic (like Claude 2.0 and Claude Instant), OpenAI (GPT 3.5 and GPT 4) and Google Gemini 1.5 models (Flash and Pro).
+
+Some known limitions with Cody Enterprise:
+
+- To use Claude 3 (Opus and Sonnets) models, make sure you've upgraded your Sourcegraph instance to the latest version
+- Customers using Cody Gateway, Gemini 1.5 Pro and Flash are available for Chat, and Flash is available for autocomplete
+- For BYOK customers, Gemini models 1.5 (Flash and Pro) are only available for chat. We don't support Gemini models for autocomplete
+
+<Callout type="note">Read more about all the supported LLM models [here](/cody/capabilities/supported-models)</Callout>
 
 ## Setting up Cody Enterprise
 
@@ -311,6 +331,54 @@ For `accessToken`, you can either:
 - Leave it empty and rely on instance role bindings or other AWS configurations in the `frontend` service
 - Set it to `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>` if directly configuring the credentials
 - Set it to `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>:<SESSION_TOKEN>` if a session token is also required
+
+
+### Using GCP Vertex AI
+
+Right now, We only support Anthropic Claude models on [GCP Vertex](https://cloud.google.com/vertex-ai/generative-ai/docs/partner-models/use-claude).
+
+1. Enable the [Vertex AI API](https://console.cloud.google.com/marketplace/product/google/aiplatform.googleapis.com) in the GCP console. Once Vertex has been enabled in your project, navigate to the [Vertex Model Garden](https://console.cloud.google.com/vertex-ai/model-garden) to select & enable the Anthropic Claude model(s) which you wish to use with Cody. See [Supported LLM Models](../capabilities/supported-models) for an up-to-date list of Anthropic Claude models supported by Cody.
+
+<Callout type="note">It may take some time to enable Vertex and provision access to the models you plan to use</Callout>
+
+2. **Create a Service Account**:
+   - Create a [service account](https://cloud.google.com/iam/docs/service-account-overview).
+   - Assign the `Vertex AI User` role to the service account.
+   - Generate a JSON key for the service account and download it.
+
+3. **Convert JSON Key to Base64** by doing:
+```python
+cat <downloaded-json-key> | base64
+```
+
+Once ready, go to **Site admin > Site configuration** (`/site-admin/configuration`) on your instance and set:
+
+
+```json
+{
+  // [...]
+  "cody.enabled": true,
+  "completions": {
+    "chatModel": "claude-3-opus@20240229",
+    "completionModel": "claude-3-haiku@20240307",
+    "provider": "google",
+    "endpoint": "<See below>",
+    "accessToken": "<Base64 string from step 3>"
+  }
+}
+
+```
+
+For the `Endpoint`, you can
+1. Navigate to the Documentation Page:
+   Go to the Claude 3 Haiku Documentation on the GCP Console Model garden
+2. Locate the Example: if you scroll enough through the page to find the example that shows how to use the cURL command with the Claude 3 Haiku model. The example will include a sample request JSON body and the necessary endpoint URL. Copy the URL in the site-admin config:
+     The endpoint URL will look something like this:
+   `https://LOCATION-aiplatform.googleapis.com/v1/projects/PROJECT_ID/locations/LOCATION/publishers/anthropic/models/`
+
+3. Example URL:
+`https://us-east5-aiplatform.googleapis.com/v1/projects/sourcegraph-vertex-staging/locations/us-east5/publishers/anthropic/models`
+
 
 ### Use Azure OpenAI Service
 
