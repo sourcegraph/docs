@@ -85,34 +85,13 @@ export const navigation: NavigationItem[] = [
         sections: [
           { title: "Features", href: "/code-search/features" },
           {
-            title: "Search Types", href: "/code-search/types/exhaustive",
-            subsections: [
-              { title: "Exhaustive Search", href: "/code-search/types/exhaustive", },
-              { title: "Search Jobs", href: "/code-search/types/search-jobs", },
-              { title: "Structural Search", href: "/code-search/types/structural", },
-              { title: "Fuzzy Search", href: "/code-search/types/fuzzy", },
-              { title: "Symbol Search", href: "/code-search/types/symbol", },
-
-            ]
-          },
-          {
-            title: "Working with Search", href: "/code-search/working/saved_searches",
-            subsections: [
-              { title: "Saved Search", href: "/code-search/working/saved_searches", },
-              { title: "Search Filters", href: "/code-search/working/search_filters", },
-              { title: "Search Snippet", href: "/code-search/working/snippets", },
-              { title: "Search Contexts", href: "/code-search/working/search_contexts", },
-              { title: "Search Subexpressions", href: "/code-search/working/search_subexpressions", },
-            ]
-          },
-          {
             title: "Search Query Syntax", href: "/code-search/queries",
             subsections: [
-              { title: "Query Language", href: "/code-search/queries/language", },
+              { title: "Search Filters Panel", href: "/code-search/working/search_filters", },
+              { title: "Search Examples", href: "/code-search/queries/examples", },
+              { title: "Symbol Search", href: "/code-search/types/symbol", },
+              { title: "Language Reference", href: "/code-search/queries/language", },
             ]
-          },
-          {
-            title: "Search Examples", href: "/code-search/examples",
           },
           {
             title: "Code Navigation", href: "/code-search/code-navigation",
@@ -127,9 +106,20 @@ export const navigation: NavigationItem[] = [
             ]
           },
           {
+            title: "Advanced Features", href: "/code-search/working/saved_searches",
+            subsections: [
+              { title: "Fuzzy Finder", href: "/code-search/types/fuzzy", },
+              { title: "Search Contexts", href: "/code-search/working/search_contexts", },
+              { title: "Search Jobs", href: "/code-search/types/search-jobs", },
+              { title: "Search Snippets", href: "/code-search/working/snippets", },
+              { title: "Search Subexpressions", href: "/code-search/working/search_subexpressions", },
+              { title: "Saved Searches", href: "/code-search/working/saved_searches", },
+              { title: "Structural Search", href: "/code-search/types/structural", }
+            ]
+          },
+          {
             title: "FAQs", href: "/code-search/faq",
           },
-
         ],
       },
     ],
@@ -384,37 +374,29 @@ const navigation_5_2: NavigationItem[] = [
         sections: [
           { title: "Features", href: "/code-search/features" },
           {
-            title: "Search Types", href: "/code-search/types/exhaustive",
-            subsections: [
-              { title: "Exhaustive Search", href: "/code-search/types/exhaustive", },
-              { title: "Search Jobs", href: "/code-search/types/search-jobs", },
-              { title: "Structural Search", href: "/code-search/types/structural", },
-              { title: "Fuzzy Search", href: "/code-search/types/fuzzy", },
-
-            ]
-          },
-          {
-            title: "Working with Search", href: "/code-search/working/saved_searches",
-            subsections: [
-              { title: "Saved Search", href: "/code-search/working/saved_searches", },
-              { title: "Search Snippet", href: "/code-search/working/snippets", },
-              { title: "Search Contexts", href: "/code-search/working/search_contexts", },
-              { title: "Search Subexpressions", href: "/code-search/working/search_subexpressions", },
-            ]
-          },
-          {
             title: "Search Query Syntax", href: "/code-search/queries",
             subsections: [
-              { title: "Query Language", href: "/code-search/queries/language", },
+              { title: "Search Filters Panel", href: "/code-search/working/search_filters", },
+              { title: "Search Examples", href: "/code-search/queries/examples", },
+              { title: "Symbol Search", href: "/code-search/types/symbol", },
+              { title: "Language Reference", href: "/code-search/queries/language", },
             ]
           },
           {
-            title: "Search Examples", href: "/code-search/examples",
+            title: "Advanced Features", href: "/code-search/working/saved_searches",
+            subsections: [
+              { title: "Fuzzy Finder", href: "/code-search/types/fuzzy", },
+              { title: "Search Contexts", href: "/code-search/working/search_contexts", },
+              { title: "Search Jobs", href: "/code-search/types/search-jobs", },
+              { title: "Search Snippets", href: "/code-search/working/snippets", },
+              { title: "Search Subexpressions", href: "/code-search/working/search_subexpressions", },
+              { title: "Saved Searches", href: "/code-search/working/saved_searches", },
+              { title: "Structural Search", href: "/code-search/types/structural", }
+            ]
           },
           {
             title: "FAQs", href: "/code-search/faq",
           },
-
         ],
       },
       {
@@ -638,34 +620,13 @@ const navigation_5_3: NavigationItem[] = [
         sections: [
           { title: "Features", href: "/code-search/features" },
           {
-            title: "Search Types", href: "/code-search/types/exhaustive",
-            subsections: [
-              { title: "Exhaustive Search", href: "/code-search/types/exhaustive", },
-              { title: "Search Jobs", href: "/code-search/types/search-jobs", },
-              { title: "Structural Search", href: "/code-search/types/structural", },
-              { title: "Fuzzy Search", href: "/code-search/types/fuzzy", },
-              { title: "Symbol Search", href: "/code-search/types/symbol", },
-
-            ]
-          },
-          {
-            title: "Working with Search", href: "/code-search/working/saved_searches",
-            subsections: [
-              { title: "Saved Search", href: "/code-search/working/saved_searches", },
-              { title: "Search Filters", href: "/code-search/working/search_filters", },
-              { title: "Search Snippet", href: "/code-search/working/snippets", },
-              { title: "Search Contexts", href: "/code-search/working/search_contexts", },
-              { title: "Search Subexpressions", href: "/code-search/working/search_subexpressions", },
-            ]
-          },
-          {
             title: "Search Query Syntax", href: "/code-search/queries",
             subsections: [
-              { title: "Query Language", href: "/code-search/queries/language", },
+              { title: "Search Filters Panel", href: "/code-search/working/search_filters", },
+              { title: "Search Examples", href: "/code-search/queries/examples", },
+              { title: "Symbol Search", href: "/code-search/types/symbol", },
+              { title: "Language Reference", href: "/code-search/queries/language", },
             ]
-          },
-          {
-            title: "Search Examples", href: "/code-search/examples",
           },
           {
             title: "Code Navigation", href: "/code-search/code-navigation",
@@ -680,9 +641,20 @@ const navigation_5_3: NavigationItem[] = [
             ]
           },
           {
+            title: "Advanced Features", href: "/code-search/working/saved_searches",
+            subsections: [
+              { title: "Fuzzy Finder", href: "/code-search/types/fuzzy", },
+              { title: "Search Contexts", href: "/code-search/working/search_contexts", },
+              { title: "Search Subexpressions", href: "/code-search/working/search_subexpressions", },
+              { title: "Search Jobs", href: "/code-search/types/search-jobs", },
+              { title: "Search Snippets", href: "/code-search/working/snippets", },
+              { title: "Saved Searches", href: "/code-search/working/saved_searches", },
+              { title: "Structural Search", href: "/code-search/types/structural", }
+            ]
+          },
+          {
             title: "FAQs", href: "/code-search/faq",
           },
-
         ],
       },
     ],
