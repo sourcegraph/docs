@@ -1,5 +1,5 @@
 import {Button} from './ui/button';
-import {IconChat, IconCommand, IconSpinner} from './ui/icons';
+import {IconChat, IconSpinner} from './ui/icons';
 import {useEnterSubmit} from '@/lib/hooks/use-enter-submit';
 import {UseChatHelpers} from 'ai/react';
 import * as React from 'react';

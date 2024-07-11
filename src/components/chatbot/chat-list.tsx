@@ -8,6 +8,7 @@ export interface ChatList {
 }
 
 const exampleMessage: Message = {
+	id: '1',
 	content: 'Hello, how can I help you today?',
 	role: 'assistant'
 };
