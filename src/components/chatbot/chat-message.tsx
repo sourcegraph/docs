@@ -15,7 +15,13 @@ export interface ChatMessageProps {
 
 export function ChatMessage({message, ...props}: ChatMessageProps) {
 	return (
-		<div className={cn('group relative mb-4 flex items-start')} {...props}>
+		<div
+			className={cn(
+				'group relative mb-4 flex',
+				message.content.length > 60 ? 'items-start' : 'items-center'
+			)}
+			{...props}
+		>
 			<div
 				className={cn(
 					'flex h-9 w-9 shrink-0 select-none items-center justify-center rounded-xl border bg-light-bg p-1 text-primary shadow dark:bg-dark-bg'

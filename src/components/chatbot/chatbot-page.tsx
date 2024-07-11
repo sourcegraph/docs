@@ -35,13 +35,20 @@ export function Chatbot({id, initialMessages, className}: ChatProps) {
 	return (
 		<div
 			className={cn(
-				'relative flex min-h-[80vh] min-w-0 flex-auto flex-col py-16 lg:pl-8 lg:pr-0 xl:px-16',
+				'relative flex min-h-[80vh] min-w-0 flex-auto flex-col px-4 py-16 text-slate-800 dark:text-slate-200 lg:pl-8 lg:pr-0 xl:px-16',
 				className
 			)}
 		>
+			<div className="mx-auto mb-8 w-full max-w-3xl flex-shrink-0">
+				<h1 className="text-2xl font-semibold">Ask Sourcegraph AI</h1>
+				<p className="subtitle my-2 opacity-70">
+					Find precise answers to any question about Sourcegraph
+					documentation with our AI chatbot.
+				</p>
+			</div>
 			<div
 				className={cn(
-					'relative max-h-[65vh] flex-1 overflow-y-auto pb-4',
+					'relative max-h-[50vh] flex-1 overflow-y-auto pb-4',
 					className
 				)}
 			>

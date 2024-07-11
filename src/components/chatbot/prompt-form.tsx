@@ -71,11 +71,17 @@ export function PromptForm({
 								disabled={isLoading || input === ''}
 							>
 								{isLoading ? (
-									<IconSpinner />
+									<>
+										<IconSpinner className="h-5 w-5 text-background" />
+										Generating
+									</>
 								) : (
-									<SourceGraphIcon className="h-5 w-5" />
+									<>
+										<SourceGraphIcon className="h-5 w-5" />
+										Send
+									</>
 								)}
-								Send
+
 								<span className="sr-only">Send message</span>
 							</Button>
 						</div>
