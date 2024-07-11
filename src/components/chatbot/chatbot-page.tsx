@@ -35,10 +35,6 @@ export function Chatbot({ id, initialMessages, className }: ChatProps) {
   return (
     <div className={cn('min-w-0 flex-auto py-16 lg:pl-8 lg:pr-0 xl:px-16 flex flex-col h-[calc(100vh-20px)]', className)}>
       <div className={cn('flex-1 overflow-y-auto pb-4', className)}>
-        <div className="flex-shrink-0 mb-8">
-          <h1 className="text-2xl font-semibold">Ask Sourcegraph</h1>
-          <p className="subtitle">Get information faster by asking our AI chatbot assistant.</p>
-        </div>
         <ChatList messages={messages} />
       </div>
       <ChatInput
