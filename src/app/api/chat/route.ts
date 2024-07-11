@@ -10,10 +10,6 @@ export const runtime = 'edge';
  */
 export async function POST(req: Request) {
 	try {
-		console.log(
-			'NEXT_LB_PIPE_API_KEY: ',
-			process.env?.NEXT_LB_PIPE_API_KEY
-		);
 		if (!process.env.NEXT_LB_PIPE_API_KEY) {
 			throw new Error(
 				'Please set NEXT_LB_PIPE_API_KEY in your environment variables.'
