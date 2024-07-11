@@ -1,60 +1,66 @@
 # Cody for Web
 
-<p className="subtitle">Learn how to use Cody in the web interface with Sourcegraph.com</p>
+<p className="subtitle">Learn how to use Cody in the web interface with your Sourcegraph.com instance.</p>
 
-<Callout type="note" title="Experimental">
-Cody support for Web interface is in the Experimental stage.
-</Callout>
+<Callout type="info"> The new chat UI for Cody for web is currently in Beta and is available to users on Sourcegraph versions >=5.5.</Callout>
 
 In addition to the Cody extensions for [VS Code](/cody/clients/install-vscode), [JetBrains](/cody/clients/install-jetbrains) IDEs, and [Neovim](/cody/clients/install-neovim), Cody is also available in the Sourcegraph web app. Community users can use Cody for free by logging into their accounts on Sourcegraph.com, and enterprise users can use Cody within their Sourcegraph instance.
 
-    <LinkCards>
-          <LinkCard href="https://sourcegraph.com/sign-in?returnTo=/search" imgSrc="https://sourcegraph.com/.assets/img/sourcegraph-mark.svg" imgAlt="Cody for Web" title="Cody for Web (Experimental)" description="Use Cody in the Sourcegraph Web App." />
-          </LinkCards>
+<LinkCards>
+    <LinkCard href="https://sourcegraph.com/sign-in?returnTo=/search" imgSrc="https://sourcegraph.com/.assets/img/sourcegraph-mark.svg" imgAlt="Cody for Web" title="Cody for Web (Beta)" description="Use Cody in the Sourcegraph Web App." />
+</LinkCards>
 
 ## Initial setup
 
-Create a [Sourcegraph.com account](https://sourcegraph.com/sign-up) by logging in through codehosts like GitHub and GitLab or via traditional Google sign-in. This takes you to Sourcegraph’s web interface, where you can chat with and get help from Cody by opening **Cody > Web Chat**.
+Create a [Sourcegraph.com account](https://sourcegraph.com/sign-up) by logging in through codehosts like GitHub and GitLab or via traditional Google sign-in. This takes you to Sourcegraph’s web interface. From here, there are two ways to access the Cody chat:
 
-![cody-web](https://storage.googleapis.com/sourcegraph-assets/Docs/cody-web.png)
+1. Run any search query via **Code Search** and click the **Cody** button on the left to open the chat window
+2. Directly click the **Cody** tab from the top header to open the chat interface
+
+![cody-web](https://storage.googleapis.com/sourcegraph-assets/Docs/cody-web-0724.jpg)
 
 Enterprise users can also log in to their Sourcegraph.com Enterprise instance and use Cody in the web interface.
 
-## Using Cody chat
+## Chat Interface
 
-To view how Cody works in the web, open **Cody Web Chat**. Here, you can ask Cody general coding questions or questions about the repositories you care about.
+The chat interface for Cody on the web is similar to the one you get with the [VS Code](/cody/clients/install-vscode#chat) editor extension. If you click the Cody chat from the top header, you will see a **Start new chat +** button in the bottom left sidebar with the chat editor. All your previous chats appear in this left sidebar. To delete any chat, hover over the chat and click the **Delete** icon.
 
-You can view the default **Ask Cody** chat interface on the right sidebar. Once connected, Cody automatically gains context to your connected codebase to help you provide contextually-aware and accurate answers to your questions. There are also example questions that you can use to get started.
+The chat interface with your Code Search queries is operated per chat. You cannot run multiple chats and store them in parallel. A new chat window opens whenever you click the Cody button from the query editor or the top header.
 
-When using Cody chat in the web, you can select up to **10 repositories** to use as context for your question. If you’re logged in to Sourcegraph.com, these can be any **10 open source repositories** that Sourcegraph indexes. If you are an enterprise customer logged in to your company’s Sourcegraph instance, these can be **any 10 repositories** (both private or public) indexed by your admin.
+## LLM Selection
 
-You can also chat with Cody in the sidebar of any project you have open. Use Sourcegraph search to find a repo and click the **Ask Cody** button to start.
+Sourcegraph.com users with Cody **Free** and **Pro** can choose from a list of supported LLM models for a chat. Claude Sonnet 3 is the default LLM model, but users can select the LLM of their choice from the drop-down menu.
 
-    <video width="1920" height="1080" loop playsInline controls style={{ width: '100%', height: 'auto' }}>
-          <source src="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/search-cody-chat.mp4" type="video/mp4" />
-          </video>
+![llm-select-web](https://storage.googleapis.com/sourcegraph-assets/Docs/llm-select-web-0724.jpg)
 
-## Run Commands
+Users on an Enterprise Sourcegraph instance do not have the option to choose an LLM model. Their site admin will configure the default LLM model for chat.
 
-You can also run predefined, reusable prompts [Cody Commands](/cody/capabilities/commands) on your Code Search results. These help you generate contextually aware answers for a selected code snippet or the entire codebase. You can run the following commands:
+## Selecting Context with @-mentions
 
-- Explain code
-- Generate a docstring
-- Smell code for bugs
-- Generate a unit test
-- Improve variable names
-- Transpile code to a programming language of your choice
+Cody chat with a Sourcegraph.com instance allows you to add files and symbols as context in your messages.
 
-    <video width="1920" height="1080" loop playsInline controls style={{ width: '100%', height: 'auto' }}>
-          <source src="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/cody-commands-sg.mp4" type="video/mp4" />
-          </video>
+- Type `@file` and then a filename to include a file as a context
+- Type `@` and you can also add **Symbols**, **Files**, and **Repositories** as context
 
-## Context fetching mechanism
+### Context retrieval
 
-Cody users on the Enterprise plan can leverage the full power of the Sourcegraph search engine as the primary context provider to Cody. Read more about [Context fetching mechanism](/cody/core-concepts/context/#context-fetching-mechanism) in detail.
+When you start a new Cody chat inside the search query window, the chat input window opens with a default `@-mention` context chip for all the context it intends to use. This context is based on your current repository and current file.
 
-<Callout type="info">Enterprise users will no longer have embeddings as a context source. It's replaced with [Cody Context Search](/cody/core-concepts/context#context-selection).</Callout>
+At any point in time, you can edit these context chips or remove them completely if you do not want to use these as context. Any chat without a context chip will instruct Cody to use no codebase context. However, you can always provide an alternate `@-mention` file or symbols to let Cody use it as a new context source.
 
-## Context scope
+When you have both a repository and files @-mentioned, Cody will search the repository for context while prioritizing the mentioned files.
 
-Enterprise users on Cody get multi-repo support and can explicitly specify **up to 10 repos** they would like Cody to use for context.
+<Callout type="info">Using your own [custom OpenCtx providers](https://sourcegraph.com/docs/cody/capabilities/openctx) will not be supported with chat on Cody for Web.</Callout>
+
+### Rerun prompts with different context
+
+If Cody's answer isn't helpful, you can try asking again with a different context:
+
+- **Public knowledge only**: Cody will not use your own code files as context; it’ll only use knowledge trained into the base model
+- **Add context**: Provides @-mention context options to improve the response by explicitly including files, symbols, and remote repositories
+
+![re-run-prompts](https://storage.googleapis.com/sourcegraph-assets/Docs/rerun-prompt-web-0724.jpg)
+
+## Commands
+
+Commands and Custom Commands are not supported in Cody for Web. If you want to run these, it's recommended that you use Cody with the IDE editor extensions (VS Code and JetBrains). However, the plain **Explain** command would work if you type `@mention explain this code` in the chat window.

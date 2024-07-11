@@ -49,14 +49,14 @@ If this does not solve your problem, please reach out directly to your Sourcegra
 
 ## Accuracy considerations for an insight query returning a large result set
 
-If you create an insight with a search query that returns a large result set that exceeds the search timeout (generally when there are over 1,000,000 results), non-historical data points may report undercounted numbers. This behaviour is tracked in [this issue](https://github.com/sourcegraph/sourcegraph/issues/37859). This is because non-historical data points are recorded with a global search query as opposed to per-repo queries we run for backfilling. For a large result set (e.g. a query for `test` with millions of results) the global query will be disadvantaged by the global search timeout. You can find more information on search timeouts in the [docs](/code-search/types/exhaustive#timeouts).
+If you create an insight with a search query that returns a large result set that exceeds the search timeout (generally when there are over 1,000,000 results), non-historical data points may report undercounted numbers. This behaviour is tracked in [this issue](https://github.com/sourcegraph/sourcegraph/issues/37859). This is because non-historical data points are recorded with a global search query as opposed to per-repo queries we run for backfilling. For a large result set (e.g. a query for `test` with millions of results) the global query will be disadvantaged by the global search timeout. You can find more information on search timeouts in the [docs](/code-search/queries/language#timeout).
 
 You can determine if this issue may be affecting your query by just running the query in the Search UI on `/search` with a `count:all` – if your search is returning `x results in 60s` (or the upper limit max timeout is configured to) then the search will time out on insights as well. Note that the duration could be more or less `60s`, e.g. you could encounter `60.02s` as well.
 
 In this case, you may want to try:
 
 * Using a more granular query
-* Changing your site configuration so that the timeout is increased, provided your instance setup allows it. [More information on timeouts](/code-search/types/exhaustive#timeouts).
+* Changing your site configuration so that the timeout is increased, provided your instance setup allows it. [More information on timeouts](/code-search/queries/language#timeout).
 
 ## General scale limitations
 
@@ -66,7 +66,7 @@ There are a few factors to consider with respect to scale and expected performan
 
 1. General permissiveness - instances that are more open (users can see most repos) will perform better than instances that are more restricted. Insights have been tested with users having up to 100k restricted repositories.
 2. Number of repositories - Code Insights is well tested with insights running over ~35,000 repositories. It is recommended that users should scope their insights to the smallest set of repositories needed.  Users should expect at least linear degradation as repository count grows in both time to calculate insights, and render performance.
-3. Large monorepos - Code Insights allocates a fixed amount of time for each query, so large repositories that cause query timeouts will likely not have exhaustive (and therefore accurate) results. As of version 4.4.0 we added visibility to this state via an icon on the insight. Prior to the 4.4.0 version a heuristic indicator for if this is a problem is seeing values "jump" (either a significant increase or decrease) between the backfilled datapoints on creation and the up-to-date datatpoints added after creation.
+3. Large monorepos - Code Insights allocates a fixed amount of time for each query, so large repositories that cause query timeouts will likely not have exhaustive (and therefore accurate) results. As of version 4.4.0 we added visibility to this state via an icon on the insight. Prior to the 4.4.0 version a heuristic indicator for if this is a problem is seeing values "jump" (either a significant increase or decrease) between the backfilled datapoints on creation and the up-to-date datapoints added after creation.
 4. High cardinality capture groups - When using a capture group insight, high cardinality matches (for example 1000 distinct matches per repository) will cause significant increase in loading times of charts. It is possible to exceed request timeouts if there are too many distinct matches.
 5. Concurrent usage
   1. If there are many insight creators the insights will take longer to calculate.
