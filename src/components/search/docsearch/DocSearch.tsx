@@ -88,7 +88,7 @@ export function DocSearch(props: DocSearchProps) {
                 onClick={onOpen}
             />
 
-            {isOpen &&
+            {
                 createPortal(
                     <DocSearchModal
                         {...props}
@@ -96,6 +96,7 @@ export function DocSearch(props: DocSearchProps) {
                         initialQuery={initialQuery}
                         translations={props?.translations?.modal}
                         onClose={onClose}
+                        isOpen={isOpen}
                     />,
                     document.body
                 )}
