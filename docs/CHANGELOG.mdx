@@ -72,12 +72,18 @@ All notable changes to Sourcegraph are documented in this file.
 - deps: replace internal/slices [#63386](https://github.com/sourcegraph/sourcegraph/pull/63386)
   - Add a collections library to dependencies.
 - Refactor and document GitTreeTranslator [#63390](https://github.com/sourcegraph/sourcegraph/pull/63390)
+- batches: remove visibility options from create batch changes page [#63393](https://github.com/sourcegraph/sourcegraph/pull/63393)
+  - remove visibility options from create batch change page
 - enterpriseportal: only use 'revoke' verb for licenses [#63407](https://github.com/sourcegraph/sourcegraph/pull/63407)
 - bazel: bump rules_js to address permissions denied warning [#63419](https://github.com/sourcegraph/sourcegraph/pull/63419)
 - ci: emit compact executon log in CI [#63420](https://github.com/sourcegraph/sourcegraph/pull/63420)
+- batches: remove beta badge from batch changes [#63423](https://github.com/sourcegraph/sourcegraph/pull/63423)
+  - Remove Beta badge from Batch Changes pages.
 - enterpriseportal: split database package [#63425](https://github.com/sourcegraph/sourcegraph/pull/63425)
 - enterpriseportal: properly close DB handle [#63426](https://github.com/sourcegraph/sourcegraph/pull/63426)
 - codeintel: Differentiate between paths relative to upload root vs repo root [#63437](https://github.com/sourcegraph/sourcegraph/pull/63437)
+- batches: remove beta badge from Batch Changes page [#63441](https://github.com/sourcegraph/sourcegraph/pull/63441)
+  - the Beta badge is now removed from Batch Changes
 - plg: add useEmbeddedUI site config param [#63442](https://github.com/sourcegraph/sourcegraph/pull/63442)
 - svelte: Properly route to revision agnostic pages [#63444](https://github.com/sourcegraph/sourcegraph/pull/63444)
 - enterpriseportal: tweak maybeMigrate tracing [#63448](https://github.com/sourcegraph/sourcegraph/pull/63448)
@@ -111,7 +117,6 @@ All notable changes to Sourcegraph are documented in this file.
 - reword headline from tokens to credentials [#63714](https://github.com/sourcegraph/sourcegraph/pull/63714)
 - redis: set max active redis connections to 1000 [#63718](https://github.com/sourcegraph/sourcegraph/pull/63718)
   - redis-pool: set max active clients to 1000
-
 - security: Updated dind image to 27-0-3 [#63725](https://github.com/sourcegraph/sourcegraph/pull/63725)
   - Upgraded dind to 27.0.3 to patch CVE-2024-24790 vulnerability
 - svelte: Update to latest cody web version [#63732](https://github.com/sourcegraph/sourcegraph/pull/63732)
@@ -193,6 +198,9 @@ All notable changes to Sourcegraph are documented in this file.
 - search: remove keyword toggle [#63584](https://github.com/sourcegraph/sourcegraph/pull/63584)The keyword search toggle has been removed from the search results page. [Keyword search](https://sourcegraph.com/docs/code-search/queries#keyword-search-default) is now enabled by default for all searches in the Sourcegraph web app.
 - sg: one-time oauth login to persist user email for analytics [#63603](https://github.com/sourcegraph/sourcegraph/pull/63603)
 - cody: Expose Sg modelconfig data via HTTP REST API [#63604](https://github.com/sourcegraph/sourcegraph/pull/63604)Sourcegraph instances how expose an HTTP endpoint that authenticated users can call to get a list of LLM models supported by the Sourcegraph instance. In the future this will be used to allow Cody users to select the LLM model dynamically, based on what is currently available.
+- batches: use "keyword" as default pattern type [#63613](https://github.com/sourcegraph/sourcegraph/pull/63613)
+  - The new (optional) field "version" of batch specs determines how the spec is processed. This allows us to introduce new features while maintaining backward compatability.
+  - A new version `2` is introduced. Batch specs specifying `version: 2` will use keyword search as the default pattern type to determine repos/workspaces. Batch specs with `version: 1` or without version field keep using pattern type "standard".
 - svelte: Make diff headers on commit page sticky [#63615](https://github.com/sourcegraph/sourcegraph/pull/63615)
 - implement functionality to create credential GitHub apps [#63635](https://github.com/sourcegraph/sourcegraph/pull/63635)
 - svelte: Add Cody chat sidebar [#63638](https://github.com/sourcegraph/sourcegraph/pull/63638)
@@ -251,6 +259,8 @@ All notable changes to Sourcegraph are documented in this file.
   - File actions are now available in the inline 'at commit' view
   - File icon is now rendered in the file header for the inline diff view
 - svelte: History suggestions should show immediately when clicking the history button [#63335](https://github.com/sourcegraph/sourcegraph/pull/63335)
+- batches: disallow retry on deleted changesets [#63336](https://github.com/sourcegraph/sourcegraph/pull/63336)
+  - Disallow auto-retry when a changeset is deleted.
 - svelte: Data/code preloading doesn't work when using panels [#63339](https://github.com/sourcegraph/sourcegraph/pull/63339)
 - svelte: Use correct symbol icon color [#63355](https://github.com/sourcegraph/sourcegraph/pull/63355)
 - api: only allow a user or site admin to view that user's usage stats [#63365](https://github.com/sourcegraph/sourcegraph/pull/63365)
@@ -266,12 +276,15 @@ All notable changes to Sourcegraph are documented in this file.
 - sg: reduce max interrupt count and os.Exit always [#63516](https://github.com/sourcegraph/sourcegraph/pull/63516)
   - sg - Always os.Exit once shutdown hooks have completed
   - sg - Reduce max intterupt count from 5 to 2 to hard exit
+- batches: remove leading and trailing spaces from batch changes credentials [#63517](https://github.com/sourcegraph/sourcegraph/pull/63517)
+  - Whitespaces in Batch Changes credentials are trimmed before being saved to the database, this prevents 401 errors when using the token to construct an authenticated push URL.
 - search: VSCode Search extension: bring back matched lines in search results.  [#63524](https://github.com/sourcegraph/sourcegraph/pull/63524)
 - sg: fix 'sg enterprise' per-command flags [#63527](https://github.com/sourcegraph/sourcegraph/pull/63527)
 - sg: conditionally show protips [#63541](https://github.com/sourcegraph/sourcegraph/pull/63541)
   - sg - conditionally show protips when running `sg bazel`
 - search: Token decoration in keyword-enabled query input [#63543](https://github.com/sourcegraph/sourcegraph/pull/63543)
 - svelte: Reference layout shift while loading data [#63546](https://github.com/sourcegraph/sourcegraph/pull/63546)
+- batches: fix zero division error resulting in wrong stats computation [#63547](https://github.com/sourcegraph/sourcegraph/pull/63547)
 - enterpriseportal: forcibly run gorm-incompatible migration in local dev [#63549](https://github.com/sourcegraph/sourcegraph/pull/63549)
 - telemetrygateway: reduce context cancellation error reports [#63551](https://github.com/sourcegraph/sourcegraph/pull/63551)
 - search: VSCode Search extension: hide file preview link [#63552](https://github.com/sourcegraph/sourcegraph/pull/63552)
@@ -439,8 +452,6 @@ All notable changes to Sourcegraph are documented in this file.
 - V2-telemetry: Simplify sensitive metadata allowlist to accept feature only [#63325](https://github.com/sourcegraph/sourcegraph/pull/63325)
 - Search: surface pattern type in query input [#63326](https://github.com/sourcegraph/sourcegraph/pull/63326)
 - code monitors: respect default pattern type [#63333](https://github.com/sourcegraph/sourcegraph/pull/63333)
-- fix(batch-changes): disallow retry on deleted changesets [#63336](https://github.com/sourcegraph/sourcegraph/pull/63336)
-  - Disallow auto-retry when a changeset is deleted.
 - Use math/rand/v2 [#63346](https://github.com/sourcegraph/sourcegraph/pull/63346)
 - Cody pro icon was squashed in the upgrade banner [#63356](https://github.com/sourcegraph/sourcegraph/pull/63356)
 - Refactor the 'getModel' callbacks into their own file [#63359](https://github.com/sourcegraph/sourcegraph/pull/63359)NA
@@ -455,8 +466,6 @@ All notable changes to Sourcegraph are documented in this file.
 - Publish images from patch release branches [#63379](https://github.com/sourcegraph/sourcegraph/pull/63379)
 - plg: Make page headers the same style [#63380](https://github.com/sourcegraph/sourcegraph/pull/63380)
 - Improve InviteUsers interface [#63383](https://github.com/sourcegraph/sourcegraph/pull/63383)
-- chore(batch-changes): remove visibility options from create batch changes page [#63393](https://github.com/sourcegraph/sourcegraph/pull/63393)
-  - remove visibility options from create batch change page
 - Cody Gateway: New Claude 3.5 Sonnet model [#63395](https://github.com/sourcegraph/sourcegraph/pull/63395)feature(plg): new Claude 3.5 Sonnet model support for Cody Pro users
 - Search: expose path matches on FileMatch [#63396](https://github.com/sourcegraph/sourcegraph/pull/63396)
   - Exposed the matched ranges of a file path via the GraphQL API
@@ -468,8 +477,6 @@ All notable changes to Sourcegraph are documented in this file.
 - feat(cody-gateway): add support for Gemini models with context cache [#63413](https://github.com/sourcegraph/sourcegraph/pull/63413)
 - Rename intent API (add chat reference, make the name more idiomatic) [#63416](https://github.com/sourcegraph/sourcegraph/pull/63416)
 - Add language ID to private metadata for v2 codeintel events (for in p… [#63421](https://github.com/sourcegraph/sourcegraph/pull/63421)
-- chore(batch-changes): remove beta badge from batch changes [#63423](https://github.com/sourcegraph/sourcegraph/pull/63423)
-  - Remove Beta badge from Batch Changes pages.
 - lib: downgrade GORM to 1.25.6 [#63427](https://github.com/sourcegraph/sourcegraph/pull/63427)
 - "Cody" in navbar not "Cody AI" [#63429](https://github.com/sourcegraph/sourcegraph/pull/63429)
   - In the navbar, Cody is now just "Cody" not "Cody AI".
@@ -482,8 +489,6 @@ All notable changes to Sourcegraph are documented in this file.
 - remove unused CODY_APP esbuild config and entrypoint [#63438](https://github.com/sourcegraph/sourcegraph/pull/63438)
 - remove old and unused Cody search page [#63439](https://github.com/sourcegraph/sourcegraph/pull/63439)
 - remove Code Search upsell from Cody page [#63440](https://github.com/sourcegraph/sourcegraph/pull/63440)
-- chore(batch-changes): remove beta badge from Batch Changes page [#63441](https://github.com/sourcegraph/sourcegraph/pull/63441)
-  - the Beta badge is now removed from Batch Changes
 - scip-syntax: adds strict SCIP symbol parsing and formatting [#63443](https://github.com/sourcegraph/sourcegraph/pull/63443)
 - fix(code hosts): Use more deterministic API endpoints for GitHub code host connections [#63445](https://github.com/sourcegraph/sourcegraph/pull/63445)
   - The `"internal"` repositoryQuery for GitHub code host connections now use a more deterministic API that's less susceptible to missing repositories
@@ -527,8 +532,6 @@ All notable changes to Sourcegraph are documented in this file.
 - misc wording and UI tweaks to search contexts pages [#63513](https://github.com/sourcegraph/sourcegraph/pull/63513)
 - make Cody and Code Search global navbar items one-click [#63514](https://github.com/sourcegraph/sourcegraph/pull/63514)
   - Code Search and Cody now are one-click links in the global navbar. Other features are in the new "Tools" menu: search contexts, code monitors, search jobs, and notebooks. Your Cody dashboard is linked from your user menu (in the top right).
-- fix(batch-changes): remove leading and trailing spaces from batch changes credentials [#63517](https://github.com/sourcegraph/sourcegraph/pull/63517)
-  - Whitespaces in Batch Changes credentials are trimmed before being saved to the database, this prevents 401 errors when using the token to construct an authenticated push URL.
 - Bump `cody-web-experimental` package version [#63525](https://github.com/sourcegraph/sourcegraph/pull/63525)
 - sg: generate github action subscription matrix dynamically [#63526](https://github.com/sourcegraph/sourcegraph/pull/63526)
 - backend: Introduce a basic utils package for appliance sourcegraph upgrades [#63529](https://github.com/sourcegraph/sourcegraph/pull/63529)
@@ -541,7 +544,6 @@ All notable changes to Sourcegraph are documented in this file.
 - fetch User.id to suppress GraphQL cache warning [#63538](https://github.com/sourcegraph/sourcegraph/pull/63538)
 - fix(sg/bazel-do): use ci.sourcegraph.bazelrc with bazel-do [#63545](https://github.com/sourcegraph/sourcegraph/pull/63545)
   - sg - ensure bazel-do invocations use the ci sourcegraph bazelrc
-- fix(batch-changes): fix zero division error resulting in wrong stats computaion [#63547](https://github.com/sourcegraph/sourcegraph/pull/63547)
 - (chore)analytics: consistent naming of web code copied events [#63550](https://github.com/sourcegraph/sourcegraph/pull/63550)
 - update config for workflows 5.10 [#63554](https://github.com/sourcegraph/sourcegraph/pull/63554)
 - chore(search) VSCode Search extension: Update README and CHANGELOG [#63562](https://github.com/sourcegraph/sourcegraph/pull/63562)
@@ -575,9 +577,6 @@ All notable changes to Sourcegraph are documented in this file.
 - Adds a test for search-based usages [#63610](https://github.com/sourcegraph/sourcegraph/pull/63610)
 - fix(perforce) Fix support for p4breaker workaround scripts [#63611](https://github.com/sourcegraph/sourcegraph/pull/63611)
   - Fixed an issue where Sourcegraph would no longer be able to decode Perforce permissions if `p4broker` is used, provided that the filter script gets adjusted as well.
-- feat(batch changes): use "keyword" as default pattern type [#63613](https://github.com/sourcegraph/sourcegraph/pull/63613)
-  - The new (optional) field "version" of batch specs determines how the spec is processed. This allows us to introduce new features while maintaining backward compatability.
-  - A new version `2` is introduced. Batch specs specifying `version: 2` will use keyword search as the default pattern type to determine repos/workspaces. Batch specs with `version: 1` or without version field keep using pattern type "standard".
 - vsce: patch release v2.2.17 [#63617](https://github.com/sourcegraph/sourcegraph/pull/63617)
 - Add SourcegraphModelConfig.AccessToken [#63619](https://github.com/sourcegraph/sourcegraph/pull/63619)NA
 - Svelte: add mutation observer to `sizeToFit` [#63620](https://github.com/sourcegraph/sourcegraph/pull/63620)
