@@ -57,7 +57,6 @@ export function DocSearch(props: DocSearchProps) {
     const [isOpen, setIsOpen] = React.useState(!!initialQuery);
 
     const onOpen = React.useCallback(() => {
-        setInitialQuery(undefined);
         setIsOpen(true);
     }, [setIsOpen]);
 
@@ -98,7 +97,6 @@ export function DocSearch(props: DocSearchProps) {
                     initialQuery={initialQuery}
                     translations={props?.translations?.modal}
                     onClose={onClose}
-                    isOpen={isOpen}
                 />
             </Modal>}
         </>
