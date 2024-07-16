@@ -18,6 +18,7 @@ import { useDocSearchKeyboardEvents } from './useDocSearchKeyboardEvents';
 
 import type { ButtonTranslations } from './DocSearchButton';
 import type { ModalTranslations } from './DocSearchModal';
+import Modal from './Modal';
 
 export type DocSearchTranslations = Partial<{
     button: ButtonTranslations;
@@ -56,6 +57,7 @@ export function DocSearch(props: DocSearchProps) {
     const [isOpen, setIsOpen] = React.useState(!!initialQuery);
 
     const onOpen = React.useCallback(() => {
+        setInitialQuery(undefined);
         setIsOpen(true);
     }, [setIsOpen]);
 
@@ -88,18 +90,17 @@ export function DocSearch(props: DocSearchProps) {
                 onClick={onOpen}
             />
 
-            {
-                createPortal(
-                    <DocSearchModal
-                        {...props}
-                        initialScrollY={window.scrollY}
-                        initialQuery={initialQuery}
-                        translations={props?.translations?.modal}
-                        onClose={onClose}
-                        isOpen={isOpen}
-                    />,
-                    document.body
-                )}
+
+            {isOpen && <Modal wrapperId='doc-search-modal'>
+                <DocSearchModal
+                    {...props}
+                    initialScrollY={window.scrollY}
+                    initialQuery={initialQuery}
+                    translations={props?.translations?.modal}
+                    onClose={onClose}
+                    isOpen={isOpen}
+                />
+            </Modal>}
         </>
     );
 }
