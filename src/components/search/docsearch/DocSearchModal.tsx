@@ -42,6 +42,7 @@ export type DocSearchModalProps = DocSearchProps & {
   initialScrollY: number;
   onClose?: () => void;
   translations?: ModalTranslations;
+  isOpen: boolean;
 };
 
 export function DocSearchModal({
@@ -62,6 +63,7 @@ export function DocSearchModal({
   initialQuery: initialQueryFromProp = '',
   translations = {},
   getMissingResultsUrl,
+  isOpen,
   insights = false,
 }: DocSearchModalProps) {
   const {
@@ -450,6 +452,11 @@ export function DocSearchModal({
       window.removeEventListener('resize', setFullViewportHeight);
     };
   }, []);
+
+
+  if (!isOpen) {
+    return;
+  }
 
   return (
     <div
