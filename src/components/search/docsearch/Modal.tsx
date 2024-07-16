@@ -1,7 +1,7 @@
 import { ReactNode, useState, useLayoutEffect } from "react";
 import { createPortal } from "react-dom"; 
 const defaultModalProps = {
-    wrapperId: "react-portal"
+    wrapperId: "modal-portal-id"
 }
 
 type ModalProps = {
