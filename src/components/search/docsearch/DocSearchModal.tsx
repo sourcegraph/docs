@@ -41,8 +41,7 @@ export type ModalTranslations = Partial<{
 export type DocSearchModalProps = DocSearchProps & {
   initialScrollY: number;
   onClose?: () => void;
-  translations?: ModalTranslations;
-  isOpen: boolean;
+  translations?: ModalTranslations; 
 };
 
 export function DocSearchModal({
@@ -63,7 +62,6 @@ export function DocSearchModal({
   initialQuery: initialQueryFromProp = '',
   translations = {},
   getMissingResultsUrl,
-  isOpen,
   insights = false,
 }: DocSearchModalProps) {
   const {
