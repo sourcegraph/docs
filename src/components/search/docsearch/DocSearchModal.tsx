@@ -453,11 +453,6 @@ export function DocSearchModal({
     };
   }, []);
 
-
-  if (!isOpen) {
-    return;
-  }
-
   return (
     <div
       ref={containerRef}
