@@ -1,0 +1,208 @@
+# Install Cody CLI
+
+<p className="subtitle">Learn how to install the <code>cody</code> command-line tool.</p>
+
+The Cody extension by Sourcegraph enhances your coding experience in your IDE by providing intelligent code suggestions, context-aware completions, and advanced code analysis. This guide will walk you through the steps to install and set up Cody within your JetBrains environment.
+
+<LinkCards>
+   <LinkCard href="https://www.npmjs.com/package/@sourcegraph/cody" imgSrc="https://storage.googleapis.com/sourcegraph-assets/docs/images/cody/command-line-blue.svg" imgAlt="Cody CLI" title="Cody CLI" description="Install Cody CLI from npm" />
+</LinkCards>
+
+## Prerequisites
+
+- You have Node.js v20 or newer installed
+- You have `npm`, `yarn`, `pnpm`, or an equivalent package manager installed
+
+## Install CLI from npm
+
+Run the following command to install the Cody CLI:
+<Tabs>
+  <Tab title="npm">
+```shell
+npm install -g @sourcegraph/cody
+```
+  </Tab>
+  <Tab title="yarn">
+```shell
+yarn global add @sourcegraph/cody
+```
+  </Tab>
+  <Tab title="pnpm">
+```shell
+pnpm install -g @sourcegraph/cody
+```
+  </Tab>
+</Tabs>
+
+Confirm that the installation was successful by running the following command:
+
+```shell
+cody help
+```
+
+
+
+## Authenticate with cody auth login
+
+To start using the Cody CLI, you need to authenticate it with your Sourcegraph account.
+
+When using `cody auth login`, the access token is stored in the secure storage of your operating system or equivalent security tool.
+If you prefer not to let Cody store your access token, authenticate with [environment variables](#authenticate-with-only-environment-variables) instead.
+
+First, make sure you have installed the necessary tools to use `cody auth login`.
+
+<Tabs>
+  <Tab title="macOS">
+The pre-installed `security` tool is used. No additional installation is required.
+  </Tab>
+  <Tab title="Windows">
+The [CredentialManager](https://www.powershellgallery.com/packages/CredentialManager/2.0) PowerShell module is required.
+Open a PowerShell terminal with administrator privileges and run the following command:
+
+```powershell
+Install-Module -Name CredentialManager
+```
+
+  </Tab>
+  <Tab title="Linux (Ubuntu)">
+The [`secret-tool`](https://manpages.ubuntu.com/manpages/focal/man1/secret-tool.1.html#:~:text=secret%2Dtool%20is%20a%20command,of%20attribute%20keys%20and%20values) command-line tool is used. Run the following commands to install it:
+```shell
+sudo apt install libsecret-tools
+sudo apt install gnome-keyring
+```
+  </Tab>
+</Tabs>
+
+Run the following command to authenticate the Cody CLI:
+
+<Tabs>
+  <Tab title="Browser (fastest)">
+```shell
+cody auth login --web
+```
+This will open a browser window where you can authenticate with your Sourcegraph account.
+Close the browser tab after authentication is complete.
+  </Tab>
+  <Tab title="Command Line">
+- For Cody Pro/Free accounts, create an access token at https://sourcegraph.com/user/settings/tokens.
+- For Cody Enterprise accounts, sign into your Sourcegraph Enterprise account and create an access token under `Account > Settings > Access Tokens`.
+```shell
+export SRC_ENDPOINT=ENDPOINT
+export SRC_ACCESS_TOKEN=ACCESS_TOKEN
+cody auth login # stores the access token securely
+```
+You don't need to export `SRC_ENDPOINT` or `SRC_ACCESS_TOKEN` after running `cody auth login`.
+Subsequent command invocation will use the stored access token.
+  </Tab>
+</Tabs>
+
+Confirm that the authentication was successful by running the following command:
+
+```shell
+cody auth whoami
+# ✔ Authenticated as USERNAME on ENDPOINT
+```
+
+## Authenticate with only environment variables
+
+Skip this step if you have already authenticated with the `cody auth login` command.
+
+If you prefer not to let Cody CLI store your access token, you can also pass the endpoint URL and access token through the environment variables `SRC_ENDPOINT` and `SRC_ACCESS_TOKEN`.
+
+<Tabs>
+  <Tab title="macOS/Linux">
+```shell
+export SRC_ENDPOINT=ENDPOINT
+export SRC_ACCESS_TOKEN=ACCESS_TOKEN
+```
+  </Tab>
+  <Tab title="Windows">
+```powershell
+$env:SRC_ENDPOINT = "ENDPOINT"
+$env:SRC_ACCESS_TOKEN = "ACCESS_TOKEN"
+```
+  </Tab>
+</Tabs>
+
+It's recommended to store these access tokens in a secure location. 
+For example, you can store them with a password manager like [1Password](https://1password.com/) or [Bitwarden](https://bitwarden.com/).
+
+It may be tempting to export these variables in your shell startup script, but this is not recommended because it will expose your access token to all commands you run from the terminal.
+Instead, consider sourcing these environment variables on-demand when you need to authenticate with the Cody CLI.
+
+## Sign out with cody auth logout
+
+To sign out of the Cody CLI, run the following command:
+
+```shell
+cody auth logout
+```
+
+Running this command wil remove the access token from the secure storage of your operating system.
+
+Run `cody auth whoami` to confirm that the Cody CLI is no longer authenticated.
+
+# Chat with Cody CLI
+
+<p className="subtitle">Learn how to use the <code>cody chat</code> subcommand.</p>
+
+Once you've authenticated the Cody CLI, you can start using it to chat with Cody.
+
+To start a new chat, run the following command:
+
+```shell
+cody chat -m 'Explain React hooks'
+```
+
+The following commands are equivalent to the above:
+
+```shell
+# use --message instead of -m
+cody chat --message 'Explain React hooks'
+
+# space separated arguments
+cody chat Explain React hooks
+```
+
+## cody chat --context-file
+
+Use `--context-file` to provide context from local files
+
+```shell
+cody chat --context-file src/controller.ts -m 'Are there code smells in this file?'
+```
+
+## cody chat --context-repo
+
+Use `--context-repo` to provide context from remote repositories.
+This feature is only available in Cody Enterprise.
+
+```shell
+cody chat --context-repo github.com/sourcegraph/cody -m 'What is the agent?'
+```
+
+## cody chat --stdin
+
+Use `--stdin` to provide context from standard input
+
+
+```shell
+echo 'Explain React hooks' | cody chat --stdin
+```
+
+Combine `--stdin` with `--message` to send a concatenated message. The
+`--message` string appears at the top of the prompt and the `--stdin` text
+appears at the bottom.
+
+```shell
+git diff | cody chat --stdin -m 'Write a commit message for this diff'
+```
+
+Use the `-` trailing argument as an alternative to `--stdin` to read the diff from standard input.
+
+```shell
+git diff | cody chat -m 'Write a commit message for this diff' -
+```
+
+
+
