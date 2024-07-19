@@ -48,7 +48,7 @@ export const chatTableDataEnt: TableData = {
             { provider: 'OpenAI', model: 'gpt-4o', status: '✅ * (5.4.5099 and above)' },
             { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '✅' },
             { provider: 'Anthropic', model: 'claude-2.0', status: '✅' },
-            { provider: 'Anthropic', model: 'claude-2.1 (See Note 2)', status: '✅' },
+            { provider: 'Anthropic', model: 'claude-2.1 ', status: '✅' },
             { provider: 'Anthropic', model: 'claude-3 Haiku', status: '✅ * (5.3.9104 and above)' },
             { provider: 'Anthropic', model: 'claude-3 Sonnet', status: '✅ * (5.3.9104 and above)' },
             { provider: 'Anthropic', model: 'claude-3 Opus', status: '✅ * (5.3.9104 and above)' },
@@ -67,7 +67,7 @@ export const chatTableDataEnt: TableData = {
             { provider: 'OpenAI', model: 'gpt-4o', status: '✅ * (5.4.5099 and above)' },
             { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '❌' },
             { provider: 'Anthropic', model: 'claude-2.0', status: '❌' },
-            { provider: 'Anthropic', model: 'claude-2.1 (See Note 2)', status: '❌' },
+            { provider: 'Anthropic', model: 'claude-2.1', status: '❌' },
             { provider: 'Anthropic', model: 'claude-3 Haiku', status: '❌' },
             { provider: 'Anthropic', model: 'claude-3 Sonnet', status: '❌' },
             { provider: 'Anthropic', model: 'claude-3 Opus', status: '❌' },
@@ -84,7 +84,7 @@ export const chatTableDataEnt: TableData = {
             { provider: 'OpenAI', model: 'gpt-4o', status: '❌' },
             { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '✅' },
             { provider: 'Anthropic', model: 'claude-2.0', status: '✅' },
-            { provider: 'Anthropic', model: 'claude-2.1 (See Note 2)', status: '✅' },
+            { provider: 'Anthropic', model: 'claude-2.1 ', status: '✅' },
             { provider: 'Anthropic', model: 'claude-3 Haiku', status: '✅ * (5.3.9104 and above)' },
             { provider: 'Anthropic', model: 'claude-3 Sonnet', status: '✅ * (5.3.9104 and above)' },
             { provider: 'Anthropic', model: 'claude-3 Opus', status: '✅ * (5.3.9104 and above)' },
@@ -101,7 +101,7 @@ export const chatTableDataEnt: TableData = {
             { provider: 'OpenAI', model: 'gpt-4o', status: '❌' },
             { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '❌' },
             { provider: 'Anthropic', model: 'claude-2.0', status: '❌' },
-            { provider: 'Anthropic', model: 'claude-2.1 (See Note 2)', status: '❌' },
+            { provider: 'Anthropic', model: 'claude-2.1', status: '❌' },
             { provider: 'Anthropic', model: 'claude-3 Haiku', status: '❌' },
             { provider: 'Anthropic', model: 'claude-3 Sonnet', status: '❌' },
             { provider: 'Anthropic', model: 'claude-3 Opus', status: '❌' },
@@ -112,13 +112,13 @@ export const chatTableDataEnt: TableData = {
             { provider: 'Ollama*', model: 'variety', status: '❌' }
         ],
         'Azure OpenAI': [
-            { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '✅ (Note 1)' },
-            { provider: 'OpenAI', model: 'gpt-4 (both 8k and 32k)', status: '✅ (Note 1)' },
-            { provider: 'OpenAI', model: 'gpt-4 turbo', status: '✅ (Note 1)' },
+            { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '✅ ' },
+            { provider: 'OpenAI', model: 'gpt-4 (both 8k and 32k)', status: '✅' },
+            { provider: 'OpenAI', model: 'gpt-4 turbo', status: '✅' },
             { provider: 'OpenAI', model: 'gpt-4o', status: '✅ * (5.4.5099 and above)' },
             { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '❌' },
             { provider: 'Anthropic', model: 'claude-2.0', status: '❌' },
-            { provider: 'Anthropic', model: 'claude-2.1 (See Note 2)', status: '❌' },
+            { provider: 'Anthropic', model: 'claude-2.1', status: '❌' },
             { provider: 'Anthropic', model: 'claude-3 Haiku', status: '❌' },
             { provider: 'Anthropic', model: 'claude-3 Sonnet', status: '❌' },
             { provider: 'Anthropic', model: 'claude-3 Opus', status: '❌' },
@@ -135,7 +135,7 @@ export const chatTableDataEnt: TableData = {
             { provider: 'OpenAI', model: 'gpt-4o', status: '❌ * (5.4.5099 and above)' },
             { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '✅' },
             { provider: 'Anthropic', model: 'claude-2.0', status: '✅' },
-            { provider: 'Anthropic', model: 'claude-2.1 (See Note 2)', status: '✅' },
+            { provider: 'Anthropic', model: 'claude-2.1 ', status: '✅' },
             { provider: 'Anthropic', model: 'claude-3 Haiku', status: '✅ * (5.3.9104 and above)' },
             { provider: 'Anthropic', model: 'claude-3 Sonnet', status: '✅ * (5.3.9104 and above)' },
             { provider: 'Anthropic', model: 'claude-3 Opus', status: '✅ * (5.3.9104 and above)' },
@@ -152,7 +152,7 @@ export const chatTableDataEnt: TableData = {
             { provider: 'OpenAI', model: 'gpt-4o', status: '❌ * (5.4.5099 and above)' },
             { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '❌' },
             { provider: 'Anthropic', model: 'claude-2.0', status: '❌' },
-            { provider: 'Anthropic', model: 'claude-2.1 (See Note 2)', status: '❌' },
+            { provider: 'Anthropic', model: 'claude-2.1', status: '❌' },
             { provider: 'Anthropic', model: 'claude-3 Haiku', status: '✅ * (5.3.9104 and above)' },
             { provider: 'Anthropic', model: 'claude-3 Sonnet', status: '✅ * (5.3.9104 and above)' },
             { provider: 'Anthropic', model: 'claude-3 Opus', status: '✅ * (5.3.9104 and above)' },
@@ -168,7 +168,7 @@ export const chatTableDataEnt: TableData = {
 export const autocompleteTableDataEnt: TableData = {
     cody: {
         'Sourcegraph': [
-            { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note 4)', status: '✅' },
+            { provider: 'OpenAI', model: 'gpt-3.5-instruct', status: '✅' },
             { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
             { provider: 'OpenAI', model: 'gpt-4', status: '❌' },
             { provider: 'OpenAI', model: 'gpt-4 turbo', status: '❌' },
@@ -182,7 +182,7 @@ export const autocompleteTableDataEnt: TableData = {
     },
     byok: {
         'OpenAI': [
-            { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note 4)', status: '✅ (Note 1)' },
+            { provider: 'OpenAI', model: 'gpt-3.5-instruct', status: '✅ ' },
             { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
             { provider: 'OpenAI', model: 'gpt-4', status: '❌' },
             { provider: 'OpenAI', model: 'gpt-4 turbo', status: '❌' },
@@ -194,7 +194,7 @@ export const autocompleteTableDataEnt: TableData = {
             { provider: 'Ollama*', model: 'variety', status: '❌' }
         ],
         'Anthropic': [
-            { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note 4)', status: '❌' },
+            { provider: 'OpenAI', model: 'gpt-3.5-instruct', status: '❌' },
             { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
             { provider: 'OpenAI', model: 'gpt-4', status: '❌' },
             { provider: 'OpenAI', model: 'gpt-4 turbo', status: '❌' },
@@ -206,7 +206,7 @@ export const autocompleteTableDataEnt: TableData = {
             { provider: 'Ollama*', model: 'variety', status: '❌' }
         ],
         'Google': [
-            { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note 4)', status: '❌' },
+            { provider: 'OpenAI', model: 'gpt-3.5-instruct', status: '❌' },
             { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
             { provider: 'OpenAI', model: 'gpt-4', status: '❌' },
             { provider: 'OpenAI', model: 'gpt-4 turbo', status: '❌' },
@@ -218,11 +218,11 @@ export const autocompleteTableDataEnt: TableData = {
             { provider: 'Ollama*', model: 'variety', status: '❌' }
         ],
         'Azure OpenAI': [
-            { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note 4)', status: '✅ (Note 1)' },
+            { provider: 'OpenAI', model: 'gpt-3.5-instruct', status: '✅' },
             { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '✅ * (5.5.0 and above)' },
-            { provider: 'OpenAI', model: 'gpt-4', status: '🟨 * (5.5.0 and above) (Note 6)' },
-            { provider: 'OpenAI', model: 'gpt-4 turbo', status: '🟨 * (5.5.0 and above) (Note 6)' },
-            { provider: 'OpenAI', model: 'gpt-4o', status: '🟨 * (5.5.0 and above) (Note 6)' },
+            { provider: 'OpenAI', model: 'gpt-4', status: '🟨 * (5.5.0 and above)' },
+            { provider: 'OpenAI', model: 'gpt-4 turbo', status: '🟨 * (5.5.0 and above)' },
+            { provider: 'OpenAI', model: 'gpt-4o', status: '🟨 * (5.5.0 and above)' },
             { provider: 'Fireworks', model: 'StarCoder', status: '❌' },
             { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '❌' },
             { provider: 'Anthropic', model: 'Claude-3 Haiku', status: '✅ * (5.3.9104 and above)' },
@@ -230,7 +230,7 @@ export const autocompleteTableDataEnt: TableData = {
             { provider: 'Ollama*', model: 'variety', status: '❌' }
         ],
         'AWS Bedrock': [
-            { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note 4)', status: '❌' },
+            { provider: 'OpenAI', model: 'gpt-3.5-instruct', status: '❌' },
             { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
             { provider: 'OpenAI', model: 'gpt-4', status: '❌' },
             { provider: 'OpenAI', model: 'gpt-4 turbo', status: '❌' },
@@ -242,7 +242,7 @@ export const autocompleteTableDataEnt: TableData = {
             { provider: 'Ollama*', model: 'variety', status: '❌' }
         ],
         'GCP Vertex': [
-            { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note 4)', status: '❌' },
+            { provider: 'OpenAI', model: 'gpt-3.5-instruct', status: '❌' },
             { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
             { provider: 'OpenAI', model: 'gpt-4', status: '❌' },
             { provider: 'OpenAI', model: 'gpt-4 turbo', status: '❌' },
