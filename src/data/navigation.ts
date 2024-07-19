@@ -38,6 +38,7 @@ export const navigation: NavigationItem[] = [
               { title: "Cody for JetBrains", href: "/cody/clients/install-jetbrains", },
               { title: "Cody for Neovim", href: "/cody/clients/install-neovim", },
               { title: "Cody for Web", href: "/cody/clients/cody-with-sourcegraph", },
+              { title: "Cody for CLI", href: "/cody/clients/install-cli", },
               { title: "Cody for Enterprise", href: "/cody/clients/enable-cody-enterprise", },
             ]
           },
