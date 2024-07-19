@@ -156,7 +156,7 @@ const FeatureParity = ({type}: FeatureParityProps) => {
                     disabled={!selected.tableType}
                 >
                     <SelectTrigger className="w-full sm:w-56 bg-white dark:bg-black text-gray-900 dark:text-gray-300 border border-gray-300 dark:border-gray-700 shadow-sm dark:shadow-black">
-                        <SelectValue placeholder="Initial" />
+                        <SelectValue placeholder="Environment" />
                     </SelectTrigger>
                     <SelectContent className="bg-white dark:bg-black text-gray-900 dark:text-gray-300 shadow-sm dark:shadow-black">
                         {options.initial.map(option => (

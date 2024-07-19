@@ -36,8 +36,6 @@ export const options = {
         { label: '5.4.5099 and above', value: '5.4.5099 and above' },
         { label: '5.3.9104 and above', value: '5.3.9104 and above' },
         { label: '5.5.0 and above', value: '5.5.0 and above' },
-        { label: 'Note 2', value: 'Note 2' },
-        { label: 'Note 1', value: 'Note 1' }
     ]
 };
 
