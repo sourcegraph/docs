@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/select";
 import { autocompleteTableDataConf, chatTableDataConf } from '@/utils/constants/supportedModelsConfiguration';
 import { autocompleteTableDataEnt, chatTableDataEnt, options } from '@/utils/constants/supportedModelsEnt';
-import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 type Option = {
@@ -24,12 +23,7 @@ type ProviderData = {
 };
 
 interface TableData {
-    cody: {
-        [key: string]: ProviderData[];
-    };
-    byok: {
-        [key: string]: ProviderData[];
-    };
+    [key: string]: ProviderData[];
 }
 
 interface FeatureParityProps {
@@ -39,8 +33,6 @@ interface FeatureParityProps {
 const FeatureParity = ({type}: FeatureParityProps) => {
     const [selected, setSelected] = useState({
         tableType: '',
-        initial: '',
-        version: '',
         deployment: ''
     });
     const [filteredDeployments, setFilteredDeployments] = useState<Option[]>(options.deployment);
@@ -48,37 +40,22 @@ const FeatureParity = ({type}: FeatureParityProps) => {
     const [chatTableData, setChatTableData] = useState<TableData>(chatTableDataEnt)
     const [autocompleteTableData, setAutocompleteTableData] = useState<TableData>(autocompleteTableDataEnt)
 
-    const params = useParams();
-
     const handleChange = (key: keyof typeof selected, value: string) => {
         setSelected(prev => ({ ...prev, [key]: value }));
-
-        if (key === 'initial') {
-            setSelected(prev => ({ ...prev, deployment: '', version: '' }));
-        } else if (key === 'deployment') {
-            setSelected(prev => ({ ...prev, version: '' }));
-        }
-
         setShowTable(true);
     };
 
     useEffect(() => {
-        console.log('typetype', type)
-        if (type.toLowerCase() == 'ent') {
+        if (type.toLowerCase() === 'ent') {
             setChatTableData(chatTableDataEnt)
             setAutocompleteTableData(autocompleteTableDataEnt)
-        } else if (type.toLowerCase() == 'configuration') {
+        } else if (type.toLowerCase() === 'configuration') {
             setChatTableData(chatTableDataConf)
             setAutocompleteTableData(autocompleteTableDataConf)
         }
 
-        if (selected.initial === 'cody')
-            setFilteredDeployments([{ label: 'Sourcegraph', value: 'Sourcegraph' }]);
-        else if (selected.initial === 'byok')
-            setFilteredDeployments(options.deployment.filter(deployment => deployment.value !== 'Sourcegraph'));
-        else
-            setFilteredDeployments(options.deployment);
-    }, [selected]);
+        setFilteredDeployments(options.deployment);
+    }, [type]);
 
     const renderTable = (data: ProviderData[]) => {
         if (data.length === 0) return null;
@@ -107,28 +84,10 @@ const FeatureParity = ({type}: FeatureParityProps) => {
         );
     };
 
-    const getTableData = (): ProviderData[] => {
+    const getTableData = (): any => {
         const tableData: TableData = selected.tableType === 'chat' ? chatTableData : autocompleteTableData;
-
-        if (selected.initial && selected.deployment) {
-            let data: ProviderData[] = (tableData[selected.initial as 'cody' | 'byok'][selected.deployment] || []) as ProviderData[];
-
-            if (selected.version && selected.version !== 'all') {
-                const versionMap: { [key: string]: string } = {
-                    '5.4.5099 and above': '5.4.5099 and above',
-                    '5.3.9104 and above': '5.3.9104 and above',
-                    '5.5.0 and above': '5.5.0 and above',
-                    'Note 2': 'Note 2',
-                    'Note 1': 'Note 1'
-                };
-                const version: string = versionMap[selected.version];
-
-                if (version) {
-                    data = data.filter(row => row.status.includes(version));
-                }
-            }
-
-            return data;
+        if (selected.deployment) {
+            return tableData[selected.deployment] || [];
         }
         return [];
     };
@@ -141,7 +100,7 @@ const FeatureParity = ({type}: FeatureParityProps) => {
                     value={selected.tableType}
                 >
                     <SelectTrigger className="w-full sm:w-56 bg-white dark:bg-black text-gray-900 dark:text-gray-300 border border-gray-300 dark:border-gray-700 shadow-sm dark:shadow-black">
-                        <SelectValue placeholder="Feature Type" />
+                        <SelectValue placeholder="Feature" />
                     </SelectTrigger>
                     <SelectContent className="bg-white dark:bg-black text-gray-900 dark:text-gray-300 shadow-sm dark:shadow-black">
                         {options.tableType.map(option => (
@@ -151,45 +110,15 @@ const FeatureParity = ({type}: FeatureParityProps) => {
                 </Select>
 
                 <Select
-                    onValueChange={(value: string) => handleChange('initial', value)}
-                    value={selected.initial}
+                    onValueChange={(value: string) => handleChange('deployment', value)}
+                    value={selected.deployment}
                     disabled={!selected.tableType}
                 >
                     <SelectTrigger className="w-full sm:w-56 bg-white dark:bg-black text-gray-900 dark:text-gray-300 border border-gray-300 dark:border-gray-700 shadow-sm dark:shadow-black">
-                        <SelectValue placeholder="Environment" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white dark:bg-black text-gray-900 dark:text-gray-300 shadow-sm dark:shadow-black">
-                        {options.initial.map(option => (
-                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-
-                <Select
-                    onValueChange={(value: string) => handleChange('deployment', value)}
-                    value={selected.deployment}
-                    disabled={!selected.initial}
-                >
-                    <SelectTrigger className="w-full sm:w-56 bg-white dark:bg-black text-gray-900 dark:text-gray-300 border border-gray-300 dark:border-gray-700 shadow-sm dark:shadow-black">
-                        <SelectValue placeholder="Deployment" />
+                        <SelectValue placeholder="Provider" />
                     </SelectTrigger>
                     <SelectContent className="bg-white dark:bg-black text-gray-900 dark:text-gray-300 shadow-sm dark:shadow-black">
                         {filteredDeployments.map(option => (
-                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-
-                <Select
-                    onValueChange={(value: string) => handleChange('version', value)}
-                    value={selected.version}
-                    disabled={!selected.deployment}
-                >
-                    <SelectTrigger className="w-full sm:w-56 bg-white dark:bg-black text-gray-900 dark:text-gray-300 border border-gray-300 dark:border-gray-700 shadow-sm dark:shadow-black">
-                        <SelectValue placeholder="Version" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white dark:bg-black text-gray-900 dark:text-gray-300 shadow-sm dark:shadow-black">
-                        {options.version.map(option => (
                             <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
                         ))}
                     </SelectContent>
