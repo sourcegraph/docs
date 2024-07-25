@@ -1,4 +1,5 @@
 import AWSOneClickLaunchForm from './AWSOneClickLaunchForm';
+import { ContentTab, ContentTabs } from './ContentTabs';
 import Accordion from './mdx/Accordion';
 import { Callout } from './mdx/Callout';
 import { CustomLink } from './mdx/CustomLink';
@@ -7,9 +8,8 @@ import { LinkCard, LinkCards } from './mdx/LinkCards';
 import { ProductCard, ProductCards } from './mdx/ProductCards';
 import { QuickLink, QuickLinks } from './mdx/QuickLinks';
 import { Tab, Tabs } from './mdx/Tabs';
-import ResourceEstimator from './resource-estimator/ResourceEstimator';
 import { PreCodeBlock } from './PreCodeBlock';
-import { ContentTabs, ContentTab } from './ContentTabs';
+import ResourceEstimator from './resource-estimator/ResourceEstimator';
 
 const MdxComponents = (version?: string) => {
 	return {
