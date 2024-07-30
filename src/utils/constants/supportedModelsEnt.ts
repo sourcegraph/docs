@@ -138,19 +138,19 @@ export const chatTableDataEnt: any = {
 
 export const autocompleteTableDataEnt: any = {
     'Sourcegraph': [
-        { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note 4)', status: '✅' },
+        { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-4', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-4 turbo', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-4o', status: '❌' },
         { provider: 'Fireworks', model: 'StarCoder', status: '✅' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '✅' },
-        { provider: 'Anthropic', model: 'Claude-3 Haiku', status: '✅ * (5.3.9104 and above)' },
-        { provider: 'Google', model: 'Gemini 1.5 Flash', status: '✅ * (5.4.5099 and above)' },
+        { provider: 'Anthropic', model: 'Claude-3 Haiku', status: '✅ *(5.3.9104 and above)' },
+        { provider: 'Google', model: 'Gemini 1.5 Flash', status: '✅ *(5.4.5099 and above)' },
         { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'OpenAI': [
-        { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note 4)', status: '✅ (Note 1)' },
+        { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '✅ (Note #1)' },
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-4', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-4 turbo', status: '❌' },
@@ -162,19 +162,19 @@ export const autocompleteTableDataEnt: any = {
         { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Anthropic': [
-        { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note 4)', status: '❌' },
+        { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-4', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-4 turbo', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-4o', status: '❌' },
         { provider: 'Fireworks', model: 'StarCoder', status: '❌' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '✅' },
-        { provider: 'Anthropic', model: 'Claude-3 Haiku', status: '✅ * (5.3.9104 and above)' },
+        { provider: 'Anthropic', model: 'Claude-3 Haiku', status: '✅ *(5.3.9104 and above)' },
         { provider: 'Google', model: 'Gemini 1.5 Flash', status: '❌' },
         { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Google': [
-        { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note 4)', status: '❌' },
+        { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-4', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-4 turbo', status: '❌' },
@@ -186,38 +186,38 @@ export const autocompleteTableDataEnt: any = {
         { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Azure OpenAI': [
-        { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note 4)', status: '✅ (Note 1)' },
-        { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '✅ * (5.5.0 and above)' },
-        { provider: 'OpenAI', model: 'gpt-4', status: '🟨 * (5.5.0 and above) (Note 6)' },
-        { provider: 'OpenAI', model: 'gpt-4 turbo', status: '🟨 * (5.5.0 and above) (Note 6)' },
-        { provider: 'OpenAI', model: 'gpt-4o', status: '🟨 * (5.5.0 and above) (Note 6)' },
+        { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '✅ (Note #1)' },
+        { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '✅ *(5.5.0 and above)' },
+        { provider: 'OpenAI', model: 'gpt-4', status: '🟨 *(5.5.0 and above) (Note #6)' },
+        { provider: 'OpenAI', model: 'gpt-4 turbo', status: '🟨 *(5.5.0 and above) (Note #6)' },
+        { provider: 'OpenAI', model: 'gpt-4o', status: '🟨 *(5.5.0 and above) (Note #6)' },
         { provider: 'Fireworks', model: 'StarCoder', status: '❌' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '❌' },
-        { provider: 'Anthropic', model: 'Claude-3 Haiku', status: '✅ * (5.3.9104 and above)' },
+        { provider: 'Anthropic', model: 'Claude-3 Haiku', status: '❌' },
         { provider: 'Google', model: 'Gemini 1.5 Flash', status: '❌' },
         { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'AWS Bedrock': [
-        { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note 4)', status: '❌' },
+        { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-4', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-4 turbo', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-4o', status: '❌' },
         { provider: 'Fireworks', model: 'StarCoder', status: '❌' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '✅' },
-        { provider: 'Anthropic', model: 'Claude-3 Haiku', status: '✅ * (5.3.9104 and above)' },
+        { provider: 'Anthropic', model: 'Claude-3 Haiku', status: '✅ *(5.3.9104 and above)' },
         { provider: 'Google', model: 'Gemini 1.5 Flash', status: '❌' },
         { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'GCP Vertex': [
-        { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note 4)', status: '❌' },
+        { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-4', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-4 turbo', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-4o', status: '❌' },
         { provider: 'Fireworks', model: 'StarCoder', status: '❌' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '❌' },
-        { provider: 'Anthropic', model: 'Claude-3 Haiku', status: '✅ * (5.5.0 and above)' },
+        { provider: 'Anthropic', model: 'Claude-3 Haiku', status: '✅ *(5.5.0 and above)' },
         { provider: 'Google', model: 'Gemini 1.5 Flash', status: '❌' },
         { provider: 'Ollama*', model: 'variety', status: '❌' }
     ]
