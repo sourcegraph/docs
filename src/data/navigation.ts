@@ -40,6 +40,7 @@ export const navigation: NavigationItem[] = [
               { title: "Cody for Web", href: "/cody/clients/cody-with-sourcegraph", },
               { title: "Cody for CLI", href: "/cody/clients/install-cli", },
               { title: "Cody for Enterprise", href: "/cody/clients/enable-cody-enterprise", },
+              { title: "Model Configuration", href: "/cody/clients/model-configuration", },
             ]
           },
           {
@@ -343,6 +344,7 @@ const navigation_5_2: NavigationItem[] = [
               { title: "Cody for Neovim", href: "/cody/clients/install-neovim", },
               { title: "Cody for Web", href: "/cody/clients/cody-with-sourcegraph", },
               { title: "Cody for Enterprise", href: "/cody/clients/enable-cody-enterprise", },
+              { title: "LLM Model Configuration", href: "/cody/clients/model-configuration", },
             ]
           },
           {
