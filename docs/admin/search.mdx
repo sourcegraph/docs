@@ -138,8 +138,10 @@ scenario and mitigation steps](/admin/observability/alerts#zoekt-memory-map-area
 
 ### Shard merging
 
-Shard merging is a feature of Zoekt that enables the combination of smaller index files, or shards, into one larger file, a compound shard. This can reduce memory costs for Zoekt webserver. This feature is particularly useful for
-customers with many small and rarely updated repositories, and can result in a significant reduction in memory. Shard merging can be enabled by setting `SRC_ENABLE_SHARD_MERGING="1"` for Zoekt indexserver.
+Shard merging is a feature of Zoekt which combines smaller index files, or shards, into one larger file, a compound shard.
+This reduces memory requirements for Zoekt webserver and improves performance of searches that are bound by "work done per shard".
+This feature is particularly useful for customers with many small and rarely updated repositories.
+Shard merging is on by default. I can be disabled by setting the ENV `SRC_DISABLE_SHARD_MERGING="true"` for Zoekt indexserver.
 
 Shard merging can be fine-tuned by setting ENV variables for Zoekt indexserver:
 
@@ -150,7 +152,6 @@ Shard merging can be fine-tuned by setting ENV variables for Zoekt indexserver:
 | SRC_MERGE_TARGET_SIZE  | The target size of compound shards in MiB                                                      | 2000     |
 | SRC_MERGE_MIN_SIZE     | The minimum size of a compound shard in MiB                                                    | 1800     |
 | SRC_MERGE_MIN_AGE      | The time since the last commit in days. Shards with newer commits are excluded from merging.   | 7        |
-| SRC_MERGE_MAX_PRIORITY | The maximum priority a shard can have to be considered for merging, specified as a float value | 100.0    |
 
 When repostiories receive udpates, Zoekt reindexes them and tombstones their old index data. As a result, compound shards can shrink and be dismantled into individual shards once they reach a critical minimum size. These individual
 shards are then considered for future merge operations. Shard merging can be monitored via the "Compound shards" panel in Zoekt's Grafana dashboard.
