@@ -2,7 +2,7 @@
 
 <p className="subtitle">Learn and walkthrough some of the handy Code Search examples.</p>
 
-## Sourcegraph Search Examples on Github Pages
+## Sourcegraph Search Examples on GitHub Pages
 
 Check out the [Sourcegraph Search Examples](https://sourcegraph.github.io/sourcegraph-search-examples/) site for filterable search examples with links to results on sourcegraph.com.
 
@@ -10,19 +10,19 @@ Below are some additional examples that search repositories on [Sourcegraph.com]
 
 <Callout type="info"> See [search query syntax](/code-search/queries) reference.</Callout>
 
-[Search through all the repositories in an organization](https://sourcegraph.com/search?q=context:global+r:hashicorp/+terraform&patternType=standard&sm=1&groupBy=repo)
+[Search through all the repositories in an organization](https://sourcegraph.com/search?q=context:global+r:hashicorp/+terraform&patternType=keyword&groupBy=repo)
 
 ```sgquery
 context:global r:hashicorp/ terraform
 ```
 
-[Search a subset of repositories in an organization by language](https://sourcegraph.com/search?q=context:global+r:hashicorp/vault*+lang:yaml+terraform&patternType=standard&sm=1&groupBy=repo)
+[Search a subset of repositories in an organization by language](https://sourcegraph.com/search?q=context:global+r:hashicorp/vault*+lang:yaml+terraform&patternType=keyword&groupBy=repo)
 
 ```sgquery
 context:global r:hashicorp/vault* lang:yaml terraform
 ```
 
-[Search for one term or another in a specific repository](https://sourcegraph.com/search?q=context:global+r:hashicorp/vault%24+print%28+OR+log%28&patternType=standard&sm=1&groupBy=repo)
+[Search for one term or another in a specific repository](https://sourcegraph.com/search?q=context:global+r:hashicorp/vault%24+print%28+OR+log%28&patternType=keyword&groupBy=repo)
 
 ```sgquery
 context:global r:hashicorp/vault$ print( OR log(
@@ -47,7 +47,7 @@ type:diff repo:@*refs/heads/ after:"5 days ago"
 -file:\.(json|md|txt)$ hack|todo|kludge|fixme
 ```
 
-[Removal of TODOs in the repository commit log](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+type:diff+TODO+select:commit.diff.removed+&patternType=literal)
+[Removal of TODOs in the repository commit log](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+type:diff+TODO+select:commit.diff.removed+&patternType=keyword)
 
 ```sgquery
 repo:^github\.com/sourcegraph/sourcegraph$ type:diff select:commit.diff.removed TODO
@@ -77,7 +77,7 @@ repo:@*refs/heads/:^master type:diff after:"1 week ago" (eslint-disable)
 file:package.json type:diff after:"1 week ago"
 ```
 
-[Files that are Apache licensed](https://sourcegraph.com/search?q=licensed+to+the+apache+software+foundation+select:file&patternType=literal)
+[Files that are Apache licensed](https://sourcegraph.com/search?q=context:global+%22licensed+to+the+apache+software+foundation%22+select:file&patternType=keyword)
 
 ```sgquery
 licensed to the apache software foundation select:file
@@ -89,7 +89,7 @@ licensed to the apache software foundation select:file
 file:package.json type:diff after:"1 week ago" select:repo
 ```
 
-[Search changes in a files that contain a keyword](https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+type:diff+file:contains.content%28%22golang%5C.org/x/sync/errgroup%22%29+.Go&patternType=literal)
+[Search changes in a files that contain a keyword](https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+type:diff+file:contains.content%28%22golang%5C.org/x/sync/errgroup%22%29+.Go&patternType=keyword)
 
 ```sgquery
 repo:^github\.com/sourcegraph/sourcegraph$ type:diff file:contains.content("golang\.org/x/sync/errgroup") .Go
@@ -111,15 +111,4 @@ Regex searches are also useful when searching boundaries that are not delimited 
 
 ```sgquery
 repo:^github\.com/sourcegraph/sourcegraph$ \bbtn-secondary\b
-```
-
-## When to use structural search mode
-
-Use structural search when you want to match code boundaries such as () or {}:
-
-[Finding try catch statements with varying content](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+try+%7B+:%5Bmatched_statements%5D+%7D+catch+%7B+:%5Bmatched_catch%5D+%7D&patternType=structural)
-
-```sgquery
-repo:^github\.com/sourcegraph/sourcegraph$
-try { :[matched_statements] } catch { :[matched_catch] }
 ```

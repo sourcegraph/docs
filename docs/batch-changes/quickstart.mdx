@@ -16,21 +16,21 @@ Next, install the version of `src` that is compatible with your Sourcegraph inst
 ### For macOS
 
 ```bash
-curl -L https://YOUR-SOURCEGRAPH-INSTANCE/.api/src-cli/src_darwin_amd64 -o /usr/local/bin/src
+curl -L https://<YOUR-SOURCEGRAPH-INSTANCE-URL>/.api/src-cli/src_darwin_amd64 -o /usr/local/bin/src
 chmod +x /usr/local/bin/src
 ```
 
 ### For Linux
 
 ```bash
-curl -L https://YOUR-SOURCEGRAPH-INSTANCE/.api/src-cli/src_linux_amd64 -o /usr/local/bin/src
+curl -L https://<YOUR-SOURCEGRAPH-INSTANCE-URL>/.api/src-cli/src_linux_amd64 -o /usr/local/bin/src
 chmod +x /usr/local/bin/src
 ```
 
 Authenticate `src` with your Sourcegraph instance by running `src login` and following the instructions:
 
 ```bash
-src login https://YOUR-SOURCEGRAPH-INSTANCE
+src login https://<YOUR-SOURCEGRAPH-INSTANCE-URL>
 ```
 
 ![src-login-success](https://sourcegraphstatic.com/docs/images/batch_changes/src_login_success.png)
@@ -44,6 +44,7 @@ A **batch spec** is a YAML file that defines a batch change. It specifies which 
 Save the following batch spec as `hello-world.batch.yaml`:
 
 ```yaml
+version: 2
 name: hello-world
 description: Add Hello World to READMEs
 
@@ -62,7 +63,7 @@ changesetTemplate:
  body: My first batch change!
  branch: hello-world # Push the commit to this branch.
  commit:
- message: Append Hello World to all README files
+  message: Append Hello World to all README files
 ```
 
 The commits you create here will use the `git config` values for `user.name` and `user.email` from your local environment or `batch-changes@sourcegraph.com` if no user is set. Alternatively, you can also [specify an `author`](/batch-changes/batch-spec-yaml-reference#changesettemplate-commit-author) in this spec.
@@ -74,7 +75,7 @@ Let's see what changes will be made. Until now, no commits, branches, or changes
 In your terminal, run the following command:
 
 ```bash
-src batch preview -f hello-world.batch.YAML
+src batch preview -f hello-world.batch.yaml
 ```
 
 Wait for it to run and compute the changes for each repository.
