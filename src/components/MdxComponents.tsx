@@ -19,7 +19,7 @@ const MdxComponents = (version?: string) => {
 		AWSOneClickLaunchForm,
 		Accordion,
 		ContentTabs: (props: any) => <ContentTabs {...props} />,
-    ContentTab: (props: any) => <ContentTab {...props} />,
+		ContentTab: (props: any) => <ContentTab {...props} />,
 		Tabs: (props: any) => <Tabs {...props} />,
 		Tab: (props: any) => <Tab {...props} />,
 		QuickLinks,
