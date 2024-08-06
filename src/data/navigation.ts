@@ -47,7 +47,7 @@ export const navigation: NavigationItem[] = [
             subsections: [
               { title: "Chat", href: "/cody/capabilities/chat", },
               { title: "Autocomplete", href: "/cody/capabilities/autocomplete", },
-              { title: "Prompts", href: "/cody/capabilities/commands", },
+              { title: "Prompts & Commands", href: "/cody/capabilities/commands", },
               { title: "OpenCtx", href: "/cody/capabilities/openctx", },
               { title: "Debug Code", href: "/cody/capabilities/debug-code", },
               { title: "Context Filters", href: "/cody/capabilities/ignore-context", },
