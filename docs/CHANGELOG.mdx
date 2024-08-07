@@ -4,6 +4,665 @@ All notable changes to Sourcegraph are documented in this file.
 
 {/* CHANGELOG_START */}
 
+# v5.6.0
+
+
+## Feature
+
+
+#### Codenav
+
+- codenav: Add symbol support for the Hack language [#64015](https://github.com/sourcegraph/sourcegraph/pull/64015)
+
+#### Frontend
+
+- frontend: do not embed frontend assets anymore [#63946](https://github.com/sourcegraph/sourcegraph/pull/63946)
+  - frontend: assets are no longer bundled with binary through `go:embed`. Instead assets are now added to the frontend container at `assets-dist`.
+
+#### Local
+
+- local: sg tail  [#64146](https://github.com/sourcegraph/sourcegraph/pull/64146)
+  - Adds a new `sg tail` command that provides a better UI to tail and filter log messages from `sg start --tail`.
+
+#### Appliance
+
+- appliance: implement re-direct on all unknown endpoints [#64059](https://github.com/sourcegraph/sourcegraph/pull/64059)
+  - feat(appliance): implement re-direct on all unknown endpoints
+- appliance: Adopt Frontend Service + Ingress [#63893](https://github.com/sourcegraph/sourcegraph/pull/63893)
+  - feat(appliance): Appliance adopts Frontend's `Ingress` + `Service`
+- appliance: Merge unstructured objects from helm serialization and appliance cfg defaults [#64021](https://github.com/sourcegraph/sourcegraph/pull/64021)
+  - feat/appliance: Include existing objects when constructing Frontend's `Service` & `Ingress`
+- appliance: self-update [#63780](https://github.com/sourcegraph/sourcegraph/pull/63780)
+  - Appliance can automatically self-update up to 2 minor revisions beyond the currently-deployed sourcegraph version.
+- appliance: introduce mock up database configuration step in install flow [#64162](https://github.com/sourcegraph/sourcegraph/pull/64162)
+- appliance: self-update can update multiple deployments [#64132](https://github.com/sourcegraph/sourcegraph/pull/64132)
+- Appliance: Frontend Pulls Version Info from RelReg [#64089](https://github.com/sourcegraph/sourcegraph/pull/64089)
+  - feat(appliance): frontend pulls versions from relreg
+- appliance: Change site-admin updates button to point to Appliance based on env var [#64167](https://github.com/sourcegraph/sourcegraph/pull/64167)
+  - feat(appliance): change update endpoint based on env var
+  - misc: add type to storybook
+
+#### Enterpriseportal
+
+- enterpriseportal: db layer for cody gateway access [#63737](https://github.com/sourcegraph/sourcegraph/pull/63737)
+- enterpriseportal: support DevOnly in list subscriptions [#63837](https://github.com/sourcegraph/sourcegraph/pull/63837)
+- enterpriseportal: db layer for subscription licenses [#63792](https://github.com/sourcegraph/sourcegraph/pull/63792)
+- enterpriseportal: db layer for subscription conditions [#63812](https://github.com/sourcegraph/sourcegraph/pull/63812)
+- enterpriseportal: ignore context cancellation error in GetCodyGatewayUsage [#64016](https://github.com/sourcegraph/sourcegraph/pull/64016)
+
+#### Search
+
+- search: remove smart search logic [#64215](https://github.com/sourcegraph/sourcegraph/pull/64215)Smart search is no longer supported in the Sourcegraph backend. Old searches that specify 'smart search' mode will be run in the default 'precise' mode. If your query now doesn't behave as expected, you can update it to use the new `patterntype:keyword`.
+- search: update Zoekt [#64238](https://github.com/sourcegraph/sourcegraph/pull/64238)
+  - added support for all Apex language extensions
+  - shard merging for Zoekt is now enabled by default. This reduces MEM requirements for Zoekt webserver and improves performance for some queries. See our [documentation](https://sourcegraph.com/docs/admin/search#shard-merging) for more information.  
+- search: Add support to all Apex language extensions [#64194](https://github.com/sourcegraph/sourcegraph/pull/64194)
+- search: Enable improved symbol parsing for large repos (when using Rockskip) [#63988](https://github.com/sourcegraph/sourcegraph/pull/63988)
+
+#### Svelte
+
+- svelte: Improve commit page layout on mobile [#63920](https://github.com/sourcegraph/sourcegraph/pull/63920)
+- svelte: Change branch and tags page design, including mobile [#63914](https://github.com/sourcegraph/sourcegraph/pull/63914)
+- svelte: Add support for creating search jobs from search results [#64308](https://github.com/sourcegraph/sourcegraph/pull/64308)
+- svelte: Improve small screeen behavior [#63859](https://github.com/sourcegraph/sourcegraph/pull/63859)
+- svelte: Add compare page [#63850](https://github.com/sourcegraph/sourcegraph/pull/63850)
+- svelte: Add search query syntax introduction [#63753](https://github.com/sourcegraph/sourcegraph/pull/63753)
+- svelte: Add 'y' shortcut to navigate to permalink  [#63719](https://github.com/sourcegraph/sourcegraph/pull/63719)
+
+#### Dotcom
+
+- dotcom: use Enterprise Portal for Cody Gateway usage [#63653](https://github.com/sourcegraph/sourcegraph/pull/63653)
+
+#### Build
+
+- build: Add exhaustruct linter (codeintel POC) [#63965](https://github.com/sourcegraph/sourcegraph/pull/63965)
+
+#### Others
+
+- Add support for precise usagesForSymbol [#64126](https://github.com/sourcegraph/sourcegraph/pull/64126)
+  - Adds support for precise code navigation to the experimental `usagesForSymbol` API,
+which can be used to implement a reference panel or similar functionality.
+- order search filters alphabetically [#63976](https://github.com/sourcegraph/sourcegraph/pull/63976)
+- show current email during password reset and auto-populate text-box after successful completion [#59645](https://github.com/sourcegraph/sourcegraph/pull/59645)
+
+#### Bazel
+
+- bazel: read binary version info from accompanying files in OCI images instead of stamping //internal/version [#63977](https://github.com/sourcegraph/sourcegraph/pull/63977)
+
+#### Sg
+
+- sg: prototype 'sg start sourcegraph-accounts' [#63894](https://github.com/sourcegraph/sourcegraph/pull/63894)
+- sg: add 'sg sams client create' [#63885](https://github.com/sourcegraph/sourcegraph/pull/63885)
+  - `sg sams client create` can now be used to create IdP clients for SAMS.
+- sg: support correct completions on 'sg start -cmd' [#63861](https://github.com/sourcegraph/sourcegraph/pull/63861)
+  - Completions for `sg start -cmd` now offer valid suggestions.
+- sg: report user os information via analytics [#64280](https://github.com/sourcegraph/sourcegraph/pull/64280)
+- sg: do not persist external secrets [#63890](https://github.com/sourcegraph/sourcegraph/pull/63890)
+- sg: allow sg commands to default to local-dev SAMS-dev credentials [#63883](https://github.com/sourcegraph/sourcegraph/pull/63883)
+  - `sg` commands requiring SAMS client credentials now load shared SAMS-dev client credentials by default.
+
+#### Cody
+
+- cody: Refactor completions API to use new modelconfig (support more models) [#63797](https://github.com/sourcegraph/sourcegraph/pull/63797)Update the Cody APIs for chat or code completions to use the "new style" model configuration. This allows for great flexibility in configuring LLM providers and exposing new models, but also allows Cody Enterprise users to select different models for chats.This will warrant a longer, more detailed changelog entry for the patch release next week. As this unlocks many other exciting features.
+- cody: add circuit breaker to handle timed-out requests and rate limit hits [#64133](https://github.com/sourcegraph/sourcegraph/pull/64133)
+
+#### Requestclient
+
+- requestclient: propagate original User-Agent as X-Forwarded-For-User-Agent [#64113](https://github.com/sourcegraph/sourcegraph/pull/64113)
+
+## Fix
+
+
+#### Appliance
+
+- appliance: don't include is_development builds in list of versions [#64138](https://github.com/sourcegraph/sourcegraph/pull/64138)
+  - fix(appliance): don't allow installation of development builds
+- appliance: Make Appliance URL envvars strings [#64227](https://github.com/sourcegraph/sourcegraph/pull/64227)
+  - fix(appliance): make environment variables strings to be passed around
+
+#### Own
+
+- own: Prevent infinite UI update loop in own pages [#64312](https://github.com/sourcegraph/sourcegraph/pull/64312)
+
+#### Docs
+
+- docs: update quickstart guide links [#64202](https://github.com/sourcegraph/sourcegraph/pull/64202)
+
+#### Cody
+
+- cody: use client-provided timeout for completions requests [#63875](https://github.com/sourcegraph/sourcegraph/pull/63875)
+  - Use the provided timeout from request parameters if available; otherwise use the default maximum request duration (8 minutes)
+- cody: allow pre-release versions for clients [#63913](https://github.com/sourcegraph/sourcegraph/pull/63913)
+- cody: remove client check for context filters [#63855](https://github.com/sourcegraph/sourcegraph/pull/63855)
+
+#### Search
+
+- search: correctly handle select:symbol.enum [#64170](https://github.com/sourcegraph/sourcegraph/pull/64170)Fix a bug in `select:symbol.enum` filters where they returned no results
+
+#### Bazel
+
+- bazel: surface error message when gazelle cant process glob expression [#64214](https://github.com/sourcegraph/sourcegraph/pull/64214)
+
+#### Search_jobs
+
+- search_jobs: prevent job state flip-flopping between 'queued' and 'processing' [#64098](https://github.com/sourcegraph/sourcegraph/pull/64098)
+- search_jobs: remove trailing `*` from URL [#63821](https://github.com/sourcegraph/sourcegraph/pull/63821)
+- search_jobs: progress reporting [#64287](https://github.com/sourcegraph/sourcegraph/pull/64287)
+  - Show detailed progress only while job is in status "processing"
+  - Remove dependency of download links on job state
+- search_jobs: fail validation for repo searches [#64300](https://github.com/sourcegraph/sourcegraph/pull/64300)
+- search_jobs: flickering placeholder component [#64009](https://github.com/sourcegraph/sourcegraph/pull/64009)
+
+#### Enterpriseportal
+
+- enterpriseportal: drop old gorm fk constraints [#63864](https://github.com/sourcegraph/sourcegraph/pull/63864)
+
+#### Svelte
+
+- svelte: Properly redirect to cody marketing page [#64331](https://github.com/sourcegraph/sourcegraph/pull/64331)
+- svelte: Make /cody/dashboard work with the new web app [#64295](https://github.com/sourcegraph/sourcegraph/pull/64295)
+- svelte: Show correct line numbers in unified diff [#63778](https://github.com/sourcegraph/sourcegraph/pull/63778)
+- svelte: Fix and cleanup compare page [#63928](https://github.com/sourcegraph/sourcegraph/pull/63928)
+- svelte: Update top-level route list [#64272](https://github.com/sourcegraph/sourcegraph/pull/64272)
+- svelte: Ctrl+backspace in fuzzy finder [#63804](https://github.com/sourcegraph/sourcegraph/pull/63804)
+- svelte: respect default pattern type in toggles [#63795](https://github.com/sourcegraph/sourcegraph/pull/63795)
+- svelte: Better preloading in file tree [#64327](https://github.com/sourcegraph/sourcegraph/pull/64327)
+- svelte: Center file tree loading indicator [#64309](https://github.com/sourcegraph/sourcegraph/pull/64309)
+
+#### Ci
+
+- ci: reduce push_all concurrency even further due to ratelimits [#64111](https://github.com/sourcegraph/sourcegraph/pull/64111)
+- ci: check command out for error when git fails [#63993](https://github.com/sourcegraph/sourcegraph/pull/63993)
+- ci: reduce push_all concurrency due to ratelimits [#64106](https://github.com/sourcegraph/sourcegraph/pull/64106)
+- ci: only emit bazel execlog artifact for 'test' commands [#63916](https://github.com/sourcegraph/sourcegraph/pull/63916)
+
+#### Release
+
+- release: check for marker in container files instead of binary [#64205](https://github.com/sourcegraph/sourcegraph/pull/64205)
+  - release: check contiainer directory `/assets-dist` for marker instead of frontend binary
+
+
+#### Sg
+
+- sg: cloud ephemeral - do no trigger builds on main-dry-run [#64190](https://github.com/sourcegraph/sourcegraph/pull/64190)
+  - sg: deny deployment of `main-dry-run` branches on Cloud Ephemeral.
+- sg: better err msg for when we fail to insert to bigquery [#63873](https://github.com/sourcegraph/sourcegraph/pull/63873)
+  - sg: provide a better error message when we fail to insert into bigquery
+  - sg: stop puslishing to bigquery if we get 3 errors in a row
+- sg: do not try to publish analytics when it is disabled [#63800](https://github.com/sourcegraph/sourcegraph/pull/63800)
+  - sg - only start the analytics background publisher when analytics are enabled
+- sg: return different error types depending on secret failure [#63779](https://github.com/sourcegraph/sourcegraph/pull/63779)
+- sg: provide suggestions we fail to get local gcp account email address [#64325](https://github.com/sourcegraph/sourcegraph/pull/64325)sg - provide steps a user can follow if we fail to get the local gcp email address
+- sg: acknowledge command execution state to avoid recursion when executing short running commands [#64181](https://github.com/sourcegraph/sourcegraph/pull/64181)
+
+#### Batches
+
+- batches: switch github app installation handling from redirect flow to webhooks [#64036](https://github.com/sourcegraph/sourcegraph/pull/64036)
+  - When installing a GitHub app for batch changes, the instance now waits for a callback from GitHub to complete the installation to avoid issues from eventual consistency.
+- batches: don't request unnecessary info that's likely to cause GH errors [#64299](https://github.com/sourcegraph/sourcegraph/pull/64299)
+  - fix(batches): improve GitHub Apps integration reliability by simplifying the data requested from GitHub
+- batches: show warning instead of error when the changeset status is not FAILED [#64243](https://github.com/sourcegraph/sourcegraph/pull/64243)
+  - Batch changes that are still retrying now show a warning instead of an error.
+
+#### Others
+
+- Try workaround for bad index choice when updating execution logs [#64328](https://github.com/sourcegraph/sourcegraph/pull/64328)
+- block URLs without a hostname [#64248](https://github.com/sourcegraph/sourcegraph/pull/64248)
+- uses the same base64 for decoding we use for encoding the UsageCursor [#64290](https://github.com/sourcegraph/sourcegraph/pull/64290)
+- Don't propagate un-translated source ranges [#64263](https://github.com/sourcegraph/sourcegraph/pull/64263)
+- Handle sub-repo permissions in CodeGraphData API [#64241](https://github.com/sourcegraph/sourcegraph/pull/64241)
+- Fixes incorrect highlighting for comments at the start of a file [#64235](https://github.com/sourcegraph/sourcegraph/pull/64235)Fixes incorrect syntax highlighting when a comment is present at the start of a file.
+- connection pending alert and alert content alignment [#64120](https://github.com/sourcegraph/sourcegraph/pull/64120)
+- set timeout for web-sveltekit/unit_tests to moderate [#63879](https://github.com/sourcegraph/sourcegraph/pull/63879)
+- Add Exists method to dbworker Store to avoid COUNT(*) [#64297](https://github.com/sourcegraph/sourcegraph/pull/64297)
+- Prefer SCIP uploads over LSIF uploads [#64217](https://github.com/sourcegraph/sourcegraph/pull/64217)Fixes a bug where old LSIF uploads would also be used for code
+navigation even when newer SCIP uploads were available for the
+same language, potentially leading to duplicate results in the reference
+panel. With this change, scip-go uploads shadow the uploads
+for lsif-go, and similarly for other indexers following the scip-X/lsif-X naming
+convention.
+- Synchronize access to reads of fields in retry test [#63967](https://github.com/sourcegraph/sourcegraph/pull/63967)
+- add extra check for code intelligence inference [#64083](https://github.com/sourcegraph/sourcegraph/pull/64083)
+- De-dup and concurrent-ify file content requests & splitting [#64169](https://github.com/sourcegraph/sourcegraph/pull/64169)
+- Handle potential nil reference properly [#64265](https://github.com/sourcegraph/sourcegraph/pull/64265)
+- add commit signing filter to `credentialForGitHubAppExists` [#64128](https://github.com/sourcegraph/sourcegraph/pull/64128)
+- make invalid token error message visible while adding external services [#60876](https://github.com/sourcegraph/sourcegraph/pull/60876)
+
+#### Telemetry
+
+- telemetry: silence invalid events that we already know about [#64084](https://github.com/sourcegraph/sourcegraph/pull/64084)
+
+## Chore
+
+
+#### Others
+
+- Mark flaky web-sveltekit tests as manual [#63874](https://github.com/sourcegraph/sourcegraph/pull/63874)
+- Frontend does not need disk [#64273](https://github.com/sourcegraph/sourcegraph/pull/64273)
+- Make return type more obvious [#63651](https://github.com/sourcegraph/sourcegraph/pull/63651)
+- Update main occurrence extraction code to allow for symbol-based matching [#64082](https://github.com/sourcegraph/sourcegraph/pull/64082)
+- Rename Index -> AutoIndexJob [#63955](https://github.com/sourcegraph/sourcegraph/pull/63955)
+- Reduce frequency of COUNT(*) on lsif_indexes [#64288](https://github.com/sourcegraph/sourcegraph/pull/64288)
+- Bump version of sourcegraph/log library [#64233](https://github.com/sourcegraph/sourcegraph/pull/64233)
+- Remove cmd/frontend/external/app [#64054](https://github.com/sourcegraph/sourcegraph/pull/64054)
+- Remove redis init side-effect of app.NewHandler [#64062](https://github.com/sourcegraph/sourcegraph/pull/64062)
+- Don't pass nil context [#64055](https://github.com/sourcegraph/sourcegraph/pull/64055)
+- Move codenav types to lower-level package [#64141](https://github.com/sourcegraph/sourcegraph/pull/64141)
+- Replace 'dumps' terminology in comments [#63775](https://github.com/sourcegraph/sourcegraph/pull/63775)
+- Change some APIs to use symbols instead of monikers [#64029](https://github.com/sourcegraph/sourcegraph/pull/64029)
+- Rename uploadstore packages for clarity [#63931](https://github.com/sourcegraph/sourcegraph/pull/63931)
+- Remove incorrectly logged warning [#64267](https://github.com/sourcegraph/sourcegraph/pull/64267)
+- Use binary search over symbols array [#64240](https://github.com/sourcegraph/sourcegraph/pull/64240)
+- De-duplicate CTE for visible uploads [#64232](https://github.com/sourcegraph/sourcegraph/pull/64232)
+- Remove unused loghandlers package [#64067](https://github.com/sourcegraph/sourcegraph/pull/64067)
+- move internal/conf/validation to cmd/frontend [#64064](https://github.com/sourcegraph/sourcegraph/pull/64064)
+- Init userpasswd provider where we initialize every other authn provider [#64061](https://github.com/sourcegraph/sourcegraph/pull/64061)
+- remove flaky flag from svelte e2e_test [#64123](https://github.com/sourcegraph/sourcegraph/pull/64123)
+- Mark flaky test as manual [#63968](https://github.com/sourcegraph/sourcegraph/pull/63968)
+- Factor out sub-query for locating nearest uploads [#64210](https://github.com/sourcegraph/sourcegraph/pull/64210)
+- Remove global externalURL watcher [#64058](https://github.com/sourcegraph/sourcegraph/pull/64058)
+- re-enable e2e tests for web-sveltekit [#63910](https://github.com/sourcegraph/sourcegraph/pull/63910)
+- Replace QueuedCount -> CountByState with bitset parameter [#64302](https://github.com/sourcegraph/sourcegraph/pull/64302)
+- Deglobalize oneclickexporter instance [#64066](https://github.com/sourcegraph/sourcegraph/pull/64066)
+- Make location fetching queries more uniform [#64026](https://github.com/sourcegraph/sourcegraph/pull/64026)
+- Document tech debt wrt multiple doc traversals [#64006](https://github.com/sourcegraph/sourcegraph/pull/64006)
+- Unify LsifStore.*SymbolUsages APIs into one [#64076](https://github.com/sourcegraph/sourcegraph/pull/64076)
+- Add docs for RepoStore methods [#64283](https://github.com/sourcegraph/sourcegraph/pull/64283)
+- Rename URI -> DocumentPath [#63979](https://github.com/sourcegraph/sourcegraph/pull/63979)
+- Remove unused TTL in object.Storage config [#63947](https://github.com/sourcegraph/sourcegraph/pull/63947)
+- Move cmd/frontend/webhooks to cmd/frontend/internal [#64157](https://github.com/sourcegraph/sourcegraph/pull/64157)
+- Rename type Bytes -> Size [#64183](https://github.com/sourcegraph/sourcegraph/pull/64183)
+- Unconditionally call endObservation [#64150](https://github.com/sourcegraph/sourcegraph/pull/64150)
+- move internal/highlight to cmd/frontend [#64065](https://github.com/sourcegraph/sourcegraph/pull/64065)
+- Bubble precise Usages instead of Locations [#64118](https://github.com/sourcegraph/sourcegraph/pull/64118)
+- Switch over to fake RepoStore in codenav tests [#64284](https://github.com/sourcegraph/sourcegraph/pull/64284)
+- move internal/suspiciousnames to cmd/frontend/internal [#64071](https://github.com/sourcegraph/sourcegraph/pull/64071)
+- Simplify license routines [#64068](https://github.com/sourcegraph/sourcegraph/pull/64068)
+- Use Option type and rename API [#63820](https://github.com/sourcegraph/sourcegraph/pull/63820)
+- Bump autoindexing image SHAs [#63801](https://github.com/sourcegraph/sourcegraph/pull/63801)
+- Move and clean up test code for syntactic usages [#64318](https://github.com/sourcegraph/sourcegraph/pull/64318)
+- Remove unnecessary _ imports [#64158](https://github.com/sourcegraph/sourcegraph/pull/64158)
+- remove cmd/frontend/external redirection package [#64070](https://github.com/sourcegraph/sourcegraph/pull/64070)
+- Consolidate mocks for dbworker/store.Store type [#64294](https://github.com/sourcegraph/sourcegraph/pull/64294)
+- Consolidate mocks for uploads's Store type [#64286](https://github.com/sourcegraph/sourcegraph/pull/64286)
+- move cmd/frontend/oneclickexport to cmd/frontend/internal/oneclickexport [#64069](https://github.com/sourcegraph/sourcegraph/pull/64069)
+- Move authn into cmd/frontend [#63648](https://github.com/sourcegraph/sourcegraph/pull/63648)GitLab code host connections were [able to sync permissions by mapping Sourcegraph users to GitLab users via the username property of an external OIDC or SAML provider](https://sourcegraph.com/docs/admin/code_hosts/gitlab#administrator-sudo-level-access-token) that is shared across Sourcegraph and GitLab. This integration stopped working a long time ago, and it has been removed in this release.
+- Replace calls to deprecated ioutil.TempFile [#64177](https://github.com/sourcegraph/sourcegraph/pull/64177)
+
+#### Svelte
+
+- svelte: Add manual entries for repo sub pages to development proxy [#64313](https://github.com/sourcegraph/sourcegraph/pull/64313)
+- svelte: Disable tests which time out [#63844](https://github.com/sourcegraph/sourcegraph/pull/63844)
+- svelte: Refactor infinity query implementation [#63824](https://github.com/sourcegraph/sourcegraph/pull/63824)
+- svelte: fix test by removing duplicate aria-label [#63942](https://github.com/sourcegraph/sourcegraph/pull/63942)
+- svelte: Commit/diff style and behavior tweaks [#63785](https://github.com/sourcegraph/sourcegraph/pull/63785)
+- svelte: Refactor repo loaders [#63828](https://github.com/sourcegraph/sourcegraph/pull/63828)
+- svelte: Clean up dependencies [#63777](https://github.com/sourcegraph/sourcegraph/pull/63777)
+
+#### Enterpriseportal
+
+- enterpriseportal: rewrite subscriptions API tests to be table-driven [#63831](https://github.com/sourcegraph/sourcegraph/pull/63831)
+- enterpriseportal: simplify display_name constraint [#63835](https://github.com/sourcegraph/sourcegraph/pull/63835)
+
+#### Telemetrygateway
+
+- telemetrygateway: gracefully handle sams introspectToken cancelation [#63809](https://github.com/sourcegraph/sourcegraph/pull/63809)
+
+#### Bazel
+
+- bazel: re-enable remote caching of Copy{File,Directory,ToDirectory} actions [#64153](https://github.com/sourcegraph/sourcegraph/pull/64153)
+- bazel: emit json profile for image push jobs [#64188](https://github.com/sourcegraph/sourcegraph/pull/64188)
+- bazel: rework push_all to improve concurrency by avoiding bazel server lock (round 2) [#64079](https://github.com/sourcegraph/sourcegraph/pull/64079)
+- bazel: emit json profile for image push jobs (properly) [#64189](https://github.com/sourcegraph/sourcegraph/pull/64189)
+- bazel: disable stamping on rust_binary targets [#64007](https://github.com/sourcegraph/sourcegraph/pull/64007)
+
+#### Config
+
+- config: clarify env var already registered panic [#63784](https://github.com/sourcegraph/sourcegraph/pull/63784)
+  - When conflicting env var are detected, print the two to ease debugging.
+
+#### Executors
+
+- executors: Native Kubernetes Executors default to use single job pod [#64088](https://github.com/sourcegraph/sourcegraph/pull/64088)
+
+#### Codeintel
+
+- codeintel: Derive TargetPathWithoutRoot dynamically [#63986](https://github.com/sourcegraph/sourcegraph/pull/63986)
+- codeintel: Move mock generation near interface package [#64000](https://github.com/sourcegraph/sourcegraph/pull/64000)
+- codeintel: Simplify code using upload filtering [#63997](https://github.com/sourcegraph/sourcegraph/pull/63997)
+- codeintel: Pass UsageKind instead of raw column names [#64003](https://github.com/sourcegraph/sourcegraph/pull/64003)
+- codeintel: replaces lsp.Range uses with scip.Range [#64178](https://github.com/sourcegraph/sourcegraph/pull/64178)
+- codeintel: Rename local variables for clarity [#63983](https://github.com/sourcegraph/sourcegraph/pull/63983)
+- codeintel: Move RequestState construction to separate func [#63998](https://github.com/sourcegraph/sourcegraph/pull/63998)
+- codeintel: Rename uploads/../Store -> codegraph/../DataStore [#64001](https://github.com/sourcegraph/sourcegraph/pull/64001)
+
+#### Search
+
+- search: update search API call sites to set the version explicitly [#63782](https://github.com/sourcegraph/sourcegraph/pull/63782)
+- search: update logging of search durations [#64269](https://github.com/sourcegraph/sourcegraph/pull/64269)
+
+#### Local
+
+- local: clear ambiguity in between sg version|live [#64122](https://github.com/sourcegraph/sourcegraph/pull/64122)
+  - `sg version` explicitly mentions that it's the CLI version that's printed out, not any instance version.
+- local: use //cmd/frontend:frontend_nobundle for bazel commandsets [#64085](https://github.com/sourcegraph/sourcegraph/pull/64085)
+
+#### Search_jobs
+
+- search_jobs: add janitor job [#64186](https://github.com/sourcegraph/sourcegraph/pull/64186)The new background job drastically reduces the size of the `exhaustive_*` tables and improves performance of the Search Jobs GQL API.
+- search_jobs: improve description on main page [#63992](https://github.com/sourcegraph/sourcegraph/pull/63992)
+- search_jobs: remove label "admin" from contact card [#63823](https://github.com/sourcegraph/sourcegraph/pull/63823)
+
+#### Cody
+
+- cody: allow setting "cody.contextFilters" in site config without feature flag [#63881](https://github.com/sourcegraph/sourcegraph/pull/63881)
+
+#### Frontend
+
+- frontend: use explicit cache for admin analytics [#64077](https://github.com/sourcegraph/sourcegraph/pull/64077)
+
+#### Worker
+
+- worker: move aggregated user stats job to worker [#64033](https://github.com/sourcegraph/sourcegraph/pull/64033)
+- worker: disable jobs based on ENVs [#63853](https://github.com/sourcegraph/sourcegraph/pull/63853)
+- worker: move event_logs janitor routines to worker [#63981](https://github.com/sourcegraph/sourcegraph/pull/63981)
+- worker: move llm token counter to worker [#64008](https://github.com/sourcegraph/sourcegraph/pull/64008)
+- worker: move refreshAnalyticsCache to worker [#64041](https://github.com/sourcegraph/sourcegraph/pull/64041)
+
+#### Log
+
+- log: remove use of log15 in ghe-feeder [#64131](https://github.com/sourcegraph/sourcegraph/pull/64131)
+
+#### Ci
+
+- ci: emit execlog for image push jobs [#64130](https://github.com/sourcegraph/sourcegraph/pull/64130)
+
+#### Sg
+
+- sg: remove 'sg telemetry' and related docs [#63763](https://github.com/sourcegraph/sourcegraph/pull/63763)
+  - `sg`: the deprecated `sg telemetry` command for allowlisting export of V1 telemetry from Cloud instances has been removed. Use telemetry V2 instead.
+- sg: clean up help formatting [#63860](https://github.com/sourcegraph/sourcegraph/pull/63860)
+
+## Ci
+
+
+#### Others
+
+- add cloud controller gql compat test [#64092](https://github.com/sourcegraph/sourcegraph/pull/64092)
+- automatic retry push images job at least 1 [#64145](https://github.com/sourcegraph/sourcegraph/pull/64145)
+
+## Perf
+
+
+#### Others
+
+- Find syntactic matches concurrently [#63937](https://github.com/sourcegraph/sourcegraph/pull/63937)
+
+## Refactor
+
+
+#### Github
+
+- github: Have a dedicated PublicRepository type [#63607](https://github.com/sourcegraph/sourcegraph/pull/63607)
+
+#### Codeintel
+
+- codeintel: Extracts a MappedIndex abstraction over uploads [#63781](https://github.com/sourcegraph/sourcegraph/pull/63781)
+
+#### Others
+
+- steps the usage cursor provenance state in a single place [#64321](https://github.com/sourcegraph/sourcegraph/pull/64321)
+- handles Cursor uniformly over all usage provenances [#64319](https://github.com/sourcegraph/sourcegraph/pull/64319)
+- renames usage cursor and adds fields for future syntactic cursor [#64208](https://github.com/sourcegraph/sourcegraph/pull/64208)
+
+#### Svelte
+
+- svelte: Reduce logo complexity [#64274](https://github.com/sourcegraph/sourcegraph/pull/64274)
+
+## Reverts
+
+- Revert "Cody: add support for neovim, cody-cli, eclipse, and visualstudio clients [#0](https://github.com/sourcegraph/sourcegraph/pull/63854)
+- Revert "chore(ci): post instructions for PR sections in a comment" [#64176](https://github.com/sourcegraph/sourcegraph/pull/64187)
+
+## Uncategorized
+
+- feat(code insights): language stats speed improvements by using archive loading [#62946](https://github.com/sourcegraph/sourcegraph/pull/62946)
+  - Language stats queries now request one archive from gitserver instead of individual file requests. This leads to a huge performance improvement. Even extra large repositories like chromium are now able to compute within one minute. Previously they timed out.
+- various improvements to saved searches [#63539](https://github.com/sourcegraph/sourcegraph/pull/63539)
+  - Improved the saved searches feature, which lets you save search queries to easily reuse them later and share them with other people in an organization.
+  - Added the ability to transfer ownership of a saved search to a user's organizations or from an organization to a user's account.
+  - Removed a long-deprecated and ineffective settings `search.savedQueries` field. You can manage saved searches in a user's or organization's profile area (e.g., at `/user/searches`).
+- Correctly re-map source ranges in new SCIP-based APIs [#63630](https://github.com/sourcegraph/sourcegraph/pull/63630)
+- Move internal/session into cmd/frontend/internal [#63649](https://github.com/sourcegraph/sourcegraph/pull/63649)
+- subrepo: More explicitly define supported hosts [#63650](https://github.com/sourcegraph/sourcegraph/pull/63650)
+- licensecheck: Make proper goroutine [#63655](https://github.com/sourcegraph/sourcegraph/pull/63655)
+- Remove old reference to env var that no longer exists [#63656](https://github.com/sourcegraph/sourcegraph/pull/63656)
+- schema: Remove unused extension schema file [#63657](https://github.com/sourcegraph/sourcegraph/pull/63657)
+- dotcom: Remove dotcom on-by-default Cloudflare trust mode [#63658](https://github.com/sourcegraph/sourcegraph/pull/63658)
+- webhooks: Polish UI components [#63664](https://github.com/sourcegraph/sourcegraph/pull/63664)
+- webhooks: Deterministically match webhook events to repos [#63668](https://github.com/sourcegraph/sourcegraph/pull/63668)
+- gating: Add individual switches for disabling tools features [#63686](https://github.com/sourcegraph/sourcegraph/pull/63686)
+- Svelte: implement new reference panel against new Usages API [#63724](https://github.com/sourcegraph/sourcegraph/pull/63724)
+- Usages API: implement surroundingContent [#63730](https://github.com/sourcegraph/sourcegraph/pull/63730)
+- authz: Drop requirement for installing authz providers in every service [#63743](https://github.com/sourcegraph/sourcegraph/pull/63743)
+- make pagination hooks store filter & query params in URL, not just pagination params [#63744](https://github.com/sourcegraph/sourcegraph/pull/63744)
+- Update comment and decode bytes instead [#63754](https://github.com/sourcegraph/sourcegraph/pull/63754)
+- Svelte: some unrelated cleanups [#63757](https://github.com/sourcegraph/sourcegraph/pull/63757)
+- fix/internal/txemail: add timeout for SMTP connection establishment [#63759](https://github.com/sourcegraph/sourcegraph/pull/63759)
+  - Instead of waiting forever, we wait at most 30 seconds before giving up when trying to connect to the configured mail server when sending an email.
+- feat/graphql/access_tokens: send access token creation/deletion emails in background and create special message for dial errors [#63760](https://github.com/sourcegraph/sourcegraph/pull/63760)
+  - When creating or deleting an access token, we no longer wait for the email to be sent before returning to the caller. Instead, we now send it in the background.
+- Add more Completions handler tests [#63761](https://github.com/sourcegraph/sourcegraph/pull/63761)NA
+- Search: make 'exclude tests' more general [#63762](https://github.com/sourcegraph/sourcegraph/pull/63762)
+- Minor refactoring, fixes [#63766](https://github.com/sourcegraph/sourcegraph/pull/63766)NA
+- Svelte: add more general shrinkable path [#63770](https://github.com/sourcegraph/sourcegraph/pull/63770)
+- feature/db/sub_repo_perms: add IPs column to sub repo perms [#63771](https://github.com/sourcegraph/sourcegraph/pull/63771)
+  - The sub_repo_permissions table now has an ips column to store the associated IP address associated with each path rule.
+- security: Auto-update package lockfiles for Sourcegraph base images [#63776](https://github.com/sourcegraph/sourcegraph/pull/63776)
+- gateway: Don't panic because of duplicate env var registration [#63787](https://github.com/sourcegraph/sourcegraph/pull/63787)
+- RFC 969 API boilerplate [#63789](https://github.com/sourcegraph/sourcegraph/pull/63789)
+- Structural search: fix precise lang filtering [#63791](https://github.com/sourcegraph/sourcegraph/pull/63791)
+- feature: update `sg release cut` to automate stitch graph gen and release branch creation [#63794](https://github.com/sourcegraph/sourcegraph/pull/63794)
+- Wolfi image for Sourcegraph Frontend [#63798](https://github.com/sourcegraph/sourcegraph/pull/63798)
+- fix(nix/p4-fusion): update p4-fusion helix-api hashes [#63805](https://github.com/sourcegraph/sourcegraph/pull/63805)
+- Move Cody Web to beta [#63806](https://github.com/sourcegraph/sourcegraph/pull/63806)
+- feat/lib/telemetrygateway: expose simple Dial [#63810](https://github.com/sourcegraph/sourcegraph/pull/63810)
+- internal/database/sub_repo_permissions: modify store to be able to insert ip based permissions [#63811](https://github.com/sourcegraph/sourcegraph/pull/63811)The sub_repositorypermissions database store can now save and retrieve the IP addresses associated with each path rule.
+- Several fixes around merging modelconfig, and the current Cody Gateway data [#63814](https://github.com/sourcegraph/sourcegraph/pull/63814)NA
+- Svelte: optimize `observeIntersection` [#63816](https://github.com/sourcegraph/sourcegraph/pull/63816)
+- change model identifier for finetuned deepseek model [#63817](https://github.com/sourcegraph/sourcegraph/pull/63817)
+- Syntactic indexing non local refs java [#63822](https://github.com/sourcegraph/sourcegraph/pull/63822)
+- feat/sg/msp: helpful error on cloudsqlproxy port conflict [#63830](https://github.com/sourcegraph/sourcegraph/pull/63830)
+- feat/sg/enterprise: add 'sg enterprise set-name' [#63832](https://github.com/sourcegraph/sourcegraph/pull/63832)
+- updated error messaging for blocked requests due to abuse [#63836](https://github.com/sourcegraph/sourcegraph/pull/63836)
+- gitserver: Add option to allow setting custom context line count [#63840](https://github.com/sourcegraph/sourcegraph/pull/63840)
+- misc saved searches followups [#63841](https://github.com/sourcegraph/sourcegraph/pull/63841)
+- gitserver: Add OctopusMergeBase RPC method [#63842](https://github.com/sourcegraph/sourcegraph/pull/63842)
+- pr-auditor: use pr-auditor from devx-service [#63847](https://github.com/sourcegraph/sourcegraph/pull/63847)
+- Cody: add access token callback pages for CLI, Eclipse and VS [#63849](https://github.com/sourcegraph/sourcegraph/pull/63849)
+- Cody: add support for neovim, cody-cli, eclipse, and visualstudio clients [#63851](https://github.com/sourcegraph/sourcegraph/pull/63851)
+  - Fix HTTP 406 error when using the Neovim Cody plugin with Enterprise instances
+
+- chore/lib/telemetrygateway: fixup Dial helper [#63862](https://github.com/sourcegraph/sourcegraph/pull/63862)
+- Blame: fix some issues with the stream [#63865](https://github.com/sourcegraph/sourcegraph/pull/63865)
+  - Fixed an issue with blame view that can cause retry loops and error pages that block interaction with the rest of the UI
+- docs: Add alternate names and links in GraphQL docs [#63867](https://github.com/sourcegraph/sourcegraph/pull/63867)
+- show saved searches in new global navbar [#63868](https://github.com/sourcegraph/sourcegraph/pull/63868)
+- factor out PatternConstrainedInput [#63869](https://github.com/sourcegraph/sourcegraph/pull/63869)
+- Add configuration for Intent Detection API [#63871](https://github.com/sourcegraph/sourcegraph/pull/63871)
+- Prompt Library [#63872](https://github.com/sourcegraph/sourcegraph/pull/63872)
+  - The Prompt Library lets you create, share, and browse chat prompts for use with Cody. Prompts are owned by users or organizations, and site admins can make prompts public so that all users on the instance can see and use them. To use a prompt from your Prompt Library in Cody, select it in the Prompts dropdown in the Cody chat message field.
+- Integrate Cohere re-ranking API [#63877](https://github.com/sourcegraph/sourcegraph/pull/63877)
+- Special oauth containers [#63880](https://github.com/sourcegraph/sourcegraph/pull/63880)
+- Feature: db connection pinger and validator [#63884](https://github.com/sourcegraph/sourcegraph/pull/63884)
+- Update CodyLLMConfiguration GraphQL object to be modelconfig aware [#63886](https://github.com/sourcegraph/sourcegraph/pull/63886)NA
+- sg: check for nil multiError [#63889](https://github.com/sourcegraph/sourcegraph/pull/63889)
+- Search: add regex support to `repo:has.meta()` [#63891](https://github.com/sourcegraph/sourcegraph/pull/63891)
+  - `repo:has.meta()` predicate now supports regex patterns for keys and values
+- Fixes re: Cody Pro x Sourcegraph-supplied models [#63892](https://github.com/sourcegraph/sourcegraph/pull/63892)NA
+- cody-gateway: handle missing Google response [#63895](https://github.com/sourcegraph/sourcegraph/pull/63895)cody-gateway: log missing Google response as warning
+- Svelte: fix css selector [#63896](https://github.com/sourcegraph/sourcegraph/pull/63896)
+- self hosted models [#63899](https://github.com/sourcegraph/sourcegraph/pull/63899)Cody Enterprise: added a new configuration for self-hosting models. Reach out to support if you would like to use this feature as it is in early access.
+- Adds unit tests for syntactic usages [#63900](https://github.com/sourcegraph/sourcegraph/pull/63900)
+- [sg] Make rfc command use private RFCs by default [#63902](https://github.com/sourcegraph/sourcegraph/pull/63902)
+- Unify naming of used/ignored context [#63903](https://github.com/sourcegraph/sourcegraph/pull/63903)
+- track usage stats for saved searches in UTC day increments [#63904](https://github.com/sourcegraph/sourcegraph/pull/63904)
+- query Repository.id to support Apollo Client caching [#63905](https://github.com/sourcegraph/sourcegraph/pull/63905)
+- withAuthenticatedUser: use react-router-dom hooks & add test [#63906](https://github.com/sourcegraph/sourcegraph/pull/63906)
+- show org name not displayName in most places [#63907](https://github.com/sourcegraph/sourcegraph/pull/63907)
+  - The user menu and other filter menus now show the names of organizations, not their "display names", to avoid ambiguity. For example, these menus will now show `abc-corp` not `ABC Corp` (if the latter was the `abc-corp`'s display name).
+- add saved search visibility, draft, and timestamps [#63909](https://github.com/sourcegraph/sourcegraph/pull/63909)
+  - Saved searches can now be made public (by site admins), which means all users can view them. This is a great way to share useful search queries with all users of a Sourcegraph instance.
+  - Saved searches can be marked as a "draft", which is a gentle indicator that other people shouldn't use it yet.
+- fix(build-tracker): Failed back-compat doesn't count towards branch-locking quota [#63911](https://github.com/sourcegraph/sourcegraph/pull/63911)
+- sg: enable alerting by default for production projects [#63912](https://github.com/sourcegraph/sourcegraph/pull/63912)
+- Add separate shadow value for hovercards [#63918](https://github.com/sourcegraph/sourcegraph/pull/63918)
+- GraphQL: improve query cost violation message [#63921](https://github.com/sourcegraph/sourcegraph/pull/63921)
+- fix/frontend/httpapi: improve request reader [#63923](https://github.com/sourcegraph/sourcegraph/pull/63923)
+- saved searches & prompt library fixes [#63930](https://github.com/sourcegraph/sourcegraph/pull/63930)
+- remove "organizations aren't supported" page on dotcom [#63932](https://github.com/sourcegraph/sourcegraph/pull/63932)
+- prevent orgs from being named "global" on dotcom [#63933](https://github.com/sourcegraph/sourcegraph/pull/63933)
+- allow non-site admins to list their orgs' members on dotcom [#63934](https://github.com/sourcegraph/sourcegraph/pull/63934)
+- show "Copied" indicator when copying an access token [#63936](https://github.com/sourcegraph/sourcegraph/pull/63936)
+- codeintel: GitTreeTranslator rewrite [#63938](https://github.com/sourcegraph/sourcegraph/pull/63938)
+- repoupdater: Make batches init jobs dependent on batches.IsEnabled [#63939](https://github.com/sourcegraph/sourcegraph/pull/63939)
+- [update] Remove sleep in goroutine for webhook handlers [#63940](https://github.com/sourcegraph/sourcegraph/pull/63940)
+- support getting other orgs on dotcom from the GraphQL API [#63941](https://github.com/sourcegraph/sourcegraph/pull/63941)
+- misc improvements to graphqlbackend [#63943](https://github.com/sourcegraph/sourcegraph/pull/63943)
+- explicitly check viewer access to settings in GraphQL API [#63945](https://github.com/sourcegraph/sourcegraph/pull/63945)
+- use the viewerSettings GraphQL API instead of the 5y+-deprecated viewerConfiguration API [#63949](https://github.com/sourcegraph/sourcegraph/pull/63949)
+- upgrade vitest to latest [#63951](https://github.com/sourcegraph/sourcegraph/pull/63951)
+- Add counter for traced requests to Fireworks [#63953](https://github.com/sourcegraph/sourcegraph/pull/63953)
+- Remove references to modelconfig.sourcegraph.pollingInterval [#63956](https://github.com/sourcegraph/sourcegraph/pull/63956)NA
+- fix/database/sub_repo_perms: don't mark TestSubRepoPermsStore_GetByUserWithIPs as Parallel [#63958](https://github.com/sourcegraph/sourcegraph/pull/63958)
+  - A race condition in the sub_repo_permissions database store test suite has been fixed.
+- Svelte rollout: add toggles for svelte-enabled pages [#63960](https://github.com/sourcegraph/sourcegraph/pull/63960)
+- fix saved searches and prompts list page for anon users [#63961](https://github.com/sourcegraph/sourcegraph/pull/63961)
+- various OrgArea fixes [#63962](https://github.com/sourcegraph/sourcegraph/pull/63962)
+- allow site admins to list org members & view user/org settings on dotcom [#63963](https://github.com/sourcegraph/sourcegraph/pull/63963)
+- Svelte: Fix Safari 17.3 groupBy usage [#63964](https://github.com/sourcegraph/sourcegraph/pull/63964)
+- finish removing chromatic [#63966](https://github.com/sourcegraph/sourcegraph/pull/63966)
+- cody: correct link to emacs-cody [#63974](https://github.com/sourcegraph/sourcegraph/pull/63974)
+- Implement server-side single-repo context fetching for RFC 969 [#63980](https://github.com/sourcegraph/sourcegraph/pull/63980)
+- [fix] Fix being unable to add batch changes credentials when rate limited [#63984](https://github.com/sourcegraph/sourcegraph/pull/63984)
+  - Fixed an issue where, when Sourcegraph is applying rate limits, batch change credentials could not be added. Sourcegraph now waits a maximum of 10 seconds to update credentials, and if it times out, it saves the credentials regardless and displays a warning to the user.
+- fix incorrect URL (/new) on saved search and prompt library pages [#63995](https://github.com/sourcegraph/sourcegraph/pull/63995)
+- feature/worker/permission syncer: perforce: sync HOST field using IP addresses [#64010](https://github.com/sourcegraph/sourcegraph/pull/64010)
+  - The perforce permissions syncer has been updated to save the IP address associated with each sub_repository_permissions rule.
+- Bring back post-sign-up route to the backend router [#64011](https://github.com/sourcegraph/sourcegraph/pull/64011)
+- authz: Compute providers on the fly [#64012](https://github.com/sourcegraph/sourcegraph/pull/64012)
+- feat/frontend/dotcom: add toggles for various online license checks [#64013](https://github.com/sourcegraph/sourcegraph/pull/64013)
+- Update the legacy link to sg doc [#64017](https://github.com/sourcegraph/sourcegraph/pull/64017)
+- Update the outdated link to #dev-experience to #discuss-dev-infra [#64018](https://github.com/sourcegraph/sourcegraph/pull/64018)
+- Maintenance Splash Page [#64019](https://github.com/sourcegraph/sourcegraph/pull/64019)
+- codeintel: returns surroundingContent from search result [#64022](https://github.com/sourcegraph/sourcegraph/pull/64022)
+- codeintel: runs occurrence and symbol search in parallel [#64023](https://github.com/sourcegraph/sourcegraph/pull/64023)
+- codeintel: allows batch retrieval of SCIP documents [#64024](https://github.com/sourcegraph/sourcegraph/pull/64024)
+- codeintel: fetches diffs from gitserver in batches [#64025](https://github.com/sourcegraph/sourcegraph/pull/64025)
+- Removes the old GitTreeTranslator API [#64027](https://github.com/sourcegraph/sourcegraph/pull/64027)
+- Remove dead collaborators invite code [#64039](https://github.com/sourcegraph/sourcegraph/pull/64039)
+- Make cody gateway usage worker a periodic routine [#64040](https://github.com/sourcegraph/sourcegraph/pull/64040)
+- Unpin openjdk-11 version in blobstore package [#64045](https://github.com/sourcegraph/sourcegraph/pull/64045)
+- bug: update version consts in updatecheck handler [#64052](https://github.com/sourcegraph/sourcegraph/pull/64052)
+- cleanup: Move azure openai provider config validation to right place [#64056](https://github.com/sourcegraph/sourcegraph/pull/64056)
+- security: Auto-update package lockfiles for Sourcegraph base images [#64060](https://github.com/sourcegraph/sourcegraph/pull/64060)
+- auth: Fix Found page response when redis is down [#64063](https://github.com/sourcegraph/sourcegraph/pull/64063)
+- codeintel: Adds a batch api for fetching multiple documents to MappedIndex [#64073](https://github.com/sourcegraph/sourcegraph/pull/64073)
+- Syntactic indexing policy toggle: UI and supporting APIs (with backcompat) [#64075](https://github.com/sourcegraph/sourcegraph/pull/64075)
+  - In site-admin APIs for updating code intelligence policies:
+    - field `indexingEnabled` is renamed to `preciseIndexingEnabled`
+    - a required `syntacticIndexingEnabled` is added (only takes effect if experimental feature is enabled)
+    - field `forIndexing` is renamed to `forPreciseIndexing`
+- codeintel: Speed up syntactic and search-based usages using batch APIs [#64078](https://github.com/sourcegraph/sourcegraph/pull/64078)
+- scip-syntax: uses `.starts_with` to check reference capture [#64081](https://github.com/sourcegraph/sourcegraph/pull/64081)
+- feat/worker/permission syncing: make sub repo permissions re-insertion fall back to original paths if ips not added yet [#64086](https://github.com/sourcegraph/sourcegraph/pull/64086)
+- Enable p4-fusion by default for Perforce code host connections [#64101](https://github.com/sourcegraph/sourcegraph/pull/64101)
+  - For Perforce code host connections, `p4-fusion` is now always enabled and the option for the much slower and unreliable `git p4` no longer exists.
+- gerrit: Add support for repositoryPathPattern [#64102](https://github.com/sourcegraph/sourcegraph/pull/64102)Added support for the `repositoryPathPattern` setting for Gerrit code host connections.
+- msp: use BUILDKITE_BUILD_CREATOR as fallback [#64104](https://github.com/sourcegraph/sourcegraph/pull/64104)
+- msp: remove old author variable [#64107](https://github.com/sourcegraph/sourcegraph/pull/64107)
+- Blob search: Fix incorrect icons in the blob search bar [#64108](https://github.com/sourcegraph/sourcegraph/pull/64108)
+- gomod: update zoekt for guardrails perf experiment [#64109](https://github.com/sourcegraph/sourcegraph/pull/64109)
+- Svelte Navigation: hide teams when own is not enabled [#64110](https://github.com/sourcegraph/sourcegraph/pull/64110)
+- search-blitz: adjust limit for snippetAttribution to match gateway [#64119](https://github.com/sourcegraph/sourcegraph/pull/64119)
+- observability: Adds useful data to traces from gosyntect.Highlight [#64121](https://github.com/sourcegraph/sourcegraph/pull/64121)
+- scip-syntax: Simplifies to two visibilities [#64124](https://github.com/sourcegraph/sourcegraph/pull/64124)
+- gomod: update zoekt to include improvement to experiment [#64125](https://github.com/sourcegraph/sourcegraph/pull/64125)
+- Support detecting search and edit intent [#64129](https://github.com/sourcegraph/sourcegraph/pull/64129)
+- SvelteKit: Add 'Tools' Menu item back to global navigation [#64134](https://github.com/sourcegraph/sourcegraph/pull/64134)
+- Svelte: do not show path section if empty [#64135](https://github.com/sourcegraph/sourcegraph/pull/64135)
+- SvelteKit: fix issue where clicking link with no href refreshed the page [#64136](https://github.com/sourcegraph/sourcegraph/pull/64136)
+- fix/internal/requestclient: read all instances of x-forwarded-for header, not just the first [#64137](https://github.com/sourcegraph/sourcegraph/pull/64137)
+- bug: parse v in target versions [#64139](https://github.com/sourcegraph/sourcegraph/pull/64139)
+- codeintel: document that pagination for usages might return extra results [#64142](https://github.com/sourcegraph/sourcegraph/pull/64142)
+- bug: fix default version [#64143](https://github.com/sourcegraph/sourcegraph/pull/64143)
+- chore(syntax-highlighter): Some cleanup for locals detection [#64144](https://github.com/sourcegraph/sourcegraph/pull/64144)
+- Bump cody web to most recent package @sourcegraph/cody-web [#64149](https://github.com/sourcegraph/sourcegraph/pull/64149)
+- docs: Specify matching behavior for usagesForSymbol(range:) [#64151](https://github.com/sourcegraph/sourcegraph/pull/64151)
+- Svelte: Bump cody web to most recent package @sourcegraph/cody-web [#64152](https://github.com/sourcegraph/sourcegraph/pull/64152)
+- Nit: adds space between tools menu item and dropdown icon [#64154](https://github.com/sourcegraph/sourcegraph/pull/64154)
+- frontend: Remove global conf server variable [#64155](https://github.com/sourcegraph/sourcegraph/pull/64155)
+- frontend: Consolidate remaining registry packages [#64156](https://github.com/sourcegraph/sourcegraph/pull/64156)
+- Add unit test for modelconfig converting starcoder completion model [#64160](https://github.com/sourcegraph/sourcegraph/pull/64160)NA
+- Relax modelconfig name restrictions [#64161](https://github.com/sourcegraph/sourcegraph/pull/64161)NA.
+- Svelte: add welcome introduction when enabling svelte for the first time [#64163](https://github.com/sourcegraph/sourcegraph/pull/64163)
+- replace modelOverridesRecommendedSettings with selfHostedModels [#64164](https://github.com/sourcegraph/sourcegraph/pull/64164)Improved configuration functionality for Cody Enterprise with Self-hosted models.
+- fix autocomplete regression in `main` ("various" provider issue) [#64165](https://github.com/sourcegraph/sourcegraph/pull/64165)N/A
+- Expose ranker relevance score in GraphQL API [#64172](https://github.com/sourcegraph/sourcegraph/pull/64172)
+- Policy patch - leave fields unchanged if they're missing from request [#64174](https://github.com/sourcegraph/sourcegraph/pull/64174)
+- docs: Weaken guarantees for Usage cursor [#64185](https://github.com/sourcegraph/sourcegraph/pull/64185)
+- Code intel: respect provenance when getting usages [#64193](https://github.com/sourcegraph/sourcegraph/pull/64193)
+- Bump @sourcegraph/cody-web to 0.3.2 [#64195](https://github.com/sourcegraph/sourcegraph/pull/64195)
+- Don't block `frontend` initialization with invalid modelconfig [#64200](https://github.com/sourcegraph/sourcegraph/pull/64200)NA
+- security: Auto-update package lockfiles for Sourcegraph base images [#64204](https://github.com/sourcegraph/sourcegraph/pull/64204)
+- search: apply phrase boosting to more queries [#64207](https://github.com/sourcegraph/sourcegraph/pull/64207)
+- sg cloud eph: simplify status [#64209](https://github.com/sourcegraph/sourcegraph/pull/64209)
+- Styling updates throughout [#64221](https://github.com/sourcegraph/sourcegraph/pull/64221)
+- Svelte: welcome banner followups [#64222](https://github.com/sourcegraph/sourcegraph/pull/64222)
+- Cody web: add server-side fetching for URL mentions [#64223](https://github.com/sourcegraph/sourcegraph/pull/64223)
+- Bump @sourcegraph/cody-web to 0.3.4 [#64224](https://github.com/sourcegraph/sourcegraph/pull/64224)
+- Chore: remove enablePreciseOccurrences feature flag [#64229](https://github.com/sourcegraph/sourcegraph/pull/64229)
+- Web: fix git blame for files that have `/stream/` in their path [#64230](https://github.com/sourcegraph/sourcegraph/pull/64230)
+  - Fixed an issue where blame view would error when the file contains the path element `/stream/`
+- codeintel: make usage-range non-optional [#64236](https://github.com/sourcegraph/sourcegraph/pull/64236)
+- ephemerals: fix feature flag name [#64237](https://github.com/sourcegraph/sourcegraph/pull/64237)
+- Reapply "soap: Fix auto-redirect to IdP when SOAP is enabled" (#64234)  [#64244](https://github.com/sourcegraph/sourcegraph/pull/64244)
+- gitserver: RawDiff checks if commits exist [#64245](https://github.com/sourcegraph/sourcegraph/pull/64245)Fixes a bug where a force push on HEAD of a repository might lead to our unindexed search failing until the indexed search had updated.
+- servicecatalog: remove searcher dep on database [#64247](https://github.com/sourcegraph/sourcegraph/pull/64247)
+- Chore: remove non-null assertions [#64249](https://github.com/sourcegraph/sourcegraph/pull/64249)
+- Svelte: fix welcome banner flashing on reload [#64251](https://github.com/sourcegraph/sourcegraph/pull/64251)
+- Cody Web: Update Cody Web to 0.3.6 [React version] [#64254](https://github.com/sourcegraph/sourcegraph/pull/64254)
+- Svelte: make closing the welcome overlay more obvious [#64256](https://github.com/sourcegraph/sourcegraph/pull/64256)
+- gomod: update zoekt for shard scanning improvement [#64264](https://github.com/sourcegraph/sourcegraph/pull/64264)
+- Update p4-fusion-sg wolfi-package [#64266](https://github.com/sourcegraph/sourcegraph/pull/64266)
+- Return 'sourcegraph' as the CodyLLMConfigurationResolver.Provider [#64276](https://github.com/sourcegraph/sourcegraph/pull/64276)NA
+- Svelte: remove site admin gate on code intel preview [#64277](https://github.com/sourcegraph/sourcegraph/pull/64277)
+- Improving Azure errors for customer containers [#64278](https://github.com/sourcegraph/sourcegraph/pull/64278)
+- Update the default Sourcegraph-supplied LLM models [#64281](https://github.com/sourcegraph/sourcegraph/pull/64281)NA?
+- Enable SCIP based APIs by default [#64285](https://github.com/sourcegraph/sourcegraph/pull/64285)
+- Update wolfi hashes [#64289](https://github.com/sourcegraph/sourcegraph/pull/64289)
+- searcher: fix benchmarks [#64292](https://github.com/sourcegraph/sourcegraph/pull/64292)
+- Search: re-add support for 'lucky' patterntype [#64293](https://github.com/sourcegraph/sourcegraph/pull/64293)
+- Update Cody Web to 0.3.7 [#64296](https://github.com/sourcegraph/sourcegraph/pull/64296)
+- Search: boost matches on quoted terms [#64298](https://github.com/sourcegraph/sourcegraph/pull/64298)
+- Return model IDs from GraphQL, not model Names [#64307](https://github.com/sourcegraph/sourcegraph/pull/64307)NA
+- Svelte: more welcome banner behavior updates [#64311](https://github.com/sourcegraph/sourcegraph/pull/64311)
+- Fix Cody Web Svelte Sidebar [#64320](https://github.com/sourcegraph/sourcegraph/pull/64320)
+- Center align Cody logo in Cody Web Sidebar [#64324](https://github.com/sourcegraph/sourcegraph/pull/64324)
+- upgrade Cody Web, always create a new chat [#64334](https://github.com/sourcegraph/sourcegraph/pull/64334)
+- Svelte: enable toggle by default [#64340](https://github.com/sourcegraph/sourcegraph/pull/64340)
+
+## Untracked
+
+The following PRs were merged onto the previous release branch but could not be automatically mapped to a corresponding commit in this release:
+- [Backport-5.5.x]: Move Cody Web to beta (#63806) [#63808](https://github.com/sourcegraph/sourcegraph/pull/63808)
+- Backport: Blame: fix some issues with the stream (#63865) [#63929](https://github.com/sourcegraph/sourcegraph/pull/63929)
+- security: Auto-update package lockfiles for Sourcegraph base images [#64035](https://github.com/sourcegraph/sourcegraph/pull/64035)
+- security: Bump openjdk-11 version in blobstore image [#64047](https://github.com/sourcegraph/sourcegraph/pull/64047)
+- appliance: backport all recent appliance changes [#64182](https://github.com/sourcegraph/sourcegraph/pull/64182)
+  - Backport all recent appliance changes. The appliance is still pre-release.
+- cherry-pick 856e41e with resolved conflicts [#64228](https://github.com/sourcegraph/sourcegraph/pull/64228)
+
 # v5.5.3956
 
 ### Reverts
