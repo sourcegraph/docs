@@ -2,45 +2,62 @@ const { Feed } = require('feed');
 const fs = require('fs');
 const path = require('path');
 
+const loadChangelog = () => {
+    const changelogPath = path.join(__dirname, '..', 'docs', 'CHANGELOG.mdx');
+    return fs.readFileSync(changelogPath, 'utf8');
+}
+
+const extractRSSComments = (content) => {
+    const regex = /\{\/\*\s*RSS=(.*?)\s*\*\/}/g;
+    const matches = [];
+    let match;
+
+    while ((match = regex.exec(content)) !== null) {
+        matches.push(JSON.parse(match[1].trim()));
+    }
+
+    return matches;
+}
+
 const generateRssFeed = () => {
-    const siteURL = 'https://example.com';
+    const baseURL = 'https://sourcegraph.com'
+    const siteURL = 'https://sourcegraph.com/docs';
     const date = new Date();
 
     const feed = new Feed({
-        title: 'Your Site Name',
-        description: 'Your site description',
+        title: 'Sourcegraph RSS',
+        description: 'RSS feed for Sourcegraph',
         id: siteURL,
-        link: siteURL,
+        link: baseURL,
         language: 'en',
         image: `${siteURL}/favicon.png`,
         favicon: `${siteURL}/favicon.ico`,
-        copyright: `All rights reserved ${date.getFullYear()}, Your Name`,
+        copyright: `All rights reserved ${date.getFullYear()}, Sourcegraph`,
         updated: date,
-        generator: 'Feed for Node.js',
+        generator: 'Sourcegraph RSS Feed',
         feedLinks: {
-            rss2: `${siteURL}/rss.xml`,
+            rss2: `${siteURL}/changelog.rss`,
         },
         author: {
-            name: 'Your Name',
-            email: 'your-email@example.com',
-            link: siteURL,
+            name: 'Sourcegraph',
+            email: 'hi@sourcegraph.com',
+            link: 'https://sourcegraph.com',
         },
     });
 
-    // Here, you would typically fetch your posts or content
-    // This is just an example
-    const posts = [
-        { title: 'Post 1', slug: 'post-1', content: 'Content 1' },
-        { title: 'Post 2', slug: 'post-2', content: 'Content 2' },
-    ];
+    const changelog = loadChangelog();
+    const rssComments = extractRSSComments(changelog);
 
-    posts.forEach((post) => {
+    // the rss comments have the structure: {/* RSS={"version":"vX.Y.Z", "releasedAt": "<TS>" */}
+    rssComments.forEach((comment) => {
+        const tag = comment.version.replace('v', '');
+        const versionDocLink = `${siteURL}/CHANGELOG#${comment.version.replaceAll('.', '')}`;
         feed.addItem({
-            title: post.title,
-            id: `${siteURL}/${post.slug}`,
-            link: `${siteURL}/${post.slug}`,
-            description: post.content,
-            date: new Date(),
+            title: `Sourcegraph ${tag}`,
+            id: comment.version,
+            link: versionDocLink,
+            description: `Sourcegraph ${tag} is now available! Note: we've updated our versioning conventions. Please see our releases page for more information.`,
+            date: new Date(comment.releasedAt),
         });
     });
 

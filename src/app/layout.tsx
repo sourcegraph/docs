@@ -55,9 +55,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 			)}
 			suppressHydrationWarning
 		>
-			<body
-				suppressHydrationWarning
-				className="flex min-h-full bg-light-bg dark:bg-dark-bg"
+		<head>
+			<link
+				rel="alternate"
+				type="application/rss+xml"
+				title="RSS Feed for Sourcegraph"
+				href="/changelog.rss"
+			/>
+		</head>
+		<body
+			suppressHydrationWarning
+			className="flex min-h-full bg-light-bg dark:bg-dark-bg"
 			>
 				<Providers>
 					<Layout>{children}</Layout>
