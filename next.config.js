@@ -1,6 +1,7 @@
 const config = require('./docs.config.js');
 const {withContentlayer} = require('next-contentlayer');
 const {updatedRedirectsData} = require('./src/data/redirects.ts');
+const {generateRssFeed} = require('./dev/rss')
 /** @type {import('next').NextConfig} */
 
 const nextConfig = {
@@ -52,4 +53,8 @@ const nextConfig = {
 	}
 };
 
-module.exports = withContentlayer(nextConfig);
+module.exports = async () => {
+	// placing this here so its part of nextjs's build process
+	await generateRssFeed();
+	return withContentlayer(nextConfig);
+};
