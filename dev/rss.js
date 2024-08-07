@@ -49,7 +49,11 @@ const generateRssFeed = () => {
     const rssComments = extractRSSComments(changelog);
 
     // the rss comments have the structure: {/* RSS={"version":"vX.Y.Z", "releasedAt": "<TS>" */}
-    rssComments.forEach((comment) => {
+    for (let idx = 0; idx < rssComments.length; idx++) {
+        const comment = rssComments[idx];
+        if (!comment.version || !comment.releasedAt) {
+            continue;
+        }
         const tag = comment.version.replace('v', '');
         const versionDocLink = `${siteURL}/CHANGELOG#${comment.version.replaceAll('.', '')}`;
         feed.addItem({
@@ -59,7 +63,7 @@ const generateRssFeed = () => {
             description: `Sourcegraph ${tag} is now available! Note: we've updated our versioning conventions. Please see our releases page for more information.`,
             date: new Date(comment.releasedAt),
         });
-    });
+    }
 
     fs.writeFileSync(path.join(__dirname, '../public/changelog.rss'), feed.rss2());
 }
