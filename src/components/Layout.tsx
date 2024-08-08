@@ -1,18 +1,18 @@
 'use client';
 
-import {Hero} from '@/components/Hero';
-import {Logo} from '@/components/Logo';
-import {MobileNavigation} from '@/components/MobileNavigation';
-import {Navigation} from '@/components/Navigation';
-import {ThemeSelector} from '@/components/ThemeSelector';
+import { Hero } from '@/components/Hero';
+import { Logo } from '@/components/Logo';
+import { MobileNavigation } from '@/components/MobileNavigation';
+import { Navigation } from '@/components/Navigation';
+import { ThemeSelector } from '@/components/ThemeSelector';
 import SourceGraphIcon from '@/components/icons/SourceGraphIcon';
 import clsx from 'clsx';
 import Link from 'next/link';
-import {usePathname} from 'next/navigation';
-import {useEffect, useState} from 'react';
-import {LogoMark} from './LogoMark';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { LogoMark } from './LogoMark';
 import VersionSelector from './VersionSelector';
-import {Search} from './search/Search';
+import { Search } from './search/Search';
 
 function GitHubIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -30,7 +30,7 @@ function Header() {
 			setIsScrolled(window.scrollY > 0);
 		}
 		onScroll();
-		window.addEventListener('scroll', onScroll, {passive: true});
+		window.addEventListener('scroll', onScroll, { passive: true });
 		return () => {
 			window.removeEventListener('scroll', onScroll);
 		};
@@ -75,7 +75,7 @@ function Header() {
 					>
 						<SourceGraphIcon className="hidden h-6 w-6 sm:block" />
 						<span className="font-semibold">
-							Ask <span className="hidden sm:inline">Source</span>
+							Ask <span className="hidden sm:inline">AI</span>
 						</span>
 					</Link>
 					<VersionSelector />
@@ -95,7 +95,7 @@ function Header() {
 	);
 }
 
-export function Layout({children}: {children: React.ReactNode}) {
+export function Layout({ children }: { children: React.ReactNode }) {
 	let pathname = usePathname();
 	let isHomePage = pathname === '/';
 
