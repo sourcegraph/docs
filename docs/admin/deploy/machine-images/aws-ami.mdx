@@ -4,11 +4,11 @@ Sourcegraph [Amazon Machine Images (AMIs)](https://docs.aws.amazon.com/AWSEC2/la
 
 Following these docs will provision the following resources:
 
-- An EC2 node running Sourcegraph
-- A root EBS volume with 50GB of storage
-- An additional EBS volume with 500GB of storage for storing code and search indices
+- An EC2 instance running Sourcegraph
+- A root EBS volume containing the EC2 instance OS, and Sourcegraph Docker images, with a default size of 50 GB
+- An additional EBS volume for storing code and search indices, with a default of 500 GB, but should be customized during deployment
 
-### Instance size chart
+### Instance Size Chart
 
 Select an AMI according and instance type to the number of users and repositories you have using this table. If you fall between two sizes, choose the larger of the two.
 
@@ -32,23 +32,23 @@ Click [here](https://github.com/sourcegraph/deploy#amazon-ec2-amis) to see the c
 
 ## Deploy Sourcegraph
 
-1. In the [instance size chart](#instance-size-chart), click the link for the AMI that matches your deployment size.
-2. Choose **Launch instance from AMI**.
-3. Name your instance.
-4. Select an **instance type** according to [the sizing chart](#instance-size-chart).
-5. **Key pair (login)**: Select or create a new Key Pair for connecting to your instance securely (this may be required in the event you need support).
-6. **Network settings**:
-   - Under "Auto-assign public IP" select "Enable".
-   - Select a **Security Group** for the instance, or create one with the following rules:
-     - Allow SSH from Anywhere: `port range 22, source 0.0.0.0/0, ::/0`
-     - Allow HTTPS from the internet: `port range 443, source 0.0.0.0/0, ::/0`
-     - Allow HTTP traffic from the internet: `port range 80, source 0.0.0.0/0, ::/0`
-   - **NOTE**: If you do not wish to have HTTP/HTTPS exposed to the public internet, you may later choose to remove these rules so that all traffic routes through your AWS load balancer.
+1. In the [instance size chart](#instance-size-chart), click the link for the AMI that matches your deployment size
+2. Choose **Launch instance from AMI**
+3. Name your instance
+4. Select an **instance type** according to [the sizing chart](#instance-size-chart)
+5. **Key pair (login)**: Create a new Key Pair, or select an existing one from your AWS account for connecting to your instance via SSH (this may be required in the event you need support)
+6. **Network settings**: Consult with your networking team for appropriate settings in your environment. To get started with a basic PoC instance (without production code), directly exposed to the internet:
+   - Under "Auto-assign public IP" select "Enable"
+   - Select a **Security Group** for the instance, or create one with rules appropriate to your needs:
+      - Allow HTTPS from the internet: `port range 443, source 0.0.0.0/0, ::/0`
+      - Allow HTTP traffic from the internet: `port range 80, source 0.0.0.0/0, ::/0`
+      - Allow SSH from your WAN IP: `port range 22, source <your WAN IP>/32`
+   - **NOTE**: Do not leave SSH open to the public internet.
+   - **NOTE**: We highly recommend deploying an Application Load Balancer in front of your instance, and adjusting / removing these rules accordingly.
 7. **Configure storage**:
    - **Root Volume:** `50GB`
-   - **EBS Volume:** `500GB` - this should be at least 25-50% *more* than the size of all your repositories on disk (you may check your GitHub/BitBucket/GitLab instance's disk usage.)
-8. Click **Launch instance**, and navigate to the public IP address in your browser. (Look for the IPv4 Public IP value in your EC2
-   instance page under the Description panel.)
+   - **EBS Volume:** `500GB` - this should be at least 25-50% *more* than the size of all your repositories on disk; you may check your GitHub / Bitbucket / GitLab instance's disk usage, and leave yourself a margin for growth
+8. Click **Launch instance**, and navigate to the public IP address in your browser; look for the IPv4 Public IP address in your EC2 instance's details page under the Description panel
 
 Once the instance has started, please allow ~5 minutes for Sourcegraph to initialize. During this time you may observe a `404 page not found` response.
 
@@ -152,11 +152,11 @@ Click **Create subnet** in your VPC subnets dashboard:
   - Port: `443`
   - Default action: Select the HTTPS target group created for the instance.
 
-### Securing your instance
+### Securing Your Instance
 
-[Configure user authentication](/admin/auth) (SSO, SAML, OpenID Connect, etc.) to give users of your Sourcegraph instance access to it.
+1. [Configure user authentication](/admin/auth) (SSO, SAML, OpenID Connect, etc.) to give users of your Sourcegraph instance access to it.
 
-Now that your instance is confirmed to be working, and you have HTTPS working through an Amazon load balancer, you may choose to secure your Sourcegraph instance further by modifying the security group/firewall rules to prevent access from the public internet. You can do this by modifying the security group/firewall rules.
+Now that your instance is confirmed to be working, and you have HTTPS working through an Application Load Balancer, we recommend securing your Sourcegraph instance further by modifying the security group rules to prevent access from the public internet.
 
 ---
 
@@ -176,7 +176,7 @@ Please take time to review the following before proceeding with the upgrades:
 #### Step 1: Stop the current instance
 
 1. Stop your current Sourcegraph AMI instance
-   - Go to the ECS console for your instance
+   - Go to the EC2 console for your instance
    - Click Instance State to Stop Instance
 2. Detach the non-root data volume (Device name: /dev/sdb/)
    - Go to the Storage section in your instance console
@@ -198,7 +198,7 @@ Please take time to review the following before proceeding with the upgrades:
  - Remove the **second** EBS volume
 7. After reviewing the settings, click **Launch Instance**
 8. Attach the detached volume to the new instance
-   - Go to the Volumes section in your ECS Console
+   - Go to the Volumes section in your EC2 Console
    - Select the volume you've detached earlier
    - Click **Actions > Attach Volume**
 9. On the `Attach volume` page:
@@ -214,11 +214,11 @@ Please refer to the upgrade procedure above if you wish to roll back your instan
 
 ---
 
-## Storage and Backups
+## Backups
 
-We strongly recommend you taking [snapshots of the entire EBS volume](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-creating-snapshot.html) on an [automatic, scheduled basis](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/snapshot-lifecycle.html).
+We strongly recommend you take [snapshots of the entire EBS volume](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-creating-snapshot.html) on an [automatic, scheduled basis](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/snapshot-lifecycle.html).
 
-## Additional resources
+## Additional Resources
 
 - [Increase the size of an Amazon EBS volume on an EC2 instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/modify-ebs-volume-on-instance.html)
 - [Change the instance type](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-resize.html)
