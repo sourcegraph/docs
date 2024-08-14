@@ -1,7 +1,7 @@
 const config = require('./docs.config.js');
 const {withContentlayer} = require('next-contentlayer');
 const {updatedRedirectsData} = require('./src/data/redirects.ts');
-const {generateRssFeed} = require('./dev/rss')
+const {generateRssFeed} = require('./dev/rss');
 /** @type {import('next').NextConfig} */
 
 const nextConfig = {
@@ -22,20 +22,32 @@ const nextConfig = {
 				destination: '/:slug*',
 				permanent: false
 			},
-			// // Redirect for docs for version 5.5 hosted at https://5.5.sourcegraph.com/
-			// {
-			// 	source: '/docs/v/5.5/:slug*',
-			// 	destination: '/docs/@5.5/:slug*',
-			// 	permanent: false,
-			// 	basePath: false
-			// },
-			// {
-			// 	source: '/docs/@5.5/:slug*',
-			// 	destination: 'https://5.5.sourcegraph.com/:slug*',
-			// 	permanent: false,
-			// 	basePath: false
-			// },
-			// Redirect for docs for version 5.3 hosted at https://5.3.sourcegraph.com/
+			// Redirect for docs for version 5.5 hosted at https://5.5.sourcegraph.com/
+			{
+				source: '/docs/v/5.5/:slug*',
+				destination: '/docs/@5.5/:slug*',
+				permanent: false,
+				basePath: false
+			},
+			{
+				source: '/docs/@5.5/:slug*',
+				destination: 'https://5.5.sourcegraph.com/:slug*',
+				permanent: false,
+				basePath: false
+			},
+			// Redirect for docs for version 5.4 hosted at https://5.4.sourcegraph.com/
+			{
+				source: '/docs/v/5.4/:slug*',
+				destination: '/docs/@5.4/:slug*',
+				permanent: false,
+				basePath: false
+			},
+			{
+				source: '/docs/@5.4/:slug*',
+				destination: 'https://5.4.sourcegraph.com/:slug*',
+				permanent: false,
+				basePath: false
+			},
 			{
 				source: '/docs/v/5.3/:slug*',
 				destination: '/docs/@5.3/:slug*',
