@@ -12,6 +12,7 @@ The following methods are supported for sign up and sign in:
 - [GitHub OAuth](#github)
 - [GitLab OAuth](#gitlab)
 - [Bitbucket Cloud OAuth](#bitbucket-cloud)
+- [Bitbucket Server OAuth](#bitbucket-server)
 - [Gerrit](#gerrit) (Beta)
 - [SAML](/admin/auth/saml)
 - [OpenID Connect](#openid-connect)
@@ -305,6 +306,33 @@ Then add the following lines to your [site configuration](/admin/config/site_con
     ]
 ```
 Replace the `clientKey` and `clientSecret` values with the values from your Bitbucket Cloud OAuth consumer.
+
+## Bitbucket Server
+
+[Configure a Bitbucket Server incoming link](https://confluence.atlassian.com/bitbucketserver0720/configure-an-incoming-link-1116282013.html). Set the following values, replacing `sourcegraph.example.com` with the IP or hostname of your
+Sourcegraph instance:
+
+- Redirect URL: `https://sourcegraph.example.com/.auth/bitbucketserver/callback`
+- Permissions:
+  - `Repositories`: `Read` (more information in [repository permissions section](/admin/permissions))
+
+After the link is created, you will need to copy the `Client ID` and the `Client Secret`.
+Then add the following lines to your [site configuration](/admin/config/site_config):
+
+```json
+{
+    // ...
+    "auth.providers": [
+      {
+        "type": "bitbucketserver",
+        "url": "https://bitbucket.example.com",
+        "displayName": "Bitbucket Server",
+        "clientID": "replace-with-the-oauth-client-id",
+        "clientSecret": "replace-with-the-oauth-client-secret"
+      }
+    ]
+```
+Replace the `clientID` and `clientSecret` values with the values from your Bitbucket Server link.
 
 ## Gerrit
 <span class="badge badge-beta">Beta</span>
