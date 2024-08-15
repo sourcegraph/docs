@@ -12,67 +12,30 @@ const nextConfig = {
 	//
 	// VERCEL_ENV is a system env var set by Vercel
 	// https://vercel.com/docs/projects/environment-variables/system-environment-variables
-	basePath: process.env.VERCEL_ENV === 'production' ? '/docs' : '',
+	// basePath: process.env.VERCEL_ENV === 'production' ? '/docs' : '',
+	basePath: '/docs',
 	async redirects() {
 		return [
 			...updatedRedirectsData,
-			// Redirect any path with pattern /docs/v/latest_sg/cody for example to /docs/cody
 			{
 				source: `/v/${config.DOCS_LATEST_VERSION}/:slug*`,
-				destination: '/:slug*',
+				destination: `https://sourcegraph.com/docs/:slug*`,
 				permanent: false
 			},
-			// Redirect for docs for version 5.5 hosted at https://5.5.sourcegraph.com/
 			{
-				source: '/docs/v/5.5/:slug*',
-				destination: '/docs/@5.5/:slug*',
-				permanent: false,
-				basePath: false
+				source: `/@${config.DOCS_LATEST_VERSION}/:slug*`,
+				destination: `https://sourcegraph.com/docs/:slug*`,
+				permanent: false
 			},
 			{
-				source: '/docs/@5.5/:slug*',
-				destination: 'https://5.5.sourcegraph.com/:slug*',
-				permanent: false,
-				basePath: false
-			},
-			// Redirect for docs for version 5.4 hosted at https://5.4.sourcegraph.com/
-			{
-				source: '/docs/v/5.4/:slug*',
-				destination: '/docs/@5.4/:slug*',
-				permanent: false,
-				basePath: false
+				source: '/v/:version(\\d+\\.\\d+)/:slug*',
+				destination: 'https://:version.sourcegraph.com/:slug*',
+				permanent: true
 			},
 			{
-				source: '/docs/@5.4/:slug*',
-				destination: 'https://5.4.sourcegraph.com/:slug*',
-				permanent: false,
-				basePath: false
-			},
-			{
-				source: '/docs/v/5.3/:slug*',
-				destination: '/docs/@5.3/:slug*',
-				permanent: false,
-				basePath: false
-			},
-			{
-				source: '/docs/@5.3/:slug*',
-				destination: 'https://5.3.sourcegraph.com/:slug*',
-				permanent: false,
-				basePath: false
-			},
-
-			// Redirect for docs for version 5.2 hosted at https://5.2.sourcegraph.com/
-			{
-				source: '/docs/v/5.2/:slug*',
-				destination: '/docs/@5.2/:slug*',
-				permanent: false,
-				basePath: false
-			},
-			{
-				source: '/docs/@5.2/:slug*',
-				destination: 'https://5.2.sourcegraph.com/:slug*',
-				permanent: false,
-				basePath: false
+				source: '/@:version(\\d+\\.\\d+)/:slug*',
+				destination: 'https://:version.sourcegraph.com/:slug*',
+				permanent: true
 			}
 		];
 	}
