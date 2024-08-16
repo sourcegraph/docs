@@ -6,11 +6,11 @@
 
 Sourcegraph v5.6.0 or later supports the ability to choose between different LLM models, allowing developers to use the best model for Cody Chat as needed.
 
-This is accomplished exposing much more flexible configuration options for Cody when using Sourcegraph Enterprise. The newer style of configuration is described next. However, you can still use the [Older style "Completions" Configuration](#Older-style-Completions-Configuration).
+This is accomplished exposing much more flexible configuration options for Cody when using Sourcegraph Enterprise. The newer style of configuration is described next. However, you can still use the [Older style "Completions" Configuration](#legacy-completions-configuration).
 
 ## Quickstart
 
-The simplest way to configure your Sourcegraph Enterprise would be to add the following configuration section to your site configuration:
+The simplest way to configure your Sourcegraph Enterprise would be to add the following configuration section to your instance's [site configuration](/admin/config/site_config):
 
 ```json
   ...
@@ -26,7 +26,7 @@ However, if you are seeking more control and wish to restrict which LLM models a
 
 ## Concepts
 
-The LLM models available for use from a Sourcegraph Enterprise instance are the union of "Sourcegraph-supplied models" and any custom models providers that you explicitlly add to your Sourcegraph instance's site configuration. For most administrators, just relying on Sourcegraph-supplied models will ensure that you are using quality models without needing to worry about the worry about the specifics.
+The LLM models available for use from a Sourcegraph Enterprise instance are the union of "Sourcegraph-supplied models" and any custom models providers that you explicitly add to your Sourcegraph instance's site configuration. For most administrators, just relying on Sourcegraph-supplied models will ensure that you are using quality models without needing to worry about the specifics.
 
 ### Sourcegraph-supplied Models
 
@@ -49,10 +49,10 @@ The `"modelFilters"` section is how you restrict which Cody Gateway models are m
 The first field is the `"statusFilter"`. Each LLM model is given a label by Sourcegraph as per its release, such as "stable", beta", or "experimental". By default, all models available on
 Cody Gateway are exposed. Using the category filter ensures that only models with a particular category are made available to your users.
 
-The `"allow"` and `"deny"` fields, are arrays of model references for what models should or should not be included. These values accept wild cards.
+The `"allow"` and `"deny"` fields, are arrays of [model references](#model-configuration) for what models should or should not be included. These values accept wild cards.
 
 
-The following examples illusrate how to use all these settings in conjunction:
+The following examples illustrate how to use all these settings in conjunction:
 
 ```json
 "modelConfiguration": {
@@ -97,7 +97,7 @@ The `"modelConfiguration"` setting also contains a `"defaultModels"` field that 
 
 The format of these strings is a "Model Reference", which is a format for uniquely identifying each LLM model exposed from your Sourcegraph instance.
 
-## Advanced Configruation
+## Advanced Configuration
 
 For most administrators, relying on the LLM models made available by Cody Gateway is sufficient. However, if even more customization is required, you can configure your own LLM providers and models.
 
@@ -155,9 +155,9 @@ The following configuration shippet defines a single provider override with the 
 
 **Server-side Configuration**
 
-The most imporant part of a provider's configuration is the `"serverSideConfig"` field. That defines how the LLM model's should be invoked, i.e. which external service or API will be called to serve LLM results.
+The most important part of a provider's configuration is the `"serverSideConfig"` field. That defines how the LLM model's should be invoked, i.e. which external service or API will be called to serve LLM requests.
 
-In the example, the `"type"` field was `"anthropic"`. Meaning that any interactions using the `"anthropic-direct"` provider would be sent directly to Anthropic, at the supplied URL and using the given access token.
+In the example, the `"type"` field was `"anthropic"`. Meaning that any interactions using the `"anthropic-direct"` provider would be sent directly to Anthropic, at the supplied `endpoint` URL using the given `accessToken`.
 
 However, Sourcegraph supports several different types of LLM API providers natively. The current set of supported LLM API providers is:
 
@@ -204,11 +204,11 @@ The following configuration snippet defines a custom model, using the `"anthropi
 }
 ```
 
-Most of the configuration fields are self-explanitory, such as labeling the model's category ("stable", "beta") or category ("accuracy", "speed"). The more important fields are described below:
+Most of the configuration fields are self-explanatory, such as labeling the model's category ("stable", "beta") or category ("accuracy", "speed"). The more important fields are described below:
 
 **modelRef**. Each model is given a unique identifier, referred to as a model reference or "mref". This is a string of the form `${providerId}::${apiVersionId}::${modelId}`.
 
-In order to associate a model with your provider, the `${providerId}` must patch. The `${modelId}` can be almost any URL-safe string.
+In order to associate a model with your provider, the `${providerId}` must match. The `${modelId}` can be almost any URL-safe string.
 
 The `${apiVersionId}` is required in order to detect compatibility issues between newer models and Sourcegraph instances. In the following example, the string "2023-06-01" is used to clarify that this LLM model should formulate API requests using that version of the Anthropic API. If you are unsure, when defining your own models you can leave this as `"unknown"`.
 
