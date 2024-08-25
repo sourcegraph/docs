@@ -64,6 +64,17 @@ It's worthwhile to note some limitations of this process:
 - Rename of a Perforce depot, including changing the depot on the Perforce server or the `repositoryPathPattern` config option, will cause a re-import of the depot.
 - Unless [permissions syncing](#repository-permissions) is enabled, Sourcegraph is not aware of the depot permissions, so it can't enforce access restrictions.
 
+## Perforce labels
+
+Perforce labels are converted to Git tags, but only under the following conditions:
+
+- The depot is fully contained within one of the label's views. (i.e. the depot is contained at `//path/to/depot/...` and the label's view is `//path/to/depot/...`).
+- The label has a Revision field that matches a single revision. (i.e. `@4521`)
+
+Perforce label names are also more flexible than git tag names, so incompatible characters are replaced with underscores. (i.e. `v1:2:3` will become `v1_2_3`)
+
+This behaviour can be disabled by setting `noConvertLabels` to `true` in the [fusion client configuration](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@44e848d4ba5a3d47bc6e8651638cfe2279d02102/-/blob/schema/perforce.schema.json?L66-131).
+
 ## Repository permissions
 
 To enforce file-level permissions for Perforce depots using the [Perforce protects file](https://www.perforce.com/manuals/cmdref/Content/CmdRef/p4_protect.html), include [the `authorization` field](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@2a716bd70c294acf1b3679b790834c4dea9ea956/-/blob/schema/perforce.schema.json?L67-78) in the configuration of the Perforce code host connection you created [above](#add-a-perforce-code-host):
@@ -192,10 +203,11 @@ When file-level permissions are enabled, Sourcegraph will read the Perforce prot
 	// The ticket value for the user (P4PASSWD). You can get this by running `p4 login -p` or `p4 login -pa`. It should look like `6211C5E719EDE6925855039E8F5CC3D2`.
 	"p4.passwd": null,
 
-	// The Perforce Server address to be used for p4 CLI (P4PORT).
+	// The Perforce Server address to be used for p4 CLI (P4PORT). It's recommended to specify the protocol prefix (e.g. tcp: or ssl:) as part of the address.
 	"p4.port": null,
 	// Other example values:
 	// - "ssl:111.222.333.444:1666"
+	// - "tcp:111.222.333.444:1666"
 
 	// The user to be authenticated for p4 CLI (P4USER).
 	"p4.user": null,
