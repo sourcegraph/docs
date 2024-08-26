@@ -1,12 +1,24 @@
 # Search Jobs
 
-<p className="subtitle">Use Search Jobs to search code at scale for large-scale organizations.</p>
-
-<Callout type="note" title="Beta"> Search Jobs feature is in Beta stage and only available for Enterprise accounts. It is enabled by default since 5.3.0.</Callout>
+Use Search Jobs to search code at scale for large-scale organizations.
 
 Search Jobs allows you to run search queries across your organization's codebase (all repositories, branches, and revisions) at scale. It enhances the existing Sourcegraph's search capabilities, enabling you to run searches without query timeouts or incomplete results.
 
 With Search Jobs, you can start a search, let it run in the background, and then download the results from the Search Jobs UI when it's done. Site administrators can **enable** or **disable** the Search Jobs feature, making it accessible to all users on the Sourcegraph instance.
+
+## Using Search Jobs
+
+To use Search Jobs, you need to:
+
+- Run a search query from your Sourcegraph instance
+- Click the result menu below the search bar to see if your query is supported by Search Jobs
+
+![run-query-for-search-jobs](https://storage.googleapis.com/sourcegraph-assets/Docs/search-jobs/search-jobs-create.png)
+
+- If your query is valid, click **Create a search job** to initiate the search job
+- You will be redirected to the "Search Jobs UI" page at `/search-jobs`, where you can view all your created search jobs. If you're a site admin, you can also view search jobs from other users on the instance
+
+![view-search-jobs](https://storage.googleapis.com/sourcegraph-assets/Docs/search-jobs/search-jobs-manage.png)
 
 ## Search results format
 
@@ -67,21 +79,6 @@ If you would like to allow your Sourcegraph instance to control the creation and
 
 - `SEARCH_JOBS_UPLOAD_MANAGE_BUCKET=true`
 
-## Using Search Jobs
-
-To use Search Jobs, you need to:
-
-- Run a search query from your Sourcegraph instance
-- Click the result menu below the search bar to see if your query is valid for the long search
-
-![run-query-for-search-jobs](https://storage.googleapis.com/sourcegraph-assets/Docs/query-serach-jobs.png)
-
-- If your query is valid, click **Run search job** to initiate the search job
-- You will be redirected to the "Search Jobs UI" page at `/search-jobs`, where you can view all your created search jobs. If you're a site admin, you can also view search jobs from other users on the instance
-
-![view-search-jobs](https://storage.googleapis.com/sourcegraph-assets/Docs/view-search-jobs.png)
-
-
 ## Supported result types
 
 Search jobs supports the following result types:
@@ -99,20 +96,20 @@ The following result types are not supported:
 The following elements of our query language are not supported:
 
 - file predicates, such as `file:has.content`, `file:has.owner`, `file:has.contributor`, `file:contains.content`
-- `.*` regexp search
+- catch-all `.*` regexp search
 - Multiple `rev` filters
 - Queries with `index: filter`
 
-<Callout type="note">The search bar already supports exhaustive searches with the `count:all` operator. However, these searches are subject to lower timeouts, making them harder to use in large codebases.</Callout>
+
+<Callout type="note">
+    Alternatively, the search bar supports the `count:all` operator which increases result limits and timeouts.
+    This works well if the search completes within a few minutes and the number of results is less than the configured display limit.
+    For longer running searches and searches with huge result sets, Search Jobs is the better choice.
+</Callout>
 
 ## Disable Search Jobs
 
-Follow these steps to disable Search Jobs and to hide the feature in the Sourcegraph UI:
-
-- Login to your Sourcegraph instance and go to the site admin
-- Next, click the site configuration
-- From here, you'll see `experimentalFeatures`
-- Set `searchJobs` to `false` and then refresh the page
+To disable Search Jobs, set `DISABLE_SEARCH_JOBS=true` in your frontend and worker services.
 
 ## FAQ
 
