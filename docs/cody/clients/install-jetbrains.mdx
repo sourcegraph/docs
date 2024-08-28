@@ -79,6 +79,74 @@ function bubbleSort(array)
   <source src="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/jb-suggest-062024.mp4" type="video/mp4"/>
 </video>
 
+## Chat
+
+Cody chat in JetBrains is available in a unified interface opened right next to your code. Once connected to Sourcegraph, a new chat input field is opened with a default `@-mention` [context chips](#context-retrieval).
+
+All your previous and existing chats are stored for later use and can be accessed via the **History** icon from the top menu. You can download them to share or use later in a `.json` file or delete them altogether.
+
+### Chat interface
+
+The chat interface is designed intuitively. Your very first chat input lives at the top of the panel, and the first message in any chat log will stay pinned to the top of the chat. After your first message, the chat input window moves to the bottom of the sidebar.
+
+Since your first message to Cody anchors the conversation, you can return to the top chat box anytime, edit your prompt, or re-run it using a different LLM model.
+
+<video width="1920" height="1080" loop playsInline controls style={{ width: '100%', height: 'auto', aspectRatio: '1920 / 1080' }}>
+  <source src="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/jb-chat-interface-0824.mp4" type="video/mp4" />
+</video>
+
+### Changing LLM model for chat
+
+<Callout type="note"> You need to be a Cody Free or Pro user to have multi-model selection capability. Enterprise users with the new [model configuration](/cody/clients/model-configuration) can use the LLM selection dropdown to choose a chat model.</Callout>
+
+For Chat:
+
+- Open chat or toggle between editor and chat
+- Click on the model selector (which by default indicates Claude 3.5 Sonnet)
+- See the selection of models and click the model you desire. This model will now be the default model going forward on any new chats
+
+For Edit:
+
+- On any file, select some code and a right-click
+- Select **Cody > Edit Code**
+- Select the default model available (this is Claude Sonnet 3.5)
+- See the selection of models and click the model you desire. This model will now be the default model going forward on any new edits
+
+### Context retrieval
+
+When you start a new Cody chat, the chat input window opens with a default `@-mention` context chips for all the context it intends to use. This context is based on your current repository and current file (or a file selection if you have code highlighted).
+
+![jb-context-retrieval](https://storage.googleapis.com/sourcegraph-assets/Docs/jb-context-retrieval-0824.jpg)
+
+At any point in time, you can edit these context chips or remove them completely if you do not want to use these as context. Any chat without a context chip will instruct Cody to use no codebase context. However, you can always provide an alternate `@-mention` file or symbols to let Cody use it as a new source of context.
+
+When you have both a repository and files @-mentioned, Cody will search the repository for context while prioritizing the mentioned files.
+
+### Selecting Context with @-mentions
+
+Cody's chat allows you to add files and symbols as context in your messages.
+
+- Type `@-file` and then a filename to include a file as a context
+- Type `@#` and then a symbol name to include the symbol's definition as context. Functions, methods, classes, types, etc., are all symbols
+
+The `@-file` also supports line numbers to query the context of large files. You can add ranges of large files to your context by @-mentioning a large file and appending a number range to the filename, for example, `@filepath/filename:1-10`.
+
+When you `@-mention` files to add to Cody’s context window, the file lookup takes `files.exclude`, `search.exclude`, and `.gitgnore` files into account. This makes the file search faster as a result up to 100ms.
+
+Moreover, when you `@-mention` files, Cody will track the number of characters in those files against the context window limit of the selected chat model. As you `@-mention` multiple files, Cody will calculate how many tokens of the context window remain. When the remaining context window size becomes too small, you get **File too large** errors for further more `@-mention` files.
+
+Cody defaults to showing @-mention context chips for all the context it intends to use. When you open a new chat, Cody will show context chips for your current repository and current file (or file selection if you have code highlighted).
+
+### Rerun prompts with different context
+
+If Cody's answer isn't helpful, you can try asking again with different context:
+
+- **Public knowledge only**: Cody will not use your own code files as context; it’ll only use knowledge trained into the base model.
+- **Current file only**: Re-run the prompt again using just the current file as context.
+- **Add context**: Provides @-mention context options to improve the response by explicitly including files, symbols, remote repositories, or even web pages (by URL).
+
+![jb-rerun-context](https://storage.googleapis.com/sourcegraph-assets/Docs/jb-rerun-context-0824.jpg)
+
 ## Autocomplete
 
 Cody provides multi-line autocomplete as you type. Autocomplete suggestions appear as inlay suggestions and are enabled by default in your JetBrains IntelliJ editor. With this setting, there is a list of programming languages supported and enabled by default.
@@ -178,10 +246,6 @@ You can use Ollama models locally for Cody’s chat and commands. This lets you 
 <video width="1920" height="1080" loop playsInline controls style={{ width: '100%', height: 'auto', aspectRatio: '1920 / 1080' }}>
     <source src="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/jb-ollama.mp4" type="video/mp4" />
  </video>
-
-## Chat history
-
-Next to the **Chat** tab is **Chat History**, which displays Cody's previous chat interactions. You can revisit any previous chat interactions to get the context of the conversation. You can export your chat history as JSON files for later use.
 
 ## Context fetching mechanism
 
