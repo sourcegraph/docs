@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react';
 import { LogoMark } from './LogoMark';
 import VersionSelector from './VersionSelector';
 import { Search } from './search/Search';
+import { Sparkles } from 'lucide-react';
 
 function GitHubIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -70,11 +71,13 @@ function Header() {
 				</div>
 				<div className="relative ml-3 flex basis-0 items-center justify-end gap-3 sm:ml-4 sm:gap-6 md:flex-grow">
 					<Link
-						href="/ask-source"
+						href="/ask-ai"
 						className="flex items-center gap-3 whitespace-nowrap"
 					>
-						<SourceGraphIcon className="hidden h-6 w-6 sm:block" />
-						<span className="font-semibold">
+						<div className="flex items-center gap-3 whitespace-nowrap sparkle-hover">
+							<Sparkles className="hidden h-5 w-5 sm:block sparkle"/>
+						</div>
+						<span className="font-medium">
 							Ask <span className="hidden sm:inline">AI</span>
 						</span>
 					</Link>

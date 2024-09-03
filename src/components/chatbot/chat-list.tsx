@@ -5,6 +5,7 @@ import {ChatMessage} from './chat-message';
 
 export interface ChatList {
 	messages: Message[];
+	isLoading: boolean
 }
 
 const exampleMessage: Message = {
@@ -13,13 +14,13 @@ const exampleMessage: Message = {
 	role: 'assistant'
 };
 
-export function ChatList({messages}: ChatList) {
+export function ChatList({messages, isLoading}: ChatList) {
 	return (
 		<div className="relative mx-auto w-full max-w-3xl overflow-y-auto">
 			{messages.length === 0 && <ChatMessage message={exampleMessage} />}
 			{messages?.map((message, index) => (
 				<div key={index}>
-					<ChatMessage message={message} />
+					<ChatMessage message={message} isLoading={isLoading} />
 					{index < messages.length - 1 && (
 						<Separator className="my-4 md:my-8" />
 					)}

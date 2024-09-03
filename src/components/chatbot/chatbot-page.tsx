@@ -52,7 +52,7 @@ export function Chatbot({ id, initialMessages, className }: ChatProps) {
           className
         )}
       >
-        <ChatList messages={messages} />
+        <ChatList messages={messages} isLoading={isLoading} />
       </div>
 
       <ChatInput
