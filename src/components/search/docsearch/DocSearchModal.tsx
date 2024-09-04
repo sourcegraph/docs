@@ -171,7 +171,7 @@ export function DocSearchModal({
         initialState: {
           query: initialQuery,
           context: {
-            searchSuggestions: [],
+            searchSuggestions: ["Cody","Code Search"],
           },
         },
         insights,
