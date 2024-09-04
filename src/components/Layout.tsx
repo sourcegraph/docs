@@ -72,9 +72,9 @@ function Header() {
 				<div className="relative ml-3 flex basis-0 items-center justify-end gap-3 sm:ml-4 sm:gap-6 md:flex-grow">
 					<Link
 						href="/ask-ai"
-						className="flex items-center gap-3 whitespace-nowrap"
+						className="flex items-center gap-1 whitespace-nowrap"
 					>
-						<div className="flex items-center gap-3 whitespace-nowrap sparkle-hover">
+						<div className="flex items-center whitespace-nowrap sparkle-hover">
 							<Sparkles className="hidden h-5 w-5 sm:block sparkle"/>
 						</div>
 						<span className="font-medium">
