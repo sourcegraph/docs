@@ -28,7 +28,7 @@ export function ChatMessage({message, isLoading = false, ...props}: ChatMessageP
           'flex h-9 w-9 shrink-0 select-none items-center justify-center rounded-xl border bg-light-bg p-1 text-primary shadow dark:bg-dark-bg'
         )}
       >
-        {message.role === 'user' ? (
+        {message.role === 'user' && !isLoading ? (
           <IconUser className="h-5 w-5" />
         ) : (
           <Sparkles color="#62BECC" className="hidden h-5 w-5 sm:block" />

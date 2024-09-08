@@ -20,10 +20,16 @@ export function ChatList({messages, isLoading}: ChatList) {
 			{messages.length === 0 && <ChatMessage message={exampleMessage} />}
 			{messages?.map((message, index) => (
 				<div key={index}>
-					<ChatMessage message={message} isLoading={isLoading} />
+					<ChatMessage message={message} />
 					{index < messages.length - 1 && (
 						<Separator className="my-4 md:my-8" />
 					)}
+					{isLoading && messages.length === index + 1 && 
+						<>
+							<Separator className="my-4 md:my-8" />
+							<ChatMessage message={message} isLoading={true} />
+						</>
+					}
 				</div>
 			))}
 		</div>
