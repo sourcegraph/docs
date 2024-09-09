@@ -39,7 +39,7 @@ export function ChatInput({
 							className="bg-background"
 							size={'sm'}
 						>
-							<IconStop className="h-5 w-5 text-muted-foreground/50 group-hover:text-background" />
+							<IconStop className="h-5 w-5 text-muted-foreground/50 group-hover:text-background dark:text-dark-bg-3" />
 							Stop generating
 						</Button>
 					) : (
@@ -50,7 +50,7 @@ export function ChatInput({
 								className="bg-background"
 								size={'sm'}
 							>
-								<IconRegenerate className="h-5 w-5 text-muted-foreground/50 group-hover:text-background" />
+								<IconRegenerate className="h-5 w-5 text-muted-foreground/50 group-hover:text-background dark:text-dark-bg-3" />
 								Regenerate response
 							</Button>
 						)

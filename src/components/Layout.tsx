@@ -1,19 +1,18 @@
 'use client';
 
-import { Hero } from '@/components/Hero';
-import { Logo } from '@/components/Logo';
-import { MobileNavigation } from '@/components/MobileNavigation';
-import { Navigation } from '@/components/Navigation';
-import { ThemeSelector } from '@/components/ThemeSelector';
-import SourceGraphIcon from '@/components/icons/SourceGraphIcon';
+import {Hero} from '@/components/Hero';
+import {Logo} from '@/components/Logo';
+import {MobileNavigation} from '@/components/MobileNavigation';
+import {Navigation} from '@/components/Navigation';
+import {ThemeSelector} from '@/components/ThemeSelector';
 import clsx from 'clsx';
+import {Sparkles} from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { LogoMark } from './LogoMark';
+import {usePathname} from 'next/navigation';
+import {useEffect, useState} from 'react';
+import {LogoMark} from './LogoMark';
 import VersionSelector from './VersionSelector';
-import { Search } from './search/Search';
-import { Sparkles } from 'lucide-react';
+import {Search} from './search/Search';
 
 function GitHubIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -31,7 +30,7 @@ function Header() {
 			setIsScrolled(window.scrollY > 0);
 		}
 		onScroll();
-		window.addEventListener('scroll', onScroll, { passive: true });
+		window.addEventListener('scroll', onScroll, {passive: true});
 		return () => {
 			window.removeEventListener('scroll', onScroll);
 		};
@@ -40,7 +39,7 @@ function Header() {
 	return (
 		<header
 			className={clsx(
-				'sticky top-0 z-50 flex flex-none flex-wrap items-center justify-between bg-light-bg px-4 py-6 shadow-md shadow-slate-900/5 transition duration-500 dark:border-dark-border dark:shadow-none sm:px-6 lg:border-b lg:border-light-border lg:px-8',
+				'sticky top-0 z-50 flex flex-none flex-wrap items-center justify-between bg-light-bg px-4 py-6 shadow-md shadow-slate-900/5 transition duration-500 sm:px-6 lg:border-b lg:border-light-border lg:px-8 dark:border-dark-border dark:shadow-none',
 				isScrolled
 					? 'dark:bg-dark-bg-1 dark:backdrop-blur dark:[@supports(backdrop-filter:blur(0))]:bg-dark-bg-1/80'
 					: 'dark:bg-transparent'
@@ -72,12 +71,12 @@ function Header() {
 				<div className="relative ml-3 flex basis-0 items-center justify-end gap-3 sm:ml-4 sm:gap-6 md:flex-grow">
 					<Link
 						href="/ask-ai"
-						className="flex items-center gap-1 whitespace-nowrap"
+						className="group flex animate-pulse items-center gap-1 whitespace-nowrap"
 					>
-						<div className="flex items-center whitespace-nowrap sparkle-hover">
-							<Sparkles className="hidden h-5 w-5 sm:block sparkle"/>
+						<div className="flex items-center whitespace-nowrap text-slate-500">
+							<Sparkles className="sparkle hidden h-5 w-5 sm:block" />
 						</div>
-						<span className="font-medium">
+						<span className="font-medium text-slate-300">
 							Ask <span className="hidden sm:inline">AI</span>
 						</span>
 					</Link>
@@ -98,7 +97,7 @@ function Header() {
 	);
 }
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export function Layout({children}: {children: React.ReactNode}) {
 	let pathname = usePathname();
 	let isHomePage = pathname === '/';
 

@@ -1,10 +1,9 @@
-import {Button} from './ui/button';
-import {IconChat, IconSpinner} from './ui/icons';
 import {useEnterSubmit} from '@/lib/hooks/use-enter-submit';
 import {UseChatHelpers} from 'ai/react';
 import * as React from 'react';
 import Textarea from 'react-textarea-autosize';
-import SourceGraphIcon from '@/components/icons/SourceGraphIcon';
+import {Button} from './ui/button';
+import {IconChat, IconSpinner} from './ui/icons';
 
 export interface PromptProps
 	extends Pick<UseChatHelpers, 'input' | 'setInput'> {
@@ -39,7 +38,7 @@ export function PromptForm({
 			}}
 			ref={formRef}
 		>
-			<div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-2 pb-2 dark:bg-dark-bg sm:rounded-2xl sm:border">
+			<div className="relative flex max-h-60 w-full grow flex-col overflow-hidden border-light-border bg-background px-2 pb-2 sm:rounded-2xl sm:border dark:border-dark-border dark:bg-dark-bg">
 				<div className="flex w-full flex-col">
 					<label
 						htmlFor="playground"
@@ -47,17 +46,19 @@ export function PromptForm({
 					>
 						<div className="flex items-center gap-x-2">
 							<IconChat
-								className="h-5 w-5 text-muted-foreground/50"
+								className="h-5 w-5 text-muted-foreground/50 dark:text-dark-bg-3"
 								aria-hidden="true"
 							/>
-							<h3>Ask</h3>
+							<h3 className="dark:text-slate-500">
+								Ask your questions
+							</h3>
 						</div>
 
 						<div className="flex items-center justify-center gap-2 md:justify-start">
 							{/* Reset chat */}
 							<Button
 								variant="ghost"
-								className="max-w-xs"
+								className="hover:bg-light-bg2 max-w-xs rounded-md text-slate-100 text-slate-500 ring-light-border-2 hover:ring-1 hover:ring-inset  dark:text-slate-400 dark:ring-dark-border dark:hover:bg-dark-bg-3 dark:hover:ring-inset"
 								onClick={e => {
 									e.preventDefault();
 									location.reload();
@@ -69,6 +70,7 @@ export function PromptForm({
 							<Button
 								type="submit"
 								disabled={isLoading || input === ''}
+								className="hover:bg-light-bg2 rounded-md bg-dark-bg-3 text-slate-100 shadow-sm ring-1 ring-inset ring-light-border-2 dark:bg-dark-bg-2 dark:text-slate-400 dark:ring-inset dark:ring-dark-border dark:hover:bg-dark-bg-3"
 							>
 								{isLoading ? (
 									<>
@@ -76,9 +78,7 @@ export function PromptForm({
 										Generating
 									</>
 								) : (
-									<>
-										Send
-									</>
+									<>Send</>
 								)}
 
 								<span className="sr-only">Send message</span>
@@ -96,7 +96,7 @@ export function PromptForm({
 					onChange={e => setInput(e.target.value)}
 					placeholder="Ask any question related to Sourcegraph documentation..."
 					spellCheck={false}
-					className="min-h-[60px] w-full resize-none rounded-lg bg-light-bg px-4 py-[1.3rem] focus-within:outline-none dark:bg-dark-bg-1 sm:text-sm"
+					className="min-h-[60px] w-full resize-none rounded-lg bg-light-bg px-4 py-[1.3rem] focus-within:outline-none sm:text-sm dark:bg-dark-bg-2"
 				/>
 			</div>
 		</form>
