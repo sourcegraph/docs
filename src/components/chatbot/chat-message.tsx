@@ -58,10 +58,6 @@ export function ChatMessage({
 			<div className="ml-4 flex-1 space-y-2 px-1">
 				{isLoading ? (
 					<div className="space-y-2">
-						<div className="h-4 w-3/4 animate-pulse rounded-md bg-gray-300 dark:bg-gray-700"></div>
-						<div className="h-4 w-2/4 animate-pulse rounded-md bg-gray-300 dark:bg-gray-700"></div>
-						<div className="h-4 w-1/2 animate-pulse rounded-md bg-gray-300 dark:bg-gray-700"></div>
-
 						<p
 							className={`animate-fade text-sm transition-all duration-500 ease-in-out ${stateStyles[analysisState]}`}
 						>

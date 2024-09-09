@@ -71,7 +71,7 @@ function Header() {
 				<div className="relative ml-3 flex basis-0 items-center justify-end gap-3 sm:ml-4 sm:gap-6 md:flex-grow">
 					<Link
 						href="/ask-ai"
-						className="group flex animate-pulse items-center gap-1 whitespace-nowrap"
+						className="group flex items-center gap-1 whitespace-nowrap hover:animate-pulse"
 					>
 						<div className="flex items-center whitespace-nowrap text-slate-500">
 							<Sparkles className="sparkle hidden h-5 w-5 sm:block" />
