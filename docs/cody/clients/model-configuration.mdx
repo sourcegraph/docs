@@ -111,21 +111,21 @@ The `"modelConfiguration"` section exposes two fields `"providerOverrides"` and 
 
 ### Provider Configuration
 
-A "provider" a way to organize LLM models. Typically a provider would be referring to the company that produced the model. Or the specific API/service being used to access the model. But conceptually, it's just a namespace.
+A "provider" is a way to organize LLM models. Typically a provider would be referring to the company that produced the model. Or the specific API/service being used to access the model. But conceptually, it's just a namespace.
 
 By defining a provider override in your Sourcegraph site configuration, you are introducing a new namespace to contain models. Or customize the existing provider namespace supplied by Sourcegraph. (e.g. all `"anthropic"` models.)
 
-The following configuration shippet defines a single provider override with the ID `"anthropic-direct"`.
+The following configuration shippet defines a single provider override with the ID `"anthropic"`.
 
 ```json
 "modelConfiguration": {
   // Do not use any Sourcegraph-supplied models.
   "sourcegraph": null,
 
-  // Introduce our own, custom provider "anthropic-direct".
+  // Define a provider for "anthropic".
   "providerOverrides": [
     {
-      "id": "anthropic-direct",
+      "id": "anthropic",
       "displayName": "Anthropic models, sent directly to anthropic.com",
 
       // The server-side config section defines how this provider operates.
@@ -159,7 +159,7 @@ The following configuration shippet defines a single provider override with the 
 
 The most important part of a provider's configuration is the `"serverSideConfig"` field. That defines how the LLM model's should be invoked, i.e. which external service or API will be called to serve LLM requests.
 
-In the example, the `"type"` field was `"anthropic"`. Meaning that any interactions using the `"anthropic-direct"` provider would be sent directly to Anthropic, at the supplied `endpoint` URL using the given `accessToken`.
+In the example, the `"type"` field was `"anthropic"`. Meaning that any interactions using the `"anthropic"` provider would be sent directly to Anthropic, at the supplied `endpoint` URL using the given `accessToken`.
 
 However, Sourcegraph supports several different types of LLM API providers natively. The current set of supported LLM API providers is:
 
@@ -181,22 +181,20 @@ With a provider defined, we can now specify custom models using that provider by
 
 **Model Reference**
 
-The following configuration snippet defines a custom model, using the `"anthropic-direct"` provider from the previous example.
+The following configuration snippet defines a custom model, using the `"anthropic"` provider from the previous example.
 
 ```json
 "modelConfiguration": {
   ...
   "modelOverrides": [
     {
-      "modelRef": "anthropic-direct::2023-06-01::claude-3-sonnet",
-      "displayName": "Claude 3 Sonnet",
-      "modelName": "claude-3-sonnet-20240229",
+      "modelRef": "anthropic::2024-06-20::claude-3-5-sonnet",
+      "displayName": "Claude 3.5 Sonnet",
+      "modelName": "claude-3-5-sonnet-20240620",
       "contextWindow": {
-        "maxInputTokens": 10000,
+        "maxInputTokens": 45000,
         "maxOutputTokens": 4000
       },
-
-
       "capabilities": ["chat", "autocomplete"],
       "category": "balanced",
       "status": "stable"
