@@ -36,7 +36,6 @@ export const navigation: NavigationItem[] = [
             subsections: [
               { title: "Cody for VS Code", href: "/cody/clients/install-vscode", },
               { title: "Cody for JetBrains", href: "/cody/clients/install-jetbrains", },
-              { title: "Cody for Neovim", href: "/cody/clients/install-neovim", },
               { title: "Cody for Web", href: "/cody/clients/cody-with-sourcegraph", },
               { title: "Cody for CLI", href: "/cody/clients/install-cli", },
               { title: "Cody for Enterprise", href: "/cody/clients/enable-cody-enterprise", },
@@ -317,7 +316,7 @@ export const navigation: NavigationItem[] = [
       },
       {
         title: "Changelog",
-        href: "/CHANGELOG",
+        href: "https://sourcegraph.com/changelog",
       },
       {
         title: "Releases",
@@ -556,7 +555,7 @@ const navigation_5_2: NavigationItem[] = [
       },
       {
         title: "Changelog",
-        href: "/CHANGELOG",
+        href: "https://sourcegraph.com/changelog",
       },
     ],
   },
@@ -852,7 +851,7 @@ const navigation_5_3: NavigationItem[] = [
       },
       {
         title: "Changelog",
-        href: "/CHANGELOG",
+        href: "https://sourcegraph.com/changelog",
       },
     ],
   },

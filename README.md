@@ -1,6 +1,6 @@
 # Sourcegraph Docs
 
-<!-- Working branch for August Release -->
+<!-- Working branch for September 2024 Release -->
 
 Welcome to the Sourcegraph documentation! We're excited to have you contribute to our docs. We've recently rearchitectured our docs tech stack — powered by Next.js, TailwindCSS and deployed on Vercel. This guide will walk you through the process of contributing to our documentation using the new tech stack.
 
@@ -134,9 +134,9 @@ For example, if you want to link to the Cody Quickstart somewhere in the Code Se
 - This is a way to hash-link to [Cody for VSCode installation](/cody/clients/install-vscode#verifying-the-installation) in Code Search docs
 ```
 
-### Adding images and binary assets
+### Adding media assets (images, videos and gifs)
 
-For large images and other binary assets, upload them to the `sourcegraph-assets` Google Cloud Storage bucket instead with `gsutil cp -a public-read local/path/to/myasset.png gs://sourcegraph-assets/` (and refer to them as `https://sourcegraphstatic.com/myasset.png`). For a more detailed instructions visit [this page](https://handbook.sourcegraph.com/handbook/editing/handbook-images-video/).
+You can upload images, videos and gifs to Sourcegraph docs. For a more detailed instructions visit [this page](https://www.notion.so/sourcegraph/How-to-host-blog-assets-using-GCP-file-storage-a2cae02bd0c74166a12eaff5062c41ad).
 
 > Note: Make sure to use [ImageOptim.app](https://imageoptim.com/mac) to reduce the size of the images before uploading, since large images degrade page loading speed.
 
