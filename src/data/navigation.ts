@@ -622,6 +622,16 @@ const navigation_5_3: NavigationItem[] = [
           { title: "Usage and Pricing", href: "/cody/usage-and-pricing" },
           { title: "Troubleshooting", href: "/cody/troubleshooting" },
           { title: "FAQs", href: "/cody/faq" },
+          {
+            title: "Cody API", href: "/cody/api",
+            subsections: [
+              { title: "Cody for VS Code", href: "/cody/clients/install-vscode", },
+              { title: "Cody for JetBrains", href: "/cody/clients/install-jetbrains", },
+              { title: "Cody for Neovim", href: "/cody/clients/install-neovim", },
+              { title: "Cody for Web", href: "/cody/clients/cody-with-sourcegraph", },
+              { title: "Cody for Enterprise", href: "/cody/clients/enable-cody-enterprise", },
+            ]
+          },
         ],
       },
       {

@@ -1,0 +1,352 @@
+# Sourcegraph API Documentation
+
+Welcome to the Sourcegraph API documentation. This document provides detailed information about the Sourcegraph API endpoints, including request and response formats, parameters, and code examples in cURL, TypeScript, and Python.
+
+The API base URL is `https://sourcegraph.com/`.
+
+---
+
+## Table of Contents
+
+- [Sourcegraph API Documentation](#sourcegraph-api-documentation)
+  - [Table of Contents](#table-of-contents)
+  - [Find Relevant Source Locations](#find-relevant-source-locations)
+    - [Description](#description)
+    - [Request Body](#request-body)
+      - [Parameters](#parameters)
+    - [Response](#response)
+      - [Response Body](#response-body)
+    - [Code Examples](#code-examples)
+      - [cURL](#curl)
+      - [TypeScript](#typescript)
+      - [Python](#python)
+  - [List Available Models](#list-available-models)
+    - [Description](#description-1)
+    - [Response](#response-1)
+      - [Response Body](#response-body-1)
+    - [Code Examples](#code-examples-1)
+      - [cURL](#curl-1)
+      - [TypeScript](#typescript-1)
+      - [Python](#python-1)
+  - [Retrieve Model Details](#retrieve-model-details)
+    - [Description](#description-2)
+    - [Path Parameters](#path-parameters)
+    - [Response](#response-2)
+      - [Response Body](#response-body-2)
+    - [Code Examples](#code-examples-2)
+      - [cURL](#curl-2)
+      - [TypeScript](#typescript-2)
+      - [Python](#python-2)
+  - [Schemas](#schemas)
+    - [CodyContextRequest](#codycontextrequest)
+    - [CodyContextResponse](#codycontextresponse)
+    - [RepoSpec](#repospec)
+    - [FileChunkContext](#filechunkcontext)
+    - [BlobInfo](#blobinfo)
+    - [RepositoryInfo](#repositoryinfo)
+    - [CommitInfo](#commitinfo)
+    - [OAIListModelsResponse](#oailistmodelsresponse)
+    - [OAIModel](#oaimodel)
+    - [Error](#error)
+  - [Error Handling](#error-handling)
+  - [Authentication](#authentication)
+  - [Contact](#contact)
+
+---
+
+## Find Relevant Source Locations
+
+**Endpoint:** `POST /.api/cody/context`
+
+**Summary:** Find relevant source locations given a natural language query.
+
+### Description
+
+Returns a list of source code locations (also known as "context") that are relevant to the given natural language query and list of repositories.
+
+### Request Body
+
+- **Content-Type:** `application/json`
+- **Schema:** [`CodyContextRequest`](#codycontextrequest)
+
+#### Parameters
+
+- `query` (string, **required**): The natural language query to find relevant context from the provided list of repositories.
+- `repos` (array of [`RepoSpec`](#repospec), optional): The list of repositories to search through.
+- `codeResultsCount` (integer, optional, default: 15): The number of code results to return. Minimum 0, maximum 100.
+- `textResultsCount` (integer, optional, default: 5): The number of text results to return. Minimum 0, maximum 100.
+
+### Response
+
+- **Status Code:** `200 OK`
+- **Content-Type:** `application/json`
+- **Schema:** [`CodyContextResponse`](#codycontextresponse)
+
+#### Response Body
+
+- `results` (array of [`FileChunkContext`](#filechunkcontext), **required**): A list of relevant source code locations.
+
+### Code Examples
+
+#### cURL
+
+```bash
+curl -X POST https://sourcegraph.com/.api/cody/context \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Implement a linked list in Go",
+    "repos": [{"name": "sourcegraph/sourcegraph"}],
+    "codeResultsCount": 10,
+    "textResultsCount": 5
+  }'
+```
+
+#### TypeScript
+
+```typescript
+const response = await fetch('https://sourcegraph.com/.api/cody/context', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    query: 'Implement a linked list in Go',
+    repos: [{ name: 'sourcegraph/sourcegraph' }],
+    codeResultsCount: 10,
+    textResultsCount: 5
+  })
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+#### Python
+
+```python
+import requests
+
+url = 'https://sourcegraph.com/.api/cody/context'
+payload = {
+    'query': 'Implement a linked list in Go',
+    'repos': [{'name': 'sourcegraph/sourcegraph'}],
+    'codeResultsCount': 10,
+    'textResultsCount': 5
+}
+headers = {'Content-Type': 'application/json'}
+
+response = requests.post(url, json=payload, headers=headers)
+print(response.json())
+```
+
+---
+
+## List Available Models
+
+**Endpoint:** `GET /.api/llm/models`
+
+### Description
+
+Lists the currently available models and provides basic information about each one, such as the owner and availability.
+
+### Response
+
+- **Status Code:** `200 OK`
+- **Content-Type:** `application/json`
+- **Schema:** [`OAIListModelsResponse`](#oailistmodelsresponse)
+
+#### Response Body
+
+- `object` (string, **required**): Should be `"list"`.
+- `data` (array of [`OAIModel`](#oaimodel), **required**): List of available models.
+
+- **Error Response**
+
+  - **Schema:** [`Error`](#error)
+  - **Fields:**
+    - `type` (string, **required**): Type of error.
+    - `message` (string, **required**): Error message.
+
+### Code Examples
+
+#### cURL
+
+```bash
+curl -X GET https://sourcegraph.com/.api/llm/models
+```
+
+#### TypeScript
+
+```typescript
+const response = await fetch('https://sourcegraph.com/.api/llm/models');
+const data = await response.json();
+console.log(data);
+```
+
+#### Python
+
+```python
+import requests
+
+url = 'https://sourcegraph.com/.api/llm/models'
+response = requests.get(url)
+print(response.json())
+```
+
+---
+
+## Retrieve Model Details
+
+**Endpoint:** `GET /.api/llm/models/{modelId}`
+
+### Description
+
+Retrieves a model instance, providing basic information about the model such as the owner and permissions.
+
+### Path Parameters
+
+- `modelId` (string, **required**): The identifier of the model to retrieve.
+
+### Response
+
+- **Status Code:** `200 OK`
+- **Content-Type:** `application/json`
+- **Schema:** [`OAIModel`](#oaimodel)
+
+#### Response Body
+
+- `id` (string, **required**): The model identifier.
+- `object` (string, **required**): Should be `"model"`.
+- `created` (integer, **required**): Unix timestamp (in seconds) when the model was created.
+- `owned_by` (string, **required**): The organization that owns the model.
+
+- **Error Response**
+
+  - **Schema:** [`Error`](#error)
+  - **Fields:**
+    - `type` (string, **required**): Type of error.
+    - `message` (string, **required**): Error message.
+
+### Code Examples
+
+#### cURL
+
+```bash
+curl -X GET https://sourcegraph.com/.api/llm/models/{modelId}
+```
+
+*Replace `{modelId}` with the actual model ID.*
+
+#### TypeScript
+
+```typescript
+const modelId = 'your-model-id';
+const response = await fetch(`https://sourcegraph.com/.api/llm/models/${modelId}`);
+const data = await response.json();
+console.log(data);
+```
+
+#### Python
+
+```python
+import requests
+
+model_id = 'your-model-id'
+url = f'https://sourcegraph.com/.api/llm/models/{model_id}'
+response = requests.get(url)
+print(response.json())
+```
+
+---
+
+## Schemas
+
+### CodyContextRequest
+
+- `query` (string, **required**): The natural language query.
+- `repos` (array of [`RepoSpec`](#repospec), optional): List of repositories to search through.
+- `codeResultsCount` (integer, optional, default: 15): Number of code results to return. Minimum 0, maximum 100.
+- `textResultsCount` (integer, optional, default: 5): Number of text results to return. Minimum 0, maximum 100.
+
+### CodyContextResponse
+
+- `results` (array of [`FileChunkContext`](#filechunkcontext), **required**): List of relevant source code locations.
+
+### RepoSpec
+
+*Exactly one of the properties must be defined.*
+
+- `name` (string, optional): The name of the repository.
+- `id` (string, optional): The ID of the repository.
+
+### FileChunkContext
+
+- `blob` ([`BlobInfo`](#blobinfo), **required**): Information about the file.
+- `startLine` (integer, **required**): Starting line number of the chunk.
+- `endLine` (integer, **required**): Ending line number of the chunk.
+- `chunkContent` (string, **required**): Content of the chunk.
+
+### BlobInfo
+
+- `path` (string, **required**): File path.
+- `repository` ([`RepositoryInfo`](#repositoryinfo), **required**): Repository information.
+- `commit` ([`CommitInfo`](#commitinfo), **required**): Commit information.
+- `url` (string, **required**): URL to the file.
+
+### RepositoryInfo
+
+- `id` (string, **required**): Repository ID.
+- `name` (string, **required**): Repository name.
+
+### CommitInfo
+
+- `oid` (string, **required**): Commit object ID.
+
+### OAIListModelsResponse
+
+- `object` (string, **required**): Should be `"list"`.
+- `data` (array of [`OAIModel`](#oaimodel), **required**): List of models.
+
+### OAIModel
+
+- `id` (string, **required**): The model identifier.
+- `object` (string, **required**): Should be `"model"`.
+- `created` (integer, **required**): Unix timestamp when the model was created.
+- `owned_by` (string, **required**): The organization that owns the model.
+
+### Error
+
+- `type` (string, **required**): Type of error.
+- `message` (string, **required**): Error message.
+
+---
+
+## Error Handling
+
+In case of an error, the API will return a JSON object with the following structure:
+
+```json
+{
+  "type": "error_type",
+  "message": "Detailed error message."
+}
+```
+
+- `type`: A string indicating the type of error.
+- `message`: A detailed message explaining the error.
+
+---
+
+## Authentication
+
+*Note: Authentication details are not provided in the OpenAPI specification. If authentication is required, ensure to include appropriate headers or tokens as per the API's authentication mechanism.*
+
+---
+
+## Contact
+
+For any questions or issues, please contact the [Sourcegraph Support Team](mailto:support@sourcegraph.com).
+
+---
+
+*This document was generated to provide comprehensive information about the Sourcegraph API. For more details, please refer to the official documentation or contact support.*
