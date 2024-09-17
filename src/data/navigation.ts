@@ -24,62 +24,123 @@ export type VersionNavigations = Record<string, NavigationItem[]>;
 
 export const navigation: NavigationItem[] = [
   {
-    separator: "Code Intelligence",
+    separator: "Cody",
     topics: [
       {
-        title: "Cody",
+        title: "Introduction",
         href: "/cody",
         sections: [
           { title: "Quickstart", href: "/cody/quickstart" },
-          {
-            title: "Installation", href: "/cody/clients",
-            subsections: [
-              { title: "Cody for VS Code", href: "/cody/clients/install-vscode", },
-              { title: "Cody for JetBrains", href: "/cody/clients/install-jetbrains", },
-              { title: "Cody for Web", href: "/cody/clients/cody-with-sourcegraph", },
-              { title: "Cody for CLI", href: "/cody/clients/install-cli", },
-              { title: "Cody for Enterprise", href: "/cody/clients/enable-cody-enterprise", },
-              { title: "Model Configuration", href: "/cody/clients/model-configuration", },
-            ]
-          },
-          {
-            title: "Capabilities", href: "/cody/capabilities",
-            subsections: [
-              { title: "Chat", href: "/cody/capabilities/chat", },
-              { title: "Autocomplete", href: "/cody/capabilities/autocomplete", },
-              { title: "Prompts & Commands", href: "/cody/capabilities/commands", },
-              { title: "OpenCtx", href: "/cody/capabilities/openctx", },
-              { title: "Debug Code", href: "/cody/capabilities/debug-code", },
-              { title: "Context Filters", href: "/cody/capabilities/ignore-context", },
-              { title: "Proxy Setup", href: "/cody/capabilities/proxy-setup", },
-              { title: "Supported Models", href: "/cody/capabilities/supported-models", },
-              { title: "Feature Parity Reference", href: "/cody/clients/feature-reference", },
-            ]
-          },
-          {
-            title: "Core Concepts", href: "/cody/core-concepts/context",
-            subsections: [
-              { title: "Context", href: "/cody/core-concepts/context", },
-              { title: "Token Limits", href: "/cody/core-concepts/token-limits", },
-              // { title: "Embeddings", href: "/cody/core-concepts/embeddings", },
-              { title: "Keyword Search", href: "/cody/core-concepts/keyword-search", },
-              // { title: "Code Graph", href: "/cody/core-concepts/code-graph", },
-              { title: "Cody Gateway", href: "/cody/core-concepts/cody-gateway", },
-              { title: "Enterprise Architecture", href: "/cody/core-concepts/enterprise-architecture", },
-            ]
-          },
-          // {
-          //   title: "Use Cases", href: "/cody/use-cases/generate-unit-tests",
-          //   subsections: [
-          //     { title: "Generate Unit Tests", href: "/cody/use-cases/generate-unit-tests", },
-          //     // { title: "Build UI", href: "/cody/use-cases/build-ui", },
-          //   ]
-          // },
-          { title: "Usage and Pricing", href: "/cody/usage-and-pricing" },
-          { title: "Troubleshooting", href: "/cody/troubleshooting" },
-          { title: "FAQs", href: "/cody/faq" },
         ],
       },
+      {
+        title: "Cody for Admins",
+        href: "/cody/enterprise",
+        sections: [
+          { title: "Get Started", href: "/cody/clients/enable-cody-enterprise" },
+          { title: "Configuring Cody", href: "/cody/enterprise/configure-cody" },
+          { title: "LLM Models & Configurations", href: "/cody/enterprise/llm-models" },
+          { title: "Enterprise Architecture", href: "/cody/core-concepts/enterprise-architecture" },
+
+        ],
+      },
+      {
+        title: "Cody for Users",
+        href: "/clients",
+        sections: [
+          { title: "VS Code", href: "/cody/clients/install-vscode" },
+          { title: "JetBrains", href: "/cody/clients/install-jetbrains" },
+          { title: "Web", href: "/cody/clients/cody-with-sourcegraph" },
+        ],
+      },
+      {
+        title: "Features",
+        href: "/capabilities",
+        sections: [
+          { title: "Chat", href: "/cody/capabilities/chat" },
+          { title: "Autocomplete", href: "/cody/capabilities/autocomplete" },
+          { title: "Prompts & Commands", href: "/cody/capabilities/commands" },
+          { title: "Debug Code", href: "/cody/capabilities/debug-code" },
+          { title: "Context", href: "/cody/core-concepts/context" },
+          { title: "Cody CLI", href: "/cody/clients/install-cli" },
+          { title: "OpenCtx", href: "/cody/capabilities/openctx" },
+        ],
+      },
+      {
+        title: "Cody at a Glance",
+        href: "/cody",
+        sections: [
+          { title: "Feature Parity Matrix", href: "/cody/clients/feature-reference" },
+          { title: "Supported LLM Models", href: "/cody/capabilities/supported-models" },
+          { title: "Token Limits", href: "/cody/core-concepts/token-limits" },
+        ],
+      },
+      { title: "Usage and Pricing", href: "/cody/usage-and-pricing" },
+      { title: "Troubleshooting", href: "/cody/troubleshooting" },
+      { title: "FAQs", href: "/cody/faq" },
+    ],
+  },
+
+  // {
+  //   separator: "Cody",
+  //   topics: [
+  //     {
+  //       title: "Introduction",
+  //       href: "/cody",
+  //       sections: [
+  //         { title: "QuickStart", href: "/code-search/features" },
+  //         {
+  //           title: "Cody for Admins", href: "/code-search/queries",
+  //           subsections: [
+  //             { title: "Get Started", href: "/code-search/working/search_filters", },
+  //             { title: "Configuring Cody", href: "/code-search/queries/examples", },
+  //             { title: "LLM Models & Configurations", href: "/code-search/types/symbol", },
+  //             { title: "Enterprise Architecture", href: "/code-search/queries/language", },
+  //           ]
+  //         },
+  //         {
+  //           title: "Cody for Users", href: "/code-search/queries",
+  //           subsections: [
+  //             { title: "Cody Clients", href: "/code-search/working/search_filters", },
+  //           ]
+  //         },
+  //         {
+  //           title: "Features", href: "/code-search/code-navigation",
+  //           subsections: [
+  //             { title: "Chat", href: "/code-search/code-navigation/features", },
+  //             { title: "Autocomplete", href: "/code-search/code-navigation/search_based_code_navigation", },
+  //             { title: "Prompts & Commands", href: "/code-search/code-navigation/precise_code_navigation", },
+  //             { title: "Debug Code", href: "/code-search/code-navigation/writing_an_indexer", },
+  //             { title: "Context", href: "/code-search/code-navigation/auto_indexing", },
+  //             { title: "OpenCtx", href: "/code-search/code-navigation/envvars", },
+  //             { title: "Cody CLI", href: "/code-search/code-navigation/troubleshooting", },
+  //           ]
+  //         },
+  //         {
+  //           title: "Resources", href: "/code-search/working/saved_searches",
+  //           subsections: [
+  //             { title: "Feature Parity Matrix", href: "/code-search/types/fuzzy", },
+  //             { title: "Token Limits", href: "/code-search/working/search_contexts", },
+  //             { title: "Supported LLM Models", href: "/code-search/types/search-jobs", },
+  //           ]
+  //         },
+  //         {
+  //           title: "Usage & Pricing", href: "/code-search/faq",
+  //         },
+  //         {
+  //           title: "Troubleshooting", href: "/code-search/faq",
+  //         },
+  //         {
+  //           title: "FAQs", href: "/code-search/faq",
+  //         },
+  //       ],
+  //     },
+  //   ],
+  // },
+
+  {
+    separator: "Code Search",
+    topics: [
       {
         title: "Code Search",
         href: "/code-search",
