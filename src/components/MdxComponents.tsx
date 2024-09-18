@@ -11,11 +11,13 @@ import { QuickLink, QuickLinks } from './mdx/QuickLinks';
 import { Tab, Tabs } from './mdx/Tabs';
 import { PreCodeBlock } from './PreCodeBlock';
 import ResourceEstimator from './resource-estimator/ResourceEstimator';
+import { CurrentVersion, CurrentVersionLongForm } from './Versions';
 
 const MdxComponents = (version?: string) => {
 	return {
 		FeatureParity,
 		ResourceEstimator,
+		CurrentVersion,
 		AWSOneClickLaunchForm,
 		Accordion,
 		ContentTabs: (props: any) => <ContentTabs {...props} />,
