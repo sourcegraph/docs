@@ -46,7 +46,7 @@ export const navigation: NavigationItem[] = [
       },
       {
         title: "Cody for Users",
-        href: "/clients",
+        href: "/cody/clients",
         sections: [
           { title: "VS Code", href: "/cody/clients/install-vscode" },
           { title: "JetBrains", href: "/cody/clients/install-jetbrains" },
@@ -54,8 +54,8 @@ export const navigation: NavigationItem[] = [
         ],
       },
       {
-        title: "Features",
-        href: "/capabilities",
+        title: "Capabilities",
+        href: "/cody/capabilities",
         sections: [
           { title: "Chat", href: "/cody/capabilities/chat" },
           { title: "Autocomplete", href: "/cody/capabilities/autocomplete" },
