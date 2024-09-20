@@ -5,8 +5,8 @@
 <Callout type="note">For Sourcegraph Cloud customers, configuring the available LLM models requires contacting your Sourcegraph account team representative</Callout>
 
 Cody Enterprise can be configured using one of two methods:
-1. "Completions" Configuration
-2. Model Configuration (Early Access Program)
+1. ["Completions" Configuration](#completions-configuration)
+2. [Model Configuration](#model-configuration) (Early Access Program)
 
 <Callout type="warning">The Model Configuration method is in Early Access Program and only avaiable on Sourcegraph v5.6.0 or later. In the future when Model Configuration exits EAP, configuring Cody via your Sourcegraph Enterprise instance via the "Completions" Configuration site configuration section will be deprecated. For now, both methods remain supported. We recommend you continue to use the Completions Configuration unless you have specific reason to do otherwise.</Callout>
 
@@ -416,9 +416,21 @@ The `"modelConfiguration"` section exposes two fields `"providerOverrides"` and 
 
 A "provider" is a way to organize LLM models. Typically a provider would be referring to the company that produced the model. Or the specific API/service being used to access the model. But conceptually, it's just a namespace.
 
-By defining a provider override in your Sourcegraph site configuration, you are introducing a new namespace to contain models. Or customize the existing provider namespace supplied by Sourcegraph. (e.g. all `"anthropic"` models.)
+By defining a provider override in your Sourcegraph site configuration, you are introducing a new namespace to contain models. Or customize the existing provider namespace supplied by Sourcegraph. (e.g. all `"anthropic"` models.). The following is the list of accepted Provider IDs:
+| Provider Id        | Description  |
+|--------------------| ------------ |
+| `default`          | [Cody Gateway](/cody/core-concepts/cody-gateway), which supports many different models from various services |
+| `openaicompatible` | Any OpenAI-compatible API implementation                                                                     |
+| `aws-bedrock`      | [Amazon Bedrock](https://docs.aws.amazon.com/bedrock/)                                                       |
+| `azure-openai`     | [Microsoft Azure OpenAI](https://azure.microsoft.com/en-us/products/ai-services/openai-service/)             |
+| `anthropic`        | [Anthropic](https://www.anthropic.com)                                                                       |
+| `fireworks`        | [Fireworks AI](https://fireworks.ai)                                                                         |
+| `google`           | [GCP Vertex](https://cloud.google.com/vertex-ai/)                                                            |
+| `gemini`           | [Google Gemini](http://cloud.google.com/gemini)                                                              |
+| `openai`           | [OpenAI](http://platform.openai.com)                                                                         |
 
-The following configuration shippet defines a single provider override with the ID `"anthropic"`.
+
+The following configuration snippet defines a single provider override with the ID `"anthropic"`.
 
 ```json
 "modelConfiguration": {
@@ -466,17 +478,19 @@ In the example, the `"type"` field was `"anthropic"`. Meaning that any interacti
 
 However, Sourcegraph supports several different types of LLM API providers natively. The current set of supported LLM API providers is:
 
-| Provider type        | Description  |
-| -------------------- | ------------ |
-| `"sourcegraph"`      | [Cody Gateway](/cody/core-concepts/cody-gateway), which supports many different models from various services |
-| `"openaicompatible"` | Any OpenAI-compatible API implementation                                                                     |
-| `"awsBedrock"`       | [Amazon Bedrock](https://docs.aws.amazon.com/bedrock/)                                                       |
-| `"azureOpenAI"`      | [Microsoft Azure OpenAI](https://azure.microsoft.com/en-us/products/ai-services/openai-service/)             |
-| `"anthropic"`        | [Anthropic](https://www.anthropic.com)                                                                       |
-| `"fireworks"`        | [Fireworks AI](https://fireworks.ai)                                                                         |
-| `"google"`           | [Google Gemini](http://cloud.google.com/gemini) and [Vertex](https://cloud.google.com/vertex-ai/)            |
-| `"openai"`           | [OpenAI](http://platform.openai.com)                                                                         |
-| `"huggingface-tgi"`  | [Hugging Face Text Generation Interface](https://huggingface.co/docs/text-generation-inference/en/index)     |
+| Provider Id              | Provider type        | Description  |
+|--------------------------| -------------------- | ------------ |
+| `"default"`              | `"sourcegraph"`      | [Cody Gateway](/cody/core-concepts/cody-gateway), which supports many different models from various services |
+| `"openaicompatible"`     | `"openaicompatible"` | Any OpenAI-compatible API implementation                                                                     |
+| `"aws-bedrock"`          | `"awsBedrock"`       | [Amazon Bedrock](https://docs.aws.amazon.com/bedrock/)                                                       |
+| `"azure-openai"`         | `"azureOpenAI"`      | [Microsoft Azure OpenAI](https://azure.microsoft.com/en-us/products/ai-services/openai-service/)             |
+| `"anthropic"`            | `"anthropic"`        | [Anthropic](https://www.anthropic.com)                                                                       |
+| `"fireworks"`            | `"fireworks"`        | [Fireworks AI](https://fireworks.ai)                                                                         |
+| `"google"` or `"gemini"` | `"google"`           | [Google Gemini](http://cloud.google.com/gemini) and [GCP Vertex](https://cloud.google.com/vertex-ai/)        |
+| `openai`                 | `"openai"`           | [OpenAI](http://platform.openai.com)                                                                         |
+|                          | `"huggingface-tgi"`  | [Hugging Face Text Generation Interface](https://huggingface.co/docs/text-generation-inference/en/index)     |
+
+<Callout type="note"> The above table shows the intended mapping of Provider Ids to Provider types. You should use the appropriate Provider type in the `"serverSideConfig"` section of your model configuration based on the Provider Id you choose.</Callout>
 
 ### Model Configuration
 
