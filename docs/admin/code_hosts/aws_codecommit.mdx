@@ -87,6 +87,24 @@ To add CodeCommit repositories in Docker Container:
 1. Follow the rest of the steps detailed in the [AWS SSH setup guide](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-ssh-unixes.html) to make sure you can connect to the code host locally.
 1. Confirm you have the connection by running the following ssh command locally: `ssh git-codecommit.us-west-1.amazonaws.com` (Update link with your server region)
 1. Confirm you can clone the repository locally.
+
+### Configuring SSH credentials in the Web UI
+
+```json
+{
+  "gitURLType": "ssh",
+  "gitSSHKeyID": "<SSH key ID>",
+  "gitSSHCredential": {
+    // make sure the key is base64 encoded
+    // $ cat ~/.ssh/id_rsa | base64
+    "privateKey": "<base64 encoded of the SSH private key>",
+    "passphrase": "<passphrase if applicable, omit if none is needed>"
+  }
+}
+```
+
+### Mounting SSH keys into the container
+
 1. Copy all the files at your `$HOME/.ssh directory` to `$HOME/.sourcegraph/config/ssh` directory. See [docs](/admin/deploy/docker-single-container/#ssh-authentication-config-keys-knownhosts) for more information about our ssh file system.
     1. Read our [guide here](/admin/deploy/docker-compose/#git-ssh-configuration) for Docker Compose deployments
     1. Read our [guide here](/admin/deploy/kubernetes/configure#ssh-for-cloning) for Kubernetes deployments
