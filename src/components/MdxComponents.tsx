@@ -11,6 +11,7 @@ import { QuickLink, QuickLinks } from './mdx/QuickLinks';
 import { Tab, Tabs } from './mdx/Tabs';
 import { PreCodeBlock } from './PreCodeBlock';
 import ResourceEstimator from './resource-estimator/ResourceEstimator';
+import { Badge } from './ui/badge';
 
 const MdxComponents = (version?: string) => {
 	return {
@@ -62,7 +63,8 @@ const MdxComponents = (version?: string) => {
 			<div {...props} className="table-auto w-full overflow-x-auto">
 				<table>{props.children}</table>
 			</div>
-		)
+		),
+		Badge
 	};
 };
 
