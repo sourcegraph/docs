@@ -22,6 +22,9 @@ async function getLatestVersion() {
   return await response.json();
 }
 
+const CURRENT_VERSION_S = getLatestVersion()
+export const CURRENT_VERSION_STRING = CURRENT_VERSION_S.version
+
 export async function PreCodeBlock({ children, ...props }: PreProps) {
   const propsObj = { ...props }
   const propsValues = Object.values(propsObj)
