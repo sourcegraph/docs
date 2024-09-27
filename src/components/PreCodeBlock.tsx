@@ -36,9 +36,21 @@ async function getLatestVersion() {
   return releaseInfo.version
 }
 
+function trimPrefix(str: string, prefix: string) {
+  if (str.startsWith(prefix)) {
+    return str.slice(prefix.length);
+  }
+  return str;
+}
+
 export async function CURRENT_VERSION_STRING() {
   const v = await getLatestVersion()
   return v
+}
+
+export async function CURRENT_VERSION_STRING_NO_V() {
+  const v = await getLatestVersion()
+  return trimPrefix(v, "v")
 }
 
 export async function PreCodeBlock({ children, ...props }: PreProps) {
@@ -59,7 +71,9 @@ export async function PreCodeBlock({ children, ...props }: PreProps) {
   }
 
   const version = await getLatestVersion()
+  const version_no_v = trimPrefix(version, "v")
   codeContent = codeContent.replace(/{CURRENT_VERSION}/g, version)
+  codeContent = codeContent.replace(/{CURRENT_VERSION_NO_V}/g, version_no_v)
 
   return (
     <div className="relative">
@@ -68,5 +82,36 @@ export async function PreCodeBlock({ children, ...props }: PreProps) {
         {codeContent}
       </pre>
     </div>
+  )
+}
+
+export async function PreCode({ children, ...props }: PreProps) {
+  const isCodeBlock = props.style?.display === 'grid';
+  // Only apply styles to inline code
+  const codeClasses = isCodeBlock
+    ? 'bg-transparent'
+    : 'border font-medium bg-slate-100 dark:bg-slate-900 px-1 py-0.5 rounded-md border-slate-300 dark:border-slate-700';
+
+  let codeContent = props?.raw || ''
+
+  // If raw prop is not available, try to extract content from children
+  if (!codeContent && children) {
+    React.Children.forEach(children, (child) => {
+      if (React.isValidElement(child) && child.props.children) {
+        codeContent += child.props.children
+      }
+    })
+  }
+
+  const version = await getLatestVersion()
+  const version_no_v = trimPrefix(version, "v")
+  if (typeof children === "string") {
+    children = children.replace(/{CURRENT_VERSION}/g, version_no_v).replace(/{CURRENT_VERSION_NO_V}/g, version_no_v)
+  }
+
+  return (
+    <code className={codeClasses}>
+      {children}
+    </code>
   )
 }
