@@ -332,6 +332,15 @@ export const navigation: NavigationItem[] = [
       },
     ],
   },
+  {
+    separator: "Sourcegraph OPEN API",
+    topics: [
+      {
+        title: "Sourcegraph Open API",
+        href: "/openapi",
+      }
+    ],
+  },
 ];
 
 const navigation_5_2: NavigationItem[] = [
