@@ -333,11 +333,11 @@ export const navigation: NavigationItem[] = [
     ],
   },
   {
-    separator: "Sourcegraph OPEN API",
+    separator: "Cody API",
     topics: [
       {
-        title: "Sourcegraph Open API",
-        href: "/openapi",
+        title: "Cody API",
+        href: "/cody-api",
       }
     ],
   },

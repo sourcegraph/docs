@@ -88,7 +88,7 @@ function Header() {
 export function Layout({ children }: { children: React.ReactNode }) {
 	let pathname = usePathname();
 	let isHomePage = pathname === '/';
-	let isOpenApiPage = pathname === '/openapi';
+	let isCodyApiPage = pathname === '/cody-api';
 
 	return (
 		<div className="flex w-full flex-col">
@@ -96,7 +96,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 			{isHomePage && <Hero />}
 
-			{!isOpenApiPage && (
+			{!isCodyApiPage && (
 				<div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-12">
 					<div className="hidden lg:relative lg:block lg:flex-none">
 						<div className="absolute bottom-0 right-0 top-16 hidden h-12 w-px bg-transparent dark:block" />
@@ -108,7 +108,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 					{children}
 				</div>
 			)}
-			{isOpenApiPage && children}
+			{isCodyApiPage && children}
 		</div>
 	);
 }
