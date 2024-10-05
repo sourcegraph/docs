@@ -27,14 +27,14 @@ Click **Create Instance** in your [Google Cloud Compute Engine Console](https://
 1. Expand the **Advanced options** section and the **Disks** section within to add an additional disk to store data from the Sourcegraph Docker instance.
 
 1. Click **+ ADD NEW DISK** to setup the new disk with the following settings:
-  * `Name`: "sourcegraph-docker-disk" (or something similarly descriptive)
+  * `Name`: "sourcegraph-docker-data" (or something similarly descriptive)
   * `Description`: "Disk for storing Docker data for Sourcegraph" (or something similarly descriptive)
   * `Disk source type`: Blank disk
   * `Disk type`: SSD persistent disk
   * `Size`: `250GB` minimum
-      * Sourcegraph needs at least as much space as all your repositories combined take up
-      * Allocating as much disk space as you can upfront minimize the need for [resizing this disk](https://cloud.google.com/compute/docs/disks/add-persistent-disk#resize_pd) later on
-  * `(optional, recommended) Snapshot schedule`: The most straightfoward way of automatically backing Sourcegraph's data is to set up a [snapshot schedule](https://cloud.google.com/compute/docs/disks/scheduled-snapshots) for this disk. We strongly recommend that you take the time to do so here.
+      * Sourcegraph recommends 3x the storage space of all your repos combined, as it needs to store the repos, indexes, databases, etc.
+      * Allocate as much disk space as you can upfront to reduce the need to later [resize this disk](https://cloud.google.com/compute/docs/disks/add-persistent-disk#resize_pd)
+  * `(Recommended) Snapshot schedule`: We strongly recommend that you configure a [snapshot schedule](https://cloud.google.com/compute/docs/disks/scheduled-snapshots) for this disk.
   * `Attachment settings - Mode`: Read/write
   * `Attachment settings - Deletion rule`: Keep disk
 
@@ -155,9 +155,9 @@ Please refer to the [Docker Compose upgrade docs](/admin/deploy/docker-compose/u
 
 Data is persisted within a [Docker volume](https://docs.docker.com/storage/volumes/) as defined in the [deployment repository](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/master/docker-compose/docker-compose.yaml). The startup script configures Docker using a [daemon configuration file](https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file) to store all the data on the attached data volume, which is mounted at `/mnt/docker-data`, where volumes are stored within `/mnt/docker-data/volumes`.
 
-The most straightforward method to backup the data is to [snapshot the entire `/mnt/docker-data` volume](https://cloud.google.com/compute/docs/disks/create-snapshots) automatically using a [snapshot schedule](https://cloud.google.com/compute/docs/disks/scheduled-snapshots). You can also [set up a snapshot snapshot schedule](https://cloud.google.com/compute/docs/disks/scheduled-snapshots) after your instance has been created.
+The most straightforward method to backup the data is to [snapshot the entire `/mnt/docker-data` volume](https://cloud.google.com/compute/docs/disks/create-snapshots) automatically using a [snapshot schedule](https://cloud.google.com/compute/docs/disks/scheduled-snapshots).
 
-<span class="badge badge-note">RECOMMENDED</span> Using an external Postgres service such as [AWS RDS for PostgreSQL](https://aws.amazon.com/rds/) takes care of backing up all the user data for you. If the Sourcegraph instance ever dies or gets destroyed, creating a fresh new instance connected to the old external Postgres service will get Sourcegraph back to its previous state.
+<span class="badge badge-note">RECOMMENDED</span> Using an external Postgres service such as Google Cloud SQL takes care of backing up user data for you. If the Sourcegraph instance ever dies or gets destroyed, creating a fresh new instance connected to the old external Postgres service will get Sourcegraph back to its previous state.
 
 ---
 
