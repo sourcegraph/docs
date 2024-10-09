@@ -37,7 +37,7 @@ const OpenApiPage: React.FC = () => {
         </Link>
       </nav>
       <OpenAPi
-        apiDescriptionUrl="https://sourcegraph.github.io/openapi/openapi.Sourcegraph.Latest.yaml"
+        apiDescriptionUrl="/docs/openapi/openapi.Sourcegraph.Latest.yaml"
         router="hash"
       />
     </div>

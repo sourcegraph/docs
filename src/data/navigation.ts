@@ -294,8 +294,12 @@ export const navigation: NavigationItem[] = [
         href: "/api/graphql",
       },
       {
-        title: "Sourcegraph Stream API",
+        title: "Sourcegraph Search API",
         href: "/api/stream_api",
+      },
+      {
+        title: "Sourcegraph REST API",
+        href: "/api/openapi",
       },
     ],
   },
@@ -331,16 +335,7 @@ export const navigation: NavigationItem[] = [
         href: "/releases",
       },
     ],
-  },
-  {
-    separator: "Cody API",
-    topics: [
-      {
-        title: "Cody API",
-        href: "/cody-api",
-      }
-    ],
-  },
+  }
 ];
 
 const navigation_5_2: NavigationItem[] = [
