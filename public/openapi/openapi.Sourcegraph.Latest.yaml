@@ -1,0 +1,225 @@
+openapi: 3.0.0
+info:
+  title: Sourcegraph
+  version: Latest
+tags: []
+paths:
+  /.api/cody/context:
+    post:
+      operationId: CodyService_context
+      summary: Find relevant source locations given a natural language query
+      description: |-
+        Returns a list of source code locations (aka. "context") that are relevant
+        to the given natural language query and list of repos.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodyContextResponse'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CodyContextRequest'
+  /.api/llm/models:
+    get:
+      operationId: OAIModels_list
+      description: Lists the currently available models, and provides basic information about each one such as the owner and availability.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAIListModelsResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /.api/llm/models/{modelId}:
+    get:
+      operationId: OAIModels_retrieveModel
+      description: Retrieves a model instance, providing basic information about the model such as the owner and permissioning.
+      parameters:
+        - name: modelId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAIModel'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    BlobInfo:
+      type: object
+      required:
+        - path
+        - repository
+        - commit
+        - url
+      properties:
+        path:
+          type: string
+        repository:
+          $ref: '#/components/schemas/RepositoryInfo'
+        commit:
+          $ref: '#/components/schemas/CommitInfo'
+        url:
+          type: string
+    CodyContextRequest:
+      type: object
+      required:
+        - query
+      properties:
+        repos:
+          type: array
+          items:
+            $ref: '#/components/schemas/RepoSpec'
+          description: The list of repos to search through.
+        query:
+          type: string
+          description: The natural language query to find relevant context from the provided list of repos.
+        codeResultsCount:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 100
+          description: 'The number of results to return from source code (example: Python or TypeScript).'
+          default: 15
+        textResultsCount:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 100
+          description: The number of results to return from text sources like Markdown.
+          default: 5
+    CodyContextResponse:
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileChunkContext'
+    CommitInfo:
+      type: object
+      required:
+        - oid
+      properties:
+        oid:
+          type: string
+    Error:
+      type: object
+      required:
+        - type
+        - message
+      properties:
+        type:
+          type: string
+        message:
+          type: string
+    FileChunkContext:
+      type: object
+      required:
+        - blob
+        - startLine
+        - endLine
+        - chunkContent
+      properties:
+        blob:
+          $ref: '#/components/schemas/BlobInfo'
+        startLine:
+          type: integer
+          format: int32
+        endLine:
+          type: integer
+          format: int32
+        chunkContent:
+          type: string
+    OAIListModelsResponse:
+      type: object
+      required:
+        - object
+        - data
+      properties:
+        object:
+          type: string
+          enum:
+            - list
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/OAIModel'
+    OAIModel:
+      type: object
+      required:
+        - id
+        - object
+        - created
+        - owned_by
+      properties:
+        id:
+          type: string
+          description: The model identifier, which can be referenced in the API endpoints.
+        object:
+          type: string
+          enum:
+            - model
+          description: The object type, which is always "model".
+        created:
+          type: integer
+          format: int64
+          description: The Unix timestamp (in seconds) when the model was created.
+        owned_by:
+          type: string
+          description: The organization that owns the model.
+      description: Describes an OpenAI model offering that can be used with the API.
+    RepoSpec:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the repository.
+        id:
+          type: string
+          description: The ID of the repository.
+      description: |-
+        RepoSpec matches a repository either by name or ID.
+
+        Exactly one of the properties must be defined. For example, the message
+        `{id:"id", name:"name"}` is invalid because it declares both id and name.
+    RepositoryInfo:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+    Versions:
+      type: string
+      enum:
+        - V5_7
+        - V5_8
+        - Latest
