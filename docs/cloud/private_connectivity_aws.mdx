@@ -26,12 +26,13 @@ Customer should reach out to their account manager to initiate the process. The 
 - The DNS name of the private code host, e.g. `github.internal.company.net` or private artifact registry, e.g. `artifactory.internal.company.net`.
 - The region of the private resource on AWS, e.g. `us-east-1`.
 - The type of the TLS certificate used by the private resource, one of self-signed by internal private CA, or issued by a public CA.
+- The VPC endpoint serivce name in the format of `com.amazonaws.vpce.<REGION>.<VPC_ENDPOINT_SERVICE_ID>`. Learn more from [create the VPC Endpoint Service](#create-the-vpc-endpoint-service).
 
 ### Create the VPC Endpoint Service
 
 When a customer has private resources inside the AWS VPC and needs to expose it for Sourcegraph managed AWS VPC, customers can follow [AWS Documentation](https://docs.aws.amazon.com/vpc/latest/privatelink/create-endpoint-service.html). An example can be found from our [handbook](https://handbook.sourcegraph.com/departments/cloud/technical-docs/private-code-hosts/#aws-private-link-playbook-for-customer).
 
-Sourcegraph will provide the Sourcegraph-managed AWS account ARN that needs to be allowlist in your VPC endpoint service, e.g., `arn:aws:iam::$accountId:root`. It must be allowlisted by customer before the connection can be requested by Sourcegraph. Notes: The AWS account is created exclusively for individual Cloud customers and not shared with others.
+Sourcegraph will provide the Sourcegraph-managed AWS account ARN that needs to be allowlist in your VPC endpoint service, e.g., `arn:aws:iam::$accountId:root`. It must be allowlisted by customer before the connection can be established. Notes: The AWS account is created exclusively for individual Cloud customers and not shared with others.
 
 The customer needs to share the following details with Sourcegraph:
 
@@ -77,3 +78,9 @@ Only if private artifact registry is protected by authentication, the customer w
 ### Can I use self-signed TLS certificate for my private resources?
 
 Yes. Please work with your account team to add the certificate chain of your internal CA to [site configuration](/admin/config/site_config#experimentalFeatures) at `experimentalFeatures.tls.external.certificates`.
+
+### What is the disater recovery plan?
+
+For customers with a disaster recovery plan that can failover the private resource deployment to another region, we recommend the customer to provision VPC endpoint services in the failover region and share the details with Sourcegraph during the onboarding process. In the event of an incident, the customer can reach out to support and request Sourcegraph to failover the connection to the failover region.
+
+For disater recovery plan of Sourcegraph Cloud, please reach out to your account team for more information.
