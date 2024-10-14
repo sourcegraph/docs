@@ -107,3 +107,39 @@ Known issues:
         - Note: this only completes the failing org jobs. You may then see the `user not found` error above, and will still need to mark the rest of the jobs as complete.
         
     3. If the error messages are neither of those two things, this is not currently a known issue. Contact support and we can help!
+
+## Clicking on Code Insight data points leads to invalid search queries
+
+### Issue
+When clicking on a data point in a Code Insight, users are redirected to the search results page with an invalid search query,
+resulting in no results or an error message.
+
+### Symptoms
+- Clicking on a Code Insight data point leads to a search query with too many slashes
+- The search query fails with an error message like: "Unable To Process Query Error parsing regexp: missing closing ): (/"
+- No search results are displayed
+
+### Workaround
+
+Modify your Code Insight query to use the new syntax style. For example:
+
+Instead of:
+
+```
+select:file patterntype:regexp file:.php content:class\s(.)\sextends\sModelRepo\s{
+```
+
+Use:
+
+```
+select:file file:.php /class\s(.)\sextends\sModelRepo\s{/
+```
+
+### Steps to apply the workaround
+
+1. Navigate to your Code Insight
+2. Locate the query causing the issue
+3. Update the query using the new syntax style as shown above
+4. Save the changes to your Code Insight
+
+After applying this workaround, clicking on data points should lead to valid search queries and display the expected results.
