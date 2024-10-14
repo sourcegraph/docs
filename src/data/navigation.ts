@@ -328,7 +328,7 @@ export const navigation: NavigationItem[] = [
       },
       {
         title: "Technical changelog",
-        href: "https://sourcegraph.com/docs/technical-changelog",
+        href: "/technical-changelog",
       },
       {
         title: "Releases",
@@ -571,7 +571,7 @@ const navigation_5_2: NavigationItem[] = [
       },
       {
         title: "Technical changelog",
-        href: "https://sourcegraph.com/docs/technical-changelog",
+        href: "/technical-changelog",
       },
     ],
   },
