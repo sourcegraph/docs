@@ -332,6 +332,15 @@ export const navigation: NavigationItem[] = [
       },
     ],
   },
+  {
+    separator: "Cody API",
+    topics: [
+      {
+        title: "Cody API",
+        href: "/cody-api",
+      }
+    ],
+  },
 ];
 
 const navigation_5_2: NavigationItem[] = [
