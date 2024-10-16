@@ -6,12 +6,28 @@ To retrieve the SBOMs for a specific release, you can use the `src` command line
 
 1. Install `src` by following the [Quickstart](../quickstart.mdx).
 2. Install `cosign` by following the [Installation Guide](https://docs.sigstore.dev/cosign/system_config/installation/).
-3. Identify your Sourcegraph instance's version - you can do this by checking your deployment, or visiting the Settings page on your Sourcegraph instance at and checking the version shown in the bottom left corner. 
+3. Identify the version of Sourcegraph your require SBOMs for. This may be a [recent release](../../CHANGELOG.mdx), or your instance's current version.
+    1. SBOMs are only available for Sourcegraph release 5.8.[TODO] and later.
+    2. Find your instance's current version by checking your deployment, or by visiting the Settings page on your Sourcegraph instance and checking the version shown in the bottom left corner.
+    ![](https://storage.googleapis.com/sourcegraph-assets/docs/images/settings/view-version.png)
 4. Run `src sbom fetch -v <version>` to fetch SBOMs for all containers in this release. `src` will automatically validate that all SBOMs were signed by Sourcegraph.
-```bash
-# Fetch SBOMs for Sourcegraph release 5.8.123
-$ src sbom fetch -v 5.8.123
-```
+    ```
+    # Fetch SBOMs for Sourcegraph release 5.8.123
+    $ src sbom fetch -v 5.8.123
+
+    Fetching SBOMs and validating signatures for all 55 images in the Sourcegraph 5.8.123 release...
+
+    ✅ us-central1-docker.pkg.dev/sourcegraph-ci/rfc795-internal/appliance
+    ✅ us-central1-docker.pkg.dev/sourcegraph-ci/rfc795-internal/batcheshelper
+    ✅ us-central1-docker.pkg.dev/sourcegraph-ci/rfc795-internal/bundled-executor
+    [...]
+
+    🟢 Fetched verified SBOMs for 55 images
+
+    Fetched and validated SBOMs have been written to `sourcegraph-sboms/sourcegraph-5.8.123`.
+
+    Your Sourcegraph deployment may not use all of these images. Please check your deployment to confirm which images are used.
+    ```
 5. Once completed, you can find the set of validated SBOMs under `sourcegraph-sboms/sourcegraph-<version>/`.
 
 **Note:** `src sbom fetch` will retrieve SBOMs for **all** containers that make up a Sourcegraph release. Your Sourcegraph instance will use only a subset of these containers - please check your deployment to determine which SBOM files are relevant to your deployment.
