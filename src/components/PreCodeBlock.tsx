@@ -79,7 +79,7 @@ export async function PreCodeBlock({ children, ...props }: PreProps) {
     <div className="relative">
       <pre className="pt-12" data-language={lang} data-theme={dataTheme}>
         <CopyButton lang={lang} text={codeContent} />
-        {codeContent}
+        {children}
       </pre>
     </div>
   )
