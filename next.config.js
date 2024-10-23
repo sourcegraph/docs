@@ -36,6 +36,11 @@ const nextConfig = {
 				source: '/@:version(\\d+\\.\\d+)/:slug*',
 				destination: 'https://:version.sourcegraph.com/:slug*',
 				permanent: true
+			},
+			{
+				source: '/changelog.rss',
+				destination: '/technical-changelog.rss',
+				permanent: true
 			}
 		];
 	}
