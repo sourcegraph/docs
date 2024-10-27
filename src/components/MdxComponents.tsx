@@ -1,6 +1,7 @@
 import AWSOneClickLaunchForm from './AWSOneClickLaunchForm';
 import { ContentTab, ContentTabs } from './ContentTabs';
 import FeatureParity from './FeatureParity';
+import { PreCode, PreCodeBlock } from './PreCodeBlock';
 import Accordion from './mdx/Accordion';
 import { Callout } from './mdx/Callout';
 import { CustomLink } from './mdx/CustomLink';
@@ -9,12 +10,13 @@ import { LinkCard, LinkCards } from './mdx/LinkCards';
 import { ProductCard, ProductCards } from './mdx/ProductCards';
 import { QuickLink, QuickLinks } from './mdx/QuickLinks';
 import { Tab, Tabs } from './mdx/Tabs';
-import { PreCodeBlock, PreCode } from './PreCodeBlock';
+import { ApiOperation } from './openapi/ApiOperation';
 import ResourceEstimator from './resource-estimator/ResourceEstimator';
 import { Badge } from './ui/badge';
 
 const MdxComponents = (version?: string) => {
   return {
+    ApiOperation,
     FeatureParity,
     ResourceEstimator,
     AWSOneClickLaunchForm,
