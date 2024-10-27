@@ -68,6 +68,7 @@ export function Tabs({children}: TabsProps) {
 }
 
 interface TabProps {
+	title?: string;
 	children: ReactNode;
 }
 

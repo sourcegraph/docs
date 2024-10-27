@@ -1,0 +1,790 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Sourcegraph",
+    "version": "Latest"
+  },
+  "tags": [],
+  "paths": {
+    "/.api/cody/context": {
+      "post": {
+        "operationId": "CodyService_context",
+        "description": "Send a natural language query with a list of repositories, and Cody locates related code examples from those repos.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CodyContextResponse"
+                },
+                "example": {
+                  "results": [
+                    {
+                      "blob": {
+                        "path": "vscode/src/chat/chat-view/ChatController.ts",
+                        "repository": {
+                          "id": "UmVwb3NpdG9yeToyNzU5OQ==",
+                          "name": "github.com/sourcegraph/cody"
+                        },
+                        "commit": {
+                          "oid": "fdcc8a185b21c81d1987bc1daf2c29cec3d19b06"
+                        },
+                        "url": "/github.com/sourcegraph/cody@fdcc8a185b21c81d1987bc1daf2c29cec3d19b06/-/blob/vscode/src/chat/chat-view/ChatController.ts"
+                      },
+                      "startLine": 156,
+                      "endLine": 181,
+                      "chunkContent": "\n/**\n * ChatController is the view controller class for the chat panel.\n * It handles all events sent from the view, keeps track of the underlying chat model,\n * and interacts with the rest of the extension.\n *\n * Its methods are grouped into the following sections, each of which is demarcated\n * by a comment block (search for \"// #region \"):\n *\n * 1. top-level view action handlers\n * 2. view updaters\n * 3. chat request lifecycle methods\n * 4. session management\n * 5. webview container management\n * 6. other public accessors and mutators\n *\n * The following invariants should be maintained:\n * 1. top-level view action handlers\n *    a. should all follow the handle$ACTION naming convention\n *    b. should be private (with the existing exceptions)\n * 2. view updaters\n *    a. should all follow the post$ACTION naming convention\n *    b. should NOT mutate model state\n * 3. Keep the public interface of this class small in order to\n *    avoid tight coupling with other classes. If communication\n"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CodyContextRequest"
+              },
+              "example": {
+                "query": "What does ChatController do?",
+                "repos": [
+                  {
+                    "name": "github.com/sourcegraph/cody"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/.api/llm/chat/completions": {
+      "post": {
+        "operationId": "LLMService_chatCompletions",
+        "description": "Send a structured list of input messages with text and/or image content, and the model will generate the next message in the conversation.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateChatCompletionResponse"
+                },
+                "example": {
+                  "id": "chat-UUID",
+                  "created": 1727692163829,
+                  "model": "anthropic::2023-06-01::claude-3.5-sonnet",
+                  "object": "object",
+                  "choices": [
+                    {
+                      "index": 0,
+                      "finish_reason": "stop",
+                      "message": {
+                        "role": "assistant",
+                        "content": "URIs identify, URLs locate"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateChatCompletionRequest"
+              },
+              "example": {
+                "model": "anthropic::2023-06-01::claude-3.5-sonnet",
+                "max_tokens": 2000,
+                "messages": [
+                  {
+                    "role": "user",
+                    "content": "what is the difference between URI and URL?"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/.api/llm/models": {
+      "get": {
+        "operationId": "LLMService_list",
+        "description": "Lists the currently available models, and provides basic information about each one such as the owner and availability.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAIListModelsResponse"
+                },
+                "example": {
+                  "object": "list",
+                  "data": [
+                    {
+                      "id": "anthropic::2023-06-01::claude-3.5-sonnet",
+                      "object": "model",
+                      "created": 0,
+                      "owned_by": "anthropic"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/.api/llm/models/{modelId}": {
+      "get": {
+        "operationId": "LLMService_retrieveModel",
+        "description": "Retrieves a model instance, providing basic information about the model such as the owner and permissioning.",
+        "parameters": [
+          {
+            "name": "modelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAIModel"
+                },
+                "example": {
+                  "id": "anthropic::2023-06-01::claude-3.5-sonnet",
+                  "object": "model",
+                  "created": 0,
+                  "owned_by": "anthropic"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "SourcegraphTokenAuth": []
+    }
+  ],
+  "components": {
+    "schemas": {
+      "BlobInfo": {
+        "type": "object",
+        "required": [
+          "path",
+          "repository",
+          "commit",
+          "url"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "repository": {
+            "$ref": "#/components/schemas/RepositoryInfo"
+          },
+          "commit": {
+            "$ref": "#/components/schemas/CommitInfo"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "ChatCompletionChoice": {
+        "type": "object",
+        "required": [
+          "index",
+          "message"
+        ],
+        "properties": {
+          "finish_reason": {
+            "type": "string"
+          },
+          "index": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "$ref": "#/components/schemas/ChatCompletionResponseMessage"
+          },
+          "logprobs": {
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ChatCompletionLogprobs"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "ChatCompletionLogprobs": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatCompletionTokenLogprob"
+            }
+          }
+        }
+      },
+      "ChatCompletionRequestMessage": {
+        "type": "object",
+        "required": [
+          "role",
+          "content"
+        ],
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "assistant",
+              "system"
+            ]
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MessageContentPart"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "ChatCompletionResponseMessage": {
+        "type": "object",
+        "required": [
+          "role",
+          "content"
+        ],
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "assistant"
+            ]
+          },
+          "content": {
+            "type": "string"
+          }
+        }
+      },
+      "ChatCompletionStreamOptions": {
+        "type": "object",
+        "properties": {
+          "include_usage": {
+            "type": "boolean",
+            "nullable": true
+          }
+        }
+      },
+      "ChatCompletionTokenLogprob": {
+        "type": "object",
+        "required": [
+          "token",
+          "logprob",
+          "bytes",
+          "top_logprobs"
+        ],
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "logprob": {
+            "type": "number",
+            "format": "double"
+          },
+          "bytes": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "top_logprobs": {
+            "type": "object",
+            "required": [
+              "token",
+              "logprob",
+              "bytes"
+            ],
+            "properties": {
+              "token": {
+                "type": "string"
+              },
+              "logprob": {
+                "type": "number",
+                "format": "double"
+              },
+              "bytes": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "description": "The template for omitting properties."
+          }
+        }
+      },
+      "CodyContextRequest": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "repos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RepoSpec"
+            },
+            "description": "The list of repos to search through."
+          },
+          "query": {
+            "type": "string",
+            "description": "The natural language query to find relevant context from the provided list of repos."
+          },
+          "codeResultsCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "The number of results to return from source code (example: Python or TypeScript).",
+            "default": 15
+          },
+          "textResultsCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "The number of results to return from text sources like Markdown.",
+            "default": 5
+          },
+          "filePatterns": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "An optional list of file patterns used to filter the results. The\npatterns are regex strings. For a file chunk to be returned a context\nresult, the path must match at least one of these patterns."
+          },
+          "version": {
+            "type": "string",
+            "enum": [
+              "1.0",
+              "2.0"
+            ],
+            "description": "The version number of the context API\n\nValid versions:\n- \"1.0\": The old context API (default).\n- \"2.0\": The new context API.",
+            "default": "1.0"
+          }
+        }
+      },
+      "CodyContextResponse": {
+        "type": "object",
+        "required": [
+          "results"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileChunkContext"
+            }
+          }
+        }
+      },
+      "CommitInfo": {
+        "type": "object",
+        "required": [
+          "oid"
+        ],
+        "properties": {
+          "oid": {
+            "type": "string"
+          }
+        }
+      },
+      "CompletionUsage": {
+        "type": "object",
+        "required": [
+          "completion_tokens",
+          "prompt_tokens",
+          "total_tokens"
+        ],
+        "properties": {
+          "completion_tokens": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of tokens in the generated completion."
+          },
+          "prompt_tokens": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of tokens in the prompt."
+          },
+          "total_tokens": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Total number of tokens used in the request (prompt + completion)."
+          }
+        },
+        "description": "Usage statistics for the completion request."
+      },
+      "CreateChatCompletionRequest": {
+        "type": "object",
+        "required": [
+          "model"
+        ],
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatCompletionRequestMessage"
+            },
+            "description": "A list of messages to start the thread with."
+          },
+          "model": {
+            "type": "string",
+            "description": "A model name using the syntax `${ProviderID}::${APIVersionID}::${ModelID}`:\n- ProviderID: lowercase name of the LLM provider. Example: `\"anthropic\"` in\n`\"anthropic::2023-06-01::claude-3.5-sonnet\"`.\n- APIVersionID: the upstream LLM provider API version. Typically formatted as\na date. Example, `\"2024-02-01\"` in `\"openai::2024-02-01::gpt-4o\"`.\n- ModelID: the name of the model. Example, `\"mixtral-8x7b-instruct\"` in\n`\"mistral::v1::mixtral-8x7b-instruct\"`.\n\nUse `GET /.api/llm/models` to list available models."
+          },
+          "max_tokens": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "maximum": 8000,
+            "description": "The maximum number of tokens that can be generated in the completion."
+          },
+          "logit_bias": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "logprobs": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "top_logprobs": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "n": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "frequency_penalty": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "presence_penalty": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "response_format": {
+            "type": "string",
+            "enum": [
+              "text",
+              "json_object"
+            ],
+            "nullable": true
+          },
+          "seed": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "service_tier": {
+            "type": "string",
+            "nullable": true
+          },
+          "stop": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ],
+            "nullable": true
+          },
+          "stream": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "stream_options": {
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ChatCompletionStreamOptions"
+              }
+            ],
+            "nullable": true
+          },
+          "temperature": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "top_p": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "user": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CreateChatCompletionResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "choices",
+          "created",
+          "model",
+          "object"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "choices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatCompletionChoice"
+            }
+          },
+          "created": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "model": {
+            "type": "string"
+          },
+          "service_tier": {
+            "type": "string",
+            "nullable": true
+          },
+          "system_fingerprint": {
+            "type": "string",
+            "nullable": true
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "object"
+            ]
+          },
+          "usage": {
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CompletionUsage"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "type",
+          "message"
+        ],
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "FileChunkContext": {
+        "type": "object",
+        "required": [
+          "blob",
+          "startLine",
+          "endLine",
+          "chunkContent"
+        ],
+        "properties": {
+          "blob": {
+            "$ref": "#/components/schemas/BlobInfo"
+          },
+          "startLine": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "endLine": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chunkContent": {
+            "type": "string"
+          }
+        }
+      },
+      "MessageContentPart": {
+        "type": "object",
+        "required": [
+          "type",
+          "text"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "text"
+            ]
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "OAIListModelsResponse": {
+        "type": "object",
+        "required": [
+          "object",
+          "data"
+        ],
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "list"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OAIModel"
+            }
+          }
+        }
+      },
+      "OAIModel": {
+        "type": "object",
+        "required": [
+          "id",
+          "object",
+          "created",
+          "owned_by"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The model identifier, which can be referenced in the API endpoints."
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "model"
+            ],
+            "description": "The object type, which is always \"model\"."
+          },
+          "created": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The Unix timestamp (in seconds) when the model was created."
+          },
+          "owned_by": {
+            "type": "string",
+            "description": "The organization that owns the model."
+          }
+        },
+        "description": "Describes an OpenAI model offering that can be used with the API."
+      },
+      "RepoSpec": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the repository."
+          },
+          "id": {
+            "type": "string",
+            "description": "The ID of the repository."
+          }
+        },
+        "description": "RepoSpec matches a repository either by name or ID.\n\nExactly one of the properties must be defined. For example, the message\n`{id:\"id\", name:\"name\"}` is invalid because it declares both id and name."
+      },
+      "RepositoryInfo": {
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "Versions": {
+        "type": "string",
+        "enum": [
+          "V5_7",
+          "V5_8",
+          "Latest"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "SourcegraphTokenAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Authenticate to Sourcegraph APIs with the HTTP header \"Authorization\" using\nthe following formatting:\n\n```\nAuthorization: token TOKEN_VALUE\n```\nIn most cases, a Sourcegraph access token looks like this `sgp_asdadakjaaaaaaabbbbbbssswwwwaaal2131kasdaakkkkkq21asdasaa`.\n\nIn rare cases, you may encounter other kinds of token formats, which are documented in the table below.\n\n|                  Token Name                  |                                   Description                                    |            Type            |    Regular Expression     |                         |\n| -------------------------------------------- | -------------------------------------------------------------------------------- | -------------------------- | ------------------------- | ----------------------- |\n| Sourcegraph Access Token (v3)                | Token used to access the Sourcegraph GraphQL API                                 | User-generated             | `sgp_(?:[a-fA-F0-9]{16}\\|local)_[a-fA-F0-9]{40}` |\n| Sourcegraph Access Token (v2, deprecated)    | Token used to access the Sourcegraph GraphQL API                                 | User-generated             | `sgp_[a-fA-F0-9]{40}`     |                         |\n| Sourcegraph Access Token (v1, deprecated)    | Token used to access the Sourcegraph GraphQL API                                 | User-generated             | `[a-fA-F0-9]{40}`         |                         |\n| Sourcegraph Dotcom User Gateway Access Token | Token used to grant sourcegraph.com users access to Cody                         | Backend (not user-visible) | `sgd_[a-fA-F0-9]{64}`     |                         |\n| Sourcegraph License Key Token                | Token used for product subscriptions, derived from a Sourcegraph license key     | Backend (not user-visible) | `slk_[a-fA-F0-9]{64}`     |                         |\n| Sourcegraph Enterprise subscription (aka \"product subscription\") Token       | Token used for Enterprise subscriptions, derived from a Sourcegraph license key | Backend (not user-visible) | `sgs_[a-fA-F0-9]{64}`     |                         |"
+      }
+    }
+  }
+}
