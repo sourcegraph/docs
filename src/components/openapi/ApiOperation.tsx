@@ -244,6 +244,12 @@ function schemaType(schema: OAISchema, refs: Set<string>): React.ReactNode {
 			: schema.items?.type ?? '';
 		return <span>{name}[]</span>;
 	}
+    if (schema.anyOf && schema.anyOf.length > 0) {
+		const parts = schema.anyOf.map(tpe => (
+			<span>{schemaType(tpe, refs)}</span>
+		));
+		return joinReactNodes(parts, ' | ');
+	}
 	return schema.type;
 }
 
