@@ -2,4 +2,4 @@
 
 ## Pull Request approval
 
-Although pull request approval is not enforced for this repository in order to reduce friction, merging without a review will generate a ticket for the docs team to review your changes. So if possible, have your pull request approved before merging.
+You will need to get your PR approved by at least one member of the Sourcegraph team. For reviews of docs formatting, styles, and component usage, please tag the docs team via the #docs Slack channel.
