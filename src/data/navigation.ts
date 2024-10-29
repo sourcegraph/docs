@@ -42,6 +42,16 @@ export const navigation: NavigationItem[] = [
             ]
           },
           {
+            title: "Model configuration",
+            href: "/cody/model-configuration",
+            subsections: [
+              {
+                title: "Reference",
+                href: "/cody/model-configuration/reference",
+              }
+            ],
+          },
+          {
             title: "Capabilities", href: "/cody/capabilities",
             subsections: [
               { title: "Chat", href: "/cody/capabilities/chat", },
