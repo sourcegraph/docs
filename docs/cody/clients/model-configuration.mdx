@@ -1,44 +1,31 @@
 # LLM Model Configuration
 
-<p className="subtitle">
-	This guide will walk you through the steps to customize the LLM models
-	available from your Sourcegraph Enterprise instance.
-</p>
+<p className="subtitle">This guide will walk you through the steps to customize the LLM models available from your Sourcegraph Enterprise instance.</p>
 
-<Callout type="note">
-	For Sourcegraph Cloud customers, configuring the available LLM models
-	requires contacting your Sourcegraph account team representative
-</Callout>
+<Callout type="note">For Sourcegraph Cloud customers, configuring the available LLM models requires contacting your Sourcegraph account team representative</Callout>
 
 Cody Enterprise can be configured using one of two methods:
-
 1. "Completions" Configuration
 2. Model Configuration (Early Access Program)
 
-<Callout type="warning">
-	The Model Configuration method is in Early Access Program and only avaiable
-	on Sourcegraph v5.6.0 or later. In the future when Model Configuration exits
-	EAP, configuring Cody via your Sourcegraph Enterprise instance via the
-	"Completions" Configuration site configuration section will be deprecated.
-	For now, both methods remain supported. We recommend you continue to use the
-	Completions Configuration unless you have specific reason to do otherwise.
-</Callout>
+<Callout type="warning">The Model Configuration method is in Early Access Program and only avaiable on Sourcegraph v5.6.0 or later. In the future when Model Configuration exits EAP, configuring Cody via your Sourcegraph Enterprise instance via the "Completions" Configuration site configuration section will be deprecated. For now, both methods remain supported. We recommend you continue to use the Completions Configuration unless you have specific reason to do otherwise.</Callout>
 
 ## "Completions" Configuration
+
 
 ## Setting up Cody Enterprise
 
 You can set up Cody for your Enterprise instance in one of the following ways:
 
--   [Self-hosted Sourcegraph](#cody-on-self-hosted-sourcegraph-enterprise)
--   [Sourcegraph Cloud](#cody-on-sourcegraph-cloud)
+- [Self-hosted Sourcegraph](#cody-on-self-hosted-sourcegraph-enterprise)
+- [Sourcegraph Cloud](#cody-on-sourcegraph-cloud)
 
 ## Cody on self-hosted Sourcegraph Enterprise
 
 ### Prerequisites
 
--   You have Sourcegraph version 5.1.0 or above
--   A Sourcegraph Enterprise subscription with [Cody Gateway access](/cody/core-concepts/cody-gateway) or [an account with a third-party LLM provider](#supported-models-and-model-providers)
+- You have Sourcegraph version 5.1.0 or above
+- A Sourcegraph Enterprise subscription with [Cody Gateway access](/cody/core-concepts/cody-gateway) or [an account with a third-party LLM provider](#supported-models-and-model-providers)
 
 ### Enable Cody on your Sourcegraph instance
 
@@ -48,32 +35,28 @@ This requires site-admin privileges. To do so,
 
 1. First, configure your desired LLM provider either by [Using Sourcegraph Cody Gateway](/cody/core-concepts/cody-gateway#using-cody-gateway-in-sourcegraph-enterprise) (recommended) or [Using a third-party LLM provider directly](#supported-models-and-model-providers)
 
-<Callout type="note">
-	{' '}
-	If you are a Sourcegraph Cloud customer, skip directly to step 3.
-</Callout>
-1
+<Callout type="note"> If you are a Sourcegraph Cloud customer, skip directly to step 3.</Callout>
 
 2. Next, go to **Site admin > Site configuration** (`/site-admin/configuration`) on your instance and set:
 
 ```json
-{
-	// [...]
-	"cody.enabled": true,
-	"completions": {
-		"provider": "sourcegraph"
-	}
-}
+    {
+      // [...]
+      "cody.enabled": true,
+      "completions": {
+        "provider": "sourcegraph"
+      }
+    }
 ```
 
 Cody is now fully enabled on your self-hosted Sourcegraph enterprise instance!
 
 ## Cody on Sourcegraph Cloud
 
--   With [Sourcegraph Cloud](/cloud/), you get Cody as a managed service, and you **do not** need to [enable Cody as is required for self-hosted setup](#enable-cody-on-your-sourcegraph-instance)
--   However, by contacting your account manager, Cody can still be enabled on-demand on your Sourcegraph instance. The Sourcegraph team will refer to the <a href="https://handbook.sourcegraph.com/departments/cloud/#managed-instance-requests" target="_blank">handbook</a>
--   Next, you can configure the [VS Code extension](#configure-the-vs-code-extension) by following the same steps as mentioned for the self-hosted environment
--   After which, you are all set to use Cody with Sourcegraph Cloud
+- With [Sourcegraph Cloud](/cloud/), you get Cody as a managed service, and you **do not** need to [enable Cody as is required for self-hosted setup](#enable-cody-on-your-sourcegraph-instance)
+- However, by contacting your account manager, Cody can still be enabled on-demand on your Sourcegraph instance. The Sourcegraph team will refer to the <a href="https://handbook.sourcegraph.com/departments/cloud/#managed-instance-requests" target="_blank">handbook</a>
+- Next, you can configure the [VS Code extension](#configure-the-vs-code-extension) by following the same steps as mentioned for the self-hosted environment
+- After which, you are all set to use Cody with Sourcegraph Cloud
 
 [Learn more about running Cody on Sourcegraph Cloud](/cloud/#cody).
 
@@ -81,16 +64,16 @@ Cody is now fully enabled on your self-hosted Sourcegraph enterprise instance!
 
 To turn Cody off:
 
--   Go to **Site admin > Site configuration** (`/site-admin/configuration`) on your instance and set:
+- Go to **Site admin > Site configuration** (`/site-admin/configuration`) on your instance and set:
 
 ```json
-{
-	// [...]
-	"cody.enabled": false
-}
+    {
+      // [...]
+      "cody.enabled": false
+    }
 ```
 
--   Next, remove `completions` configuration if they exist
+- Next, remove `completions` configuration if they exist
 
 ## Enable Cody only for some users
 
@@ -103,43 +86,38 @@ In Sourcegraph 5.3+, access to Cody is managed via user roles. By default, all u
 First, ensure Cody is enabled in your site configuration. Go to **Site admin > Site configuration** (`/site-admin/configuration`) on your instance and set:
 
 ```json
-{
-	// [...]
-	"cody.enabled": true
-	// Make sure cody.restrictUsersFeatureFlag is not in your configuration! If it is, remove it.
-}
+    {
+      // [...]
+      "cody.enabled": true,
+      // Make sure cody.restrictUsersFeatureFlag is not in your configuration! If it is, remove it.
+    }
 ```
 
-<Callout type="note">
-	{' '}
-	Ensure `cody.restrictUsersFeatureFlag` is **not** in your site configuration.
-	If it is, remove it or else the old feature-flag approach from Sourcegraph 5.2
-	and earlier will be used.
-</Callout>
+<Callout type="note"> Ensure `cody.restrictUsersFeatureFlag` is **not** in your site configuration. If it is, remove it or else the old feature-flag approach from Sourcegraph 5.2 and earlier will be used.</Callout>
 
 Next, go to **Site admin > Users & Auth > Roles** (`/site-admin/roles`) on your instance. On that page, you can:
 
--   Control whether users _by default_ have access to Cody (expand `User [System]` and toggle **Cody** > **Access** as desired)
--   Control whether groups of users have access to Cody (`+Create role` and enable the **Cody** > **Access** toggle as desired)
+- Control whether users _by default_ have access to Cody (expand `User [System]` and toggle **Cody** > **Access** as desired)
+- Control whether groups of users have access to Cody (`+Create role` and enable the **Cody** > **Access** toggle as desired)
 
 ### Sourcegraph 5.2 and earlier
 
 In Sourcegraph 5.2 and earlier, you should use the feature flag `cody` to turn Cody on selectively for some users. To do so:
 
--   Go to **Site admin > Site configuration** (`/site-admin/configuration`) on your instance and set:
+- Go to **Site admin > Site configuration** (`/site-admin/configuration`) on your instance and set:
 
 ```json
-{
-	// [...]
-	"cody.enabled": true,
-	"cody.restrictUsersFeatureFlag": true
-}
+    {
+      // [...]
+      "cody.enabled": true,
+      "cody.restrictUsersFeatureFlag": true
+    }
 ```
 
--   Next, go to **Site admin > Feature flags** (`/site-admin/feature-flags`)
--   Add a feature flag called `cody`
--   Select the `boolean` type and set it to `false`
--   Once added, click on the feature flag and use **add overrides** to pick users that will have access to Cody
+- Next, go to **Site admin > Feature flags** (`/site-admin/feature-flags`)
+- Add a feature flag called `cody`
+- Select the `boolean` type and set it to `false`
+- Once added, click on the feature flag and use **add overrides** to pick users that will have access to Cody
 
 ![add-overrides](https://user-images.githubusercontent.com/25070988/235454594-9f1a6b27-6882-44d9-be32-258d6c244880.png)
 
@@ -147,16 +125,16 @@ In Sourcegraph 5.2 and earlier, you should use the feature flag `cody` to turn C
 
 [Cody Enterprise](https://sourcegraph.com/enterprise) supports many models and model providers. You can configure Cody Enterprise to access models via Sourcegraph Cody Gateway or directly using your own model provider account or infrastructure.
 
--   Using [Sourcegraph Cody Gateway](/cody/core-concepts/cody-gateway):
-    -   Recommended for most organizations.
-    -   Supports [state-of-the-art models](/cody/capabilities/supported-models) from Anthropic, OpenAI, and more, without needing a separate account or incurring separate charges.
--   Using your organization's account with a model provider:
-    -   [Use your organization's Anthropic account](#use-your-organizations-anthropic-account)
-    -   [Use your organization's OpenAI account](#use-your-organizations-openai-account)
--   Using your organization's public cloud infrastructure:
-    -   [Use Amazon Bedrock (AWS)](#use-amazon-bedrock-aws)
-    -   [Use Azure OpenAI Service](#use-azure-openai-service)
-    -   _Use Vertex AI on Google Cloud (coming soon)_
+- Using [Sourcegraph Cody Gateway](/cody/core-concepts/cody-gateway):
+  - Recommended for most organizations.
+  - Supports [state-of-the-art models](/cody/capabilities/supported-models) from Anthropic, OpenAI, and more, without needing a separate account or incurring separate charges.
+- Using your organization's account with a model provider:
+  - [Use your organization's Anthropic account](#use-your-organizations-anthropic-account)
+  - [Use your organization's OpenAI account](#use-your-organizations-openai-account)
+- Using your organization's public cloud infrastructure:
+  - [Use Amazon Bedrock (AWS)](#use-amazon-bedrock-aws)
+  - [Use Azure OpenAI Service](#use-azure-openai-service)
+  - *Use Vertex AI on Google Cloud (coming soon)*
 
 ### Use your organization's Anthropic account
 
@@ -164,15 +142,15 @@ First, [create your own key with Anthropic](https://console.anthropic.com/accoun
 
 ```json
 {
-	// [...]
-	"cody.enabled": true,
-	"completions": {
-		"provider": "anthropic",
-		"chatModel": "claude-2.0", // Or any other model you would like to use
-		"fastChatModel": "claude-instant-1.2", // Or any other model you would like to use
-		"completionModel": "claude-instant-1.2", // Or any other model you would like to use
-		"accessToken": "<key>"
-	}
+  // [...]
+  "cody.enabled": true,
+  "completions": {
+    "provider": "anthropic",
+    "chatModel": "claude-2.0", // Or any other model you would like to use
+    "fastChatModel": "claude-instant-1.2", // Or any other model you would like to use
+    "completionModel": "claude-instant-1.2", // Or any other model you would like to use
+    "accessToken": "<key>"
+  }
 }
 ```
 
@@ -182,15 +160,15 @@ First, [create your own key with OpenAI](https://beta.openai.com/account/api-key
 
 ```json
 {
-	// [...]
-	"cody.enabled": true,
-	"completions": {
-		"provider": "openai",
-		"chatModel": "gpt-4", // Or any other model you would like to use
-		"fastChatModel": "gpt-3.5-turbo", // Or any other model you would like to use
-		"completionModel": "gpt-3.5-turbo-instruct", // Or any other model that supports the legacy completions endpoint
-		"accessToken": "<key>"
-	}
+  // [...]
+  "cody.enabled": true,
+  "completions": {
+    "provider": "openai",
+    "chatModel": "gpt-4", // Or any other model you would like to use
+    "fastChatModel": "gpt-3.5-turbo", // Or any other model you would like to use
+    "completionModel": "gpt-3.5-turbo-instruct", // Or any other model that supports the legacy completions endpoint
+    "accessToken": "<key>"
+  }
 }
 ```
 
@@ -209,15 +187,15 @@ Once ready, go to **Site admin > Site configuration** (`/site-admin/configuratio
 
 ```json
 {
-	// [...]
-	"cody.enabled": true,
-	"completions": {
-		"provider": "aws-bedrock",
-		"chatModel": "anthropic.claude-3-opus-20240229-v1:0",
-		"completionModel": "anthropic.claude-instant-v1",
-		"endpoint": "<See below>",
-		"accessToken": "<See below>"
-	}
+  // [...]
+  "cody.enabled": true,
+  "completions": {
+    "provider": "aws-bedrock",
+    "chatModel": "anthropic.claude-3-opus-20240229-v1:0",
+    "completionModel": "anthropic.claude-instant-v1",
+    "endpoint": "<See below>",
+    "accessToken": "<See below>"
+  }
 }
 ```
 
@@ -225,14 +203,15 @@ For the `chatModel` and `completionModel` fields, see [Amazon's Bedrock document
 
 For `endpoint`, you can either:
 
--   For Pay-as-you-go, set it to an AWS region code (e.g., `us-west-2`) when using a public Amazon Bedrock endpoint
--   For Provisioned Throughput, set it to the provisioned VPC endpoint for the `bedrock-runtime` API (e.g., `"https://vpce-0a10b2345cd67e89f-abc0defg.bedrock-runtime.us-west-2.vpce.amazonaws.com"`)
+- For Pay-as-you-go, set it to an AWS region code (e.g., `us-west-2`) when using a public Amazon Bedrock endpoint
+- For Provisioned Throughput, set it to the provisioned VPC endpoint for the `bedrock-runtime` API (e.g., `"https://vpce-0a10b2345cd67e89f-abc0defg.bedrock-runtime.us-west-2.vpce.amazonaws.com"`)
 
 For `accessToken`, you can either:
 
--   Leave it empty and rely on instance role bindings or other AWS configurations in the `frontend` service
--   Set it to `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>` if directly configuring the credentials
--   Set it to `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>:<SESSION_TOKEN>` if a session token is also required
+- Leave it empty and rely on instance role bindings or other AWS configurations in the `frontend` service
+- Set it to `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>` if directly configuring the credentials
+- Set it to `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>:<SESSION_TOKEN>` if a session token is also required
+
 
 ### Using GCP Vertex AI
 
@@ -240,49 +219,46 @@ Right now, We only support Anthropic Claude models on [GCP Vertex](https://cloud
 
 1. Enable the [Vertex AI API](https://console.cloud.google.com/marketplace/product/google/aiplatform.googleapis.com) in the GCP console. Once Vertex has been enabled in your project, navigate to the [Vertex Model Garden](https://console.cloud.google.com/vertex-ai/model-garden) to select & enable the Anthropic Claude model(s) which you wish to use with Cody. See [Supported LLM Models](../capabilities/supported-models) for an up-to-date list of Anthropic Claude models supported by Cody.
 
-<Callout type="note">
-	It may take some time to enable Vertex and provision access to the models
-	you plan to use
-</Callout>
+<Callout type="note">It may take some time to enable Vertex and provision access to the models you plan to use</Callout>
 
 2. **Create a Service Account**:
-
-    - Create a [service account](https://cloud.google.com/iam/docs/service-account-overview).
-    - Assign the `Vertex AI User` role to the service account.
-    - Generate a JSON key for the service account and download it.
+   - Create a [service account](https://cloud.google.com/iam/docs/service-account-overview).
+   - Assign the `Vertex AI User` role to the service account.
+   - Generate a JSON key for the service account and download it.
 
 3. **Convert JSON Key to Base64** by doing:
-
 ```python
 cat <downloaded-json-key> | base64
 ```
 
 Once ready, go to **Site admin > Site configuration** (`/site-admin/configuration`) on your instance and set:
 
+
 ```json
 {
-	// [...]
-	"cody.enabled": true,
-	"completions": {
-		"chatModel": "claude-3-opus@20240229",
-		"completionModel": "claude-3-haiku@20240307",
-		"provider": "google",
-		"endpoint": "<See below>",
-		"accessToken": "<Base64 string from step 3>"
-	}
+  // [...]
+  "cody.enabled": true,
+  "completions": {
+    "chatModel": "claude-3-opus@20240229",
+    "completionModel": "claude-3-haiku@20240307",
+    "provider": "google",
+    "endpoint": "<See below>",
+    "accessToken": "<Base64 string from step 3>"
+  }
 }
+
 ```
 
 For the `Endpoint`, you can
-
 1. Navigate to the Documentation Page:
    Go to the Claude 3 Haiku Documentation on the GCP Console Model garden
 2. Locate the Example: if you scroll enough through the page to find the example that shows how to use the cURL command with the Claude 3 Haiku model. The example will include a sample request JSON body and the necessary endpoint URL. Copy the URL in the site-admin config:
-   The endpoint URL will look something like this:
+     The endpoint URL will look something like this:
    `https://LOCATION-aiplatform.googleapis.com/v1/projects/PROJECT_ID/locations/LOCATION/publishers/anthropic/models/`
 
 3. Example URL:
-   `https://us-east5-aiplatform.googleapis.com/v1/projects/sourcegraph-vertex-staging/locations/us-east5/publishers/anthropic/models`
+`https://us-east5-aiplatform.googleapis.com/v1/projects/sourcegraph-vertex-staging/locations/us-east5/publishers/anthropic/models`
+
 
 ### Use Azure OpenAI Service
 
@@ -294,23 +270,23 @@ Once done, go to **Site admin > Site configuration** (`/site-admin/configuration
 
 ```json
 {
-	// [...]
-	"cody.enabled": true,
-	"completions": {
-		"provider": "azure-openai",
-		"chatModel": "<deployment name of the model>",
-		"fastChatModel": "<deployment name of the model>",
-		"completionModel": "<deployment name of the model>", // the model must support the legacy completions endpoint such as gpt-3.5-turbo-instruct
-		"endpoint": "<endpoint>",
-		"accessToken": "<See below>"
-	}
+  // [...]
+  "cody.enabled": true,
+  "completions": {
+    "provider": "azure-openai",
+    "chatModel": "<deployment name of the model>",
+    "fastChatModel": "<deployment name of the model>",
+    "completionModel": "<deployment name of the model>", // the model must support the legacy completions endpoint such as gpt-3.5-turbo-instruct
+    "endpoint": "<endpoint>",
+    "accessToken": "<See below>"
+  }
 }
 ```
 
 For the access token, you can either:
 
--   As of 5.2.4 the access token can be left empty and it will rely on Environmental, Workload Identity or Managed Identity credentials configured for the `frontend` and `worker` services
--   Set it to `<API_KEY>` if directly configuring the credentials using the API key specified in the Azure portal
+- As of 5.2.4 the access token can be left empty and it will rely on Environmental, Workload Identity or Managed Identity credentials configured for the `frontend` and `worker` services
+- Set it to `<API_KEY>` if directly configuring the credentials using the API key specified in the Azure portal
 
 ### Use StarCoder for Autocomplete
 
@@ -322,232 +298,68 @@ To enable StarCoder go to **Site admin > Site configuration** (`/site-admin/conf
 
 ```json
 {
-	// [...]
-	"cody.enabled": true,
-	"completions": {
-		"provider": "sourcegraph",
-		"completionModel": "fireworks/starcoder"
-	}
+  // [...]
+  "cody.enabled": true,
+  "completions": {
+    "provider": "sourcegraph",
+    "completionModel": "fireworks/starcoder"
+  }
 }
 ```
 
 Users of the Cody Extensions will automatically pick up this change when connected to your Enterprise instance.
 
+
 # Model Configuration
 
-Sourcegraph v5.6.0 or later supports the ability to choose between different LLM models, allowing developers to use the
-best model for Cody Chat as needed. This is accomplished exposing much more flexible configuration options for Cody when
-using Sourcegraph Enterprise. The newer style of configuration is described next.
-However, you can still use the [Older style "Completions" Configuration](#legacy-completions-configuration).
-
-<Callout type="info">
-	Before you start, please note that the model configuration is an early
-	access program (EAP) and we are working towards improving on its coverage of
-	supported providers. If you are having any issues with this configuration,
-	please reach out to your Sourcegraph Account Representative or roll back
-	your configuration to the Legacy "Completions" configuration.
-</Callout>{' '}
-
-The LLM models available for use from a Sourcegraph Enterprise instance are the union of "Sourcegraph-supplied models"
-and any custom models providers that you explicitly add to your Sourcegraph instance's site configuration.
-For most administrators, just relying on Sourcegraph-supplied models will ensure that you are using quality models
-without needing to worry about the specifics.
+Sourcegraph v5.6.0 or later supports the ability to choose between different LLM models, allowing developers to use the best model for Cody Chat as needed. This is accomplished exposing much more flexible configuration options for Cody when using Sourcegraph Enterprise. The newer style of configuration is described next. However, you can still use the [Older style "Completions" Configuration](#legacy-completions-configuration).
 
 ## Quickstart
 
-The simplest way to configure your Sourcegraph Enterprise would be to [use the default model configuration](/link):
+<Callout type="info">Before you start, please note that the model configuration is an early access program (EAP) and we are working towards improving on its coverage of supported providers. If you are having any issues with this configuration, please reach out to your Sourcegraph Account Representative or roll back your configuration to the Legacy "Completions" configuration </Callout> 
 
-The `"sourcegraph"` section defines how Sourcegraph-supplied LLM models should be configured. (That is, LLM models made
-available by the [Cody Gateway](/cody/core-concepts/cody-gateway) service.)
-The default settings will expose all current Cody Gateway models from your Sourcegraph instance, and make them available to users.
+The simplest way to configure your Sourcegraph Enterprise would be to add the following configuration section to your instance's [site configuration](/admin/config/site_config):
+
+```json
+  ...
+  "cody.enabled": true,
+  "modelConfiguration": {
+    "sourcegraph": {}
+  },
+  ...
+```
+
+The `"modelConfiguration"` section defines which LLM models are supported by the Sourcegraph instance, and how to invoke them. The `"sourcegraph"` section defines how Sourcegraph-supplied LLM models should be configured. (That is, LLM models made available by the [Cody Gateway](/cody/core-concepts/cody-gateway) service.) The default settings will expose all current Cody Gateway models from your Sourcegraph instance, and make them available to users.
 
 However, if you are seeking more control and wish to restrict which LLM models are available, or if you wish to use your own API access key, you can expand upon the `"modelConfiguration"` section as needed.
 
-## Sourcegraph-supplied Models
+## Concepts
 
-The Sourcegraph-supplied models are those that are available from [Cody Gateway](/cody/core-concepts/cody-gateway),
-and your site configuration controls which of those models can be used.
+The LLM models available for use from a Sourcegraph Enterprise instance are the union of "Sourcegraph-supplied models" and any custom models providers that you explicitly add to your Sourcegraph instance's site configuration. For most administrators, just relying on Sourcegraph-supplied models will ensure that you are using quality models without needing to worry about the specifics.
+
+### Sourcegraph-supplied Models
+
+The Sourcegraph-supplied models are those that are available from [Cody Gateway](/cody/core-concepts/cody-gateway), and your site configuration controls which of those models can be used.
+
+If you wish to not use _any_ Sourcegraph-supplied models, and instead _only_ rely on those you have explicitly defined in your site configuration, you can set the `"sourcegraph"` field to `null`.
+
 There are three top-level settings for configuring Sourcegraph-supplied LLM models:
 
 | Field                     | Description                                                                              |
-| ------------------------- | ---------------------------------------------------------------------------------------- |
-| `endpoint` (optional)     | The URL for connecting to Cody Gateway, defaults to the production instance.             |
+| -----------               | ---------------------------------------------------------------------------------------- |
+| `endpoint` (optional)     | The URL for connecting to Cody Gateway, defaults to the production instance.             | 
 | `accessToken` (optional)  | The access token used to connect to Cody Gateway, defaulting to the current license key. |
 | `modelFilters` (optional) | Filters for which models to include from Cody Gateway.                                   |
 
-### Use the default model configuration
-
-The easiest way to set up Cody on your Sourcegraph instance is by using the default model configuration,
-which routes requests to LLM providers through the Cody Gateway.
-To enable this, add the following section to your site configuration:
-
-```json
-"cody.enabled": true,
-"modelConfiguration": {
-  "sourcegraph": {}
-}
-```
-
-This configuration establishes the following:
-
--   Your instance uses Sourcegraph-defined default models.
--   Your instance can access all models provided by Sourcegraph.
--   Your instance communicates with LLM providers through the Cody Gateway service.
-
-To view the default and available models, run the following command:
-
-```bash
-curl curl --location 'https://your-instance.com/.api/modelconfig/supported-models.json' \
-  --header 'Authorization: token YOUR_ACCESS_TOKEN'
-```
-
-This will return a JSON response with the following structure:
-
-```json
-{
-	"providers": [
-		{
-			"id": "anthropic",
-			"displayName": "Anthropic"
-		},
-		{
-			"id": "fireworks",
-			"displayName": "Fireworks"
-		},
-		{
-			"id": "google",
-			"displayName": "Google"
-		},
-		{
-			"id": "openai",
-			"displayName": "OpenAI"
-		}
-		// ...other providers
-	],
-	"models": [
-		{
-			"modelRef": "anthropic::2024-10-22::claude-3-5-sonnet-latest",
-			"displayName": "Claude 3.5 Sonnet (Latest)",
-			"modelName": "claude-3-5-sonnet-latest",
-			"capabilities": ["edit", "chat", "vision"],
-			"category": "accuracy",
-			"status": "stable",
-			"tier": "free",
-			"contextWindow": {
-				"maxInputTokens": 45000,
-				"maxOutputTokens": 4000
-			}
-		},
-		{
-			"modelRef": "anthropic::2023-06-01::claude-3-opus",
-			"displayName": "Claude 3 Opus",
-			"modelName": "claude-3-opus-20240229",
-			"capabilities": ["edit", "chat"],
-			"category": "other",
-			"status": "stable",
-			"tier": "pro",
-			"contextWindow": {
-				"maxInputTokens": 45000,
-				"maxOutputTokens": 4000
-			}
-		},
-		{
-			"modelRef": "anthropic::2023-06-01::claude-3-haiku",
-			"displayName": "Claude 3 Haiku",
-			"modelName": "claude-3-haiku-20240307",
-			"capabilities": ["edit", "chat"],
-			"category": "speed",
-			"status": "stable",
-			"tier": "free",
-			"contextWindow": {
-				"maxInputTokens": 7000,
-				"maxOutputTokens": 4000
-			}
-		},
-		{
-			"modelRef": "fireworks::v1::starcoder",
-			"displayName": "StarCoder",
-			"modelName": "starcoder",
-			"capabilities": ["autocomplete"],
-			"category": "speed",
-			"status": "stable",
-			"tier": "free",
-			"contextWindow": {
-				"maxInputTokens": 2048,
-				"maxOutputTokens": 256
-			}
-		},
-		{
-			"modelRef": "fireworks::v1::deepseek-coder-v2-lite-base",
-			"displayName": "DeepSeek V2 Lite Base",
-			"modelName": "accounts/sourcegraph/models/deepseek-coder-v2-lite-base",
-			"capabilities": ["autocomplete"],
-			"category": "speed",
-			"status": "stable",
-			"tier": "free",
-			"contextWindow": {
-				"maxInputTokens": 2048,
-				"maxOutputTokens": 256
-			}
-		},
-		{
-			"modelRef": "google::v1::gemini-1.5-pro",
-			"displayName": "Gemini 1.5 Pro",
-			"modelName": "gemini-1.5-pro",
-			"capabilities": ["edit", "chat"],
-			"category": "balanced",
-			"status": "stable",
-			"tier": "free",
-			"contextWindow": {
-				"maxInputTokens": 45000,
-				"maxOutputTokens": 4000
-			}
-		},
-		{
-			"modelRef": "openai::2024-02-01::gpt-4o",
-			"displayName": "GPT-4o",
-			"modelName": "gpt-4o",
-			"capabilities": ["edit", "chat", "vision"],
-			"category": "accuracy",
-			"status": "stable",
-			"tier": "pro",
-			"contextWindow": {
-				"maxInputTokens": 45000,
-				"maxOutputTokens": 4000
-			}
-		}
-		// ...other models
-	],
-	"defaultModels": {
-		"chat": "anthropic::2024-10-22::claude-3-5-sonnet-latest",
-		"fastChat": "anthropic::2023-06-01::claude-3-haiku",
-		"codeCompletion": "fireworks::v1::starcoder"
-	}
-}
-```
-
-Most of the configuration fields are self-explanatory, such as labeling the model's category ("stable", "beta") or category ("accuracy", "speed"). The more important fields are described below:
-
-**modelRef**. Each model is given a unique identifier, referred to as a model reference or "mref". This is a string of the form `${providerId}::${apiVersionId}::${modelId}`.
-
-In order to associate a model with your provider, the `${providerId}` must match. The `${modelId}` can be almost any URL-safe string.
-
-The `${apiVersionId}` is required in order to detect compatibility issues between newer models and Sourcegraph instances. In the following example, the string "2023-06-01" is used to clarify that this LLM model should formulate API requests using that version of the Anthropic API. If you are unsure, when defining your own models you can leave this as `"unknown"`.
-
-**contextWindow**. The context window is the number of "tokens" sent to an LLM. Either in the amount of contextual data sent in the LLM prompt (e.g. the question, relevant snippets, etc.) and the maximum size of the output allowed in the response. These values directly control factors such as the time it takes to respond to a prompt and the cost of the LLM request. And each LLM model or provider may have their own limits as well.
-
-**modelName**. The model _name_, is the value required by the LLM model's API provider. In this example, the `modelRef` defined the model's ID as `claude-3-sonnet` but the `modelName` was the more specific "claude-3-sonnet-20240229".
-
-**capabilities**. The capabilities of a model determine which situations the model can be used. For example, models only supported for "autocomplete" will not be available for Cody chats.
-
-### Model filters
+**Model Filters**
 
 The `"modelFilters"` section is how you restrict which Cody Gateway models are made available to your Sourcegraph Enterprise instance's users.
 
 The first field is the `"statusFilter"`. Each LLM model is given a label by Sourcegraph as per its release, such as "stable", beta", or "experimental". By default, all models available on
 Cody Gateway are exposed. Using the category filter ensures that only models with a particular category are made available to your users.
 
-The `"allow"` and `"deny"` fields, are arrays of `modelRef`s for what models should or should not be included. These values accept wild cards.
+The `"allow"` and `"deny"` fields, are arrays of [model references](#model-configuration) for what models should or should not be included. These values accept wild cards.
+
 
 The following examples illustrate how to use all these settings in conjunction:
 
@@ -579,37 +391,30 @@ The following examples illustrate how to use all these settings in conjunction:
 }
 ```
 
-## Change default models
+## Default Models
 
-The response from the request described in the section above includes a `defaultModels` section, indicating the default models for each of the Cody features.
-To override these default models, add a `defaultModels` section within the `modelConfiguration` section in your site configuration.
+The `"modelConfiguration"` setting also contains a `"defaultModels"` field that allows you to specify the LLM model used depending on the situation. If no default is specified, or refers to a model that isn't found, it will silently fallback to a suitable alternative.
 
 ```json
-"cody.enabled": true,
-"modelConfiguration": {
-  // allow all Sourcegraph-supplied models via Cody Gateway
-  "sourcegraph": {},
-  // override the default model for chat
-  "defaultModels": {
-    "chat": "google::v1::gemini-1.5-pro",
+  ...
+  "cody.enabled": true,
+  "modelConfiguration": {
+    "defaultModels": {
+      "chat": "anthropic::2023-06-01::claude-3.5-sonnet",
+      "codeCompletion": "anthropic::2023-06-01::claude-3.5-sonnet",
+      "fastChat": "anthropic::2023-06-01::claude-3-haiku"
+    }
   }
-}
+  ...
 ```
 
-The configuration snippet above changes the default model for chat while retaining the default values for other features, such as "fastChat" and "autocomplete."
-
-Note: The values in the `defaultModels` section should match the `modelRef` of one of the available models (found in the `"models"` field of the `.api/modelconfig/supported-models.json` response).
+The format of these strings is a "Model Reference", which is a format for uniquely identifying each LLM model exposed from your Sourcegraph instance.
 
 ## Advanced Configuration
 
 For most administrators, relying on the LLM models made available by Cody Gateway is sufficient. However, if even more customization is required, you can configure your own LLM providers and models.
 
-<Callout type="warning">
-	Defining your own LLM providers and models is an advanced use-case and
-	requires care to get the correct results. It also may bypass protections to
-	ensure compatibility between your Sourcegraph instance and LLMs. If you need
-	help contact your Sourcegraph account executive.
-</Callout>
+<Callout type="warning">Defining your own LLM providers and models is an advanced use-case and requires care to get the correct results. It also may bypass protections to ensure compatibility between your Sourcegraph instance and LLMs. If you need help contact your Sourcegraph account executive.</Callout>
 
 ### Overview
 
@@ -621,7 +426,7 @@ A "provider" is a way to organize LLM models. Typically a provider would be refe
 
 By defining a provider override in your Sourcegraph site configuration, you are introducing a new namespace to contain models. Or customize the existing provider namespace supplied by Sourcegraph. (e.g. all `"anthropic"` models.)
 
-The following configuration snippet defines a single provider override with the ID `"anthropic"`.
+The following configuration shippet defines a single provider override with the ID `"anthropic"`.
 
 ```json
 "cody.enabled": true,
@@ -670,8 +475,8 @@ In the example, the `"type"` field was `"anthropic"`. Meaning that any interacti
 
 However, Sourcegraph supports several different types of LLM API providers natively. The current set of supported LLM API providers is:
 
-| Provider type        | Description                                                                                                  |
-| -------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Provider type        | Description  |
+| -------------------- | ------------ |
 | `"sourcegraph"`      | [Cody Gateway](/cody/core-concepts/cody-gateway), which supports many different models from various services |
 | `"openaicompatible"` | Any OpenAI-compatible API implementation                                                                     |
 | `"awsBedrock"`       | [Amazon Bedrock](https://docs.aws.amazon.com/bedrock/)                                                       |
@@ -725,5 +530,7 @@ The `${apiVersionId}` is required in order to detect compatibility issues betwee
 **modelName**. The model _name_, is the value required by the LLM model's API provider. In this example, the `modelRef` defined the model's ID as `claude-3-sonnet` but the `modelName` was the more specific "claude-3-sonnet-20240229".
 
 **capabilities**. The capabilities of a model determine which situations the model can be used. For example, models only supported for "autocomplete" will not be available for Cody chats.
+
+
 
 It's recommended that every instance admin not using a third-party LLM provider makes this change and we are planning to make this the default in a future release.
