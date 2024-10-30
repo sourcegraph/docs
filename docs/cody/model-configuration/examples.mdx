@@ -1,1 +1,120 @@
 # Examples
+
+## Sourcegraph-supplied models only
+
+This section includes examples how to configure Cody to use Sourcegraph-supplied models.
+
+-   [Minimal configuration](/cody/model-configuration#configure-sourcegraph-supplied-models)
+-   [Using model filters](/cody/model-configuration#model-filters)
+-   [Change default models](/cody/model-configuration#default-models)
+
+## Sourcegraph-supplied models and BYOK (Bring Your Own Key)
+
+Sourcegraph-supplied models come with preconfigured providers, identified by the following IDs (namespaces):
+
+-   "anthropic"
+-   "google"
+-   "fireworks"
+-   "mistral"
+-   "openai"
+
+### Override provider config for all models in the namespace
+
+When Sourcegraph-supplied models are used and a provider override for a Sourcegraph-supported provider (same ID) is specified, the override applies to all Sourcegraph-supplied models within that provider.
+For example, if you specify an override for a provider with ID `"anthropic"`, it will apply to all models from the `"anthropic"` provider.
+
+Example configuration:
+
+```json
+{
+"cody.enabled": true,
+"modelConfiguration": {
+  "sourcegraph": {},
+  "providerOverrides": [
+    {
+     "id": "anthropic",
+    "displayName": "Anthropic BYOK",
+    "serverSideConfig": {
+      "type": "anthropic",
+      "accessToken": "sk-ant-token",
+       "endpoint": "https://api.anthropic.com/v1/messages"
+      }
+    }
+  ],
+  "defaultModels": {
+    "chat": "anthropic::2024-10-22::claude-3.5-sonnet",
+    "fastChat": "anthropic::2023-06-01::claude-3-haiku",
+    "autocomplete": "fireworks::v1::deepseek-coder-v2-lite-base"
+  }
+}
+```
+
+In the configuration above, we:
+
+-   Enable Sourcegraph-supplied models and do not set any overrides (note that `"modelConfiguration.modelOverrides"` is not specified).
+-   Route requests for Anthropic models directly to the Anthropic API (via the provider override specified for "anthropic").
+-   Route requests for other models (such as the Fireworks model for "autocomplete") through Cody Gateway.
+
+### Override provider configur for some models and use the Sourcegraph-configured provider config for the rest
+
+It's possible to route requests directly to the LLM provider (bypassing the Cody Gateway) for some models while using the Sourcegraph-configured provider config for the rest.
+
+Example configuration:
+
+```json
+{
+"cody.enabled": true,
+"modelConfiguration": {
+  "sourcegraph": {},
+  "providerOverrides": [
+    {
+     "id": "anthropic-byok",
+      "displayName": "Anthropic BYOK",
+      "serverSideConfig": {
+      "type": "anthropic",
+      "accessToken": "sk-ant-token",
+       "endpoint": "https://api.anthropic.com/v1/messages"
+      }
+    }
+  ],
+  "modelOverrides": [
+    {
+      "modelRef": "anthropic-byok::2024-10-22::claude-3.5-sonnet",
+      "displayName": "Claude 3.5 Sonnet",
+      "modelName": "claude-3-5-sonnet-latest",
+      "capabilities": ["edit", "chat", "vision"],
+      "category": "accuracy",
+      "status": "stable",
+      "tier": "free",
+      "contextWindow": {
+        "maxInputTokens": 45000,
+        "maxOutputTokens": 4000
+      }
+    }
+  ],
+  "defaultModels": {
+    "chat": "anthropic-byok::2024-10-22::claude-3.5-sonnet",
+    "fastChat": "anthropic::2023-06-01::claude-3-haiku",
+    "autocomplete": "fireworks::v1::deepseek-coder-v2-lite-base"
+  }
+}
+```
+
+In the configuration above, we:
+
+-   Enable Sourcegraph-supplied models (the `sourcegraph` field is not empty).
+-   Define a new provider with the ID `"anthropic-byok"` and configure it to use the Anthropic API.
+-   Since this provider is unknown to Sourcegraph, no Sourcegraph-supplied models are available for it. Therefore,
+    we add a custom model in the `"modelOverrides"` section.
+-   Use the custom model configured in the previous step (`"anthropic-byok::2024-10-22::claude-3.5-sonnet"`) for `"chat"`.
+    Requests are sent directly to the Anthropic API as set in the provider override.
+-   For `"fastChat"` and `"autocomplete"`, we use Sourcegraph-supplied models via Cody Gateway.
+
+## Config examples for various LLM providers
+
+Below are configuration examples for setting up various LLM providers using BYOK.
+These examples are applicable whether or not you are using Sourcegraph-supported models.
+
+<Accordion title="Anthropic">
+
+</Accordion>
