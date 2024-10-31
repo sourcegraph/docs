@@ -36,6 +36,7 @@ export const navigation: NavigationItem[] = [
             subsections: [
               { title: "Cody for VS Code", href: "/cody/clients/install-vscode", },
               { title: "Cody for JetBrains", href: "/cody/clients/install-jetbrains", },
+              { title: "Cody for Visual Studio", href: "/cody/clients/install-visual-studio", },
               { title: "Cody for Web", href: "/cody/clients/cody-with-sourcegraph", },
               { title: "Cody for Enterprise", href: "/cody/clients/enable-cody-enterprise", },
               { title: "Model Configuration", href: "/cody/clients/model-configuration", },
