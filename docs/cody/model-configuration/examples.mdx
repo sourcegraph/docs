@@ -223,9 +223,74 @@ In the configuration above, we:
 
 </Accordion>
 
-<Accordion title="OpenAI"></Accordion>
+<Accordion title="OpenAI">
+
+```json
+"modelConfiguration": {
+  "sourcegraph": null,
+  "providerOverrides": [
+    {
+      "id": "openai",
+      "displayName": "OpenAI",
+      "serverSideConfig": {
+        "type": "openai",
+        "accessToken": "token",
+        "endpoint": "https://api.openai.com"
+      }
+    }
+  ],
+  "modelOverrides": [
+    {
+      "modelRef": "openai::2024-02-01::gpt-4o",
+      "displayName": "GPT-4o",
+      "modelName": "gpt-4o",
+      "capabilities": ["edit", "chat"],
+      "category": "accuracy",
+      "status": "stable",
+      "tier": "pro",
+      "contextWindow": {
+          "maxInputTokens": 45000,
+          "maxOutputTokens": 400
+      }
+    },
+    {
+      "modelRef": "openai::unknown::gpt-3.5-turbo-instruct",
+      "displayName": "GPT-3.5 Turbo Instruct",
+      "modelName": "gpt-3.5-turbo-instruct",
+      "capabilities": ["autocomplete"],
+      "category": "speed",
+      "status": "stable",
+      "tier": "free",
+      "contextWindow": {
+          "maxInputTokens": 7000,
+          "maxOutputTokens": 400
+      }
+    }
+],
+  "defaultModels": {
+    "chat": "openai::2024-02-01::gpt-4o",
+    "fastChat": "openai::2024-02-01::gpt-4o",
+    "autocomplete": "openai::unknown::gpt-3.5-turbo-instruct"
+  }
+}
+```
+
+In the configuration above, we:
+
+-   Set up a provider override for OpenAI, routing requests for this provider directly to the specified OpenAI endpoint (bypassing Cody Gateway).
+-   Add two OpenAI models:
+    -   `"openai::2024-02-01::gpt-4o"` with "edit" and "chat" capabiities - used for "chat" and "fastChat"
+    -   `"openai::unknown::gpt-3.5-turbo-instruct"` with "autocomplete" capability - used for "autocomplete".
+
+</Accordion>
+
 <Accordion title="Azure OpenAI"></Accordion>
-<Accordion title="Generic OpenAI-compatible"></Accordion>
+
+<Accordion title="Generic OpenAI-compatible">
+
+TODO
+
+</Accordion>
 
 <Accordion title="Google Vertex (Anthropic)"></Accordion>
 <Accordion title="Google Vertex (Gemini)"></Accordion>
