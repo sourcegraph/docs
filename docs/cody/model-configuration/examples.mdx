@@ -284,7 +284,72 @@ In the configuration above, we:
 
 </Accordion>
 
-<Accordion title="Azure OpenAI"></Accordion>
+<Accordion title="Azure OpenAI">
+
+```json
+"cody.enabled": true,
+"modelConfiguration": {
+  "sourcegraph": null,
+  "providerOverrides": [
+      {
+          "id": "azure-openai",
+          "displayName": "Azure OpenAI",
+          "serverSideConfig": {
+              "type": "azureOpenAI",
+              "accessToken": "token",
+              "endpoint": "https://acme-test.openai.azure.com/",
+              "user": "",
+              "useDeprecatedCompletionsAPI": true
+          }
+      }
+  ],
+  "modelOverrides": [
+      {
+          "modelRef": "azure-openai::unknown::gpt-4o",
+          "displayName": "GPT-4o",
+          "modelName": "gpt-4o",
+          "capabilities": ["edit", "chat"],
+          "category": "accuracy",
+          "status": "stable",
+          "tier": "pro",
+          "contextWindow": {
+              "maxInputTokens": 45000,
+              "maxOutputTokens": 4000
+          }
+      },
+          {
+          "modelRef": "azure-openai::unknown::gpt-35-turbo-instruct-test",
+          "displayName": "GPT-3.5 Turbo Instruct",
+          "modelName": "gpt-35-turbo-instruct-test",
+          "capabilities": ["autocomplete"],
+          "category": "speed",
+          "status": "stable",
+          "tier": "free",
+          "contextWindow": {
+              "maxInputTokens": 7000,
+              "maxOutputTokens": 4000
+          }
+      }
+  ],
+  "defaultModels": {
+  "chat": "azure-openai::unknown::gpt-4o",
+  "fastChat": "azure-openai::unknown::gpt-4o",
+  "autocomplete": "azure-openai::unknown::gpt-35-turbo-instruct-test"
+  }
+}
+```
+
+In the configuration above, we:
+
+-   Set up a provider override for Azure OpenAI, routing requests for this provider directly to the specified Azure OpenAI endpoint (bypassing Cody Gateway).
+-   Add two OpenAI models:
+    -   `"azure-openai::unknown::gpt-4o"` with "edit" and "chat" capabiities - used for "chat" and "fastChat"
+    -   `"azure-openai::unknown::gpt-35-turbo-instruct-test"` with "autocomplete" capability - used for "autocomplete".
+-   Since `"azure-openai::unknown::gpt-35-turbo-instruct-test"` is not supported on the newer OpenAI `"v1/chat/completions"` endpoint,
+    we set `"useDeprecatedCompletionsAPI"` to `true` to route requests to the legacy `"v1/completions"` endpoint. This setting is
+    unnecessary if you are using a model supported on the `"v1/chat/completions"` endpoint.
+
+</Accordion>
 
 <Accordion title="Generic OpenAI-compatible">
 
