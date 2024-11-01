@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const loadChangelog = () => {
-    const changelogPath = path.join(__dirname, '..', 'docs', 'CHANGELOG.mdx');
+    const changelogPath = path.join(__dirname, '..', 'docs', 'technical-changelog.mdx');
     return fs.readFileSync(changelogPath, 'utf8');
 }
 
@@ -36,7 +36,7 @@ const generateRssFeed = () => {
         updated: date,
         generator: 'Sourcegraph RSS Feed',
         feedLinks: {
-            rss2: `${siteURL}/changelog.rss`,
+            rss2: `${siteURL}/technical-changelog.rss`,
         },
         author: {
             name: 'Sourcegraph',
@@ -55,7 +55,7 @@ const generateRssFeed = () => {
             continue;
         }
         const tag = comment.version.replace('v', '');
-        const versionDocLink = `${siteURL}/CHANGELOG#${comment.version.replaceAll('.', '')}`;
+        const versionDocLink = `${siteURL}/technical-changelog#${comment.version.replaceAll('.', '')}`;
         feed.addItem({
             title: `Sourcegraph ${tag}`,
             id: comment.version,
@@ -65,7 +65,7 @@ const generateRssFeed = () => {
         });
     }
 
-    fs.writeFileSync(path.join(__dirname, '../public/changelog.rss'), feed.rss2());
+    fs.writeFileSync(path.join(__dirname, '../public/technical-changelog.rss'), feed.rss2());
 }
 
 module.exports = { generateRssFeed }

@@ -36,8 +36,8 @@ export const navigation: NavigationItem[] = [
             subsections: [
               { title: "Cody for VS Code", href: "/cody/clients/install-vscode", },
               { title: "Cody for JetBrains", href: "/cody/clients/install-jetbrains", },
+              { title: "Cody for Visual Studio", href: "/cody/clients/install-visual-studio", },
               { title: "Cody for Web", href: "/cody/clients/cody-with-sourcegraph", },
-              { title: "Cody for CLI", href: "/cody/clients/install-cli", },
               { title: "Cody for Enterprise", href: "/cody/clients/enable-cody-enterprise", },
               { title: "Model Configuration", href: "/cody/clients/model-configuration", },
             ]
@@ -280,13 +280,15 @@ export const navigation: NavigationItem[] = [
     separator: "CLI & API",
     topics: [
       {
-        title: "Sourcegraph CLI",
+        title: "Sourcegraph & Cody CLI",
         href: "/cli",
         sections: [
           { title: "Quickstart", href: "/cli/quickstart" },
           { title: "Explanations", href: "/cli/explanations" },
           { title: "How-to Guides", href: "/cli/how-tos" },
           { title: "References", href: "/cli/references" },
+          { title: "Cody CLI", href: "/cody/clients/install-cli", },
+
         ],
       },
       {
@@ -325,6 +327,10 @@ export const navigation: NavigationItem[] = [
       {
         title: "Changelog",
         href: "https://sourcegraph.com/changelog",
+      },
+      {
+        title: "Technical changelog",
+        href: "/technical-changelog",
       },
       {
         title: "Releases",
@@ -564,6 +570,10 @@ const navigation_5_2: NavigationItem[] = [
       {
         title: "Changelog",
         href: "https://sourcegraph.com/changelog",
+      },
+      {
+        title: "Technical changelog",
+        href: "/technical-changelog",
       },
     ],
   },
@@ -860,6 +870,10 @@ const navigation_5_3: NavigationItem[] = [
       {
         title: "Changelog",
         href: "https://sourcegraph.com/changelog",
+      },
+      {
+        title: "Technical changelog",
+        href: "/technical-changelog",
       },
     ],
   },

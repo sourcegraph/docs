@@ -60,7 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 				rel="alternate"
 				type="application/rss+xml"
 				title="RSS Feed for Sourcegraph"
-				href="/changelog.rss"
+				href="/technical-changelog.rss"
 			/>
 		</head>
 		<body
