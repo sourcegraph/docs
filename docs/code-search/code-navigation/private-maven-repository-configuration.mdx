@@ -1,15 +1,15 @@
-### Configuring Maven to Use a Private Repository for Auto-Indexing
+# Configuring Maven to Use a Private Repository for Auto-Indexing
 
-#### Overview
-In Sourcegraph, configuring Maven to use a private repository, such as Nexus or Artifactory, is essential when dependencies are retrieved from private repositories that require authentication (as opposed to public repositories such as Maven Central). This guide covers steps to set up Maven for SCIP-JAVA indexing with a private repository, ensuring secure and consistent dependency resolution.
+Configuring Maven to use a private repository, such as Nexus or Artifactory, with Sourcegraph is essential when dependencies are retrieved from private repositories that require authentication (as opposed to public repositories such as Maven Central). This guide covers steps to set up Maven for SCIP-JAVA indexing with a private repository, ensuring secure and consistent dependency resolution.
 
-#### Step 1: Testing the Configuration on a Single Repository
+## Testing the Configuration on a Single Repository
 
-To test and validate the Maven configuration, start by modifying a single repository’s auto-indexing settings to include a custom settings.xml file. Refer to (Maven's official docs)[https://maven.apache.org/settings.html#quick-overview] for an overview of how this file is used to configure Maven repositories and other settings.
+To test and validate the Maven configuration, modify a single repository’s auto-indexing settings to include a custom settings.xml file. Refer to (Maven's official docs)[https://maven.apache.org/settings.html#quick-overview] for an overview of how this file is used to configure Maven repositories and other settings.
 
-1. **Add Custom Index Job Configuration**:
-   - Access the repository’s index settings in Sourcegraph and open the “Raw” configuration panel.
-   - Insert the following configuration:
+### Add Custom Index Job Configuration
+
+- Access the repository’s index settings in Sourcegraph and open the “Raw” configuration panel.
+- Insert the following configuration:
 
      ```json
      {
@@ -33,17 +33,19 @@ To test and validate the Maven configuration, start by modifying a single reposi
      }
      ```
 
-2. **Set Up Executor Secrets**:
-   - Before triggering the indexing process, make sure the environment variables `$ARTIFACTORY_USER` and `$ARTIFACTORY_PASSWORD` are created as [Executor Secrets](https://sourcegraph.com/docs/admin/executors/executor_secrets).
+### Set Up Executor Secrets
 
-3. **Trigger Indexing**:
-   - After configuring the repository, navigate to the "Precise Indexes" tab and click "Enqueue" to start the indexing process.
+- Before triggering the indexing process, make sure the environment variables `$ARTIFACTORY_USER` and `$ARTIFACTORY_PASSWORD` are created as [Executor Secrets](https://sourcegraph.com/docs/admin/executors/executor_secrets).
 
-#### Step 2: Automating the Configuration Across All Repositories
+1. **Trigger Indexing**:
+   - After configuring the repository, navigate to the "Precise Indexes" tab and click "Enqueue" to start indexing.
+
+## Automating the Configuration Across All Repositories
 
 After verifying the configuration on a single repository, you can automate the setup across all repositories by modifying the inference configuration using a Lua script.
 
-**Create or Update the Lua Script**:  
+### Create or Update the Lua Script
+
 Navigate to `site-admin -> Code Graph -> Inference`, and replace or add the following Lua script for SCIP-JAVA indexing with Maven’s `settings.xml` setup:
 
 ```lua
@@ -65,7 +67,7 @@ local custom_java_recognizer = recognizer.new_path_recognizer {
         pattern.new_path_basename("pom.xml"),
         pattern.new_path_basename("build.gradle"),
         pattern.new_path_basename("build.gradle.kts"),
-    },
+ },
     generate = function(api, paths)
         api:register({
             local_steps = new_steps,
@@ -74,18 +76,18 @@ local custom_java_recognizer = recognizer.new_path_recognizer {
             outfile = "index.scip",
             indexer = java_indexer,
             indexer_args = { "scip-java", "index", "--build-tool=auto" }
-        })
+ })
     end
 }
 
 return require("sg.autoindex.config").new({
-    ["custom.java"] = custom_java_recognizer,
-    ["sg.java"] = false
+ ["custom.java"] = custom_java_recognizer,
+ ["sg.java"] = false
 })
 ```
 
-#### Verify the Configuration
+### Verify the Configuration
 
-Once the Lua script is applied, you can verify that the configuration is working by using the **"Preview results"** button in the Lua script editor under the "Inference Configuration" section. This will display the inferred index jobs for your repositories, showing details such as the root directory, indexer, indexer arguments, and environment variables used for each job.
+Once the Lua script is applied, you can verify that the configuration works by using the **"Preview results"** button in the Lua script editor under the "Inference Configuration" section. This will display the inferred index jobs for your repositories, showing details such as the root directory, indexer, indexer arguments, and environment variables used for each job.
 
-If everything is configured correctly, the dependencies will be pulled from the specified private repository without any issues.
+If everything is configured correctly, the dependencies will be pulled from the specified private repository without issues.
