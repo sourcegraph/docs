@@ -37,7 +37,7 @@ Example configuration:
     "displayName": "Anthropic BYOK",
     "serverSideConfig": {
       "type": "anthropic",
-      "accessToken": "sk-ant-token",
+      "accessToken": "token",
        "endpoint": "https://api.anthropic.com/v1/messages"
       }
     }
@@ -99,7 +99,7 @@ These examples are applicable whether or not you are using Sourcegraph-supported
       "displayName": "Anthropic",
       "serverSideConfig": {
       "type": "anthropic",
-      "accessToken": "sk-ant-token",
+      "accessToken": "token",
         "endpoint": "https://api.anthropic.com/v1/messages"
       }
     }
@@ -291,50 +291,50 @@ In the configuration above, we:
 "modelConfiguration": {
   "sourcegraph": null,
   "providerOverrides": [
-      {
-          "id": "azure-openai",
-          "displayName": "Azure OpenAI",
-          "serverSideConfig": {
-              "type": "azureOpenAI",
-              "accessToken": "token",
-              "endpoint": "https://acme-test.openai.azure.com/",
-              "user": "",
-              "useDeprecatedCompletionsAPI": true
-          }
-      }
+    {
+        "id": "azure-openai",
+        "displayName": "Azure OpenAI",
+        "serverSideConfig": {
+          "type": "azureOpenAI",
+          "accessToken": "token",
+          "endpoint": "https://acme-test.openai.azure.com/",
+          "user": "",
+          "useDeprecatedCompletionsAPI": true
+        }
+    }
   ],
   "modelOverrides": [
       {
-          "modelRef": "azure-openai::unknown::gpt-4o",
-          "displayName": "GPT-4o",
-          "modelName": "gpt-4o",
-          "capabilities": ["edit", "chat"],
-          "category": "accuracy",
-          "status": "stable",
-          "tier": "pro",
-          "contextWindow": {
-              "maxInputTokens": 45000,
-              "maxOutputTokens": 4000
-          }
+        "modelRef": "azure-openai::unknown::gpt-4o",
+        "displayName": "GPT-4o",
+        "modelName": "gpt-4o",
+        "capabilities": ["edit", "chat"],
+        "category": "accuracy",
+        "status": "stable",
+        "tier": "pro",
+        "contextWindow": {
+            "maxInputTokens": 45000,
+            "maxOutputTokens": 4000
+        }
       },
-          {
-          "modelRef": "azure-openai::unknown::gpt-35-turbo-instruct-test",
-          "displayName": "GPT-3.5 Turbo Instruct",
-          "modelName": "gpt-35-turbo-instruct-test",
-          "capabilities": ["autocomplete"],
-          "category": "speed",
-          "status": "stable",
-          "tier": "free",
-          "contextWindow": {
-              "maxInputTokens": 7000,
-              "maxOutputTokens": 4000
-          }
+      {
+        "modelRef": "azure-openai::unknown::gpt-35-turbo-instruct-test",
+        "displayName": "GPT-3.5 Turbo Instruct",
+        "modelName": "gpt-35-turbo-instruct-test",
+        "capabilities": ["autocomplete"],
+        "category": "speed",
+        "status": "stable",
+        "tier": "free",
+        "contextWindow": {
+            "maxInputTokens": 7000,
+            "maxOutputTokens": 4000
+        }
       }
   ],
   "defaultModels": {
-  "chat": "azure-openai::unknown::gpt-4o",
-  "fastChat": "azure-openai::unknown::gpt-4o",
-  "autocomplete": "azure-openai::unknown::gpt-35-turbo-instruct-test"
+    "chat": "azure-openai::unknown::gpt-4o",
+    "fastChat": "azure-openai::unknown::gpt-4o",
+    "autocomplete": "azure-openai::unknown::gpt-35-turbo-instruct-test"
   }
 }
 ```
@@ -353,7 +353,92 @@ In the configuration above, we:
 
 <Accordion title="Generic OpenAI-compatible">
 
-TODO
+```json
+"cody.enabled": true,
+"modelConfiguration": {
+  "sourcegraph": null,
+  "providerOverrides": [
+    {
+      "id": "fireworks",
+      "displayName": "Fireworks",
+      "serverSideConfig": {
+        "type": "openaicompatible",
+        "endpoints": [
+          {
+              "url": "https://api.fireworks.ai/inference/v1",
+              "accessToken": "token"
+          }
+        ]
+      }
+    },
+    {
+      "id": "huggingface-codellama",
+      "displayName": "Hugging Face",
+      "serverSideConfig": {
+        "type": "openaicompatible",
+        "endpoints": [
+          {
+            "url": "https://api-inference.huggingface.co/models/meta-llama/CodeLlama-7b-hf/v1/",
+            "accessToken": "token"
+          }
+        ]
+      }
+    },
+  ],
+  "modelOverrides": [
+    {
+      "modelRef": "fireworks::v1::llama-v3p1-70b-instruct",
+      "modelName": "llama-v3p1-70b-instruct",
+      "displayName": "(Fireworks) Llama 3.1 70B Instruct",
+      "contextWindow": {
+        "maxInputTokens": 64000,
+        "maxOutputTokens": 8192
+      },
+      "serverSideConfig": {
+        "type": "openaicompatible",
+        "apiModel": "accounts/fireworks/models/llama-v3p1-70b-instruct"
+      },
+      "clientSideConfig": {
+        "openaicompatible": {}
+      },
+      "capabilities": ["chat"],
+      "category": "balanced",
+      "status": "stable"
+    },
+    {
+      "modelRef": "huggingface-codellama::v1::CodeLlama-7b-hf",
+      "modelName": "CodeLlama-7b-hf",
+      "displayName": "(HuggingFace) CodeLlama-7b-hf",
+      "contextWindow": {
+        "maxInputTokens": 8192,
+        "maxOutputTokens": 4096
+      },
+      "serverSideConfig": {
+        "type": "openaicompatible",
+        "apiModel": "meta-llama/CodeLlama-7b-hf"
+      },
+      "clientSideConfig": {
+        "openaicompatible": {}
+      },
+      "capabilities": ["autocomplete", "chat"],
+      "category": "balanced",
+      "status": "stable"
+    }
+  ],
+  "defaultModels": {
+    "chat": "fireworks::v1::llama-v3p1-70b-instruct",
+    "fastChat": "fireworks::v1::llama-v3p1-70b-instruct",
+    "autocomplete": "huggingface-codellama::v1::CodeLlama-7b-hf"
+  }
+}
+```
+
+In the configuration above, we:
+
+-   Configure two OpenAI-compatible providers: `"fireworks"` and `"huggingface-codellama"`.
+-   Add two OpenAI-compatible models: `"fireworks::v1::llama-v3p1-70b-instruct"` and `"huggingface-codellama::v1::CodeLlama-7b-hf"`. Additionally:
+    -   Set `clientSideConfig.openaicompatible` to `{}` to indicate to Cody clients that these models are OpenAI-compatible, ensuring the appropriate code paths are utilized.
+    -   Designate these models as the default choices for chat and autocomplete, respectively.
 
 </Accordion>
 
@@ -411,7 +496,7 @@ TODO
 In the configuration above, we:
 
 -   Set up a provider override for Google Anthropic, routing requests for this provider directly to the specified endpoint (bypassing Cody Gateway).
--   Add two OpenAI models:
+-   Add two Anthropic models:
     -   `"google::unknown::claude-3-5-sonnet"` with "chat" capabiity - used for "chat" and "fastChat"
     -   `"google::unknown::claude-3-haiku"` with "autocomplete" capability - used for "autocomplete".
 
@@ -419,7 +504,48 @@ In the configuration above, we:
 
 <Accordion title="Google Vertex (Gemini)">
 
-TODO
+```json
+"modelConfiguration": {
+  "sourcegraph": null,
+  "providerOverrides": [
+      {
+          "id": "google",
+          "displayName": "Google Gemini",
+          "serverSideConfig": {
+            "type": "google",
+            "accessToken": "token",
+            "endpoint": "https://generativelanguage.googleapis.com/v1beta/models"
+          }
+      }
+  ],
+  "modelOverrides": [
+    {
+      "modelRef": "google::v1::gemini-1.5-pro",
+      "displayName": "Gemini 1.5 Pro",
+      "modelName": "gemini-1.5-pro",
+      "capabilities": ["chat", "autocomplete"],
+      "category": "balanced",
+      "status": "stable",
+      "tier": "free",
+      "contextWindow": {
+        "maxInputTokens": 45000,
+        "maxOutputTokens": 400
+      }
+    }
+  ],
+  "defaultModels": {
+    "chat": "google::v1::gemini-1.5-pro",
+    "fastChat": "google::v1::gemini-1.5-pro",
+    "autocomplete": "google::v1::gemini-1.5-pro"
+  }
+}
+```
+
+In the configuration above, we:
+
+-   Set up a provider override for Google Gemini, routing requests for this provider directly to the specified endpoint (bypassing Cody Gateway).
+-   Add the `"google::v1::gemini-1.5-pro"` model, which is used for all Cody features.
+    We do not add other models for simplicity, as adding multiple models is already covered in the examples above.
 
 </Accordion>
 
@@ -493,4 +619,61 @@ configuration type. For more details, refer to the [Model Overrides](/cody/model
 
 ## Self-hosted models
 
-TODO
+<Callout type="note">
+	Configuring self-hosted models can be nuanced and complex. Consider reaching
+	out to Sourcegraph support for assistance with the setup.
+</Callout>
+
+For detailed information about configuring self-hosted models, please refer to the [self-hosted models](/cody/model-configuration#self-hosted-models) documentation.
+
+Example configuration:
+
+```json
+"cody.enabled": true,
+"modelConfiguration": {
+  "sourcegraph": null,
+  "providerOverrides": [
+    {
+      "id": "fireworks",
+      "displayName": "Fireworks",
+      "serverSideConfig": {
+        "type": "openaicompatible",
+        "endpoints": [
+          {
+            "url": "https://api.fireworks.ai/inference/v1",
+            "accessToken": "token"
+          }
+        ]
+      }
+    }
+  ],
+  "selfHostedModels": [
+    {
+      "provider": "fireworks",
+      "model": "mixtral-8x7b-instruct@v1",
+      "override": {
+        "displayName": "(Fireworks) Mixtral 8x7b Instruct",
+        "serverSideConfig": {
+          "type": "openaicompatible",
+          "apiModel": "accounts/fireworks/models/mixtral-8x7b-instruct"
+        }
+      }
+    },
+    {
+      "provider": "fireworks",
+      "model": "mixtral-8x22b-instruct@v1",
+      "override": {
+        "displayName": "(Fireworks) Mixtral 8x22b Instruct",
+        "serverSideConfig": {
+          "type": "openaicompatible",
+          "apiModel": "accounts/fireworks/models/mixtral-8x22b-instruct"
+        }
+      }
+    },
+  ]
+}
+```
+
+In the configuration above we:
+
+-   TODO
