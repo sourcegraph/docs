@@ -9,7 +9,7 @@ import { LinkCard, LinkCards } from './mdx/LinkCards';
 import { ProductCard, ProductCards } from './mdx/ProductCards';
 import { QuickLink, QuickLinks } from './mdx/QuickLinks';
 import { Tab, Tabs } from './mdx/Tabs';
-import { PreCodeBlock, PreCode } from './PreCodeBlock';
+import { PreCode, PreCodeBlock } from './PreCodeBlock';
 import ResourceEstimator from './resource-estimator/ResourceEstimator';
 import { Badge } from './ui/badge';
 

@@ -6,10 +6,10 @@ Context refers to any additional information provided to help Cody understand an
 
 ## Why is context important?
 
-Context and [methods of retrieving context](#context-selection) are crucial to the quality and accuracy of AI. Cody relies on its ability to retrieve context from user codebases in order to provide reliable and accurate answers to developers’ questions. When Cody has access to the most relevant context about your codebase, it can:
+Context and [methods of retrieving context](#context-selection) are crucial to the quality and accuracy of AI. Cody relies on its ability to retrieve context from user codebases to provide reliable and accurate answers to developers’ questions. When Cody has access to the most relevant context about your codebase, it can:
 
 - Answer questions about your codebase
-- Produce unit tests and documentation
+- Produce unit tests and docs
 - Generate code that aligns with the libraries and style of your codebase
 - Significantly reduce your work that's required to translate LLM-provided answers into actionable value for your users
 
@@ -25,19 +25,22 @@ All these methods collectively ensure Cody's ability to provide relevant and hig
 
 ## Context fetching mechanism
 
-Enterprise users on Cody [Web](/cody/clients/cody-with-sourcegraph), [VS Code](/cody/clients/install-vscode) and [JetBrains](/cody/clients/install-jetbrains) can leverage the full power of the Sourcegraph search engine as the primary context provider to Cody. This means access to more repos and files from across your codebase and a system that is more scalable and easier to configure.
+You can @-mention files, symbols, and web pages in Cody. Cody Enterprise also supports @-mentioning remote directories to search for context in a broader scope. Cody's experimental [OpenCtx](https://openctx.org) support adds more context sources, including Jira, Linear, Google Docs, Notion, and more.
 
-Users on Cody Free or Pro plans use context depending on the type of [clients](/cody/clients) they use.
+Here's a detailed breakdown of the number of repositories supported by each client for Cody Free, Pro, and Enterprise users:
 
-Here's a detailed breakdown of the context fetching mechanism for each client for Cody Free, Pro, and Enterprise users:
+|    **Tier**    |  **Client**   | **Repositories** |
+| -------------- | ------------- | ---------------- |
+| **Free/Pro**   | VS Code       | 1                |
+|                | JetBrains     | 1                |
+|                | Visual Studio | 1                |
+| **Enterprise** | Cody Web      | Multi            |
+|                | VS Code       | Multi            |
+|                | JetBrains     | Multi            |
 
-|    **Tier**    | **Client** | **Repositories** |
-| -------------- | ---------- | ---------------- |
-| **Free/Pro**   | VS Code    | 1                |
-|                | JetBrains  | 1                |
-| **Enterprise** | Cody Web   | Multi            |
-|                | VS Code    | Multi            |
-|                | JetBrains  | Multi            |
+## Context sources
+
+You can @-mention files, symbols, and web pages in Cody. Cody Enterprise also supports @-mentioning repositories to search for context in a broader scope. Cody's experimental [OpenCtx](https://openctx.org) support adds more context sources, including Jira, Linear, Google Docs, Notion, and more.
 
 ## How does context work with Cody prompts?
 
@@ -45,30 +48,18 @@ Cody works in conjunction with an LLM to provide codebase-aware answers. The LLM
 
 A typical prompt has three parts:
 
-- **Prefix**: An optional description of the desired output, often derived from predefined [Commands](/cody/capabilities/commands) that specify tasks the LLM can perform
+- **Prefix**: An optional description of the desired output, often derived from predefined [Prompts](/cody/capabilities/commands) that specify tasks the LLM can perform
 - **User input**: The information provided, including your code query or request
 - **Context**: Additional information that helps the LLM provide a relevant answer based on your specific codebase
 
-For example, Cody's `/explain` code command receives a prompt like this:
-
-- **Prefix**: Explain the following Go code at a high level. Only include details that are essential to an overall understanding of what's happening in the code
-- **User input**: `zoekt.QueryToZoektQuery(b.query, b.resultTypes, b.features, typ)`
-- **Context**: Contents of `sourcegraph/sourcegraph/internal/search/zoekt/query.go`
-
-### Impact of context LLM vs Cody
+## Impact of context LLM vs Cody
 
 When the same prompt is sent to a standard LLM, the response may lack specifics about your codebase. In contrast, Cody augments the prompt with context from relevant code snippets, making the answer far more specific to your codebase. This difference underscores the importance of context in Cody's functionality.
 
-## Usage and Limits
+## Manage Cody context window size
 
-Cody's usage and limits policies help optimize its performance and ensure cost-effectiveness. This section provides insights into the context window size, token limits for chat, commands, and completions, and administrators' control over these settings.
+While Cody aims to provide maximum context for each prompt, there are limits to ensure efficiency. For more details, see our [docs on token limits](/cody/core-concepts/token-limits).
 
-### Cody context window size
+Site administrators can update the maximum context window size to meet their specific requirements. While using fewer tokens is a cost-saving solution, it can also cause errors. For example, using an `edit` or `describe` type prompts with a too small context window size might give you errors like `You've selected too much code`.
 
-While Cody aims to provide maximum context for each prompt, there are limits to ensure efficiency. For more details, see our [documentation on token limits](/cody/core-concepts/token-limits.mdx).
-
-### Manage context window size
-
-Site administrators can update the maximum context window size to meet their specific requirements. While using fewer tokens is a cost-saving solution, it can also cause errors. For example, using the `/edit` command with a too small context window size might give you errors like `You've selected too much code`.
-
-Using more tokens usually produces higher-quality responses, but also increases response times. In general, it's recommended not to modify the token limit. However, if needed, you can set it to a value that should not compromise quality or generate errors.
+Using more tokens usually produces higher-quality responses but also increases response times. In general, it's recommended not to modify the token limit. However, if needed, you can set it to a value that should not compromise quality or generate errors.
