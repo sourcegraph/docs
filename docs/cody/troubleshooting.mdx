@@ -69,9 +69,13 @@ To troubleshoot further:
 
 ### Rate limits
 
-On the free plan, Cody provides **unlimited autocomplete suggestions** and **200 chat and command invokations** per user per month.
+Cody Free provides **unlimited autocomplete suggestions** and **200 chat and command invocations** per user per month.
 
-On the Pro and Enterprise plans, there are much higher limits that are used to keep our services operational. These limits reset within a day.
+On Cody Pro and Enterprise plans, usage is unlimited but controlled by **Fair Usage**. This means that some users occasionally experience a limitation placed on their account.  This limitation resets within 24 hours.  If this issue persists, contact us through our [community forum](https://community.sourcegraph.com), Discord, or email support@sourcegraph.com.
+
+#### 429 errors
+
+A 429 status code means you are on a free account and hit your usage limit/quota for the day. It can also mean you were sending too many requests in a short period of time. If you have Cody Pro and you are seeing 429 errors, you can contact us at [support@sourcegraph.com](mailto:support@sourcegraph.com) to resolve this.
 
 ### Error logging in VS Code on Linux and Windows
 
@@ -89,6 +93,25 @@ On Windows,
 - In your Command Prompt or PowerShell window, run the following command: `setx NODE_TLS_REJECT_UNAUTHORIZED 0`
 - Restart Visual Studio Code and try the sign in process again
 
+### Cloudflare Request Failed
+
+ If you encounter this error:
+
+```
+Request Failed: Request to https://sourcegraph.com/.api/completions/stream?api-version=1&client-name=vscode&client-version=1.34.3 failed with 403 Forbidden
+```
+
+It indicates that our web application firewall provider, Cloudflare, has flagged the source IP as suspicious.
+
+Consider disabling anonymizers, VPNs, or open proxies. If using a VPN is essential, you can try [1.1.1.1](https://one.one.one.one), which is recognized to be compatible with our services.
+
+### VS Code Pro License Issues
+
+If VS Code prompts you to upgrade to Pro despite already having a Pro license, this usually happens because you're logged into a free Cody/Sourcegraph account rather than your Pro account. To fix this:
+
+- Check which account you're currently logged into
+- If needed, log out and sign in with your PRO account credentials
+
 ### Error exceeding `localStorage` quota
 
 When using Cody chat, you may come across this error:
@@ -99,7 +122,7 @@ Failed to execute 'setItem' on 'Storage': Setting the value of 'user-history:$us
 
 This error indicates that the chat history size surpasses the capacity of your browser's local storage. Cody stores comprehensive context data with each chat message, contributing to this limitation.
 
-To fix this, navigate to https://sourcegraph.example.com/cody/chat and click `Clear Chat History` if your instance is on v5.2.3+. For older versions, clear your browsing data or browser history.
+To fix this, navigate to https://sourcegraph.your-domain.com/cody/chat and click `Clear Chat History` if your instance is on v5.2.3+. For older versions, clear your browsing data or browser history.
 
 ### Record performance traces for Cody
 
@@ -110,6 +133,7 @@ You can get performance traces from the Cody VS Code extension in production wit
 ```bash
 /Applications/Visual\ Studio\ Code.app/Contents/MacOS/Electron --inspect-extensions=9333
 ```
+
 Note that you may need to quit VSCode first, then run that command to re-launch it. It will open all of your windows and tabs again.
 - After VS Code is started, head over to Chrome and go to `chrome://inspect`, which takes you to the following:
 
@@ -150,15 +174,13 @@ If you are experiencing performance issues with Cody in VSCode, recording a CPU 
 
 Following these steps will help the team understand and resolve the performance issues more effectively.
 
-
-
 ## JetBrains IntelliJ extension
 
 ### Access Cody logs
 
 JetBrains logs can be accessed via the **Output** panel. To access logs, you must first enable Cody logs from the Settings menu.  To do so:
 
-- Open the Settings panel (⌘, for MacOS) (Ctrl Alt 0S for Windows)
+- Open the Settings panel (`⌘,` for macOS) (`Ctrl+Alt+S` for Windows)
 - Go to `Sourcegraph & Cody`
 - Click on `Cody`
 - Check the box to Enable debug
@@ -175,13 +197,11 @@ If you notice the Cody agent reaching 100% CPU utilization, try the following:
 1. Re-enable the plugin.
 This simple action of turning the plugin off and on again can often resolve the high CPU usage issue.
 
-
-
 ## Android Studio extension
 
 ### Cody cannot start. Stuck on spinning icon.
 
-This issue occurs because JCEF isn't supported in Android Studio and causes Cody not to start. The suggested workaround is to;
+This issue occurs because JCEF isn't supported in Android Studio and causes Cody to not start. The suggested workaround is to:
 
 1. Go to `Help` > `Find Action: Registry`.
 1. Scroll to `ide.browser.jcef.sandbox.enable`.
@@ -189,3 +209,17 @@ This issue occurs because JCEF isn't supported in Android Studio and causes Cody
 1. Then go to `Help` > `Find Action: Choose Boot runtime for the IDE`.
 1. Select the last option.
 1. Restart Android Studio.
+
+## Regular Expressions
+
+### Asterisks being removed
+
+If you send Cody a prompt with a query string like `$filteredResults = preg_grep('*\.' . basename($inputPath) . '\.*', $fileList);`, the asterisks may be removed because Cody interprets the content as a literal string rather than code.
+
+When sharing code with Cody, wrap your code in triple backticks (```) to ensure it's recognized as a code block rather than plain text. For example:
+
+````regex
+```
+$filteredResults = preg_grep('*\.' . basename($inputPath) . '\.*', $fileList);
+```
+````
