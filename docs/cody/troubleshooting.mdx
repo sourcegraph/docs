@@ -223,3 +223,76 @@ When sharing code with Cody, wrap your code in triple backticks (```) to ensure 
 $filteredResults = preg_grep('*\.' . basename($inputPath) . '\.*', $fileList);
 ```
 ````
+
+## OpenAI o1
+
+### Context Deadline Exceeded Error
+
+Symptoms:
+
+- "Request Failed: Request to... failed with 500 Internal Server Error: context deadline exceeded"
+- Occurs with both o1-mini and o1-preview
+- Happens even with relatively small inputs (~220 lines)
+
+Solutions:
+
+- Keep input context smaller - aim for less than 200 lines of code initially
+- Break down larger requests into smaller chunks
+- Start a new chat session if errors persist
+- Add "Keep your answer brief!" to prompts when possible
+
+Prevention:
+
+- Import only the most relevant files
+- Use file range syntax (e.g., @file:1-100) to limit context
+- Focus on specific sections rather than entire codebases
+
+### Truncated Outputs
+
+Symptoms:
+
+- Response cuts off mid-sentence
+- Unable to get complete code examples
+- "Continue" requests also result in truncation
+
+Solutions:
+
+- For `o1-preview`: Copy the last line and ask to "continue from last line"
+- Switch to `o1-mini` for more reliable complete outputs
+- Break down complex requests into smaller steps
+- Consider using Sonnet 3.5 for tasks requiring longer outputs
+
+Limits:
+
+- Input tokens: 45k
+- Output tokens: 4k
+
+### Model Switching Issues
+
+Symptoms:
+
+- Model reverts to Sonnet 3.5 unexpectedly
+- "On waitlist" message appears after previously having access
+- Unable to select o1 models in command palette
+
+Solutions:
+
+- Restart IDE/VS Code
+- Sign out and sign back in
+- Check Pro subscription status
+- Contact support if issues persist
+
+### Response Format Errors
+
+Symptoms:
+
+- "Request Failed: Unexpected response format"
+- Model stops responding
+- Inconsistent output formatting
+
+Solutions:
+
+- Cancel and retry the request
+- Start a new chat session
+- Reduce context complexity
+- Use one-shot prompts with clear requirements
