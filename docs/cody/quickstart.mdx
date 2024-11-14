@@ -1,138 +1,76 @@
 # Cody Quickstart
 
-<p className="subtitle">In this quickstart guide, you'll learn how to use Cody once you have installed the extension in your VS Code editor. Here you will perform the following three tasks:</p>
+<p className="subtitle">This quickstart guide shows how to use Cody in the VS Code editor. You'll learn about the following tasks:</p>
 
-1. Generate unit tests for your code
-2. Identify errors and get suggested code fixes
-3. Add documentation to your code snippets
+- Chat with Cody to ask questions about your code
+- Code completions and suggestions
+- Use Cody to refactor code
+- Use Cody to debug code and ask Cody to fix bugs
+
+<Callout type="info">There are [many ways to use Cody](/cody/clients). For this guide, we'll be using the [VS Code](/cody/clients/install-vscode) extension.</Callout>
 
 ## Prerequisites
 
-- Make sure you have the [Cody extension installed](/cody/clients/install-vscode) in your VS Code editor
-- You have a Free or Pro account through Sourcegraph.com or a Sourcegraph Enterprise account
-- You have a project open in VS Code
+Before you start, you'll need the following:
 
-## Getting started with the Cody extension, prompts, and commands
+- [Cody extension installed](/cody/clients/install-vscode) in your VS Code editor
+- Free or Pro account via Sourcegraph.com or a Sourcegraph Enterprise account
+- A project open in VS Code
 
-After installing the extension, the side activity bar will display an icon for **Cody**. Click this icon, and Cody's panel will open. This interface is used to start a **New Chat**, run Cody **commands**, prompts or get access to relevant resources.
+## Getting started with the Cody
 
-![Cody icon in side activity bar ](https://storage.googleapis.com/sourcegraph-assets/Docs/cody-sidebar-102024.png)
+After installing the extension and connecting to a Sourcegraph instance, you can leverage Cody to use the best LLM and context to understand, write, and fix code. Click the **Cody** icon from the VS Code side activity bar to open the Cody chat panel.
 
-Cody supports **Prompts** and **Commands** with VS Code. These are quick, ready-to-use actions that you can apply to any code or text-based snippet you've highlighted. You can run a command in the following ways:
+By default, the chat input will have the context of your entire codebase, and Claude 3.5 Sonnet (New) is selected as the default chat model. Based on your [Cody tier](https://sourcegraph.com/pricing?product=cody), you can change the LLM model and context based on your use case to optimize speed, accuracy, or cost.
 
-- Highlight your code and select the command or any prompt from the sidebar
-- Press `Option+K` to run an edit command exclusively
-- Right-click on any code element and select **Cody > Choose a command** from the list
+To help you automate your key tasks in your development workflow, you get **[Prompts](/cody/capabilities/commands)**. If you are a part of an organization on Sourcegraph.com or a self-hosted Sourcegraph instance, you can view these pre-built Prompts created by your teammates. On the contrary, you can create your own Prompts via the **Prompt Library** from your Sourcegraph instance.
 
-## Working with the Cody extension
+The Cody chat interface offers a few more options and settings. [You can read more in these docs](/cody/capabilities/chat).
 
-Let's create a JavaScript function that converts a `given date` into a human-readable description of the time elapsed between the `given date` and the `current date`. This example uses a starter boilerplate code that helps you set up and run three tasks with the Cody VS Code extension.
+![cody-chat-interface](https://storage.googleapis.com/sourcegraph-assets/Docs/cody-chat-interface-1124.png)
 
-Here's the code for the date elapsed function:
+## Chat with Cody
 
-```js
-function getTimeAgoDescription(dateString) {
-	const startDate = new Date(dateString);
-	const currentDate = new Date();
+The best way to see Cody in action is through chat. Cody allows you to chat directly with AI to ask questions about your code. You can start by asking simple questions like:
 
-	const years = currentDate.getFullYear() - startDate.getFullYear();
-	const months = currentDate.getMonth() - startDate.getMonth();
-	const days = currentDate.getDate() - startDate.getDate();
+- What does this code do?
+- Explain this codebase in three to four lines
 
-	let timeAgoDescription = '';
+Or ask more complex questions like:
 
-	if (years > 0) {
-		timeAgoDescription += `${years} ${years === 1 ? 'year' : 'years'}`;
-	}
+- Suggest ways to refactor the codebase?
+- How can I make this code more performant?
 
-	if (months > 0) {
-		if (timeAgoDescription !== '') {
-			timeAgoDescription += ' ';
-		}
-		timeAgoDescription += `${months} ${months === 1 ? 'month' : 'months'}`;
-	}
+Cody will respond with a code snippet, a suggested fix, or an explanation.
 
-	if (days > 0) {
-		if (timeAgoDescription !== '') {
-			timeAgoDescription += ' ';
-		}
-		timeAgoDescription += `${days} ${days === 1 ? 'day' : 'days'}`;
-	}
+![chat-with-cody](https://storage.googleapis.com/sourcegraph-assets/Docs/chat-with-cody-1124.png)
 
-	if (timeAgoDescription === '') {
-		timeAgoDescription = 'today';
-	} else {
-		timeAgoDescription += ' ago';
-	}
+## Code completions and suggestions
 
-	return timeAgoDescription;
-}
-```
+Cody helps you code faster by providing real-time single and multi-line code completions. It uses the context of the code around your cursor to make accurate suggestions and starts predicting what you're trying to write before you type it.
 
-## 1. Generate a unit test
+Let's try it by typing a `bubbleSort()` function in a JavaScript file.
 
-To ensure code quality and early bug detection, one of the most useful commands that Cody offers is **Generate unit tests**. It quickly helps you write test code for any snippet that you have highlighted. To generate a unit test for our example function:
+![cody-completions](https://storage.googleapis.com/sourcegraph-assets/Docs/cody-completions-1124.png)
 
-- Open the `date.js` file in VS Code
-- Highlight a code snippet that you'd like to test
-- Inside Cody chat, type `/test` or press the command hotkey (`⌥` + `c` / `alt` + `c`)
-- Select `Generate unit tests` option and hit `Enter`
+Cody automatically predicts the function body in gray-dimmed text. Press `Tab` to accept the suggestion or `Esc` to dismiss it.
 
-Cody will help you generate the following unit test in the sidebar:
+## Use Cody to refactor code
 
-```js
-import assert from 'assert';
-import { getTimeAgoDescription } from '../src/date.js';
+You can refactor your code with inline edits. All you need to do is highlight the code, hit the edit hotkey (`Opt + K`), and describe a change. Cody will generate a diff for the change in seconds.
 
-describe('getTimeAgoDescription', () => {
-	it('returns correct relative time for date 1 month ago', () => {
-		const oneMonthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-		const result = getTimeAgoDescription(oneMonthAgo);
-		assert.equal(result, '1 month ago');
-	});
+Let's use the same `bubbleSort()` function from the previous section. Now, refactor the function to sort dates in descending order. Highlight the function and press `Opt + K`.
 
-	it('returns correct relative time for date 2 months ago', () => {
-		const twoMonthsAgo = new Date(Date.now() - 2 * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-		const result = getTimeAgoDescription(twoMonthsAgo);
-		assert.equal(result, '2 months ago');
-	});
-});
+![cody-refactor](https://storage.googleapis.com/sourcegraph-assets/Docs/cody-refactor-code-1124.png)
 
-```
+Type your refactoring suggestion in the input field and press `Enter`. Cody will generate a diff for the change in seconds. You can review the diff, accept the change, reject it, or retry if you are unsatisfied with the result.
 
-This unit test file tests the `getTimeAgoDescription()` function from the `date.js` file. These tests help you validate that the `getTimeAgoDescription()` function correctly returns the relative time descriptions for dates in the past. The tests generate specific sample input dates and confirm that the output matches the expected result.
+## Use Cody to debug code
 
-## 2. Suggest bug fixes and changes to code snippets
+You can ask Cody to debug your code and fix bugs. Cody chat and inline edits are both quite powerful in debugging. If there is a bug, you can ask Cody to debug and fix the code. VS Code and JetBrains IDEs offer **Ask Cody to fix** option.
 
-Cody is very efficient at catching bugs and suggesting improvements to code snippets. To try this out, let's run our previously generated unit test and see if Cody notices any issues. Inside your VS Code terminal, run the following command to try the unit test:
+When a mistake occurs, a red warning is triggered. Along with this, you get a lightbulb icon. If you click on this lightbulb icon, there is an **Ask Cody to fix** option. Click this, and Cody will try to fix the bug with a **Cody is working** notice.
 
-```bash
-node tests/test.js
-```
+![code-actions](https://storage.googleapis.com/sourcegraph-assets/Docs/cody-code-actions-vscode-1124.png)
 
-This results in an error, as our function does not identify the `describe` statement.
-
-![Example of running failed unit test ](https://storage.googleapis.com/sourcegraph-assets/Docs/cody-quickstart/unit-test-fail.png)
-
-Let's paste this error into the Cody chat and see what suggestions it provides:
-
-![Example of error debugging with Cody ](https://storage.googleapis.com/sourcegraph-assets/Docs/cody-quickstart/debug-with-cody.png)
-
-Leveraging the failed test output, Cody is able to identify the potential bug and suggest a fix. It recommends installing `mocha`, importing it at the top of the `test.js` file to identify `describe`, and finally running it with `mocha`.
-
-![Example of successfully running unit test ](https://storage.googleapis.com/sourcegraph-assets/Docs/cody-quickstart/passed-tests.png)
-
-## 3. Ask Cody to add code documentation
-
-Cody can also create well-crafted code documentation and comments, significantly improving the readability experience.
-You can add it by selecting a code snippet and running the **Document** command. Cody will add a comment to the top of the code snippet.
-
-## Try other commands and Cody chat
-
-That's it for this quickstart guide! Feel free to continue chatting with Cody to learn more about its [capabilities](/cody/capabilities). Cody can run some other useful commands including:
-
-- Explain code snippets
-- Refactor code and variable names
-- Translate code to different languages
-- Answer general questions about your code
-- Write context-aware code with a general awareness of the broader codebase
+That's it for this quickstart guide! Feel free to continue chatting with Cody to learn more about its [capabilities](/cody/capabilities).
