@@ -1,23 +1,18 @@
-{/* Hackathon */}
-
 # Manage Cody Context
 
-<p className="subtitle">This documentation helps you control and manage what context from your codebase is used by Cody. You can do it via </p>
+<p className="subtitle">You can control and manage what context from your codebase is used by Cody. You can do this by using Cody Context Filters.</p>
 
-- Cody Context Filters (Cody Enterprise Only)
-- Cody Ignore File (Experimental) (All Cody users)
+<Callout type="note">Cody Context Filters is available only for Enterprise users on all supported [clients](/cody/clients).</Callout>
 
-## Cody Context Filters
+## Context Filters
 
-<Callout type="note">Context Filters is available only for Cody Enterprise users.</Callout>
-
-Admins on the Sourcegraph Enterprise instance can use the Cody Context Filters to determine which repositories Cody can use as the context in its requests to third-party LLMs. Cody Context Filters can be used when the following conditions are met:
+Admins on the Sourcegraph Enterprise instance can use the Cody Context Filters to determine which repositories Cody can use as the context in its requests to third-party LLMs. You can use Context Filters if you have:
 
 - A valid Cody Enterprise license running on Sourcegraph instance version `>=5.4.0`
 - Running the supported Cody client versions: VS Code `>=1.20.0` and JetBrains `>=6.0.0`
 - Setting the `cody-context-filters-enabled` feature flag to `true`
 
-Administrators can configure the `cody.contextFilters` field in the site configuration with the repos that they wish Cody to exclude or only include using the following structure:
+Site admins can customize the `cody.contextFilters` field in the site configuration to specify which repositories Cody should `include` or `exclude`, using the following structure:
 
 ```json
 {
@@ -43,17 +38,19 @@ Administrators can configure the `cody.contextFilters` field in the site configu
 
 ```
 
-### How include and exclude rules work
+## How `include` and `exclude` rules work
 
 The `include` and `exclude` rules define the repositories Cody can use as context. The rules can be defined in the following combination:
 
-1. `cody.contextFilters` field is not defined
+### `cody.contextFilters` field is not defined
 
-By default, there are no restrictions on the repositories Cody can use for context in requests to third-party LLMs. All repositories are included, and none are excluded.
+By default, Cody can access all repositories for context when making requests to third-party LLMs, with no restrictions on inclusion or exclusion.
 
-2. Only `include` rules are specified
+### Only `include` rules are specified
 
-Cody is restricted from using content from repositories whose names match any specified patterns in the `include` field. Since no `exclude` rules are specified, no repositories are explicitly excluded. An `include` field might contain a catch-all pattern (e.g., a `regexp` matching any string). In this case, Cody can access content from any repository, as a single match in the `include` rules is sufficient for inclusion. For example,
+Cody is restricted to using content only from repositories whose names match the patterns specified in the `include` field. No repositories are explicitly excluded if no `exclude` rules are defined.
+
+The `include` field can also contain a catch-all pattern (e.g., a `regexp` that matches any string), allowing Cody to access content from all repositories. A single match in the `include` rules is enough for a repository to be included. For example:
 
 ```json
 {
@@ -69,11 +66,13 @@ Cody is restricted from using content from repositories whose names match any sp
 
 ```
 
-The `include` rules allow Cody to access the repository matching the `regexp`. This means Cody can now fully access the repository and its content to fetch context.
+These `include` rules allow Cody only to utilize the repository matching the `regexp` with full access to fetch context.
 
-1. Only `exclude` rules are specified
+### Only `exclude` rules are specified
 
-All repositories are considered included by default without the `include` rules. Cody is prohibited from using content from any repository whose name matches at least one pattern specified in the exclude field. An `exclude` field may contain a catch-all condition (e.g., a `regexp` matching any string). If such a match occurs, Cody is restricted from using content from any repository. For example,
+By default, all repositories are included unless specific `include` rules are defined. If **only** `exclude` rules are specified, Cody will not use content from any repository whose name matches at least one pattern in the `exclude` field.
+
+The `exclude` field can also include a catch-all condition, such as a `regexp` that matches any string. When such a condition is present, Cody is entirely restricted from accessing content from any repository. For example:
 
 ```json
 {
@@ -89,19 +88,15 @@ All repositories are considered included by default without the `include` rules.
 
 ```
 
-In this case, Cody's commands are disabled, and you cannot use them for context fetching. If you try running any of these, you'll be prompted with an error message. However, Cody chat will still work, and you can use it to ask questions.
+#### Chat behavior when exclude rules are defined
+
+Some Cody features, such as using **Prompts**, will not work if the `exclude` rules are defined. They appear to be disabled in the Cody chat interface. If you try running any of these, you'll be prompted with an error message. However, Cody chat will still work; you can use it to ask questions.
 
 ![commands-disabled-exclude-rules](https://storage.googleapis.com/sourcegraph-assets/Docs/commands-disabled-082024.png)
 
-The demo shows what happens when you try to run commands due to the `exclude` rules.
+### Both `include` and `exclude` rules are specified
 
-<video width="1920" height="1080" loop playsInline controls style={{ width: '100%', height: 'auto' }}>
-  <source src="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/exclude-rules.mp4" type="video/mp4"/>
-</video>
-
-1. Both `include` and `exclude` rules are specified
-
-When making requests to third-party LLMs, Cody can use content from a repository if its name matches any of the `include` patterns and does not match any of the `exclude` patterns. Thus, the `exclude` rules filter only the repositories allowed by the `include` rules. For example,
+When requesting third-party LLMs, Cody can use content from a repository if its name matches any of the `include` patterns and does not match any of the `exclude` patterns. Thus, the `exclude` rules filter only the repositories allowed by the `include` rules. For example,
 
 ```json
 {
@@ -137,31 +132,3 @@ Depending on the client type, here's a breakdown of versions supported and the b
 | **VS Code `< 1.16.X`**            | N/A          | Cody is not compatible | Respects policy and prompts to upgrade | Not affected           |
 | **`1.18.0 < VS Code < 1.20.0`**   | N/A          | Cody is not compatible | Respects policy and prompts to upgrade | Not affected           |
 | **VS Code `>= 1.20.0`**           | N/A          | Respects policy  | Respects policy   | Not affected           |
-
-## Cody Ignore Files
-
-<Callout type="note">The Cody Ignore feature has been sunsetted and will no longer be maintained. We recommend using Cody Context Filters with Cody Enterprise for more flexible file exclusion and inclusion rules.</Callout>
-
-Cody users can configure the `.cody/ignore` file to specify files or folders from your codebase to be ignored as context by Cody through the following steps:
-
-## Enabling Unstable Features
-
-To use the ignore context feature, you first need to enable unstable features in Cody. Here's how:
-
-1. Open your settings in Cody Extension
-2. Next, go to the `settings.json` file
-3. Add a new line: `"cody.unstableFeatures": true`.
-
-This will enable experimental features, including the ignore context feature.
-
-## Using the Ignore Context Feature
-
-To ignore specific files or folders from the context Cody took, you need to create an `ignore` file for your project. Here's how:
-
-1. Create a new folder in your project root named `.cody`.
-2. Inside the `.cody` folder, create a file named `ignore`.
-3. In the `ignore` file, specify the files or folders you want to ignore.
-
-The `.cody/ignore` file works similarly to a `.gitignore` file. If you want to ignore a file named `secret.json`, you would add `secret.json` to your `.cody/ignore` file. If you're going to ignore a folder called `lib/shared`, you would add `lib/shared/` to your `.cody/ignore` file.
-
-Once a file or folder is added to the `.cody/ignore` file, Cody will no longer provide autocomplete suggestions for that file or folder, and it will not appear in your chat results.
