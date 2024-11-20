@@ -62,19 +62,12 @@ export const navigation: NavigationItem[] = [
               { title: "Context", href: "/cody/core-concepts/context", },
               { title: "Token Limits", href: "/cody/core-concepts/token-limits", },
               // { title: "Embeddings", href: "/cody/core-concepts/embeddings", },
-              { title: "Keyword Search", href: "/cody/core-concepts/keyword-search", },
+              // { title: "Keyword Search", href: "/cody/core-concepts/keyword-search", },
               // { title: "Code Graph", href: "/cody/core-concepts/code-graph", },
               { title: "Cody Gateway", href: "/cody/core-concepts/cody-gateway", },
               { title: "Enterprise Architecture", href: "/cody/core-concepts/enterprise-architecture", },
             ]
           },
-          // {
-          //   title: "Use Cases", href: "/cody/use-cases/generate-unit-tests",
-          //   subsections: [
-          //     { title: "Generate Unit Tests", href: "/cody/use-cases/generate-unit-tests", },
-          //     // { title: "Build UI", href: "/cody/use-cases/build-ui", },
-          //   ]
-          // },
           { title: "Usage and Pricing", href: "/cody/usage-and-pricing" },
           { title: "Troubleshooting", href: "/cody/troubleshooting" },
           { title: "FAQs", href: "/cody/faq" },
