@@ -1,6 +1,6 @@
 # Sourcegraph Docs
 
-<!-- Working branch for October 2024 Release -->
+<!-- Working branch for October 30th 2024 Release -->
 
 Welcome to the Sourcegraph documentation! We're excited to have you contribute to our docs. We've recently rearchitectured our docs tech stack — powered by Next.js, TailwindCSS and deployed on Vercel. This guide will walk you through the process of contributing to our documentation using the new tech stack.
 
@@ -118,7 +118,7 @@ Here are the list of all the supported components we have:
 - `<LinkCards>`
 - `<Callout>`
 
-For a better docs experience we'll continue adding more components in future.
+For a better docs experience, we'll continue adding more components in the future.
 
 ### Adding a link
 
@@ -145,6 +145,13 @@ You can upload images, videos and gifs to Sourcegraph docs. For a more detailed 
 ### Locally
 
 As you make changes to the documentation, the development server will automatically update. Review your changes by navigating to `http://localhost:3000` in your browser.
+
+### Previewing Vercel Deployments
+
+When you open a PR Vercel deploys and provides you with a preview deployment link. To view your deployment, click the "Visit Preview" and then append `/docs` at the end of the URL. The original link gives you a `404`. 
+
+![CleanShot 2024-11-05 at 10 11 29@2x](https://github.com/user-attachments/assets/b0911e2e-95a7-4f56-b2ff-b659d13077d8)
+
 
 ## Submitting your Contribution
 

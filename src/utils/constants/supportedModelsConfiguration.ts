@@ -89,7 +89,7 @@ export const chatTableDataConf: any = {
         { provider: 'Fireworks', model: 'mixtral 8x7b', status: '❌' },
         { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
-    'AWS Bedrock': [
+    'Amazon Bedrock': [
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-4', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-4 turbo', status: '❌' },
@@ -193,7 +193,7 @@ export const autocompleteTableDataConf: any = {
         { provider: 'Google', model: 'Gemini 1.5 Flash', status: '❌' },
         { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
-    'AWS Bedrock': [
+    'Amazon Bedrock': [
         { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
         { provider: 'OpenAI', model: 'gpt-4', status: '❌' },

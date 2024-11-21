@@ -4,11 +4,12 @@ A **private network** refers to a secure network environment segregated from the
 When deploying self-hosted Sourcegraph instances in private networks with specific compliance and policy requirements, additional configuration may be required to ensure all networking features function correctly. The reasons for applying the following configuration options depend on the specific functionality of the Sourcegraph service and the unique network and infrastructure requirements of the organization. 
 
 The following is a list of Sourcegraph services and how and when each initiates outbound connections to external services:
+- **executor**: Sourcegraph [Executor](../executors) batch change or precise indexing jobs may need to connect to services hosted within an organization's private network
 - **frontend**: The frontend service communicates externally when connecting to external [auth providers](../auth), sending [telemetry data](../pings), testing code host connections, and connecting to [externally hosted](../external_services) Sourcegraph services
 - **gitserver**: Executes git commands against externally hosted [code hosts](../external_service)
-- **repo-updater**: Communicates with [code hosts](../external_service) APIs to coordinate repository synchronization
 - **migrator**: Connects to Postgres instances (which may be [externally hosted](../external_services/postgres)) to process database migrations
-- **executor**: Sourcegraph [Executor](../executors) batch change or precise indexing jobs may need to connect to services hosted within an organization's private network
+- **repo-updater**: Communicates with [code hosts](../external_service) APIs to coordinate repository synchronization
+- **worker**: Sourcegraph [Worker](../workers) run various background jobs that may require establishing connections to services hosted within an organization's private network
 
 ## HTTP proxy configuration
 All Sourcegraph services respect the conventional `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY` environment variables for routing Sourcegraph client application HTTP traffic through a proxy server. The steps for configuring proxy environment variables will depend on your Sourcegraph deployment method.
@@ -17,14 +18,14 @@ All Sourcegraph services respect the conventional `HTTP_PROXY`, `HTTPS_PROXY`, a
 Add the proxy environment variables to your Sourcegraph Helm chart [override file](https://github.com/sourcegraph/deploy-sourcegraph-helm/blob/main/charts/sourcegraph/values.yaml):
 
 ```yaml
-frontend|gitserver|repo-updater:
+executor|frontend|gitserver|migrator|repo-updater|worker:
   env:
   - name: HTTP_PROXY 
     value: http://proxy.example.com:8080
   - name: HTTPS_PROXY
     value: http://proxy.example.com:8080
   - name: NO_PROXY
-    value:  "*.cluster.local,blobstore,codeinsights-db,codeintel-db,sourcegraph-frontend-internal,sourcegraph-frontend,github-proxy,gitserver,grafana,indexed-search-indexer,indexed-search,jaeger-query,pgsql,precise-code-intel-worker,prometheus,redis-cache,redis-store,repo-updater,searcher,symbols,syntect-server,worker-executors,worker" 
+    value: "blobstore,codeinsights-db,codeintel-db,sourcegraph-frontend-internal,sourcegraph-frontend,github-proxy,gitserver,grafana,indexed-search-indexer,indexed-search,jaeger-query,pgsql,precise-code-intel-worker,prometheus,redis-cache,redis-store,repo-updater,searcher,symbols,syntect-server,worker-executors,worker,cloud-sql-proxy,localhost,127.0.0.1,.svc,.svc.cluster.local,kubernetes.default.svc"
 ```
 
 <Callout type="warning">Failure to configure `NO_PROXY` correctly can cause the proxy configuration to interfere with local networking between internal Sourcegraph services.</Callout>
