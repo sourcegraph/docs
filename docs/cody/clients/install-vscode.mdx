@@ -15,7 +15,7 @@ The Cody extension by Sourcegraph enhances your coding experience in VS Code by 
 
 ## Install the VS Code extension
 
-Follow these steps to install the Cody AI extension for VS Code:
+You can install VS Code directly from the [VS Code extension marketplace listing](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-ai) or by following these steps directly within VS Code:
 
 - Open VS Code editor on your local machine
 - Click the **Extensions** icon in the Activity Bar on the side of VS Code, or use the keyboard shortcut `Cmd+Shift+X` (macOS) or `Ctrl+Shift+X` (Windows/Linux)
@@ -94,8 +94,6 @@ You should now be prompted to authorize Sourcegraph to connect to your VSCode ex
 
 Once connected, click the Cody icon from the sidebar again. The Cody extension will open in a configurable side panel.
 
-![Cody icon in side activity bar ](https://storage.googleapis.com/sourcegraph-assets/Docs/cody-sidebar-0724.jpg)
-
 Let's create an autocomplete suggestion to verify that the Cody extension has been successfully installed and is working as expected.
 
 Cody provides intelligent code suggestions and context-aware autocompletions for numerous programming languages like JavaScript, Python, TypeScript, Go, etc.
@@ -129,7 +127,7 @@ The chat interface is designed intuitively. Your very first chat input lives at 
 Since your first message to Cody anchors the conversation, you can return to the top chat box anytime, edit your prompt, or re-run it using a different LLM model.
 
 <video width="1920" height="1080" loop playsInline controls style={{ width: '100%', height: 'auto', aspectRatio: '1920 / 1080' }}>
-  <source src="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/chat-interface-0724.mp4" type="video/mp4" />
+  <source src="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/cody-in-action-102024.mp4" type="video/mp4" />
 </video>
 
 ### Chat History
@@ -138,7 +136,7 @@ A chat history icon at the top of your chat input window allows you to navigate 
 
 ### Changing LLM model for chat
 
-<Callout type="note"> You need to be a Cody Free or Pro user to have multi-model selection capability. Enterprise users with the new [model configuration](/cody/clients/model-configuration) can use the LLM selection dropdown to choose a chat model.</Callout>
+<Callout type="note"> You need to be a Cody Free or Pro user to have multi-model selection capability. You can view which LLMs you have access to on our [supported LLMs page](/cody/capabilities/supported-models). Enterprise users with the new [model configuration](/cody/clients/model-configuration) can use the LLM selection dropdown to choose a chat model.</Callout>
 
 For Chat:
 
@@ -164,7 +162,7 @@ The `@-file` also supports line numbers to query the context of large files. You
 
 When you `@-mention` files to add to Cody’s context window, the file lookup takes `files.exclude`, `search.exclude`, and `.gitgnore` files into account. This makes the file search faster as a result up to 100ms.
 
-Moreover, when you `@-mention` files, Cody will track the number of characters in those files against the context window limit of the selected chat model. As you `@-mention` multiple files, Cody will calculate how many tokens of the context window remain. When the remaining context window size becomes too small, you get **File too large** errors for further more `@-mention` files.
+Moreover, when you `@-mention` files, Cody will track the number of characters in those files against the context window limit of the selected chat model. As you `@-mention` multiple files, Cody will calculate how many tokens of the context window remain. When the remaining context window size becomes too small, you'll receive **File too large** errors when attempting to `@-mention` additional files.
 
 Cody defaults to showing @-mention context chips for all the context it intends to use. When you open a new chat, Cody will show context chips for your current repository and current file (or file selection if you have code highlighted).
 
@@ -172,7 +170,7 @@ Cody defaults to showing @-mention context chips for all the context it intends 
 
 When you start a new Cody chat, the chat input window opens with a default `@-mention` context chips for all the context it intends to use. This context is based on your current repository and current file (or a file selection if you have code highlighted).
 
-![context-retrieval](https://storage.googleapis.com/sourcegraph-assets/Docs/context-retrieval-0724.jpg)
+![context-retrieval](https://storage.googleapis.com/sourcegraph-assets/Docs/context-retrieval-102024.png)
 
 At any point in time, you can edit these context chips or remove them completely if you do not want to use these as context. Any chat without a context chip will instruct Cody to use no codebase context. However, you can always provide an alternate `@-mention` file or symbols to let Cody use it as a new source of context.
 
@@ -180,7 +178,7 @@ When you have both a repository and files @-mentioned, Cody will search the repo
 
 ### @-mention context providers with OpenCtx
 
-<Callout type="info">OpenCtx context providers is in Experimental stage for all Cody users. Enterprise users can also use this but with limited support. If you have feedback or questions, please visit our [support forum](https://community.sourcegraph.com/c/openctx/10).</Callout>
+<Callout type="info">OpenCtx context providers are in Experimental stage for all Cody users. Enterprise users can also use this but with limited support. If you have feedback or questions, please visit our [support forum](https://community.sourcegraph.com/c/openctx/10).</Callout>
 
 [OpenCtx](https://openctx.org/) is an open standard for bringing contextual info about code into your dev tools. Cody Free and Pro users can use OpenCtx providers to fetch and use context from the following sources:
 
@@ -211,13 +209,11 @@ If Cody's answer isn't helpful, you can try asking again with different context:
 - Current file only: Re-run the prompt again using just the current file as context.
 - Add context: Provides @-mention context options to improve the response by explicitly including files, symbols, remote repositories, or even web pages (by URL).
 
-<video width="1920" height="1080" loop playsInline controls style={{ width: '100%', height: 'auto', aspectRatio: '1920 / 1080' }}>
-  <source src="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/rerun-context-0724.mp4" />
-</video>
+![re-run-with-context](https://storage.googleapis.com/sourcegraph-assets/Docs/re-run-with-context.png)
 
 ## Context fetching mechanism
 
-VS Code users on the Free or Pro plan use [local context](/cody/core-concepts/context#context-selection).
+VS Code users on the Free or Pro plan use [local context](/cody/core-concepts/context#context-sources).
 
 Enterprise users can use the full power of the Sourcegraph search engine as Cody's primary context provider.
 
@@ -247,14 +243,10 @@ Cody offers quick, ready-to-use [prompts and commands](/cody/capabilities/comman
 - **Document Code**: Add code documentation
 - **Edit Code**: Edit code with instructions
 - **Explain Code**: Describe your code with more details
-- **Find Code Smells**: Identify bad code practices and bugs
 - **Generate Unit Tests**: Write tests for your code
-- **Custom Commands**: Helps you write and define your own commands
-
-Let's understand how the `Document Code` command generates code documentation for a function.
 
 <video width="1920" height="1080" loop playsInline controls style={{ width: '100%', height: 'auto' }}>
-	<source src="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/code-comments-cody-0724.mp4" type="video/mp4" />
+	<source src="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/cody-prompts-102024-2.mp4" type="video/mp4" />
 	</video>
 
 ### Custom Commands
@@ -275,11 +267,11 @@ For customization and advanced use cases, you can create **Custom Commands** tai
 
 Cody lets you dynamically insert code from chat into your files with **Smart Apply**. Every time Cody provides you with a code suggestion, you can click the **Apply** button. Cody will then analyze your open code file, find where that relevant code should live, and add a diff. For chat messages where Cody provides multiple code suggestions, you can apply each in sequence to go from chat suggestions to written code.
 
-Smart Apply also supports the executing of commands in the terminal. When you ask Cody a question related to terminal commands, you can now execute the suggestion in your terminal by clicking the `Execute` button in the chat window.
+![smart-apply-code](https://storage.googleapis.com/sourcegraph-assets/Docs/smart-apply-102024.png)
 
-<video width="1920" height="1080" loop playsInline controls style={{ width: '100%', height: 'auto', aspectRatio: '1920 / 1080' }}>
-    <source src="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/cody-vscode-1.36-command-execute.mp4" type="video/mp4" />
- </video>
+Smart Apply also supports executing commands in the terminal. When you ask Cody a question related to terminal commands, you can execute the suggestion in your terminal by clicking the `Execute` button in the chat window.
+
+![smart-apply-execute](https://storage.googleapis.com/sourcegraph-assets/Docs/smart-apply-102024.png)
 
 ## Keyboard shortcuts
 
@@ -305,15 +297,15 @@ Cody also works with Cursor, Gitpod, IDX, and other similar VS Code forks. To ac
 
 ## Supported LLM models
 
-Claude Sonnet 3.5 is the default LLM model for inline edits and commands. If you've used Claude 3 Sonnet for inline edit or commands before, remember to manually update the model. The default model change only affects new users.
+Claude 3.5 Sonnet is the default LLM model for inline edits and prompts. If you've used a different or older LLM model for inline edits or commands before, remember to manually change your model to Claude 3.5 Sonnet. Default model changes only affect new users.
 
-Users on Cody **Free** and **Pro** can choose from a list of supported LLM models for Chat and Commands.
+Users on Cody **Free** and **Pro** can choose from a list of [supported LLM models](/cody/capabilities/supported-models) for chat.
 
-![LLM-models-for-cody-free](https://storage.googleapis.com/sourcegraph-assets/Docs/LLM-Select-Free.png)
+![LLM-models-for-cody-free](https://storage.googleapis.com/sourcegraph-assets/Docs/llm-dropdown-options-102024.png)
 
-Enterprise users get Claude 3 (Opus and Sonnet) as the default LLM models without extra cost. Moreover, Enterprise users can use Claude 3.5 models through Cody Gateway, Anthropic BYOK, AWS Bedrock (limited availability), and GCP Vertex.
+Enterprise users get Claude 3 (Opus and Sonnet) as the default LLM models without extra cost. Moreover, Enterprise users can use Claude 3.5 models through Cody Gateway, Anthropic BYOK, Amazon Bedrock (limited availability), and GCP Vertex.
 
-<Callout type="info">For enterprise users on AWS Bedrock: 3.5 Sonnet is unavailable in `us-west-2` but available in `us-east-1`. Check the current model availability on AWS and your customer's instance location before switching. Provisioned throughput via AWS is not supported for 3.5 Sonnet.</Callout>
+<Callout type="info">For enterprise users on Amazon Bedrock: 3.5 Sonnet is unavailable in `us-west-2` but available in `us-east-1`. Check the current model availability on AWS and your customer's instance location before switching. Provisioned throughput via AWS is not supported for 3.5 Sonnet.</Callout>
 
 You also get additional capabilities like BYOLLM (Bring Your Own LLM), supporting Single-Tenant and Self Hosted setups for flexible coding environments. Your site administrator determines the LLM, and cannot be changed within the editor. However, Cody Enterprise users when using Cody Gateway have the ability to [configure custom models](/cody/core-concepts/cody-gateway#configuring-custom-models) Anthropic (like Claude 2.0 and Claude Instant), OpenAI (GPT 3.5 and GPT 4) and Google Gemini 1.5 models (Flash and Pro).
 
@@ -328,26 +320,23 @@ You also get additional capabilities like BYOLLM (Bring Your Own LLM), supportin
 To get autocomplete suggestions from Ollama locally, follow these steps:
 
 - Install and run [Ollama](https://ollama.ai/)
-- Download one of the supported local models:
-  - `ollama pull deepseek-coder:6.7b-base-q4_K_M` for [deepseek-coder](https://ollama.ai/library/deepseek-coder)
-  - `ollama pull codellama:7b-code` for [codellama](https://ollama.ai/library/codellama)
-  - `ollama pull starcoder2:7b` for [codellama](https://ollama.ai/library/starcoder2)
+- Download one of the supported local models using `pull`. The `pull` command is used to download models from the Ollama library to your local machine.
+  - `ollama pull deepseek-coder-v2` for [deepseek-coder](https://ollama.com/library/deepseek-coder-v2)
+  - `ollama pull codellama:13b` for [codellama](https://ollama.ai/library/codellama)
+  - `ollama pull starcoder2:7b` for [starcoder2](https://ollama.ai/library/starcoder2)
 - Update Cody's VS Code settings to use the `experimental-ollama` autocomplete provider and configure the right model:
 
 ```json
-
-   {
-     "cody.autocomplete.advanced.provider": "experimental-ollama",
-     "cody.autocomplete.experimental.ollamaOptions": {
-       "url": "http://localhost:11434",
-       "model": "deepseek-coder:6.7b-base-q4_K_M"
-     }
-   }
+"cody.autocomplete.advanced.provider": "experimental-ollama",
+"cody.autocomplete.experimental.ollamaOptions": {
+    "url": "http://localhost:11434",
+    "model": "deepseek-coder-v2"
+}
 ```
 
 - Confirm Cody uses Ollama by looking at the Cody output channel or the autocomplete trace view (in the command palette)
 
-#### Cody Chat and Commands with Ollama
+### Cody Chat and Commands with Ollama
 
 <img
   src="https://storage.googleapis.com/sourcegraph-assets/blog/cody-vscode-1.8.0/localollama.png"
@@ -360,7 +349,7 @@ To generate chat and commands with Ollama locally, follow these steps:
 - Download [Ollama](https://ollama.com/download)
 - Start Ollama (make sure the Ollama logo is showing up in your menu bar)
 - Select a chat model (model that includes instruct or chat, for example, [gemma:7b-instruct-q4_K_M](https://ollama.com/library/gemma:7b-instruct-q4_K_M)) from the [Ollama Library](https://ollama.com/library)
-- Pull the chat model locally (for example, `ollama pull gemma:7b-instruct-q4_K_M`)
+- Pull (download) the chat model locally (for example, `ollama pull gemma:7b-instruct-q4_K_M`)
 - Once the chat model is downloaded successfully, open Cody in VS Code
 - Open a new Cody chat
 - In the new chat panel, you should see the chat model you've pulled in the dropdown list
