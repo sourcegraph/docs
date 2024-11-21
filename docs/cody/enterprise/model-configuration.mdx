@@ -1,26 +1,16 @@
 # Model Configuration
 
-Sourcegraph v5.6.0 or later supports the ability to choose between different LLM models, allowing developers to use the
-best model for Cody Chat as needed. This is accomplished exposing much more flexible configuration options for Cody when
-using Sourcegraph Enterprise. The newer style of configuration is described next. However, you can still use the
-[Older style "Completions" Configuration](#legacy-completions-configuration).
+<p className="subtitle">Learn how to configure Cody via `modelConfigurations` on a Sourcegraph Enterprise instance.</p>
 
-<Callout type="info">
-	Before you start, please note that the model configuration is an early
-	access program (EAP) and we are working towards improving on its coverage of
-	supported providers. If you are having any issues with this configuration,
-	please reach out to your Sourcegraph Account Representative or roll back
-	your configuration to the Legacy "Completions" configuration{' '}
-</Callout>
+For Sourcegraph `v5.6.0` and more, users on an Enterprise Sourcegraph instance can choose between different LLM models for Cody chat, enabling greater flexibility to select the best model for their needs.
 
-The LLM models available for use from a Sourcegraph Enterprise instance are the union of [Sourcegraph-supplied models](/cody/model-configuration#sourcegraph-supplied-models)
-and any custom models providers that you explicitly add to your Sourcegraph instance's site configuration.
+The LLM models available for use from a Sourcegraph Enterprise instance are the union of Sourcegraph-supplied models and any custom models providers that you explicitly add to your Sourcegraph instance's site configuration.
 
-The model configuration for Cody is managed through the `"modelConfiguration"` field in the site config.
-It includes the fields listed below, with a brief overview of each in the table.
-For more detailed information, refer to the documentation for each field.
+The model configuration for Cody is managed through the `"modelConfiguration"` field in the **Site config** section.
 
-| Field                                                                  | Description                                                                                                                                                                                |
+It includes the following fields:
+
+|                                 **Field**                                  |                                                                                        **Description**                                                                                         |
 | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [`sourcegraph`](/cody/model-configuration#sourcegraph-supplied-models) | Configures access to Sourcegraph-supplied models available through Cody Gateway.                                                                                                           |
 | [`providerOverrides`](/cody/model-configuration#provider-overrides)    | Configures model providers, allowing you to customize Cody's connection to model providers, such as using your own API keys or self-hosted models.                                         |
@@ -28,9 +18,9 @@ For more detailed information, refer to the documentation for each field.
 | [`selfHostedModels`](/cody/model-configuration#self-hosted-models)     | Adds models to Cody’s recognized models list with default configurations provided by Sourcegraph. Only available for certain models; general models can be configured in `modelOverrides`. |
 | [`defaultModels`](/cody/model-configuration#default-models)            | Specifies the models assigned to each Cody feature (chat, fast chat, autocomplete).                                                                                                        |
 
-## Quickstart
+## Getting started with `modelConfiguration`
 
-The quickest and recommended way to set up model configuration is by using Sourcegraph-supplied models through the Cody Gateway.
+The recommended way to set up model configuration is by using Sourcegraph-supplied models through the Cody Gateway.
 
 For a minimal configuration example, see [Configure Sourcegraph-supplied models](/cody/model-configuration#configure-sourcegraph-supplied-models).
 
@@ -81,7 +71,7 @@ The above configuration sets up the following:
 
 There are three main settings for configuring Sourcegraph-supplied LLM models:
 
-| Field                                                     | Description                                                                                            |
+|                           Field                           |                                              Description                                               |
 | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `endpoint`                                                | (Optional) The URL for connecting to Cody Gateway, defaulting to the production instance.              |
 | `accessToken`                                             | (Optional) The access token for connecting to Cody Gateway, which defaults to the current license key. |
@@ -91,7 +81,7 @@ There are three main settings for configuring Sourcegraph-supplied LLM models:
 
 The `"modelFilters"` section allows you to control which Cody Gateway models are available to users of your Sourcegraph Enterprise instance. The following table describes each field:
 
-| Field          | Description                                                                                                                                                        |
+|     Field      |                                                                            Description                                                                             |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `statusFilter` | Filters models by their release status, such as "stable", "beta", "deprecated" or "experimental." By default, all models available on Cody Gateway are accessible. |
 | `allow`        | An array of `modelRef`s specifying which models to include. Supports wildcards.                                                                                    |
@@ -138,7 +128,7 @@ models or customize the existing provider namespace supplied by Sourcegraph (e.g
 Provider overrides are configured via the `"modelConfiguration.providerOverrides"` field in the site configuration.
 This field is an array of items, each containing the following fields:
 
-| Field              | Description                                                                       |
+|       Field        |                                    Description                                    |
 | ------------------ | --------------------------------------------------------------------------------- |
 | `id`               | The namespace for models accessed via the provider.                               |
 | `displayName`      | A human-readable name for the provider.                                           |
@@ -184,7 +174,7 @@ should be invoked—that is, which external service or API will handle the LLM r
 
 Sourcegraph natively supports several types of LLM API providers. The current set of supported providers includes:
 
-| Provider type        | Description                                                                                                 |
+|    Provider type     |                                                 Description                                                 |
 | -------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `"sourcegraph"`      | [Cody Gateway](/cody/core-concepts/cody-gateway), offering access to various models from multiple services. |
 | `"openaicompatible"` | Any OpenAI-compatible API implementation.                                                                   |
@@ -325,7 +315,7 @@ Specifying the same model in both `"selfHostedModels"` and `"modelOverrides"` is
 
 This field is an array of items, each with the following fields:
 
-| Field        | Description                                                                                                                                                                                                                                                                                                                                           |
+|    Field     |                                                                                                                                                                      Description                                                                                                                                                                      |
 | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `provider`   | (Required) The provider ID of the model, configured in the `providerOverrides` field.                                                                                                                                                                                                                                                                 |
 | `apiVersion` | (Optional) The API version to use. Defaults to `"v1"` if not specified.                                                                                                                                                                                                                                                                               |

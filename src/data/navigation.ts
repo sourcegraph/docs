@@ -38,14 +38,15 @@ export const navigation: NavigationItem[] = [
 							{ title: "Cody for JetBrains", href: "/cody/clients/install-jetbrains", },
 							{ title: "Cody for Visual Studio", href: "/cody/clients/install-visual-studio", },
 							{ title: "Cody for Web", href: "/cody/clients/cody-with-sourcegraph", },
-							{ title: "Cody for Enterprise", href: "/cody/clients/enable-cody-enterprise", },
-							{ title: "Model Configuration", href: "/cody/clients/model-configuration", },
 						]
 					},
 					{
-						title: "Model Configuration", href: "/cody/model-configuration",
+						title: "Cody for Enterprise", href: "/cody/clients/enable-cody-enterprise",
 						subsections: [
-							{ title: "Examples", href: "/cody/model-configuration/examples", },
+							{ title: "Features", href: "/cody/enterprise/features", },
+							{ title: "Completions Configuration", href: "/cody/enterprise/completions-configuration", },
+							{ title: "Model Configuration", href: "/cody/enterprise/model-configuration", },
+							{ title: "Examples modelConfiguration", href: "/cody/enterprise/model-config-examples", },
 						]
 					},
 					{
