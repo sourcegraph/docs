@@ -61,7 +61,7 @@ export const CustomLink: React.FC<CustomLinkProps> = ({
     return (
       <HoverCard>
         <HoverCardTrigger asChild>
-				<Link href={cleanedHref} {...rest} title='' className='inline'>
+				<Link href={cleanedHref.replaceAll("'", '')} {...rest} title='' className='inline'>
           {children} <BookOpenText className='inline ml-1 text-current w-3 h-3' />
         </Link>
         </HoverCardTrigger>
