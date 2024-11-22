@@ -56,7 +56,44 @@ If you want to override the provider config for some models in the namespace and
 
 Example configuration
 
-{/*TODO: Missing code?*/}
+```json
+{
+"cody.enabled": true,
+"modelConfiguration": {
+  "sourcegraph": {},
+  "providerOverrides": [
+    {
+      "id": "anthropic-byok",
+      "displayName": "Anthropic BYOK",
+      "serverSideConfig": {
+          "type": "anthropic",
+          "accessToken": "token",
+          "endpoint": "https://api.anthropic.com/v1/messages"
+        }
+    }
+  ],
+  "modelOverrides": [
+    {
+      "modelRef": "anthropic-byok::2023-06-01::claude-3.5-sonnet",
+      "displayName": "Claude 3.5 Sonnet",
+      "modelName": "claude-3-5-sonnet-latest",
+      "capabilities": ["edit", "chat"],
+      "category": "accuracy",
+      "status": "stable",
+      "tier": "free",
+      "contextWindow": {
+        "maxInputTokens": 45000,
+        "maxOutputTokens": 4000
+      }
+    },
+  ],
+  "defaultModels": {
+    "chat": "anthropic-byok::2023-06-01::claude-3.5-sonnet",
+    "fastChat": "anthropic::2023-06-01::claude-3-haiku",
+    "autocomplete": "fireworks::v1::deepseek-coder-v2-lite-base"
+  }
+}
+```
 
 In the configuration above, we:
 
