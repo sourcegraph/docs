@@ -1,45 +1,49 @@
 # Model Configuration
 
-<p className="subtitle">Learn how to configure Cody via `modelConfigurations` on a Sourcegraph Enterprise instance.</p>
+<p className="subtitle">Learn how to configure Cody via `modelConfiguration` on a Sourcegraph Enterprise instance.</p>
 
-For Sourcegraph `v5.6.0` and more, users on an Enterprise Sourcegraph instance can choose between different LLM models for Cody chat, enabling greater flexibility to select the best model for their needs.
+<Callout type="note">`modelConfiguration` is the recommended way to configure chat and autocomplete models in Sourcegraph `v5.6.0` and later.</Callout>
 
-The LLM models available for use from a Sourcegraph Enterprise instance are the union of Sourcegraph-supplied models and any custom models providers that you explicitly add to your Sourcegraph instance's site configuration.
+The `modelConfiguration` field in the **Site config** section allows you to configure Cody to use different LLM models for chat and autocomplete, enabling greater flexibility in selecting the best model for your needs.
 
-The model configuration for Cody is managed through the `"modelConfiguration"` field in the **Site config** section.
+Using this configuration, you get an LLM selector in the Cody chat with an Enterprise instance that allows you to select the model you want to use.
 
-It includes the following fields:
+The LLM models available for a Sourcegraph Enterprise instance offer a combination of Sourcegraph-provided models and any custom models providers that you explicitly add to your Sourcegraph instance site configuration.
 
-|                                 **Field**                                  |                                                                                        **Description**                                                                                         |
+## `modelConfiguration`
+
+The model configuration for Cody is managed through the `"modelConfiguration"` field in the **Site config** section. It includes the following fields:
+
+|                               **Field**                                |                                                                                      **Description**                                                                                       |
 | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [`sourcegraph`](/cody/model-configuration#sourcegraph-supplied-models) | Configures access to Sourcegraph-supplied models available through Cody Gateway.                                                                                                           |
-| [`providerOverrides`](/cody/model-configuration#provider-overrides)    | Configures model providers, allowing you to customize Cody's connection to model providers, such as using your own API keys or self-hosted models.                                         |
-| [`modelOverrides`](/cody/model-configuration#model-overrides)          | Extends or modifies the list of models Cody recognizes, along with their configurations.                                                                                                   |
+| [`sourcegraph`](/cody/model-configuration#sourcegraph-supplied-models) | Configures access to Sourcegraph-provided models available through Cody Gateway.                                                                                                           |
+| [`providerOverrides`](/cody/model-configuration#provider-overrides)    | Configures model providers, allowing you to customize Cody's connection to model providers using your own API keys or self-hosted models.                                         |
+| [`modelOverrides`](/cody/model-configuration#model-overrides)          | Extends or modifies the list of models Cody recognizes and their configurations.                                                                                                   |
 | [`selfHostedModels`](/cody/model-configuration#self-hosted-models)     | Adds models to Cody’s recognized models list with default configurations provided by Sourcegraph. Only available for certain models; general models can be configured in `modelOverrides`. |
 | [`defaultModels`](/cody/model-configuration#default-models)            | Specifies the models assigned to each Cody feature (chat, fast chat, autocomplete).                                                                                                        |
 
 ## Getting started with `modelConfiguration`
 
-The recommended way to set up model configuration is by using Sourcegraph-supplied models through the Cody Gateway.
+The recommended way to set up model configuration is using Sourcegraph-provided models through the Cody Gateway.
 
 For a minimal configuration example, see [Configure Sourcegraph-supplied models](/cody/model-configuration#configure-sourcegraph-supplied-models).
 
-## Sourcegraph-supplied models
+## Sourcegraph-provided models
 
-Sourcegraph-supplied models, accessible through the [Cody Gateway](/cody/core-concepts/cody-gateway), are managed via your site configuration.
+Sourcegraph-provided models, accessible through the [Cody Gateway](/cody/core-concepts/cody-gateway), are managed via your site configuration.
 
 For most administrators, relying on these models alone ensures access to high-quality models without needing to manage specific configurations.
 
-Usage of these models is controlled through the `"modelConfiguration.sourcegraph"` field in the site config.
+The use of these models is controlled through the `"modelConfiguration.sourcegraph"` field in the site config.
 
-### Disable Sourcegraph-supplied models
+### Disable Sourcegraph-provided models
 
-To disable all Sourcegraph-supplied models and use only the models explicitly defined in your site configuration, set the `"sourcegraph"` field to `null` (see example below).
+To disable all Sourcegraph-provided models and use only the models explicitly defined in your site configuration, set the `"sourcegraph"` field to `null` as shown in the example below.
 
 ```json
 "cody.enabled": true,
 "modelConfiguration": {
-  "sourcegraph": null, // ignore Sourcegraph-supplied models
+  "sourcegraph": null, // ignore Sourcegraph-provided models
   "providerOverrides": {
     // define access to the LLM providers
   },
@@ -52,9 +56,9 @@ To disable all Sourcegraph-supplied models and use only the models explicitly de
 }
 ```
 
-### Configure Sourcegraph-supplied models
+### Configure Sourcegraph-provided models
 
-The minimal configuration for Sourcegraph-supplied models is:
+The minimal configuration for Sourcegraph-provided models is:
 
 ```json
 "cody.enabled": true,
@@ -65,27 +69,27 @@ The minimal configuration for Sourcegraph-supplied models is:
 
 The above configuration sets up the following:
 
--   Sourcegraph-supplied models are enabled (`sourcegraph` is not set to `null`).
--   Requests to LLM providers are routed through the Cody Gateway (no `providerOverrides` field specified).
--   Sourcegraph-defined default models are used for Cody features (no `defaultModels` field specified).
+- Sourcegraph-provided models are enabled (`sourcegraph` is not set to `null`)
+- Requests to LLM providers are routed through the Cody Gateway (no `providerOverrides` field specified)
+- Sourcegraph-defined default models are used for Cody features (no `defaultModels` field specified)
 
-There are three main settings for configuring Sourcegraph-supplied LLM models:
+There are three main settings for configuring Sourcegraph-provided LLM models:
 
-|                           Field                           |                                              Description                                               |
+|                         **Field**                         |                                            **Description**                                             |
 | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `endpoint`                                                | (Optional) The URL for connecting to Cody Gateway, defaulting to the production instance.              |
-| `accessToken`                                             | (Optional) The access token for connecting to Cody Gateway, which defaults to the current license key. |
+| `endpoint`                                                | (Optional) The URL for connecting to Cody Gateway. The default is set to the production instance.          |
+| `accessToken`                                             | (Optional) The access token for connecting to Cody Gateway defaults to the current license key. |
 | [`modelFilters`](/cody/model-configuration#model-filters) | (Optional) Filters specifying which models to include from Cody Gateway.                               |
 
 ### Model Filters
 
 The `"modelFilters"` section allows you to control which Cody Gateway models are available to users of your Sourcegraph Enterprise instance. The following table describes each field:
 
-|     Field      |                                                                            Description                                                                             |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `statusFilter` | Filters models by their release status, such as "stable", "beta", "deprecated" or "experimental." By default, all models available on Cody Gateway are accessible. |
-| `allow`        | An array of `modelRef`s specifying which models to include. Supports wildcards.                                                                                    |
-| `deny`         | An array of `modelRef`s specifying which models to exclude. Supports wildcards.                                                                                    |
+|   **Field**    |                                                                      **Description**                                                                       |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `statusFilter` | Filters models based on their release status, such as stable, beta, deprecated or experimental. By default, all models available on Cody Gateway are accessible. |
+| `allow`        | An array of `modelRef`s specifying which models to include. Supports wildcards.                                                                            |
+| `deny`         | An array of `modelRef`s specifying which models to exclude. Supports wildcards.                                                                            |
 
 The following examples demonstrate how to use each of these settings together:
 
@@ -119,16 +123,14 @@ The following examples demonstrate how to use each of these settings together:
 
 ## Provider Overrides
 
-A "provider" is an organizational concept for grouping LLM models. Typically, a provider refers to the company that
-produced the model or the specific API/service used to access it, serving as a namespace.
+A `provider` is an organizational concept for grouping LLM models. Typically, a provider refers to the company that produced the model or the specific API/service used to access it, serving as a namespace.
 
-By defining a provider override in your Sourcegraph site configuration, you can introduce a new namespace to organize
-models or customize the existing provider namespace supplied by Sourcegraph (e.g., for all `"anthropic"` models).
+By defining a provider override in your Sourcegraph site configuration, you can introduce a new namespace to organize models or customize the existing provider namespace supplied by Sourcegraph (e.g., for all `"anthropic"` models).
 
 Provider overrides are configured via the `"modelConfiguration.providerOverrides"` field in the site configuration.
 This field is an array of items, each containing the following fields:
 
-|       Field        |                                    Description                                    |
+|     **Field**      |                                  **Description**                                  |
 | ------------------ | --------------------------------------------------------------------------------- |
 | `id`               | The namespace for models accessed via the provider.                               |
 | `displayName`      | A human-readable name for the provider.                                           |
@@ -161,20 +163,18 @@ Example configuration:
 
 In the example above:
 
--   Sourcegraph-supplied models are enabled (`sourcegraph` is not set to `null`).
--   The `"openai"` provider configuration is overridden to be accessed using your own key, with the provider API accessed
-    directly via the specified `endpoint` URL. In contrast, models from the `"anthropic"` provider are accessed through the Cody Gateway.
+- Sourcegraph-provided models are enabled (`sourcegraph` is not set to `null`)
+- The `"openai"` provider configuration is overridden to be accessed using your own key, with the provider API accessed directly via the specified `endpoint` URL. In contrast, models from the `"anthropic"` provider are accessed through the Cody Gateway
 
-For additional examples, refer to the [examples page](/cody/model-configuration/examples).
+Refer to the [examples page](/cody/model-configuration/examples) for additional examples.
 
-### Server-side Config
+### Server-side config
 
-The most important part of a provider's configuration is the `"serverSideConfig"` field, which defines how the LLM models
-should be invoked—that is, which external service or API will handle the LLM requests.
+The most important part of a provider's configuration is the `"serverSideConfig"` field, which defines how the LLM models should be invoked, i.e., which external service or API will handle the LLM requests.
 
 Sourcegraph natively supports several types of LLM API providers. The current set of supported providers includes:
 
-|    Provider type     |                                                 Description                                                 |
+|  **Provider type**   |                                               **Description**                                               |
 | -------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `"sourcegraph"`      | [Cody Gateway](/cody/core-concepts/cody-gateway), offering access to various models from multiple services. |
 | `"openaicompatible"` | Any OpenAI-compatible API implementation.                                                                   |
@@ -188,56 +188,44 @@ Sourcegraph natively supports several types of LLM API providers. The current se
 
 The configuration for `serverSideConfig` varies by provider type.
 
-For examples, refer to the [examples page](/cody/model-configuration/examples).
+Refer to the [examples page](/cody/model-configuration/examples) for examples.
 
 ## Model Overrides
 
-With a provider defined (either a Sourcegraph-supplied provider or a custom provider configured via the `providerOverrides`
-field), custom models can be specified for that provider by adding them to the `"modelConfiguration.modelOverrides"` section.
+With a provider defined (either a Sourcegraph-provided provider or a custom provider configured via the `providerOverrides` field), custom models can be specified for that provider by adding them to the `"modelConfiguration.modelOverrides"` section.
 
 This field is an array of items, each with the following fields:
 
--   `modelRef` - Uniquely identifies the model within the provider namespace.
-    -   A string in the format `${providerId}::${apiVersionId}::${modelId}`.
-    -   To associate a model with your provider, `${providerId}` must match the provider’s ID.
-    -   `${modelId}` can be any URL-safe string.
-    -   `${apiVersionId}` specifies the API version, which helps detect compatibility issues between models and Sourcegraph instances.
-        For example, `"2023-06-01"` can indicate that the model uses that version of the Anthropic API. If unsure, you may set this to `"unknown"` when defining custom models.
--   `displayName` - An optional, user-friendly name for the model. If not set, clients should display the `ModelID` part of the `modelRef` instead (not the `modelName`).
--   `modelName` - A unique identifier used by the API provider to specify which model is being invoked.
-    This is the identifier that the LLM provider recognizes to determine the model you are calling.
--   `capabilities` - A list of capabilities that the model supports. Supported values: "autocomplete" and "chat".
--   `category` - Specifies the model's category, with the following options:
+- `modelRef`: Uniquely identifies the model within the provider namespace
+  - A string in the format `${providerId}::${apiVersionId}::${modelId}`
+  - To associate a model with your provider, `${providerId}` must match the provider’s ID
+  - `${modelId}` can be any URL-safe string
+  - `${apiVersionId}` specifies the API version, which helps detect compatibility issues between models and Sourcegraph instances. For example, `"2023-06-01"` can indicate that the model uses that version of the Anthropic API. If unsure, you may set this to `"unknown"` when defining custom models
+- `displayName`: An optional, user-friendly name for the model. If not set, clients should display the `ModelID` part of the `modelRef` instead (not the `modelName`)
+- `modelName`: A unique identifier the API provider uses to specify which model is being invoked. This is the identifier that the LLM provider recognizes to determine the model you are calling
+- `capabilities`: A list of capabilities that the model supports. Supported values: **autocomplete** and **chat**
+- `category`: Specifies the model's category with the following options:
+  - `"balanced"`: Typically the best default choice for most users. This category is suited for models like Sonnet 3.5 (as of October 2024)
+  - `"speed"`: Ideal for low-parameter models that may not suit general-purpose chat but are beneficial for specialized tasks, such as query rewriting
+  - `"accuracy"`: Reserved for models, like OpenAI o1, that use advanced reasoning techniques to improve response accuracy, though with slower latency
+  - `"other"`: Used for older models without distinct advantages in reasoning or speed. Select this category if you are uncertain about which category to choose
+  - `"deprecated"`: For models that are no longer supported by the provider and are filtered out on the client side (not available for use)
+- `contextWindow`: An object that defines the **number of tokens** (units of text) that can be sent to the LLM. This setting influences response time and request cost and may vary according to the limits set by each LLM model or provider. It includes two fields:
+  - `maxInputTokens`: Specifies the maximum number of tokens for the contextual data in the prompt (e.g., question, relevant snippets)
+  - `maxOutputTokens`: Specifies the maximum number of tokens allowed in the response
+- `serverSideConfig`: Additional configuration for the model. It can be one of the following:
+  - `awsBedrockProvisionedThroughput`: Specifies provisioned throughput settings for AWS Bedrock models with the following fields:
+    - `type`: Must be `"awsBedrockProvisionedThroughput"`
+    - `arn`: The ARN (Amazon Resource Name) for provisioned throughput to use when sending requests to AWS Bedrock
+- `openaicompatible`: Configuration specific to models provided by an OpenAI-compatible provider, with the following fields:
+  - `type`: Must be `"openaicompatible"`
+  - `apiModel`: The literal string value of the `model` field to be sent to the `/chat/completions` API. If set, Sourcegraph treats this as an opaque string and sends it directly to the API without inferring any additional information. By default, the configured model name is sent
 
-    -   `"balanced"` - Typically the best default choice for most users. This category is suited for state-of-the-art models, like Sonnet 3.5 (as of October 2024).
-    -   `"speed"` - Ideal for low-parameter models that may not be suited for general-purpose chat but are beneficial for specialized tasks, such as query rewriting.
-    -   `"accuracy"` - Reserved for models, like OpenAI o1, that use advanced reasoning techniques to improve response accuracy, though with slower latency.
-    -   `"other"` - Used for older models without distinct advantages in reasoning or speed. Select this category if uncertain about which category to choose.
-    -   `"deprecated"` - For models that are no longer supported by the provider and are filtered out on the client side (not available for use).
+- `clientSideConfig`: Advanced configuration options that are only respected if the model is provided by the `"openaicompatible"` provider
 
--   `contextWindow` - An object that defines the number of "tokens" (units of text) that can be sent to the LLM.
-    This setting influences response time and request cost, and may vary according to the limits set by each LLM model or provider.
-    It includes two fields:
-    -   `maxInputTokens` - Specifies the maximum number of tokens for the contextual data in the prompt (e.g., question, relevant snippets).
-    -   `maxOutputTokens` - Specifies the maximum number of tokens allowed in the response.
--   `serverSideConfig` - Additional configuration for the model. Can be one of the following:
+{/*TODO: add more details.*/}
 
-    -   `awsBedrockProvisionedThroughput` - Specifies provisioned throughput settings for AWS Bedrock models, with the following fields:
-
-        -   `type` - Must be `"awsBedrockProvisionedThroughput"`.
-        -   `arn` - The ARN (Amazon Resource Name) for provisioned throughput to use when sending requests to AWS Bedrock.
-
-    -   `openaicompatible` - Configuration specific to models provided by an OpenAI-compatible provider, with the following fields:
-
-        -   `type` - Must be `"openaicompatible"`.
-        -   `apiModel` - The literal string value of the `model` field to be sent to the `/chat/completions` API.
-            If set, Sourcegraph treats this as an opaque string and sends it directly to the API without inferring any additional information.
-            By default, the configured model name is sent.
-
--   `clientSideConfig` - Advanced configuration options that are only respected if the model is provided by the `"openaicompatible"` provider.
-    TODO: add more details.
-
-Example configuration:
+#### Example configuration
 
 ```json
 "cody.enabled": true,
@@ -289,54 +277,48 @@ Example configuration:
 
 In the example above:
 
--   Sourcegraph-supplied models are enabled (`sourcegraph` is not set to `null`).
--   An additional provider, `"huggingface-codellama"`, is configured to access Hugging Face’s OpenAI-compatible API directly.
--   A custom model, `"CodeLlama-7b-hf"`, is added using the `"huggingface-codellama"` provider.
--   Default models are set up as follows:
-    -   Sourcegraph-supplied models are used for `"chat"` and `"fastChat"` (accessed via Cody Gateway).
-    -   The newly configured model, `"huggingface-codellama::v1::CodeLlama-7b-hf"`, is used for `"autocomplete"`
-        (connecting directly to Hugging Face’s OpenAI-compatible API).
+- Sourcegraph-provided models are enabled (`sourcegraph` is not set to `null`)
+- An additional provider, `"huggingface-codellama"`, is configured to access Hugging Face’s OpenAI-compatible API directly
+- A custom model, `"CodeLlama-7b-hf"`, is added using the `"huggingface-codellama"` provider
+- Default models are set up as follows:
+  - Sourcegraph-provided models are used for `"chat"` and `"fastChat"` (accessed via Cody Gateway)
+  - The newly configured model, `"huggingface-codellama::v1::CodeLlama-7b-hf"`, is used for `"autocomplete"` (connecting directly to Hugging Face’s OpenAI-compatible API)
 
-For additional examples, refer to the [examples page](/cody/model-configuration/examples).
+Refer to the [examples page](/cody/model-configuration/examples) for additional examples.
 
-## Self-hosted Models
+## Self-hosted models
 
-<Callout type="note">
-	Configuring self-hosted models can be nuanced and complex. Consider reaching
-	out to Sourcegraph support for assistance with the setup.
-</Callout>
+<Callout type="tip">Configuring self-hosted models can be nuanced and complex. Please reach
+ out to Sourcegraph support for assistance with the setup.</Callout>
 
-With a provider defined (either a Sourcegraph-supplied provider or a custom provider configured via the `providerOverrides` field),
-self-hosted models can be added to Cody’s recognized models list by configuring the `"modelConfiguration.selfHostedModels"` section.
+With a provider defined (either a Sourcegraph-provided provider or a custom provider configured via the `providerOverrides` field), self-hosted models can be added to Cody’s recognized models list by configuring the `"modelConfiguration.selfHostedModels"` section.
 These models use Sourcegraph’s default configuration settings and are only available for select models.
-Generic models should instead be configured in the `"modelOverrides"` section.
+Generic models should be configured in the `"modelOverrides"` section instead.
 
 Specifying the same model in both `"selfHostedModels"` and `"modelOverrides"` is not allowed.
 
 This field is an array of items, each with the following fields:
 
-|    Field     |                                                                                                                                                                      Description                                                                                                                                                                      |
+|  **Field**   |                                                                                                                                                                    **Description**                                                                                                                                                                    |
 | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `provider`   | (Required) The provider ID of the model, configured in the `providerOverrides` field.                                                                                                                                                                                                                                                                 |
 | `apiVersion` | (Optional) The API version to use. Defaults to `"v1"` if not specified.                                                                                                                                                                                                                                                                               |
 | `model`      | (Optional) Specifies which default model configuration to use. Sourcegraph provides default configurations for select models. For arbitrary models, use the `modelOverrides` section. Available options include: `"starcoder2-7b@v1"`, `"starcoder2-15b@v1"`, `"mistral-7b-instruct@v1"`, `"mixtral-8x7b-instruct@v1"`, `"mixtral-8x22b-instruct@v1"` |
 
-For examples, refer to the [examples page](/cody/model-configuration/examples#self-hosted-models).
+Refer to the [examples page](/cody/model-configuration/examples#self-hosted-models) for examples.
 
-## Default Models
+## Default models
 
-The `"modelConfiguration"` setting includes a `"defaultModels"` field, which allows you to specify the LLM model used for
-each Cody feature (`"chat"`, `"fastChat"`, and `"autocomplete"`). The values for each feature should be `modelRef`s of
-either Sourcegraph-supplied models or models configured in the `modelOverrides` section.
+The `"modelConfiguration"` setting includes a `"defaultModels"` field, which allows you to specify the LLM model used for each Cody feature (`"chat"`, `"fastChat"`, and `"autocomplete"`). The values for each feature should be `modelRef`s of either Sourcegraph-provided models or models configured in the `modelOverrides` section.
 
-If no default is specified or if the specified model is not found, the configuration will silently fall back to a suitable alternative.
+If no default is specified or the specified model is not found, the configuration will silently fall back to a suitable alternative.
 
-Example configuration:
+#### Example configuration
 
 ```json
 "cody.enabled": true,
 
-// allow Sourcegraph-supplied models
+// allow Sourcegraph-provided models
 "sourcegraph": {},
 
 "defaultModels": {
@@ -346,7 +328,7 @@ Example configuration:
 }
 ```
 
-## View Configuration
+## View configuration
 
 To view the current model configuration, run the following command:
 
@@ -360,10 +342,10 @@ curl --location "${INSTANCE_URL}/.api/modelconfig/supported-models.json" \
 
 The response includes:
 
--   Configured providers and models—both Sourcegraph-supplied (if enabled, with any applied filters) and any overrides.
--   Default models for Cody features.
+- Configured providers and models—both Sourcegraph-provided (if enabled, with any applied filters) and any overrides
+- Default models for Cody features
 
-Example response:
+#### Example response
 
 ```json
 "schemaVersion": "1.0",
