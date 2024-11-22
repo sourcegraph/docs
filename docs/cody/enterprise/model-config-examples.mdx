@@ -1,20 +1,24 @@
 # Model Configuration Examples
 
-<p className="subtitle">This section includes examples about how to configure Cody to use Sourcegraph-provided models with `modelConfiguration`. These examples will use the following:</p>
+<p className="subtitle">
+	This section includes examples about how to configure Cody to use
+	Sourcegraph-provided models with `modelConfiguration`. These examples will
+	use the following:
+</p>
 
-- [Minimal configuration](/cody/enterprise/model-configuration#configure-sourcegraph-provided-models)
-- [Using model filters](/cody/enterprise/model-configuration#model-filters)
-- [Change default models](/cody/enterprise/model-configuration#default-models)
+-   [Minimal configuration](/cody/enterprise/model-configuration#configure-sourcegraph-provided-models)
+-   [Using model filters](/cody/enterprise/model-configuration#model-filters)
+-   [Change default models](/cody/enterprise/model-configuration#default-models)
 
 ## Sourcegraph-provided models and BYOK (Bring Your Own Key)
 
 By default, Sourcegraph is fully aware of several models from the following providers:
 
-- "anthropic"
-- "google"
-- "fireworks"
-- "mistral"
-- "openai"
+-   "anthropic"
+-   "google"
+-   "fireworks"
+-   "mistral"
+-   "openai"
 
 ### Override configuration of a model provider
 
@@ -46,9 +50,9 @@ Instead of Sourcegraph using its own servers to make LLM requests, it is possibl
 
 In the configuration above:
 
-- Enable Sourcegraph-provided models and do not set any overrides (note that `"modelConfiguration.modelOverrides"` is not specified)
-- Route requests for Anthropic models directly to the Anthropic API (via the provider override specified for "anthropic")
-- Route requests for other models (such as the Fireworks model for "autocomplete") through Cody Gateway
+-   Enable Sourcegraph-provided models and do not set any overrides (note that `"modelConfiguration.modelOverrides"` is not specified)
+-   Route requests for Anthropic models directly to the Anthropic API (via the provider override specified for "anthropic")
+-   Route requests for other models (such as the Fireworks model for "autocomplete") through Cody Gateway
 
 ### Partially override provider config in the namespace
 
@@ -80,7 +84,6 @@ Example configuration
       "capabilities": ["edit", "chat"],
       "category": "accuracy",
       "status": "stable",
-      "tier": "free",
       "contextWindow": {
         "maxInputTokens": 45000,
         "maxOutputTokens": 4000
@@ -97,18 +100,18 @@ Example configuration
 
 In the configuration above, we:
 
-- Enable Sourcegraph-supplied models (the `sourcegraph` field is not empty or `null`)
-- Define a new provider with the ID `"anthropic-byok"` and configure it to use the Anthropic API
-- Since this provider is unknown to Sourcegraph, no Sourcegraph-supplied models are available. Therefore, we add a custom model in the `"modelOverrides"` section
-- Use the custom model configured in the previous step (`"anthropic-byok::2024-10-22::claude-3.5-sonnet"`) for `"chat"`. Requests are sent directly to the Anthropic API as set in the provider override
-- For `"fastChat"` and `"autocomplete"`, we use Sourcegraph-provided models via Cody Gateway
+-   Enable Sourcegraph-supplied models (the `sourcegraph` field is not empty or `null`)
+-   Define a new provider with the ID `"anthropic-byok"` and configure it to use the Anthropic API
+-   Since this provider is unknown to Sourcegraph, no Sourcegraph-supplied models are available. Therefore, we add a custom model in the `"modelOverrides"` section
+-   Use the custom model configured in the previous step (`"anthropic-byok::2024-10-22::claude-3.5-sonnet"`) for `"chat"`. Requests are sent directly to the Anthropic API as set in the provider override
+-   For `"fastChat"` and `"autocomplete"`, we use Sourcegraph-provided models via Cody Gateway
 
 ## Config examples for various LLM providers
 
 Below are configuration examples for setting up various LLM providers using BYOK. These examples are applicable whether or not you are using Sourcegraph-supported models.
 
-- In this section, all configuration examples have Sourcegraph-provided models disabled. Please refer to the previous section to use a combination of Sourcegraph-provided models and BYOK.
-- Ensure that at least one model is available for each Cody feature ("chat" and "autocomplete"), regardless of the provider and model overrides configured. To verify this, [view the configuration](/cody/enterprise/model-configuration#view-configuration) and confirm that appropriate models are listed in the `"defaultModels"` section.
+-   In this section, all configuration examples have Sourcegraph-provided models disabled. Please refer to the previous section to use a combination of Sourcegraph-provided models and BYOK.
+-   Ensure that at least one model is available for each Cody feature ("chat" and "autocomplete"), regardless of the provider and model overrides configured. To verify this, [view the configuration](/cody/enterprise/model-configuration#view-configuration) and confirm that appropriate models are listed in the `"defaultModels"` section.
 
 <Accordion title="Anthropic">
 
@@ -136,7 +139,6 @@ Below are configuration examples for setting up various LLM providers using BYOK
       "capabilities": ["chat"],
       "category": "accuracy",
       "status": "stable",
-      "tier": "free",
       "contextWindow": {
         "maxInputTokens": 45000,
         "maxOutputTokens": 4000
@@ -149,20 +151,18 @@ Below are configuration examples for setting up various LLM providers using BYOK
       "capabilities": ["chat"],
       "category": "speed",
       "status": "stable",
-      "tier": "free",
       "contextWindow": {
           "maxInputTokens": 7000,
           "maxOutputTokens": 4000
       }
     },
     {
-      "modelRef": "anthropic::2023-01-01::claude-instant-1.2",
-      "displayName": "Claude Instant",
-      "modelName": "claude-instant-1.2",
-      "capabilities": ["autocomplete", "chat"],
-      "category": "other",
-      "status": "deprecated",
-      "tier": "free",
+      "modelRef": "anthropic::2023-06-01::claude-3-haiku",
+      "displayName": "Claude 3 Haiku",
+      "modelName": "claude-3-haiku-20240307",
+      "capabilities": ["edit", "chat"],
+      "category": "speed",
+      "status": "stable",
       "contextWindow": {
         "maxInputTokens": 7000,
         "maxOutputTokens": 4000
@@ -172,18 +172,18 @@ Below are configuration examples for setting up various LLM providers using BYOK
   "defaultModels": {
     "chat": "anthropic::2024-10-22::claude-3.5-sonnet",
     "fastChat": "anthropic::2023-06-01::claude-3-haiku",
-    "autocomplete": "anthropic::2023-01-01::claude-instant-1.2"
+    "autocomplete": "fireworks::v1::deepseek-coder-v2-lite-base"
   }
 }
 ```
 
 In the configuration above,
 
-- Set up a provider override for Anthropic, routing requests for this provider directly to the specified Anthropic endpoint (bypassing Cody Gateway)
-- Add three Anthropic models:
-  - Two models with chat capabilities (`"anthropic::2024-10-22::claude-3.5-sonnet"` and `"anthropic::2023-06-01::claude-3-haiku"`), providing options for chat users
-  - One model with autocomplete capability (`"anthropic::2023-01-01::claude-instant-1.2"`)
-- Set the configured models as default models for Cody features in the `"defaultModels"` field
+-   Set up a provider override for Anthropic, routing requests for this provider directly to the specified Anthropic endpoint (bypassing Cody Gateway)
+-   Add three Anthropic models:
+    -   Two models with chat capabilities (`"anthropic::2024-10-22::claude-3.5-sonnet"` and `"anthropic::2023-06-01::claude-3-haiku"`), providing options for chat users
+    -   One model with autocomplete capability (`"fireworks::v1::deepseek-coder-v2-lite-base"`)
+-   Set the configured models as default models for Cody features in the `"defaultModels"` field
 
 </Accordion>
 
@@ -211,7 +211,6 @@ In the configuration above,
  "capabilities": ["chat"],
  "category": "other",
  "status": "stable",
- "tier": "free",
  "contextWindow": {
  "maxInputTokens": 7000,
  "maxOutputTokens": 4000
@@ -240,10 +239,10 @@ In the configuration above,
 
 In the configuration above,
 
-- Set up a provider override for Fireworks, routing requests for this provider directly to the specified Fireworks endpoint (bypassing Cody Gateway)
-- Add two Fireworks models:
-  - `"fireworks::v1::mixtral-8x22b-instruct"` with "chat" capabiity - used for "chat" and "fastChat"
-  - `"fireworks::v1::starcoder-16b"` with "autocomplete" capability - used for "autocomplete"
+-   Set up a provider override for Fireworks, routing requests for this provider directly to the specified Fireworks endpoint (bypassing Cody Gateway)
+-   Add two Fireworks models:
+    -   `"fireworks::v1::mixtral-8x22b-instruct"` with "chat" capabiity - used for "chat" and "fastChat"
+    -   `"fireworks::v1::starcoder-16b"` with "autocomplete" capability - used for "autocomplete"
 
 </Accordion>
 
@@ -271,7 +270,6 @@ In the configuration above,
       "capabilities": ["chat"],
       "category": "accuracy",
       "status": "stable",
-      "tier": "pro",
       "contextWindow": {
           "maxInputTokens": 45000,
           "maxOutputTokens": 400
@@ -284,7 +282,6 @@ In the configuration above,
       "capabilities": ["autocomplete"],
       "category": "speed",
       "status": "stable",
-      "tier": "free",
       "contextWindow": {
           "maxInputTokens": 7000,
           "maxOutputTokens": 400
@@ -301,10 +298,10 @@ In the configuration above,
 
 In the configuration above,
 
-- Set up a provider override for OpenAI, routing requests for this provider directly to the specified OpenAI endpoint (bypassing Cody Gateway)
-- Add two OpenAI models:
-  - `"openai::2024-02-01::gpt-4o"` with "chat" capabilities - used for "chat" and "fastChat"
-  - `"openai::unknown::gpt-3.5-turbo-instruct"` with "autocomplete" capability - used for "autocomplete"
+-   Set up a provider override for OpenAI, routing requests for this provider directly to the specified OpenAI endpoint (bypassing Cody Gateway)
+-   Add two OpenAI models:
+    -   `"openai::2024-02-01::gpt-4o"` with "chat" capabilities - used for "chat" and "fastChat"
+    -   `"openai::unknown::gpt-3.5-turbo-instruct"` with "autocomplete" capability - used for "autocomplete"
 
 </Accordion>
 
@@ -335,7 +332,6 @@ In the configuration above,
         "capabilities": ["chat"],
         "category": "accuracy",
         "status": "stable",
-        "tier": "pro",
         "contextWindow": {
             "maxInputTokens": 45000,
             "maxOutputTokens": 4000
@@ -348,7 +344,6 @@ In the configuration above,
         "capabilities": ["autocomplete"],
         "category": "speed",
         "status": "stable",
-        "tier": "free",
         "contextWindow": {
             "maxInputTokens": 7000,
             "maxOutputTokens": 4000
@@ -364,12 +359,13 @@ In the configuration above,
 ```
 
 In the configuration above,
+In the configuration above,
 
-- Set up a provider override for Azure OpenAI, routing requests for this provider directly to the specified Azure OpenAI endpoint (bypassing Cody Gateway)
+- Set up a provider override for Azure OpenAI, routing requests for this provider directly to the specified Azure OpenAI endpoint (bypassing Cody Gateway). **Note:** For Azure OpenAI, ensure that the `modelName` matches the name defined in your Azure portal configuration for the model.
 - Add two OpenAI models:
-  - `"azure-openai::unknown::gpt-4o"` with "chat" capability - used for "chat" and "fastChat"
-  - `"azure-openai::unknown::gpt-35-turbo-instruct-test"` with "autocomplete" capability - used for "autocomplete"
-- Since `"azure-openai::unknown::gpt-35-turbo-instruct-test"` is not supported on the newer OpenAI `"v1/chat/completions"` endpoint, we set `"useDeprecatedCompletionsAPI"` to `true` to route requests to the legacy `"v1/completions"` endpoint. This setting is unnecessary if you are using a model supported on the `"v1/chat/completions"` endpoint
+    - `"azure-openai::unknown::gpt-4o"` with "chat" capability - used for "chat" and "fastChat"
+    - `"azure-openai::unknown::gpt-35-turbo-instruct-test"` with "autocomplete" capability - used for "autocomplete"
+- Since `"azure-openai::unknown::gpt-35-turbo-instruct-test"` is not supported on the newer OpenAI `"v1/chat/completions"` endpoint, we set `"useDeprecatedCompletionsAPI"` to `true` to route requests to the legacy `"v1/completions"` endpoint. This setting is unnecessary if you are using a model supported on the `"v1/chat/completions"` endpoint.
 
 </Accordion>
 
@@ -457,10 +453,10 @@ In the configuration above,
 
 In the configuration above,
 
-- Configure two OpenAI-compatible providers: `"fireworks"` and `"huggingface-codellama"`
-- Add two OpenAI-compatible models: `"fireworks::v1::llama-v3p1-70b-instruct"` and `"huggingface-codellama::v1::CodeLlama-7b-hf"`. Additionally:
-  - Set `clientSideConfig.openaicompatible` to `{}` to indicate to Cody clients that these models are OpenAI-compatible, ensuring the appropriate code paths are utilized
-  - Designate these models as the default choices for chat and autocomplete, respectively
+-   Configure two OpenAI-compatible providers: `"fireworks"` and `"huggingface-codellama"`
+-   Add two OpenAI-compatible models: `"fireworks::v1::llama-v3p1-70b-instruct"` and `"huggingface-codellama::v1::CodeLlama-7b-hf"`. Additionally:
+    -   Set `clientSideConfig.openaicompatible` to `{}` to indicate to Cody clients that these models are OpenAI-compatible, ensuring the appropriate code paths are utilized
+    -   Designate these models as the default choices for chat and autocomplete, respectively
 
 </Accordion>
 
@@ -500,7 +496,6 @@ In the configuration above,
           "capabilities": ["autocomplete", "chat"],
           "category": "speed",
           "status": "stable",
-          "tier": "free",
           "contextWindow": {
             "maxInputTokens": 7000,
             "maxOutputTokens": 4000
@@ -517,10 +512,10 @@ In the configuration above,
 
 In the configuration above,
 
-- Set up a provider override for Google Anthropic, routing requests for this provider directly to the specified endpoint (bypassing Cody Gateway)
-- Add two Anthropic models:
-  - `"google::unknown::claude-3-5-sonnet"` with "chat" capabiity - used for "chat" and "fastChat"
-  - `"google::unknown::claude-3-haiku"` with "autocomplete" capability - used for "autocomplete"
+-   Set up a provider override for Google Anthropic, routing requests for this provider directly to the specified endpoint (bypassing Cody Gateway)
+-   Add two Anthropic models:
+    -   `"google::unknown::claude-3-5-sonnet"` with "chat" capabiity - used for "chat" and "fastChat"
+    -   `"google::unknown::claude-3-haiku"` with "autocomplete" capability - used for "autocomplete"
 
 </Accordion>
 
@@ -548,7 +543,6 @@ In the configuration above,
       "capabilities": ["chat", "autocomplete"],
       "category": "balanced",
       "status": "stable",
-      "tier": "free",
       "contextWindow": {
         "maxInputTokens": 45000,
         "maxOutputTokens": 400
@@ -565,8 +559,8 @@ In the configuration above,
 
 In the configuration above,
 
-- Set up a provider override for Google Gemini, routing requests for this provider directly to the specified endpoint (bypassing Cody Gateway)
-- Add the `"google::v1::gemini-1.5-pro"` model, which is used for all Cody features. We do not add other models for simplicity, as adding multiple models is already covered in the examples above
+-   Set up a provider override for Google Gemini, routing requests for this provider directly to the specified endpoint (bypassing Cody Gateway)
+-   Add the `"google::v1::gemini-1.5-pro"` model, which is used for all Cody features. We do not add other models for simplicity, as adding multiple models is already covered in the examples above
 
 </Accordion>
 
@@ -596,7 +590,6 @@ In the configuration above,
           "capabilities": ["chat", "autocomplete"],
           "category": "other",
           "status": "stable",
-          "tier": "pro",
           "contextWindow": {
               "maxInputTokens": 45000,
               "maxOutputTokens": 4000
@@ -613,17 +606,17 @@ In the configuration above,
 
 In the configuration described above,
 
-- Set up a provider override for AWS Bedrock, routing requests for this provider directly to the specified endpoint, bypassing Cody Gateway
-- Add the `"aws-bedrock::2023-06-01::claude-3-opus"` model, which is used for all Cody features. We do not add other models for simplicity, as adding multiple models is already covered in the examples above
+-   Set up a provider override for AWS Bedrock, routing requests for this provider directly to the specified endpoint, bypassing Cody Gateway
+-   Add the `"aws-bedrock::2023-06-01::claude-3-opus"` model, which is used for all Cody features. We do not add other models for simplicity, as adding multiple models is already covered in the examples above
 
 Provider override `serverSideConfig` fields:
 
-| **Field**         | **Description**                                                                                                                                                                                                                                                                                                     |
+| **Field**     | **Description**                                                                                                                                                                                                                                                                                                 |
 | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `type`        | Must be `"awsBedrock"`.                                                                                                                                                                                                                                                                                         |
 | `accessToken` | Leave empty to rely on instance role bindings or other AWS configurations in the frontend service. Use `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>` for direct credential configuration, or `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>:<SESSION_TOKEN>` if a session token is also required.                                 |
 | `endpoint`    | For pay-as-you-go, set it to an AWS region code (e.g., `us-west-2`) when using a public Amazon Bedrock endpoint. For provisioned throughput, set it to the provisioned VPC endpoint for the bedrock-runtime API (e.g., `https://vpce-0a10b2345cd67e89f-abc0defg.bedrock-runtime.us-west-2.vpce.amazonaws.com`). |
-| `region`      | The region to use when configuring API clients. This is necessary because the 'frontend' binary container cannot access environment variables from the host OS.                                                                                                                                               |
+| `region`      | The region to use when configuring API clients. This is necessary because the 'frontend' binary container cannot access environment variables from the host OS.                                                                                                                                                 |
 
 Provisioned throughput for AWS Bedrock models can be configured using the `"awsBedrockProvisionedThroughput"` server-side configuration type. Refer to the [Model Overrides](/cody/enterprise/model-configuration#model-overrides) section for more details.
 
@@ -631,7 +624,10 @@ Provisioned throughput for AWS Bedrock models can be configured using the `"awsB
 
 ## Self-hosted models
 
-<Callout type="note">Configuring self-hosted models can be nuanced and complex. Please reach out to Sourcegraph support for assistance with the setup.</Callout>
+<Callout type="note">
+	Configuring self-hosted models can be nuanced and complex. Please reach out
+	to Sourcegraph support for assistance with the setup.
+</Callout>
 
 Please refer to the [self-hosted models](/cody/enterprise/model-configuration#self-hosted-models) documentation for detailed information about configuring self-hosted models.
 
