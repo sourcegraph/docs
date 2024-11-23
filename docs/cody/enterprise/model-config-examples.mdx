@@ -191,49 +191,49 @@ In the configuration above,
 ```json
 "cody.enabled": true,
 "modelConfiguration": {
- "sourcegraph": null,
- "providerOverrides": [
- {
- "id": "fireworks",
- "displayName": "Fireworks",
- "serverSideConfig": {
- "type": "fireworks",
- "accessToken": "token",
- "endpoint": "https://api.fireworks.ai/inference/v1/completions"
- }
- }
- ],
- "modelOverrides": [
- {
- "modelRef": "fireworks::v1::mixtral-8x22b-instruct",
- "displayName": "Mixtral 8x22B",
- "modelName": "accounts/fireworks/models/mixtral-8x22b-instruct",
- "capabilities": ["chat"],
- "category": "other",
- "status": "stable",
- "contextWindow": {
- "maxInputTokens": 7000,
- "maxOutputTokens": 4000
- }
- },
- {
- "modelRef": "fireworks::v1::starcoder-16b",
- "modelName": "accounts/fireworks/models/starcoder-16b",
- "displayName": "(Fireworks) Starcoder 16B",
- "contextWindow": {
- "maxInputTokens": 8192,
- "maxOutputTokens": 4096
- },
- "capabilities": ["autocomplete"],
- "category": "balanced",
- "status": "stable"
- }
- ],
- "defaultModels": {
- "chat": "fireworks::v1::mixtral-8x22b-instruct",
- "fastChat": "fireworks::v1::mixtral-8x22b-instruct",
- "autocomplete": "fireworks::v1::starcoder-16b"
- }
+  "sourcegraph": null,
+  "providerOverrides": [
+    {
+      "id": "fireworks",
+      "displayName": "Fireworks",
+      "serverSideConfig": {
+        "type": "fireworks",
+        "accessToken": "token",
+        "endpoint": "https://api.fireworks.ai/inference/v1/completions"
+      }
+    }
+  ],
+  "modelOverrides": [
+    {
+      "modelRef": "fireworks::v1::mixtral-8x7b-instruct",
+      "displayName": "Mixtral 8x7B",
+      "modelName": "accounts/fireworks/models/mixtral-8x7b-instruct",
+      "capabilities": ["chat"],
+      "category": "other",
+      "status": "stable",
+      "contextWindow": {
+        "maxInputTokens": 7000,
+        "maxOutputTokens": 4000
+      }
+    },
+    {
+      "modelRef": "fireworks::v1::starcoder-16b",
+      "modelName": "accounts/fireworks/models/starcoder-16b",
+      "displayName": "(Fireworks) Starcoder 16B",
+      "contextWindow": {
+        "maxInputTokens": 8192,
+        "maxOutputTokens": 4096
+      },
+      "capabilities": ["autocomplete"],
+      "category": "balanced",
+      "status": "stable"
+    }
+  ],
+  "defaultModels": {
+    "chat": "fireworks::v1::mixtral-8x7b-instruct",
+    "fastChat": "fireworks::v1::mixtral-8x7b-instruct",
+    "autocomplete": "fireworks::v1::starcoder-16b"
+  }
 }
 ```
 
@@ -241,7 +241,7 @@ In the configuration above,
 
 -   Set up a provider override for Fireworks, routing requests for this provider directly to the specified Fireworks endpoint (bypassing Cody Gateway)
 -   Add two Fireworks models:
-    -   `"fireworks::v1::mixtral-8x22b-instruct"` with "chat" capabiity - used for "chat" and "fastChat"
+    -   `"fireworks::v1::mixtral-8x7b-instruct"` with "chat" capabiity - used for "chat" and "fastChat"
     -   `"fireworks::v1::starcoder-16b"` with "autocomplete" capability - used for "autocomplete"
 
 </Accordion>
@@ -359,7 +359,6 @@ In the configuration above,
 ```
 
 In the configuration above,
-In the configuration above,
 
 -   Set up a provider override for Azure OpenAI, routing requests for this provider directly to the specified Azure OpenAI endpoint (bypassing Cody Gateway).
     **Note:** For Azure OpenAI, ensure that the `modelName` matches the name defined in your Azure portal configuration for the model.
@@ -461,6 +460,51 @@ In the configuration above,
 
 </Accordion>
 
+<Accordion title="Google Gemini">
+
+```json
+"modelConfiguration": {
+  "sourcegraph": null,
+  "providerOverrides": [
+      {
+          "id": "google",
+          "displayName": "Google Gemini",
+          "serverSideConfig": {
+            "type": "google",
+            "accessToken": "token",
+            "endpoint": "https://generativelanguage.googleapis.com/v1beta/models"
+          }
+      }
+  ],
+  "modelOverrides": [
+    {
+      "modelRef": "google::v1::gemini-1.5-pro",
+      "displayName": "Gemini 1.5 Pro",
+      "modelName": "gemini-1.5-pro",
+      "capabilities": ["chat", "autocomplete"],
+      "category": "balanced",
+      "status": "stable",
+      "contextWindow": {
+        "maxInputTokens": 45000,
+        "maxOutputTokens": 4000
+      }
+    }
+  ],
+  "defaultModels": {
+    "chat": "google::v1::gemini-1.5-pro",
+    "fastChat": "google::v1::gemini-1.5-pro",
+    "autocomplete": "google::v1::gemini-1.5-pro"
+  }
+}
+```
+
+In the configuration above,
+
+-   Set up a provider override for Google Gemini, routing requests for this provider directly to the specified endpoint (bypassing Cody Gateway)
+-   Add the `"google::v1::gemini-1.5-pro"` model, which is used for all Cody features. We do not add other models for simplicity, as adding multiple models is already covered in the examples above
+
+</Accordion>
+
 <Accordion title="Google Vertex (Anthropic)">
 
 ```json
@@ -517,51 +561,6 @@ In the configuration above,
 -   Add two Anthropic models:
     -   `"google::unknown::claude-3-5-sonnet"` with "chat" capabiity - used for "chat" and "fastChat"
     -   `"google::unknown::claude-3-haiku"` with "autocomplete" capability - used for "autocomplete"
-
-</Accordion>
-
-<Accordion title="Google Gemini">
-
-```json
-"modelConfiguration": {
-  "sourcegraph": null,
-  "providerOverrides": [
-      {
-          "id": "google",
-          "displayName": "Google Gemini",
-          "serverSideConfig": {
-            "type": "google",
-            "accessToken": "token",
-            "endpoint": "https://generativelanguage.googleapis.com/v1beta/models"
-          }
-      }
-  ],
-  "modelOverrides": [
-    {
-      "modelRef": "google::v1::gemini-1.5-pro",
-      "displayName": "Gemini 1.5 Pro",
-      "modelName": "gemini-1.5-pro",
-      "capabilities": ["chat", "autocomplete"],
-      "category": "balanced",
-      "status": "stable",
-      "contextWindow": {
-        "maxInputTokens": 45000,
-        "maxOutputTokens": 4000
-      }
-    }
-  ],
-  "defaultModels": {
-    "chat": "google::v1::gemini-1.5-pro",
-    "fastChat": "google::v1::gemini-1.5-pro",
-    "autocomplete": "google::v1::gemini-1.5-pro"
-  }
-}
-```
-
-In the configuration above,
-
--   Set up a provider override for Google Gemini, routing requests for this provider directly to the specified endpoint (bypassing Cody Gateway)
--   Add the `"google::v1::gemini-1.5-pro"` model, which is used for all Cody features. We do not add other models for simplicity, as adding multiple models is already covered in the examples above
 
 </Accordion>
 
@@ -667,12 +666,12 @@ Example configuration:
     },
     {
       "provider": "fireworks",
-      "model": "mixtral-8x22b-instruct@v1",
+      "model": "mixtral-8x7b-instruct@v1",
       "override": {
-        "displayName": "(Fireworks) Mixtral 8x22b Instruct",
+        "displayName": "(Fireworks) Mixtral 8x7b Instruct",
         "serverSideConfig": {
           "type": "openaicompatible",
-          "apiModel": "accounts/fireworks/models/mixtral-8x22b-instruct"
+          "apiModel": "accounts/fireworks/models/mixtral-8x7b-instruct"
         }
       }
     },
