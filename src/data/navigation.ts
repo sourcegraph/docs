@@ -46,7 +46,7 @@ export const navigation: NavigationItem[] = [
 							{ title: "Features", href: "/cody/enterprise/features", },
 							{ title: "Completions Configuration", href: "/cody/enterprise/completions-configuration", },
 							{ title: "Model Configuration", href: "/cody/enterprise/model-configuration", },
-							{ title: "Examples modelConfiguration", href: "/cody/enterprise/model-config-examples", },
+							{ title: "modelConfiguration examples", href: "/cody/enterprise/model-config-examples", },
 						]
 					},
 					{
