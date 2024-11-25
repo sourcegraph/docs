@@ -234,10 +234,6 @@ This field is an array of items, each with the following fields:
         -   `type`: Must be `"openaicompatible"`
         -   `apiModel`: The literal string value of the `model` field to be sent to the `/chat/completions` API. If set, Sourcegraph treats this as an opaque string and sends it directly to the API without inferring any additional information. By default, the configured model name is sent
 
--   `clientSideConfig`: Advanced configuration options that are only respected if the model is provided by the `"openaicompatible"` provider
-
-{/* TODO: add more details. */}
-
 #### Example configuration
 
 ```json
@@ -298,44 +294,6 @@ In the example above:
     -   The newly configured model, `"huggingface-codellama::v1::CodeLlama-7b-hf"`, is used for `"autocomplete"` (connecting directly to Hugging Face’s OpenAI-compatible API)
 
 Refer to the [examples page](/cody/enterprise/model-config-examples) for additional examples.
-
-## Self-hosted models
-
-<Callout type="tip">
-	Configuring self-hosted models can be nuanced and complex. Please reach out
-	to Sourcegraph support for assistance with the setup.
-</Callout>
-
-With a provider defined (either a Sourcegraph-provided provider or a custom provider configured via the `providerOverrides` field), self-hosted models can be added to Cody’s recognized models list by configuring the `"modelConfiguration.selfHostedModels"` section.
-These models use Sourcegraph’s default configuration settings and are only available for select models.
-Generic models should be configured in the `"modelOverrides"` section instead.
-
-Specifying the same model in both `"selfHostedModels"` and `"modelOverrides"` is not allowed.
-
-This field is an array of items, each with the following fields:
-
-| **Field**    | **Description**                                                                                                                                                                                                                                                                                                                                       |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `provider`   | (Required) The provider ID of the model, configured in the `providerOverrides` field.                                                                                                                                                                                                                                                                 |
-| `apiVersion` | (Optional) The API version to use. Defaults to `"v1"` if not specified.                                                                                                                                                                                                                                                                               |
-| `model`      | (Optional) Specifies which default model configuration to use. Sourcegraph provides default configurations for select models. For arbitrary models, use the `modelOverrides` section. Available options include: `"starcoder2-7b@v1"`, `"starcoder2-15b@v1"`, `"mistral-7b-instruct@v1"`, `"mixtral-8x7b-instruct@v1"`, `"mixtral-8x22b-instruct@v1"` |
-
-Refer to the [examples page](/cody/enterprise/model-config-examples#self-hosted-models) for examples.
-
-#### Example configuration
-
-```json
-"cody.enabled": true,
-
-// allow Sourcegraph-provided models
-"sourcegraph": {},
-
-"defaultModels": {
-  "chat": "openai::2024-02-01::gpt-4o",
-  "fastChat": "google::v1::gemini-1.5-flash",
-  "codeCompletion": "fireworks::v1::deepseek-coder-v2-lite-base"
-}
-```
 
 ## View configuration
 
