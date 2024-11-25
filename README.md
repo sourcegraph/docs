@@ -1,6 +1,6 @@
 # Sourcegraph Docs
 
-<!-- Working branch for October 30th 2024 Release -->
+<!-- Working branch for Nov 25th 2024 Release -->
 
 Welcome to the Sourcegraph documentation! We're excited to have you contribute to our docs. We've recently rearchitectured our docs tech stack — powered by Next.js, TailwindCSS and deployed on Vercel. This guide will walk you through the process of contributing to our documentation using the new tech stack.
 
@@ -148,7 +148,7 @@ As you make changes to the documentation, the development server will automatica
 
 ### Previewing Vercel Deployments
 
-When you open a PR Vercel deploys and provides you with a preview deployment link. To view your deployment, click the "Visit Preview" and then append `/docs` at the end of the URL. The original link gives you a `404`. 
+When you open a PR Vercel deploys and provides you with a preview deployment link. To view your deployment, click the "Visit Preview" and then append `/docs` at the end of the URL. The original link gives you a `404`.
 
 ![CleanShot 2024-11-05 at 10 11 29@2x](https://github.com/user-attachments/assets/b0911e2e-95a7-4f56-b2ff-b659d13077d8)
 
