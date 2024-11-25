@@ -573,41 +573,46 @@ In the configuration above,
   "providerOverrides": [
     {
       "id": "aws-bedrock",
-      "displayName": "Amazon Bedrock",
+      "displayName": "Anthropic models through AWS Bedrock",
       "serverSideConfig": {
-          "type": "awsBedrock",
-          "accessToken": "token",
-          "endpoint": "us-west-2",
-          "region": "us-west-2"
+        "type": "awsBedrock",
+        "accessToken": "<base64 encoded IAM username:password",
+        "endpoint": "<VPC Endpoint URL>",
+        "region": "us-west-2"
       }
     }
   ],
   "modelOverrides": [
     {
-      "modelRef": "aws-bedrock::2023-06-01::claude-3-opus",
-      "displayName": "Claude 3 Opus (Amazon Bedrock)",
-      "modelName": "anthropic.claude-3-opus-20240229-v1:0",
-      "capabilities": ["chat", "autocomplete"],
-      "category": "other",
-      "status": "stable",
+      "modelRef": "aws-bedrock::2024-02-29::claude-3-sonnet",
+      "displayName": "Claude 3 Sonnet",
+      "modelName": "claude-3-sonnet",
+      "serverSideConfig": {
+        "type": "awsBedrockProvisionedThroughput",
+        "arn": "<ARN>" // e.g., arn:aws:bedrock:us-west-2:548543007731:provisioned-model/47u2lgtk1rc1
+      },
       "contextWindow": {
-          "maxInputTokens": 45000,
-          "maxOutputTokens": 4000
-      }
-    }
+        "maxInputTokens": 16000,
+        "maxOutputTokens": 4000
+      },
+      "capabilities": ["chat", "autocomplete"],
+      "category": "balanced",
+      "status": "stable"
+    },
   ],
   "defaultModels": {
-    "chat": "aws-bedrock::2023-06-01::claude-3-opus",
-    "fastChat": "aws-bedrock::2023-06-01::claude-3-opus",
-    "autocomplete": "aws-bedrock::2023-06-01::claude-3-opus",
-  }
+    "chat": "aws-bedrock::2024-02-29::claude-3-sonnet",
+    "codeCompletion": "aws-bedrock::2024-02-29::claude-3-sonnet",
+    "fastChat": "aws-bedrock::2024-02-29::claude-3-sonnet"
+  },
 }
 ```
 
 In the configuration described above,
 
 -   Set up a provider override for Amazon Bedrock, routing requests for this provider directly to the specified endpoint, bypassing Cody Gateway
--   Add the `"aws-bedrock::2023-06-01::claude-3-opus"` model, which is used for all Cody features. We do not add other models for simplicity, as adding multiple models is already covered in the examples above
+-   Add the `"aws-bedrock::2024-02-29::claude-3-sonnet"` model, which is used for all Cody features. We do not add other models for simplicity, as adding multiple models is already covered in the examples above
+-   Note: Since the model in the example uses provisioned throughput, specify the ARN in the `serverSideConfig.arn` field of the model override.
 
 Provider override `serverSideConfig` fields:
 
