@@ -38,8 +38,15 @@ export const navigation: NavigationItem[] = [
 							{ title: "Cody for JetBrains", href: "/cody/clients/install-jetbrains", },
 							{ title: "Cody for Visual Studio", href: "/cody/clients/install-visual-studio", },
 							{ title: "Cody for Web", href: "/cody/clients/cody-with-sourcegraph", },
-							{ title: "Cody for Enterprise", href: "/cody/clients/enable-cody-enterprise", },
-							{ title: "Model Configuration", href: "/cody/clients/model-configuration", },
+						]
+					},
+					{
+						title: "Cody for Enterprise", href: "/cody/clients/enable-cody-enterprise",
+						subsections: [
+							{ title: "Features", href: "/cody/enterprise/features", },
+							{ title: "Completions Configuration", href: "/cody/enterprise/completions-configuration", },
+							{ title: "Model Configuration", href: "/cody/enterprise/model-configuration", },
+							{ title: "modelConfiguration examples", href: "/cody/enterprise/model-config-examples", },
 						]
 					},
 					{
@@ -47,7 +54,7 @@ export const navigation: NavigationItem[] = [
 						subsections: [
 							{ title: "Chat", href: "/cody/capabilities/chat", },
 							{ title: "Autocomplete", href: "/cody/capabilities/autocomplete", },
-							{ title: "Prompts & Commands", href: "/cody/capabilities/commands", },
+							{ title: "Prompts", href: "/cody/capabilities/commands", },
 							{ title: "OpenCtx", href: "/cody/capabilities/openctx", },
 							{ title: "Debug Code", href: "/cody/capabilities/debug-code", },
 							{ title: "Context Filters", href: "/cody/capabilities/ignore-context", },
