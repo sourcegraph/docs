@@ -37,6 +37,7 @@ export const navigation: NavigationItem[] = [
 							{ title: "Cody for VS Code", href: "/cody/clients/install-vscode", },
 							{ title: "Cody for JetBrains", href: "/cody/clients/install-jetbrains", },
 							{ title: "Cody for Visual Studio", href: "/cody/clients/install-visual-studio", },
+							{ title: "Cody for Eclipse", href: "/cody/clients/install-eclipse", },
 							{ title: "Cody for Web", href: "/cody/clients/cody-with-sourcegraph", },
 						]
 					},
