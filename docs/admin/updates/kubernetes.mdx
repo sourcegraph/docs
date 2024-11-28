@@ -18,12 +18,14 @@ For upgrade procedures or general info about sourcegraph versioning see the link
 ## v5.9.0 ➔ v5.10.0
 
 > Warning: This release updates the database container images from postgres 12 to postres 16, and begins using wolfi based images. See our [postgres 12 end of life](https://sourcegraph.com/docs/admin/postgres12_end_of_life_notice#postgres-12-end-of-life) notice!
+> Warning: `automatic` and migrator `upgrade` command will not work for this release, please upgrade to a 5.9 version and conduct a standard upgrade using migrator's default `up` command!
 
 #### Notes:
-- The container image for pgsql and codeintel-db have been renamed from `postgres-12-alpine` and `codeintel-db` respectively to `postgres16`. The `codeinsights-db` container has been renamed to `postgres-16-codeinsights`. 
+- The container image for pgsql and codeintel-db have been renamed from `postgres-12-alpine` and `codeintel-db` respectively to `postgresql-16`. The `codeinsights-db` container has been renamed to `postgresql-16-codeinsights`. 
 - **Admins using external dbs who have not yet upgraded from postgres 12 to postgres 16**, can expect to see database drift after upgrading to `5.10.0`. The new expected schema definition for Sourcegraph is based on postgres 16. The schema drift is the result of automatic changes made to the schema by pg_upgrade utils, and will not cause issues in the application.
   - Admins should not run migrators suggested drift fixes, and should instead upgrade their database from postgres 12 to postgres 16.
-- The [Autoupgrade](https://sourcegraph.com/docs/admin/updates/automatic#pre-v500-automatic-multiversion-upgrades) upgrade method, will detect drift and exit before conducting the upgrade unless the env var `SRC_AUTOUPGRADE_IGNORE_DRIFT=true` is set in the server container.
+- Postgres 12 image containers cannot be started with data volumes which have been upgraded by postgres 16.
+
 
 ## v5.1.0 -> v5.2.0
 
