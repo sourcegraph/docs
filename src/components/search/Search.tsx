@@ -31,6 +31,7 @@ export const Search = () => {
 			indexName={algoliaConfig.indexName}
 			apiKey={algoliaConfig.apiKey}
 			initialQuery={initialQuery}
+			maxResultsPerGroup={algoliaConfig.maxResultsPerGroup}
 		/>
 	);
 };
