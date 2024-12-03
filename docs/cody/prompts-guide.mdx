@@ -1,0 +1,242 @@
+# Cody Prompting Guide
+
+<p className="subtitle">To get the best results from Cody, whether you're exploring a codebase, summarizing a pull request, or generating code, clear and effective prompts are key. This guide will help you write effective prompts to maximize your experience with Cody.</p>
+
+## Why do prompts matter?
+
+Prompts are the foundation of how AI coding assistants like Cody interact with large language models (LLMs). They're not just chat inputs—they guide Cody to give precise, contextual, and actionable code suggestions.
+
+While Cody handles a lot of prompt engineering under the hood, the quality of your prompts still plays a key role in shaping the results.
+
+So, what defines a great prompt?
+
+## Anatomy of a prompt
+
+A well-crafted prompt has all the key elements to guide Cody in delivering accurate and relevant responses. You don’t need to include every element in every prompt, but understanding them can help you write more effectively.
+
+Let's split these docs into three parts:
+
+1. **Preparation**: How you'll prepare your code for Cody
+2. **Prompting**: How you will create effective prompts for Cody
+3. **Example prompts**: Examples of prompts for different use cases
+
+## 1. Preparation
+
+Before you start writing prompts, preparing your codebase for Cody is essential. Here are some key preparation steps:
+
+## Treat Cody like a new team member
+
+When using Cody, it's helpful to treat it like a new team member unfamiliar with your codebase. This approach helps ensure that you provide Cody with the necessary context and information to generate accurate and contextually aware answers.
+
+You should focus on providing Cody with all the necessary information, such as the codebase structure, function names, and any relevant docs. The more context and details you provide, the better Cody can assist you in generating relevant and accurate code. For example,
+
+❌ Instead of a vague prompt like:
+
+```
+How can I filter products in JavaScript?
+```
+
+✅ Provide a more specific prompt with details:
+
+```
+I have an array of product objects in JavaScript, each with the following properties: id, name, category, and price. How can I write a function to filter the products by category?
+```
+
+## Define a persona or role
+
+Specify a persona or role in your prompt to provide an extra layer of context to guide Cody. For example, asking Cody to act as a **beginner Python developer** can result in simpler, more beginner-friendly code snippets.
+
+## Choose descriptive variable names
+
+Using clear and descriptive names for variables, functions, and classes is essential for making your code readable and understandable for you and Cody. Avoid abbreviations or ambiguous names that may confuse your AI assistant.
+
+✅ Good example:
+
+```php
+function calculateTotalPrice($items, $taxRate) {
+    // ...
+}
+```
+
+❌ Bad example:
+
+```php
+function calc($i, $t) {
+    // ...
+}
+```
+
+## Write clear code comments and docstrings
+
+In addition to variable names, comments and docstrings are crucial in guiding Cody's understanding of your code. Treat them as a way to communicate with Cody, just like you would with a new engineer. Explain complex logic, algorithms, or project-specific concepts to give Cody context.
+
+✅ Good example:
+
+```javascript
+/**
+ * Calculate the shipping cost based on the order total.
+ * - For orders under $50, the shipping cost is $5.
+ * - For orders between $50 and $100, the shipping cost is $10.
+ * - For orders above $100, shipping is free.
+ *
+ * @param {number} orderTotal - The total amount of the order.
+ * @returns {number} The shipping cost, determined by the following rules:
+ */
+function calculateShippingCost(orderTotal) {
+    // Cody will autocomplete here
+}
+```
+
+A bonus here is that Cody can generate these docstrings for you, so you don't have to write them manually. You can use the **document-code** prompt to do this.
+
+## @-mention context
+
+Cody leverages the `@-mention` syntax to source context via files, symbols, web URLs, and more. By default, Cody will automatically detect context from the codebase you're working in via pre-filled context chips in the chat input field. Make sure that when you are working with any codebase, Cody picks up the default context. An empty context chip means Cody will search based on generally available context.
+
+You can learn more about context [here](/cody/capabilities/context).
+
+## Selecting the right LLM
+
+Cody offers a variety of LLMs for both chat and in-line edits by all the leading LLM providers. Each LLM has its strengths and weaknesses, so selecting the right one for your use case is important. For example, Claude 3.5 Sonnet and GPT-4o are powerful for code generation and provide accurate results. However, Gemini 1.5 Flash is a decent choice for cost-effective searches. So, you can always optimize your choice of LLM based on your use case.
+
+Learn more about all the supported LLMs [here](/cody/capabilities/supported-models).
+
+## 2. Prompting
+
+Now that your code is well-prepared let's focus on writing effective prompts for Cody via the following best practices:
+
+## Provide specific information
+
+When using Cody chat, provide as much detail as possible. Include information about the problem, expected behavior, constraints, and project-specific requirements.
+
+Be sure to include comprehensive details about the problem, what you expect to happen, any limitations, and specific requirements related to your project.
+
+❌ Bad example:
+
+```
+How do I calculate discounts based on loyalty points in Laravel?
+```
+
+✅ Good example:
+
+```
+I need to calculate discounts based on customer loyalty points.
+
+- If the customer has loyalty points above 500, apply a 10% discount.
+- If the customer has loyalty points between 200 and 500, apply a 5% discount.
+- If the customer has loyalty points below 200, no discount is applied.
+
+Create a function that takes the total amount and loyalty points as input and returns an object with the discount percentage and discount amount.
+```
+
+## Provide specific context
+
+While preparing your codebase for Cody, you learned about the importance of context chips. In addition to this default context, you can provide additional and more specific context to help Cody better understand your codebase.
+
+You can continue to `@-mention` files, symbols, and other context sources (as supported by your Cody tier) to make your search more specific and granular. You should approach this as if explaining the situation to a new team member. You should:
+
+- Reference important files and symbols
+- Provide examples from other similar functions
+
+## Provide examples and test cases
+
+You should include examples and test cases when applicable to clarify your expectations. Demonstrate edge cases or handling of special conditions to guide Cody in generating robust code.
+
+❌ Bad example:
+
+```
+I need to validate email addresses in JavaScript
+```
+
+✅ Good example:
+
+```
+Create a function to validate email addresses in JavaScript. Return true for valid email addresses and false for invalid ones. Here are some example test cases:
+
+Valid:
+- "john@example.com"
+- "jane.doe@example.co.uk"
+
+Invalid:
+- "john@example"
+- "jane.doe@example."
+- "invalid.email"
+
+Please write the function
+```
+
+## Iterate and refine
+
+Start with a general prompt and incrementally add more details based on Cody's responses. Take advantage of the fact that you can chat with Cody. Bring the back-and-forth conversation, especially if you didn't like Cody's first response. Review the generated code or suggestions, provide feedback, and refine your prompts to get the desired results.
+
+Initial prompt:
+
+```
+I need to calculate the total price of an order. Help me write the function
+```
+
+Refined prompt:
+
+```
+Thanks. I forgot to mention:
+
+- The function should take an array of order items as input
+- We need to apply a 10% discount if the total price exceeds $100
+- Final total should be rounded to two decimal places
+
+Please update the function
+```
+
+## Leverage Cody's capabilities
+
+You can utilize many other [Cody's capabilities](/cody/capabilities) for generating boilerplate code, common patterns, and repetitive tasks. Prompt it to assist with unit tests, docs, and error handling to save time and ensure code quality.
+
+✅ Good example:
+
+```
+Help me write tests for the `calculateAverageRating` function. Here are the test cases I have in mind:
+
+- Empty ratings array should return 0
+- Array with one rating should return that rating
+- Array with multiple ratings should calculate the average correctly
+
+Make sure the tests cover any edge cases or potential issues.
+```
+
+You can also use the **generate-unit-tests** prompt to generate tests for your code.
+
+## Miscellaneous information
+
+Try adding any supplementary details regarding comments, debugging guidelines, error management, required dependencies, or coding styles. For instance, when directing Cody to implement a database query in SQL, specify the need for parameterized queries to prevent SQL injection vulnerabilities and provide suggestions for optimizing query performance.
+
+## Prompts Library
+
+To accelerate and automate your work, you can leverage Cody's Prompt Library that helps you to build customizable building blocks (prompts), share your best prompts with your teammates, and enable site administrators to promote the best prompts to the rest of the organization.
+
+The Prompt Library is a system for creating and sharing customizable prompts and are designed it specifically to cater scalability, repeatability, and flexibility.
+
+You can learn more about the [Prompts and the Prompt Library here](/cody/capabilities/commands).
+
+## Example Prompts
+
+Let's take a look at some examples of good and reusable prompts that you can create via the Prompt Library.
+
+<Accordion title=" Prompt that specifies the language/framework version you are using">
+
+This prompt can help you if Cody does not generate code in the right language/framework version. For example,
+
+>Cody generating code snippets using a newer [Spring](https://spring.io/) version that's incompatible with your legacy Java application, which runs Spring 3.x. This mismatch leads to examples utilizing features from Spring Boot 2.x that your project doesn't support.
+
+The prompt to tackle this issue looks like this:
+
+```
+Please generate Java code that is compatible with the following specifications:
+
+Java version: 1.6
+Spring framework version: 3.x
+Testing framework: JUnit 4"
+
+```
+
+By sharing this prompt with your team, everyone can ensure that Cody generates code compatible with your legacy system.
+</Accordion>
