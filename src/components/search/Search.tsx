@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-
+import { searchMetadata } from '../../data/search';
 import { DocSearch } from './docsearch/DocSearch';
 import './docsearch/docsearch.css';
 
@@ -24,12 +24,14 @@ export const Search = () => {
 	}, []);
 
 	const initialQuery = getInitialQuery();
+	const { algoliaConfig } = searchMetadata;
 	return (
 		<DocSearch
-			appId="0EBA2NRQU3"
-			indexName="sourcegraph"
-			apiKey="1b6e51c1d4ef24bef0a5f1ab00dad80a"
+			appId={algoliaConfig.appId}
+			indexName={algoliaConfig.indexName}
+			apiKey={algoliaConfig.apiKey}
 			initialQuery={initialQuery}
+			maxResultsPerGroup={algoliaConfig.maxResultsPerGroup}
 		/>
 	);
 };
