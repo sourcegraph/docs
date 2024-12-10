@@ -1052,6 +1052,38 @@ For example, to update the value for `SYMBOLS_CACHE_SIZE_MB`:
 
 You can use an external or managed version of PostgreSQL and Redis with your Sourcegraph instance. For detailed information as well as the requirements for each service, please see our docs on [using external services with Sourcegraph](/admin/external_services/).
 
+### External Secrets
+
+For ensuring password protection, it is recommended to use [External Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) to manage your secrets.
+
+To create a kubernetes secret you can use the following command:
+
+```shell
+kubectl create secret generic pgsql-secret --from-literal=password=YOUR_SECURE_PASSWORD_HERE
+```
+
+Then replace the password in the yaml files it's located in, based on the deployment method you are using. 
+Below is the example Helm deployment files modified to reference this secret.
+
+```yaml
+# sourcegraph-frontend.Deployment.yaml
+spec:
+  template:
+    spec:
+      containers:
+        - name: frontend
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pgsql-secret
+                  key: password
+```
+
+You can then drop the environment variable `PGPASSWORD` from the default deployment.
+
+Similar changes will be required for other pods and services, depending on the secret being used. It's recommended to read the [official documentation](https://kubernetes.io/docs/concepts/configuration/secret/) to understand how Kubernetes secrets work. 
+
 ### External Postgres
 
 For optimal performance and resilience, it is recommended to use an external database when deploying Sourcegraph. For more information on database requirements, please refer to the [Postgres guide](/admin/postgres).
