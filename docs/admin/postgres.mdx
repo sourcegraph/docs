@@ -37,7 +37,8 @@ Sourcegraph deployments come packaged with containers using the `postgresql-16` 
 
 The `PG_UPGRADE_EXTRA_ARGS` env var can be set in the built-in `postgresql-16` and `postgresql-16-codeinsights` deployments to provide extra arguments to the `pg_upgrade` command. 
 
-Setting `PG_UPGRADE_EXTRA_ARGS=--link` provides the `--link` option to `pg_update`. Creating a hard link between the old and new data directories. This option is faster and requires less disk space, but if containers are killed during the upgrade, corrupted data will be unrecoverable without a backup.
+Setting the env var `PG_UPGRADE_EXTRA_ARGS=--link` provides the `--link` option to the underlying `pg_update`; creating a hard links between the old and new data directories instead of copying data. This option is faster and requires less disk space, however if the database containers are interrupted during the upgrade process there is a strong possibility of data corruption. This can still be a viable choice for users who are confident in their container scheduling and backups and would like to avoid longer downtimes.
+
 
 ### Upgrading external PostgreSQL instances
 
