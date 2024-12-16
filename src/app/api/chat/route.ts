@@ -6,7 +6,6 @@ const langbase = new Langbase({
 });
 
 export async function POST(req: NextRequest) {
-  console.log('request herere')
 	const options = await req.json();
 	const { stream, threadId } = await langbase.pipe.run({
 		...options,
