@@ -6,9 +6,9 @@ import config from 'docs.config';
 import { type Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import localFont from 'next/font/local';
+import Chatbot from '@/components/ChatBot';
 
-
-
+import '@langbase/components/styles'
 import '@/styles/tailwind.css';
 
 const inter = Inter({
@@ -68,6 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 			className="flex min-h-full bg-light-bg dark:bg-dark-bg"
 			>
 				<Providers>
+					<Chatbot />
 					<Layout>{children}</Layout>
 				</Providers>
 			</body>
