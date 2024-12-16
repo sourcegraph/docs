@@ -1,0 +1,16 @@
+# Outoing Connection Filtering
+It’s possible for the Sourcegraph instance to deny access to hosts by setting the environment variable `EXTERNAL_DENY_LIST` on the deployment. If you want to only prevent codemonitors and other frontend services to connect to arbitrary hosts, you can set the variable only on the frontend deployment.
+The external denylist supports a comma separated list of IP ranges, hostnames and keywords. To block all the internal connections use the “private” keyword, this would block all RFC 1918 (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) and RFC 4193 (FC00::/7) IP addresses. Keywords can be combined with ranges and IP addresses so it's very customizable.
+
+The default denylist is set up to only block localhost and the Cloud metadata service IP address. Expanding the denylist could interfere with internal authentication providers, and they might need to be excluded from the denylist.
+
+## Example Configuration
+
+```
+EXTERNAL_DENY_LIST="private,github.com"
+```
+
+This would deny all connections to hosts in the private network and github.com.
+
+## Implementation Details
+To achieve this, we use [gitea's hostmatcher](https://github.com/go-gitea/gitea/blob/v1.22.6/modules/hostmatcher/hostmatcher.go#L39). This is configured by default for the `ExternalClient`, which is used for all external requests. The common options and configuration can be found [here](https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/internal/httpcli/client.go#L406C1-L423C2).
