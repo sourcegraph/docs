@@ -338,15 +338,29 @@ An example of a subchart is shown in the [examples/subchart](https://github.com/
 
 More details on how to create and configure a subchart can be found in the [helm documentation](https://helm.sh/docs/chart_template_guide/subcharts_and_globals).
 
-### OpenTelemetry Collector
+### Tracing
 
-Learn more about Sourcegraph's integrations with the [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) in our [OpenTelemetry documentation](/admin/observability/opentelemetry).
+Sourcegraph supports HTTP tracing to help troubleshoot issues. See [Tracing](/admin/observability/tracing) for details.
 
-#### Configure a tracing backend
+To enable tracing on your Helm instance, you'll need to either:
 
-Sourcegraph currently supports exporting tracing data to several backends. Refer to [OpenTelemetry](/admin/observability/opentelemetry) for detailed descriptions on how to configure your backend of choice.
+1. Deploy our bundled Jaeger backend, or
+2. Configure an external tracing backend
 
-You can add the following values in your `override.yaml` to configure trace exporting:
+Once a tracing backend has been deployed, see our [Tracing](/admin/observability/tracing) page for next steps, including required changes to your Site Configuration to enable traces.
+
+#### Enable the bundled Jaeger deployment
+
+Sourcegraph bundles a Jaeger instance, but it is disabled by default. You can enable it by either adding this to your Helm values override file, or by appending the [jaeger/override.yaml](https://github.com/sourcegraph/deploy-sourcegraph-helm/blob/main/charts/sourcegraph/examples/jaeger/override.yaml) file to your Helm upgrade command.
+
+```yaml
+jaeger:
+  enabled: true
+```
+
+#### Configure OpenTelemetry Collector to use an external tracing backend
+
+To configure the bundled otel-collector to export traces to an external OTel-compatible backend, you you can customize the otel-collector's config file directly in your Helm values `override.yaml` file:
 
 ```yaml
 openTelemetry:
@@ -355,12 +369,11 @@ openTelemetry:
       traces:
         exporters:
           ...
-
         processors:
           ...
 ```
 
-As an example, to configure the collector to export to an external Jaeger instance, add the following to your [override.yaml](https://github.com/sourcegraph/deploy-sourcegraph-helm/tree/main/charts/sourcegraph/examples/opentelemetry-exporter/override.yaml):
+To use an external Jaeger instance, copy and customize the configs from the [opentelemetry-exporter/override.yaml](https://github.com/sourcegraph/deploy-sourcegraph-helm/tree/main/charts/sourcegraph/examples/opentelemetry-exporter/override.yaml) file, and add them to your Helm values override file:
 
 ```yaml
 openTelemetry:
@@ -379,9 +392,9 @@ openTelemetry:
 
 #### Configure a tracing backend with TLS enabled
 
-If you require a TLS connection to export trace data, you need to first add the certificate data to a Secret. The following snippet demonstrates how you can achieve this:
+If you require a TLS connection to export trace data, you need to first add the certificate data to a secret. The following snippet demonstrates how you can achieve this:
 
-<Callout type="warning">Do NOT commit the secret manifest into your Git repository unless you are okay with storing sensitive information in plaintext and your repository is private.</Callout>
+> Do NOT commit the secret manifest into your Git repository unless you are okay with storing sensitive information in plaintext and your repository is private.
 
 ```yaml
 apiVersion: v1
@@ -393,7 +406,7 @@ data:
   file.key: "<.key data>"
 ```
 
-After applying the secret to your cluster, you can [override](https://github.com/sourcegraph/deploy-sourcegraph-helm/tree/main/charts/sourcegraph/examples/opentelemetry-exporter/override-tls.yaml) the value `openTelemetry.gateway.config.traces.exportersTlsSecretName` to mount the certificate data in the Collector and instruct the exporter to use TLS:
+After applying the secret to your cluster, you can use the [opentelemetry-exporter/override-tls.yaml](https://github.com/sourcegraph/deploy-sourcegraph-helm/tree/main/charts/sourcegraph/examples/opentelemetry-exporter/override-tls.yaml) example, and configure the value `openTelemetry.gateway.config.traces.exportersTlsSecretName` in your Helm values override file to mount the certificate data in the otel-collector, and instruct the exporter to use TLS:
 
 ```yaml
 openTelemetry:
@@ -414,9 +427,7 @@ openTelemetry:
 
 #### Configure trace sampling
 
-Review the [trace sampling documentation](/admin/observability/opentelemetry#sampling-traces) to understand how to configure sampling.
-
-Add your config to your [override.yaml](https://github.com/sourcegraph/deploy-sourcegraph-helm/tree/main/charts/sourcegraph/examples/opentelemetry-exporter/override-processor.yaml) as follows:
+Review the [trace sampling](/admin/observability/opentelemetry#sampling-traces) documentation, and the [opentelemetry-exporter/override-processor.yaml](https://github.com/sourcegraph/deploy-sourcegraph-helm/tree/main/charts/sourcegraph/examples/opentelemetry-exporter/override-processor.yaml) example, then add the configs to your Helm values override file:
 
 ```yaml
 openTelemetry:
@@ -428,17 +439,6 @@ openTelemetry:
             hash_seed: 22 # An integer used to compute the hash algorithm. Note that all collectors for a given tier (e.g. behind the same load balancer) should have the same hash_seed.
             sampling_percentage: 10.0 # (default = 0): Percentage at which traces are sampled; >= 100 samples all traces
 ```
-
-#### Enable the bundled Jaeger deployment
-
-Sourcegraph ships with a bundled Jaeger instance that is disabled by default. If you do not wish to make use of an external observability backend, you can enable this instance by adding the following to your overrides:
-
-```yaml
-jaeger:
-  enabled: true
-```
-
-This will also configure the OpenTelemetry Collector to export trace data to this instance. No further configuration is required.
 
 ## Cloud providers guides
 
