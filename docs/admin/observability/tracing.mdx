@@ -23,11 +23,11 @@ To deploy our bundled Jaeger backend, follow the instructions for your deploymen
 Then configure your Site Configuration:
 
 1. Ensure your `externalURL` is configured
-2. Configure `urlTemplate`
+2. Configure `observability.tracing` > `urlTemplate`
 3. Optionally, configure `observability.client`, for Sourcegraph clients to also report traces, ex. src cli
 
 ```json
-  "externalURL": "https://your-sourcegraph-instance.example.com",
+  "externalURL": "https://sourcegraph.example.com",
   "observability.tracing": {
     "urlTemplate": "{{ .ExternalURL }}/-/debug/jaeger/trace/{{ .TraceID }}"
   },
@@ -43,22 +43,28 @@ Where:
 - `{{ .ExternalURL }}` is the value of the `externalURL` setting in your Sourcegraph instance's Site Configuration
 - `{{ .TraceID }}` is the TraceID which gets generated while processing the request
 
-Once deployed, the Jaeger web UI will be accessible at `/-/debug/jaeger`.
-
-The Sourcegraph frontend automatically proxies Jaeger's web UI to make it available at `/-/debug/jaeger`. You can proxy your own Jaeger instance instead by configuring the `JAEGER_SERVER_URL` environment variable on the `frontend` containers, and the `QUERY_BASE_PATH='/-/debug/jaeger'` environment variable on your `jaeger` container.
+Once deployed, the Jaeger web UI will be accessible at `/-/debug/jaeger`
 
 ### External OpenTelemetry-Compatible Platforms
 
 If you prefer to use an external, OTel-compatible platform, you can configure Sourcegraph to export traces to it instead. See our [OpenTelemetry documentation](/admin/observability/opentelemetry) for further details.
 
-Once your OTel backend is configured, configure the `urlTemplate` to link to your tracing backend.
+Then configure your Site Configuration:
 
-For example, if you [export your traces to Honeycomb](/admin/observability/opentelemetry#otlp-compatible-backends), your Site Configuration may look like:
+1. Configure `observability.tracing` > `urlTemplate`
+2. Optionally, configure `observability.client`, for Sourcegraph clients to also report traces, ex. src cli
+
+For example, if you export your traces to [Honeycomb](/admin/observability/opentelemetry#otlp-compatible-backends), your Site Configuration may look like:
 
 ```json
   "observability.tracing": {
     "urlTemplate": "https://ui.honeycomb.io/YOUR-HONEYCOMB-ORG/environments/YOUR-HONEYCOMB-DATASET/trace?trace_id={{ .TraceID }}"
-  }
+  },
+  "observability.client": {
+    "openTelemetry": {
+      "endpoint": "/-/debug/otlp"
+    }
+  },
 ```
 
 Where:
