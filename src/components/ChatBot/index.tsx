@@ -8,7 +8,9 @@ export default function App() {
 
   return (
     <Chatbot
+      badge='Experimental'
       apiRoute="/docs/api/chat"
+      openingMessage='Find precise answers to any question about Sourcegraph documentation with our AI chatbot.'
       suggestions={[
         {
           title: `Explain how to get started in easy steps`,
