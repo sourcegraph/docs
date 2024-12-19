@@ -14,9 +14,11 @@ on:
 
 steps:
   - run: |
-      for file in "${{ join repository.search_result_paths " " }}";
+      IFS=$'\n'
+      files="${{ join repository.search_result_paths "\n" }}"
+      for file in $files;
       do
-        sed -i 's/OLD-VALUE/NEW-VALUE/g;' ${file}
+        sed -i 's/OLD-VALUE/NEW-VALUE/g;' "${file}"
       done
     container: alpine:3
 ```
