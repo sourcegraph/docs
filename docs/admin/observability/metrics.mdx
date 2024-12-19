@@ -82,8 +82,36 @@ sshuttle -r user@host 0/0
 
 Grafana will be available at http://host:3370/-/debug/grafana.
 
-> WARNING: Our Grafana instance runs in anonymous mode with all authentication turned off, since we rely on Sourcegraph's built-in authentication.
-> Please be careful when exposing it directly to external traffic.
+### Grafana Security
+
+<Callout type="warning">
+WARNING: By default, our Grafana container runs in anonymous mode with authentication disabled, relying on Sourcegraph's authentication and authorization when accessed through your Sourcegraph instance.
+
+We recommend you use your network security controls to prevent access to Grafana's listening ports, or enable Grafana's builtin authentication.
+</Callout>
+
+To enable Grafana's builtin authentication, configure the `GF_AUTH_ANONYMOUS_ENABLED` environment variable to `false` in the Grafana container's environment variables in your deployment override file.
+
+We also recommend that you customize the default admin username and password by configuring the `GF_SECURITY_ADMIN_USER` and `GF_SECURITY_ADMIN_PASSWORD` environment variables, using your secrets management tool in your deployment pipeline.
+
+```yaml
+# Helm override
+grafana:
+  env:
+    GF_AUTH_ANONYMOUS_ENABLED:
+      value: "false"
+    GF_SECURITY_ADMIN_USER:
+      value: "custom-admin-username"
+    GF_SECURITY_ADMIN_PASSWORD:
+      value: "custom-admin-password"
+
+# Docker Compose override
+  grafana:
+    environment:
+      - 'GF_SECURITY_ADMIN_USER=custom-admin-username'
+      - 'GF_SECURITY_ADMIN_PASSWORD=custom-admin-password'
+      - 'GF_AUTH_ANONYMOUS_ENABLED=false'
+```
 
 ## Prometheus
 
