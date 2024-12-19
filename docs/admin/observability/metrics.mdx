@@ -82,17 +82,24 @@ sshuttle -r user@host 0/0
 
 Grafana will be available at http://host:3370/-/debug/grafana.
 
-### Grafana Security
+### Grafana security
 
 <Callout type="warning">
 WARNING: By default, our Grafana container runs in anonymous mode with authentication disabled, relying on Sourcegraph's authentication and authorization when accessed through your Sourcegraph instance.
 
-We recommend you use your network security controls to prevent access to Grafana's listening ports, or enable Grafana's builtin authentication.
+We recommend you use your network security controls to prevent access to Grafana's listening port, or enable Grafana's built-in authentication.
 </Callout>
 
-To enable Grafana's builtin authentication, configure the `GF_AUTH_ANONYMOUS_ENABLED` environment variable to `false` in the Grafana container's environment variables in your deployment override file.
+To enable Grafana's built-in authentication, configure the `GF_AUTH_ANONYMOUS_ENABLED` environment variable to `false` in the Grafana container's environment variables in your deployment override file, then redeploy the Grafana container.
 
-We also recommend that you customize the default admin username and password by configuring the `GF_SECURITY_ADMIN_USER` and `GF_SECURITY_ADMIN_PASSWORD` environment variables, using your secrets management tool in your deployment pipeline.
+We also recommend that you customize the default admin username and password.
+
+For new deployments, configure the `GF_SECURITY_ADMIN_USER` and `GF_SECURITY_ADMIN_PASSWORD` environment variables on the Grafana container, using your deployment pipeline's secrets management tool, to initialize the default admin user. Changing these environment variables do not change the username or password after the user is initialized on first deployment.
+
+For existing deployments, you can either:
+
+1. Log in to the Grafana web UI with the default credentials, and it will prompt you to change the password.
+2. Or, configure the environment variables the same as a new instance, delete the Grafana container's storage volume, and restart the Grafana container. This will cause Grafana to re-initialize, including the default admin user. The contents of the Grafana container's storage volume are ephemeral, so metrics data will not be lost.
 
 ```yaml
 # Helm override
@@ -108,10 +115,11 @@ grafana:
 # Docker Compose override
   grafana:
     environment:
+      - 'GF_AUTH_ANONYMOUS_ENABLED=false'
       - 'GF_SECURITY_ADMIN_USER=custom-admin-username'
       - 'GF_SECURITY_ADMIN_PASSWORD=custom-admin-password'
-      - 'GF_AUTH_ANONYMOUS_ENABLED=false'
 ```
+
 
 ## Prometheus
 
