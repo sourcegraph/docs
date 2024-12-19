@@ -90,16 +90,21 @@ WARNING: By default, our Grafana container runs in anonymous mode with authentic
 We recommend you use your network security controls to prevent access to Grafana's listening port, or enable Grafana's built-in authentication.
 </Callout>
 
-To enable Grafana's built-in authentication, configure the `GF_AUTH_ANONYMOUS_ENABLED` environment variable to `false` in the Grafana container's environment variables in your deployment override file, then redeploy the Grafana container.
+To enable Grafana's built-in authentication, add `GF_AUTH_ANONYMOUS_ENABLED` as `false` in the Grafana container's environment variables in your deployment override file, then redeploy the Grafana container.
 
 We also recommend that you customize the default admin username and password.
 
-For new deployments, configure the `GF_SECURITY_ADMIN_USER` and `GF_SECURITY_ADMIN_PASSWORD` environment variables on the Grafana container, using your deployment pipeline's secrets management tool, to initialize the default admin user. Changing these environment variables do not change the username or password after the user is initialized on first deployment.
+For new deployments, configure the `GF_SECURITY_ADMIN_USER` and `GF_SECURITY_ADMIN_PASSWORD` environment variables on the Grafana container, using your deployment pipeline's secrets management tool, before initial deployment, to initialize the default admin user on first deployment.
 
-For existing deployments, you can either:
+For existing deployments, you can either log in to the Grafana web UI with the default credentials and it will prompt you to change the password, or you can reinitialize Grafana:
 
-1. Log in to the Grafana web UI with the default credentials, and it will prompt you to change the password.
-2. Or, configure the environment variables the same as a new instance, delete the Grafana container's storage volume, and restart the Grafana container. This will cause Grafana to re-initialize, including the default admin user. The contents of the Grafana container's storage volume are ephemeral, so metrics data will not be lost.
+1. Export any customized dashboards via JSON (if applicable)
+2. Configure the environment variables the same as a new instance
+3. Delete the Grafana container's storage volume
+4. Redeploy the Grafana container
+5. Import any customized dashboards (if applicable)
+
+The contents of the Grafana container's storage volume are ephemeral, so metrics data is not lost in this process.
 
 ```yaml
 # Helm override
