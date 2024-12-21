@@ -1,16 +1,32 @@
 # Outoing Connection Filtering
-It’s possible for the Sourcegraph instance to deny access to hosts by setting the environment variable `EXTERNAL_DENY_LIST` on the deployment. If you want to only prevent codemonitors and other frontend services to connect to arbitrary hosts, you can set the variable only on the frontend deployment.
-The external denylist supports a comma separated list of IP ranges, hostnames and keywords. To block all the internal connections use the “private” keyword, this would block all RFC 1918 (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) and RFC 4193 (FC00::/7) IP addresses. Keywords can be combined with ranges and IP addresses so it's very customizable.
+Sourcegraph supports outbound connection filtering. Both for regular external connections and so-called "untrusted" connections, where a regular user can provide a URL to make an outbound connection to.
+
+The allow- and denylist support a comma separated list of IP ranges, hostnames and keywords. To block or allow all the internal connections use the “private” keyword, this would block all RFC 1918 (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) and RFC 4193 (FC00::/7) IP addresses. Keywords can be combined with ranges and IP addresses so it's very customizable.
+
+## Trusted External Connections
+It’s possible for the Sourcegraph instance to deny access to external hosts by setting the environment variable `EXTERNAL_DENY_LIST` on the deployment.
 
 The default denylist is set up to only block localhost and the Cloud metadata service IP address. Expanding the denylist could interfere with internal authentication providers, and they might need to be excluded from the denylist.
 
-## Example Configuration
+### Example Configuration
+
+Adding a denylist can be done by setting the environment variable `EXTERNAL_DENY_LIST` on the deployment.
 
 ```
 EXTERNAL_DENY_LIST="private,github.com"
 ```
 
 This would deny all connections to hosts in the private network and github.com.
+
+## Untrusted External Connections
+Codemonitors, webhooks and Cody URL context are limited to only be able to access public IP addresses by default. This behavior can be changed with the `UNTRUSTED_EXTERNAL_ALLOW_LIST` environment variable, which configures the allowlist.
+
+### Example Configuration
+If you want Cody to use context from an internal server in addition to internet access, you can add the internal server's IP address to the allowlist:
+
+```
+UNTRUSTED_EXTERNAL_ALLOW_LIST="external,192.168.1.53"
+```
 
 ## Implementation Details
 To achieve this, we use [gitea's hostmatcher](https://github.com/go-gitea/gitea/blob/v1.22.6/modules/hostmatcher/hostmatcher.go#L39). This is configured by default for the `ExternalClient`, which is used for all external requests. The common options and configuration can be found [here](https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/internal/httpcli/client.go#L406C1-L423C2).
