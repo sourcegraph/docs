@@ -68,7 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 			className="flex min-h-full bg-light-bg dark:bg-dark-bg"
 			>
 				<Providers>
-					<Chatbot />
+					{/* <Chatbot /> */}
 					<Layout>{children}</Layout>
 				</Providers>
 			</body>
