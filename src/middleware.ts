@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import docsConfig from '../docs.config.js'
+
 const { updatedRedirectsData } = require('./data/redirects.ts');
+
 function createRedirectUrl(request: NextRequest, destination: string, path: string): string {
   // Handle absolute URLs
   if (destination.startsWith('http')) {
@@ -17,8 +19,10 @@ function createRedirectUrl(request: NextRequest, destination: string, path: stri
       const version = versionMatch ? versionMatch[0] : ''
       destination = destination.replace(':version', version)
     }
+
     return destination
   }
+
   // Handle relative paths
   const basePath = '/docs'
   return destination.startsWith('/') ? 
@@ -29,6 +33,7 @@ function createRedirectUrl(request: NextRequest, destination: string, path: stri
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
   const pathWithoutBase = path.replace('/docs', '')
+
   // Handle base redirects from redirects.ts
   const redirect = updatedRedirectsData.find((r: any) => r.source === pathWithoutBase)
   if (redirect) {
@@ -72,8 +77,10 @@ export function middleware(request: NextRequest) {
   }
   if (pathWithoutBase === '/changelog.rss') 
     return NextResponse.redirect(createRedirectUrl(request, '/technical-changelog.rss', path))
+
   return NextResponse.next()
 }
+
 export const config = {
   matcher: [
     '/((?!api|_next/static|_next/image|assets|favicon.ico|sw.js).*)',
