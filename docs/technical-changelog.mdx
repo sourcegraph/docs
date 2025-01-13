@@ -4,6 +4,111 @@ This page documents all notable changes to Sourcegraph. For more detailed change
 
 {/* CHANGELOG_START */}
 
+# 5.11 Patch 3
+
+## v5.11.4013
+
+- [sourcegraph](https://github.com/sourcegraph/sourcegraph/releases/tag/v5.11.4013)
+
+- [docker-compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/releases/tag/v5.11.4013)
+
+- [helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/releases/tag/v5.11.4013)
+
+- [kustomize](https://github.com/sourcegraph/deploy-sourcegraph-k8s/releases/tag/v5.11.4013)
+
+### Features
+
+#### Security
+
+- Sign release images `(PR #2703)`
+  - Publish signatures for release containers.  Backport c11764be4adb377521e4067c4852953d7c434e24 from #2697
+
+#### Others
+
+- Allow single container server to run postgresql-16 `(PR #2714)`
+  - server: runs postgresql from /var/run/postgresql instead of /run/postgresql
+ Backport 36c78cdf596e1b22079512931fa526346c2ec821 from #2711
+
+### Fix
+
+#### Release
+
+- recover from unclean database shutdowns in pgsql entrypoint `(PR #2706)`
+  - fix(rel): fix issue with Postgres docker container failing upgrades after an unclean database shutdown.
+  Backport ca5185ce2528b67e1ce6bcb5170f96d3699e11e0 from #2660
+
+### Reverts
+
+  There were no reverts for this release
+
+### Uncategorized
+
+#### Others
+
+- [Backport 5.11.x] fix(Bitbucket Cloud): Fix pagination logic for bitbucket cloud permissions `(PR #2700)`
+  - Fixed an issue where Bitbucket Cloud permission syncs could produce incomplete results, resulting in lacking permissions.  Backport 389661481f0f0a2385ef4f78f4113ab6ba14f4d5 from #2699
+
+{/* RSS={"version":"v5.11.4013", "releasedAt": "2025-01-11"} */}
+
+
+# 5.11 Patch 2
+
+## v5.11.3601
+
+- [sourcegraph](https://github.com/sourcegraph/sourcegraph/releases/tag/v5.11.3601)
+
+- [docker-compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/releases/tag/v5.11.3601)
+
+- [helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/releases/tag/v5.11.3601)
+
+- [kustomize](https://github.com/sourcegraph/deploy-sourcegraph-k8s/releases/tag/v5.11.3601)
+
+### Features
+
+#### Code Intelligence
+
+- Make syntactic indexing write partial index to disk already GZIP compressed `(PR #2646)`
+
+### Reverts
+
+  There were no reverts for this release
+
+{/* RSS={"version":"v5.11.3601", "releasedAt": "2025-01-08"} */}
+
+
+# 5.11 Patch 1
+
+## v5.11.2732
+
+- [sourcegraph](https://github.com/sourcegraph/sourcegraph/releases/tag/v5.11.2732)
+
+- [docker-compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/releases/tag/v5.11.2732)
+
+- [helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/releases/tag/v5.11.2732)
+
+- [kustomize](https://github.com/sourcegraph/deploy-sourcegraph-k8s/releases/tag/v5.11.2732)
+
+### Fix
+
+#### Search
+
+- propagate disk space to NewFirecrackerWorkspace `(PR #2574)`
+  - Addresses errors similar to: `failed to prepare workspace: failed to create ext4 filesystem in backing file: &quot;mke2fs 1.45.5 (07-Jan-2020)\nThe file losetup: /var/lib/firecracker/loop-devices/workspace-loop-47749-3763347387: Warning: file is smaller than 512 bytes; the loop device may be useless or invisible for system tools.\n/dev/loop13 does not exist and no size was specified.\n&quot;: exit status 1`
+  - Affects reading and using the environment variable `EXECUTOR_FIRECRACKER_DISK_SPACE`  Backport 22db2a97a0393cdd233a92da7ade96cd59bb99ef from #2562
+
+### Chore
+
+#### Security
+
+- Auto-update all packages in Sourcegraph base images (5.11.x) `(PR #2494)`
+
+### Reverts
+
+  There were no reverts for this release
+
+{/* RSS={"version":"v5.11.2732", "releasedAt": "2025-01-03"} */}
+
+
 # 5.11 Patch 0
 
 > Warning: This release updates the database container images from Postgres 12 to Postgres 16, and begins using Wolfi based images. Customers are advised to have a database backup before upgrading! See our [postgres 12 end of life](https://sourcegraph.com/docs/admin/postgres12_end_of_life_notice#postgres-12-end-of-life) notice!
