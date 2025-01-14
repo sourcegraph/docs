@@ -213,7 +213,7 @@ If Cody's answer isn't helpful, you can try asking again with different context:
 
 ## Context fetching mechanism
 
-VS Code users on the Free or Pro plan use [local context](/cody/core-concepts/context#context-selection).
+VS Code users on the Free or Pro plan use [local context](/cody/core-concepts/context#context-sources).
 
 Enterprise users can use the full power of the Sourcegraph search engine as Cody's primary context provider.
 
@@ -231,37 +231,22 @@ You can @-mention files, symbols, and web pages in Cody. Cody Enterprise also su
 
 Admins on the Sourcegraph Enterprise instance can use the Cody Context Filters to determine which repositories Cody can use as the context in its requests to third-party LLMs. Inside your site configuration, you can define a set of `include` and `exclude` rules that will be used to filter the list of repositories Cody can access.
 
-For repos mentioned in the `exclude` field, Cody's commands are disabled, and you cannot use them for context fetching. If you try running any of these, you'll be prompted with an error message. However, Cody chat will still work, and you can use it to ask questions.
+For repos mentioned in the `exclude` field, prompts are disabled, and you cannot use them for context fetching. If you try running any of these, you'll be prompted with an error message. However, Cody chat will still work, and you can use it to ask questions.
 
 [Read more about the Cody Context Filters here →](/cody/capabilities/ignore-context)
 
-## Prompts and Commands
+## Prompts
 
-Cody offers quick, ready-to-use [prompts and commands](/cody/capabilities/commands) for common actions to write, describe, fix, and smell code. These allow you to run predefined actions with smart context-fetching anywhere in the editor, like:
+Cody allows you create quick, ready-to-use [prompts](/cody/capabilities/commands) to automate key tasks in your workflow. Prompts are created and saved in the Prompt Library and can be accessed from the **Tools > Prompt Library** in the top navigation bar in your Sourcegraph instance.
 
-- **New Chat**: Ask Cody a question
-- **Document Code**: Add code documentation
-- **Edit Code**: Edit code with instructions
-- **Explain Code**: Describe your code with more details
-- **Generate Unit Tests**: Write tests for your code
+To help you get started, there are a few prompts that are available by default. These can assist you to:
 
-<video width="1920" height="1080" loop playsInline controls style={{ width: '100%', height: 'auto' }}>
-	<source src="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/cody-prompts-102024-2.mp4" type="video/mp4" />
-	</video>
+- Document code
+- Explain code
+- Detect code smells
+- Generate unit tests
 
-### Custom Commands
-
-<Callout type="note">Custom Commands are currently available in Beta for all users and are currently supported by Cody for the VS Code extension version 0.8 and above.</Callout>
-
-For customization and advanced use cases, you can create **Custom Commands** tailored to your requirements. You can also bind keyboard shortcuts to run your custom commands quickly. To bind a keyboard shortcut, open the Keyboard Shortcuts editor and search for `cody.command.custom.` to see the list of your custom commands.
-
-<img
-  src="https://storage.googleapis.com/sourcegraph-assets/blog/cody-vscode-1.8.0/keybindings.png"
-  alt="Settings"
-  style={{ aspectRatio: '1059 / 228' }}
- />
-
-<Callout type="info">Learn more about Custom Commands [here](/cody/capabilities/commands#custom-commands)</Callout>
+![default-prompts](https://storage.googleapis.com/sourcegraph-assets/Docs/default-prompts-1124.png)
 
 ## Smart Apply code suggestions
 
@@ -297,15 +282,15 @@ Cody also works with Cursor, Gitpod, IDX, and other similar VS Code forks. To ac
 
 ## Supported LLM models
 
-Claude 3.5 Sonnet is the default LLM model for inline edits and prompts. If you've used a different or older LLM model for inline edits or commands before, remember to manually change your model to Claude 3.5 Sonnet. Default model changes only affect new users.
+Claude 3.5 Sonnet is the default LLM model for inline edits and prompts. If you've used a different or older LLM model for inline edits before, remember to manually change your model to Claude 3.5 Sonnet. Default model changes only affect new users.
 
 Users on Cody **Free** and **Pro** can choose from a list of [supported LLM models](/cody/capabilities/supported-models) for chat.
 
 ![LLM-models-for-cody-free](https://storage.googleapis.com/sourcegraph-assets/Docs/llm-dropdown-options-102024.png)
 
-Enterprise users get Claude 3 (Opus and Sonnet) as the default LLM models without extra cost. Moreover, Enterprise users can use Claude 3.5 models through Cody Gateway, Anthropic BYOK, AWS Bedrock (limited availability), and GCP Vertex.
+Enterprise users get Claude 3 (Opus and Sonnet) as the default LLM models without extra cost. Moreover, Enterprise users can use Claude 3.5 models through Cody Gateway, Anthropic BYOK, Amazon Bedrock (limited availability), and GCP Vertex.
 
-<Callout type="info">For enterprise users on AWS Bedrock: 3.5 Sonnet is unavailable in `us-west-2` but available in `us-east-1`. Check the current model availability on AWS and your customer's instance location before switching. Provisioned throughput via AWS is not supported for 3.5 Sonnet.</Callout>
+<Callout type="info">For enterprise users on Amazon Bedrock: 3.5 Sonnet is unavailable in `us-west-2` but available in `us-east-1`. Check the current model availability on AWS and your customer's instance location before switching. Provisioned throughput via AWS is not supported for 3.5 Sonnet.</Callout>
 
 You also get additional capabilities like BYOLLM (Bring Your Own LLM), supporting Single-Tenant and Self Hosted setups for flexible coding environments. Your site administrator determines the LLM, and cannot be changed within the editor. However, Cody Enterprise users when using Cody Gateway have the ability to [configure custom models](/cody/core-concepts/cody-gateway#configuring-custom-models) Anthropic (like Claude 2.0 and Claude Instant), OpenAI (GPT 3.5 and GPT 4) and Google Gemini 1.5 models (Flash and Pro).
 
@@ -336,7 +321,7 @@ To get autocomplete suggestions from Ollama locally, follow these steps:
 
 - Confirm Cody uses Ollama by looking at the Cody output channel or the autocomplete trace view (in the command palette)
 
-### Cody Chat and Commands with Ollama
+### Cody chat with Ollama
 
 <img
   src="https://storage.googleapis.com/sourcegraph-assets/blog/cody-vscode-1.8.0/localollama.png"
@@ -344,7 +329,7 @@ To get autocomplete suggestions from Ollama locally, follow these steps:
   style={{ aspectRatio: '1110 / 443' }}
  />
 
-To generate chat and commands with Ollama locally, follow these steps:
+To generate chat with Ollama locally, follow these steps:
 
 - Download [Ollama](https://ollama.com/download)
 - Start Ollama (make sure the Ollama logo is showing up in your menu bar)
@@ -381,30 +366,39 @@ Once configured, and VS Code has been restarted, you can select the configured m
 Example VS Code user settings JSON configuration:
 
 ```json
-{
-  "cody.dev.models": [
-    // Google (e.g. Gemini 1.5 Pro)
+{ 
+    "cody.dev.models": [
     {
       "provider": "google",
-      "model": "gemini-1.5-pro-latest",
-      "tokens": 1000000,
-      "apiKey": "xyz"
+      "model": "gemini-2.0-flash-exp",
+      "inputTokens": 1048576,
+      "outputTokens": 8192,
+      "apiKey": "<YOUR_OWN_API_KEY>",
+      "options": {
+        "temperature": 0.0
+      }
     },
-    // Groq (e.g. llama2 70b)
     {
       "provider": "groq",
       "model": "llama2-70b-4096",
-      "tokens": 4096,
-      "apiKey": "xyz"
+      "inputTokens": 4000,
+      "outputTokens": 4000,
+      "apiKey": "<YOUR_OWN_API_KEY>",
+      "options": {
+          "temperature": 0.0
+      }
     },
-    // OpenAI & OpenAI-compatible APIs
     {
-      "provider": "openai", // keep groq as provider
+      "provider": "openai",
       "model": "some-model-id",
-      "apiKey": "xyz",
+      "inputTokens": 32000,
+      "outputTokens": 4000,
+      "apiKey": "<YOUR_OWN_API_KEY>",
+      "options": {
+          "temperature": 0.0
+      },
       "apiEndpoint": "https://host.domain/path"
     },
-    // Ollama (remote)
     {
       "provider": "ollama",
       "model": "some-model-id",
@@ -416,16 +410,20 @@ Example VS Code user settings JSON configuration:
 
 ### Provider configuration options
 
-- `provider`: `"google"`, `"groq"` or `"ollama"`
-  - The LLM provider type.
-- `model`: `string`
-  - The ID of the model, e.g. `"gemini-1.5-pro-latest"`
-- `tokens`: `number` - optional
-  - The context window size of the model. Default: `7000`.
-- `apiKey`: `string` - optional
-  - The API key for the endpoint. Required if the provider is `"google"` or `"groq"`.
-- `apiEndpoint`: `string` - optional
-  - The endpoint URL, if you don't want to use the provider’s default endpoint.
+- `"provider"`: `"google"`, `"groq"`, `"ollama"` or `"openai"`
+    - The LLM provider type.
+- `"model"`: `string`
+    - The ID of the model, e.g. `"gemini-2.0-flash-exp"`
+- `"inputTokens"`: `number` - optional
+    - The context window size of the model's input. Default: 7000.
+- `"outputTokens"`: `number` - optional
+    - The context window size of the model's output. Default: 4000.
+- `"apiKey"`: `string` - optional
+    - The API key for the endpoint. Required if the provider is `"google"`, `"groq"`, `"ollama"` or `"openai"`.
+- `"apiEndpoint"`: `string` - optional
+    - The endpoint URL, if you don't want to use the provider’s default endpoint.
+- `"options"` : `object` - optional
+    - Additional parameters like `temperature`, `topK`, `topP` based on provider documentation.
 
 ### Debugging experimental models
 

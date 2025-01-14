@@ -22,9 +22,9 @@ Sourcegraph releases have three digits, for example: `v5.0.3`
 | minor         | `0`     |
 | patch         | `3`     |
 
-For more details on our release cadence, refer to the [Sourcegraph handbook](https://handbook.sourcegraph.com/departments/engineering/dev/process/releases/#sourcegraph-releases).
+For more details on previous releases see [Sourcegraph Releases](/releases).
 
-Generally, we ship a new version of Sourcegraph with new features and bug fixes monthly, followed by a patch release later that month. Major and minor releases happen less frequently and contain substantial changes to Sourcegraph.
+Generally, we ship a new minor version of Sourcegraph with new features and bug fixes monthly, followed by a patch release later that month.
 
 Check the [Sourcegraph blog](https://about.sourcegraph.com/blog) for release announcements and details on the latest version.
 
@@ -78,14 +78,16 @@ It is highly recommended to:
 Sourcegraph upgrades take the following general form:
 1. Determine if your instance is ready to Upgrade (check upgrade notes)
 2. Merge the latest Sourcegraph release into your deployment manifests
-3. If updating more than a single minor version, perform an [**automatic multi-version upgrade**](/admin/updates/automatic) if targeting **Sourcegraph 5.1 or later**; [manual multi-version upgrades]/admin/updates/migrator/migrator-operations) are required if upgrading to an earlier version, which requires shutting off the instance and invoking the `migrator` container or job to perform the database rewrite and application of unfinished out-of-band migrations
+3. Select an upgrade method:
+   - If updating more than a single minor version, perform a multiversion upgrade with either the migrator [upgrade command](/admin/updates/migrator/migrator-operations#upgrade) or an [automatic upgrade](/admin/updates/automatic). *This method requires downtime.*
+   - If updating a single minor version, perform a standard upgrade with the [migrator up command](/admin/updates/migrator/migrator-operations#up) or an [automatic upgrade](/admin/updates/automatic). `up` is the default migrator entry command and runs on `frontend` startup.
 4. With upstream changes to your manifests merged, start the new instance
 
 > Note: For more explicit steps, specific to your deployment see the operations guides linked below.
 
 ### Upgrade Readiness
 
-Starting in v5.0.0, as an admin you are able to check instance upgrade readiness by navigating to the `Site admin > Updates` page. Here you'll be notified if your instance has any **schema drift** or unfinished **out of band migrations**.
+Navigate to the `Site admin > Updates` page. Here you'll be notified if your instance has any **schema drift** or unfinished **out of band migrations**.
 
 ![Screenshot 2023-05-17 at 1 37 12 PM](https://storage.googleapis.com/sourcegraph-assets/docs/239155807-185fc3e8-0706-4a23-b9fe-e262f9a9e4b3.png)
 
@@ -117,6 +119,7 @@ If your instance has schema drift or unfinished oob migrations you may need to a
 - [**Sourcegraph AWS AMI instances**](/admin/deploy/machine-images/aws-ami#upgrade)
 
 ## Other helpful links
+- [Postgres 12 End Of Life Notice](admin/postgres12_end_of_life_notice#postgres-12-end-of-life)
 - [Migrator operations](/admin/updates/migrator/migrator-operations)
 - [Upgrading Early Versions](/admin/updates/migrator/upgrading-early-versions)
 - [Troubleshooting upgrades](/admin/updates/migrator/troubleshooting-upgrades)

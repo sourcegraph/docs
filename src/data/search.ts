@@ -11,5 +11,6 @@ export const searchMetadata = {
       // Public API key: it is safe to commit it
       apiKey: '1b6e51c1d4ef24bef0a5f1ab00dad80a',
       indexName: 'sourcegraph',
+      maxResultsPerGroup:20
     },
 }
