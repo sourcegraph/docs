@@ -180,7 +180,7 @@ Following these steps will help the team understand and resolve the performance 
 
 JetBrains logs can be accessed via the **Output** panel. To access logs, you must first enable Cody logs from the Settings menu.  To do so:
 
-- Open the Settings panel (`⌘,` for macOS) (`Ctrl+Alt+S` for Windows)
+- Open the Settings panel (`⌘,` for macOS) (`Ctrl+Alt+S` for Windows/Linux)
 - Go to `Sourcegraph & Cody`
 - Click on `Cody`
 - Check the box to Enable debug
@@ -224,6 +224,10 @@ $filteredResults = preg_grep('*\.' . basename($inputPath) . '\.*', $fileList);
 ```
 ````
 
+## Forked Repos As Context
+
+If you would like to add a forked repository as Cody context, you may need to add `"search.includeForks": true` to the [global settings](/admin/config/settings#editing-global-settings-for-site-admins) for your instance.
+
 ## Eclipse extension
 
 ### See a white screen the first time you open Cody chat
@@ -247,3 +251,76 @@ You can open the Cody Log view using the same steps as above, but instead, selec
 This will include more information about what Cody is doing, including any errors. There is a copy button at the top right of the log view that you can use to copy the log to your clipboard and send it to us. Be careful not to include any sensitive information, as the log communication is verbose and may contain tokens.
 
 Additionally, Eclipse's built-in Error Log can be used to view any uncaught exceptions and their stack traces. You can open the Error Log using the **Window > Show View > Error Log** menu.
+
+## OpenAI o1
+
+### Context Deadline Exceeded Error
+
+Symptoms:
+
+- "Request Failed: Request to... failed with 500 Internal Server Error: context deadline exceeded"
+- Occurs with both o1-mini and o1-preview
+- Happens even with relatively small inputs (~220 lines)
+
+Solutions:
+
+- Keep input context smaller - aim for less than 200 lines of code initially
+- Break down larger requests into smaller chunks
+- Start a new chat session if errors persist
+- Add "Keep your answer brief!" to prompts when possible
+
+Prevention:
+
+- Import only the most relevant files
+- Use file range syntax (e.g., @file:1-100) to limit context
+- Focus on specific sections rather than entire codebases
+
+### Truncated Outputs
+
+Symptoms:
+
+- Response cuts off mid-sentence
+- Unable to get complete code examples
+- "Continue" requests also result in truncation
+
+Solutions:
+
+- For `o1-preview`: Copy the last line and ask to "continue from last line"
+- Switch to `o1-mini` for more reliable complete outputs
+- Break down complex requests into smaller steps
+- Consider using Sonnet 3.5 for tasks requiring longer outputs
+
+Limits:
+
+- Input tokens: 45k
+- Output tokens: 4k
+
+### Model Switching Issues
+
+Symptoms:
+
+- Model reverts to Sonnet 3.5 unexpectedly
+- "On waitlist" message appears after previously having access
+- Unable to select o1 models in command palette
+
+Solutions:
+
+- Restart IDE/VS Code
+- Sign out and sign back in
+- Check Pro subscription status
+- Contact support if issues persist
+
+### Response Format Errors
+
+Symptoms:
+
+- "Request Failed: Unexpected response format"
+- Model stops responding
+- Inconsistent output formatting
+
+Solutions:
+
+- Cancel and retry the request
+- Start a new chat session
+- Reduce context complexity
+- Use one-shot prompts with clear requirements
