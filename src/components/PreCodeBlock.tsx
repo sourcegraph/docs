@@ -72,8 +72,15 @@ export async function PreCodeBlock({ children, ...props }: PreProps) {
 
   const version = await getLatestVersion()
   const version_no_v = trimPrefix(version, "v")
+  let mustReplaceVersions = false
+  if (codeContent.includes("{CURRENT_VERSION}") || codeContent.includes("{CURRENT_VERSION_NO_V}")) {
+    mustReplaceVersions = true
+  }
   codeContent = codeContent.replace(/{CURRENT_VERSION}/g, version)
   codeContent = codeContent.replace(/{CURRENT_VERSION_NO_V}/g, version_no_v)
+  if (mustReplaceVersions) {
+    children = codeContent
+  }
 
   return (
     <div className="relative">

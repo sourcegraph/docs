@@ -1,41 +1,41 @@
 # OpenTelemetry
 
->NOTE: This feature is supported on Sourcegraph 4.0 and later.
+> This page is a deep dive into OpenTelemetry and customizing it. To get started with HTTP Tracing, see the [Tracing](/admin/observability/tracing) page.
 
-> WARNING: Sourcegraph is actively working on implementing [OpenTelemetry](https://opentelemetry.io/) for all observability data. **The first—and currently only—[signal](https://opentelemetry.io/docs/concepts/signals/) to be fully integrated is [tracing](/admin/observability/tracing)**.
+[OpenTelemetry](https://opentelemetry.io/) (OTel) is an industry-standard toolset to handle observability data, ex. metrics, logs, and traces.
 
-Sourcegraph exports OpenTelemetry data to a bundled [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) instance.
-This service can be configured to ingest, process, and then export observability data to an observability backend of choice.
-This approach offers a great deal of flexibility.
+To handle this data, Sourcegraph deployments include a bundled [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) (otel-collector) container, which can be configured to ingest, process, and export observability data to a backend of your choice. This approach offers great flexibility.
 
-## Configuration
+> NOTE: Sourcegraph currently uses OTel for HTTP Traces, and may use it for metrics and logs in the future.
 
-Sourcegraph's OpenTelemetry Collector is deployed with a [custom image, `sourcegraph/opentelemetry-collector`](TODO/UPDATE SOURCEGRAPH SEARCH LINK/-/tree/docker-images/opentelemetry-collector), and is configured with a configuration YAML file.
-By default, `sourcegraph/opentelemetry-collector` is configured to not do anything with the data it receives, but [exporters to various backends](#exporters) can be configured for each signal we currently support—**currently, only [traces data](#tracing) is supported**.
+For an in-depth explanation of the parts that compose a full collector pipeline, see OpenTelemetry's [documentation](https://opentelemetry.io/docs/collector/configuration/).
 
-Refer to the [documentation](https://opentelemetry.io/docs/collector/configuration/) for an in-depth explanation of the parts that compose a full collector pipeline.
+## Deployment and Configuration
 
-For more details on configuring the OpenTelemetry collector for your deployment method, refer to the deployment-specific guidance:
+Sourcegraph's bundled otel-collector is deployed via Docker image, and is configured via configuration YAML file. By default, it is not configured to do anything with the data it receives, but [exporters](#exporters) to various backends can be configured.
 
-- [Kubernetes with Kustomize](/admin/deploy/kubernetes/configure#tracing)
-- [Kubernetes with Helm](/admin/deploy/kubernetes#opentelemetry-collector)
-- [Docker Compose](/admin/deploy/docker-compose/operations#opentelemetry-collector)
+For details on how to deploy the otel-collector, and where to find its configuration file, refer to the docs page specific to your deployment type:
 
-## Tracing
+- [Kubernetes with Helm](/admin/deploy/kubernetes#configure-opentelemetry-collector-to-use-an-external-tracing-backend)
+- [Kubernetes with Kustomize](/admin/deploy/kubernetes/configure#deploy-opentelemetry-collector-to-use-an-external-tracing-backend)
+- [Docker Compose](/admin/deploy/docker-compose/configuration#configure-an-external-tracing-backend)
 
-Sourcegraph traces are exported in OpenTelemetry format to the bundled OpenTelemetry collector.
-To learn more about Sourcegraph traces in general, refer to our [tracing documentation](/admin/observability/tracing).
+## HTTP Tracing Backends
 
-`sourcegraph/opentelemetry-collector` includes the following exporters that support traces:
+Sourcegraph containers export HTTP traces in OTel format to the bundled otel-collector.
+For more information about HTTP traces, see the [Tracing](/admin/observability/tracing) page.
 
-- [OTLP-compatible backends](#otlp-compatible-backends) (includes services like Honeycomb and Grafana Tempo)
+The bundled otel-collector includes the following exporters, which support HTTP traces in OTel format:
+
+- [OTLP-compatible backends](#otlp-compatible-backends), ex. Honeycomb, Grafana Tempo
 - [Jaeger](#jaeger)
 - [Google Cloud](#google-cloud)
 
-> NOTE: In case you require an additional exporter from the [`opentelemetry-collector-contrib` repository](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter), please [open an issue](https://github.com/sourcegraph/sourcegraph/issues).
+Basic configuration for each tracing backend type is described below.
 
-Basic configuration for each tracing backend type is described below. Note that just adding a backend to the `exporters` block does not enable it—it must also be added to the `service` block.
-Refer to the next snippet for a basic but complete example, which is the [default out-of-the-box configuration](TODO/UPDATE SOURCEGRAPH SEARCH LINK/-/blob/docker-images/opentelemetry-collector/configs/logging.yaml):
+> NOTE: If you require an additional exporter from the [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter)  repository, please contact Sourcegraph Customer Support.
+
+To enable a backend, it must be adding to both the `exporters` block and the `service` block:
 
 ```yaml
 receivers:
@@ -45,7 +45,7 @@ receivers:
       http:
 
 exporters:
-  logging:
+  logging: # Export HTTP traces as log events
     loglevel: warn
     sampling_initial: 5
     sampling_thereafter: 200
@@ -59,17 +59,17 @@ service:
         - logging # The exporter name must be added here to enable it
 ```
 
-### Sampling traces
+## Sampling traces
 
-To reduce the volume of traces being exported, the collector can be configured to apply sampling to the exported traces. Sourcegraph bundles the [probabilistic sampler](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/probabilisticsamplerprocessor) and the [tail sampler](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/tailsamplingprocessor/README) as part of it's default collector container image.
+To reduce the volume of traces exported, the collector can be configured to apply sampling. Sourcegraph includes the [probabilistic](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/probabilisticsamplerprocessor) and [tail](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/tailsamplingprocessor/README.md) samplers in the bundled collector.
 
-If enabled, this sampling mechanism will be applied to all traces, regardless if a request was explictly marked as to be traced.
+> NOTE: If sampling is enabled, the sampling mechanism will be applied to all traces, regardless if a request was explicitly requested to be traced.
 
-#### Probabilistic sampler
+### Probabilistic sampler
 
-The probabilistic sampler hashes Trace IDs and determines whether a trace should be sampled based on this hash. Note that semantic convention of tags on a trace take precedence over Trace ID hashing when deciding whether a trace should be sampled or not.
+The probabilistic sampler hashes TraceIDs and determines whether a trace should be sampled based on this hash. Note that semantic convention of tags on a trace take precedence over TraceID hashing when deciding whether a trace should be sampled or not.
 
-Refer to the next snippet for an example on how to update the configuration to enable sampling using the probabilistic sampler.
+To enable probabilistic sampling, add the following to the `processors` block:
 
 ```yaml
 exporters:
@@ -90,18 +90,19 @@ service:
 
 ### Tail sampling
 
-The tail sampler samples traces according to policies and the sampling decision of whether a trace should be sampled is determined at the _tail end_ of a pipeline. For more information on the supported policies and other configuration options of the sampler see [tail sampler configuration](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/tailsamplingprocessor/README).
+The tail sampler samples traces according to policies and the sampling decision of whether a trace should be sampled is determined at the _tail end_ of a pipeline. For more information on the supported policies and other configuration options of the sampler see [tail sampler configuration](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/tailsamplingprocessor/README.md).
 
-The sampler waits for a certain amount of spans before making applying the configured policy. Due to it keeping a certain amount of spans in memory the sampler incurs as slight performance cost compared to the Probabilistic sampler. For a better comparison on probabilistic vs tail sampling processors see [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/tailsamplingprocessor/README#probabilistic-sampling-processor-compared-to-the-tail-sampling-processor-with-the-probabilistic-policy)
+The sampler waits for a certain amount of spans before making applying the configured policy. Due to it keeping a certain amount of spans in memory, the sampler incurs as slight performance cost compared to the probabilistic sampler.
 
-Refer to the next snippet for an example on how to update the configuration to enable tail sampling with a particular policy.
+To understand how the policies are applied, see the open-telemetry code [here](https://sourcegraph.com/github.com/open-telemetry/opentelemetry-collector-contrib@71dd19d2e59cd1f8aa9844461089d5c17efaa0ca/-/blob/processor/tailsamplingprocessor/processor.go?L214).
+
+To enable tail sampling, and customize the policies, add the following to the `processors` block:
 
 ```yaml
 receivers:
     # ...
 exporters:
     # ...
-
 processors:
   tail_sampling:
     # Wait time since the first span of a trace before making a sampling decision
@@ -110,20 +111,17 @@ processors:
     num_traces: 50000 # default value = 50000
     # Expected number of new traces (helps in allocating data structures)
     expected_new_traces_per_sec: 10 # default value = 0
-    # Recommended reading to understand how the policies are applied:
-    # https://sourcegraph.com/github.com/open-telemetry/opentelemetry-collector-contrib@71dd19d2e59cd1f8aa9844461089d5c17efaa0ca/-/blob/processor/tailsamplingprocessor/processor.go?L214
     policies:
       [
           {
-            # If a span contains `sampling_retain: true`, it will always be sampled (not dropped),
-            # regardless of the probabilistic sampling.
+            # If a span contains `sampling_retain: true`, it will always be included
             name: policy-retain,
             type: string_attribute,
             string_attribute: {key: sampling.retain, values: ['true']},
           },
           {
             # Only keep 10% of the traces.
-            name: policy-probalistic,
+            name: policy-probabilistic,
             type: probabilistic,
             probabilistic: {sampling_percentage: 10}
           }
@@ -136,68 +134,69 @@ service:
       processors: [tail_sampling]
 ```
 
-### Filtering traces
+## Filtering traces
 
-As part of the default container image Sourcegraph bundles the [filter processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/filterprocessor/README). By configuring a pipeline to have a filter processor one is able to include or exclude (depending on configuration!) on whether a trace should be allowed through the pipeline and be exported.
-
-Refer to the following snippet where a filter processor is configured to only allow traces with the service name "foobar" to continue through the pipeline. All other traces that do not have this service name will be dropped.
+The bundled otel-collector also includes the [filter processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/filterprocessor/README.md). The following example only allows traces with the service name "foobar". All other traces will be dropped.
 
 ```yaml
 exporters:
     # ...
-
 receivers:
     # ...
-
 processors:
-   filter/foobar: # the format is <processor type>/<name> - note a name is NOT required
+   filter/foobar: # Format is <processor type>/<name> - name is optional
       spans:
           include:
-             match_type: strict # regexp is also a supported type
+             match_type: strict # Also supports regex
              services:
              - "foobar"
 
 service:
     pipelines:
-        traces: # pipeline accepts all traces
-        traces/foobar: # pipeline that only export foobar traces
+        traces: # This pipeline exports all traces
+        traces/foobar: # This pipeline only exports traces from the foobar service
             # ...
             processors: [filter/foobar]
 ```
+
 ## Exporters
 
-Exporters send observability data from OpenTelemetry collector to desired backends.
-Each exporter can support one, or several, OpenTelemetry signals.
+Exporters send observability data from the otel-collector to the needed backend(s).
+Each exporter can support one or more OTel signals.
 
-This section outlines some common configurations for exporters—for more details, refer to the [official OpenTelemetry exporters documentation](https://opentelemetry.io/docs/collector/configuration/#exporters).
+This section outlines some common exporter configurations. For details, see OpenTelemetry's [exporters](https://opentelemetry.io/docs/collector/configuration/#exporters) page.
 
-> NOTE: In case you require an additional exporter from the [`opentelemetry-collector-contrib` repository](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter), please [open an issue](https://github.com/sourcegraph/sourcegraph/issues).
+> NOTE: If you require an additional exporter from the [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter)  repository, please contact Sourcegraph Customer Support.
 
 ### OTLP-compatible backends
 
-Backends compatible with the [OpenTelemetry protocol (OTLP)](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/otlp) include services like [Honeycomb](https://docs.honeycomb.io/getting-data-in/opentelemetry-overview/) and [Grafana Tempo](https://grafana.com/blog/2021/04/13/how-to-send-traces-to-grafana-clouds-tempo-service-with-opentelemetry-collector/).
-OTLP-compatible backends typically accept the [OTLP gRPC protocol](#otlp-grpc-backends), but they can also implement the [OTLP HTTP protocol](#otlp-http-backends).
+Backends compatible with the [OpenTelemetry Protocol (OTLP)](https://opentelemetry.io/docs/specs/otlp/) include services such as:
+
+- [Honeycomb](https://docs.honeycomb.io/getting-data-in/opentelemetry-overview/)
+- [Grafana Tempo](https://grafana.com/blog/2021/04/13/how-to-send-traces-to-grafana-clouds-tempo-service-with-opentelemetry-collector/)
+
+OTLP-compatible backends typically accept the [OTLP gRPC protocol](#otlp-grpc-backends), but may require the [OTLP HTTP protocol](#otlp-http-backends) instead.
 
 #### OTLP gRPC backends
 
-Refer to the [`otlp` exporter documentation](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlpexporter/README) for all available options.
+Refer to the [otlp exporter](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlpexporter/README.md) documentation for available options.
 
 ```yaml
 exporters:
   otlp:
-    endpoint: otelcol2:4317
+    endpoint: secure-otel-collector:4317
     tls:
       cert_file: file.cert
       key_file: file.key
   otlp/2:
-    endpoint: otelcol2:4317
+    endpoint: insecure-otel-collector:4317
     tls:
       insecure: true
 ```
 
 #### OTLP HTTP backends
 
-Refer to the [`otlphttp` exporter documentation](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlphttpexporter/README) for all available options.
+Refer to the [otlphttp exporter](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlphttpexporter/README.md) documentation for available options.
 
 ```yaml
 exporters:
@@ -207,18 +206,14 @@ exporters:
 
 ### Jaeger
 
-Refer to the [`jaeger` exporter documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/exporter/jaegerexporter/README) for all options.
+If you're looking for information about Sourcegraph's bundled Jaeger instance, head back to the [Tracing](/admin/observability/tracing) page to find the instructions for your deployment method.
 
-Most Sourcegraph deployment methods still ship with an opt-in Jaeger instance—to set this up, follow the relevant deployment guides, which will also set up the appropriate configuration for you:
+Refer to the [Jaeger](https://opentelemetry.io/docs/languages/js/exporters/#jaeger) documentation for options.
 
-- [Kubernetes with Kustomize](/admin/deploy/kubernetes/configure#deploy-opentelemetry-collector-with-jaeger-as-tracing-backend)
-- [Kubernetes with Helm](/admin/deploy/kubernetes/helm#enable-the-bundled-jaeger-deployment)
-- [Docker Compose](/admin/deploy/docker-compose/operations#enable-the-bundled-jaeger-deployment)
-
-If you wish to do additional configuration or connect to your own Jaeger instance, the deployed Collector image is bundled with a [basic configuration with Jaeger exporting](TODO/UPDATE SOURCEGRAPH SEARCH LINK/-/blob/docker-images/opentelemetry-collector/configs/jaeger.yaml).
-If this configuration serves your needs, you do not have to provide a separate config—the Collector startup command can be set to `/bin/otelcol-sourcegraph --config=/etc/otel-collector/configs/jaeger.yaml`. Note that this requires the environment variable `$JAEGER_HOST` to be set on the Collector instance (i.e. the container in Kubernetes or Docker Compose):
+If you use your own Jaeger instance, and if the bundled otel-collector's basic configuration with the Jaeger OTel exporter enabled meets your needs, configure the otel-collector's startup command to `/bin/otelcol-sourcegraph --config=/etc/otel-collector/configs/jaeger.yaml`. Note that this requires the environment variable `$JAEGER_HOST` to be set on the otel-collector service / container:
 
 ```yaml
+# otel-collector config.yaml
 exporters:
   jaeger:
     # Default Jaeger gRPC server
@@ -227,17 +222,17 @@ exporters:
       insecure: true
 ```
 
+The Sourcegraph frontend automatically proxies Jaeger's web UI to make it available at `/-/debug/jaeger`. You can proxy your own Jaeger instance instead by configuring the `JAEGER_SERVER_URL` environment variable on the `frontend` containers, and the `QUERY_BASE_PATH='/-/debug/jaeger'` environment variable on your `jaeger` container.
+
 ### Google Cloud
 
-Refer to the [`googlecloud` exporter documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/exporter/googlecloudexporter/README) for all available options.
-
-If you run Sourcegraph on a GCP workload, all requests will be authenticated automatically. The documentation describes other authentication methods.
+If you run Sourcegraph in GCP and wish to export your HTTP traces to Google Cloud Trace, otel-collector can use project authentication. See the [Google Cloud Exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/exporter/googlecloudexporter/README.md) documentation for available options.
 
 ```yaml
 exporters:
   googlecloud:
     # See docs
-    project: project-name # or fetched from credentials
+    project: project-name # Project name can also be fetched from secrets
     retry_on_failure:
       enabled: false
 ```
