@@ -9,61 +9,63 @@ import { LinkCard, LinkCards } from './mdx/LinkCards';
 import { ProductCard, ProductCards } from './mdx/ProductCards';
 import { QuickLink, QuickLinks } from './mdx/QuickLinks';
 import { Tab, Tabs } from './mdx/Tabs';
-import { PreCodeBlock } from './PreCodeBlock';
+import { PreCode, PreCodeBlock } from './PreCodeBlock';
 import ResourceEstimator from './resource-estimator/ResourceEstimator';
+import { Badge } from './ui/badge';
 
 const MdxComponents = (version?: string) => {
-	return {
-		FeatureParity,
-		ResourceEstimator,
-		AWSOneClickLaunchForm,
-		Accordion,
-		ContentTabs: (props: any) => <ContentTabs {...props} />,
-		ContentTab: (props: any) => <ContentTab {...props} />,
-		Tabs: (props: any) => <Tabs {...props} />,
-		Tab: (props: any) => <Tab {...props} />,
-		QuickLinks,
-		QuickLink: (props: React.ComponentProps<typeof QuickLink>) => (
-			<QuickLink {...props} version={version} />
-		),
-		LinkCards,
-		LinkCard: (props: React.ComponentProps<typeof LinkCard>) => (
-			<LinkCard {...props} version={version} />
-		),
-		Callout,
-		ProductCards,
-		ProductCard: (props: React.ComponentProps<typeof ProductCard>) => (
-			<ProductCard {...props} version={version} />
-		),
-		code: (props: any) => {
-			const isCodeBlock = props.style?.display === 'grid';
-			// Only apply styles to inline code
-			const codeClasses = isCodeBlock
-				? 'bg-transparent'
-				: 'border font-medium bg-slate-100 dark:bg-slate-900 px-1 py-0.5 rounded-md border-slate-300 dark:border-slate-700';
+  return {
+    FeatureParity,
+    ResourceEstimator,
+    AWSOneClickLaunchForm,
+    Accordion,
+    ContentTabs: (props: any) => <ContentTabs {...props} />,
+    ContentTab: (props: any) => <ContentTab {...props} />,
+    Tabs: (props: any) => <Tabs {...props} />,
+    Tab: (props: any) => <Tab {...props} />,
+    QuickLinks,
+    QuickLink: (props: React.ComponentProps<typeof QuickLink>) => (
+      <QuickLink {...props} version={version} />
+    ),
+    LinkCards,
+    LinkCard: (props: React.ComponentProps<typeof LinkCard>) => (
+      <LinkCard {...props} version={version} />
+    ),
+    Callout,
+    ProductCards,
+    ProductCard: (props: React.ComponentProps<typeof ProductCard>) => (
+      <ProductCard {...props} version={version} />
+    ),
+    code: (props: any) => {
+      const isCodeBlock = props.style?.display === 'grid';
+      // Only apply styles to inline code
+      const codeClasses = isCodeBlock
+        ? 'bg-transparent'
+        : 'border font-medium bg-slate-100 dark:bg-slate-900 px-1 py-0.5 rounded-md border-slate-300 dark:border-slate-700';
 
-			return <code className={codeClasses} {...props} />;
-		},
-		a: (props: any) => <CustomLink {...props} version={version} />,
-		h2: (props: any) => {
-			return <Heading level="2" id={props.id} props={props} />;
-		},
-		h3: (props: any) => {
-			return <Heading level="3" id={props.id} props={props} />;
-		},
-		img: (props: any) => {
-			return <img className="rounded-xl" {...props} />;
-		},
-		video: (props: any) => {
-			return <video className="rounded-xl" {...props} />;
-		},
-		pre: (props: any) => <PreCodeBlock {...props} />,
-		table: (props: any) => (
-			<div {...props} className="table-auto w-full overflow-x-auto">
-				<table>{props.children}</table>
-			</div>
-		)
-	};
+      return <PreCode className={codeClasses} {...props} />;
+    },
+    a: (props: any) => <CustomLink {...props} version={version} />,
+    h2: (props: any) => {
+      return <Heading level="2" id={props.id} props={props} />;
+    },
+    h3: (props: any) => {
+      return <Heading level="3" id={props.id} props={props} />;
+    },
+    img: (props: any) => {
+      return <img className="rounded-xl" {...props} />;
+    },
+    video: (props: any) => {
+      return <video className="rounded-xl" {...props} />;
+    },
+    pre: (props: any) => <PreCodeBlock {...props} />,
+    table: (props: any) => (
+      <div {...props} className="table-auto w-full overflow-x-auto">
+        <table>{props.children}</table>
+      </div>
+    ),
+    Badge
+  };
 };
 
 export default MdxComponents;

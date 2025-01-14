@@ -4,15 +4,46 @@ If authentication (HTTP(S) or SSH) is required to `git clone` a repository then 
 
 First, ensure your **Site admin > Manage code hosts** code host configuration is configured to use SSH. For example, by setting the `gitURLType` field to "ssh". Alternatively, you may use the "Generic Git host" code host type, which allows you to directly specify Git repository URLs for cloning.
 
-Then, follow the directions below depending on your deployment type:
+Then, you need to supply the SSH keys and passphrase to Sourcegraph if applicable. You have two options:
+
+- **Option 1**: Configure the SSH credentials in code host configuration in the Web UI. (Recommended)
+- **Option 2**: Mount the SSH keys into the container.
+
+## Configuring SSH credentials in the Web UI (Recommended)
+
+In supported code hosts configuration, you can provide the credentials in the JSON configuration. For example:
+
+```json
+{
+  "url": "https://github.com",
+  "token": "<personal access token>",
+  "gitURLType": "ssh",
+  "gitSSHCredential": {
+    // make sure the key is base64 encoded
+    // $ cat ~/.ssh/id_rsa | base64
+    "privateKey": "<base64 encoded of the SSH private key>",
+    "passphrase": "<passphrase if applicable, omit if none is needed>"
+  }
+}
+```
+
+Some providers may require additional configuration, consult the [code host specific documentation](/admin/code_hosts/) for more information.
+
+## Mounting SSH keys into the container
 
 - [Sourcegraph with Docker Compose](/admin/deploy/docker-compose/): See [the Docker Compose git configuration guide](/admin/deploy/docker-compose/#git-configuration).
 - [Sourcegraph with Kubernetes](/admin/deploy/kubernetes/): See [Configure repository cloning via SSH](/admin/deploy/kubernetes/configure#ssh-for-cloning).
 - [Single-container Sourcegraph](/admin/deploy/docker-single-container/): See [the single-container git configuration guide](/admin/deploy/docker-single-container/#git-configuration-and-authentication).
 
->NOTE: Repository access over SSH is not yet supported on [Sourcegraph Cloud](/cloud/).
-
 ## Troubleshooting
+
+### Error: `illegal base64 data at input byte 0`
+
+This error indicates that the provided private key is not base64-encoded. Ensure that the private key is base64-encoded before providing it to Sourcegraph.
+
+```bash
+cat ~/.ssh/id_rsa | base64
+```
 
 ### What should be included in my config file?
 

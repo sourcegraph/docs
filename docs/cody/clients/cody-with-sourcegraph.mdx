@@ -2,12 +2,10 @@
 
 <p className="subtitle">Learn how to use Cody in the web interface with your Sourcegraph.com instance.</p>
 
-<Callout type="info"> The new chat UI for Cody for web is currently in Beta and is available to users on Sourcegraph versions >=5.5.</Callout>
-
-In addition to the Cody extensions for [VS Code](/cody/clients/install-vscode), [JetBrains](/cody/clients/install-jetbrains) IDEs, and [Neovim](/cody/clients/install-neovim), Cody is also available in the Sourcegraph web app. Community users can use Cody for free by logging into their accounts on Sourcegraph.com, and enterprise users can use Cody within their Sourcegraph instance.
+In addition to the Cody extensions for [VS Code](/cody/clients/install-vscode), [JetBrains](/cody/clients/install-jetbrains), [Visual Studio](/cody/clients/install-visual-studio ), and [Eclispe](/cody/clients/install-eclipse) IDEs, Cody is also available in the Sourcegraph web app. Community users can use Cody for free by logging into their accounts on Sourcegraph.com, and enterprise users can use Cody within their Sourcegraph instance.
 
 <LinkCards>
-    <LinkCard href="https://sourcegraph.com/cody/chat" imgSrc="https://sourcegraph.com/.assets/img/sourcegraph-mark.svg" imgAlt="Cody for Web" title="Cody for Web (Beta)" description="Use Cody in the Sourcegraph Web App." />
+    <LinkCard href="https://sourcegraph.com/cody/chat" imgSrc="https://sourcegraph.com/.assets/img/sourcegraph-mark.svg" imgAlt="Cody for Web" title="Cody for Web" description="Use Cody in the Sourcegraph Web App." />
 </LinkCards>
 
 ## Initial setup
@@ -21,46 +19,45 @@ Create a [Sourcegraph.com account](https://sourcegraph.com/sign-up) by logging i
 
 Enterprise users can also log in to their Sourcegraph.com Enterprise instance and use Cody in the web interface.
 
-## Chat Interface
+## Chat interface
 
-The chat interface for Cody on the web is similar to the one you get with the [VS Code](/cody/clients/install-vscode#chat) editor extension. If you click the Cody chat from the top header, you will see a **Start new chat +** button in the bottom left sidebar with the chat editor. All your previous chats appear in this left sidebar. To delete any chat, hover over the chat and click the **Delete** icon.
+The Cody chat interface for the web is similar to the one you get with the IDE extensions. However, the chat experience is slightly different depending on whether you use Cody with your search query results or directly from the top header.
 
-The chat interface with your Code Search queries is operated per chat. You cannot run multiple chats and store them in parallel. A new chat window opens whenever you click the Cody button from the query editor or the top header.
+The chat interface with your Code Search queries opens parallel to your query search results, similar to the chat window in the IDE extensions. However, when you click **Cody** from the top header in your Sourcegraph.com instance, the chat interface opens on a new page.
 
-## LLM Selection
+<Callout type="info"> The new and improved chat UI for Cody for the web is currently available to users on Sourcegraph versions >=5.5. To use this new chat interface, you should update your Sourcegraph instance to the latest version.</Callout>
 
-Sourcegraph.com users with Cody **Free** and **Pro** can choose from a list of supported LLM models for a chat. Claude Sonnet 3 is the default LLM model, but users can select the LLM of their choice from the drop-down menu.
+## Chat with Cody on the web interface
 
-![llm-select-web](https://storage.googleapis.com/sourcegraph-assets/Docs/llm-select-web-0724.jpg)
+The feature set for the Cody chat is the same as the IDE extensions. Your previous chats can be viewed from the **History** tab. Claude 3.5 Sonnet (New) is selected as the default chat model. You can change this LLM model based on your use case to optimize speed, accuracy, or cost. Enterprise users with the new [model configuration](/cody/clients/model-configuration) can use the LLM selection dropdown to choose a chat model. You can read about these supported LLM models [here](/cody/capabilities/supported-models#chat-and-commands).
 
-Users on an Enterprise Sourcegraph instance do not have the option to choose an LLM model. Their site admin will configure the default LLM model for chat.
+To help you automate your key tasks in your development workflow, you get **[Prompts](/cody/capabilities/commands)**. If you are a part of an organization on Sourcegraph.com or a self-hosted Sourcegraph instance, you can view these pre-built Prompts created by your teammates. On the contrary, you can create your Prompts via the **Prompt Library** from your Sourcegraph instance.
 
-## Selecting Context with @-mentions
+## Context selection
 
-Cody chat with a Sourcegraph.com instance allows you to add files and symbols as context in your messages.
+If you use Cody with your search results, the chat input will, by default, have the context of your searched codebase. This context is based on your current repository and file.
 
-- Type `@file` and then a filename to include a file as a context
-- Type `@` and you can also add **Symbols**, **Files**, and **Repositories** as context
+![cody-web-with-search](https://storage.googleapis.com/sourcegraph-assets/Docs/cody-web-search-results-1124.png)
 
-### Context retrieval
+You can add or delete any new or existing context by `@-mentioning` files, symbols, directories, repositories, and web URLs. Enterprise users can `@-mention` remote directories as well. When you have both a repository and files as context, Cody will search the repository for context while prioritizing the mentioned files.
 
-When you start a new Cody chat inside the search query window, the chat input window opens with a default `@-mention` context chip for all the context it intends to use. This context is based on your current repository and current file.
+If you use Cody directly from the top header, the chat input will have no pre-filled context chips by default. You can chat without context or add or delete any new or existing context by `@-mentioning` context chips.
 
-At any point in time, you can edit these context chips or remove them completely if you do not want to use these as context. Any chat without a context chip will instruct Cody to use no codebase context. However, you can always provide an alternate `@-mention` file or symbols to let Cody use it as a new context source.
-
-When you have both a repository and files @-mentioned, Cody will search the repository for context while prioritizing the mentioned files.
-
-<Callout type="info">Using your own [custom OpenCtx providers](https://sourcegraph.com/docs/cody/capabilities/openctx) will not be supported with chat on Cody for Web.</Callout>
+![cody-web-no-search](https://storage.googleapis.com/sourcegraph-assets/Docs/cody-web-top-header-1124.png)
 
 ### Rerun prompts with different context
 
 If Cody's answer isn't helpful, you can try asking again with a different context:
 
-- **Public knowledge only**: Cody will not use your own code files as context; it’ll only use knowledge trained into the base model
+- **Public knowledge only**: Cody will not use your code files as context; it’ll only use knowledge trained into the base model
 - **Add context**: Provides @-mention context options to improve the response by explicitly including files, symbols, and remote repositories
 
 ![re-run-prompts](https://storage.googleapis.com/sourcegraph-assets/Docs/rerun-prompt-web-0724.jpg)
 
+<Callout type="tip">For a detailed breakdown of Cody's capabilities across different clients [read these feature parity docs](/cody/clients/feature-reference).</Callout>
+
 ## Prompts
 
-Prompts and the Prompt Library are supported in Cody for Web. You can access these from the **prompts** selector drop-down in the chat interface. Read more about prompts and the Prompt Library [here](/cody/capabilities/commands).
+Cody allows you create quick, ready-to-use [prompts](/cody/capabilities/commands) to automate key tasks in your workflow. Prompts are created and saved in the Prompt Library and can be accessed from the **Tools > Prompt Library** in the top navigation bar in your Sourcegraph instance.
+
+![cody-web-prompts](https://storage.googleapis.com/sourcegraph-assets/Docs/cody-web-prompts-1124.png)

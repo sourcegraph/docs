@@ -65,7 +65,7 @@ The Sourcegraph search language supports [RE2](https://golang.org/s/re2syntax) s
 - It's well-supported in Go, allowing us to take advantage of a rich ecosystem (notably including [Zoekt](https://github.com/sourcegraph/zoekt))
 - Our API and tooling makes it straightforward to use Sourcegraph with other tools that provide facilities not built in to the search language.
 
-As an example of how you can use Sourcegraph tooling with other tools, we can use `jq` (which supports Perl regexes) along with `src` to post-filter search results. In this case, we want to use backreferences to find go functions take a single pointer argument and return a non-pointer of the same type as the input.
+As an example of how you can use Sourcegraph tooling with other tools, we can use `jq` (which supports Perl regexes) along with `src` to post-filter search results. In this case, we want to use backreferences to find go functions that take a single pointer argument and return a non-pointer of the same type as the input.
 
 ```shell
 re2_regex='func \w+\(\w+ \*\w+\) \w+'
@@ -86,27 +86,7 @@ src search --json --stream -- "/$re2_regex/" \
 
 ## Search experience
 
-<Callout type="note">There is a new search experience in Sourcegraph `v5.6.0` and more. It is currently in the Beta stage.</Callout>
-
-Users on Sourcegraph instance `v5.6.0` can try out the new Code Search experience by toggling the **Enable** button under **Try a new, faster UX** drop-down in the top right corner of the Code Search page.
-
-For Sourcegraph Enterprise users, their site admins must enable the new search experience first. Admins can go to **Site admin > Feature flags** from your Enterprise Sourcegraph instance to do so. Here, you can find the following feature flags that you should configure as follows:
-
-- `web-next`: `false`
-- `web-next-rollout`: `true`
-- `web-next-toggle`: `true`
-
-This configuration will work as follows:
-
-- `web-next`: When this flag is set the user will get the new web app for any page that is available in the new web app
-- `web-next-rollout`: When this flag is set the user will get the new web app for pages that have been explicitly marked as `rolled out`
-- `web-next-toggle`: When enabled users see a toggle in the top navbar that allows them to enable/disable the new web app for themselves
-
-Which flags configuration admins should set depends on the following scenarios:
-
-- If an admin want’s to allow users to opt-in to the new experience, then you should enable `web-next-toggle` for everyone
-- If you want to enable the new web app for everyone you should set `web-next-rollout`
-- If you want to allow people to opt-out they should additionally set `web-next-toggle`
+Users on Sourcegraph instance `v5.9.0` or more get the improved and new Code Search experience set by default. Sourcegraph Enterprise users' site admins can optionally opt-out and revert to the old view.
 
 You get the following improvements:
 
