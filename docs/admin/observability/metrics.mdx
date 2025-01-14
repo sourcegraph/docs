@@ -82,8 +82,49 @@ sshuttle -r user@host 0/0
 
 Grafana will be available at http://host:3370/-/debug/grafana.
 
-> WARNING: Our Grafana instance runs in anonymous mode with all authentication turned off, since we rely on Sourcegraph's built-in authentication.
-> Please be careful when exposing it directly to external traffic.
+### Grafana security
+
+<Callout type="warning">
+WARNING: By default, our Grafana container runs in anonymous mode with authentication disabled, relying on Sourcegraph's authentication and authorization when accessed through your Sourcegraph instance.
+
+We recommend you use your network security controls to prevent access to Grafana's listening port, or enable Grafana's built-in authentication.
+</Callout>
+
+To enable Grafana's built-in authentication, add `GF_AUTH_ANONYMOUS_ENABLED` as `false` in the Grafana container's environment variables in your deployment override file, then redeploy the Grafana container.
+
+We also recommend that you customize the default admin username and password.
+
+For new deployments, configure the `GF_SECURITY_ADMIN_USER` and `GF_SECURITY_ADMIN_PASSWORD` environment variables on the Grafana container, using your deployment pipeline's secrets management tool, before initial deployment, to initialize the default admin user on first deployment.
+
+For existing deployments, you can either log in to the Grafana web UI with the default credentials and it will prompt you to change the password, or you can reinitialize Grafana:
+
+1. Export any customized dashboards via JSON (if applicable)
+2. Configure the environment variables the same as a new instance
+3. Delete the Grafana container's storage volume
+4. Redeploy the Grafana container
+5. Import any customized dashboards (if applicable)
+
+The contents of the Grafana container's storage volume are ephemeral, so metrics data is not lost in this process.
+
+```yaml
+# Helm override
+grafana:
+  env:
+    GF_AUTH_ANONYMOUS_ENABLED:
+      value: "false"
+    GF_SECURITY_ADMIN_USER:
+      value: "custom-admin-username"
+    GF_SECURITY_ADMIN_PASSWORD:
+      value: "custom-admin-password"
+
+# Docker Compose override
+  grafana:
+    environment:
+      - 'GF_AUTH_ANONYMOUS_ENABLED=false'
+      - 'GF_SECURITY_ADMIN_USER=custom-admin-username'
+      - 'GF_SECURITY_ADMIN_PASSWORD=custom-admin-password'
+```
+
 
 ## Prometheus
 
