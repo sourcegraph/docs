@@ -138,6 +138,37 @@ SELECT * FROM users;
 
 ## Upgrade
 
+### Postgresql 16
+
+From sourcegraph version 5.11 onwards, the Sourcegraph single container Docker image uses Postgresql 16. Upgrading from Postgresql 12 to Postgresql 16 is a manual process, that is similar to the one outlined below for multi-version upgrades, but migrator has been merged into the container, allowing for a simpler upgrade.
+
+> NOTE: It is highly recommended to **take an up-to-date snapshot of your databases** prior to starting a multi-version upgrade. The upgrade process aggressively mutates the shape and contents of your database, and undiscovered errors in the migration process or unexpected environmental differences may cause an unusable instance or data loss.
+>
+> We recommend performing the entire upgrade procedure on an idle clone of the production instance and switch traffic over on success, if possible. This may be low-effort for installations with a canary environment or a blue/green deployment strategy.
+>
+> **If you do not feel confident running this process solo**, contact customer support team to help guide you thorough the process.
+
+**Before performing a multi-version upgrade**:
+
+- Read our [update policy](/admin/updates/#update-policy) to learn about Sourcegraph updates.
+- Find the entries that apply to the version range you're passing through in the [update notes for Sourcegraph with Docker Single Container](/admin/updates/server#multi-version-upgrade-procedure).
+
+0. You must first shutdown the container instance via `docker stop [CONTAINER]`.
+1. Start a temporary Postgres container on top of the Postgres data directory used by the old `sourcegraph/server` image. You must use the *new* postgresql-16-codeinsights image, which is based on the new Postgresql 16 image, and provides an automatic upgrade script to move from Postgresql 12 to Postgresql 16.
+
+`docker run --rm -it -v ~/.sourcegraph/data/postgresql:/data/pgdata-12 -e POSTGRES_USER=postgres  -p 5432:5432 sourcegraph/postgresql-16-codeinsights:{CURRENT_VERSION_NO_V}`
+
+2. Once that temporary container marks that Postgresql has started, the migration is complete and you can stop the temporary container.
+3. You need to copy the `reindex.completed` file for the older reindex.
+
+`cp ~/.sourcegraph/data/postgresql/5.10-reindex.completed ~/.sourcegraph/data/postgresql/5.1-reindex.completed`
+
+4. Start the new `sourcegraph/server` container.
+
+`docker run --publish 7080:7080 --publish 127.0.0.1:3370:3370 --rm --volume ~/.sourcegraph/config:/etc/sourcegraph --volume ~/.sourcegraph/data:/var/opt/sourcegraph sourcegraph/server:{CURRENT_VERSION_NO_V}`
+
+You now have a single server Sourcegraph container image running on Postgresql 16. 
+
 ### Standard upgrades
 
 A [standard upgrade](/admin/updates/#standard-upgrades) occurs between two minor versions of Sourcegraph. If you are looking to jump forward several versions, you must perform a [multi-version upgrade](#multi-version-upgrades) instead.
@@ -150,6 +181,16 @@ A [standard upgrade](/admin/updates/#standard-upgrades) occurs between two minor
 To update, just use the newer `sourcegraph/server:N.N.N` Docker image (where `N.N.N` is a patch or single minor release away your current version) in place of the older one, using the same Docker volumes. Your server's data will be migrated automatically if needed. You can always find the version number details of the latest release via the [technical changelog](/technical-changelog).
 
 ### Multi-version upgrades
+
+> NOTE: It is no longer necessary to run Migrator outside of the single instance container. Migrator is now built into the container, and will be run via the `sourcegraph/server` image.
+>
+> We **still** recommend performing the entire upgrade procedure on an idle clone of the production instance and switch traffic over on success, if possible. This may be low-effort for installations with a canary environment or a blue/green deployment strategy.
+>
+> The below docs are kept for posterity for users on older versions of Sourcegraph that are looking to upgrade or run the migrator tool.
+
+To update, just use the newer `sourcegraph/server:N.N.N` Docker image in place of the older one, using the same Docker volumes. Your server's data will be migrated automatically if needed. You can always find the version number details of the latest release via the [technical changelog](/technical-changelog).
+
+### (Legacy) Multi-version upgrades
 
 A [multi-version upgrade](/admin/updates/#multi-version-upgrades) is a downtime-incurring upgrade from version 3.20 or later to any future version. Multi-version upgrades will run both schema and data migrations to ensure the data available from the instance remains available post-upgrade.
 
@@ -213,21 +254,22 @@ For example, `${PATH}` is `~/.sourcegraph/data` in `-v ~/.sourcegraph/data:/var/
 
 ```sh
 $ docker run --rm -it \
-  -v ${PATH}/postgresql:/data/pgdata-${PG_VERSION} \
+  -v ${PATH}/postgresql:/data/pgdata-12 \
   -u 70 \
   -p 5432:5432 \
   --entrypoint bash \
-  sourcegraph/postgres-${PG_VERSION_TAG}:${SG_VERSION} \
-  -c 'echo "host all all 0.0.0.0/0 trust" >> /data/pgdata-${PG_VERSION}/pg_hba.conf && postgres -c l listen_addresses="*" -D /data/pgdata-${PG_VERSION}'
+  sourcegraph/${PG_VERSION_TAG}:${SG_VERSION} \
+  -c 'echo "host all all 0.0.0.0/0 trust" >> /data/pgdata-12/pg_hba.conf && postgres -c l listen_addresses="*" -D /data/pgdata-12'
 ```
 
 The version of this Postgres container is dependent on the version of the instance prior to upgrade.
 
-| `${SG_VERSION}`     | `${PG_VERSION}` | `${PG_VERSION_TAG}` |
-| ------------------- | --------------- | ------------------- |
-| `3.20.X` - `3.29.X` | `12`            | `12.6`              |
-| `3.30.X` - `3.37.X` | `12`            | `12.6-alpine`       |
-| `3.38.X` -          | `12`            | `12-alpine`         |
+| `${SG_VERSION}`     | `${PG_VERSION_TAG}`   |
+| ------------------- | -------------------   |
+| `3.20.X` - `3.29.X` | `postgres-12.6`       |
+| `3.30.X` - `3.37.X` | `postgres-12.6-alpine`|
+| `3.38.X` - `5.9.X`  | `postgres-12-alpine`  |
+| `5.10.X` -          | `postgresql-16`       |
 
 ## Troubleshooting
 
