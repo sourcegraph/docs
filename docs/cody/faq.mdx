@@ -137,18 +137,20 @@ cody chat --model '$name_of_the_model' -m 'Hi Cody!'
 
 For example, to use Claude 3.5 Sonnet, you'd pass the following command in your terminal, `cody chat --model 'claude-3.5-sonnet' -m 'Hi Cody!'
 
-### Is it possible to set separate token usage just for programmatic access( via API) and not to be used via IDE?
+### Can I configure custom context windows for API-only access?
 
-Yes, it's possible to configure a custom context window exclusively for programmatic access via the API. To achieve this you need to use the custom [model configuration](https://sourcegraph.com/docs/cody/enterprise/model-configuration#model-overrides). You need to configure the below settings
+Yes, it's possible to configure a custom context window exclusively for programmatic access via the API. To achieve this you need to use the custom [model configuration](https://sourcegraph.com/docs/cody/enterprise/model-configuration#model-overrides) and set the "capabilities" list as empty in the model configuration. 
 
-		maxInputTokens: Specifies the maximum number of tokens for the contextual data in the prompt (e.g., question, relevant snippets
-		
-		maxOutputTokens: Specifies the maximum number of tokens allowed in the response
+Here's an example config 
 
-Also, you need to set the "capabilities" list as empty in the model configuration.
-
-  "capabilities": []
-
+      "contextWindow": {
+        // Specifies the maximum number of tokens for the contextual data in the prompt (e.g., question, relevant snippets)
+        "maxInputTokens": 45000,
+        // Specifies the maximum number of tokens allowed in the response
+        "maxOutputTokens": 8000
+      },
+      // Set the "capabilities" list as empty to ensure the model is not available on Cody Web or IDEs
+      "capabilities": [],
 
 ## OpenAI o1
 
