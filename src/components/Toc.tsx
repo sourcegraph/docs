@@ -115,7 +115,7 @@ export function TableOfContents({ headings }: Props) {
 												className={clsx(
 													isActive(heading)
 														? 'font-semibold text-link-light dark:text-link'
-														: 'font-normal text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
+														: 'font-normal text-slate-500 hover:text-slate-700 dark:text-dark-text-secondary dark:hover:text-slate-300'
 												)}
 											>
 												{heading.title}
@@ -125,7 +125,7 @@ export function TableOfContents({ headings }: Props) {
 									{heading.level === 2 && (
 										<ol
 											role="list"
-											className="mt-2 space-y-3 pl-5 text-slate-500 dark:text-slate-400"
+											className="mt-2 space-y-3 pl-5 text-slate-500 dark:text-dark-text-secondary"
 										>
 											<li key={heading.id}>
 												<Link

@@ -33,7 +33,7 @@ function PageLink({
 				<Link
 					href={href}
 					className={clsx(
-						'flex items-center gap-x-1 text-base font-semibold text-slate-500 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-300',
+						'flex items-center gap-x-1 text-base font-semibold text-slate-500 hover:text-slate-600 dark:text-dark-text-secondary dark:hover:text-slate-300',
 						dir === 'previous' && 'flex-row-reverse'
 					)}
 				>

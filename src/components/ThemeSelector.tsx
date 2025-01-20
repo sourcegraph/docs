@@ -73,10 +73,11 @@ export function ThemeSelector(
 									'text-link': selected,
 									'text-slate-700 dark:text-white':
 										active && !selected,
-									'text-slate-700 dark:text-slate-400':
+									'text-slate-700 dark:text-dark-text-secondary':
 										!active && !selected,
 									'bg-light-bg-2/80 dark:bg-dark-bg-3': active
-								}
+								},
+								'hover:bg-vermilion-08 hover:text-vermilion-11'
 							)
 						}
 					>

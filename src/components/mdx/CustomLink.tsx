@@ -59,17 +59,17 @@ export const CustomLink: React.FC<CustomLinkProps> = ({
   // If there's a title, wrap the content in a HoverCard for tooltip
   if (rest?.title) {
     return (
-      <HoverCard>
-        <HoverCardTrigger asChild>
-				<Link href={cleanedHref.replaceAll("'", '')} {...rest} title='' className='inline'>
-          {children} <BookOpenText className='inline ml-1 text-current w-3 h-3' />
-        </Link>
-        </HoverCardTrigger>
-        <HoverCardContent>
-            <div className='mt-0 mb-1 text-black font-medium leading-6'>{children}</div>
-            <div className='text-sm leading-6 '>{highlightCode(rest.title || '')}</div>
-          </HoverCardContent>
-      </HoverCard>
+			<HoverCard>
+				<HoverCardTrigger asChild>
+					<Link href={cleanedHref.replaceAll("'", '')} {...rest} title='' className='inline text-teal-07 hover:text-teal-08'>
+						{children} <BookOpenText className='inline ml-1 text-current w-3 h-3' />
+					</Link>
+				</HoverCardTrigger>
+				<HoverCardContent className="bg-vermilion-11 dark:bg-vermilion-00">
+					<div className='mt-0 mb-1 text-vermilion-07 font-medium leading-6'>{children}</div>
+					<div className='text-sm leading-6 text-vermilion-08'>{highlightCode(rest.title || '')}</div>
+				</HoverCardContent>
+			</HoverCard>
     );
   }
 

@@ -30,7 +30,7 @@ export function Hero() {
 
 							<p
 								className={clsx(
-									'mt-3 text-xl tracking-tight text-slate-700 dark:text-slate-200 sm:text-2xl'
+									'mt-3 text-xl tracking-tight text-slate-700 dark:text-dark-text-primary sm:text-2xl'
 								)}
 							>
 								Sourcegraph allows developers to rapidly search, write, and understand code by bringing insights from their entire codebase right into the editor.
