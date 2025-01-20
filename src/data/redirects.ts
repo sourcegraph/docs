@@ -6718,12 +6718,19 @@ const redirectsData = [
     permanent: true
   },
   // Model Config docs
-
   {
     source: "/cody/clients/model-configuration",
     destination: "/cody/enterprise/model-configuration",
     permanent: true
   },
+
+  //Commands redirects
+    {
+    source: "/cody/capabilities/commands",
+    destination: "/cody/capabilities/prompts",
+    permanent: true
+  },
+
 
 ];
 
