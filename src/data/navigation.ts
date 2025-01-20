@@ -27,6 +27,23 @@ export const navigation: NavigationItem[] = [
 		separator: "Code Intelligence",
 		topics: [
 			{
+				title: "Omnibox",
+				href: "/omnibox",
+				sections: [
+					{ title: "Quickstart", href: "/omnibox/quickstart" },
+					{
+						title: "Query Types", href: "/omnibox/query-types",
+						subsections: [
+							{ title: "Symbol Search", href: "/omnibox/query-types/symbol-search", },
+							{ title: "File Search", href: "/omnibox/query-types/file-search", },
+							{ title: "Error Lookups", href: "/omnibox/query-types/error-lookups", },
+							{ title: "String Literal Search", href: "/omnibox/query-types/string-literal-search", },
+						]
+					},
+					{ title: "FAQs", href: "/omnibox/faq" },
+				],
+			},
+			{
 				title: "Cody",
 				href: "/cody",
 				sections: [
