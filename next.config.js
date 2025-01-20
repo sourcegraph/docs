@@ -14,36 +14,36 @@ const nextConfig = {
 	// https://vercel.com/docs/projects/environment-variables/system-environment-variables
 	// basePath: process.env.VERCEL_ENV === 'production' ? '/docs' : '',
 	basePath: '/docs',
-	async redirects() {
-		return [
-			...updatedRedirectsData,
-			{
-				source: `/v/${config.DOCS_LATEST_VERSION}/:slug*`,
-				destination: `https://sourcegraph.com/docs/:slug*`,
-				permanent: false
-			},
-			{
-				source: `/@${config.DOCS_LATEST_VERSION}/:slug*`,
-				destination: `https://sourcegraph.com/docs/:slug*`,
-				permanent: false
-			},
-			{
-				source: '/v/:version(\\d+\\.\\d+)/:slug*',
-				destination: 'https://:version.sourcegraph.com/:slug*',
-				permanent: true
-			},
-			{
-				source: '/@:version(\\d+\\.\\d+)/:slug*',
-				destination: 'https://:version.sourcegraph.com/:slug*',
-				permanent: true
-			},
-			{
-				source: '/changelog.rss',
-				destination: '/technical-changelog.rss',
-				permanent: true
-			}
-		];
-	}
+	// async redirects() {
+	// 	return [
+	// 		...updatedRedirectsData,
+	// 		{
+	// 			source: `/v/${config.DOCS_LATEST_VERSION}/:slug*`,
+	// 			destination: `https://sourcegraph.com/docs/:slug*`,
+	// 			permanent: false
+	// 		},
+	// 		{
+	// 			source: `/@${config.DOCS_LATEST_VERSION}/:slug*`,
+	// 			destination: `https://sourcegraph.com/docs/:slug*`,
+	// 			permanent: false
+	// 		},
+	// 		{
+	// 			source: '/v/:version(\\d+\\.\\d+)/:slug*',
+	// 			destination: 'https://:version.sourcegraph.com/:slug*',
+	// 			permanent: true
+	// 		},
+	// 		{
+	// 			source: '/@:version(\\d+\\.\\d+)/:slug*',
+	// 			destination: 'https://:version.sourcegraph.com/:slug*',
+	// 			permanent: true
+	// 		},
+	// 		{
+	// 			source: '/changelog.rss',
+	// 			destination: '/technical-changelog.rss',
+	// 			permanent: true
+	// 		}
+	// 	];
+	// }
 };
 
 module.exports = async () => {
