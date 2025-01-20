@@ -6717,6 +6717,13 @@ const redirectsData = [
     destination: "/code-search/code-navigation/inference_configuration",
     permanent: true
   },
+  // Model Config docs
+
+  {
+    source: "/cody/clients/model-configuration",
+    destination: "/cody/enterprise/model-configuration",
+    permanent: true
+  },
 
 ];
 
