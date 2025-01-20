@@ -11,8 +11,10 @@ const tabVideos = {
   'Multi-Models': 'https://www.youtube.com/embed/ZK-rNEhJIDs?autoplay=1&mute=1'
 }
 
+type TabKeys = keyof typeof tabVideos;
+
 export function DemoLayout() {
-  const [activeTab, setActiveTab] = useState('Overview');
+  const [activeTab, setActiveTab] = useState<TabKeys>('Overview');
 
   return (
     <div className="space-y-6 mb-10">
@@ -21,7 +23,7 @@ export function DemoLayout() {
         {tabs.map((tab, index) => (
           <button
             key={index}
-            onClick={() => setActiveTab(tab)}
+            onClick={() => setActiveTab(tab as TabKeys)}
             className={`px-[12px] py-[7px] rounded-[5px] transition ${
               activeTab === tab
                 ? 'bg-vermilion-07 text-white hover:bg-vermilion-08'
@@ -32,8 +34,6 @@ export function DemoLayout() {
           </button>
         ))}
       </div>
-
-      {/* Video Container with Gradient Shadow */}
       <div className="relative w-full max-w-[1000px] mx-auto">
         <div 
           className="absolute inset-0 -m-4 rounded-[6px] blur-xl opacity-20"
