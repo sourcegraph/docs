@@ -75,7 +75,7 @@ export function ThemeSelector(
 										active && !selected,
 									'text-slate-700 dark:text-dark-text-secondary':
 										!active && !selected,
-									'bg-light-bg-2/80 dark:bg-dark-bg-3': active
+									'bg-vermilion-08 text-vermilion-11': active
 								},
 								'hover:bg-vermilion-08 hover:text-vermilion-11'
 							)

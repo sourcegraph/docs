@@ -75,7 +75,7 @@ export const CustomLink: React.FC<CustomLinkProps> = ({
 
 	// Internal links handled by Next.js Link component
 	return (
-		<Link href={cleanedHref} {...rest}>
+		<Link href={cleanedHref} {...rest} className='no-underline hover-underline'>
 			{children}
 			{/* Ensuring <a> is used inside <Link> for custom attributes like 'className' */}
 		</Link>

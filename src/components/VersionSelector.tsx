@@ -39,7 +39,7 @@ export default function VersionSelector() {
 			<div>
 				<Menu.Button
 					className="inline-flex w-full items-center justify-center gap-x-1.5
-				rounded-md px-2 py-2 text-xs font-medium text-slate-500 shadow-sm ring-1 ring-inset ring-light-border-2 hover:bg-slate-100 dark:bg-dark-bg-2 dark:text-dark-text-secondary dark:ring-inset dark:ring-dark-border"
+				rounded-md px-2 py-2 text-xs font-medium text-slate-500 shadow-sm ring-1 ring-inset ring-light-border-2 hover:bg-vermilion-08 hover:text-vermilion-11 dark:bg-dark-bg-2 dark:text-dark-text-secondary dark:ring-inset dark:ring-dark-border"
 				>
 					{selectedVersion.name}
 					<ChevronDownIcon
@@ -71,8 +71,9 @@ export default function VersionSelector() {
 											setSelectedVersion(version)
 										}
 										className={clsx(
+											'hover:bg-vermilion-08 hover:text-vermilion-11',
 											active &&
-											'bg-light-bg-2 text-slate-900 dark:bg-dark-bg-3 dark:text-white',
+											'bg-vermilion-08 text-vermilion-11',
 											count === 0 && 'rounded-t-md',
 											'flex w-full items-center justify-between px-3 py-2'
 										)}
@@ -94,7 +95,7 @@ export default function VersionSelector() {
 								href="/legacy"
 								className={clsx(
 									active &&
-									'bg-light-bg-2 text-slate-900 dark:bg-dark-bg-3 dark:text-white',
+									'bg-vermilion-08 text-vermilion-11',
 									'flex items-center justify-between rounded-b-md px-3 py-2'
 								)}
 							>
