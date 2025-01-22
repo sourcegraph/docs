@@ -1,21 +1,30 @@
 # Private network configuration
 
-A **private network** refers to a secure network environment segregated from the public internet, designed to facilitate internal communications and operations within an organization. This network setup restricts external access, enhancing security and control over data flow by limiting exposure to external threats and unauthorized access.
+## Overview
+A private network is your organization's secure, internal network space - separated from the public internet.
+Think of it as your company's own protected environment where internal systems can communicate safely,
+keeping your sensitive data and operations shielded from external access.
 
-When deploying self-hosted Sourcegraph instances in private networks with specific compliance and policy requirements, additional configuration may be required to ensure all networking features function correctly. The reasons for applying the following configuration options depend on the specific functionality of the Sourcegraph service and the unique network and infrastructure requirements of the organization.
+When deploying self-hosted Sourcegraph instances in private networks with specific compliance and policy requirements,
+additional configuration may be required to ensure all networking features function correctly. The reasons for applying the following configuration options depend on the specific functionality of the Sourcegraph service and the unique network and infrastructure requirements of the organization.
 
 The following is a list of Sourcegraph services and how and when each initiates outbound connections to external services:
 
-- **executor**: Sourcegraph [Executor](../executors) batch change or precise indexing jobs may need to connect to services hosted within an organization's private network
-- **frontend**: The frontend service communicates externally when connecting to external [auth providers](../auth), sending [telemetry data](../pings), testing code host connections, and connecting to [externally hosted](../external_services) Sourcegraph services
+- **executor**: Sourcegraph [Executor](../executors) batch change or precise indexing jobs may need to connect to
+services hosted within an organization's private network
+- **frontend**: The frontend service communicates externally when connecting to external [auth providers](../auth),
+sending [telemetry data](../pings), testing code host connections, and connecting to [externally hosted](../external_services) Sourcegraph services
 - **gitserver**: Executes git commands against externally hosted [code hosts](../external_service)
 - **migrator**: Connects to Postgres instances (which may be [externally hosted](../external_services/postgres)) to process database migrations
 - **repo-updater**: Communicates with [code hosts](../external_service) APIs to coordinate repository synchronization
-- **worker**: Sourcegraph [Worker](../workers) run various background jobs that may require establishing connections to services hosted within an organization's private network
+- **worker**: Sourcegraph [Worker](../workers) run various background jobs that may require establishing connections to
+services hosted within an organization's private network
 
 ## HTTP proxy configuration
 
-All Sourcegraph services respect the conventional `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY` environment variables for routing Sourcegraph client application HTTP traffic through a proxy server. The steps for configuring proxy environment variables will depend on your Sourcegraph deployment method.
+All Sourcegraph services respect the conventional `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY` environment variables for
+routing Sourcegraph client application HTTP traffic through a proxy server. The steps for configuring proxy environment
+variables will depend on your Sourcegraph deployment method.
 
 ### Kubernetes Helm
 
@@ -32,48 +41,143 @@ executor|frontend|gitserver|migrator|repo-updater|worker:
     value: "blobstore,codeinsights-db,codeintel-db,sourcegraph-frontend-internal,sourcegraph-frontend,github-proxy,gitserver,grafana,indexed-search-indexer,indexed-search,jaeger-query,pgsql,precise-code-intel-worker,prometheus,redis-cache,redis-store,repo-updater,searcher,symbols,syntect-server,worker-executors,worker,cloud-sql-proxy,localhost,127.0.0.1,.svc,.svc.cluster.local,kubernetes.default.svc"
 ```
 
-<Callout type="warning">Failure to configure `NO_PROXY` correctly can cause the proxy configuration to interfere with local networking between internal Sourcegraph services.</Callout>
+<Callout type="warning">Failure to configure `NO_PROXY` correctly can cause the proxy configuration to interfere with
+local networking between internal Sourcegraph services.</Callout>
 
-## Using private CA root certificates
-Some organizations maintain a private Certificate Authority (CA) for issuing certificates within their private network. When Sourcegraph connects to TLS encrypted service using a self-signed certificate that it does not trust, you will observe an `x509: certificate signed by unknown authority` error message in logs.
+## Configuring TLS certificates for private networks
 
-In order for Sourcegraph to respect an organization's self-signed certificates, the private CA root certificate(s) will need to be appended to Sourcegraph's trusted CA root certificate list in `/etc/ssl/certs/ca-certificates.crt`.
+When deploying Sourcegraph in private networks, you'll often need to configure TLS certificates to establish trusted
+connections with internal services like code hosts. The recommended approach is to configure root CA certificates
+through Sourcegraph's site configuration using `tls.external` in the `experimentalFeatures` section.
 
-### Configuring sourcegraph-frontend to recognize private CA root certificates
-The following details the process for setting up the sourcegraph-frontend to acknowledge and trust a private CA root certificate for Sourcegraph instances deployed using [Helm](../deploy/kubernetes/helm). For any other Sourcegraph service that needs to trust an organization's private CA root certificate (including gitserver, repo-updater, or migrator), similar steps will need to be followed.
+This method offers several advantages:
+- Works consistently across both Cloud and self-hosted deployments
+- Requires minimal configuration changes
+- Can be managed entirely through the web UI
+- Maintains certificates in a centralized location
+- Aligns with enterprise PKI best practices
 
-1. Copy out the existing `ca-certificates.crt` file from the sourcegraph-frontend container:
-```sh
-kubectl cp $(kubectl get pod -l app=sourcegraph-frontend -o jsonpath='{.items[0].metadata.name}'):/etc/ssl/certs/ca-certificates.crt sourcegraph-frontend-ca-certificates.crt
-```
-2. Concatenate the private CA root certificate to the `sourcegraph-frontend-ca-certificates.crt` file:
-```sh
-cat sourcegraph-frontend-ca-certificates.crt {private-ca-certificate.crt file} > ca-certificates.crt
-```
-3. Create a new Kubernetes ConfigMap containing the concatenated `ca-certificates.crt` file:
-```sh
-kubectl create configmap sourcegraph-frontend-ca-certificates --from-file=ca-certificates.crt
-```
-4. Mount the `sourcegraph-frontend-ca-certificates` ConfigMap to the sourcegraph-frontend Deployment:
-```yaml
-frontend:
-  extraVolumes:
-  - name: ca-certificates
-    configMap:
-      name: sourcegraph-frontend-ca-certificates
-  extraVolumeMounts:
-  - name: ca-certificates
-    mountPath: /etc/ssl/certs/
+The configuration process involves identifying and adding the public key of your organization's root Certificate
+Authority (CA) to Sourcegraph's site configuration. This approach is particularly efficient because:
+* Root CA certificates typically have long expiration periods (often measured in years)
+* A single root CA certificate usually covers multiple internal services
+* The configuration can be managed without container modifications or filesystem changes
+
+### Obtain the certificate chain
+Use the OpenSSL command to extract the certificate chain from your code host.
+Replace the domain and port with your internal code host's values:
+
+```bash
+openssl s_client -showcerts -connect github.com:443 \
+-nameopt lname < /dev/null > certs.log 2>&1
 ```
 
-Once deployed, you should see the private CA root certificate in the sourcegraph-frontend container's `/etc/ssl/certs/ca-certificates.crt` file.
-```sh
-kubectl exec -it $(kubectl get pod -l app=sourcegraph-frontend -o jsonpath='{.items[0].metadata.name}') -- tail /etc/ssl/certs/ca-certificates.crt
+### Identify the root certificate
+In the generated `certs.log` file, locate the root CA certificate:
+
+Certificate chains typically include 3 certificates:
+
+* Root certificate authority (depth=3).
+* Intermediate certificate authority (depth=1).
+* Server (leaf) certificate (depth=0).
+
+The certificate with the highest depth number in the chain will be the root CA certificate.
+
+The root CA certificate will typically have:
+
+* A long expiration period (years).
+* A descriptive common name (e.g., "Enterprise Root CA 2023").
+
+Example root CA certificate for github.com:
+
+```text
+Connecting to 140.82.114.3
+depth=2 countryName=US, stateOrProvinceName=New Jersey, localityName=Jersey City, organizationName=The USERTRUST Network, commonName=USERTrust ECC Certification Authority
+verify return:1
+depth=1 countryName=GB, stateOrProvinceName=Greater Manchester, localityName=Salford, organizationName=Sectigo Limited, commonName=Sectigo ECC Domain Validation Secure Server CA
+verify return:1
+depth=0 commonName=github.com
+verify return:1
+CONNECTED(00000005)
+---
+...
+ 2 s:countryName=US, stateOrProvinceName=New Jersey, localityName=Jersey City, organizationName=The USERTRUST Network, commonName=USERTrust ECC Certification Authority
+   i:countryName=GB, stateOrProvinceName=Greater Manchester, localityName=Salford, organizationName=Comodo CA Limited, commonName=AAA Certificate Services
+   a:PKEY: id-ecPublicKey, 384 (bit); sigalg: RSA-SHA384
+   v:NotBefore: Mar 12 00:00:00 2019 GMT; NotAfter: Dec 31 23:59:59 2028 GMT
+-----BEGIN CERTIFICATE-----
+MII...c=
+-----END CERTIFICATE-----
 ```
 
-You can verify that the self-signed certificate is trusted using `curl`:
-```sh
-kubectl exec -it $(kubectl get pod -l app=sourcegraph-frontend -o jsonpath='{.items[0].metadata.name}') -- curl -v {https://internal.service.example.com} > /dev/null
+### Format the certificate
+Once you've identified the root CA certificate:
+
+* Extract the certificate content including the BEGIN and END markers.
+* Format the certificate for the site configuration:
+    * Replace newlines with \n characters.
+    * Enclose the entire certificate in double quotes.
+    * Add a trailing comma.
+
+### Add the certificate to the site configuration
+
+Add the formatted certificate to your Sourcegraph site configuration.
+
+```json
+{
+    "experimentalFeatures": {
+        "tls.external": {
+            "certificates": [
+                "-----BEGIN CERTIFICATE-----\naZ...==\n-----END CERTIFICATE-----"
+            ]
+        }
+    }
+}
 ```
 
-<Callout type="note">It is recommended to repeat these steps on a regular cadence to ensure that Sourcegraph's CA root certificate list stays up to date.</Callout>
+For organizations with multiple root CAs (uncommon), additional certificates can be added to the array:
+```json
+{
+    "experimentalFeatures": {
+        "tls.external": {
+            "certificates": [
+                "-----BEGIN CERTIFICATE-----\naZ...==\n-----END CERTIFICATE-----",
+                "-----BEGIN CERTIFICATE-----\nMI...I7\n-----END CERTIFICATE-----"
+            ]
+        }
+    }
+}
+```
+
+### Validation of certificate configuration
+These steps confirms that configuring the root CA certificate through `tls.external` is sufficient for all standard
+Sourcegraph operations that require secure connections to internal services.
+
+    1. **Code host connectivity**
+       - Verify using the UI "Test Connection" button
+       - Trigger validate completed sync jobs
+        <Callout type="info">Executed by: sourcegraph-frontend service</Callout>
+
+    2. **Repository operations**
+       - Verify individual repository synchronization
+       - Verify cloning operations
+        <Callout type="info">Executed by: gitserver service</Callout>
+
+    3. **Permission synchronization**
+       -  Verify user-centric permission sync jobs
+        <Callout type="info">Executed by: worker service</Callout>
+
+<Callout type="note">
+Repository-centric permission sync jobs are expected to behave identically, as they use the same underlying TLS configuration mechanisms.
+</Callout>
+
+### Recommended best practices
+* Only include root CA certificates, not intermediate or server certificates.
+* Avoid using insecureSkipVerify: true and add TLS certificates if needed, as it bypasses important security checks.
+* Document certificate sources and expiration dates in your organization's runbooks.
+* Plan for certificate rotation well before root CA expiration.
+* Most enterprises use a single root CA, so adding one certificate often covers all internal services.
+* Keep the certificate list minimal and well-maintained.
+
+
+
