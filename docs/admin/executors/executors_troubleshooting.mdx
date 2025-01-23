@@ -242,3 +242,22 @@ Tells us that the Pod cannot be scheduled because the pod affinity rules (`EXECU
 configured do not match any nodes.
 
 In this case, the `EXECUTOR_KUBERNETES_POD_AFFINITY` needs to be modified to correctly target the node.
+
+### Executor Job failure issues
+
+If you see below errors for executor jobs:
+
+Codeintel
+```Index failed to index: Running command "step.kubernetes.pre-index.0": job sg-executor-job-codeintel-111877 failed: Usage of EmptyDir volume "job-data" exceeds the limit "5Gi".```
+
+Batch Changes
+```"step.kubernetes.step.0.pre": job sg-executor-job-batches-91562 failed: Usage of EmptyDir volume "job-data" exceeds the limit "5Gi".```
+
+Update the below variables in the respective executor's deployment file to increase EmptyDir volume "job-data" storage. In this example, ```KUBERNETES_JOB_VOLUME_SIZE``` is set to 20Gi, but you can tweak it as per your requirement.
+
+```
+- name: KUBERNETES_JOB_VOLUME_TYPE          value: emptyDir        
+- name: KUBERNETES_JOB_VOLUME_SIZE          value: 20Gi
+```
+
+```KUBERNETES_JOB_VOLUME_TYPE``` can be either set to ```emptyDir``` or ```pvc``` and if it’s not set, the default is ```emptyDir```
