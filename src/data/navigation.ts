@@ -55,7 +55,7 @@ export const navigation: NavigationItem[] = [
 						subsections: [
 							{ title: "Chat", href: "/cody/capabilities/chat", },
 							{ title: "Autocomplete", href: "/cody/capabilities/autocomplete", },
-							{ title: "Prompts", href: "/cody/capabilities/commands", },
+							{ title: "Prompts", href: "/cody/capabilities/prompts", },
 							{ title: "OpenCtx", href: "/cody/capabilities/openctx", },
 							{ title: "Debug Code", href: "/cody/capabilities/debug-code", },
 							{ title: "Context Filters", href: "/cody/capabilities/ignore-context", },
@@ -102,7 +102,6 @@ export const navigation: NavigationItem[] = [
 							{ title: "Features", href: "/code-search/code-navigation/features", },
 							{ title: "Search-based code navigation", href: "/code-search/code-navigation/search_based_code_navigation", },
 							{ title: "Precise code navigation", href: "/code-search/code-navigation/precise_code_navigation", },
-							{ title: "Indexers", href: "/code-search/code-navigation/writing_an_indexer", },
 							{ title: "Auto-indexing", href: "/code-search/code-navigation/auto_indexing", },
 							{ title: "Environment Variables", href: "/code-search/code-navigation/envvars", },
 							{ title: "Troubleshooting", href: "/code-search/code-navigation/troubleshooting", },
