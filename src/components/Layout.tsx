@@ -65,7 +65,7 @@ function Header() {
 						Documentation
 					</Link>
 					<Link
-						href="/help"
+						href="https://community.sourcegraph.com"
 						aria-label="Home page"
 						className="relative z-10 hidden md:block text-vermilion-08 hover:text-vermilion-07 ml-4"
 					>
