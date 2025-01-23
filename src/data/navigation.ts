@@ -303,6 +303,27 @@ export const navigation: NavigationItem[] = [
 		],
 	},
 	{
+		separator: "Pricing",
+		topics: [
+			{
+				title: "Free",
+				href: "/pricing/free",
+			},
+			{
+				title: "Enterprise Starter",
+				href: "/pricing/enterprise-starter",
+				sections: [
+					{ title: "Billing", href: "/pricing/billing" },
+
+				],
+			},
+			{
+				title: "Enterprise",
+				href: "/pricing/enterprise",
+			},
+		],
+	},
+	{
 		separator: "Help & Support",
 		topics: [
 			{
