@@ -109,7 +109,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 			<Header />
 
 			{isHomePage && <Hero />}
-			{isHomePage && <DemoLayout />}
+			{/* {isHomePage && <DemoLayout />} */}
 
 			<div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-12">
 				<div className="hidden lg:relative lg:block lg:flex-none">
