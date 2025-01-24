@@ -8,12 +8,15 @@ keeping your sensitive data and operations shielded from external access.
 When deploying self-hosted Sourcegraph instances in private networks with specific compliance and policy requirements,
 additional configuration may be required to ensure all networking features function correctly. The reasons for applying the following configuration options depend on the specific functionality of the Sourcegraph service and the unique network and infrastructure requirements of the organization.
 
-The following is a list of Sourcegraph services and how and when each initiates outbound connections to external services:
-
+The following is a list of Sourcegraph services that initiate outbound connections to external services. Sourcegraph services not included in this list can be assumed to only connect to services within the Sourcegraph deployment's network segment:
 - **executor**: Sourcegraph [Executor](../executors) batch change or precise indexing jobs may need to connect to
 services hosted within an organization's private network
-- **frontend**: The frontend service communicates externally when connecting to external [auth providers](../auth),
-sending [telemetry data](../pings), testing code host connections, and connecting to [externally hosted](../external_services) Sourcegraph services
+- **frontend**: The frontend service communicates externally when connecting to:
+    * External [auth providers](../auth)
+    * Sending [telemetry data](../pings)
+    * Testing [code host connections](../code_hosts)
+    * Connecting to [externally hosted](../external_services) Sourcegraph services
+    * Connecting to external [LLM providers](../../cody/capabilities/supported-models) with Cody
 - **gitserver**: Executes git commands against externally hosted [code hosts](../external_service)
 - **migrator**: Connects to Postgres instances (which may be [externally hosted](../external_services/postgres)) to process database migrations
 - **repo-updater**: Communicates with [code hosts](../external_service) APIs to coordinate repository synchronization
@@ -39,6 +42,18 @@ executor|frontend|gitserver|migrator|repo-updater|worker:
     value: http://proxy.example.com:8080
   - name: NO_PROXY
     value: "blobstore,codeinsights-db,codeintel-db,sourcegraph-frontend-internal,sourcegraph-frontend,github-proxy,gitserver,grafana,indexed-search-indexer,indexed-search,jaeger-query,pgsql,precise-code-intel-worker,prometheus,redis-cache,redis-store,repo-updater,searcher,symbols,syntect-server,worker-executors,worker,cloud-sql-proxy,localhost,127.0.0.1,.svc,.svc.cluster.local,kubernetes.default.svc"
+```
+
+### Docker Compose
+
+Add the proxy environment variables your docker compose override file.
+```yaml:docker-compose.override.yaml
+services:
+  <service-name>:
+    environment:
+      - HTTP_PROXY=http://proxy.example.com:8080
+      - HTTPS_PROXY=http://proxy.example.com:8080
+      - NO_PROXY='blobstore,caddy,cadvisor,codeintel-db,codeintel-db-exporter,codeinsights-db,codeinsights-db-exporter,sourcegraph-frontend-0,sourcegraph-frontend-internal,gitserver-0,grafana,migrator,node-exporter,otel-collector,pgsql,pgsql-exporter,precise-code-intel-worker,prometheus,redis-cache,redis-store,repo-updater,searcher-0,symbols-0,syntect-server,worker,zoekt-indexserver-0,zoekt-webserver-0,localhost,127.0.0.1'
 ```
 
 <Callout type="warning">Failure to configure `NO_PROXY` correctly can cause the proxy configuration to interfere with
@@ -68,7 +83,7 @@ Use the OpenSSL command to extract the certificate chain from your code host.
 Replace the domain and port with your internal code host's values:
 
 ```bash
-openssl s_client -showcerts -connect github.com:443 \
+openssl s_client -showcerts -connect example.com:8443 \
 -nameopt lname < /dev/null > certs.log 2>&1
 ```
 
@@ -77,16 +92,14 @@ In the generated `certs.log` file, locate the root CA certificate:
 
 Certificate chains typically include 3 certificates:
 
-* Root certificate authority (depth=3).
-* Intermediate certificate authority (depth=1).
-* Server (leaf) certificate (depth=0).
+* Root certificate authority (depth=2)
+* Intermediate certificate authority (depth=1)
+* Server (leaf) certificate (depth=0)
 
-The certificate with the highest depth number in the chain will be the root CA certificate.
+The last certificate in the chain will be the root CA certificate and will typically have:
 
-The root CA certificate will typically have:
-
-* A long expiration period (years).
-* A descriptive common name (e.g., "Enterprise Root CA 2023").
+* A long expiration period (years)
+* A descriptive common name (e.g., "Enterprise Root CA 2023")
 
 Example root CA certificate for github.com:
 
@@ -115,12 +128,24 @@ Once you've identified the root CA certificate:
 
 * Extract the certificate content including the BEGIN and END markers.
 * Format the certificate for the site configuration:
-    * Replace newlines with \n characters.
-    * Enclose the entire certificate in double quotes.
-    * Add a trailing comma.
+    * Replace newlines with \n characters
+    * Enclose the entire certificate in double quotes
+    * Add a trailing comma
+
+
+The following command can be used to easily obtain, extract, and format the root certificate from a 3 certificate chain.
+Be sure to adjust the hostname and port to match your internal code host. If your certificate chain is of a different
+depth, adjust the awk command accordingly. `awk '/BEGIN CERTIFICATE/{i++} i==X'`
+ ```bash
+openssl s_client -showcerts -connect example.com:8443 \
+-nameopt lname < /dev/null 2>&1 \
+| awk '/BEGIN CERTIFICATE/,/END CERTIFICATE/' \
+| awk '/BEGIN CERTIFICATE/{i++} i==2' \
+| awk '{printf "%s\\n", $0}' | sed 's/\\n$//' \
+| awk '{print "\"" $0 "\","}'
+```
 
 ### Add the certificate to the site configuration
-
 Add the formatted certificate to your Sourcegraph site configuration.
 
 ```json
@@ -156,7 +181,7 @@ Sourcegraph operations that require secure connections to internal services.
     1. **Code host connectivity**
        - Verify using the UI "Test Connection" button
        - Trigger validate completed sync jobs
-        <Callout type="info">Executed by: sourcegraph-frontend service</Callout>
+        <Callout type="info">Executed by: frontend service</Callout>
 
     2. **Repository operations**
        - Verify individual repository synchronization
@@ -173,7 +198,7 @@ Repository-centric permission sync jobs are expected to behave identically, as t
 
 ### Recommended best practices
 * Only include root CA certificates, not intermediate or server certificates.
-* Avoid using insecureSkipVerify: true and add TLS certificates if needed, as it bypasses important security checks.
+* Avoid using `insecureSkipVerify: true` and add TLS certificates if needed, as it bypasses important security checks.
 * Document certificate sources and expiration dates in your organization's runbooks.
 * Plan for certificate rotation well before root CA expiration.
 * Most enterprises use a single root CA, so adding one certificate often covers all internal services.
