@@ -59,6 +59,23 @@ services:
 <Callout type="warning">Failure to configure `NO_PROXY` correctly can cause the proxy configuration to interfere with
 local networking between internal Sourcegraph services.</Callout>
 
+## Docker networking configuration
+To avoid IP range collissions with the host network, it is recommended to explicitly configure a CIDR range for the
+Docker network.
+
+```yaml
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.20.2.0/27" # CIDR range for the Docker network that doesn't overlap with the host network.
+```
+
+Additional information on docker networking can be found here:
+* [Docker networking overview](https://docs.docker.com/network/)
+* [Networking in Compose](https://docs.docker.com/compose/how-tos/networking/)
+
 ## Configuring TLS certificates for private networks
 
 When deploying Sourcegraph in private networks, you'll often need to configure TLS certificates to establish trusted
