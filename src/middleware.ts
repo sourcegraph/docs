@@ -48,15 +48,15 @@ export function middleware(request: NextRequest) {
   if (pathWithoutBase.startsWith(`/v/${docsConfig.DOCS_LATEST_VERSION}/`)) {
     return NextResponse.redirect(createRedirectUrl(
       request,
-      `https://sourcegraph.com/docs/:slug*`,
-      pathWithoutBase
+      pathWithoutBase.substring(`/v/${docsConfig.DOCS_LATEST_VERSION}/`.length - 1),
+      ""
     ))
   }
   if (pathWithoutBase.startsWith(`/@${docsConfig.DOCS_LATEST_VERSION}/`)) {
     return NextResponse.redirect(createRedirectUrl(
       request,
-      `https://sourcegraph.com/docs/:slug*`,
-      pathWithoutBase
+      pathWithoutBase.substring(`/@${docsConfig.DOCS_LATEST_VERSION}/`.length - 1),
+      ""
     ))
   }
   const versionMatch = pathWithoutBase.match(/^\/v\/(\d+\.\d+)\/(.*)/)
