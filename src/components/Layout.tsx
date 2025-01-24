@@ -57,7 +57,7 @@ function Header() {
 					>
 						<Logo className="h-9 w-auto" />
 					</Link>
-					<Link
+					{/* <Link
 						href="/"
 						aria-label="Home page"
 						className="relative z-10 md:block text-vermilion-08 hover:text-vermilion-07 ml-2"
@@ -70,7 +70,7 @@ function Header() {
 						className="relative z-10 hidden md:block text-vermilion-08 hover:text-vermilion-07 ml-4"
 					>
 						Help
-					</Link>
+					</Link> */}
 					<Link
 						href="/"
 						className="relative z-10 block md:hidden"
