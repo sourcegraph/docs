@@ -262,9 +262,9 @@ export const navigation: NavigationItem[] = [
 				sections: [
 					{ title: "Metrics", href: "/analytics#metrics" },
 					{ title: "Cloud Analytics", href: "/analytics/cloud" },
-					{ title: "Self-hosted Analytics (coming soon)", href: "/analytics/self-hosted" },
+					{ title: "Self-hosted Analytics", href: "/analytics/self-hosted" },
 				],
-			},		
+			},
 			{
 				title: "Sourcegraph Cloud",
 				href: "/cloud",
