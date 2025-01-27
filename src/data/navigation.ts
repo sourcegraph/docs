@@ -42,16 +42,6 @@ export const navigation: NavigationItem[] = [
 						]
 					},
 					{
-						title: "Chat", href: "/cody/chat",
-						subsections: [
-							{ title: "Features", href: "/cody/chat/features", },
-							{ title: "Query Types", href: "/cody/chat/query-types", },
-							{ title: "Prompts", href: "/cody/capabilities/prompts", },
-							{ title: "Agentic Chat", href: "/cody/capabilities/prompts", },							{ title: "OpenCtx", href: "/cody/capabilities/openctx", },
-							{ title: "Supported Models", href: "/cody/capabilities/supported-models", },
-						]
-					},
-					{
 						title: "Cody for Enterprise", href: "/cody/clients/enable-cody-enterprise",
 						subsections: [
 							{ title: "Features", href: "/cody/enterprise/features", },
@@ -63,10 +53,15 @@ export const navigation: NavigationItem[] = [
 					{
 						title: "Capabilities", href: "/cody/capabilities",
 						subsections: [
+							{ title: "Chat", href: "/cody/capabilities/chat", },
+							{ title: "Query Types", href: "/cody/capabilities/query-types", },
 							{ title: "Autocomplete", href: "/cody/capabilities/autocomplete", },
+							{ title: "Prompts", href: "/cody/capabilities/prompts", },
+							{ title: "OpenCtx", href: "/cody/capabilities/openctx", },
 							{ title: "Debug Code", href: "/cody/capabilities/debug-code", },
 							{ title: "Context Filters", href: "/cody/capabilities/ignore-context", },
 							{ title: "Proxy Setup", href: "/cody/capabilities/proxy-setup", },
+							{ title: "Supported Models", href: "/cody/capabilities/supported-models", },
 							{ title: "Feature Parity Reference", href: "/cody/clients/feature-reference", },
 						]
 					},
