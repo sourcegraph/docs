@@ -20,10 +20,10 @@ export function SecurityIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 					gradientUnits="userSpaceOnUse"
 					gradientTransform="translate(52.5954 73.4848) rotate(52.8287) scale(89.9806 88.1015)"
 				>
-					<stop offset="0.12479" stopColor="#7048E8" />
-					<stop offset="0.308435" stopColor="#00CBEC" />
-					<stop offset="0.642062" stopColor="#A112FF" />
-					<stop offset="1" stopColor="#FF5543" />
+					<stop offset="0.12479" stopColor="#F34E3F" />
+					<stop offset="0.308435" stopColor="#F34E3F" />
+					<stop offset="0.642062" stopColor="#F34E3F" />
+					<stop offset="1" stopColor="#F34E3F" />
 				</radialGradient>
 			</defs>
 		</svg>

@@ -5,7 +5,7 @@ export function Globe({ className }: { className?: string }) {
 			width="24"
 			height="24"
 			viewBox="0 0 24 24"
-			fill="none"
+			fill="#F34E3F"
 			stroke="currentColor"
 			strokeWidth="2"
 			strokeLinecap="round"
