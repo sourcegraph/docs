@@ -51,7 +51,7 @@ function Header() {
 				</div>
 				<div className="relative flex flex-grow basis-0 items-center">
 					<Link
-						href="https://sourcegraph.com/"
+						href="/"
 						aria-label="Home page"
 						className="relative z-10 hidden md:block"
 					>
