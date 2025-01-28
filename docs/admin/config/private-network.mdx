@@ -60,27 +60,18 @@ services:
 local networking between internal Sourcegraph services.</Callout>
 
 ## Docker networking configuration
-To avoid IP range collisions with the host network, it is recommended to explicitly configure a CIDR range for the
-Docker network.
-
-```yaml
-networks:
-  default:
-    ipam:
-      driver: default
-      config:
-        - subnet: "172.20.2.0/27" # CIDR range for the Docker network that doesn't overlap with the host network.
-```
+If there is an IP conflict on between the host network and the Docker network, you may need to configure the docker CIDR
+range in the docker-compose override file.
 
 Additional information on docker networking can be found here:
 * [Docker networking overview](https://docs.docker.com/network/)
 * [Networking in Compose](https://docs.docker.com/compose/how-tos/networking/)
 
-## Configuring TLS certificates for private networks
+## Trusting TLS certificates using internal PKI
 
-When deploying Sourcegraph in private networks, you'll often need to configure TLS certificates to establish trusted
-connections with internal services like code hosts. The recommended approach is to configure root CA certificates
-through Sourcegraph's site configuration using `tls.external` in the `experimentalFeatures` section.
+If your organization uses internal Public Key Infrastructure to manage TLS certificates, you may need to configure your
+Sourcegraph instance to trust your internal Root Certificate Authorities, so your instance can connect to other internal
+services, ex. code hosts, authentication providers, etc.
 
 This method offers several advantages:
 - Works consistently across both Cloud and self-hosted deployments
