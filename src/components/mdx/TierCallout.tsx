@@ -5,7 +5,7 @@ import { Users, Flag } from 'lucide-react';
 const styles = {
   container: 'border-slate-300 border-[#eaeaea] dark:border-[#333333]',
   icon: 'text-inherit',
-  body: 'text-sky-800 [--tw-prose-background:theme(colors.sky.50)] prose-a:text-sky-900 prose-code:text-sky-900 dark:text-slate-300 dark:prose-code:text-slate-300'
+  body: 'text-[#334155] dark:text-dark-text-secondary'
 };
 
 export function TierCallout({

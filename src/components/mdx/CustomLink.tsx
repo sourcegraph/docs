@@ -29,7 +29,7 @@ export const CustomLink: React.FC<CustomLinkProps> = ({
 	// Handling external links
 	if (href.startsWith('http')) {
 		return (
-			<a href={href} target="_blank" rel="noopener noreferrer" {...rest}>
+			<a href={href} target="_blank" rel="noopener noreferrer" {...rest} className='no-underline hover-underline'> 
 				{children}
 			</a>
 		);
@@ -38,7 +38,7 @@ export const CustomLink: React.FC<CustomLinkProps> = ({
 	// Handling anchor links
 	if (href.startsWith('#')) {
 		return (
-			<a href={href} {...rest}>
+			<a href={href} {...rest} className='no-underline hover-underline'>
 				{children}
 			</a>
 		);
@@ -61,7 +61,7 @@ export const CustomLink: React.FC<CustomLinkProps> = ({
     return (
 			<HoverCard>
 				<HoverCardTrigger asChild>
-					<Link href={cleanedHref.replaceAll("'", '')} {...rest} title='' className='inline text-teal-07 hover:text-teal-08'>
+					<Link href={cleanedHref.replaceAll("'", '')} {...rest} title='' className='inline text-teal-07 hover:text-teal-08 no-underline hover-underline'>
 						{children} <BookOpenText className='inline ml-1 text-current w-3 h-3' />
 					</Link>
 				</HoverCardTrigger>

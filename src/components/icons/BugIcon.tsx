@@ -5,7 +5,7 @@ export function BugIcon ({ className }: { className?: string }) {
     width="24"
     height="24"
     viewBox="0 0 24 24"
-    fill="#F34E3F"
+    fill="transparent"
     stroke="#F34E3F"
     strokeWidth="2"
     strokeLinecap="round"
