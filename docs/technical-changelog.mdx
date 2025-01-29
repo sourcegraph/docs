@@ -4,6 +4,706 @@ This page documents all notable changes to Sourcegraph. For more detailed change
 
 {/* CHANGELOG_START */}
 
+# 6.0 Patch 0
+
+## v6.0.0
+
+- [sourcegraph](https://github.com/sourcegraph/sourcegraph/releases/tag/v6.0.0)
+
+- [docker-compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/releases/tag/v6.0.0)
+
+- [helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/releases/tag/v6.0.0)
+
+- [kustomize](https://github.com/sourcegraph/deploy-sourcegraph-k8s/releases/tag/v6.0.0)
+
+### Features
+
+#### Agents
+
+- make review agent configurable via program files `(PR #2962)`
+  - The Review agent now requires the program file `.sourcegraph/review-agent.json` with at least the content `"{}"` to enable posting Pull Requests review through the GitHub App. The JSON file may contain additional configuration options to override defaults of the `ReviewRequestConfiguration` object (see OpenAPI spec)
+
+#### Ci
+
+- publish images with branch tag on release branch `(PR #3039)`
+- tag release branch images with branch image tag `(PR #3032)`
+
+#### Cloud
+
+- add support to collect web vitals metrics to web-svelte `(PR #2735)`
+
+#### Code Intelligence
+
+- Add audit logs for changes to syntactic jobs `(PR #2893)`
+- highlights json files with tree-sitter `(PR #2469)`
+  - Improved highlighting for JSON files
+
+#### Cody
+
+- improve rendering of diagnostics as GitHub comments `(PR #2954)`
+  - The Review Agent now includes the rule ID when posting comments on pull requests. By default, the minimum review severity is errors (previously it was warning). When the minimum severity is overridden to be warnings, then the review comments will also include the severity.
+- make Review Agent rule detection configurable `(PR #2913)`
+  - Configure custom review rules for the Review Agent by adding `*.rule.md` files nested under `.sourcegraph/` directories in any ancestor director of files in the diff.
+- Sourcegraph Agents `(PR #2739)`
+  - New `/.api/agents/**` endpoints to manage the creation of Sourcegraph Agents (EAP feature).
+  - New support to automatically review GitHub Pull Requests with a Review Agent via GitHub Apps (EAP feature).
+- first stab at a Code Review Agent API `(PR #2568)`
+  - New `GET /.api/tools` endpoint to list tool definitions for Sourcegraph API endpoints to use with the LLM /chat/completions endpoint for function calling.
+  - New `POST /.api/review/diff` endpoint to get a list of code review comments given a git diff (including GitHub pull requests and Gitlab merge requests).
+
+#### Dev
+
+- add support to export otel metrics to prom in local dev `(PR #2781)`
+
+#### Dotcom
+
+- support Svelte workspace switcher in dotcom `(PR #2675)`
+- enable workspaces-prod proxy `(PR #2664)`
+- add feature flag to enable React switcher in dotcom POC `(PR #2659)`
+
+#### Msp
+
+- add client details to MSP audit logs `(PR #2887)`
+- enable CloudSQL Enterprise Plus with postgresql.highAvailability `(PR #2682)`
+- upgrade CloudSQL to POSTGRES_16 `(PR #2667)`
+- support BigQuery table partitioning `(PR #2597)`
+
+#### Multi Tenant
+
+- enable extension setup step for everyone `(PR #3137)`
+- add org wasn't added modal UI `(PR #3072)`
+- add cancel subscription UI `(PR #3044)`
+- polish join workspace and status pages `(PR #2900)`
+- support 3ds and redirection-based payment flow for workspace creation `(PR #2865)`
+- Enable the new Sourcegraph branding by default `(PR #2801)`
+- polish workspace creation flow `(PR #2787)`
+- prepare common svelte UI for workspaces app `(PR #2734)`
+- connect repositories management page to API `(PR #2688)`
+- improve switch tenant UI `(PR #2656)`
+- add workspace billing settings page `(PR #2600)`
+- add workspace settings users page `(PR #2504)`
+- add workspace settings general page `(PR #2503)`
+- add workspace settings main layout `(PR #2502)`
+
+#### Multi-Tenant/Mt-Router
+
+- add prod deployment `(PR #2622)`
+
+#### Multitenant
+
+- Add UseRandomExternalAccount code host connection option and use it in MT `(PR #2821)`
+- Disable web app toggle by default on workspaces `(PR #2771)`
+- no pings, no telemetry redaction `(PR #2491)`
+
+#### Rbac
+
+- add USER_EXTERNAL_ACCOUNTS#READ_ALL_USERS for workspace admin `(PR #2512)`
+
+#### Release
+
+- address pg12 -> pg16 drift with normalization `(PR #2950)`
+  - Normalize drift detection to handle for postgres 12 to 16 upgrade
+
+#### Search
+
+- Code search is homepage for workspaces `(PR #3127)`
+- Add upsell menu items `(PR #3122)`
+- Update production favicon `(PR #2909)`
+- Add omnibox routes `(PR #2797)`
+- Add new main navigation (feature flagged) `(PR #2768)`
+- Use new brand logo to web apps (feature flagged) `(PR #2767)`
+- (new web app) Add download option to file page `(PR #2461)`
+- (new web app) Add padding and messages to end of search results `(PR #2455)`
+
+#### Source
+
+- multitenant: add "edit" state when editing workspace repositories `(PR #2849)`
+
+#### Telemetry
+
+- allowlist model metadata on `privateMetadata` `(PR #2832)`
+
+#### Tenant/Billing
+
+- use EstimateWorkspaceSubscriptionSubtotal in UpdateSeatsModal `(PR #2930)`
+
+#### Tenants/Telemetry
+
+- report external URL for workspace identifier `(PR #2602)`
+
+#### Web/Tenant
+
+- update selected repos and repo size with pending state `(PR #2925)`
+
+#### Workspace
+
+- Open up instance url inside of vs code `(PR #2782)`
+- add billing link to request-to-join template params `(PR #2596)`
+
+#### Workspaces
+
+- add background goroutine job that emits telemetry about repo count and size `(PR #3130)`
+- metrics for subscription renewals and debt collection `(PR #2886)`
+- prevent workspace ID prefix from being used in names `(PR #2841)`
+- import suspiciousnames to blocklist `(PR #2803)`
+- add AdministrationService, /internal UI for suspending workspaces `(PR #2786)`
+- add some plans telemetry `(PR #2783)`
+- restrict display name length `(PR #2776)`
+- add suspension states `(PR #2751)`
+- bypass some workspace name checks with SAMS user metadata `(PR #2733)`
+- allow configurable sender address `(PR #2729)`
+- add seat count events `(PR #2665)`
+- state transition log `(PR #2661)`
+- required email domains `(PR #2614)`
+- improve wording of name-check errors, add telemetry `(PR #2593)`
+- initial web and service telemetry `(PR #2522)`
+- global creation control `(PR #2498)`
+- status pages for workspace not found and suspended `(PR #2438)`
+- handle SAMS user deletion `(PR #2384)`
+
+#### Workspaces/Billing
+
+- counter for stripe API usage `(PR #2855)`
+
+#### Workspaces/Internal
+
+- support ID lookup `(PR #2839)`
+
+#### Workspaces/Routerreconciler
+
+- make upsert reconcile incremental `(PR #2848)`
+
+#### Workspaces/Settings
+
+- add workspace ID to sidebar `(PR #2728)`
+
+#### Workspaces/Web
+
+- add telemetry events for workspace plans `(PR #2840)`
+- set title to Sourcegraph Workspaces `(PR #2834)`
+
+#### Others
+
+- add CTA for agents API `(PR #2799)`
+- prompt templates now support specific @ mentions `(PR #2793)`
+  - feat: prompt templates now support specific @ mentions
+- propagate bestScoringLine and use that to center chunks in the search UI `(PR #2683)`
+  - For broad matches, we now center the best-scoring line in search results
+- add tools support to LLM API (aka. function calling) `(PR #2537)`
+  - The `/.api/llm/chat/completions` endpoint now support function calling via the `tools` property. This feature works when using the LLM providers: OpenAI, Anthropic, Fireworks, AWS Bedrock, and Gemini.OPTIONAL; info at [https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c](https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c)
+- add ability to boost user-relevant repos for `patterntype:nls` `(PR #2489)`
+
+### Fix
+
+#### Actor
+
+- better preserve anonymous user ID for telemetry `(PR #2546)`
+
+#### Agents
+
+- Remove leftover printf statement `(PR #3079)`
+  -  Backport 9639850855bb169f7dee4fbcff869c77c17f9328 from #3007
+- fix bug in AgentStore.ListByWebhookID and LLMChatClient `(PR #3054)`
+  - Fixed bug in Review Agent where it didn't post review comments even
+for small diffs
+Backport 4710b59 from #3019
+
+#### Auth
+
+- Improve session expiration behavior `(PR #2765)`
+  - We are changing the behavior of session expiration to be a hard-cap instead of a rolling window.
+`auth.sessionExpiry` will now set a hard-limit on the sessions lifetime, and users will have to re-authenticate after this period.
+To preserve the previous behavior where sessions would be invalidated after they haven't been used for a while, a new configuration option named `auth.maxSessionIdleDuration` has been introduced that controls session expiration based on inactivity.
+- Don't expire sessions based on OAuth token validity `(PR #2761)`
+  - Fixed an issue where Sourcegraph user sessions initiated via OAuth integrations did not respect the `auth.sessionExpiry` configuration and expired much earlier.
+
+#### Ci
+
+- include push version tag to private registry `(PR #3074)`
+- add handling for unbound variable in push_all.sh `(PR #3036)`
+
+#### Cloud
+
+- add explicit bucket to lcp metrics `(PR #2846)`
+- typo in metric attrs name `(PR #2804)`
+
+#### Code Intelligence
+
+- Better cleanup in syntactic indexing worker `(PR #3156)`
+- Don't create unscoped Logger `(PR #2945)`
+- Overwrite old->new commit for syntactic indexing jobs `(PR #2764)`
+- Handle missing committer date in policy code `(PR #2696)`
+- Add DB constraints for syntactic jobs+policies `(PR #2566)`
+  - In the site admin configuration for code graph policies, restricts the creation of policies for syntactic indexing to HEAD-only. This restriction may be lifted in the future. Policies for precise auto-indexing are not affected.
+- Enforce auth conditions in repo scheduling `(PR #2549)`
+
+#### Cody
+
+- add billing metadata to prompt library events `(PR #3116)`
+- make public OpenAPI docs work again `(PR #3081)`
+  -  Backport dc8deea005067145855b03a3344675386bc75be7 from #3078
+- minor fixes `(PR #2916)`
+
+#### Cody-Gateway
+
+- fail-open Enterprise subscription sync `(PR #2775)`
+
+#### Dev
+
+- Fix transitive use of global counters in tests `(PR #2905)`
+
+#### Dev/Svelte
+
+- send all 'default.' requests to server `(PR #2923)`
+
+#### Dotcom
+
+- tweaks for dotcom-mode workspace switcher `(PR #2684)`
+
+#### Gitserver
+
+- Return error on no merge base `(PR #2790)`
+
+#### Goroutine
+
+- do not redact stacktrace `(PR #2571)`
+
+#### Intent
+
+- Remove heuristic for marking one-term queries as searches `(PR #2580)`
+
+#### Multi Tenant
+
+- fixes welcome message alert `(PR #3174)`
+- fix flashes and incorrect free up seat mutation in user management `(PR #3058)`
+- add support for workspace vscode sign up flow `(PR #2942)`
+- force to keep only one dropdown menu visible `(PR #2903)`
+- fix small paper cuts in workspace-creation flow `(PR #2809)`
+- fix Safari 16.6 billing layout (sub-grids rows) `(PR #2721)`
+- add a better error handling for workspace settings pages `(PR #2707)`
+- fix post workspace delete redirection `(PR #2698)`
+- fix user management reduce seats case `(PR #2647)`
+- fixes update seats modal max count validation `(PR #2616)`
+  - OPTIONAL; info at [https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c](https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c)
+- fixes general setting page re-submitting problem `(PR #2548)`
+
+#### Multitenant
+
+- Public repositories should no longer be duplicatable `(PR #2828)`
+- Only evaluate newly added repositories `(PR #2701)`
+- add telemetry for when repositories are added or removed `(PR #2346)`
+  - N/A
+- add telemetry event for when onboarding repository checks fail `(PR #2337)`
+  - N/A
+
+#### Navbar
+
+- add divider after orgs `(PR #2921)`
+
+#### Observability
+
+- align Cody completions metrics queries with chart names in Grafana `(PR #2476)`
+
+#### Release
+
+- add handling of cp failure for postgres conf `(PR #3113)`
+  - fix(rel): add handling for permissions errors when handling custom Postgres configurations in database containers.Backport 67bddb2 from #3041
+
+#### Search
+
+- Fix brand logo and colors `(PR #3120)`
+- Do not show code search menu item when code search is disabled `(PR #3118)`
+- (new web ui) Add search upsell page `(PR #2979)`
+- Update breadcrumbs integration test `(PR #2960)`
+- Cody marketing page redirect on dotcom `(PR #2952)`
+- update response dashboards to use streaming search `(PR #2932)`
+- Insights: fix mouse click cursor behavior when creating new insight `(PR #2851)`
+- accept escaped characters in `content` filters `(PR #2807)`
+- fix repo-rev (button-group) ui `(PR #2806)`
+- add response telemetry for streaming search `(PR #2784)`
+  - OPTIONAL; info at [https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c](https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c)
+- VSCode Search extension - auth panel not loading when filesystem is case sensitive `(PR #2713)`
+  - fixes `404 errors when trying to load "authSidebar.js"` when the Code Search VS Code extension is used with the VSCode Remote SSH extension
+- remove alert suggesting structural search `(PR #2615)`
+- (new web ui) Open files in new tab when clicked on with ctrl/cmd `(PR #2557)`
+- add missing return in SearchQuery.RepositoryRevSpecs `(PR #2521)`
+- (new web app) Redirect /cody to /cody/chat `(PR #2475)`
+- (new web app) Set correct fuzzy finder request headers `(PR #2449)`
+- (new web app) Respect notices settings `(PR #2417)`
+
+#### Source
+
+- Check if user can access installations for public repositories `(PR #2963)`
+- Change ListSelectedRepositories to filter for the random external account connection `(PR #2911)`
+- Fix UseRandomExternalAccount connection check `(PR #2904)`
+- multitenant: fix nil panic in ListSelectedRepositories multitenant endpoint `(PR #2844)`
+- Do not create a connection with no repositories `(PR #2395)`
+
+#### Telemetry
+
+- uniformly apply marketingtracking, clean up deprecated values `(PR #2601)`
+
+#### Telemetry/Teestore
+
+- do not write to store concurrently in tx `(PR #2888)`
+
+#### Telemetrygatewayexporter
+
+- support export target without a port `(PR #2745)`
+
+#### Tenant
+
+- disable workspaces for SOAP users `(PR #2490)`
+
+#### Tenant/Reconciler
+
+- use nil-safe field getter when applying feature flags `(PR #2408)`
+
+#### Tenant/Settings
+
+- fix workspace display name update `(PR #2705)`
+
+#### Tenant/Users
+
+- only spin on specific action `(PR #2971)`
+
+#### Tenants/Web
+
+- magic redirect to sign-out -> sign-in if Workspaces requests return Code.Unauthenticated `(PR #2421)`
+
+#### Ui
+
+- Update error page when GitHub account is not yet connected `(PR #3059)`
+- Disable adding more MT repositories while repositories are being saved `(PR #3010)`
+- set sideEffects path in client/ui to correct `init.ts` path `(PR #2773)`
+
+#### Workspaces
+
+- dynamic logout link `(PR #2854)`
+- catch panics in connectrpc handlers `(PR #2837)`
+- remove trace ID from block result `(PR #2831)`
+- include all workspaces in name availability check `(PR #2794)`
+- check for user metadata if 'sourcegraph.com' is a required email domain `(PR #2654)`
+- ignore missing subscription when pruning invitations, rename ReconcileConsumedSeats `(PR #2650)`
+- improve UX when email domain is not allowed `(PR #2618)`
+- error indicates name must be lowercase `(PR #2599)`
+- rename URL fields to URI per AIP `(PR #2595)`
+- prevent panic in billing renewer `(PR #2570)`
+- address seat count problems `(PR #2482)`
+
+#### Workspaces/Billing
+
+- no-op SubscriptionUpdater returns ErrNoSubscriptionUpdateRequired `(PR #2572)`
+
+#### Workspaces/Blocklists
+
+- relax restrictions around generic terms `(PR #2712)`
+
+#### Workspaces/Dev
+
+- do not use wrangler with concurrency `(PR #2730)`
+
+#### Workspaces/Settings
+
+- remove workspace ID on collapse `(PR #2742)`
+
+#### Others
+
+- respect errors from sql row iterations `(PR #2948)`
+- std upgradetest with pv set doesn't go beyond targetVersion `(PR #2928)`
+  - NA
+- Add missing error assignment `(PR #2864)`
+- Tweak relevant repos heuristic `(PR #2655)`
+- extract runner config into env vars `(PR #2637)`
+- don't show current prompt in suggested area `(PR #2582)`
+  - fix: don't show current prompt in suggestions
+- always saturate the limit when boosting `(PR #2479)`
+- add context to intent call `(PR #2432)`
+
+### Chore
+
+#### Ci
+
+- Add new search team members to teams.yml `(PR #2724)`
+
+#### Code Intelligence
+
+- Log connection stats on cancellation for precise queries `(PR #3003)`
+- Remove duplicate IndexEnqueuer interfaces `(PR #2944)`
+- Remove spurious "=" in site admin UI for editing policies `(PR #2902)`
+- Syntactic policies UI restrict to HEAD `(PR #2774)`
+- Introduce experimental olly package with helper functions `(PR #2753)`
+- Fix flaky test in syntactic indexing store_test `(PR #2722)`
+- Document quirks in various pattern syntaxes `(PR #2687)`
+- Use collections.SliceMultiMap in policies API `(PR #2565)`
+- Enqueue syntactic jobs in a single query `(PR #2555)`
+- Remove reposcheduler.Store interface `(PR #2551)`
+- Move unwrap function to check package `(PR #2540)`
+- Add test for precise usagesForSymbol `(PR #2535)`
+- Add doc comment about precondition `(PR #2534)`
+- Add fast path for commit checking `(PR #2532)`
+- Bump scip dependency `(PR #2531)`
+- Fix wrong napkin math in comment `(PR #2528)`
+- Avoid panic on missing committer date `(PR #2527)`
+- Avoid panic on nil metadata `(PR #2526)`
+- Rename & move codenav.PinnedIndexCommits -> codegraph.PinnedUploadKey `(PR #2454)`
+
+#### Cody
+
+- use same buckets for completions latency metrics `(PR #2746)`
+- Remove codypcw's buf.gen.yaml `(PR #2673)`
+- Create proper interface for CompletionsHandler [CODY-4619] `(PR #2623)`
+- measure completions overhead by feature `(PR #2533)`
+- measure sg instance to cody gw network latency `(PR #2501)`
+- refactor completions handler latency metrics `(PR #2496)`
+- measure completions handler overhead `(PR #2478)`
+- add upstream request tracing for completions `(PR #2429)`
+- remove test domain `(PR #2400)`
+
+#### Dev
+
+- Cap number of connections more explicitly `(PR #3001)`
+- Document purpose of onconflict linter `(PR #2882)`
+- Avoid horizontal scaling for syntactic enqueuer `(PR #2813)`
+- Clarify docs for redispool.Store & NewPeriodicGoroutine `(PR #2812)`
+- Fix flaky ordering in test `(PR #2811)`
+- Add env var to disable assertions `(PR #2810)`
+- Add columns to track which policy created an auto-indexing job `(PR #2788)`
+- Introduce String() method on api.CommitID `(PR #2757)`
+- Replace Id -> ID in internal/codeintel `(PR #2755)`
+- Fix typo in function name `(PR #2693)`
+- Add helper function for printing error trees `(PR #2692)`
+- Improve doc comment for REDMetrics `(PR #2635)`
+- Remove unused field in REDMetrics `(PR #2634)`
+- Use clearer names & comments in Rockskip `(PR #2624)`
+- Rename db -> codeIntelDB in Rockskip for clarity `(PR #2606)`
+- Refactor Rockskip service config to dedicated type `(PR #2605)`
+- Move codeintel/core.Option to lib/core `(PR #2578)`
+- Add collections.SliceMultiMap type `(PR #2564)`
+- Add collections.SetMultiMap type `(PR #2556)`
+- Migrate other directories from require.NoError to check.MustNoError `(PR #2554)`
+- Migrate internal/ from require.NoError to check.MustNoError `(PR #2553)`
+- Migrate cmd/ from require.NoError to check.MustNoError `(PR #2552)`
+- Filter out archived and forked repos in reposcheduler `(PR #2550)`
+  - Auto-indexing is disabled for forks and archived repositories. This is currently not configurable.
+- Migrate cmd/ from require.Equal to check.MustEqual `(PR #2541)`
+- Minor enhancements to check package `(PR #2530)`
+- Introduce generic collections.Stack type `(PR #2511)`
+- Move iterext package to lib/ `(PR #2510)`
+- Move collections package to lib/ `(PR #2509)`
+- Move rapidext package to lib/ `(PR #2508)`
+- Introduce types for limiting reads `(PR #2470)`
+- Replace ioutil -> io due to deprecation `(PR #2465)`
+- Generalize bytesize package to handle more units `(PR #2464)`
+- Update prettier ignore file for Svelte app `(PR #2416)`
+
+#### Msp
+
+- upgrade ConnectRPC `(PR #2710)`
+- upgrade MSP cloud.google.com/go dependencies `(PR #2709)`
+- upgrade TF providers, remove nobl9 `(PR #2681)`
+
+#### Search
+
+- Migrate Button component to Svelte 5 `(PR #2868)`
+- Upgrade to SvelteKit v2.16.0 and Svelte v5.19.0 `(PR #2867)`
+- (new web ui) Run `pnpm format` `(PR #2850)`
+- vsce: patch release v2.2.20 `(PR #2748)`
+- Add changelog entry for PR 2713 `(PR #2747)`
+- (new web ui) Update to Svelte 5.16.2 `(PR #2590)`
+- (new web app) Update svelte and kit to latest versions `(PR #2567)`
+
+#### Security
+
+- Auto-update all packages in Sourcegraph base images `(PR #2500)`
+- Auto-update all packages in Sourcegraph base images `(PR #2360)`
+
+#### Workspaces
+
+- Fix url/text for user menu workspace link `(PR #2843)`
+- Style fixes on Workspace Settings, General Settings and User settings `(PR #2798)`
+  - OPTIONAL; info at [https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c](https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c)
+- refactor name-checking to helper `(PR #2726)`
+- add some improved API docstrings `(PR #2708)`
+- enable MSP rollouts `(PR #2619)`
+- rename 'loginservice' to 'xdomainloginservice' `(PR #2544)`
+- move SPA handler to 'spaservice' subpackage `(PR #2543)`
+- Update workspace repo size limit `(PR #2480)`
+
+#### Others
+
+- Layout finetuning of Creating Workspaces and Tenant Onboarding (#3065) `(PR #3139)`
+- Polish buy seats modal `(PR #2917)`
+  - OPTIONAL; info at [https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c](https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c)
+- Remove intent heuristic `(PR #2791)`
+- Delete unused DeleteOrg code `(PR #2585)`
+- Replace NewBuffer([]byte("str")) -> NewBufferString("str") `(PR #2466)`
+- make error message actionable for invalid date format `(PR #2401)`
+
+### Test
+
+#### Tenant/Reconciler
+
+- E2E QA sanity checks on reconciler `(PR #2460)`
+
+### Refactor
+
+#### Dev
+
+- Cleanup and fix new web app build process `(PR #2474)`
+
+### Reverts
+
+- revert sentry, opsgenie, fix deprecation notice `(PR #-1)`
+- Revert "fix/batch: use latest ubuntu LTS in hello world template (#28… `(PR #28)`
+- Revert "fix: set the tag in the push_all.sh script" `(PR #2989)`
+
+### Uncategorized
+
+#### Others
+
+- [Backport 6.0.x] Update Cody Web v0.29.0 `(PR #3162)`
+  - OPTIONAL; info at [https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c](https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c)Backport 07c56ed from #3160
+- [backport] feat/web: Update cloning status to new designs (#2760) `(PR #3158)`
+- [Backport 6.0.x] onboarding: add input field to selected repo List `(PR #3154)`
+- Backport 3148 to 6.0.x `(PR #3151)`
+  - OPTIONAL; info at [https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c](https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c)
+- [Backport 6.0.x] repoupdater: Don't grow backoff bigger than int32 `(PR #3135)`
+- [Backport 6.0.x] workspace settings: mention query in info message `(PR #3112)`
+-  [Backport 6.0.x] fix(agents): use plural naming convention for API endpoints `(PR #3080)`
+  - Renamed REST API endpoints to consistently use plural names in `/.api/review**` and `/.api/tool`. For example, `GET /.api/reviews/diagnostics/ID` instead of `GET /.api/review/diagnostic`. See OpenAPI spec for updated paths. Backport 864c824e184a7dc84df694797c5603883d72ccf1 from #3028
+- BACKPORT - Revert "feat: add CTA for agents API (#2799)" `(PR #3048)`
+- [Backport 6.0.x] Changes naming "Open" to "Unused" seats `(PR #3029)`
+- Omnibox: route likely code generation commands to Chat `(PR #2969)`
+- Update Cody Web v0.27.0 `(PR #2968)`
+  - OPTIONAL; info at [https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c](https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c)
+- Update Cody Web v0.26.0 `(PR #2966)`
+  - OPTIONAL; info at [https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c](https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c)
+- Update Cody Web v0.25.0 `(PR #2959)`
+  - OPTIONAL; info at [https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c](https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c)
+- auth: Fixup check for canSignOut `(PR #2958)`
+- omnibox: hard boost current repo and relevant repos `(PR #2943)`
+- allowlist `language` on `cody-autoedit` `(PR #2941)`
+- tenant(web): Don't advertise upcoming code host support `(PR #2940)`
+- web: Fix page header for create workspace page `(PR #2939)`
+- web: Fix currency localization `(PR #2938)`
+- tenant: Only set feature flags required for the launch `(PR #2937)`
+- tenant: Add structured log message about missing tenant to alert on `(PR #2935)`
+- Omnibox: disable intent detection when CG is unavailable `(PR #2934)`
+- Update Cody Web to 0.24.0 `(PR #2920)`
+  - Update Cody to 0.24.0
+- bug: Adds a link to stripe portal on the Last Payment Failed warning  `(PR #2919)`
+  - OPTIONAL; info at [https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c](https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c)
+- sg: make `.tool-versions` parsing better and silence mise `(PR #2918)`
+- tenant: Set cody gateway rate limits `(PR #2915)`
+- Adds style to pending invited users `(PR #2898)`
+  - Adds style to pending invited users `(PR #2898)`
+- tenant: Add back without cancel for dormancy check `(PR #2883)`
+- tenant(repos): Expose mirrorInfo for repos for all repos to admins `(PR #2876)`
+- web: Prevent access to workspace setup and settings for non-admins `(PR #2874)`
+- accessrequest: Don't allow access requests for authenticated users `(PR #2873)`
+- auth: Don't repeat code for mocked providers `(PR #2872)`
+- auth: Code cleanup `(PR #2862)`
+- web: Fix click target for delete workspace button `(PR #2861)`
+- session: Remove sign-out cookie `(PR #2860)`
+- session: Don't invalidate every active user session on sign out `(PR #2859)`
+- tenant: Don't special case user account in onboarding `(PR #2847)`
+- tenant: Enable agentic feature flags `(PR #2830)`
+- web: Use new logo in more places `(PR #2823)`
+- workspaces: Update favicon `(PR #2819)`
+- [CODY-4627] Agent Review Tables take 3 `(PR #2815)`
+  - Adds implementations for `GET .api/agents/review/{review_id}`,  `GET .api/agents/review/diagnostic/{diagnostic_id}/`, and `POST .api/agents/review/diagnostic/{diagnostic_id}/feedback`
+- web: Temporarily restore logo but break Safari dark mode logo `(PR #2808)`
+- gomod: bump Zoekt for BM25 line scoring `(PR #2780)`
+- Disable streaming in LLM API if not explicitly enabled `(PR #2778)`
+  - `./api/llm/chat/completions` only streams response if `"stream": true` is passed in the request body
+- workspaces: Apply correct repo size limit `(PR #2772)`
+- Added more clarity around workspace deletion `(PR #2769)`
+- workspaces: Add back org namespace to list of selected repos `(PR #2737)`
+- security/fix: always return absolute URLs `(PR #2727)`
+- Order by NULLS LAST when sorting repositories in GQL API `(PR #2725)`
+- tenant: Set dormancy threshold to 1 week `(PR #2723)`
+- Remove clustering dev script `(PR #2720)`
+- web: Port new user menu to react `(PR #2718)`
+- globalstate: Simplify store and reduce writes `(PR #2717)`
+- only `UPDATE global_state` to set initialized if not initialized `(PR #2716)`
+- globalstate: Don't update row on every call `(PR #2715)`
+- skip pre-exit hook on aspect-default queue `(PR #2694)`
+- web: More alignment of nav dropdown with designs `(PR #2691)`
+- tenant: Small improvements to MT app `(PR #2680)`
+- Update Cody Web v0.22.0 `(PR #2678)`
+  - OPTIONAL; info at [https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c](https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c)
+- NLS: support quoted phrases `(PR #2677)`
+- workspaces: Consolidate web config and add web URL `(PR #2670)`
+- auth: Fixup some auth redirections `(PR #2668)`
+- NLS: simplify query parsing logic `(PR #2662)`
+- cmd/cloud-ops-interview: init service `(PR #2658)`
+- gomod: bump Zoekt for 'best line match' feature `(PR #2653)`
+- auth: Don't allow CreatePassword when builtin auth is off `(PR #2644)`
+- tenant(githubapp): Expose Sourcegraph repo on resolver list `(PR #2641)`
+- change model to beta `(PR #2639)`
+- gating: Allow cloud init for workspaces instance `(PR #2638)`
+- NLS: disable stemming `(PR #2620)`
+- tenant: Enable autoedits in every tenant on creation `(PR #2607)`
+- NLS: always rank literal matches first `(PR #2598)`
+- repo: Allow to get totalCount for repositories as non-admin `(PR #2591)`
+- auth: Make sign out more explicit and clean up normalization `(PR #2589)`
+- auth: Clarify integration points and middlewares `(PR #2588)`
+- auth: Consolidate auth provider redirects `(PR #2587)`
+- httpapi Cleanup handler creation `(PR #2586)`
+- auth: Slightly clean up auth code `(PR #2584)`
+- conf: Use sourcegraph controlled default domain `(PR #2583)`
+- restrict auto-edits model to only pro users `(PR #2579)`
+- NLS: avoid tokenizing filenames `(PR #2576)`
+- NLS: simplify find symbol heuristic `(PR #2561)`
+- respect `count:` for nls search `(PR #2560)`
+- logging: Fix incorrect use of logger `(PR #2525)`
+- change the deployment id for autoedits model `(PR #2507)`
+- sg: add support to retrieve a sams idp client `(PR #2497)`
+- frontend: Reduce amount of dependencies passed around `(PR #2450)`
+- tenant: Mark tenant as seen even if request is cancelled `(PR #2441)`
+- tenant: Add intent detection FF for new hosts `(PR #2437)`
+- ci: Execute backcompat tests as PG16 `(PR #2427)`
+- tenant: Allow to add 100 repos to the GitHub App `(PR #2426)`
+- tenant: Allow to add more than 30 repos to the GitHub App `(PR #2425)`
+- bitbucketcloud: Fix repo perms syncing for inherited permissions and groups `(PR #2398)`
+  - Fixed an issue with Bitbucket Cloud permission syncing where inherited permissions and group permissions were not correctly reflected.
+- dotcom, workspaces: propagate 'plg' namespace metadata as feature flags `(PR #2382)`
+- gating: Consolidate License and Subscription resolvers `(PR #2359)`
+- gating: Move repo size and count constraints into provider `(PR #2356)`
+- gating: Implement more parts of workspaces gating `(PR #2355)`
+- gating: Enable workspaces gating provider `(PR #2307)`
+- gating: Add GrantDisplayName to Provider `(PR #2306)`
+- gating: Add provider specific background routines `(PR #2305)`
+- gating: Move TelemetryExportMode and AccessTokenInstanceIdentifier into Provider `(PR #2304)`
+- gating: Reduce number of references to global gating provider `(PR #2301)`
+- gating: Remove license mocks `(PR #2300)`
+- gating: Move license expiration checks fully into CheckGrant `(PR #2299)`
+- gating: Remove unused fields from ProductLicenseInfo `(PR #2297)`
+- gating: Remove unused redundant licenseinfo resolver `(PR #2296)`
+- gating: Unexport Plan and check for all license keys `(PR #2295)`
+- gating: Add MaximumUserCount to provider interface `(PR #2294)`
+- gating: Implement TrueUp feature `(PR #2293)`
+- gating: Remove IsFreePlan `(PR #2210)`
+- redis: Clarify store requirements and improve test setup `(PR #2020)`
+- repo: Expose repository settings page as read-only to non-admins `(PR #1897)`
+- authz: Craft authz provider factory and pass around explicitly `(PR #1893)`
+- repoupdater: Remove in memory scheduler `(PR #1473)`
+- tenant: Mark all views as security_invoker `(PR #744)`
+
+### Untracked
+
+The following PRs were merged onto the previous release branch but could not be automatically mapped to a corresponding commit in this release:
+
+- Log connection stats on cancellation for precise queries `(PR #3002)`
+- Cap number of connections more explicitly `(PR #2999)`
+- Auto-update all packages in Sourcegraph base images (5.11.x) `(PR #2494)`
+- [Backport 5.11.x] bitbucketcloud: Fix repo perms syncing for inherited permissions and groups `(PR #2399)`
+  - Fixed an issue with Bitbucket Cloud permission syncing where inherited permissions and group permissions were not correctly reflected.
+
+{/* RSS={"version":"v6.0.0", "releasedAt": "2025-01-29"} */}
+
+
 # 5.11 Patch 5
 
 > Attention -  If upgrading from Sourcegraph version 5.9 or earlier, this release will update our included database container images from Postgres 12 to Postgres 16.
