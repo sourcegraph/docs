@@ -13,13 +13,13 @@ export function Prose<T extends React.ElementType = 'div'>({
 		<Component
 			className={clsx(
 				className,
-				'prose prose-slate max-w-none dark:prose-invert dark:text-slate-400',
+				'prose prose-slate max-w-none dark:prose-invert dark:text-dark-text-secondary',
 				// headings
 				'prose-headings:scroll-mt-28 prose-headings:font-display prose-headings:font-normal lg:prose-headings:scroll-mt-[8.5rem]',
 				// For headings anchor
 				'prose-headings:relative prose-headings:flex prose-headings:items-center',
 				// lead
-				'prose-lead:text-slate-500 dark:prose-lead:text-slate-400',
+				'prose-lead:text-slate-500 dark:prose-lead:text-dark-text-secondary',
 				// links
 				'prose-a:font-semibold dark:prose-a:text-link',
 				// link underline
@@ -31,7 +31,7 @@ export function Prose<T extends React.ElementType = 'div'>({
 				//table head alignment
 				'prose-th:table-cell',
 				// Strong
-				'prose-strong:text-dark-bg dark:prose-strong:text-slate-200',
+				'prose-strong:text-dark-bg dark:prose-strong:text-dark-text-primary',
 				// Inline code block
 				'prose-code:before:content-none prose-code:after:content-none',
 				// Video

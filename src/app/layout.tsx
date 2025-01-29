@@ -39,9 +39,40 @@ export const metadata: Metadata = {
 		canonical: '/docs'
 	},
 	openGraph: {
-		images: [{url: 'https://sourcegraph.com/docs/sourcegraph-docs-c.png'}]
+		images: [{ url: 'https://sourcegraph.com/docs/sourcegraph-docs-c.png' }]
 	}
 };
+
+
+// PolySans Variable Font
+const polySansVariable = localFont({
+  src: [
+    {
+      path: '../fonts/PolySans-Neutral.woff',
+      style: 'normal',
+    },
+    {
+      path: '../fonts/PolySans-NeutralItalic.woff',
+      style: 'italic',
+    }
+  ],
+  variable: '--font-polysans'
+});
+
+// PolySans Mono Font
+const polySansMono = localFont({
+  src: [
+    {
+      path: '../fonts/PolySans-NeutralMono.woff',
+      style: 'normal',
+    },
+    {
+      path: '../fonts/PolySans-SlimMono.woff',
+      style: 'normal',
+    }
+  ],
+  variable: '--font-polysans-mono'
+});
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
@@ -49,23 +80,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 			lang="en"
 			style={{ colorScheme: 'dark' }}
 			className={clsx(
-				'h-full antialiased',
-				inter.variable,
-				lexend.variable
-			)}
+        'h-full antialiased',
+        polySansVariable.variable,
+        polySansMono.variable
+      )}
 			suppressHydrationWarning
 		>
-		<head>
-			<link
-				rel="alternate"
-				type="application/rss+xml"
-				title="RSS Feed for Sourcegraph"
-				href="/technical-changelog.rss"
-			/>
-		</head>
-		<body
-			suppressHydrationWarning
-			className="flex min-h-full bg-light-bg dark:bg-dark-bg"
+			<head>
+				<link
+					rel="alternate"
+					type="application/rss+xml"
+					title="RSS Feed for Sourcegraph"
+					href="/technical-changelog.rss"
+				/>
+			</head>
+			<body
+				suppressHydrationWarning
+				className="flex min-h-full bg-light-bg dark:bg-dark-bg"
 			>
 				<Providers>
 					{/* <Chatbot /> */}
