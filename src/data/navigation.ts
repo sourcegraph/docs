@@ -54,9 +54,10 @@ export const navigation: NavigationItem[] = [
 						title: "Capabilities", href: "/cody/capabilities",
 						subsections: [
 							{ title: "Chat", href: "/cody/capabilities/chat", },
+              { title: "Agentic chat", href: "/cody/capabilities/agentic-chat", },
 							{ title: "Autocomplete", href: "/cody/capabilities/autocomplete", },
+              { title: "Auto-edit", href: "/cody/capabilities/auto-edit", },
               { title: "Prompts", href: "/cody/capabilities/prompts", },
-							{ title: "Agentic chat", href: "/cody/capabilities/agentic-chat", },
 							{ title: "OpenCtx", href: "/cody/capabilities/openctx", },
 							{ title: "Debug Code", href: "/cody/capabilities/debug-code", },
 							{ title: "Context Filters", href: "/cody/capabilities/ignore-context", },
@@ -255,6 +256,15 @@ export const navigation: NavigationItem[] = [
 						href: "/admin/enterprise_getting_started_guide",
 					},
 					{ title: "Pricing", href: "/admin/pricing" },
+				],
+			},
+			{
+				title: "Sourcegraph Analytics",
+				href: "/analytics",
+				sections: [
+					{ title: "Metrics", href: "/analytics#metrics" },
+					{ title: "Cloud Analytics", href: "/analytics/cloud" },
+					{ title: "Self-hosted Analytics", href: "/analytics/self-hosted" },
 				],
 			},
 			{
