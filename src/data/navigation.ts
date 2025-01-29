@@ -325,7 +325,7 @@ export const navigation: NavigationItem[] = [
 				title: "Enterprise Starter",
 				href: "/pricing/enterprise-starter",
 				sections: [
-					{ title: "Billing", href: "/pricing/billing-faq" },
+					{ title: "Billing", href: "/pricing/billing-faqs" },
 
 				],
 			},
