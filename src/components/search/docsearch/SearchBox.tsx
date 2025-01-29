@@ -83,8 +83,8 @@ export function SearchBox({ translations = {}, ...props }: SearchBoxProps) {
 
         <input
           // className="DocSearch-Input"
-          className="DocSearch-Input h-8 w-full bg-transparent text-slate-600 placeholder-slate-400 focus:outline-none dark:text-slate-200 dark:placeholder-slate-500 text-base"
-          // className="h-8 w-full bg-transparent text-slate-600 placeholder-slate-400 focus:outline-none dark:text-slate-200 dark:placeholder-slate-500"
+          className="DocSearch-Input h-8 w-full bg-transparent text-slate-600 placeholder-slate-400 focus:outline-none dark:text-dark-text-primary dark:placeholder-slate-500 text-base"
+          // className="h-8 w-full bg-transparent text-slate-600 placeholder-slate-400 focus:outline-none dark:text-dark-text-primary dark:placeholder-slate-500"
           ref={props.inputRef}
           {...props.getInputProps({
             inputElement: props.inputRef.current!,
