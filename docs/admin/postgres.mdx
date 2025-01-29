@@ -8,7 +8,14 @@ Sourcegraph uses several PostgreSQL databases to support various functionality. 
 
 ## Version requirements
 
-We support Postgres 16 and above. Older versions of Sourcegraph supported 12 see our [Postgres 12 deprecation notice](/admin/postgres12_end_of_life_notice) for more details.
+We support Postgres 16 and above. Older versions of Sourcegraph supported 12 see our [Postgres 12 deprecation notice](/admin/postgres12_end_of_life_notice) for more details. Starting in Sourcegraph 6.0.0, sourcegraph services will no longer connect to a PostgreSQL 12 or lower database. Instead displaying an error message in container logs for services attempting to connect to a PostgreSQL database below version 16.
+```
+migrator  | ✱ Sourcegraph migrator 6.0.0
+migrator  | ⚠️ Failed to check for migrator update: unexpected status code 404. Continuing...
+migrator  | Attempting connection to frontend...
+migrator  | {"SeverityText":"FATAL","Timestamp":1738107940979396426,"InstrumentationScope":"migrator","Caller":"migrator/main.go:24","Function":"main.main","Body":"new db handle: Sourcegraph requires PostgreSQL 16+. For more information about PostgreSQL requirements and upgrade guides, visit https://sourcegraph.com/docs/admin/postgres","Resource":{"service.name":"migrator","service.version":"6.0.0","service.instance.id":"23097a97-50f4-4b42-80b5-83802baffeb4"},"Attributes":{}}
+migrator exited with code 1
+```
 
 ## Role requirements
 
@@ -29,11 +36,27 @@ vector
 
 ### Upgrading Built-in PostgreSQL
 
-Sourcegraph deployments come packaged with containers using the `postgresql-16` image for `pgsql` and `codeintel-db` deployments and `postgresql-16-codeinsights` for `codeinsights`. These images contain an entryscript which will detect and upgrade Postgres instances at version 12 (our previous images Postgres version). See the (Postgres 12 end of life notice)[/admin/prostgres12_end_of_life_notice#] for more details. 
+Starting in version `5.10.0`, Sourcegraph begins supporting PostgreSQL 16. For admins deploying our built-in PostgreSQL, we facilitate the upgrade of PostgreSQL using entrypoint scripts packaged in the new `postgresql-16` and `postgresql-16-codeinsights` container images which become standard in our deployment repos in `5.10.0`. The database container images are renamed as follows:
+
+**postgres-12-alpine → postgresql-16**
+
+**codeintel-db → postgresql-16**
+
+**codeinsights-db → postgresql-16-codeinsights**
 
 > WARNING: Upgrading the PostgreSQL database requires stopping your Sourcegraph deployment which will result in **downtime**.
 >
-> Additionally, once the upgrade process is started via the database container, interrupting the container before the upgrade is complete could result in corrupting the underlying Postgres database. We strongly advise taking a backup before the upgrade. 
+> Once the database upgrade process is started, containers running the upgrade should not be stopped or restarted.
+
+When our `postgresql-16` images start, if they detect a PostgresSQL 12 database in their attached volume, they will automatically attempt to upgrade the database to PostgreSQL 16.
+
+We have the following advisements to admins:
+- Container orchestration management systems (e.g. Kubernetes) may restart containers at any time, **it is recommended that you take a backup of your database before starting the upgrade process.**
+- Review your deployment types [upgrade notes](/admin/updates#upgrades-index) before upgrading. The PostgreSQL upgrade process mutates the database schema in a way that may Sourcegraph `v5.10.0` and `v5.11.0` may not recognize. [Learn more about pg12 to pg16 schema drift here](/admin/how-to/postgres_12_to_16_drift).
+
+For additional assistance with PostgreSQL upgrades, please contact support@sourcegraph.com.
+
+#### Upgrade entryscript `--link` option
 
 The `PG_UPGRADE_EXTRA_ARGS` env var can be set in the built-in `postgresql-16` and `postgresql-16-codeinsights` deployments to provide extra arguments to the `pg_upgrade` command. 
 
