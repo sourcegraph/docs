@@ -73,6 +73,26 @@ To perform a **manual** multi-version upgrade on a Sourcegraph instance running 
 
 2. **Disable Connections to the Database**:
    > **⚠️ Attention:** If your database is still running Postgres 12, upgrade your database to Postgres 16 in this step. For our built-in databases offerings, this can be accomplished by starting the databases using our `postgresql-16` images packaged in the deploy repos starting in version `5.10.0`. Learn more [here](/admin/postgres).
+   - **NOTE**: Names of the images have changed with the release of Sourcegraph 5.10.0. If you are using a version prior to 5.10.0, please ensure you use the following image names going forward:
+      - `postgres-12` -> `postgresql-16`
+      - `codeintel-db` -> `postgresql-16`
+      - `codeinsights-db` -> `postgresql-16-codeinsights`
+
+   - Change the `image:` in your `docker-compose.yaml` to the release of `pgsql`, `codeinsights-db`, and `codeintel-db`. **Example:**
+    ```yaml
+    pgsql:
+      container_name: pgsql
+      image: 'index.docker.io/sourcegraph/postgresql-16:6.0.0'
+    ...
+    codeintel-db:
+      container_name: codeintel-db
+      image: 'index.docker.io/sourcegraph/postgresql-16:6.0.0'
+    ...
+    codeinsights-db:
+      container_name: codeintel-db
+      image: 'index.docker.io/sourcegraph/postgresql-16-codeinsights:6.0.0'
+    ```
+
    - Run the following command in the directory containing your `docker-compose.yaml` file.
   ```sh
   $ docker-compose stop && docker-compose up -d pgsql codeintel-db codeinsights-db
