@@ -134,6 +134,30 @@ To perform a **manual** multi-version upgrade on a Sourcegraph instance running 
 
 2. **Disable Connections to the Database**:
   > **⚠️ Attention:** If your database is still running Postgres 12, upgrade your database to Postgres 16 in this step. For our built-in databases offerings, this can be accomplished by starting the databases using our `postgresql-16` images packaged in the deploy repos starting in version `5.10.0`. Learn more [here](/admin/postgres).
+  - If you're using our built in Postgres containers, versions from 5.10 onwards contain update in place scripts than run if necessary. You will first have to update the `image` field in your `pgsql`, `codeintel-db` and `codeinsights-db` StatefulSets to `sourcegraph/postgresql-16:6.0.0`  and `sourcegraph/codeinsights-db:6.0.0` respectively.
+  - **Example:**
+  ```yaml
+  # deploy-sourcegraph-k8s/base/sourcegraph/codeinsights-db/codeinsights-db.StatefulSet.yaml 
+      containers:
+        - name: codeinsights
+          image: index.docker.io/sourcegraph/postgresql-16-codeinsights:6.0.0
+  # deploy-sourcegraph-k8s/base/sourcegraph/codeintel-db/codeintel-db.StatefulSet.yaml 
+      containers:
+        - name: pgsql
+          image: index.docker.io/sourcegraph/postgresql-16:6.0.0
+  # deploy-sourcegraph-k8s/base/sourcegraph/pgsql/pgsql.StatefulSet.yaml 
+      containers:
+        - name: pgsql
+          image: index.docker.io/sourcegraph/postgresql-16:6.0.0
+  ```
+
+  - Apply specifically these changes to your cluster:
+  ```sh
+  $ kubectl apply -f deploy-sourcegraph-k8s/base/sourcegraph/pgsql/pgsql.StatefulSet.yaml deploy-sourcegraph-k8s/base/sourcegraph/codeintel-db/codeintel-db.StatefulSet.yaml deploy-sourcegraph-k8s/base/sourcegraph/codeinsights-db/codeinsights-db.StatefulSet.yaml
+  ```
+
+  - Wait until the containers come up, and complete their migration to Postgresql 16
+
    - The following services must have their replicas scaled to 0:
      - Deployments (e.g., `kubectl scale deployment <name> --replicas=0`)
        - precise-code-intel-worker
