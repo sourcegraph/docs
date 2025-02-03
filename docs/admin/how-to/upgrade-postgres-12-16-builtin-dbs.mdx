@@ -8,7 +8,7 @@ The following doc contains detailed instructions for upgrading the built-in Post
 
 ## Docker Compose
 
-1. Bring down your deployments
+1. **Bring down your containers**
 ```bash
 docker-compose down --remove-orphans
 ```
@@ -30,8 +30,50 @@ codeinsights-db:
 ```bash
 docker-compose up -d pgsql codeintel-db codeinsights-db
 ```
-At this point simply wait for the database containers to come up healthy. If for some reason the database containers fail to come up healthy, please check their logs and reach out to us for support at support@sourcegraph.com.
+Wait for the database containers to come up healthy. If for some reason the database containers fail to come up healthy, please check their logs and reach out to us for support at support@sourcegraph.com.
 
 ## Kubernetes Kustomize
+
+1. **Disable Connections to the Database**:
+   - The following services must have their replicas scaled to 0:
+     - Deployments (e.g., `kubectl scale deployment <name> --replicas=0`)
+       - precise-code-intel-worker
+       - repo-updater
+       - searcher
+       - sourcegraph-frontend
+       - sourcegraph-frontend-internal
+       - symbols
+       - worker
+     - Stateful sets (e.g., `kubectl scale sts <name> --replicas=0`):
+       - gitserver
+       - indexed-search
+*convenience command:*
+```sh
+$ kubectl scale deployment precise-code-intel-worker repo-updater searcher sourcegraph-frontend sourcegraph-frontend-internal symbols worker --replicas=0 && kubectl scale sts gitserver indexed-search --replicas=0
+```
+2. **Update base files for the database statefulSets**:
+  - Update the `image` field in your `pgsql`, `codeintel-db` and `codeinsights-db` StatefulSets to `sourcegraph/postgresql-16:6.0.0`  and `sourcegraph/codeinsights-db:6.0.0` respectively.
+  **Example:**
+  ```yaml
+  # deploy-sourcegraph-k8s/base/sourcegraph/codeinsights-db/codeinsights-db.StatefulSet.yaml 
+      containers:
+        - name: codeinsights
+          image: index.docker.io/sourcegraph/postgresql-16-codeinsights:6.0.0
+  # deploy-sourcegraph-k8s/base/sourcegraph/codeintel-db/codeintel-db.StatefulSet.yaml 
+      containers:
+        - name: pgsql
+          image: index.docker.io/sourcegraph/postgresql-16:6.0.0
+  # deploy-sourcegraph-k8s/base/sourcegraph/pgsql/pgsql.StatefulSet.yaml 
+      containers:
+        - name: pgsql
+          image: index.docker.io/sourcegraph/postgresql-16:6.0.0
+  ```
+
+3. Apply the new container images to the database statefulsets:
+```sh
+$ kubectl apply -f deploy-sourcegraph-k8s/base/sourcegraph/pgsql/pgsql.StatefulSet.yaml deploy-sourcegraph-k8s/base/sourcegraph/codeintel-db/codeintel-db.StatefulSet.yaml deploy-sourcegraph-k8s/base/sourcegraph/codeinsights-db/codeinsights-db.StatefulSet.yaml
+```
+- Wait until the containers come up, and complete their migration to Postgresql 16
+
 
 ## Helm
