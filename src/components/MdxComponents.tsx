@@ -3,6 +3,7 @@ import { ContentTab, ContentTabs } from './ContentTabs';
 import FeatureParity from './FeatureParity';
 import Accordion from './mdx/Accordion';
 import { Callout } from './mdx/Callout';
+import { TierCallout } from './mdx/TierCallout';
 import { CustomLink } from './mdx/CustomLink';
 import { Heading } from './mdx/Heading';
 import { LinkCard, LinkCards } from './mdx/LinkCards';
@@ -64,7 +65,8 @@ const MdxComponents = (version?: string) => {
         <table>{props.children}</table>
       </div>
     ),
-    Badge
+    Badge,
+    TierCallout
   };
 };
 

@@ -54,8 +54,11 @@ export const navigation: NavigationItem[] = [
 						title: "Capabilities", href: "/cody/capabilities",
 						subsections: [
 							{ title: "Chat", href: "/cody/capabilities/chat", },
+							{ title: "Query Types", href: "/cody/capabilities/query-types", },
+              				{ title: "Agentic chat", href: "/cody/capabilities/agentic-chat", },
 							{ title: "Autocomplete", href: "/cody/capabilities/autocomplete", },
-							{ title: "Prompts", href: "/cody/capabilities/prompts", },
+              				{ title: "Auto-edit", href: "/cody/capabilities/auto-edit", },
+              				{ title: "Prompts", href: "/cody/capabilities/prompts", },
 							{ title: "OpenCtx", href: "/cody/capabilities/openctx", },
 							{ title: "Debug Code", href: "/cody/capabilities/debug-code", },
 							{ title: "Context Filters", href: "/cody/capabilities/ignore-context", },
@@ -257,6 +260,15 @@ export const navigation: NavigationItem[] = [
 				],
 			},
 			{
+				title: "Sourcegraph Analytics",
+				href: "/analytics",
+				sections: [
+					{ title: "Metrics", href: "/analytics#metrics" },
+					{ title: "Cloud Analytics", href: "/analytics/cloud" },
+					{ title: "Self-hosted Analytics", href: "/analytics/self-hosted" },
+				],
+			},
+			{
 				title: "Sourcegraph Cloud",
 				href: "/cloud",
 			},
@@ -299,6 +311,27 @@ export const navigation: NavigationItem[] = [
 			{
 				title: "Sourcegraph Stream API",
 				href: "/api/stream_api",
+			},
+		],
+	},
+	{
+		separator: "Pricing",
+		topics: [
+			{
+				title: "Free",
+				href: "/pricing/free",
+			},
+			{
+				title: "Enterprise Starter",
+				href: "/pricing/enterprise-starter",
+				sections: [
+					{ title: "Billing", href: "/pricing/billing-faqs" },
+
+				],
+			},
+			{
+				title: "Enterprise",
+				href: "/pricing/enterprise",
 			},
 		],
 	},
