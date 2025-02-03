@@ -205,13 +205,13 @@ To perform a multi-version upgrade via migrators [upgrade](/admin/updates/migrat
      ```
 
 5. **Generate and apply a new cluster.yaml file**:
-     - Comment out the [multi-version-upgrade util](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/instances/template/kustomization.template.yaml#L155) in your cluster kustomization file (`instances/my-sourcegraph/kustomize.yaml`).
+     1. Comment out the [multi-version-upgrade util](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/instances/template/kustomization.template.yaml#L155) in your cluster kustomization file (`instances/my-sourcegraph/kustomize.yaml`).
      ```yaml
      # - ../../components/utils/uid # -- Run all Postgres database with valid users on host
      # - ../../components/utils/multi-version-upgrade # -- Scale down non-database pods to 0 for multi-version upgrade
      # - ../../components/utils/migrate-to-nonprivileged # -- Component for migrating from privileged to non-privileged
      ```
-     - Generate and apply a new cluster.yaml with the new images from Step 2.
+     2. Generate and apply a new cluster.yaml with the new images from Step 2.
      ```sh
      kubectl kustomize instances/my-sourcegraph -o cluster.yaml
      kubectl apply --prune -l deploy=sourcegraph -f cluster.yaml
