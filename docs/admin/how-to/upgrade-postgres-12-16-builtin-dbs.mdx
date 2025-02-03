@@ -1,0 +1,37 @@
+# Upgrading Built-in PostgreSQL
+
+The following doc contains detailed instructions for upgrading the built-in PostgreSQL databases. Via our `postgresql-16` and `postgresql-16-codeinsights` image entrypoint script. This doc assumes an admin is attempting to upgrade to Sourcegraph `6.0.0` from an older version (usually pre `5.10.0`) using one of our "deploy" repos. For more general info see [Upgrading PostgreSQL](/admin/postgres#upgrading-postgresql).
+
+> WARNING: Upgrading the PostgreSQL database requires stopping your Sourcegraph deployment which will result in **downtime**.
+>
+> Additionally, once the upgrade process is started via the database container, interrupting the container before the upgrade is complete could result in corrupting the underlying Postgres database. **We strongly advise taking a backup before the upgrade.**
+
+## Docker Compose
+
+1. Bring down your deployments
+```bash
+docker-compose down --remove-orphans
+```
+2. Change the `image:` in your `docker-compose.yaml` to the release of `pgsql`, `codeinsights-db`, and `codeintel-db`. Or [merge in changes](/admin/deploy/docker-compose/upgrade#standard-upgrades) from the tagged sourcegraph release you're planning to upgrade to. **Example:**
+```yaml
+pgsql:
+    container_name: pgsql
+    image: 'index.docker.io/sourcegraph/postgresql-16:6.0.0'
+...
+codeintel-db:
+    container_name: codeintel-db
+    image: 'index.docker.io/sourcegraph/postgresql-16:6.0.0'
+...
+codeinsights-db:
+    container_name: codeintel-db
+    image: 'index.docker.io/sourcegraph/postgresql-16-codeinsights:6.0.0'
+```
+3. Bring up your deployments
+```bash
+docker-compose up -d pgsql codeintel-db codeinsights-db
+```
+At this point simply wait for the database containers to come up healthy. If for some reason the database containers fail to come up healthy, please check their logs and reach out to us for support at support@sourcegraph.com.
+
+## Kubernetes Kustomize
+
+## Helm
