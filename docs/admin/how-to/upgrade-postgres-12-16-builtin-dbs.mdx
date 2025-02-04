@@ -8,6 +8,8 @@ The following doc contains detailed instructions for upgrading the built-in Post
 
 ## Docker Compose
 
+Docker compose supports [standard](/admin/deploy/docker-compose/upgrade#standard-upgrades) and [multi-version](/admin/deploy/docker-compose/upgrade#multi-version-upgrades) upgrades to Postgres 16 versions! However if you prefer to upgrade your DBs independent of a Sourcegraph version upgrade see the following procedure.
+
 1. **Bring down your containers**
 ```bash
 docker-compose down --remove-orphans
@@ -33,6 +35,8 @@ docker-compose up -d pgsql codeintel-db codeinsights-db
 Wait for the database containers to come up healthy. If for some reason the database containers fail to come up healthy, please check their logs and reach out to us for support at support@sourcegraph.com.
 
 ## Kubernetes Kustomize
+
+Kubernetes Kustomize supports [standard](/admin/deploy/kubernetes/upgrade#standard-upgrades) and [multi-version](/deploy/kubernetes/upgrade#multi-version-upgrades) upgrades to Postgres 16 versions! However if you prefer to upgrade your DBs independent of a Sourcegraph version upgrade see the following procedure.
 
 1. **Disable Connections to the Database**:
    - The following services must have their replicas scaled to 0:
@@ -77,3 +81,7 @@ $ kubectl apply -f deploy-sourcegraph-k8s/base/sourcegraph/pgsql/pgsql.StatefulS
 
 
 ## Helm
+
+To upgrade builtin containers in Helm admins must update their instance to v5.10.0 or v5.11.0 via the [helm multi-version upgrade procedure](/admin/deploy/kubernetes#multi-version-upgrade-procedure) or standard upgrade procedure. This is because `helm upgrade` doesn't support just the DBs in a chart.
+
+<Callout type="warning"> In Sourcegraph version 6.0.0 Sourcegraph services will no longer be able to connect to a Postgres 12 database. This means at and after Sourcegraph 6.0.0, migrator will not be connect to older versions to execute the `upgrade` command. </Callout>
