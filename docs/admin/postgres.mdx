@@ -6,9 +6,11 @@ Sourcegraph uses several PostgreSQL databases to support various functionality. 
 - `codeintel-db`: provides support for lsif data and part of the code-intelligence
 - `codeinsights-db`: provides support for code insights data
 
-## Version requirements
+## Requirements
 
-We support Postgres 16 and above. Older versions of Sourcegraph supported 12 see our [Postgres 12 deprecation notice](/admin/postgres12_end_of_life_notice) for more details. Starting in Sourcegraph 6.0.0, sourcegraph services will no longer connect to a PostgreSQL 12 or lower database. Instead displaying an error message in container logs for services attempting to connect to a PostgreSQL database below version 16.
+### Version requirements
+
+We support Postgres 16 and above. Older versions of Sourcegraph supported 12 see our [Postgres 12 deprecation notice](/admin/postgres12_end_of_life_notice) for more details. Starting in Sourcegraph 6.0.0, sourcegraph services will no longer connect to a PostgreSQL 12 or lower database. Instead, it will display an error message in container logs for services attempting to connect to a PostgreSQL database below version 16.
 ```
 migrator  | ✱ Sourcegraph migrator 6.0.0
 migrator  | ⚠️ Failed to check for migrator update: unexpected status code 404. Continuing...
@@ -17,7 +19,14 @@ migrator  | {"SeverityText":"FATAL","Timestamp":1738107940979396426,"Instrumenta
 migrator exited with code 1
 ```
 
-## Role requirements
+Sourcegraph services attempting to connect to a database running Postgres 12 or less will display the following error message:
+```
+"new db handle: Sourcegraph requires PostgreSQL 16+. For more information about PostgreSQL requirements and upgrade guides, visit https://sourcegraph.com/docs/admin/postgres"
+```
+
+See [below](#upgrading-postgresql) for more details about how to upgrade your PostgreSQL database.
+
+### Role requirements
 
 The user provided to Sourcegraph must have full access to the `sg` database and be able to create the following
 extensions:
@@ -32,23 +41,28 @@ pgcrypto
 vector
 ```
 
-## [Configuring PostgreSQL](/admin/config/postgres-conf)
+## Configuring PostgreSQL
+
+Sourcegraph databases come preconfigured, however admins may make custom configurations as needed. For more information see our [configuration docs](/admin/config/postgres-conf).
+
+## Upgrading PostgreSQL
 
 ### Upgrading Built-in PostgreSQL
 
-Starting in version `5.10.0`, Sourcegraph begins supporting PostgreSQL 16. For admins deploying our built-in PostgreSQL, we facilitate the upgrade of PostgreSQL using entrypoint scripts packaged in the new `postgresql-16` and `postgresql-16-codeinsights` container images which become standard in our deployment repos in `5.10.0`. The database container images are renamed as follows:
+In Sourcegraph 5.10.0, we've upgraded our builtin database images to PostgreSQL 16.
 
-**postgres-12-alpine → postgresql-16**
+Database Image Updates:
+- `postgres-12` is now `postgresql-16`
+- `codeintel-db` is now `postgresql-16`
+- `codeinsights-db` is now `postgresql-16-codeinsights`
 
-**codeintel-db → postgresql-16**
-
-**codeinsights-db → postgresql-16-codeinsights**
+These images contain an entry script that will detect and upgrade Postgres instances from version 12 (the version in our previous images) to Postgres 16.
 
 > WARNING: Upgrading the PostgreSQL database requires stopping your Sourcegraph deployment which will result in **downtime**.
 >
-> Once the database upgrade process is started, containers running the upgrade should not be stopped or restarted.
+> Additionally, once the upgrade process is started via the database container, interrupting the container before the upgrade is complete could result in corrupting the underlying Postgres database. **We strongly advise taking a backup before the upgrade.**
 
-When our `postgresql-16` images start, if they detect a PostgresSQL 12 database in their attached volume, they will automatically attempt to upgrade the database to PostgreSQL 16.
+**For instance specfic instructions on how to upgrade a builtin Postgres database via the image entrypoint script, see [our instance specific operational instructions](/admin/how-to/upgrade-postgres-12-16-builtin-dbs).**
 
 We have the following advisements to admins:
 - Container orchestration management systems (e.g. Kubernetes) may restart containers at any time, **it is recommended that you take a backup of your database before starting the upgrade process.**
@@ -56,14 +70,15 @@ We have the following advisements to admins:
 
 For additional assistance with PostgreSQL upgrades, please contact support@sourcegraph.com.
 
-#### Upgrade entryscript `--link` option
+### Upgrade entrypoint script options
 
-The `PG_UPGRADE_EXTRA_ARGS` env var can be set in the built-in `postgresql-16` and `postgresql-16-codeinsights` deployments to provide extra arguments to the `pg_upgrade` command. 
+The `PG_UPGRADE_EXTRA_ARGS` environment variable allows you to customize the `pg_upgrade` command in `postgresql-16` and `postgresql-16-codeinsights` deployments.
 
-Setting the env var `PG_UPGRADE_EXTRA_ARGS=--link` provides the `--link` option to the underlying `pg_update`; creating a hard links between the old and new data directories instead of copying data. This option is faster and requires less disk space, however if the database containers are interrupted during the upgrade process there is a strong possibility of data corruption. This can still be a viable choice for users who are confident in their container scheduling and backups and would like to avoid longer downtimes.
+- **Quick upgrade option:**
+Setting `PG_UPGRADE_EXTRA_ARGS=--link` creates hard links between old and new data directories instead of copying data. While faster and space-efficient, this method risks data corruption if containers are interrupted during an upgrade. It is best used when you have reliable container scheduling and solid backups.
 
-If not using the `--link` option, you will need enough disk space available for Postgres to make a copy of the existing data. For example, if your database is currently using 100GiB of storage, you will need an additional 100GiB free space in order for the upgrade process to succeed.
-
+- **Storage requirements:**
+Without `--link`, you'll need double the current database size in free disk space. For example, a 100GiB database requires an additional 100GiB free space for the upgrade.
 
 ### Upgrading external PostgreSQL instances
 
