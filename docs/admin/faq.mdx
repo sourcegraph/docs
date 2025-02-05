@@ -111,6 +111,21 @@ While it is technically possible to consume all of Sourcegraph's metrics in an e
 
 Other monitoring systems that support Prometheus scraping (for example, Datadog and New Relic) or [Prometheus federation](https://prometheus.io/docs/prometheus/latest/federation/) can be configured to federate Sourcegraph's [high-level alerting metrics](/admin/observability/metrics#high-level-alerting-metrics). For information on how to configure those systems, please check your provider's documentation.
 
+The `/-/debug/grafana` endpoint is specifically designed for the built-in Grafana instance that comes with Sourcegraph. When using an external Grafana instance, this endpoint won't automatically redirect to your custom Grafana URL.
+ 
+To properly integrate your external Grafana and Prometheus instances with Sourcegraph, you'll want to:
+Ensure your configuration in values.yaml is correct:
+```
+frontend:
+  env:
+    GRAFANA_SERVER_URL:
+      value: https://grafana.mycompany.com
+    PROMETHEUS_URL:
+      value: http://prometheus.mycompany.com
+ ```
+
+You can then access your dashboards directly through your Grafana instance URL.
+
 ### I am getting "Error: Cluster information not available" in the Instrumentation page, what should I do?
 
 This error is expected if your instance was not [deployed with Kubernetes](/admin/deploy/kubernetes/). The Instrumentation page is currently only available for Kubernetes instances.
