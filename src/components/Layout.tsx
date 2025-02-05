@@ -13,7 +13,6 @@ import { LogoMark } from './LogoMark';
 import VersionSelector from './VersionSelector';
 import { Search } from './search/Search';
 import { DemoLayout } from '@/components/DemoLayout';
-import { TopBanner } from './TopBanner';
 
 function GitHubIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -101,14 +100,12 @@ function Header() {
 	);
 }
 
-
 export function Layout({ children }: { children: React.ReactNode }) {
 	let pathname = usePathname();
 	let isHomePage = pathname === '/';
 
 	return (
 		<div className="flex w-full flex-col">
-			<TopBanner text="⚠️ You're viewing our legacy docs, which we no longer maintain. For all the new updates, read our" />
 			<Header />
 
 			{isHomePage && <Hero />}
