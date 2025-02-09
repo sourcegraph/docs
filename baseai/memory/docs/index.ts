@@ -1,16 +1,16 @@
 import { MemoryI } from '@baseai/core';
 
 const memoryDocs = (): MemoryI => ({
-  name: 'docs',
-  description: 'Docs folder of sourcegraph docs repository as an auto-synced memory',
+	name: 'docs',
+	description: 'Docs folder of sourcegraph docs repository as an auto-synced memory',
 	git: {
 		enabled: true,
-		include: ['**/*'],
+		include: ['**/*.mdx'],
 		gitignore: true,
 		deployedAt: '',
 		embeddedAt: '',
 	},
-  documents: {
+	documents: {
 		meta: doc => {
 			const url = `https://sourcegraph.com/docs/${doc.path}`;
 			return {
