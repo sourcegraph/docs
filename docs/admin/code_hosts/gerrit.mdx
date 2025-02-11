@@ -21,8 +21,8 @@ A Gerrit instance can be connected to Sourcegraph as follows:
 ```json
 {
   "url": "https://gerrit.example.com/", // Be sure to add a trailing slash
-  "username": "<admin username>",
-  "password": "<admin password>",
+  "username": "<username>",
+  "password": "<password>",
   "projects": [ // If not set, all projects on the Gerrit instance will be mirrored
     "docs",
     "kubernetes/kubernetes"
@@ -33,14 +33,33 @@ A Gerrit instance can be connected to Sourcegraph as follows:
   "authorization": {} // Marks all repositories as private. Users will be required to present valid Gerrit HTTP credentials in order to view repositories
 }
 ```
-4. The provided `username` and `password` must be the HTTP credentials of an admin account on Gerrit. See [the Gerrit HTTP documentation](https://gerrit-documentation.storage.googleapis.com/Documentation/2.14.2/user-upload.html#http) for details on how to generate HTTP credentials.
-<Callout type="note">The Gerrit instance has to have HTTPS clones enabled (the default). [`download.scheme=http`](https://gerrit-review.googlesource.com/Documentation/config-gerrit.html#download). Sourcegraph cannot clone Gerrit repos via SSH.</Callout>
+4. The provided `username` and `password` must be the HTTP credentials of an account on Gerrit that has access to all the repositories that need to be cloned. See [the Gerrit HTTP documentation](https://gerrit-documentation.storage.googleapis.com/Documentation/2.14.2/user-upload.html#http) for details on how to generate HTTP credentials.
 5. Select **Add Repositories** to create the connection. Sourcegraph will start mirroring the specified projects.
 
 If you added the `"authorization": {}` option to the configuration, and this is the first Gerrit code host connection you have created for this Gerrit instance, you might see a warning like this:
 ![Warning indicating that an authentication provider is required for a code host connection](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/gerrit/gerrit-auth-warning.png)
 
 Simply follow the steps in the next section to configure a Gerrit authentication provider.
+
+### Clone using SSH
+
+To clone using SSH, provide `"gitSSHCredential"` in the configuration:
+
+```json
+{
+  "url": "https://gerrit.example.com/",
+  "username": "<username>",
+  "password": "<password>",
+  "projects": [
+    "docs",
+    "kubernetes/kubernetes"
+  ],
+  "gitSSHCredential": {
+    "privateKey": "..." // base64 encoded private key that will be used for cloning
+  },
+  "authorization": {}
+}
+```
 
 ## Add Gerrit as an authentication provider
 
