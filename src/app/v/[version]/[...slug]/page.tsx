@@ -16,34 +16,36 @@ export const generateStaticParams = async () => {
 	}));
 };
 
-export const generateMetadata = ({ params }: Props) => {
-	const path = params.slug.join('/');
-	const post = allPosts.find(
+export const generateMetadata = async (props: Props) => {
+    const params = await props.params;
+    const path = params.slug.join('/');
+    const post = allPosts.find(
 		post =>
 			post._raw.flattenedPath === `versioned/${params.version}/${path}`
 	);
-	if (post && post.headings && post.headings.length > 0) {
+    if (post && post.headings && post.headings.length > 0) {
 		return { title: post.headings[0].title };
 	}
 };
 
 interface Props {
-	params: {
+	params: Promise<{
 		version: string;
 		slug: string[];
-	};
+	}>;
 }
 
-const PostLayout = ({ params }: Props) => {
-	const path = params.slug.join('/');
-	const post = allPosts.find(
+const PostLayout = async (props: Props) => {
+    const params = await props.params;
+    const path = params.slug.join('/');
+    const post = allPosts.find(
 		post =>
 			post._raw.flattenedPath === `versioned/${params.version}/${path}`
 	);
-	if (!post) return notFound();
-	const Content = getMDXComponent(post.body.code);
+    if (!post) return notFound();
+    const Content = getMDXComponent(post.body.code);
 
-	return (
+    return (
 		<>
 			<div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none lg:pl-8 lg:pr-0 xl:px-16">
 				<Breadcrumbs path={params.slug} />
