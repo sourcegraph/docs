@@ -1,6 +1,6 @@
 'use client';
 
-import { Chatbot } from '@langbase/components';
+import {Chatbot} from '@langbase/components';
 import '@langbase/components/styles';
 
 export default function Chat() {
@@ -11,8 +11,9 @@ export default function Chat() {
 					background-color: #dedede;
 				}
 			`}</style>
-			<Chatbot apiRoute="/docs/api/chat"
-				openingMessage="Hi there! Welcome to Ask Sourcegraph AI agent. How can I help you?"
+			<Chatbot
+				apiRoute="/docs/api/chat"
+				openingMessage="Hi there! I'm Sourcegraph's AI assistant trained for our documentation. How can I help you?"
 				// Remember AI can make mistakes, please double-check responses.
 				suggestions={[
 					{
