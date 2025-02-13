@@ -5,20 +5,19 @@ import {getMDXComponent} from 'next-contentlayer/hooks';
 import {notFound} from 'next/navigation';
 
 interface Props {
-	params: Promise<{
+	params: {
 		version: string;
-	}>;
+	};
 }
 
-const PostLayout = async (props: Props) => {
-    const params = await props.params;
-    const post = allPosts.find(
+const PostLayout = ({params}: Props) => {
+	const post = allPosts.find(
 		post => post._raw.flattenedPath === `versioned/${params.version}`
 	);
-    if (!post) return notFound();
-    const Content = getMDXComponent(post.body.code);
+	if (!post) return notFound();
+	const Content = getMDXComponent(post.body.code);
 
-    return (
+	return (
 		<>
 			<div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none lg:pl-8 lg:pr-0 xl:px-16">
 				<article>
