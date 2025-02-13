@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import { defineDocumentType, makeSource } from 'contentlayer/source-files';
 import fs from 'fs';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
