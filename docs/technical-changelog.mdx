@@ -4,6 +4,94 @@ This page documents all notable changes to Sourcegraph. For more detailed change
 
 {/* CHANGELOG_START */}
 
+# 6.1 Patch 1
+
+## v6.1.376
+
+- [sourcegraph](https://github.com/sourcegraph/sourcegraph/releases/tag/v6.1.376)
+
+- [docker-compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/releases/tag/v6.1.376)
+
+- [helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/releases/tag/v6.1.376)
+
+- [kustomize](https://github.com/sourcegraph/deploy-sourcegraph-k8s/releases/tag/v6.1.376)
+
+### Features
+
+#### Agents
+
+- add support for globally enabled rules (#3480) `(PR #3502)`
+- simplify agent admin onboarding experience `(PR #3501)`
+  - You can now create a GitHub App with all the right permissions/events for code review agents. Previously, you had to manually customize the apps.  Backport 87e8d77f464912cbd4356a8c3c39fba1d099e3b6 from #3473
+
+#### Cody
+
+- add "autocomplete" capability to Claude Haiku models `(PR #3638)`
+
+#### Tenant
+
+- telemetry for adding code `(PR #3560)`
+
+### Fix
+
+#### Agents
+
+- fix bug when using global rules in default revision `(PR #3524)`
+- fix bug where POST /reviews always failed `(PR #3522)`
+- improve error reporting in `POST /reviews` `(PR #3518)`
+- render errors as strings in agent run logs `(PR #3516)`
+  - Errors are now rendered as strings in agent run logs. Previously, they rendered as `Source: {}`, which wasn't helpful.
+ Backport d1f18d280fc9d3a985a284c31e819412d2add606 from #3514
+- hide listing of rules to fix unconditional error `(PR #3498)`
+
+#### Code Intelligence
+
+- Correctly handle document counts exceeding MaxInt32 `(PR #3596)`
+  - Fixes a bug in SCIP index processing for instances with a long history
+of processing large uploads.  Backport 48e7b47898ee7710f12270c6861c335a2ef75f48 from #3595
+
+#### Release
+
+- check for and remove timescaledb extension `(PR #3584)`
+  - fix(rel): remove TimescaleDB from existing database if found during upgrade to Postgres 16 on the codeinsights database.
+  Backport 71b4af3d6faef054803db0151b2cc7b151bb1c0e from #3556
+
+#### Security
+
+- Allow the admin's HTTP auth provider headers in CORS preflight requests `(PR #3540)`
+  - HTTP header auth username and email headers, if configured, are no longer blocked by CORS.  Backport 782b98a780dac335576b8f43affb4b1a10123882 from #3512
+
+#### Others
+
+- transformChanges.group.directory should ignore file names `(PR #3594)`
+  - fix: transformChanges.group.directory now ignores file names
+  Backport 3b76fe4ab146565b0e736231353b1e24f1468241 from #3576
+- Fix missing JSON schema on serve-git connection page `(PR #3567)`
+- do not close stream when tab is unfocused `(PR #3529)`
+  - Fixes an (unreleased) issue that could cause duplicate search results when switching between tabs.
+ Backport 746a29a25d6e54dfe7ab38f70855a9f58a652426 from #3528
+
+### Chore
+
+#### Agents
+
+- Allow non-site-admins to read agent endpoints [CODY-4962] `(PR #3511)`
+  - GET access to `/.api/agent/*` endpoints for non-site admins  Backport 321543c38aab312c7d3924e19617f9f247c3a5fa from #3504
+
+### Reverts
+
+  There were no reverts for this release
+
+### Uncategorized
+
+#### Others
+
+- Backport 3542 to 6.1.x `(PR #3612)`
+- [Backport 6.1.x] tenant: Report newRepositoryTotalSizeBytes for setSelectedRepos `(PR #3568)`
+
+{/* RSS={"version":"v6.1.376", "releasedAt": "2025-02-19"} */}
+
+
 # 6.1 Patch 0
 
 ## v6.1.0
