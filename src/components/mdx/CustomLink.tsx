@@ -29,7 +29,7 @@ export const CustomLink: React.FC<CustomLinkProps> = ({
 	// Handling external links
 	if (href.startsWith('http')) {
 		return (
-			<a href={href} target="_blank" rel="noopener noreferrer" {...rest} className='no-underline hover-underline'> 
+			<a href={href} target="_blank" rel="noopener noreferrer" {...rest} className='no-underline text-vermilion-07'> 
 				{children}
 			</a>
 		);
