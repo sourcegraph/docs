@@ -71,7 +71,7 @@ To troubleshoot further:
 
 Cody Free provides **unlimited autocomplete suggestions** and **200 chat invocations** per user per month.
 
-On Cody Pro and Enterprise plans, usage is unlimited but controlled by **Fair Usage**. This means that some users occasionally experience a limitation placed on their account.  This limitation resets within 24 hours.  If this issue persists, contact us through our [community forum](https://community.sourcegraph.com), Discord, or email support@sourcegraph.com.
+On Cody Pro and Enterprise plans, usage limits are increased, and controlled by **Fair Usage**. This means that some users occasionally experience a limitation placed on their account. This limitation resets within 24 hours. If this issue persists, contact us through our [community forum](https://community.sourcegraph.com), Discord, or email support@sourcegraph.com.
 
 #### 429 errors
 
@@ -104,6 +104,20 @@ Request Failed: Request to https://sourcegraph.com/.api/completions/stream?api-v
 It indicates that our web application firewall provider, Cloudflare, has flagged the source IP as suspicious.
 
 Consider disabling anonymizers, VPNs, or open proxies. If using a VPN is essential, you can try [1.1.1.1](https://one.one.one.one), which is recognized to be compatible with our services.
+
+### Error with Cody `contextFilters` during chat or editing code
+
+The `contextFilters` setting in Cody is used to control which files are included or excluded when Cody searches for relevant context while answering questions or providing code assistance. Sometimes, you can see the following error:
+
+```
+Edit failed to run: file is ignored (due to cody.contextFilters Enterprise configuration setting)
+```
+
+This error occurs when you're trying to work with a file that's been excluded by Cody's enterprise-level `contextFilters` configuration. At times, this can happen to files that also haven't been excluded. First, check with your organization's admin to understand which files are excluded.
+
+If the error occurs with a file that's not been excluded, the workaround is to uninstall the Cody plugin, restart your IDE and then reinstall the latest version of the extension.
+
+This should clear the error.
 
 ### VS Code Pro License Issues
 
@@ -259,7 +273,6 @@ Additionally, Eclipse's built-in Error Log can be used to view any uncaught exce
 Symptoms:
 
 - "Request Failed: Request to... failed with 500 Internal Server Error: context deadline exceeded"
-- Occurs with both o1-mini and o1-preview
 - Happens even with relatively small inputs (~220 lines)
 
 Solutions:
@@ -285,8 +298,6 @@ Symptoms:
 
 Solutions:
 
-- For `o1-preview`: Copy the last line and ask to "continue from last line"
-- Switch to `o1-mini` for more reliable complete outputs
 - Break down complex requests into smaller steps
 - Consider using Sonnet 3.5 for tasks requiring longer outputs
 
