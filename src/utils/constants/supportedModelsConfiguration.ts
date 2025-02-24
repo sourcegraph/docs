@@ -11,7 +11,6 @@ export const chatTableDataConf: any = {
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet', status: 'anthropic/claude-3-5-sonnet-20240620' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet (Latest)', status: 'anthropic/claude-3-5-sonnet-20241022' },
         { provider: 'Google', model: 'Gemini 1.5 Pro', status: 'google/gemini-1.5-pro-latest' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'OpenAI': [
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: 'openai/gpt-3.5-turbo' },
@@ -25,7 +24,6 @@ export const chatTableDataConf: any = {
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet', status: '❌' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet (Latest)', status: '❌' },
         { provider: 'Google', model: 'Gemini 1.5 Pro', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Anthropic': [
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
@@ -39,7 +37,6 @@ export const chatTableDataConf: any = {
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet', status: 'anthropic/claude-3-5-sonnet-20240620' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet (Latest)', status: 'anthropic/claude-3-5-sonnet-20241022' },
         { provider: 'Google', model: 'Gemini 1.5 Pro', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Google': [
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
@@ -53,7 +50,6 @@ export const chatTableDataConf: any = {
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet', status: '❌' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet (Latest)', status: '❌' },
         { provider: 'Google', model: 'Gemini 1.5 Pro', status: 'google/gemini-1.5-pro-latest' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Azure OpenAI': [
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
@@ -67,7 +63,6 @@ export const chatTableDataConf: any = {
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet', status: '❌' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet (Latest)', status: '❌' },
         { provider: 'Google', model: 'Gemini 1.5 Pro', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Amazon Bedrock': [
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
@@ -81,7 +76,6 @@ export const chatTableDataConf: any = {
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet', status: 'anthropic.claude-3-5-sonnet-20240620-v1:0' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet (Latest)', status: 'anthropic.claude-3-5-sonnet-20241022-v2:0' },
         { provider: 'Google', model: 'Gemini 1.5 Pro', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'GCP Vertex': [
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
@@ -95,7 +89,6 @@ export const chatTableDataConf: any = {
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet', status: 'claude-3-5-sonnet@20240620' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet (Latest)', status: 'claude-3-5-sonnet@20241022' },
         { provider: 'Google', model: 'Gemini 1.5 Pro', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ]
 };
 
@@ -109,7 +102,6 @@ export const autocompleteTableDataConf: any = {
         { provider: 'Fireworks', model: 'StarCoder', status: 'fireworks/starcoder' },
         { provider: 'Fireworks', model: 'DeepSeek Coder V2', status: 'fireworks/deepseek-coder-v2-lite-base' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: 'anthropic/claude-instant-1.2' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'OpenAI': [
         { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: 'gpt-3.5-turbo-instruct' },
@@ -120,7 +112,6 @@ export const autocompleteTableDataConf: any = {
         { provider: 'Fireworks', model: 'StarCoder', status: '❌' },
         { provider: 'Fireworks', model: 'DeepSeek Coder V2', status: '❌' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Anthropic': [
         { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '❌' },
@@ -131,7 +122,6 @@ export const autocompleteTableDataConf: any = {
         { provider: 'Fireworks', model: 'StarCoder', status: '❌' },
         { provider: 'Fireworks', model: 'DeepSeek Coder V2', status: '❌' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: 'claude-instant-1.2' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Google': [
         { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '❌' },
@@ -142,7 +132,6 @@ export const autocompleteTableDataConf: any = {
         { provider: 'Fireworks', model: 'StarCoder', status: '❌' },
         { provider: 'Fireworks', model: 'DeepSeek Coder V2', status: '❌' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Azure OpenAI': [
         { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '<deployment name of the model> (Note #1)' },
@@ -153,7 +142,6 @@ export const autocompleteTableDataConf: any = {
         { provider: 'Fireworks', model: 'StarCoder', status: '❌' },
         { provider: 'Fireworks', model: 'DeepSeek Coder V2', status: '❌' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Amazon Bedrock': [
         { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '❌' },
@@ -164,7 +152,6 @@ export const autocompleteTableDataConf: any = {
         { provider: 'Fireworks', model: 'StarCoder', status: '❌' },
         { provider: 'Fireworks', model: 'DeepSeek Coder V2', status: '❌' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: 'anthropic.claude-instant-v1' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'GCP Vertex': [
         { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '❌' },
@@ -175,6 +162,5 @@ export const autocompleteTableDataConf: any = {
         { provider: 'Fireworks', model: 'StarCoder', status: '❌' },
         { provider: 'Fireworks', model: 'DeepSeek Coder V2', status: '❌' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ]
 };
