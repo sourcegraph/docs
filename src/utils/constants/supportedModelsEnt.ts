@@ -27,7 +27,6 @@ export const chatTableDataEnt: any = {
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet', status: '✅ *(5.5.0 and above)' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet (Latest)', status: '✅ *(5.9 and above)' },
         { provider: 'Google', model: 'Gemini 1.5 Pro', status: '✅ *(5.4.5099 and above)' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'OpenAI': [
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '✅' },
@@ -41,7 +40,6 @@ export const chatTableDataEnt: any = {
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet', status: '❌' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet (Latest)', status: '❌' },
         { provider: 'Google', model: 'Gemini 1.5 Pro', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Anthropic': [
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
@@ -55,7 +53,6 @@ export const chatTableDataEnt: any = {
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet', status: '✅ *(5.5.0 and above)' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet (Latest)', status: '✅ *(5.5.0 and above)' },
         { provider: 'Google', model: 'Gemini 1.5 Pro', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Google': [
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
@@ -69,7 +66,6 @@ export const chatTableDataEnt: any = {
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet', status: '❌' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet (Latest)', status: '❌' },
         { provider: 'Google', model: 'Gemini 1.5 Pro', status: '✅ *(5.4.5099 and above)' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Azure OpenAI': [
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '✅ (Note #1)' },
@@ -83,7 +79,6 @@ export const chatTableDataEnt: any = {
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet', status: '❌' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet (Latest)', status: '❌' },
         { provider: 'Google', model: 'Gemini 1.5 Pro', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Amazon Bedrock': [
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
@@ -97,7 +92,6 @@ export const chatTableDataEnt: any = {
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet', status: '✅ *(5.5.0 and above)' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet (Latest)', status: '✅ *(5.5.0 and above)' },
         { provider: 'Google', model: 'Gemini 1.5 Pro', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'GCP Vertex': [
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
@@ -111,7 +105,6 @@ export const chatTableDataEnt: any = {
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet', status: '✅ *(5.5.0 and above)' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet (Latest)', status: '✅ *(5.5.0 and above)' },
         { provider: 'Google', model: 'Gemini 1.5 Pro', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ]
 };
 
@@ -125,7 +118,6 @@ export const autocompleteTableDataEnt: any = {
         { provider: 'Fireworks', model: 'StarCoder', status: '✅' },
         { provider: 'Fireworks', model: 'DeepSeek Coder V2', status: '✅' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '✅' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'OpenAI': [
         { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '✅ (Note #1)' },
@@ -136,7 +128,6 @@ export const autocompleteTableDataEnt: any = {
         { provider: 'Fireworks', model: 'StarCoder', status: '❌' },
         { provider: 'Fireworks', model: 'DeepSeek Coder V2', status: '❌' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Anthropic': [
         { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '❌' },
@@ -147,7 +138,6 @@ export const autocompleteTableDataEnt: any = {
         { provider: 'Fireworks', model: 'StarCoder', status: '❌' },
         { provider: 'Fireworks', model: 'DeepSeek Coder V2', status: '❌' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '✅' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Google': [
         { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '❌' },
@@ -158,7 +148,6 @@ export const autocompleteTableDataEnt: any = {
         { provider: 'Fireworks', model: 'StarCoder', status: '❌' },
         { provider: 'Fireworks', model: 'DeepSeek Coder V2', status: '❌' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Azure OpenAI': [
         { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '✅ (Note #1)' },
@@ -169,7 +158,6 @@ export const autocompleteTableDataEnt: any = {
         { provider: 'Fireworks', model: 'StarCoder', status: '❌' },
         { provider: 'Fireworks', model: 'DeepSeek Coder V2', status: '❌' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Amazon Bedrock': [
         { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '❌' },
@@ -180,7 +168,6 @@ export const autocompleteTableDataEnt: any = {
         { provider: 'Fireworks', model: 'StarCoder', status: '❌' },
         { provider: 'Fireworks', model: 'DeepSeek Coder V2', status: '❌' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '✅' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'GCP Vertex': [
         { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '❌' },
@@ -191,6 +178,5 @@ export const autocompleteTableDataEnt: any = {
         { provider: 'Fireworks', model: 'StarCoder', status: '❌' },
         { provider: 'Fireworks', model: 'DeepSeek Coder V2', status: '❌' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ]
 };
