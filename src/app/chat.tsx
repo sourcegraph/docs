@@ -17,20 +17,20 @@ export default function Chat() {
 				// Remember AI can make mistakes, please double-check responses.
 				suggestions={[
 					{
-						title: `What is SourceGraph?`,
-						prompt: `What is SourceGraph?`
+						title: `What is Sourcegraph?`,
+						prompt: `What is Sourcegraph?`
 					},
 					{
 						title: `What is Cody?`,
 						prompt: `What is Cody?`
 					},
 					{
-						title: `What can I do with Cody?`,
-						prompt: `What can I do with Cody?`
+						title: `Search query syntax?`,
+						prompt: `What is the search query syntax?`
 					},
 					{
-						title: `What are search query types?`,
-						prompt: `What are search query types?`
+						title: `Language specific query examples?`,
+						prompt: `Give me language specific query examples?`
 					}
 				]}
 			/>
