@@ -23,15 +23,10 @@ export const chatTableDataEnt: any = {
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '✅' },
         { provider: 'Anthropic', model: 'claude-2.0', status: '✅' },
         { provider: 'Anthropic', model: 'claude-2.1 (See Note #2)', status: '✅' },
-        { provider: 'Anthropic', model: 'claude-3 Haiku', status: '✅ *(5.3.9104 and above)' },
         { provider: 'Anthropic', model: 'claude-3 Sonnet', status: '✅ *(5.3.9104 and above)' },
-        { provider: 'Anthropic', model: 'claude-3 Opus', status: '✅ *(5.3.9104 and above)' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet', status: '✅ *(5.5.0 and above)' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet (Latest)', status: '✅ *(5.9 and above)' },
         { provider: 'Google', model: 'Gemini 1.5 Pro', status: '✅ *(5.4.5099 and above)' },
-        { provider: 'Google', model: 'Gemini 1.5 Flash', status: '✅ *(5.4.5099 and above)' },
-        { provider: 'Fireworks', model: 'mixtral 8x7b', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'OpenAI': [
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '✅' },
@@ -41,15 +36,10 @@ export const chatTableDataEnt: any = {
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '❌' },
         { provider: 'Anthropic', model: 'claude-2.0', status: '❌' },
         { provider: 'Anthropic', model: 'claude-2.1 (See Note #2)', status: '❌' },
-        { provider: 'Anthropic', model: 'claude-3 Haiku', status: '❌' },
         { provider: 'Anthropic', model: 'claude-3 Sonnet', status: '❌' },
-        { provider: 'Anthropic', model: 'claude-3 Opus', status: '❌' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet', status: '❌' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet (Latest)', status: '❌' },
         { provider: 'Google', model: 'Gemini 1.5 Pro', status: '❌' },
-        { provider: 'Google', model: 'Gemini 1.5 Flash', status: '❌' },
-        { provider: 'Fireworks', model: 'mixtral 8x7b', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Anthropic': [
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
@@ -59,15 +49,10 @@ export const chatTableDataEnt: any = {
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '✅' },
         { provider: 'Anthropic', model: 'claude-2.0', status: '✅' },
         { provider: 'Anthropic', model: 'claude-2.1 (See Note #2)', status: '✅' },
-        { provider: 'Anthropic', model: 'claude-3 Haiku', status: '✅ *(5.3.9104 and above)' },
         { provider: 'Anthropic', model: 'claude-3 Sonnet', status: '✅ *(5.3.9104 and above)' },
-        { provider: 'Anthropic', model: 'claude-3 Opus', status: '✅ *(5.3.9104 and above)' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet', status: '✅ *(5.5.0 and above)' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet (Latest)', status: '✅ *(5.5.0 and above)' },
         { provider: 'Google', model: 'Gemini 1.5 Pro', status: '❌' },
-        { provider: 'Google', model: 'Gemini 1.5 Flash', status: '❌' },
-        { provider: 'Fireworks', model: 'mixtral 8x7b', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Google': [
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
@@ -77,15 +62,10 @@ export const chatTableDataEnt: any = {
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '❌' },
         { provider: 'Anthropic', model: 'claude-2.0', status: '❌' },
         { provider: 'Anthropic', model: 'claude-2.1 (See Note #2)', status: '❌' },
-        { provider: 'Anthropic', model: 'claude-3 Haiku', status: '❌' },
         { provider: 'Anthropic', model: 'claude-3 Sonnet', status: '❌' },
-        { provider: 'Anthropic', model: 'claude-3 Opus', status: '❌' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet', status: '❌' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet (Latest)', status: '❌' },
         { provider: 'Google', model: 'Gemini 1.5 Pro', status: '✅ *(5.4.5099 and above)' },
-        { provider: 'Google', model: 'Gemini 1.5 Flash', status: '✅ *(5.4.5099 and above)' },
-        { provider: 'Fireworks', model: 'mixtral 8x7b', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Azure OpenAI': [
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '✅ (Note #1)' },
@@ -95,15 +75,10 @@ export const chatTableDataEnt: any = {
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '❌' },
         { provider: 'Anthropic', model: 'claude-2.0', status: '❌' },
         { provider: 'Anthropic', model: 'claude-2.1 (See Note #2)', status: '❌' },
-        { provider: 'Anthropic', model: 'claude-3 Haiku', status: '❌' },
         { provider: 'Anthropic', model: 'claude-3 Sonnet', status: '❌' },
-        { provider: 'Anthropic', model: 'claude-3 Opus', status: '❌' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet', status: '❌' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet (Latest)', status: '❌' },
         { provider: 'Google', model: 'Gemini 1.5 Pro', status: '❌' },
-        { provider: 'Google', model: 'Gemini 1.5 Flash', status: '❌' },
-        { provider: 'Fireworks', model: 'mixtral 8x7b', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Amazon Bedrock': [
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
@@ -113,15 +88,10 @@ export const chatTableDataEnt: any = {
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '✅' },
         { provider: 'Anthropic', model: 'claude-2.0', status: '✅' },
         { provider: 'Anthropic', model: 'claude-2.1 (See Note #2)', status: '✅' },
-        { provider: 'Anthropic', model: 'claude-3 Haiku', status: '✅ *(5.3.9104 and above)' },
         { provider: 'Anthropic', model: 'claude-3 Sonnet', status: '✅ *(5.3.9104 and above)' },
-        { provider: 'Anthropic', model: 'claude-3 Opus', status: '✅ *(5.3.9104 and above)' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet', status: '✅ *(5.5.0 and above)' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet (Latest)', status: '✅ *(5.5.0 and above)' },
         { provider: 'Google', model: 'Gemini 1.5 Pro', status: '❌' },
-        { provider: 'Google', model: 'Gemini 1.5 Flash', status: '❌' },
-        { provider: 'Fireworks', model: 'mixtral 8x7b', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'GCP Vertex': [
         { provider: 'OpenAI', model: 'gpt-3.5 turbo', status: '❌' },
@@ -131,15 +101,10 @@ export const chatTableDataEnt: any = {
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '❌' },
         { provider: 'Anthropic', model: 'claude-2.0', status: '❌' },
         { provider: 'Anthropic', model: 'claude-2.1 (See Note #2)', status: '❌' },
-        { provider: 'Anthropic', model: 'claude-3 Haiku', status: '✅ *(5.3.9104 and above)' },
         { provider: 'Anthropic', model: 'claude-3 Sonnet', status: '✅ *(5.3.9104 and above)' },
-        { provider: 'Anthropic', model: 'claude-3 Opus', status: '✅ *(5.3.9104 and above)' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet', status: '✅ *(5.5.0 and above)' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet (Latest)', status: '✅ *(5.5.0 and above)' },
         { provider: 'Google', model: 'Gemini 1.5 Pro', status: '❌' },
-        { provider: 'Google', model: 'Gemini 1.5 Flash', status: '❌' },
-        { provider: 'Fireworks', model: 'mixtral 8x7b', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ]
 };
 
@@ -153,9 +118,6 @@ export const autocompleteTableDataEnt: any = {
         { provider: 'Fireworks', model: 'StarCoder', status: '✅' },
         { provider: 'Fireworks', model: 'DeepSeek Coder V2', status: '✅' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '✅' },
-        { provider: 'Anthropic', model: 'Claude-3 Haiku', status: '✅ *(5.3.9104 and above)' },
-        { provider: 'Google', model: 'Gemini 1.5 Flash', status: '✅ *(5.4.5099 and above)' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'OpenAI': [
         { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '✅ (Note #1)' },
@@ -166,9 +128,6 @@ export const autocompleteTableDataEnt: any = {
         { provider: 'Fireworks', model: 'StarCoder', status: '❌' },
         { provider: 'Fireworks', model: 'DeepSeek Coder V2', status: '❌' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '❌' },
-        { provider: 'Anthropic', model: 'Claude-3 Haiku', status: '❌' },
-        { provider: 'Google', model: 'Gemini 1.5 Flash', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Anthropic': [
         { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '❌' },
@@ -179,9 +138,6 @@ export const autocompleteTableDataEnt: any = {
         { provider: 'Fireworks', model: 'StarCoder', status: '❌' },
         { provider: 'Fireworks', model: 'DeepSeek Coder V2', status: '❌' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '✅' },
-        { provider: 'Anthropic', model: 'Claude-3 Haiku', status: '✅ *(5.3.9104 and above)' },
-        { provider: 'Google', model: 'Gemini 1.5 Flash', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Google': [
         { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '❌' },
@@ -192,9 +148,6 @@ export const autocompleteTableDataEnt: any = {
         { provider: 'Fireworks', model: 'StarCoder', status: '❌' },
         { provider: 'Fireworks', model: 'DeepSeek Coder V2', status: '❌' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '❌' },
-        { provider: 'Anthropic', model: 'Claude-3 Haiku', status: '❌' },
-        { provider: 'Google', model: 'Gemini 1.5 Flash', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Azure OpenAI': [
         { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '✅ (Note #1)' },
@@ -205,9 +158,6 @@ export const autocompleteTableDataEnt: any = {
         { provider: 'Fireworks', model: 'StarCoder', status: '❌' },
         { provider: 'Fireworks', model: 'DeepSeek Coder V2', status: '❌' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '❌' },
-        { provider: 'Anthropic', model: 'Claude-3 Haiku', status: '❌' },
-        { provider: 'Google', model: 'Gemini 1.5 Flash', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'Amazon Bedrock': [
         { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '❌' },
@@ -218,9 +168,6 @@ export const autocompleteTableDataEnt: any = {
         { provider: 'Fireworks', model: 'StarCoder', status: '❌' },
         { provider: 'Fireworks', model: 'DeepSeek Coder V2', status: '❌' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '✅' },
-        { provider: 'Anthropic', model: 'Claude-3 Haiku', status: '✅ *(5.3.9104 and above)' },
-        { provider: 'Google', model: 'Gemini 1.5 Flash', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ],
     'GCP Vertex': [
         { provider: 'OpenAI', model: 'gpt-3.5-instruct (Note #4)', status: '❌' },
@@ -231,8 +178,5 @@ export const autocompleteTableDataEnt: any = {
         { provider: 'Fireworks', model: 'StarCoder', status: '❌' },
         { provider: 'Fireworks', model: 'DeepSeek Coder V2', status: '❌' },
         { provider: 'Anthropic', model: 'Claude-Instant-1.2', status: '❌' },
-        { provider: 'Anthropic', model: 'Claude-3 Haiku', status: '✅ *(5.5.0 and above)' },
-        { provider: 'Google', model: 'Gemini 1.5 Flash', status: '❌' },
-        { provider: 'Ollama*', model: 'variety', status: '❌' }
     ]
 };
