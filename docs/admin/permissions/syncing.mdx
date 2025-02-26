@@ -10,6 +10,7 @@ permissions. Both are on by default, resulting in double polling:
 Sourcegraph collects this information and stores it in internal database.
 
 To see which code hosts support permission syncing, please refer to [Supported code hosts table](/admin/#supported-code-hosts).
+
 ## How it works
 
 ### Periodic sync
@@ -27,6 +28,7 @@ Besides periodic schedule of jobs, we also have a way to request permission sync
 or repository on-demand. This is useful for example when a new user is added to Sourcegraph.
 
 To do that, the following GraphQL request needs to be made:
+
 ```graphql
 mutation {
     scheduleUserPermissionsSync(user: "user") {
@@ -36,6 +38,7 @@ mutation {
 ```
 
 Or in the case of adding a repository, the following request is made:
+
 ```graphql
 mutation {
     scheduleRepositoryPermissionsSync(repository: "repository") {
@@ -45,6 +48,7 @@ mutation {
 ```
 
 **Example**:
+
 - User `bob` is added to Sourcegraph.
 - `bob` has access to repositories `horsegraph/global` and `horsegraph/bob` on the code host
 - an on-demand request is made to sync repository permissions of `bob`, this job is added to the queue with high priority, so it will be processed
@@ -69,6 +73,7 @@ processed. To avoid overloading the code host a sync job [might not be processed
 and depending on the code host, might be heavily rate limited.
 
 Priority queue is needed to process the sync jobs in the order of most important first. E.g.:
+
 - on-demand sync is high priority
 - sync of entities with no permissions is high priority
 - sync of oldest permissions is normal priority, since we already do have some permissions in the system
@@ -230,13 +235,14 @@ mentioned above. Even if we let permission sync consume all the rate limit and w
 is rarely the case. Depending on the code host, the rate limit might be much higher, but then we might be
 firing huge amounts of requests to the code host.
 
-> IMPORTANT: For permission syncing to be quicker, the code host needs to be able to handle big amounts of requests per hour.
+<Callout type="warning">IMPORTANT: For permission syncing to be quicker, the code host needs to be able to handle big amounts of requests per hour.</Callout>
 
-> IMPORTANT: Depending on the customer scale, the amount of users, repositories and the distribution of permissions accross them, the time it takes to fully sync will vary.
+<Callout type="warning">IMPORTANT: Depending on the customer scale, the amount of users, repositories and the distribution of permissions accross them, the time it takes to fully sync will vary.</Callout>
 
-> IMPORTANT: We recommend **configuring webhooks for permissions on GitHub** which makes lag time much smaller.
+<Callout type="warning">IMPORTANT: We recommend **configuring webhooks for permissions on GitHub** which makes lag time much smaller.</Callout>
 
 ## Configuration
+
 There are variety of options in the site configuration to tune how the permissions sync requests are
 scheduled. Default values are shown below:
 
@@ -268,7 +274,9 @@ Internal rate limiter settings are described on each code host configuration pag
 ### Recommendations
 
 #### Less users than repositories
+
 If there are a lot less users, than repositories, it is better to rely on user-centric perms sync instead of repo-centric sync. In that case, we recommend:
+
 ```json
 {
   // ...
@@ -288,6 +296,7 @@ a minute. `5000/(4 * 60) = 20.8`, so the scheduler needs to schedule 21 users on
 
 The rate limit for the code host would need to be changed to support the load. In that case the recommendation
 is to set it to 2x of the amount of [requests expected from permission syncing](#request-count).
+
 #### More users than repositories
 
 If the situation is reversed, it is recommended to do the opposite than above. Prefer repo-centric

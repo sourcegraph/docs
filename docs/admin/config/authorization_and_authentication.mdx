@@ -68,47 +68,12 @@ Once authentication with GitHub via OAuth is configured, follow [these steps to 
 
 ### GitLab Enterprise or GitLab Cloud authentication and authorization
 
-We support both authentication and permissions syncing (through OAuth) for GitLab. If you use GitLab as your code host, you have two available authentication flows:
-
-#### Option 1
+We support both authentication and permissions syncing (through OAuth) for GitLab.
 
 1. Use SAML (or another auth mechanism) to log in to GitLab
 2. Use GitLab OAuth to log in to Sourcegraph
 
 In this way, access to Sourcegraph will still be managed by your identity provider, using the code host as a middle step. This option is the simplest to configure. To do so, [set up GitLab as an authentication option](/admin/auth/#gitlab), and then [enable permissions syncing](/admin/code_hosts/gitlab#oauth-application).
-
-#### Option 2
-
-Alternatively, you can configure SAML authentication in Sourcegraph, and use GitLab permissions syncing in the background to control access permissions. To implement this method, you will need to make sure that GitLab is able to return a value in `identities.provider` for the `GET /users` endpoint ([GitLab documentation](https://docs.gitlab.com/ee/api/users.html#for-admins)) that your identity provider is able to pass as the `nameID` in the SAML response. If that isn’t possible, you will need to use the first option.
-
-To configure SAML auth with GitLab permissions, you will need to first [configure permissions from GitLab](/admin/code_hosts/gitlab#administrator-sudo-level-access-token). Then, [configure SAML authentication](/admin/auth/saml/). The `nameID` passed by the identity provider will need to match the value of `identities.provider`.
-
-For example, if the GitLab API returns:
-
-```json
-{
-  "identities": [{ "provider": "saml", "extern_uid": "email@domain.com" }]
-}
-```
-
-Then you will need to configure permission in Sourcegraph as:
-
-```json
-{
-  "url": "https://gitlab.com",
-  "token": "$PERSONAL_ACCESS_TOKEN",
-  "authorization": {
-    "identityProvider": {
-      "type": "external",
-      "authProviderID": "$AUTH_PROVIDER_ID",
-      "authProviderType": "$AUTH_PROVIDER_TYPE",
-      "gitlabProvider": "saml"
-    }
-  }
-}
-```
-
-And configure the identity provider to pass the email address as the `nameID`.
 
 ### Bitbucket Server / Bitbucket Data Center authorization
 
