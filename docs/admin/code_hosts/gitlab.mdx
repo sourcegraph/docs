@@ -98,38 +98,6 @@ Then, [add or edit a GitLab connection](#repository-syncing) and include the `au
 In this case, a user's OAuth token will be used to get a list of repositories that the user can access.
 [Repository-centric permissions syncing](/admin/permissions/syncing) will be disabled.
 
-### Administrator (sudo-level) access token
-
-This method requires administrator access to GitLab so that Sourcegraph can access the [admin GitLab Users API endpoint](https://docs.gitlab.com/ee/api/users.html#for-admins). For each GitLab user, this endpoint provides the user ID that comes from the authentication provider, so Sourcegraph can associate a user in its system to a user in GitLab.
-
-Prerequisite: Add the [SAML](/admin/auth/#saml) or [OpenID Connect](/admin/auth/#openid-connect)
-authentication provider you use to sign into GitLab.
-
-Then, [add or edit a GitLab connection](#repository-syncing) using an administrator (sudo-level) personal access token, and include the `authorization` field:
-
-```json
-{
-  "url": "https://gitlab.com",
-  "token": "$PERSONAL_ACCESS_TOKEN",
-  // ...
-  "authorization": {
-    "identityProvider": {
-      "type": "external",
-      "authProviderID": "$AUTH_PROVIDER_ID",
-      "authProviderType": "$AUTH_PROVIDER_TYPE",
-      "gitlabProvider": "$AUTH_PROVIDER_GITLAB_ID"
-    }
-  }
-}
-```
-
-`$AUTH_PROVIDER_ID` and `$AUTH_PROVIDER_TYPE` identify the authentication provider to use and should
-match the fields specified in the authentication provider config
-(`auth.providers`). The authProviderID can be found in the `configID` field of the auth provider config.
-
-`$AUTH_PROVIDER_GITLAB_ID` should match the `identities.provider` returned by
-[the admin GitLab Users API endpoint](https://docs.gitlab.com/ee/api/users.html#for-admins).
-
 ### Username
 
 Prerequisite: Ensure that `http-header` is the *only* authentication provider type configured for
@@ -296,7 +264,7 @@ See [Internal rate limits](/admin/code_hosts/rate_limits#internal-rate-limits).
 	// It is important that the Sourcegraph repository name generated with this pattern be unique to this code host. If different code hosts generate repository names that collide, Sourcegraph's behavior is undefined.
 	"repositoryPathPattern": "{host}/{pathWithNamespace}",
 
-	// A GitLab access token with "api" scope. Can be a personal access token (PAT) or an OAuth token. If you are enabling permissions with identity provider type "external", this token should also have "sudo" scope.
+	// A GitLab access token with "api" scope. Can be a personal access token (PAT) or an OAuth token. If you are enabling permissions with identity provider type "username", this token should also have "sudo" scope.
 	"token": null,
 
 	// The OAuth token expiry (Unix timestamp in seconds)

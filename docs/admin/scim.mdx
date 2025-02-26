@@ -1,66 +1,54 @@
 # SCIM
 
-<Callout type="info">This feature is in beta while we're testing it with more IdPs. Our implementation complies with the SCIM 2.0 specification, and passes the validator for Okta and Microsoft Entra ID. But implementations might differ on the side of IdPs and validators don't give a 100% coverage, so we can't guarantee that our solution works with all IdPs in every case.</Callout>
+<Callout type="info">This feature is in beta while we're testing it with more IdPs. Reach out if you're running into trouble.</Callout>
 
-SCIM (System for Cross-domain Identity Management) is a standard for provisioning and deprovisioning users and groups in an organization. IdPs (identity providers) like Okta, OneLogin, and Microsoft Entra ID support provisioning users through SCIM.
+SCIM (System for Cross-domain Identity Management) is a standard for provisioning and deprovisioning users and groups in an organization. Identity providers like Okta, OneLogin, and Microsoft Entra ID support provisioning users through SCIM.
 
-Sourcegraph supports SCIM 2.0 for provisioning and de-provisioning _users_.
+Sourcegraph supports SCIM 2.0 for provisioning and de-provisioning users, groups are currently not supported.
 
+<<<<<<< Updated upstream
 > <Callout type="note">SCIM integration requires your SCIM provider to have network connectivity to your Sourcegraph instance. For example, using Okta's SCIM service with a private Sourcegraph instance, you will need to implement an [Okta privisioning agent](https://help.okta.com/en-us/content/topics/provisioning/opp/opp-main.htm) within a network that can connect to both your Sourcegraph instance and Okta's cloud services before continuing this setup.</Callout>
 
 > <Callout type="note">While our implementation of SCIM 2.0 is compliant with the specification, we’ve only tested it against two IdPs: Okta and Microsoft Entra ID. We can't guarantee it works with every IdP if the provider doesn't fully comply with the specification.</Callout> 
 
 > <Callout type="note">Currently, there is a known issue where Microsoft Entra ID [validator](https://scimvalidator.microsoft.com/) will fail; however, this does not impact the ability to provision users.</Callout>
+=======
+<Callout type="note">While our implementation of SCIM 2.0 is compliant with the specification, we’ve only tested it against two IdPs: Okta and Microsoft Entra ID. We can't guarantee it works with every IdP if the provider doesn't fully comply with the specification.</Callout>
+>>>>>>> Stashed changes
 
-## How to use
+## How to configure SCIM
 
-To use SCIM, you must have an existing IdP configured as an auth provider on your Sourcegraph instance. For authenticating SCIM requests, we currently support Bearer token authentication. We have a guide for Okta setup [below](#setting-up-okta-as-the-idp).
+To use SCIM, you must have an existing IdP configured as an auth provider on your Sourcegraph instance. For authenticating SCIM requests, we currently support Bearer token authentication.
 
-To configure:
 
-1. Generate a random alphanumeric bearer token of maximum 255 characters.
+To configure SCIM, follow these steps:
+
+1. Generate a random alphanumeric bearer token for the SCIM client to use when talking to Sourcegraph of maximum 255 characters.
    To do this in a terminal, run:
 
-   ```
+   ```bash
    openssl rand -base64 342 | tr -dc 'a-zA-Z0-9' | cut -c -255
    ```
 
-   (This command generates a random base64 string with more characters than required (342 characters) and then filters out non-alphanumeric characters. Finally, it trims the output to 255 characters. The reason we generate a longer string is to account for the fact that the base64 encoding has non-alphanumeric characters, which are removed by the tr command.)
-
 2. Add the following line to your [site configuration](/admin/config/site_config):
 
-   ```
+   ```json
    "scim.authToken": "{your token}"
    ```
+
 3. If you use Microsoft Entra ID, add the following setting to your site config:
 
-   ```
+   ```json
    "scim.identityProvider": "Azure AD"
    ```
-4. Set up your IdP to use our SCIM API. The API is at
 
-   ```
+4. Set up your IdP to use our SCIM API. The API endpoint is at
+
+   ```txt
    https://sourcegraph.company.com/.api/scim/v2
    ```
 
-## Configuring SCIM for Okta
-
-To set up user provisioning in [Okta](https://help.okta.com/en-us/Content/Topics/Apps/Apps_App_Integration_Wizard_SCIM.htm), you must first set up a new app integration of the "SAML 2.0" type, then configure it to use SCIM. Here are the steps to do this:
-
-1. Follow our [SAML guide](/admin/auth/saml/okta) to set up a new app integration with SAML, then open the integration you just created.
-    - If you already have the integration, just open your existing app integration.
-1. Go to the "General" tab and click "Edit" in the "App Settings" section.
-1. Set "Provisioning" to "SCIM". This creates a new tab called "Provisioning".
-1. Go to the "Provisioning" tab, and click "Edit"
-1. Set "SCIM connector base URL" to `{yourSourcegraphUrl}/.api/scim/v2`
-1. Set "Unique identifier field for users" to `userName`
-1. Check the first three items in `Supported provisioning actions`: "Import New Users and Profile Updates", "Push New Users", and "Push Profile Updates".
-1. Set "Authentication mode" to "HTTP Header"
-1. Under "HTTP Header", paste the same alphanumeric bearer token you used in your site config.
-1. Click "Test Connection Configuration" (first four items should be green—the user-related ones), then "Save".
-1. Switch to "Provisioning" → "To App" and click "Edit". Enable "Create Users", "Update User Attributes" and "Deactivate Users".
-
-> NOTE: You can also use our [SAML](/admin/auth/saml/okta) and [OpenID Connect](/admin/auth#openid-connect) integrations with Okta.
+See further down for [Okta specific setup](#setting-up-okta-as-the-idp).
 
 ## Features and limitations
 
@@ -100,3 +88,22 @@ We support the following SCIM 2.0 features:
 - ❌ Entity tags (ETags)
 - ❌ Multi-tenancy – you can only have 1 SCIM client configured at a time.
 - ❌ Tests with many IdPs – we’ve only validated the endpoint with Okta and Microsoft Entra ID.
+
+## Configuring SCIM for Okta
+
+To set up user provisioning in [Okta](https://help.okta.com/en-us/Content/Topics/Apps/Apps_App_Integration_Wizard_SCIM.htm), you must first set up a new app integration of the "SAML 2.0" type. Only SAML 2.0 supports SCIM provisioning in Okta today. Here are the steps to do this:
+
+1. Follow our [SAML guide](/admin/auth/saml/okta) to set up an app integration with SAML, then open the integration you just created in Okta.
+    - If you already have the integration, just open your existing app integration.
+1. Go to the "General" tab and click "Edit" in the "App Settings" section.
+1. Set "Provisioning" to "SCIM". This creates a new tab called "Provisioning".
+1. Go to the "Provisioning" tab, and click "Edit"
+1. Set "SCIM connector base URL" to `{yourSourcegraphUrl}/.api/scim/v2`
+1. Set "Unique identifier field for users" to `userName`
+1. Check the first three items in `Supported provisioning actions`: "Push New Users", and "Push Profile Updates".
+1. Set "Authentication mode" to "HTTP Header"
+1. Under "HTTP Header", paste the same alphanumeric bearer token you used in your site config.
+1. Click "Test Connection Configuration" ("Create Users", and "Update User Attributes" should be green), then "Save".
+1. Switch to "Provisioning" → "To App" and click "Edit". Enable "Create Users", "Update User Attributes" and "Deactivate Users", and "Save" again.
+
+> NOTE: You can also use our [SAML](/admin/auth/saml/okta) and [OpenID Connect](/admin/auth#openid-connect) integrations with Okta.
