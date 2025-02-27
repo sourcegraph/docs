@@ -12,6 +12,9 @@ export default function Chat() {
 				}
 			`}</style>
 			<Chatbot
+				title="Ask AI"
+				triggerText="Ask AI"
+				badge="Experimental"
 				apiRoute="/docs/api/chat"
 				openingMessage="Hi there! I'm Sourcegraph's AI assistant trained for our documentation. How can I help you?"
 				// Remember AI can make mistakes, please double-check responses.
@@ -25,11 +28,11 @@ export default function Chat() {
 						prompt: `What is Cody?`
 					},
 					{
-						title: `Search query syntax?`,
+						title: `Search query syntax`,
 						prompt: `What is the search query syntax?`
 					},
 					{
-						title: `Language specific query examples?`,
+						title: `Language specific query examples`,
 						prompt: `Give me language specific query examples?`
 					}
 				]}
