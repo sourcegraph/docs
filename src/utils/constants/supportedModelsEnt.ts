@@ -26,6 +26,7 @@ export const chatTableDataEnt: any = {
         { provider: 'Anthropic', model: 'claude-3 Sonnet', status: '✅ *(5.3.9104 and above)' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet', status: '✅ *(5.5.0 and above)' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet (Latest)', status: '✅ *(5.9 and above)' },
+        { provider: 'Anthropic', model: 'claude-3.7 Sonnet', status: '✅ *(6.1.1295 and above)' },
         { provider: 'Google', model: 'Gemini 1.5 Pro', status: '✅ *(5.4.5099 and above)' },
     ],
     'OpenAI': [
@@ -52,6 +53,7 @@ export const chatTableDataEnt: any = {
         { provider: 'Anthropic', model: 'claude-3 Sonnet', status: '✅ *(5.3.9104 and above)' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet', status: '✅ *(5.5.0 and above)' },
         { provider: 'Anthropic', model: 'claude-3.5 Sonnet (Latest)', status: '✅ *(5.5.0 and above)' },
+        { provider: 'Anthropic', model: 'claude-3.7 Sonnet', status: '✅ *(6.1.1295 and above)' },
         { provider: 'Google', model: 'Gemini 1.5 Pro', status: '❌' },
     ],
     'Google': [
