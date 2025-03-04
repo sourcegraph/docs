@@ -66,7 +66,7 @@ export default {
         light: '#F34E3F', // Teal-07
         DEFAULT: '#FF7867', // Teal-08
       },
-      'link-underline': '#002533', // Teal-02
+      'link-underline': '#606060', // Teal-02
       'link-underline-light': '#EAFCFF', // Teal-11
       // Brand Colors
       black: '#060000',
