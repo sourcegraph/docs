@@ -21,9 +21,9 @@ export function Prose<T extends React.ElementType = 'div'>({
 				// lead
 				'prose-lead:text-slate-500 dark:prose-lead:text-dark-text-secondary',
 				// links
-				'prose-a:font-semibold dark:prose-a:text-link',
+				'prose-a:font-semibold prose-a:text-vermilion-00 hover:prose-a-text:[#606060] visited:text-[#4A4A4A] hover:visited:text-[#606060] dark:prose-a:vermilion-11 dark:hover:prose-a:dark-text-secondary dark:visited:text-[#606060] dark:hover:visited:text-[#A9A9A9]',
 				// link underline
-				'prose-a:underline prose-a:decoration-link-light hover:prose-a:text-link-light hover:prose-a:underline dark:prose-a:no-underline dark:hover:prose-a:underline',
+				'prose-a:underline hover:prose-a:text-[#606060] hover:prose-a:underline dark:prose-a:underline dark:hover:prose-a:underline',
 				// pre
 				'prose-pre:rounded-xl prose-pre:bg-slate-900 prose-pre:shadow-lg dark:prose-pre:bg-slate-800/60 dark:prose-pre:shadow-none dark:prose-pre:ring-1 dark:prose-pre:ring-slate-300/10',
 				// hr
@@ -31,7 +31,7 @@ export function Prose<T extends React.ElementType = 'div'>({
 				//table head alignment
 				'prose-th:table-cell',
 				// Strong
-				'prose-strong:text-dark-bg dark:prose-strong:text-dark-text-primary',
+				'prose-strong:text-vermilion-08 dark:prose-strong:text-vermilion-08',
 				// Inline code block
 				'prose-code:before:content-none prose-code:after:content-none',
 				// Video
