@@ -13,13 +13,13 @@ export function Prose<T extends React.ElementType = 'div'>({
 		<Component
 			className={clsx(
 				className,
-				'prose prose-slate max-w-none dark:prose-invert dark:text-dark-text-secondary',
+				'prose prose-slate max-w-none dark:prose-invert dark:text-dark-paragraph-text',
 				// headings
 				'prose-headings:scroll-mt-28 prose-headings:font-display prose-headings:font-normal lg:prose-headings:scroll-mt-[8.5rem]',
 				// For headings anchor
 				'prose-headings:relative prose-headings:flex prose-headings:items-center',
 				// lead
-				'prose-lead:text-slate-500 dark:prose-lead:text-dark-text-secondary',
+				'prose-lead:text-slate-500 dark:prose-lead:text-dark-paragraph-text',
 				// links
 				'prose-a:font-semibold prose-a:text-vermilion-00 hover:prose-a-text:[#606060] visited:text-[#4A4A4A] hover:visited:text-[#606060] dark:prose-a:vermilion-11 dark:hover:prose-a:dark-text-secondary dark:visited:text-[#606060] dark:hover:visited:text-[#A9A9A9]',
 				// link underline

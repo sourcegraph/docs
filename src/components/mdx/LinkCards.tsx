@@ -36,7 +36,7 @@ export function LinkCard({
 					<h3 className="slate-900 font-display text-xl dark:text-white">
 						{title}
 					</h3>
-					<p className="font-normal text-slate-700 dark:text-dark-text-secondary">
+					<p className="font-normal text-slate-700 dark:text-dark-paragraph-text">
 						{description}
 					</p>
 					<CustomLink version={version} href={href}>

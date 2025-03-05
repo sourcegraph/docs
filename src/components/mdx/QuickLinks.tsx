@@ -35,7 +35,7 @@ export function QuickLink({
 						{title}
 					</CustomLink>
 				</h2>
-				<p className="mt-1 text-sm text-slate-700 dark:text-dark-text-secondary">
+				<p className="mt-1 text-sm text-slate-700 dark:text-dark-paragraph-text">
 					{description}
 				</p>
 			</div>
