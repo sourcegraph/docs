@@ -73,7 +73,7 @@ export function ThemeSelector(
 									'text-link': selected,
 									'text-slate-700 dark:text-white':
 										active && !selected,
-									'text-slate-700 dark:text-dark-text-secondary':
+									'text-slate-700 dark:text-dark-paragraph-text':
 										!active && !selected,
 									'bg-vermilion-08 text-vermilion-11': active
 								},

@@ -84,6 +84,7 @@ export default {
       'light-text-muted': '#060000', // Vermilion-07
       'dark-text-primary': '#FFF3F0', // Vermilion-11
       'dark-text-secondary': '#A9A9A9',
+      'dark-paragraph-text': '#FFF3F0',
       'sggray': {
         100: '#F5F7FB',
         200: '#DBE2F0',
