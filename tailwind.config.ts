@@ -45,6 +45,7 @@ export default {
         '00': '#030106',
         '01': '#120720',
         '02': '#291242',
+        '06': '#914BDC',
         '07': '#A96AF3',
         '08': '#BE8CFF',
         '11': '#FAF4FF',
@@ -65,7 +66,7 @@ export default {
         light: '#F34E3F', // Teal-07
         DEFAULT: '#FF7867', // Teal-08
       },
-      'link-underline': '#002533', // Teal-02
+      'link-underline': '#606060', // Teal-02
       'link-underline-light': '#EAFCFF', // Teal-11
       // Brand Colors
       black: '#060000',
@@ -83,6 +84,7 @@ export default {
       'light-text-muted': '#060000', // Vermilion-07
       'dark-text-primary': '#FFF3F0', // Vermilion-11
       'dark-text-secondary': '#A9A9A9',
+      'dark-paragraph-text': '#FFF3F0',
       'sggray': {
         100: '#F5F7FB',
         200: '#DBE2F0',

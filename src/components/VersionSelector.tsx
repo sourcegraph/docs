@@ -39,7 +39,7 @@ export default function VersionSelector() {
 			<div>
 				<Menu.Button
 					className="inline-flex w-full items-center justify-center gap-x-1.5
-				rounded-md px-2 py-2 text-xs font-medium text-slate-500 shadow-sm ring-1 ring-inset ring-light-border-2 hover:bg-vermilion-08 hover:text-vermilion-11 dark:bg-dark-bg-2 dark:text-dark-text-secondary dark:ring-inset dark:ring-dark-border"
+				rounded-md px-2 py-2 text-xs font-medium text-slate-500 shadow-sm ring-1 ring-inset ring-light-border-2 hover:bg-vermilion-08 hover:text-vermilion-11 dark:bg-dark-bg-2 dark:text-dark-paragraph-text dark:ring-inset dark:ring-dark-border"
 				>
 					{selectedVersion.name}
 					<ChevronDownIcon
@@ -58,7 +58,7 @@ export default function VersionSelector() {
 				leaveFrom="transform opacity-100 scale-100"
 				leaveTo="transform opacity-0 scale-95"
 			>
-				<Menu.Items className="divide- absolute right-0 z-10 mt-2 flex w-32 origin-top-right flex-col divide-light-border rounded-md bg-light-bg-1 text-xs text-slate-500 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:divide-dark-border dark:bg-dark-bg-2 dark:text-dark-text-secondary sm:w-48 sm:text-sm">
+				<Menu.Items className="divide- absolute right-0 z-10 mt-2 flex w-32 origin-top-right flex-col divide-light-border rounded-md bg-light-bg-1 text-xs text-slate-500 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:divide-dark-border dark:bg-dark-bg-2 dark:text-dark-paragraph-text sm:w-48 sm:text-sm">
 					{/* Versions */}
 					{versions.length > 0 &&
 						versions.map((version, count) => (
