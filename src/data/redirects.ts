@@ -6731,6 +6731,13 @@ const redirectsData = [
     permanent: true
   },
 
+    //Eclispe redirects
+    {
+      source: "/cody/clients/install-eclipse",
+    destination: "/cody/clients",
+    permanent: true
+  },
+
 
 ];
 
