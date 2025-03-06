@@ -37,7 +37,7 @@ export const navigation: NavigationItem[] = [
 							{ title: "Cody for VS Code", href: "/cody/clients/install-vscode", },
 							{ title: "Cody for JetBrains", href: "/cody/clients/install-jetbrains", },
 							{ title: "Cody for Visual Studio", href: "/cody/clients/install-visual-studio", },
-							{ title: "Cody for Eclipse", href: "/cody/clients/install-eclipse", },
+							// { title: "Cody for Eclipse", href: "/cody/clients/install-eclipse", },
 							{ title: "Cody for Web", href: "/cody/clients/cody-with-sourcegraph", },
 						]
 					},
@@ -55,10 +55,10 @@ export const navigation: NavigationItem[] = [
 						subsections: [
 							{ title: "Chat", href: "/cody/capabilities/chat", },
 							{ title: "Query Types", href: "/cody/capabilities/query-types", },
-              				{ title: "Agentic chat", href: "/cody/capabilities/agentic-chat", },
+							{ title: "Agentic chat", href: "/cody/capabilities/agentic-chat", },
 							{ title: "Autocomplete", href: "/cody/capabilities/autocomplete", },
-              				{ title: "Auto-edit", href: "/cody/capabilities/auto-edit", },
-              				{ title: "Prompts", href: "/cody/capabilities/prompts", },
+							{ title: "Auto-edit", href: "/cody/capabilities/auto-edit", },
+							{ title: "Prompts", href: "/cody/capabilities/prompts", },
 							{ title: "OpenCtx", href: "/cody/capabilities/openctx", },
 							{ title: "Debug Code", href: "/cody/capabilities/debug-code", },
 							{ title: "Context Filters", href: "/cody/capabilities/ignore-context", },
