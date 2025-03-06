@@ -318,20 +318,21 @@ export const navigation: NavigationItem[] = [
 		separator: "Pricing",
 		topics: [
 			{
-				title: "Free",
-				href: "/pricing/free",
-			},
-			{
-				title: "Enterprise Starter",
-				href: "/pricing/enterprise-starter",
+				title: "Plans",
+				href: "/pricing/plans/free",
 				sections: [
-					{ title: "Billing", href: "/pricing/billing-faqs" },
-
+					{ title: "Free", href: "/pricing/plans/free" },
+					{ title: "Enterprise Starter", href: "/pricing/plans/enterprise-starter" },
+					{ title: "Enterprise", href: "/pricing/plans/enterprise" },
 				],
 			},
 			{
-				title: "Enterprise",
-				href: "/pricing/enterprise",
+				title: "Plan Comparison",
+				href: "/pricing/plan-comparison",
+			},
+			{
+				title: "FAQs",
+				href: "/pricing/faqs",
 			},
 		],
 	},
