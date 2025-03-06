@@ -6725,16 +6725,38 @@ const redirectsData = [
   },
 
   //Commands redirects
-    {
+  {
     source: "/cody/capabilities/commands",
     destination: "/cody/capabilities/prompts",
     permanent: true
   },
 
-    //Eclispe redirects
-    {
-      source: "/cody/clients/install-eclipse",
+  //Eclispe redirects
+  {
+    source: "/cody/clients/install-eclipse",
     destination: "/cody/clients",
+    permanent: true
+  },
+
+  //Pricing redirects
+  {
+    source: "/pricing/free",
+    destination: "/pricing/plans/free",
+    permanent: true
+  },
+  {
+    source: "/pricing/enterprise-starter",
+    destination: "/pricing/plans/enterprise-starter",
+    permanent: true
+  },
+  {
+    source: "/pricing/enterprise",
+    destination: "/pricing/plans/enterprise",
+    permanent: true
+  },
+  {
+    source: "/pricing/billing-faqs",
+    destination: "/pricing/faqs",
     permanent: true
   },
 
