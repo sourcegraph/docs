@@ -1,18 +1,8 @@
-# `src search-jobs list`
+# src search-jobs list
 
-## Flags
+## Overview
 
-| Name | Description | Default Value |
-|------|-------------|---------------|
-| `-asc` | Sort search jobs in ascending order | `false` |
-| `-dump-requests` | Log GraphQL requests and responses to stdout | `false` |
-| `-f` | Format for the output using Go text/template syntax | `\{\{\.ID\}\}: \{\{\.Creator.Username\}\} \{\{\.State\}\} (\{\{\.Query\}\})` |
-| `-get-curl` | Print the curl command for executing this query and exit (WARNING: includes printing your access token!) | `false` |
-| `-insecure-skip-verify` | Skip validation of TLS certificates against trusted chains | `false` |
-| `-limit` | Limit the number of search jobs returned | `10` |
-| `-order-by` | Sort search jobs by a field | `CREATED_AT` |
-| `-trace` | Log the trace ID for requests. [See docs](/admin/observability/tracing) | `false` |
-| `-user-agent-telemetry` | Include the operating system and architecture in the User-Agent sent with requests to Sourcegraph | `true` |
+`src search-jobs list` is a tool that lists search jobs on a Sourcegraph instance.
 
 ## Usage
 
@@ -20,39 +10,55 @@
 Usage of 'src search-jobs list':
   -asc
         Sort search jobs in ascending order
+  -c string
+        Comma-separated list of columns to display. Available: id,query,state,username,createdat,startedat,finishedat,url,logurl,total,completed,failed,inprogress (default "id,username,state,query")
   -dump-requests
         Log GraphQL requests and responses to stdout
-  -f string
-        Format for the output, using the syntax of Go package text/template. (e.g. "{{.ID}}: {{.Creator.Username}} ({{.Query}})" or "{{.|json}}") (default "{{.ID}}: {{.Creator.Username}} {{.State}}")
   -get-curl
         Print the curl command for executing this query and exit (WARNING: includes printing your access token!)
   -insecure-skip-verify
         Skip validation of TLS certificates against trusted chains
+  -json
+        Output results as JSON for programmatic access
   -limit int
         Limit the number of search jobs returned (default 10)
   -order-by string
-        Sort search jobs by a field (default "CREATED_AT")
+        Sort search jobs by a sortable field (QUERY, CREATED_AT, STATE) (default "CREATED_AT")
   -trace
         Log the trace ID for requests. See https://docs.sourcegraph.com/admin/observability/tracing
   -user-agent-telemetry
         Include the operating system and architecture in the User-Agent sent with requests to Sourcegraph (default true)
 
-Examples:
+        Examples:
 
-  List all search jobs:
+          List all search jobs:
 
-    $ src search-jobs list
+                $ src search-jobs list
 
-  List all search jobs in ascending order:
+          List all search jobs in ascending order:
 
-    $ src search-jobs list --asc
+                $ src search-jobs list --asc
 
-  Limit the number of search jobs returned:
+          Limit the number of search jobs returned:
 
-    $ src search-jobs list --limit 5
+                $ src search-jobs list --limit 5
 
-  Order search jobs by a field (must be one of: QUERY, CREATED_AT, STATE):
+          Order search jobs by a field (must be one of: QUERY, CREATED_AT, STATE):
 
-    $ src search-jobs list --order-by QUERY
+                $ src search-jobs list --order-by QUERY
 
+          Select specific columns to display:
+
+                $ src search-jobs list -c id,state,username,createdat
+
+          Output results as JSON:
+
+                $ src search-jobs list -json
+
+          Combine options:
+
+                $ src search-jobs list --limit 10 --order-by STATE --asc -c id,query,state
+
+          Available columns are: id, query, state, username, createdat, startedat, finishedat,
+          url, logurl, total, completed, failed, inprogress
 ```

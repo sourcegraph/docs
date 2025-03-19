@@ -1,13 +1,13 @@
-# src search-jobs get
+# src search-jobs results
 
 ## Overview
 
-`src search-jobs get` is a tool that gets details of a single search job on a Sourcegraph instance.
+`src search-jobs results` is a tool that gets the results of a search job on a Sourcegraph instance.
 
 ## Usage
 
 ```
-Usage of 'src search-jobs get':
+Usage of 'src search-jobs results':
   -c string
         Comma-separated list of columns to display. Available: id,query,state,username,createdat,startedat,finishedat,url,logurl,total,completed,failed,inprogress (default "id,username,state,query")
   -dump-requests
@@ -18,6 +18,8 @@ Usage of 'src search-jobs get':
         Skip validation of TLS certificates against trusted chains
   -json
         Output results as JSON for programmatic access
+  -out string
+        File path to save the results (optional)
   -trace
         Log the trace ID for requests. See https://docs.sourcegraph.com/admin/observability/tracing
   -user-agent-telemetry
@@ -25,18 +27,13 @@ Usage of 'src search-jobs get':
 
         Examples:
 
-          Get a search job by ID:
+                Get the results of a search job:
+                  $ src search-jobs results U2VhcmNoSm9iOjY5
 
-                $ src search-jobs get U2VhcmNoSm9iOjY5
+                Save search results to a file:
+                  $ src search-jobs results U2VhcmNoSm9iOjY5 -out results.jsonl
 
-          Get a search job with specific columns:
-
-                $ src search-jobs get U2VhcmNoSm9iOjY5 -c id,state,username
-
-          Get a search job in JSON format:
-
-                $ src search-jobs get U2VhcmNoSm9iOjY5 -json
-
-          Available columns are: id, query, state, username, createdat, startedat, finishedat,
-          url, logurl, total, completed, failed, inprogress
+        The results command retrieves the raw search results in JSON Lines format.
+        Each line contains a single JSON object representing a search result. The data
+        will be displayed on stdout or written to the file specified with -out.
 ```
