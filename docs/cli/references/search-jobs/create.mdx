@@ -1,38 +1,42 @@
-# `src search-jobs create`
+# src search-jobs create
 
-## Flags
+## Overview
 
-| Name | Description | Default Value |
-|------|-------------|---------------|
-| `-dump-requests` | Log GraphQL requests and responses to stdout | `false` |
-| `-f` | Format for the output using Go text/template syntax | `\{\{\.ID\}\}: \{\{\.Creator.Username\}\} \{\{\.State\}\} (\{\{\.Query\}\})` |
-| `-get-curl` | Print the curl command for executing this query and exit (WARNING: includes printing your access token!) | `false` |
-| `-insecure-skip-verify` | Skip validation of TLS certificates against trusted chains | `false` |
-| `-query` | Search query (required) | |
-| `-trace` | Log the trace ID for requests. [See docs](/admin/observability/tracing) | `false` |
-| `-user-agent-telemetry` | Include the operating system and architecture in the User-Agent sent with requests to Sourcegraph | `true` |
+`src search-jobs create` is a tool that creates a search job on a Sourcegraph instance.
+
 ## Usage
 
 ```
 Usage of 'src search-jobs create':
+  -c string
+        Comma-separated list of columns to display. Available: id,query,state,username,createdat,startedat,finishedat,url,logurl,total,completed,failed,inprogress (default "id,username,state,query")
   -dump-requests
         Log GraphQL requests and responses to stdout
-  -f string
-        Format for the output, using the syntax of Go package text/template. (e.g. "{{.ID}}: {{.Creator.Username}} ({{.Query}})" or "{{.|json}}") (default "{{.ID}}: {{.Creator.Username}} {{.State}} ({{.Query}})")
   -get-curl
         Print the curl command for executing this query and exit (WARNING: includes printing your access token!)
   -insecure-skip-verify
         Skip validation of TLS certificates against trusted chains
-  -query string
-        Search query
+  -json
+        Output results as JSON for programmatic access
   -trace
         Log the trace ID for requests. See https://docs.sourcegraph.com/admin/observability/tracing
   -user-agent-telemetry
         Include the operating system and architecture in the User-Agent sent with requests to Sourcegraph (default true)
 
-Examples:
+        Examples:
 
-  Create a search job:
+          Create a search job:
 
-    $ src search-jobs create -query "repo:^github\.com/sourcegraph/sourcegraph$ sort:indexed-desc"
+                $ src search-jobs create "repo:^github\.com/sourcegraph/sourcegraph$ sort:indexed-desc"
+
+          Create a search job and display specific columns:
+
+                $ src search-jobs create "repo:sourcegraph" -c id,state,username
+
+          Create a search job and output in JSON format:
+
+                $ src search-jobs create "repo:sourcegraph" -json
+
+          Available columns are: id, query, state, username, createdat, startedat, finishedat,
+          url, logurl, total, completed, failed, inprogress
 ```
