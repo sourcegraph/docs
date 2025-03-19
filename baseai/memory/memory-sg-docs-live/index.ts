@@ -8,7 +8,7 @@ const memoryDocs = (): MemoryI => ({
 		include: ['**/*.mdx'],
 		gitignore: true,
 		embeddedAt: '',
-		deployedAt: ''
+		deployedAt: '47153aa8a7fa9708ed976517a531dc222c7f4a30'
 	},
 	documents: {
 		meta: doc => {
