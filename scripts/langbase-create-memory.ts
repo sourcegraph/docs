@@ -9,7 +9,7 @@ async function main() {
     const memory = await langbase.memories.create({
         name: 'memory-sg-docs-live',
         description: 'An AI memory storing all Sourcegraph docs.',
-        chunk_size: 10000,
+        chunk_size: 30000,
     });
 
     console.log('Memory created:', memory);
