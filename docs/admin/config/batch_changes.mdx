@@ -306,3 +306,30 @@ When a user is deleted, their Batch Changes become inaccessible in the UI but th
 This allows recovering the Batch Changes if the user is restored.
 
 However, if the user deletion is permanent, deleting both account and data, then the associated Batch Changes are also permanently deleted from the database. This frees storage space and removes dangling references.
+
+## Batch Spec Library
+
+The Batch Spec Library is a collection of Batch Specs that can be used to create Batch Changes. Sourcegraph provides a few Batch Specs out of the box.
+
+Site admins can manage the library through the GraphQL mutations `createBatchSpecLibraryRecord`, `updateBatchSpecLibraryRecord`, and `deleteBatchSpecLibraryRecord`. Use the query `batchSpecLibrary` to list all available Batch Spec examples.
+
+```graphql
+createBatchSpecLibraryRecord(name: "example", spec: "version: 2\nname: example") {
+  id
+}
+
+updateBatchSpecLibraryRecord(id: "QmF0Y2hTcGVjTGlicmFyeVJlY29yZDo4", name: "example-2", spec: "version: 2\nname: example-2") {
+  id
+}
+
+deleteBatchSpecLibraryRecord(id: "QmF0Y2hTcGVjTGlicmFyeVJlY29yZDo4") {
+  alwaysNil
+}
+
+batchSpecLibrary(first: 100) {
+  nodes {
+    id
+    name
+  }
+}
+```
