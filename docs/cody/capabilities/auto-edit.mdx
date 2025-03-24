@@ -18,6 +18,42 @@ Auto-edit is enabled by default for Cody Pro and Enterprise users. You can opt o
 
 Site admins can opt their organization out of the auto-edit feature by disabling it from their config settings.
 
+### Auto-edit access for Enterprise customers
+
+Auto-edit is available for Enterprise customers with [Sourcegraph Cody Gateway](/cody/core-concepts/cody-gateway#sourcegraph-cody-gateway) access. Enabling the feature requires two steps:
+
+1. Site administrators must:
+   - Enable the feature flag `cody-autoedit-experiment-enabled-flag` and can also opt-out via the same flag
+   - Add `fireworks::*` as an [allowed provider](https://sourcegraph.com/docs/cody/enterprise/model-configuration#model-filters) (see below)
+2. Once enabled, auto-edit will become the default suggestion mode for all users
+3. Users can optionally switch back to autocomplete from the Cody extension settings
+
+![enable-from-cody-settings](https://storage.googleapis.com/sourcegraph-assets/Docs/enable-auto-edit-from-settings.jpg)
+
+The following example demonstrates how to add Fireworks as an allowed LLM provider:
+
+```json
+
+"cody.enabled": true,
+"modelConfiguration": {
+  "sourcegraph": {
+    "modelFilters": {
+      // Only allow "beta" and "stable" models.
+      // Not "experimental" or "deprecated".
+      "statusFilter": ["beta", "stable"],
+
+      // Allow any models provided by Anthropic, OpenAI, Google and Fireworks.
+      "allow": [
+        "anthropic::*", // Anthropic models
+        "openai::*", // OpenAI models
+        "google::*", // Google Gemini models
+        "fireworks::*", // Open source models hosted by Sourcegraph
+      ],
+    }
+  }
+}
+```
+
 ## How does auto-edit work?
 
 The system detects potential changes based on the following:
