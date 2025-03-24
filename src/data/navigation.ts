@@ -256,7 +256,6 @@ export const navigation: NavigationItem[] = [
 						title: "Enterprise Getting Started",
 						href: "/admin/enterprise_getting_started_guide",
 					},
-					{ title: "Pricing", href: "/admin/pricing" },
 				],
 			},
 			{
@@ -319,7 +318,7 @@ export const navigation: NavigationItem[] = [
 		topics: [
 			{
 				title: "Plans",
-				href: "/pricing/plans/free",
+				href: "/pricing/plans",
 				sections: [
 					{ title: "Free", href: "/pricing/plans/free" },
 					{ title: "Enterprise Starter", href: "/pricing/plans/enterprise-starter" },
