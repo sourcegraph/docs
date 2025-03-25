@@ -6760,6 +6760,25 @@ const redirectsData = [
     permanent: true
   },
 
+  // Admin pricing docs redirects
+  {
+    source: "/admin/pricing",
+    destination: "/pricing/plans",
+    permanent: true
+  },
+
+  {
+    source: "/admin/pricing#how-are-active-users-calculated-for-sourcegraph-cody",
+    destination: "/cody/usage-and-pricing#billing-faqs-for-cody-enterprise",
+    permanent: true
+  },
+
+  {
+    source: "/admin/pricing#how-are-active-users-calculated-for-sourcegraph-code-search-and-code-intelligence-platform",
+    destination: "/pricing/faqs#how-are-active-users-calculated-for-sourcegraph-code-search-and-code-intelligence-platform",
+    permanent: true
+  },
+
 
 ];
 
