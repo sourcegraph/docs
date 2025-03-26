@@ -82,6 +82,26 @@ $ kubectl apply -f deploy-sourcegraph-k8s/base/sourcegraph/pgsql/pgsql.StatefulS
 
 ## Helm
 
-To upgrade builtin containers in Helm admins must update their instance to v5.11.6271 via the [helm multi-version upgrade procedure](/admin/deploy/kubernetes#multi-version-upgrade-procedure) or standard upgrade procedure. This is because `helm upgrade` doesn't support just the DBs in a chart.
+Unlike other deployment methods, Helm charts function as a complete unit and don't allow upgrading only the database components independently. Therefore, the PostgreSQL upgrade must be performed as part of a full Sourcegraph version upgrade.
 
-<Callout type="warning"> In Sourcegraph version 6.0.0 Sourcegraph services will no longer be able to connect to a Postgres 12 database. This means at and after Sourcegraph 6.0.0, migrator will not be connect to older versions to execute the `upgrade` command. </Callout>
+### Required Upgrade Path
+
+<Callout type="warning">Sourcegraph versions `v6.0.x` and later require PostgreSQL 16 and will not connect to PostgreSQL 12 databases. This means any direct upgrade from versions earlier than `v5.10.3940` to any version `v6.0.x` or later will fail because the migrator in `v6.0.x` and later cannot connect to PostgreSQL 12 to perform the upgrade.</Callout>
+
+To safely upgrade PostgreSQL in Helm deployments:
+
+1. **First upgrade to an intermediate version**:
+   - Upgrade to either Sourcegraph `v5.10.3940` or `v5.11.6271` using the [helm multi-version upgrade procedure](/admin/deploy/kubernetes#multi-version-upgrade-procedure) or [standard upgrade procedure](/admin/deploy/kubernetes#standard-upgrades)
+   - These specific versions include the necessary PostgreSQL upgrade scripts to safely migrate from PG12 to PG16
+
+2. **Verify the PostgreSQL upgrade** (optional):
+   - You can verify the PostgreSQL version has been successfully upgraded by connecting to the database:
+     ```bash
+     kubectl exec -it pgsql -- psql -U sg -c "SELECT version();"
+     ```
+   - The output should show PostgreSQL 16.x
+
+3. **Proceed to target version**:
+   - Once PostgreSQL has been upgraded to version 16, you can safely upgrade to your target version (`v6.0.x` or later) using the standard upgrade procedure
+
+For any issues during the PostgreSQL upgrade process, please contact support@sourcegraph.com.
