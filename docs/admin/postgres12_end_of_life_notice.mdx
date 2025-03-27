@@ -43,3 +43,12 @@ We expect the downtime to last approximately 2.5 hours per TB of code indexed in
 Upgrading your Postgres version is highly dependent on your specific situation. If you have a separate team managing this database, reach out to them to understand their practices. And, as always, feel free to reach out to Sourcegraph to assist you.
 
 When using external databases, you can upgrade your Postgres version at any time, either alongside a Sourcegraph upgrade or independently of it. We encourage you to do so as soon as it's convenient for you.
+
+### How Can I Check If Reindexing Is Still Running?
+Reindexing in Sourcegraph can take several hours, depending on the number of repositories and system resources. While there's no built-in progress tracker, you can check its status using this PostgreSQL query:
+
+```
+SELECT * FROM pg_stat_progress_create_index;
+```
+Look for the `blocks_done` value in the output. Run the query at intervals—if this number increases, reindexing is ongoing. For better readability, enable extended output with `\x` command.
+Also note that the reindexing process might take a bit of time reindexing the rockskip table if the reindexing is happening in the code intel DB.
