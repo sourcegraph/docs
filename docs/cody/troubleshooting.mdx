@@ -153,30 +153,53 @@ To fix this, navigate to https://sourcegraph.your-domain.com/cody/chat and click
 
 ### Record performance traces for Cody
 
-You can get performance traces from the Cody VS Code extension in production with full support for source maps. To do so:
+#### VS Code
 
-- Start VS Code with a special runtime flag. In macOS, you can do so via the terminal like this:
+You can capture performance traces from the Cody VS Code extension to help diagnose memory issues. To do so:
 
-```bash
-/Applications/Visual\ Studio\ Code.app/Contents/MacOS/Electron --inspect-extensions=9333
-```
+1. Quit VS Code and start it with a special runtime flag (on Mac):
+   ```bash
+   /Applications/Visual\ Studio\ Code.app/Contents/MacOS/Electron --inspect-extensions=9333
+   ```
 
-Note that you may need to quit VSCode first, then run that command to re-launch it. It will open all of your windows and tabs again.
-- After VS Code is started, head over to Chrome and go to `chrome://inspect`, which takes you to the following:
+2. Open Chrome and go to `chrome://inspect`
 
-![](https://gist.github.com/assets/458591/0a17881b-5449-48d5-a53e-5556f4f2dedd)
+3. Configure the inspect server you started on port 9333:
+   - Click on **Open dedicated DevTools for Node**
+   - Go to the **Connection** tab
+   - Click **Add connection** and type `localhost:9333`
 
-- Configure the inspect server you started on port `9333` from here. To do so, click on **Open dedicated DevTools for Node**, then go to the **Connection** tab, and make sure to add `localhost:9333` to the list
+4. Return to the `chrome://inspect` tab, and you should see a new remote target that you can click **inspect** on
 
-![](https://gist.github.com/assets/458591/972ce113-88f0-482a-99b7-5e51957981ef)
+5. Click on the **Memory** tab, select **Allocation sampling** and click **Start** to begin profiling. Continue until the issue you're experiencing occurs
 
-- Now head back to the `chrome://inspect` tab, and you should see a new remote target that you can inspect
+6. Let it run for a moment to register increasing memory usage (1-3 minutes should be fine). During that time, use VS Code normally.
 
-![](https://gist.github.com/assets/458591/06b2e293-aea7-42e8-a9cc-592863b6fb07)
+7. Click **Stop** and when profiling is complete, right-click on the profile name and select **Save profile...**
 
-- Clicking this will open a (somewhat reduced) DevTools view. Great! We've almost got it. From here you can go to the **Performance** tab to record a trace. And finally, swap tabs to the VS Code window and interact with the extension. Come back later to stop the recording and export it.
+8. Send us the saved profile file
 
-![](https://gist.github.com/assets/458591/d590636b-31e5-4436-8039-ee62b7a8e59f)
+#### JetBrains/IntelliJ
+
+To record performance traces in JetBrains IDEs:
+
+1. Start IntelliJ with the `CODY_AGENT_DEBUG_INSPECT=true` environment flag set. On macOS, you can do this by running:
+   ```bash
+   CODY_AGENT_DEBUG_INSPECT=true open -na "IntelliJ IDEA.app"
+   ```
+   (Note: App name may differ for other JetBrains variants)
+
+2. Open Chrome and navigate to `chrome://inspect` in the address bar
+
+3. You will see available targets - click **inspect** on the relevant one
+
+4. Select **Allocation sampling** and click **Start** to begin profiling. Continue until the issue you're experiencing occurs
+
+5. Let it run for 1-3 minutes while using IntelliJ normally
+
+6. Click **Stop**, and when profiling is complete, right-click on the profile name and select **Save profile...**
+
+7. Send us the saved profile file
 
 ### Record a CPU profile for Cody in VSCode
 
