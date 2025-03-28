@@ -151,6 +151,7 @@ export const navigation: NavigationItem[] = [
 						subsections: [
 							{ title: "Publishing Changesets", href: "/batch-changes/publishing-changesets", },
 							{ title: "Tracking Changesets", href: "/batch-changes/tracking-existing-changesets", },
+							{ title: "Rebasing Changesets", href: "/batch-changes/rebasing-changesets", },
 						]
 					},
 					{
