@@ -9,11 +9,17 @@ const langbase = new Langbase({
 
 export async function POST(req: NextRequest) {
 	const options = await req.json();
+	// console.log("🚀 ~ options:", options)
 
-	const { stream, threadId } = await langbase.pipe.run({
+	// Create a new options object with the rewritten query
+	const updatedOptions = {
 		...options,
-		name: 'ask-sourcegraph-docs'
-	});
+		name: 'ask-sourcegraph-docs',
+		lastMessageOnly: true,
+	};
+	console.log("🚀 ~ updatedOptions:", updatedOptions)
+
+	const { stream, threadId } = await langbase.pipes.run(updatedOptions);
 
 	return new Response(stream, {
 		status: 200,
