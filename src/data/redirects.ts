@@ -1,5 +1,9 @@
 const redirectsData = [
-
+  {
+    source: "/docs/admin/deploy_executors",
+    destination: "https://sourcegraph.com/docs/admin/executors/deploy_executors",
+    permanent: true
+  },
   {
     source: "/dev/roadmap",
     destination: "https://sourcegraph.com/direction",
