@@ -225,11 +225,6 @@ export const navigation: NavigationItem[] = [
 					{ title: "References", href: "/code_insights/references" },
 				],
 			},
-			{
-				title: "Notebooks",
-				href: "/notebooks",
-				sections: [{ title: "Quickstart", href: "/notebooks/quickstart" }],
-			},
 		],
 	},
 	{
