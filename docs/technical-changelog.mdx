@@ -4,6 +4,881 @@ This page documents all notable changes to Sourcegraph. For more detailed change
 
 {/* CHANGELOG_START */}
 
+# 6.2 Patch 0
+
+## v6.2.0
+
+- [sourcegraph](https://github.com/sourcegraph/sourcegraph/releases/tag/v6.2.0)
+
+- [docker-compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/releases/tag/v6.2.0)
+
+- [helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/releases/tag/v6.2.0)
+
+- [kustomize](https://github.com/sourcegraph/deploy-sourcegraph-k8s/releases/tag/v6.2.0)
+
+### Features
+
+#### Agents
+
+- First draft of new review page `(PR #4324)`
+- add rule stats to the `./api/rules` API `(PR #4320)`
+  - Added rule stats to the `.api/agents/{agent_id}/rules` REST endpoint when the query string `?include=revision.stats` is present
+- wire data into Agent overview page `(PR #4302)`
+- add support to create rules from the web UI `(PR #4229)`
+- Cool orb animation `(PR #4199)`
+- New overview page `(PR #4172)`
+- Always run merge base when computing base OID (AGENT-203) `(PR #4163)`
+- make review API return changeset and file diff `(PR #4159)`
+- Add connected indicator next to agent title `(PR #4132)`
+- Updated card design for changesets `(PR #4110)`
+- Agent overview updates `(PR #4034)`
+- Improved create new agent page `(PR #4023)`
+- add multiple table view UIs `(PR #4016)`
+  - New UIs to view an agent repos, conversations, PRs, reviews, and diagnostics
+- auto-generate feedback from changeset conversations `(PR #3996)`
+  - When a pull request is merged, diagnostic feedback is auto-generated via LLM judge from the comments and reactions
+- Visual update to agents page `(PR #3963)`
+- mirror pull requests in our database `(PR #3880)`
+  - It's now possible to `POST /.api/agents/{agent_id}/runs` to trigger a background review of a pull request
+  - It's now possible to list pull requests for an agent with `GET /.api/agents/{agent_id}/changesets`
+  - It's now possible to list repositories for an agent with `GET /.api/agents/{agent_id}/repos`
+  - It's now possible to trigger a background sync of pull requests via `POST /.api/agents/{agent_id}/runs`.
+- link to original rule URL in GitHub review comments `(PR #3816)`
+  - Review comments on GitHub now link to the original rule. Previously, it only displayed the rule slug (short ID like `logic`) and it was difficult to find the source of the rule. Now, it's easy to find both the rule instructions or identify the rule author (via git blame).
+- Rules Table [AGENT-145][AGENT-169] `(PR #3797)`
+- add $-based cost estimates in agent overview `(PR #3632)`
+  - There is now a new "Spend" tab in the agent overview that gives insights into how expensive it is to run an operate an agent, which is helpful among other reasons when making a decision about what LLM model to use.
+  - The LLM API `/.api/completions/stream` now returns the used "modelref" (Sourcegraph canonical representation) alongside the used "model" (LLM provider canonical representation).
+- Rule builder with testing on a specific PR `(PR #3614)`
+- Sync PR conversations on merge or error [CODY-5010] `(PR #3569)`
+- rename all-inferred to repo-rules `(PR #3476)`
+  - Use the setting `rules: ["repo-rules"]` instead of `rules: ["all-inferred"]` to pick up `*.rule.md` files in the repository based on the changed files in the diff.
+
+#### Autocomplete
+
+- Redict starcoder traffic to Deepseek from CG `(PR #4310)`
+
+#### Batch Changes
+
+- add sorting to changesets `(PR #4085)`
+- new api for batch spec examples `(PR #4050)`
+  - feat(batches): new batch spec examples library api
+- add title-search capabilities to batch changes `(PR #3837)`
+
+#### Batch Changes
+
+- enable ssh key commit signing for site admins `(PR #4013)`
+- add fine-grained access tokens to credential modal `(PR #4007)`
+  - feat(batches): Batch Changes now supports fine-grained access tokens as user and site-admin credentials
+- update commit signing to display public key `(PR #3968)`
+- commit signing with ssh keys `(PR #3817)`
+  - Feature is behind `batches-commit-signing` feature flag.Adds the UI form elements needed for submitting a private SSH key and passphrase for git commit signing.note: only UI elements and graphql changes in this PR, backend changes are still required.imageimage
+- implement changeset rebasing `(PR #3600)`
+
+#### Cloudapi
+
+- database configuration `(PR #3779)`
+
+#### Code Intelligence
+
+- Syntactic indexing for Scala `(PR #2393)`
+
+#### Code Nav
+
+- Add metadata and topics to repo home `(PR #3984)`
+
+#### Cody
+
+- Update context limits (CODY-5022) (#4321) `(PR #4426)`
+- add entitlements CRUD endpoints `(PR #4402)`
+- Add a site config for "enforced" Guardrails and transmit it to Cody clients `(PR #4286)`
+  - Adds a site config setting, `"attribution.mode": "enforced"`, which configures Cody IDE extensions after v1.82 (VSCode) or v7.82 (JetBrains) to not display code until attribution checks have finished.
+- Add support for logging to Search using Cody credentials `(PR #3585)`
+
+#### Cody-Gateway
+
+- MSP based version of cody gateway exposes sync sources endpoint `(PR #4261)`
+- return consumption in standardised trailer headers `(PR #3680)`
+- deprecate legacy /anthropic endpoint `(PR #3677)`
+
+#### Codygateway
+
+- allow lookup failures to check Enterprise Portal again `(PR #3936)`
+
+#### Completioncredits
+
+- disable request-count-based limiting when enforcement is enabled `(PR #4222)`
+- generate flattened usage view `(PR #3971)`
+
+#### Completions
+
+- add token usage to traces `(PR #4180)`
+- credit consumption tracking `(PR #3917)`
+- apply cost estimate from Cody Gateway as source `(PR #3681)`
+- refactor cost estimation to 'credits' from 'pennies' `(PR #3667)`
+
+#### Database/Completioncredits
+
+- improved List, add Count `(PR #4323)`
+- track raw token counts `(PR #4322)`
+
+#### Dev
+
+- add CLAUDE.md file for claude code `(PR #3957)`
+  - N/A
+- Enable SvelteKit dev server in sourcegraph command set by default `(PR #3084)`
+
+#### Dotcom
+
+- bring workspaces hype to Cody Pro upsell page `(PR #3768)`
+
+#### Entitlements
+
+- init tables `(PR #3944)`
+
+#### Gitserver
+
+- commit signing with ssh keys `(PR #3592)`
+
+#### Graphqlbackend
+
+- add prototype completionCreditsUsage query `(PR #4346)`
+
+#### Graphqlbackend/Completioncredits
+
+- prototype entitlement usage query `(PR #4483)`
+
+#### Llmapitelemetry
+
+- allow consumers to GetTokenUsages `(PR #4181)`
+
+#### Multi Tenant
+
+- bring onboarding UI a bit closer to original design `(PR #4217)`
+- add disabled tooltip to invite users button `(PR #3981)`
+- update public repositories picker tab `(PR #3923)`
+- add exit survey and delete re-typing confirmation UX `(PR #3859)`
+
+#### Release
+
+- Add timeout to migrator test `(PR #4237)`
+
+#### Sams
+
+- extend workspaces session cookie to 30 days `(PR #4213)`
+- bump IntrospectTokenCacheSize for multi-tenant services `(PR #3850)`
+
+#### Search
+
+- Add support for chaining multiple filePaths in URL (#4333) `(PR #4433)`
+- Rename scope refinement options for (hopefull) better clarity `(PR #4341)`
+- enable personalized ranking by default `(PR #4148)`
+  - We've enabled personalized ranking for search results in the new web app—marking the first step in integrating user-specific ranking signals into our search pipeline. As a result, queries spanning multiple repositories will prioritize results from repositories the user has frequently contributed to.User can disable the feature by setting `boostRelevantRepositories` to false in the settings
+  ```
+{
+  "experimentalFeatures": {
+    "boostRelevantRepositories": false,
+  },
+}
+```
+- (new web ui) Add support for capture group aggregation `(PR #4122)`
+- Add repo metadata editing `(PR #4086)`
+- Add simple form validation/handling library `(PR #4084)`
+- Code Monitors - change the display order of the tabs in the page `(PR #3959)`
+- load 100 batch changes at a time instead of 15 `(PR #3739)`
+- use `patterntype=nls` for Cody context `(PR #3709)`
+  - The `GetCodyContext` endpoint is now deprecated. Instead, clients should use the search API with `patterntype=nls`. Here's an example of how Cody calls the search API: ([https://github.com/sourcegraph/cody/blob/62d73f78c432036d1f99bc9631ed534cc2ed846b/lib/shared/src/sourcegraph-api/graphql/client.ts#L1386-L1404](https://github.com/sourcegraph/cody/blob/62d73f78c432036d1f99bc9631ed534cc2ed846b/lib/shared/src/sourcegraph-api/graphql/client.ts#L1386-L1404)).
+- Add BlamePopover for blame view in new webapp `(PR #3659)`
+- Improve cody web warmstart performance `(PR #3333)`
+
+#### Smart-Apply
+
+- allow smart apply models on dotcom `(PR #4104)`
+- Add instant apply model for smart apply `(PR #3857)`
+  - feat(smart-apply): Add instant apply models
+
+#### Source
+
+- Add projectQuery option to Gerrit code host connections `(PR #3807)`
+  - Gerrit code host connections now support a `projectQuery` option that allows for any arbitrary query parameters supported by the Gerrit API.
+- Allow adding details of an already existing GitHub App `(PR #3370)`
+  - Site admins can now add their own pre-existing GitHub Apps to Sourcegraph. This also allows site admins to supply the App details of Enterprise GitHub Apps.
+
+#### Workspaces
+
+- implement workspace membership filter `(PR #4038)`
+- add Google Tag Manager via WORKSPACES_GOOGLE_TAG_MANAGER_ID `(PR #3611)`
+- add plans-viewed event `(PR #3503)`
+- check Enterprise Portal for potential overlap `(PR #3500)`
+
+#### Workspaces/Internal
+
+- add button to find by workspace ID `(PR #3607)`
+- add link to Looker for workspace `(PR #3588)`
+- add search workspaces UI `(PR #3566)`
+
+#### Others
+
+- configurable runtime for codemonitor jobs `(PR #4289)`
+  - feat: configurable runtime for codemonitor jobs
+- show an info message that commit signing is set up `(PR #4216)`
+- hide commit signing integration when no github code host is available `(PR #4022)`
+- create new package /lib/releases `(PR #3835)`
+- do-init-only flag in `sg release create` `(PR #3767)`
+  - NA
+- patch release creates git branch for version `(PR #3712)`
+  - na
+- implement commit search on searcher `(PR #3541)`
+  - Added a feature flag to run commit search on searcher, goal being to improve stability and resource usage of gitserver
+- new GraphQL query evaluateFeatureFlags `(PR #3513)`
+  - feat: new GraphQL query evaluateFeatureFlags
+- Add C++ support for ctags `(PR #3301)`
+
+### Fix
+
+#### Agents
+
+- Render context lines against head (AGENT-195) `(PR #4430)`
+- Add missing sg enable to +page.svelte files `(PR #4399)`
+- simplify onboarding `(PR #4386)`
+- Fix broken changeset titles `(PR #4372)`
+- use MarshalCursor.idField as an override if "Id" is explictly listed `(PR #4352)`
+- add minor touches to review page `(PR #4347)`
+- make agent overview page load again `(PR #4338)`
+- generate meaningful name for newly created agents `(PR #4334)`
+- make agent page load with empty connections `(PR #4331)`
+- make `/.api/reviews?include=changesets` actually work `(PR #4328)`
+- fix explicit changeset revision ID and improve logging `(PR #4304)`
+- UI improvements to reviews list `(PR #4294)`
+- Improve overview review cards `(PR #4293)`
+- Updated review list design `(PR #4271)`
+- Fix detection of generated files (AGENT-202) `(PR #4238)`
+- Agent orb z-index removed `(PR #4235)`
+- Links the "View review" button in review list `(PR #4234)`
+- handle diffs with deleted files `(PR #4221)`
+- remove review rule `(PR #4214)`
+- fix overview page bugs `(PR #4193)`
+- fix prompt rendering issues `(PR #4186)`
+- Updated spend page for new schema `(PR #4166)`
+- Settings moved to top-level nav `(PR #4135)`
+- Link buttons and links on connection card `(PR #4129)`
+- Moves sidebar items into context menu `(PR #4126)`
+- CSS and changeset logic fixes `(PR #4113)`
+- added whitelisted prefix to system prompts `(PR #4090)`
+- Import create images properly `(PR #4073)`
+- Agents Intro Hero visual update `(PR #4070)`
+- Visual update agent hero section `(PR #3990)`
+- Conversations have Upsert semantics `(PR #3915)`
+- display stable number of agent runs `(PR #3822)`
+- skip draft PRs with the `feature_flag_enabled` trigger `(PR #3820)`
+  - The review agent no longer automatically reviews draft PRs with the `feature_flag_enabled` trigger. Instead, users must explicitly request reviews on draft PRs through a comment (`comment_starts_with`) or a label (`label_exists`)
+- track spend even when not posting GitHub review `(PR #3819)`
+- automatically add feature-flag trigger `(PR #3815)`
+  - When creating a new agent program, it now automatically includes a feature flag trigger for the feature flag named `agents-auto-review`. You must create this feature flag to have the trigger activate.
+- Run items condensed `(PR #3813)`
+- Run status indicators changed to circles `(PR #3811)`
+- get review agent working again `(PR #3766)`
+- 404 link `(PR #3763)`
+- added another migration to fix edited agent_conversation migration `(PR #3686)`
+- Add migration to fix edited migration [AGENT-157] `(PR #3641)`
+- use non-cancelable context for telemetry reporting `(PR #3630)`
+- correctly chunk diffs wrt generated files `(PR #3628)`
+  - Fix a bug where the review agent would error if a generated file had more than 100k tokens.
+  - Updated docs to describe the algorithm to detect and ignore generated files
+- mark run as "errored" on panic `(PR #3627)`
+  - Fixed a bug where an agent run would be stuck in "running" mode forever. Now, these runs get correctly marked as "errored"
+- improve wording of a log entry `(PR #3626)`
+- remove outdated suggestion `(PR #3625)`
+- fix flaky test failure `(PR #3578)`
+- several small fixes for agents `(PR #3571)`
+  - The review agent now posts a comment reply when it's triggered by a comment trigger (example: `@sourcegraph review`). This is makes the agent behave more like a colleague would.
+  - The agent run page now links back to the pull request at the top of the page
+  - "Duration: 0s" is no longer shown on the agent run page while it's running.
+  - The links to the "applied_rules" in the agent run page now work correctly. Previously, the links were a 404 because they were one long `", "` joined string. We plan to further improve the design of how rules are displayed in this page, so this is not a final solution, just a quick fix for the most immediate bug.
+- fix bug where `POST /reviews` always failed `(PR #3520)`
+
+#### Analytics
+
+- Deprecate admin analytics `(PR #3930)`
+  - Deprecate the admin analytics pages (/site-admin/analytics) and redirect users to Sourcegraph Analytics (analytics.sourcegraph.com).
+
+#### Batch Changes
+
+- don't show ssh keys if they're not applicable `(PR #4009)`
+- make batch changes restriction more visible `(PR #3860)`
+
+#### Ci
+
+- make minor_nightly_cut.sh executable `(PR #4141)`
+  - na
+- Fix pnpm patch file paths `(PR #3519)`
+
+#### Search
+
+- Fix bug that wasn't setting a default tab selection `(PR #4107)`
+  - Fixes a bug where default selections were not being set.
+
+#### Code Intelligence
+
+- allows explicitly specifying scala for scip-syntax `(PR #3875)`
+- Allow failed and errored uploads to expire in accordance with retention policy `(PR #3393)`
+
+#### Code Nav
+
+- Enable code intel for graphql and protobuf `(PR #4264)`
+- Change file tree alignment `(PR #4246)`
+- Fix inline diff view `(PR #4232)`
+
+#### Cody
+
+- allow "edit" model capability in site config `(PR #4377)`
+- endpoint and token definition in requests to Cody Gateway `(PR #3980)`
+- Cody Gateway client config `(PR #3978)`
+- Cody Gateway enabled definition `(PR #3977)`
+- Cody Gateway endpoint and token resolution on Sourcegraph instance `(PR #3950)`
+- Update auditlog API to have cursor-based pagination `(PR #3942)`
+  - Improve usability of auditlog API
+- remove Cody quota usage check worker `(PR #3922)`
+- prevent panic in chat completions API by checking error first `(PR #3918)`
+  - The API `POST /.api/llm/chat/completions` now does not panic anymore when sending a bad request (HTTP 400), which was possible to trigger if you used tool with an incorrect schema.
+
+#### Cody-Gateway
+
+- Added missing call of InitCodyGatewayModelConfig to MSP version of Cody Gateway `(PR #4266)`
+
+#### Cody-Gateway/Dotcomuser
+
+- shorter TTL for failure case `(PR #3847)`
+
+#### Codygateway
+
+- fix Enterprise actor cache fail-open `(PR #3559)`
+
+#### Completioncredits
+
+- fix aggregation generating >1 row per user `(PR #4178)`
+
+#### Completions
+
+- soft-fail aggregated token usage recorder `(PR #4284)`
+
+#### Completions/Client
+
+- check for resp nil-ness before deref `(PR #4218)`
+
+#### Completions/Entitlements
+
+- do not hard-fail on missing usage data `(PR #4446)`
+- ignore code completions `(PR #4185)`
+- fix fallback calculation `(PR #4115)`
+
+#### Dev
+
+- Fix pnpm test:preview command `(PR #4314)`
+- Fix `pnpm dev` `(PR #4219)`
+
+#### Enterpriseportal
+
+- remove bad log scopes `(PR #3536)`
+
+#### Entitlements
+
+- use bigint limits `(PR #4176)`
+
+#### Modelconfig
+
+- correct modelcost calculation `(PR #4179)`
+- remove invalid modelcost, add enforcement `(PR #4100)`
+
+#### Multi Tenant
+
+- fix add repositories error layout, workspace redirection, added repositories search `(PR #4167)`
+- fix variable preservation for add repositories picker pagination query `(PR #4030)`
+
+#### Perf
+
+- remove quadratic behavior in rune counting `(PR #3665)`
+  - (perf) Fixed quadratic behavior in commit and diff search
+
+#### Prompts
+
+- do not allow to create prompts if you're not a site admin `(PR #4011)`
+
+#### Release
+
+- add runtype names `(PR #4060)`
+  - na
+
+#### Rr
+
+- v2 and v1 next patch return same values `(PR #3956)`
+  - na
+
+#### Search
+
+- make form input directions more clear `(PR #4093)`
+- remove unscoped css `(PR #4080)`
+- disallow rev filters with repo predicates `(PR #4035)`
+  - Fixes a search bug where queries like `repo:has.file(...) rev:1.0` would completely ignore the `rev` filter. Now, these types of searches are explicitly disallowed.
+- ensure we ignore context canceled errors in searcher client `(PR #3992)`
+  - Fix a rare bug in `repo:has.file` queries where some searches could return no results.
+- truncate all Rockskip tables `(PR #3976)`
+  - With this change we delete all Rockskip indexes. In Sourcegraph v5.5.0 we shipped a bug in Rockskip which causes some unindexed symbol searches to return no results. The bug has been fixed in 6.2 and was backported to 6.1. However indexes that have been created prior to the fix are corrupted. Hence, we have to reindex all Rockskip repositories. A new index job will automatically be triggered. This requires no further action. However, during the reindex, symbol search at older revisions of very large repos will likely time out, so we encourage all customers to communicate this to their users ahead of the rollout of the new version.
+- Code monitors tab logic `(PR #3961)`
+- Fix 'case:' and 'patterntype:' parsing bug `(PR #3927)`
+- Server returns new app for /agents/* routes `(PR #3762)`
+- improve error for clashing revisions `(PR #3714)`
+- Make repo readme fill available space `(PR #3707)`
+- Fix streaming search in vscode and jetbrains extension `(PR #3510)`
+- Workaround settingscasacde error checks `(PR #3364)`
+
+#### Smart-Apply
+
+- Change the deployment id for the custom model `(PR #3921)`
+  - fix(smart-apply): Change deployment id
+
+#### Source
+
+- sub-repo-perms: adjust ipv4 string prefix matcher to use stack instead of heap allocations `(PR #4054)`
+  - N/A
+
+#### Workspaces
+
+- only check eTLD+1 if domain might have a subdomain `(PR #3561)`
+
+#### Workspaces/Web
+
+- fix tag manager ID interpolation `(PR #3664)`
+
+#### Others
+
+- escape LIKE queries for users `(PR #4311)`
+- add ssh-keygen to gitserver to enable commit signing `(PR #4300)`
+- clean up indexes for user_relevant_repos `(PR #4281)`
+- skip check for github app commit signing if configured by SSH `(PR #4169)`
+- init subrepo perms before enterprise init hooks `(PR #4064)`
+- only show commit signing for gitlab and github `(PR #4027)`
+- unset cxx instead of NoCC `(PR #3958)`
+  - na
+- use pathspec literal to avoid colons `(PR #3928)`
+  - Fixed a bug where paths that start with colons may be reported as not found.
+- (Agents) Modify agent submenu styling `(PR #3810)`
+- (Agents) Remove description field in agent creation step `(PR #3808)`
+- Enforce file size limits for highlighting `(PR #3697)`
+  - Enforces limits of 1.5 MiB and 50K lines for highlighting code files.
+- remove vertical scrollbar from pre block `(PR #3678)`
+  - (minor bugfix) Fixed an issue where we would show scrollbars on unscrollable items in the dynamic search filters sidebar
+- fetch modified files for `DiffModifiesFile` `(PR #3654)`
+- clean up cmd leak `(PR #3642)`
+- a few bugfixes for the experimental commit search on searcher `(PR #3639)`
+- close diff reader `(PR #3636)`
+- a few small fixes for commit search on searcher experiment `(PR #3620)`
+- Nightly Minor Release Pipeline `(PR #3609)`
+  - NA
+- /latest releaseregistry endpoint returns latest by semver `(PR #3563)`
+  - NA
+- change developer dialog back to cache first `(PR #3548)`
+- nightly release pipeline must test do-init step `(PR #3344)`
+  - na
+- call bazel directly for generating stitched migration graph in nightly release pipeline `(PR #2487)`
+  - NA
+
+### Chore
+
+#### Agents
+
+- add support for 'sg test agents' `(PR #4336)`
+- add extra debugging statement `(PR #4326)`
+- t.Equal argument order `(PR #4290)`
+- replace openapi-generator with custom typespec emitter `(PR #4249)`
+- optimize Go coding style rule `(PR #3848)`
+- minor fixes for spend page `(PR #3757)`
+  - API documentation for `GET /.api/reviews` now correctly shows the supported query parameters
+  - The agent spend overview now correctly displays the oldest date in the title (not newest date)
+  - The agent spend overview page now no longer has a 404 in the page title
+- move internal dev docs to Notion `(PR #3675)`
+- Conversation Reactions [AGENT-17] `(PR #3618)`
+- remove less useful rules `(PR #3598)`
+- add rules related to emitting telemetry events `(PR #3582)`
+
+#### Batch Changes
+
+- commit signing polish `(PR #4287)`
+
+#### Ci
+
+- migrate hermetic cc toolchain to bzlmod + ubuntu 24.04 (v2) `(PR #3979)`
+- remove linter_deps `(PR #3778)`
+- handle pushing of images with tag `internal-image` `(PR #3701)`
+- move hermetic_cc_toolchain to bzlmod `(PR #1665)`
+
+#### Code Intelligence
+
+- Remove stray comment `(PR #3616)`
+- Reduce frequency of auto-indexing summary builder `(PR #3615)`
+- Add test for Int4 overflow fix `(PR #3597)`
+- Delete dependency syncing code `(PR #2947)`
+
+#### Code Nav
+
+- Fetch file content from raw endpoint in React app `(PR #4299)`
+- (new web ui) Use raw endpoint to fetch file content `(PR #4136)`
+
+#### Cody
+
+- Roll Cody Web to 0.32.4 `(PR #4404)`
+  - Cody Web is updated to 0.32.4
+ Backport 70119119b25a883d94571770aafe7846c161a79d from #4401
+- fix max tokens default values for dev env `(PR #4125)`
+- make Cody Gateway accept incoming trace as a direct parent `(PR #4003)`
+- Remove teams mention from pro plan description `(PR #3749)`
+- Remove "New" from Claude 3.5 Sonnet name (SRCH-1627) `(PR #3530)`
+  - no-changelog
+
+#### Cody-Gateway
+
+- 10x all blocking/flagging limits `(PR #4184)`
+
+#### Codygateway
+
+- QA fixups `(PR #4099)`
+
+#### Completioncredits
+
+- increase aggregation interval to 5s `(PR #4251)`
+
+#### Deps
+
+- bump vulnerable dependencies `(PR #4329)`
+
+#### Dev
+
+- Extracted constant time string comparison into a utility function `(PR #4278)`
+- Upgrade playwright `(PR #4272)`
+- Clean up web-sveltekit and ui package.json files `(PR #4269)`
+- Improve stability of top level navigation test `(PR #4259)`
+- Improve playwright test stablility `(PR #4162)`
+- Remove sourcegraph.yaml code path in auto-indexing `(PR #2957)`
+- Delete most package repo code `(PR #2955)`
+  - Removes experimental support for creating, configuring and using package code hosts such as NPM dependencies, JVM dependencies, Go modules etc.
+
+#### Docs
+
+- Add link to telemetry naming best practices guide `(PR #4012)`
+
+#### Dotcom
+
+- remove deprecated events pubsub client `(PR #3662)`
+
+#### Enterpriseportal
+
+- wrap error instead of using safedetails `(PR #3937)`
+- include error in lookup error log `(PR #3935)`
+- log subscription-not-found GetCodyGatewayAccess requests `(PR #3734)`
+
+#### Gitserver
+
+- Clarify correctness of code in CommitsIter `(PR #3547)`
+
+#### Graph
+
+- Upgrade auto-indexer images (Adds support for .NET 9.0) `(PR #4057)`
+
+#### Graphql
+
+- split specific functionality of `GitTreeResolver` and `GitBlobResolver` out of shared `GitTreeEntryResolver` `(PR #3744)`
+
+#### Local
+
+- on MacOS use `login` keychain `(PR #3975)`
+- add analytics sentinel value to events `(PR #3853)`
+- remove GOWORK from sg.config `(PR #3851)`
+
+#### Modelconfig
+
+- update Gemini 2.0 Flash-Lite model info `(PR #3887)`
+
+#### Monitoring
+
+- add completions latency dashboards `(PR #3741)`
+
+#### Perf
+
+- stream commits `(PR #3661)`
+  - (internal, perf) Modified commits endpoint on gitserver to stream end-to-end, increasing raw listing throughput by ~20x.
+
+#### Refactor
+
+- extract subrepo permissions checking into a Client wrapper `(PR #3634)`
+
+#### Release
+
+- add release as branch code owners `(PR #4421)`
+  - N/A - not customer facing
+
+#### Release
+
+- move operations package out of internal `(PR #4164)`
+  - move buildkite and operations packages into public package from internal
+- Remove duplication of SBOM generation in internal releases `(PR #4061)`
+  - remove SBOM from internal release
+- Publish basic initcontainer to use in deployments `(PR #3974)`
+
+#### Search
+
+- Convert toReadable to toLoadable `(PR #4121)`
+- Standardize on valibot for runtime data validation `(PR #4082)`
+- Blame popover polish `(PR #3908)`
+- Update cody web to v0.32.2 `(PR #3904)`
+- remove fuzzy finder access for unauthorized users `(PR #3776)`
+- change os.Setenv to t.Setenv and move the env closer to the tests `(PR #3557)`
+- Add tests for KUBERNETES_GIT_CA_CERT `(PR #3539)`
+
+#### Security
+
+- Backport: Update to src-cli 6.1.1 `(PR #4477)`
+  - Update src-cli version to 6.1.1
+- [6.2.x] Auto-update all packages in Sourcegraph container images `(PR #4466)`
+- pin GH actions `(PR #4134)`
+- remove database dependency from security event logs `(PR #3907)`
+  - Removed ability to write audit logs to database.
+  - Audit logs can no longer be disabled, and will always stream to stderr.
+- Auto-update all packages in Sourcegraph base images `(PR #3483)`
+- Auto-update all packages in Sourcegraph base images `(PR #3274)`
+
+#### Source
+
+- move subrepo filtering to gitserver client for `StreamRawDiffs` `(PR #3799)`
+
+#### Telemetry
+
+- Update `NonActiveUserEvents` to include `cody.auth.connected` `(PR #4517)`
+- cody.api and requestclient cleanups `(PR #3769)`
+
+#### Workspaces
+
+- remove redundant custom utm_source `(PR #3531)`
+
+#### Workspaces/Blocklists
+
+- make fuzzy-match more lenient `(PR #3770)`
+
+#### Others
+
+- activate commit signing by default `(PR #4373)`
+  -  Backport 5f9519cec1e7edea1880dd44af25161f9d4fc88b from #4343
+- update styling for batch changes search `(PR #4291)`
+- Simplify logic for occurrence resolvers `(PR #4253)`
+- update third-party licenses `(PR #4250)`
+- try again to fix test flake `(PR #4231)`
+- fix racy test `(PR #4227)`
+- Remove packages from GraphQL & site config `(PR #4220)`
+- Disable flaky test in CI `(PR #4212)`
+- Clarify + add more o11y for HandleRawUpload `(PR #4177)`
+- add ability to fetch repo by database ID `(PR #4161)`
+- fix commit search test `(PR #4143)`
+- Remove last log15 from repo-updater `(PR #4140)`
+- cleanup code that was not implemented `(PR #4127)`
+- update third-party licenses `(PR #4097)`
+- remove unused gitserver_repos_statistics table `(PR #4087)`
+- enable diff-search-on-searcher by default `(PR #4052)`
+  - internal: moved commit and diff search from gitserver to searcher to help stabilize gitserver memory usage
+- add ability to migrate in parallel `(PR #4017)`
+- fixup copy for bitbucket.org `(PR #3993)`
+- update third-party licenses `(PR #3967)`
+- Remove intent detection model call in frontend, always return chat `(PR #3938)`
+  - The ChatIntent endpoint is now deprecated and will always return chat as the chosen intent.
+- Include context for inference logic (o11y) `(PR #3899)`
+- Add historical context for Rand parameter `(PR #3896)`
+- Remove fmt.Printf in test code `(PR #3895)`
+- Base language detection limit on measurements `(PR #3893)`
+  - Language icons for files with ambiguous extensions (such as `.h` files, which is used for both C and C++) are more likely to be accurate.
+- Add tool for language detection measurements `(PR #3873)`
+- Add constant for language detection limit `(PR #3854)`
+- Add Go style guide to rules `(PR #3845)`
+- update third-party licenses `(PR #3840)`
+- Remove unused WebBuilderDevServer field `(PR #3812)`
+- Update teams.yml for product platform changes `(PR #3748)`
+- refactor content fetching `(PR #3742)`
+- add `rawURL` `(PR #3740)`
+  - (feat) Added `rawURL` to git blob GraphQL resolver to encourage fetching file contents from in a more performant manner.
+- reduce vite logging to warn `(PR #3727)`
+- serialize commit search `(PR #3715)`
+- remove evaluated feature flags from event logging for performance `(PR #3700)`
+- Erase errors returned from *FileChecker types `(PR #3693)`
+- Add LargeString type to avoid string copies `(PR #3692)`
+- Change constants casing `(PR #3691)`
+- Add printing functions for units.Size `(PR #3690)`
+- update third-party licenses `(PR #3688)`
+- ignore debug binaries produced by delve `(PR #3679)`
+- Bump auto-indexing image SHAs `(PR #3676)`
+  - Updates default auto-indexing images for scip-go (to v0.1.23), scip-ruby (to v0.4.6) and scip-dotnet (to v0.2.10).
+- Remove client-side code for packages `(PR #3671)`
+  - Removes UI settings for experimental package repos feature.
+- add test for patch.go `(PR #3655)`
+- Remove tree-sitter-based semantic chunker `(PR #3645)`
+- Update Emi's mentions to 'emidoots' `(PR #3624)`
+- Notify Varun on changes to codeintel dashboard `(PR #3623)`
+- Update Entitle Link for documentation `(PR #3613)`
+- update third-party licenses `(PR #3572)`
+- migrate react hook useFeatureFlag to use batch query `(PR #3550)`
+- migrate developer dialog to evaluateFeatureFlags `(PR #3546)`
+- rename Search to CommitSearch `(PR #3464)`
+
+### Refactor
+
+#### Search
+
+- Rename boost: query params to repo:boost `(PR #4332)`
+  - `boost:repo()` and `boost:relevant.repos()` query params have been renamed to `repo:boost()` and `repo:boost.relevant()`.
+
+#### Security
+
+- remove security event patterns from audit logging `(PR #4154)`
+  - Security events have been removed in favor of improved audit logging
+
+#### Others
+
+- batch settings requests `(PR #4315)`
+  - perf: reduced DB roundtrips when fetching settings, lowering floor latency for API requests
+- move after commit logic into server source implementations `(PR #4224)`
+  - The executor shouldn't know about code host specific logic. This change moves github specific logic - duplicating commits when signing with a GH app - out of the executor and into the Github ChangeSetSource.This is behind a generic AfterCommit interface method of ChangeSetSource interface, for which other code host implementations are simply no-ops.
+
+### Reverts
+
+- Revert "chore: add Zoekt indexserver GRPC client" `(PR #4024)`
+
+### Uncategorized
+
+#### Others
+
+- [Backport 6.2.x] bitbucketserver: Properly refresh OAuth credentials in API calls `(PR #4522)`
+  - Fixed an issue where Bitbucket Data Center/Server OAuth2.0 credentials were sometimes not refreshed correctly, causing errors when syncing repository permissions.  Backport fb4e51d25cc2ac0713e9af3d7ed39fc6e9d01500 from #4521
+- [Backport 6.2.x] modelconfig: refresh model costs `(PR #4400)`
+- [Backport 6.2.x] Update deployment types to show accurate types in telemetry `(PR #4361)`
+  -  Backport a09017f5ef6e75ec083fc0c9444baa64b0354989 from #4319
+- cody-gateway: Fixed (Read/Write)Timeout in MSP version of cody gateway; those were misaligned compared to legacy version `(PR #4296)`
+- database: Add support for CloudSQL connector in monolith `(PR #4282)`
+- uploadpack: Fixup metrics reporting `(PR #4279)`
+- session: Store loaded user on actor `(PR #4276)`
+- Increase request duration `(PR #4275)`
+- api: Fix panic in randomizeUserPassword mutation `(PR #4265)`
+- upgrade rules_rust 0.59.2 and remove rules_rust patch `(PR #4260)`
+- monitoring: tweak entitlements docs `(PR #4252)`
+- migration: Fixup performance of packages migration `(PR #4228)`
+- gitserver: Update on-disk format again `(PR #4203)`
+- monitoring: add entitlements panels `(PR #4201)`
+- repoupdater: RecloneRepo removes repo from all shards `(PR #4187)`
+- Extract user setting link to a separate nav item `(PR #4182)`
+- gitserver: Change janitor default interval to 2h `(PR #4175)`
+- dev: add debug image `(PR #4174)`
+- tenant: Fix missing tenant errors in updates to repo_statistics `(PR #4165)`
+- internal/database: add initial entitlements store `(PR #4153)`
+- Fix some linter warnings `(PR #4147)`
+- CORE-814: soureces.Worker is used in MSP cody-gateway not only in non-MSP version `(PR #4133)`
+- chore(cloud ephemeral): allow extend lease for expired/incomplete ins… `(PR #4128)`
+- CORE-814: MSP version of Cody Gateway exposes all endpoints exposed by the non-MSP version `(PR #4123)`
+- gitserver: Recalculate size only after fetches `(PR #4116)`
+- Update Cody Web to 0.32.3 `(PR #4105)`
+- Add support for tool_results `(PR #4101)`
+- gitserver: Simplify refspecoverrides `(PR #4096)`
+- frontend: Unexport packages not used outside of frontend `(PR #4095)`
+- gitserver: Implement upload-pack in gitcli package `(PR #4094)`
+- workspaces: Deprecate code.repositoryInfo:succeeded event `(PR #4089)`
+- gitserver: Don't persist shard_id in database anymore `(PR #4088)`
+- tenant: Add deletion routine for the database `(PR #4071)`
+- Initialise subrepo permissions checker in syntactic worker `(PR #4069)`
+- feat(cody gateway): Update default chat model to Claude 3.7 Sonnet without Thinking enabled `(PR #4063)`
+- cleanup: fail if subrepo perms is not initialized `(PR #4056)`
+  - (Infra) Searcher now requires a database connection, so must be able to reach Postgres,
+- Mark Scala import packages as namespaces `(PR #4046)`
+- repo-updater: Fix bad log field `(PR #4041)`
+- CORE-814: MSP version of Cody Gateway exposes basic HTTP API `(PR #4036)`
+- gitserver: Fix goroutine leak `(PR #4033)`
+- fix bug where penny-based model configurations would result in site config validation errors `(PR #4021)`
+- symbols: Fix column reference in rockskip repo deletion `(PR #4020)`
+- Added EventLogger to the Cody Gateway supporting BigQuery configuration created by MSP `(PR #4004)`
+  - Added EventLogger to the Cody Gateway supporting BigQuery configuration created by MSP
+- Fix merge order conflict `(PR #3997)`
+- stream: Fix unintentional buffering in streaming APIs `(PR #3994)`
+- fix(cody gateway): disable chat vision by default `(PR #3988)`
+- add trace events for external requests `(PR #3987)`
+  - internal: added trace logs for HTTP lifecycle events
+- feat(cody gateway): unblock vision models requests `(PR #3986)`
+- Reapply "fix: batch workspaces to reduce memory pressure (#3657)" (#3965) `(PR #3982)`
+- symbols: enabled ad-hoc file parsing by default `(PR #3970)`
+  - We have enabled a new performance improvement for unindexed symbol search. Requests asking for all symbols of a file will now be handled by ad-hoc file parsing instead of by Rockskip or sqlite-based symbol search. This solves an issue many customers have reported for larger repositories, where the symbol sidebar in the blob view would often show errors related to timeouts. The feature can be disabled by setting `DISABLE_FILE_SYMBOLS_PARSING=true` as ENV for the symbols service.
+- p4fusion: Use the latest version in localdev `(PR #3955)`
+- p4fusion: Remove old p4-fusion wolfi package `(PR #3954)`
+- ci: Skip perforce IP tests as well in backend integration tests `(PR #3953)`
+- Search: add tracing for revision resolution `(PR #3934)`
+- bug(agent): Set display_name when fetching rules `(PR #3931)`
+- gitserver: Run p4-fusion operations in quarantined repo directory `(PR #3929)`
+- gomod: bump Zoekt for test scoring change `(PR #3926)`
+- fix(mi2 cloud eph): support older Sourcegraph versions `(PR #3920)`
+- CORE-759: Added MSP skeleton to Cody Gateway `(PR #3902)`
+  - Added feature flag for MSP and added skeleton of MSP app into Cody Gateway
+- Fix incorrect enqueuing of syntactic indexing jobs `(PR #3877)`
+  - Fix incorrect enqueuing of syntactic indexing jobs `(PR #3877)`
+- tenant: Add deletion routine for blobstore `(PR #3876)`
+- gitserver: Fix testbed setup in git 2.48 `(PR #3867)`
+- index C++ concepts using scip-ctags `(PR #3843)`
+  - Use scip 0.5.2 to identify C++ concepts
+- map "c++" -> "cpp" for scip-ctags parsing `(PR #3842)`
+  - Maps `c++` to `cpp` when selecting `scip-ctags` parser, instead of falling back to `universal-ctags`.
+- Update to src-cli 6.1.0 `(PR #3818)`
+  - Update src-cli version to 6.1.0
+- gitserver: Support fetching repo from other gitserver after resharding `(PR #3800)`
+- tenant: Add deletion routine for zoekt `(PR #3782)`
+- Changing Gemini Flash Lite model from Preview to GA `(PR #3752)`
+- tenant: Forbid changing the primary email `(PR #3747)`
+- tenant: Add deletion routine for gitserver `(PR #3745)`
+- bug(agents): db.Conversations().Create also has update semantics [AGT-172] `(PR #3743)`
+- tenant: Add small framework and first task for tenant deletion reconciler `(PR #3735)`
+- vsce: minor release v2.4.0 `(PR #3718)`
+- feat(cody gateway): change the reasoning effort for  Claude 3.7 Sonnet model to low `(PR #3710)`
+- feat(cody gateway): add Claude 3.7 Sonnet model `(PR #3705)`
+- tenant: Fix local dev not starting up `(PR #3684)`
+- Fix: Mark releases as development in the releaseregistry `(PR #3682)`
+  - NA
+- Monitoring: add new CPU/ memory group for all services `(PR #3666)`
+- cody: Change some unlimited wording to increased `(PR #3640)`
+- searcher: Add missing logger `(PR #3617)`
+- Updated marketing to reflect Pro chat limits are not unlimited `(PR #3586)`
+- Add 'clear search' feature to search input bar. `(PR #3583)`
+- monitors: Fix logo URL and use new branding in notification email `(PR #3570)`
+- Gateway: Increase ES LLM limits to match Pro `(PR #3564)`
+  - Increased ES LLM limits to match Pro
+- gitserver: Adopt zoekt charts for IO and memory pressure `(PR #3533)`
+- Search: actually enable scip-ctags for C `(PR #3532)`
+- Remove Waitlist for O1 Models `(PR #3509)`
+  - OPTIONAL; info at [https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c](https://www.notion.so/sourcegraph/Writing-a-changelog-entry-dd997f411d524caabf0d8d38a24a878c)
+- telemetry: allowlist key "chatAgent" in feature:"cody.chat-question" `(PR #3484)`
+- Update svelte/react storybook  `(PR #3472)`
+- Don't let users see event logs page on dotcom (we don't store v2 tele… `(PR #3430)`
+- search: expose bestLineMatch via GraphQL `(PR #3291)`
+- authz: Clean up requirement to validate authz providers when creating code host connection `(PR #2863)`
+- searcher: Remove RepoName field from requests `(PR #2520)`
+- gitserver: Don't reclone repos after random GC failures `(PR #2517)`
+- gitserver: Drop Git attributes janitor task `(PR #2516)`
+- repoupdater: Slightly simplify repo loading and clean up RepoNames in gRPC `(PR #2515)`
+- repoupdater: Move internal actor impersonation to caller `(PR #2514)`
+- gitserver: Consolidate purge worker and state syncer `(PR #2513)`
+- gitserver: Switch to IDs for all requests `(PR #2493)`
+
+### Untracked
+
+The following PRs were merged onto the previous release branch but could not be automatically mapped to a corresponding commit in this release:
+
+- feat(cody gateway): Update default chat model to Claude 3.7 Sonnet wi… `(PR #4207)`
+  - See [https://github.com/sourcegraph/sourcegraph/pull/4063](https://github.com/sourcegraph/sourcegraph/pull/4063)
+- Update Caddy `(PR #3906)`
+- fix bug where POST /reviews always failed `(PR #3522)`
+- Auto-update all packages in Sourcegraph base images `(PR #3482)`
+
+{/* RSS={"version":"v6.2.0", "releasedAt": "2025-04-02"} */}
+
+
 # 6.1 Patch 5
 
 ## v6.1.5633
