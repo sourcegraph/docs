@@ -881,7 +881,7 @@ const redirectsData = [
   },
   {
     source: "/campaigns/campaign_spec_yaml_reference",
-    destination: "/campaigns/references/batch_spec_yaml_reference",
+    destination: "/batch-changes/batch-spec-yaml-reference",
     permanent: true
   },
   {
