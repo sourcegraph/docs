@@ -6783,6 +6783,48 @@ const redirectsData = [
     permanent: true
   },
 
+  //Package code hosts redirects
+ {
+    source: "/admin/code_hosts/package-repos",
+    destination: "/admin/code_hosts",
+    permanent: true
+  },
+  
+ {
+    source: "/integration/jvm",
+    destination: "/admin/code_hosts",
+    permanent: true
+  },
+  
+  {
+    source: "/integration/npm",
+    destination: "//admin/code_hosts",
+    permanent: true
+  },
+  
+  {
+    source: "/integration/python",
+    destination: "/admin/code_hosts",
+    permanent: true
+  },
+  
+  {
+    source: "/integration/go",
+    destination: "/admin/code_hosts",
+    permanent: true
+  },
+  
+  {
+    source: "/integration/ruby",
+    destination: "/admin/code_hosts",
+    permanent: true
+  },
+  
+  {
+    source: "/integration/rust",
+    destination: "/admin/code_hosts",
+    permanent: true
+  },
 
 ];
 
