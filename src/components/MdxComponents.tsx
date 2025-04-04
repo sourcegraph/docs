@@ -53,6 +53,12 @@ const MdxComponents = (version?: string) => {
     h3: (props: any) => {
       return <Heading level="3" id={props.id} props={props} />;
     },
+    h4: (props: any) => {
+      return <Heading level="4" id={props.id} props={props} />;
+    },
+    h5: (props: any) => {
+      return <Heading level="5" id={props.id} props={props} />;
+    },
     img: (props: any) => {
       return <img className="rounded-xl" {...props} />;
     },
