@@ -151,6 +151,7 @@ export const navigation: NavigationItem[] = [
 						subsections: [
 							{ title: "Publishing Changesets", href: "/batch-changes/publishing-changesets", },
 							{ title: "Tracking Changesets", href: "/batch-changes/tracking-existing-changesets", },
+							{ title: "Rebasing Changesets", href: "/batch-changes/rebasing-changesets", },
 						]
 					},
 					{
@@ -223,11 +224,6 @@ export const navigation: NavigationItem[] = [
 					{ title: "How-to Guides", href: "/code_insights/how-tos" },
 					{ title: "References", href: "/code_insights/references" },
 				],
-			},
-			{
-				title: "Notebooks",
-				href: "/notebooks",
-				sections: [{ title: "Quickstart", href: "/notebooks/quickstart" }],
 			},
 		],
 	},
