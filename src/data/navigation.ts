@@ -151,6 +151,7 @@ export const navigation: NavigationItem[] = [
 						subsections: [
 							{ title: "Publishing Changesets", href: "/batch-changes/publishing-changesets", },
 							{ title: "Tracking Changesets", href: "/batch-changes/tracking-existing-changesets", },
+							{ title: "Rebasing Changesets", href: "/batch-changes/rebasing-changesets", },
 						]
 					},
 					{
@@ -224,11 +225,6 @@ export const navigation: NavigationItem[] = [
 					{ title: "References", href: "/code_insights/references" },
 				],
 			},
-			{
-				title: "Notebooks",
-				href: "/notebooks",
-				sections: [{ title: "Quickstart", href: "/notebooks/quickstart" }],
-			},
 		],
 	},
 	{
@@ -256,7 +252,6 @@ export const navigation: NavigationItem[] = [
 						title: "Enterprise Getting Started",
 						href: "/admin/enterprise_getting_started_guide",
 					},
-					{ title: "Pricing", href: "/admin/pricing" },
 				],
 			},
 			{
@@ -319,7 +314,7 @@ export const navigation: NavigationItem[] = [
 		topics: [
 			{
 				title: "Plans",
-				href: "/pricing/plans/free",
+				href: "/pricing/plans",
 				sections: [
 					{ title: "Free", href: "/pricing/plans/free" },
 					{ title: "Enterprise Starter", href: "/pricing/plans/enterprise-starter" },
