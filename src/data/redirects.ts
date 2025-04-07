@@ -1,5 +1,9 @@
 const redirectsData = [
-
+  {
+    source: "/docs/admin/deploy_executors",
+    destination: "https://sourcegraph.com/docs/admin/executors/deploy_executors",
+    permanent: true
+  },
   {
     source: "/dev/roadmap",
     destination: "https://sourcegraph.com/direction",
@@ -6757,6 +6761,25 @@ const redirectsData = [
   {
     source: "/pricing/billing-faqs",
     destination: "/pricing/faqs",
+    permanent: true
+  },
+
+  // Admin pricing docs redirects
+  {
+    source: "/admin/pricing",
+    destination: "/pricing/plans",
+    permanent: true
+  },
+
+  {
+    source: "/admin/pricing#how-are-active-users-calculated-for-sourcegraph-cody",
+    destination: "/cody/usage-and-pricing#billing-faqs-for-cody-enterprise",
+    permanent: true
+  },
+
+  {
+    source: "/admin/pricing#how-are-active-users-calculated-for-sourcegraph-code-search-and-code-intelligence-platform",
+    destination: "/pricing/faqs#how-are-active-users-calculated-for-sourcegraph-code-search-and-code-intelligence-platform",
     permanent: true
   },
 
