@@ -2,7 +2,7 @@
 
 <p className="subtitle">Auto-edit suggests code changes by analyzing cursor movements and typing. After you've made at least one character edit in your codebase, it begins proposing contextual modifications based on your cursor position and recent changes.</p>
 
-<Callout type="info">Auto-edits is currently in experimental rollout within the VS Code extension. Access is limited to selected Enterprise Starter (Cody Pro) and Enterprise users on Cody Gateway. We will expand availability as we validate the feature's performance.</Callout>
+<Callout type="info">Auto-edit is currently supported in the VS Code extension with Sourcegraph v6.0+. It's available in Beta for Pro, Enterprise Starter and Enterprise users on Cody Gateway. Auto-edit requires Fireworks to be enabled as a provider. Enterprise customers without Fireworks enabled can [disable the feature flag](#auto-edit-access-for-enterprise-customers)</Callout>
 
 ## Capabilities of auto-edit
 
@@ -14,25 +14,20 @@
 
 ## Enabling auto-edit
 
-Eligible Cody Pro users will gradually be given access to the auto-edit feature. Once you have it, you will receive an in-editor notification.
+Auto-edit is enabled by default for Cody Pro Enterprise Starter, and Enterprise users. You can opt out and switch back to **autocomplete** by selecting it from the suggestion mode in the Cody VS Code extension settings.
 
-<video width="100%" loop playsInline controls style={{ width: '100%', height: 'auto' }}>
-    <source src="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/auto-edit-in-action-2025.mp4" type="video/mp4" />
-</video>
+Site admins can opt their organization out of the auto-edit feature by disabling it from their config settings.
 
 ### Auto-edit access for Enterprise customers
 
 Auto-edit is available for Enterprise customers with [Sourcegraph Cody Gateway](/cody/core-concepts/cody-gateway#sourcegraph-cody-gateway) access. Enabling the feature requires two steps:
 
 1. Site administrators must:
-   - Enable the feature flag `cody-autoedit-experiment-enabled-flag`
+   - Ensure the feature flag `cody-autoedit-experiment-enabled-flag` is enabled (enabled by default)
    - Add `fireworks::*` as an [allowed provider](https://sourcegraph.com/docs/cody/enterprise/model-configuration#model-filters) (see below)
-2. Once enabled, developers will receive a notification in their editor to turn it on
-3. If you skip the notification or don't see it, you can manually enable/disable it from the Cody extension settings.
-
-![enable-from-cody-settings](https://storage.googleapis.com/sourcegraph-assets/Docs/enable-auto-edit-from-settings.jpg)
-
-There is a drop-down menu for Cody's suggestions mode. You can choose between the default autocomplete and the auto-edit mode, or you can turn off the suggestions completely.
+2. Once enabled, auto-edit will become the default suggestion mode for all users
+3. Users can optionally switch back to autocomplete from the Cody extension settings
+4. Site admins can opt out of auto-edits using the `cody-autoedit-experiment-enabled-flag` feature flag
 
 The following example demonstrates how to add Fireworks as an allowed LLM provider:
 
@@ -85,4 +80,4 @@ The auto-edit feature can help you with various repetitive tasks in your code:
 - **Call site updates**: When you change a function's signature, auto-edit detects all locations where the function is called and suggests necessary modifications to match the new signature. This includes updating parameter orders, adding error handling, and adjusting return value usage.
 - **Test file maintenance**: Helps with repetitive updates in test files, such as modifying test assertions, updating mock objects, or changing test data structures. Auto-edit recognizes patterns from your recent changes and suggests similar modifications across related tests.
 - **Parameter refactoring**: Assists in adding, removing, or reorganizing function parameters. When you unpack a function to handle more cases, auto-edit helps restructure the parameter list and suggests corresponding changes at call sites.
-- **Type system modifications**: When updating type definitions or interfaces, auto-edit identifies and suggests consistent changes across your codebase. This includes updating variable declarations, function parameters, and return types to maintain type consistency.
+- **Type system modifications**: Auto-edit identifies and suggests consistent changes across your codebase when updating type definitions or interfaces. This includes updating variable declarations, function parameters, and return types to maintain type consistency.
