@@ -148,10 +148,9 @@ As you make changes to the documentation, the development server will automatica
 
 ### Previewing Vercel Deployments
 
-When you open a PR Vercel deploys and provides you with a preview deployment link. To view your deployment, click the "Visit Preview" and then append `/docs` at the end of the URL. The original link gives you a `404`.
+When you open a PR Vercel deploys and provides you with a preview deployment link. To view your deployment, click the **Visit Preview** link from Vercel's deployment panel in your PRs and you get a preview of your docs
 
 ![CleanShot 2024-11-05 at 10 11 29@2x](https://github.com/user-attachments/assets/b0911e2e-95a7-4f56-b2ff-b659d13077d8)
-
 
 ## Submitting your Contribution
 
