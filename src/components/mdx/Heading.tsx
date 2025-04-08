@@ -58,7 +58,7 @@ function Anchor({id, children}: {id: string; children: ReactNode}) {
 }
 
 interface HeadingProps {
-	level?: '2' | '3' | '4' | '5';
+	level?: '2' | '3' | '4' | '5' | '6';
 	id: string;
 	props: any;
 }
