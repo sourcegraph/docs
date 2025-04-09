@@ -25,7 +25,8 @@ export default function AddForumPost() {
     setStatus({ type: 'loading', message: 'Processing forum post...' })
 
     try {
-      const response = await fetch('/docs/api/add-forum-post', {
+      const basePath = process.env.VERCEL_ENV === 'production' ? '/docs' : ''
+      const response = await fetch(`${basePath}/api/add-forum-post`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

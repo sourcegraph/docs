@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
 				topicData.accepted_answer.post_number
 			) {
 				const acceptedPost = posts.find(
-					post =>
+					(post: { post_number: number }) =>
 						post.post_number ===
 						topicData.accepted_answer.post_number
 				);
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
 			// If still no solution, try the post.accepted_answer property
 			if (!solutionHtml) {
 				const acceptedAnswerPost = posts.find(
-					post => post.accepted_answer === true
+					(post: { accepted_answer: boolean }) => post.accepted_answer === true
 				);
 
 				if (acceptedAnswerPost) {
@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
 
 		// Check if the topic already exists (by URL)
 		const existingIndex = existingData.findIndex(
-			item => item.url === newEntry.url
+			(item: { url: string }) => item.url === newEntry.url
 		);
 
 		if (existingIndex !== -1) {
