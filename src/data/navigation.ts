@@ -105,6 +105,7 @@ export const navigation: NavigationItem[] = [
 							{ title: "Features", href: "/code-search/code-navigation/features", },
 							{ title: "Search-based code navigation", href: "/code-search/code-navigation/search_based_code_navigation", },
 							{ title: "Precise code navigation", href: "/code-search/code-navigation/precise_code_navigation", },
+							{ title: "Syntactic code navigation", href: "/code-search/code-navigation/syntactic_code_navigation", },
 							{ title: "Auto-indexing", href: "/code-search/code-navigation/auto_indexing", },
 							{ title: "Environment Variables", href: "/code-search/code-navigation/envvars", },
 							{ title: "Troubleshooting", href: "/code-search/code-navigation/troubleshooting", },
