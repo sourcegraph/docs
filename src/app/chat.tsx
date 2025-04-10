@@ -11,25 +11,37 @@ export default function Chat() {
 					background-color: #dedede;
 				}
 			`}</style>
-			<Chatbot apiRoute="/docs/api/chat"
-				openingMessage="Hi there! Welcome to Ask Sourcegraph AI agent. How can I help you?"
+			<Chatbot
+				title="Ask AI"
+				triggerText="Ask AI"
+				badge="Experimental"
+				apiRoute="/docs/api/chat"
+				openingMessage="Hi there! I'm Sourcegraph's AI assistant trained for our documentation. How can I help you?"
 				// Remember AI can make mistakes, please double-check responses.
 				suggestions={[
 					{
-						title: `What is SourceGraph?`,
-						prompt: `What is SourceGraph?`
+						title: `Tell me about Sourcegraph.`,
+						prompt: `Tell me about Sourcegraph.`
 					},
 					{
-						title: `What is Cody?`,
-						prompt: `What is Cody?`
+						title: `What are the input/output token limits for Cody?`,
+						prompt: `What are the input/output token limits for Cody?`
 					},
 					{
-						title: `What can I do with Cody?`,
-						prompt: `What can I do with Cody?`
+						title: `Why doesn't Cody work with VPN?`,
+						prompt: `Why doesn't Cody work with VPN?`
 					},
 					{
-						title: `What are search query types?`,
-						prompt: `What are search query types?`
+						title: `How do I add all open files to context in Cody?`,
+						prompt: `How do I add all open files to context in Cody?`
+					},
+					{
+						title: `What is Sourcegraph search query syntax?`,
+						prompt: `What is Sourcegraph search query syntax?`
+					},
+					{
+						title: `Give me language specific query examples?`,
+						prompt: `Give me language specific query examples?`
 					}
 				]}
 			/>
