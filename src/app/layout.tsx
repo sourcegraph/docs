@@ -1,10 +1,11 @@
-import { Providers } from '@/app/providers';
-import { Layout } from '@/components/Layout';
-import { GoogleAnalytics } from '@next/third-parties/google';
+import Chat from '@/app/chat';
+import {Providers} from '@/app/providers';
+import {Layout} from '@/components/Layout';
+import {GoogleAnalytics} from '@next/third-parties/google';
 import clsx from 'clsx';
 import config from 'docs.config';
-import { type Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import {type Metadata} from 'next';
+import {Inter} from 'next/font/google';
 import localFont from 'next/font/local';
 
 import '@/styles/tailwind.css';
@@ -98,7 +99,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
 				className="flex min-h-full bg-light-bg dark:bg-dark-bg"
 			>
 				<Providers>
-					{/* <Chat /> */}
+					<Chat />
 					<Layout>{children}</Layout>
 				</Providers>
 			</body>
