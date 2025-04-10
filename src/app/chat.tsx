@@ -15,7 +15,7 @@ export default function Chat() {
 				title="Ask AI"
 				triggerText="Ask AI"
 				badge="Experimental"
-				apiRoute="/api/chat"
+				apiRoute="/docs/api/chat"
 				openingMessage="Hi there! I'm Sourcegraph's AI assistant trained for our documentation. How can I help you?"
 				// Remember AI can make mistakes, please double-check responses.
 				suggestions={[
