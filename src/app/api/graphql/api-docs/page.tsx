@@ -15,7 +15,8 @@ const PostLayout = () => {
                 <div id="page" className="drawer-layout">
                   <div id="sidebar">
                     <div className="sidebar-top-container">
-                      <h3 className="text-sm uppercase">Table of Contents</h3>
+                    <h2 className="font-display text-sm font-medium text-slate-900 dark:text-white">Table of Contents</h2>
+
 
                       {/* <div id="logo"></div>
                       <button className="close-button" type="button">
