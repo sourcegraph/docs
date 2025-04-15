@@ -18,7 +18,7 @@ Navigate to the project directory by typing the following command in your termin
 cd sourcegraph-docs
 ```
 
-Before the dependencies are install make sure your local machine has the following versions of `node` and `pnpm`:
+Before the dependencies are install make sure your local machine has the following versions of `node` and `pnpm` installed:
 
 * node: `v20.8.1`
 * pnpm: `8.13.1`
