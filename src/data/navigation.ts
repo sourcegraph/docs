@@ -235,6 +235,7 @@ export const navigation: NavigationItem[] = [
 				href: "/admin",
 				sections: [
 					{ title: "Deploy", href: "/admin/deploy" },
+					{ title: "Architecture", href: "/admin/architecture" },
 					{ title: "Upgrade", href: "/admin/updates" },
 					{ title: "Configuration", href: "/admin/config" },
 					{ title: "Licensing", href: "/admin/licensing" },
