@@ -2,7 +2,7 @@
 
 <p className="subtitle">Auto-edit suggests code changes by analyzing cursor movements and typing. After you've made at least one character edit in your codebase, it begins proposing contextual modifications based on your cursor position and recent changes.</p>
 
-<Callout type="info">Auto-edit is currently supported in the VS Code extension with Sourcegraph v6.0+. It's available in Beta for Pro, Enterprise Starter and Enterprise users on Cody Gateway. Auto-edit requires Fireworks to be enabled as a provider. Enterprise customers without Fireworks enabled can [disable the feature flag](#auto-edit-access-for-enterprise-customers)</Callout>
+<Callout type="info">Auto-edit is currently supported with Sourcegraph v6.0+ for Pro, Enterprise Starter, and Enterprise accounts on Cody Gateway. Auto-edit requires Fireworks to be enabled as a provider. Enterprise customers without Fireworks enabled can disable the feature flag.</Callout>
 
 ## Capabilities of auto-edit
 
@@ -12,9 +12,45 @@
 - Can propose similar changes across multiple locations based on recent edits
 - Can handle complex refactoring operations like adding parameters and unpacking functions
 
-## Enabling auto-edit
+## How does auto-edit work?
 
-Auto-edit is enabled by default for Cody Pro Enterprise Starter, and Enterprise users. You can opt out and switch back to **autocomplete** by selecting it from the suggestion mode in the Cody VS Code extension settings.
+The system detects potential changes based on the following:
+
+- Cursor placement in the code
+- Recent changes made in similar contexts
+- Function usage patterns
+- Common refactoring patterns
+
+## Auto-edit vs. Autocomplete
+
+In terms of feature set and functionality, auto-edit and autocomplete have some key differences:
+
+|      **Feature**       |            **Autocomplete**            |                   **Auto-edit**                    |
+| ---------------------- | -------------------------------------- | -------------------------------------------------- |
+| **Text modification**  | Can only insert text, not delete       | Can both insert and delete text                    |
+| **Cursor position**    | Only proposes content after the cursor | Can modify code before and after the cursor        |
+| **Suggestion trigger** | Suggests on every character typed      | Proposes changes based on context and recent edits |
+
+## Use cases
+
+The auto-edit feature can help you with various repetitive tasks in your code:
+
+- **Function signature refactoring**: Automatically suggests adding error returns, new parameters, or changing return types across function definitions. For example, when you modify a function to return both a value and an error, auto-edit helps update the function signature.
+- **Call site updates**: When you change a function's signature, auto-edit detects all locations where the function is called and suggests necessary modifications to match the new signature. This includes updating parameter orders, adding error handling, and adjusting return value usage.
+- **Test file maintenance**: Helps with repetitive updates in test files, such as modifying test assertions, updating mock objects, or changing test data structures. Auto-edit recognizes patterns from your recent changes and suggests similar modifications across related tests.
+- **Parameter refactoring**: Assists in adding, removing, or reorganizing function parameters. When you unpack a function to handle more cases, auto-edit helps restructure the parameter list and suggests corresponding changes at call sites.
+- **Type system modifications**: Auto-edit identifies and suggests consistent changes across your codebase when updating type definitions or interfaces. This includes updating variable declarations, function parameters, and return types to maintain type consistency.
+
+Auto-edit is supported by both Cody VS Code and JetBrains plugins.
+
+<Tabs>
+<Tab title="VS Code">
+
+<Callout type="info">Auto-edit for VS Code is currently in Beta. It's available for Pro, Enterprise Starter, and Enterprise users on Cody Gateway. Auto-edit requires Fireworks to be enabled as a provider. Enterprise customers without Fireworks enabled can disable the feature flag.</Callout>
+
+## Enabling auto-edit in VS Code
+
+Auto-edit is enabled by default for Cody Pro Enterprise Starter and Enterprise users. You can opt out and switch back to autocomplete by selecting it from the suggestion mode in the Cody VS Code extension settings.
 
 Site admins can opt their organization out of the auto-edit feature by disabling it from their config settings.
 
@@ -53,31 +89,56 @@ The following example demonstrates how to add Fireworks as an allowed LLM provid
 }
 ```
 
-## How does auto-edit work?
+</Tab>
 
-The system detects potential changes based on the following:
+<Tab title="JetBrains">
 
-- Cursor placement in the code
-- Recent changes made in similar contexts
-- Function usage patterns
-- Common refactoring patterns
+<Callout type="info">Auto-edit for JetBrains IDEs is Experimental and supports JetBrains versions 7.84.0+. It's available for Pro, Enterprise Starter, and Enterprise users on Cody Gateway. Auto-edit requires Fireworks to be enabled as a provider. Enterprise customers without Fireworks enabled can disable the feature flag.</Callout>
 
-## Auto-edit vs. Autocomplete
+## Enabling auto-edit in JetBrains
 
-In terms of feature-set and functionality, auto-edit and autocomplete have some key differences:
+You can opt-in the auto-edit feature from the JetBrains Cody plugin settings.
 
-|      **Feature**       |            **Autocomplete**            |                   **Auto-edit**                    |
-| ---------------------- | -------------------------------------- | -------------------------------------------------- |
-| **Text modification**  | Can only insert text, not delete       | Can both insert and delete text                    |
-| **Cursor position**    | Only proposes content after the cursor | Can modify code before and after the cursor        |
-| **Suggestion trigger** | Suggests on every character typed      | Proposes changes based on context and recent edits |
+- Click the three-dot menu on the top right of the Cody plugin window and select **Open Cody Settings Editor**
+- This will open the `cody_settings.json` file in your editor
+- Here, add `"cody.suggestions.mode": "auto-edit"` setting to enable the auto-edit feature
 
-## Use cases
+![JetBrains-Cody-Settings-Editor](https://storage.googleapis.com/sourcegraph-assets/Docs/jb-cody-settings.png)
 
-The auto-edit feature can help you with various repetitive tasks in your code:
+### Auto-edit access for Enterprise customers
 
-- **Function signature refactoring**: Automatically suggests adding error returns, new parameters, or changing return types across function definitions. For example, when you modify a function to return both a value and an error, auto-edit helps update the function signature.
-- **Call site updates**: When you change a function's signature, auto-edit detects all locations where the function is called and suggests necessary modifications to match the new signature. This includes updating parameter orders, adding error handling, and adjusting return value usage.
-- **Test file maintenance**: Helps with repetitive updates in test files, such as modifying test assertions, updating mock objects, or changing test data structures. Auto-edit recognizes patterns from your recent changes and suggests similar modifications across related tests.
-- **Parameter refactoring**: Assists in adding, removing, or reorganizing function parameters. When you unpack a function to handle more cases, auto-edit helps restructure the parameter list and suggests corresponding changes at call sites.
-- **Type system modifications**: Auto-edit identifies and suggests consistent changes across your codebase when updating type definitions or interfaces. This includes updating variable declarations, function parameters, and return types to maintain type consistency.
+Auto-edit is available for Enterprise customers with [Sourcegraph Cody Gateway](/cody/core-concepts/cody-gateway#sourcegraph-cody-gateway) access. Enabling the feature requires two steps:
+
+1. Site administrators must:
+   - Ensure the feature flag `cody-autoedit-experiment-enabled-flag` is enabled from the settings editor
+   - Add `fireworks::*` as an [allowed provider](https://sourcegraph.com/docs/cody/enterprise/model-configuration#model-filters) (see below)
+2. Once enabled, auto-edit will become the default suggestion mode for all users
+3. Users can optionally switch back to autocomplete from the Cody extension settings
+4. Site admins can opt out of auto-edits using the `cody-autoedit-experiment-enabled-flag` feature flag
+
+The following example demonstrates how to add Fireworks as an allowed LLM provider:
+
+```json
+
+"cody.enabled": true,
+"modelConfiguration": {
+  "sourcegraph": {
+    "modelFilters": {
+      // Only allow "beta" and "stable" models.
+      // Not "experimental" or "deprecated".
+      "statusFilter": ["beta", "stable"],
+
+      // Allow any models provided by Anthropic, OpenAI, Google and Fireworks.
+      "allow": [
+        "anthropic::*", // Anthropic models
+        "openai::*", // OpenAI models
+        "google::*", // Google Gemini models
+        "fireworks::*", // Open source models hosted by Sourcegraph
+      ],
+    }
+  }
+}
+```
+
+</Tab>
+</Tabs>
