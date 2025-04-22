@@ -72,9 +72,9 @@ Read the [Batch Changes](/batch-changes) docs to learn more.
 - src-cli: Batch changes are currently executed client-side through the `src` CLI
 - Search: Repositories in which batch specs need to be executed are resolved through the search API
 
-## Code insights
+## Code Insights
 
-Code insights surface higher-level, aggregated information to leaders in engineering organizations in dashboards. For example, code insights can track the number of matches of a search query over time, the number of code navigation diagnostic warnings in a codebase, or the usage of different programming languages. Sample use cases for this are tracking migrations, the usage of libraries across an organization, tech debt, code base health, and much more.
+Code Insights surface higher-level, aggregated information to leaders in engineering organizations in dashboards. For example, code insights can track the number of matches of a search query over time, the number of code navigation diagnostic warnings in a codebase, or the usage of different programming languages. Sample use cases for this are tracking migrations, the usage of libraries across an organization, tech debt, code base health, and much more.
 
 Code Insights persist in a separate database called `codeinsights-db`. The web application interacts with the backend through a [GraphQL API](/api/graphql).
 
@@ -156,12 +156,17 @@ Instead of requiring a browser extension, native integrations inject a script by
 
 ## Deployment
 
-Sourcegraph is deployable via three supported methods:
+Sourcegraph's recommended deployment methods are:
 
-- **[Kubernetes](/admin/deploy/kubernetes)** is intended for all medium to large-scale production deployments that require fault tolerance and high availability. For advanced users only with significant kubernetes experience required. This deployment method is developed in deploy-sourcegraph
-- **[Docker Compose](/admin/deploy/docker-compose)** is intended to be used for small to medium production deployments, with some customization available. Easy to set up with basic infrastructure and docker knowledge required. A variation on this is the pure-Docker option. Both of these deployment methods are developed in deploy-sourcegraph-docker
+1. Sourcegraph Cloud: This provides a fully managed solution where Sourcegraph handles all of the maintenance, monitoring, and upgrading tasks to give you an optimal Sourcegraph experience while immediately getting the latest features into your users' hands. This solution does require your code hosts to be connected to the Sourcegraph managed environment.
+2. Kubernetes Helm: Sourcegraph's Kubernetes deployment provides the most robust, scalable, and vetted self-hosted solution. This solution is ideal across many self-hosted customers capable of deploying a multi-node instance, and can be supported by all mainstream managed Kubernetes platforms.
+3. Docker Compose: Docker Compose provides the preferred single-node deployment solution for Sourcegraph. It can be a good option when the complexities and flexibility provided by Kubernetes Helm are not needed.
+4. Kubernetes Kustomize: Helm is Sourcegraph's more standardized and vetted approach to deploying with Kubernetes, but if Kustomize is your preferred deployment method it is a viable and supported approach.
+5. Machine Images: Sourcegraph can be deployed using dedicated Machine Images for specific Cloud providers. This can be a simple solution in specific circumstances, though has its own considerations. If you are considering this path, please discuss with your account team.
 
 The [resource estimator](/admin/deploy/resource_estimator#sourcegraph-resource-estimator) can guide you on the requirements for each deployment type.
+
+<Callout type="note">Learn more in the [deployment docs](/admin/deploy)</Callout>
 
 ## Observability
 
@@ -169,15 +174,36 @@ Observability encapsulates the monitoring and debugging of Sourcegraph deploymen
 
 Monitoring includes [metrics and dashboards](/admin/observability/metrics), [alerting](/admin/observability/alerting), and [health checking](/admin/observability/health_checks) capabilities.
 
-- grafana is the frontend for service metrics and ships with customized dashboards for Sourcegraph services
+- `grafana` is the frontend for service metrics and ships with customized dashboards for Sourcegraph services
 - prometheus handles the scraping of service metrics and ships with recording rules, alert rules, and alerting capabilities
-- cadvisor provides per-container performance metrics (scraped by Prometheus) in most Sourcegraph environments
+- `cadvisor` provides per-container performance metrics (scraped by Prometheus) in most Sourcegraph environments
 - Each Sourcegraph service provides health checks
 
 Debugging includes [tracing](/admin/observability/tracing) and [logging](/admin/observability/logs).
 
 - jaeger is the distributed tracing service used by Sourcegraph
-- jaeger-agent is a sidecar used in Kubernetes deployments for collecting traces from services
 - Each Sourcegraph service provides logs
 
-Learn more in our [Observability docs](/admin/observability).
+<Callout type="note">Learn more in the [Observability docs](/admin/observability).</Callout>
+
+## Cody
+
+This section covers the Enterprise architecture of our AI assistant, Cody. [Cody Enterprise](/cody/clients/enable-cody-enterprise) can be deployed via the Sourcegraph Cloud or on your self-hosted infrastructure.
+
+### Cody with Sourcegraph Cloud deployment
+
+This is a recommended deployment for Cody Enterprise. It uses the Sourcegraph Cloud infrastructure and Cody gateway.
+
+<img src="https://sourcegraphstatic.com/docs/enterprise-architecture-cloud-v2.png" />
+
+### Sourcegraph Enterprise Server (self-hosted) on Amazon Bedrock
+
+This is an example of a more complex deployment that uses Sourcegraph Enterprise Server (self-hosted) and Amazon Bedrock.
+
+<img src="https://sourcegraphstatic.com/docs/enterprise-architecture-aws-v0.png" />
+
+### Data flow
+
+The following diagram describes the data flow between the different components of Cody Enterprise.
+
+<img src="https://sourcegraphstatic.com/docs/enterprise-architecture-data-flow-v0.png" />
