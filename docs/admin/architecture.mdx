@@ -1,209 +1,670 @@
-# Sourcegraph Architecture
+# Sourcegraph architecture overview
 
-<p className="subtitle">This document provides a high-level overview of Sourcegraph's architecture so you can understand how our systems fit together.</p>
+This document provides a high level overview of Sourcegraph's architecture, detailing the purpose and interactions of each service in the system.
 
 ## Diagram
 
-![sourcegraph-architecture](https://storage.googleapis.com/sourcegraph-assets/Docs/sg-architecture.svg)
+You can click on each component to jump to its respective code repository or subtree. <a href="./architecture.svg" target="_blank">Open in new tab</a>
+
+<!--
+Auto-generated from ./doc/dev/background-information/architecture/architecture.dot
+Run cd ./doc/dev/background-information/architecture && ./generate.sh to update the .svg
+-->
+<object data="./architecture/architecture.svg" type="image/svg+xml" width="1023" height="1113" style="width:100%; height: auto">
+</object>
+
+Note that almost every service has a link back to the frontend, from which it gathers configuration updates.
+These edges are omitted for clarity.
+
+## Core Services
+
+### Frontend
+
+**Purpose**: The frontend service is the central service in Sourcegraph's architecture. It serves the web application, hosts the GraphQL API, and coordinates most user interactions with Sourcegraph.
+
+**Importance**: This is the primary entrypoint for most Sourcegraph functionality. Without it, users cannot interact with Sourcegraph through the web UI or API.
+
+**Additional Details**:
+- Handles user authentication and session management
+- Enforces repository permissions
+- Coordinates interactions between services
+- Manages the settings cascade (user, organization, and global settings)
+- Implements the GraphQL API layer that powers both the web UI and external API clients
+- Written in Go, with the web UI built in TypeScript/React
+- Stateless service that can be horizontally scaled
+- Organized into multiple internal packages with clear separation of concerns
+
+**Internal Architecture**:
+- **HTTP Server**: Handles incoming HTTP requests using Go's standard library
+- **GraphQL Engine**: Processes GraphQL queries with custom resolvers for various data types
+- **Authorization Layer**: Enforces permissions across all API and UI operations
+- **Request Router**: Routes user requests to appropriate internal handlers
+- **Service Clients**: Contains client code for communicating with other Sourcegraph services
+- **Database Layer**: Manages connections and transactions with the PostgreSQL database
+
+**Request Flow**:
+1. User request arrives at the frontend service
+2. Authentication and session validation occur
+3. Permission checks are performed for the requested resource
+4. The request is routed to the appropriate handler (e.g., search, repository view)
+5. The handler coordinates with other services to fulfill the request
+6. Results are transformed into the appropriate response format
+7. Response is returned to the user
+
+**Interactions**:
+- Serves as the central coordination point for all other services
+- Stores user, repository metadata, and other core data in the frontend database
+- Acts as a reverse proxy for client requests to other services
+- Forwards search requests to zoekt-webserver (indexed search) and searcher (unindexed search)
+- Makes API calls to gitserver for repository operations (e.g., file content, commit information)
+- Requests repository metadata from repo-updater
+- Retrieves code intelligence data from the codeintel database
+- Enforces permissions across all accessed resources
+- Provides the GraphQL API that all clients use to interact with Sourcegraph
+
+### Gitserver
+
+**Purpose**: Gitserver is a sharded service that clones and maintains local Git repositories from code hosts, making them available to other Sourcegraph services.
+
+**Importance**: Without gitserver, Sourcegraph cannot access repository content, making search, code navigation, and most other features non-functional.
+
+**Additional Details**:
+- Repositories are sharded across multiple gitserver instances for horizontal scaling
+- Maintains a persistent cache of repositories, but code hosts remain the source of truth
+- Performs Git operations like clone, fetch, archive, and rev-parse
+- Implements custom Git operations optimized for Sourcegraph's use cases
+- Written in Go with direct integration with Git binaries
+- Uses disk-based caching strategies to optimize performance
+- Handles repository cleanup and garbage collection
+
+**Internal Architecture**:
+- **Repository Manager**: Manages the lifecycle of repositories (cloning, updating, cleaning)
+- **Git Command Executor**: Executes Git commands with appropriate timeouts and resource limits
+- **Request Handler**: Processes API requests for repository operations
+- **Sharding Logic**: Determines which gitserver instance should host a particular repository
+- **Cleanup Worker**: Periodically removes unused repositories to free up disk space
+
+**Repository Flow**:
+1. Repository is first requested by a client (through frontend or repo-updater)
+2. Gitserver checks if the repository exists locally
+3. If not present, gitserver clones the repository from the code host
+4. For subsequent operations, gitserver operates on the local copy
+5. Periodic fetches update the repository with new commits
+6. Git operations (archive, show, etc.) are performed directly on the local repository
+
+**Scaling Characteristics**:
+- Each gitserver instance has an independent set of repositories
+- New gitserver instances can be added to handle more repositories
+- Repository distribution uses consistent hashing to minimize redistribution when scaling
+- Performance is largely determined by disk I/O speed and available memory
+- For detailed scaling information, see the [Gitserver Scaling Guide](../../../admin/deploy/scale.md#gitserver)
+
+**Interactions**:
+- Receives repository update requests from repo-updater to clone or update repositories
+- Provides repository data to almost all other services through HTTP APIs
+- Serves git data to frontend for repository browsing and file viewing
+- Supplies repository content to searcher for unindexed searches
+- Provides repository archives to zoekt-indexserver for index creation
+- Communicates directly with code hosts for clone and fetch operations
+- Executes git commands on behalf of other services
+- Implements efficient caching to reduce load on code hosts
+
+### Repo-updater
+
+**Purpose**: The repo-updater service is responsible for keeping repositories in gitserver up-to-date and syncing repository metadata from code hosts.
+
+**Importance**: Critical for ensuring Sourcegraph has current information about repositories and respects code host rate limits.
+
+**Additional Details**:
+- Singleton service that orchestrates repository updates
+- Handles code host API rate limiting and scheduling
+- Also responsible for permission syncing from code hosts
+- Manages external service connections (GitHub, GitLab, etc.)
+- Written in Go and designed as a central coordinator
+- Implements intelligent scheduling algorithms to prioritize updates
+- Handles authentication and authorization with various code host APIs
+- Maintains an in-memory queue of pending updates
+
+**Internal Architecture**:
+- **External Service Manager**: Manages connections to code hosts and other external services
+- **Repository Syncer**: Synchronizes repository metadata with code hosts
+- **Permissions Syncer**: Synchronizes repository permissions from code hosts
+- **Update Scheduler**: Schedules repository updates based on priority and last update time
+- **Rate Limiter**: Enforces API rate limits for each code host
+- **Metrics Collector**: Tracks sync status, errors, and performance metrics
+
+**Operational Flow**:
+1. External services (code hosts) are configured in Sourcegraph
+2. Repo-updater periodically polls each external service for repository information
+3. New repositories are added to the database and existing ones are updated
+4. Repository update operations are scheduled based on priority and last update time
+5. Update requests are sent to gitserver instances based on the schedule
+6. Repository permissions are synced from the code host to Sourcegraph's database
+7. Metadata about repositories (e.g., fork status, visibility) is kept up to date
+
+**Failure Handling**:
+- Implements exponential backoff for failed API requests
+- Continues functioning even if some code hosts are temporarily unavailable
+- Retries failed operations with appropriate delays
+- Can recover state after service restarts
+
+**Interactions**:
+- Makes API calls to code hosts to fetch repository metadata and permissions
+- Instructs gitserver to clone, update, or remove repositories as needed
+- Stores repository metadata in the frontend database
+- Provides repository listings and metadata to frontend
+- Implements rate limiting for code host API requests
+- Synchronizes repository permissions from code hosts
+- Maintains repository sync schedules based on activity patterns
+- Validates external service configurations (GitHub, GitLab, etc.)
+- Handles webhooks from code hosts for immediate updates when available
+
+## Search Infrastructure
+
+### Zoekt-indexserver
+
+**Purpose**: Creates and maintains the trigram-based search index for repositories' default branches.
+
+**Importance**: Enables fast, indexed code search across repositories, which is a core functionality of Sourcegraph.
+
+**Additional Details**:
+- Uses a trigram index for efficient substring matching
+- Only indexes default branches by default
+- Horizontally scalable for large codebases
+- Written in Go, forked and enhanced from the original Zoekt project
+- Optimized for handling large repositories and codebases
+- Builds specialized indices for different types of searches (content, symbols, etc.)
+- Performs incremental updates when repositories change
+
+**Technical Implementation**:
+- **Trigram Indexing**: Breaks down text into 3-character sequences for efficient substring searching
+- **Sharded Index Design**: Splits large indices into manageable shards
+- **Content Extraction**: Extracts content from various file formats before indexing
+- **Symbol Extraction**: Uses language-specific parsers to extract and index symbols
+- **Custom Compression**: Employs specialized compression techniques for code content
+
+**Indexing Process**:
+1. Receives a request to index a repository
+2. Retrieves the latest content from gitserver
+3. Analyzes repository content and extracts text and metadata
+4. Breaks content into trigrams and other searchable units
+5. Builds an optimized index structure with various lookup tables
+6. Compresses the index and writes it to disk
+7. Signals zoekt-webserver that a new index is available
+
+**Performance Characteristics**:
+- CPU-intensive during index creation
+- Memory usage scales with repository size and complexity
+- Disk I/O intensive when writing indices
+- Can be scaled horizontally by adding more instances and sharding repositories
+
+**Interactions**:
+- Gets repository content from gitserver
+- Creates indexes consumed by zoekt-webserver
+- Coordinates with frontend to determine which repositories to index
+- Emits metrics about indexing performance and coverage
+
+### Zoekt-webserver
+
+**Purpose**: Serves search requests against the trigram search index created by zoekt-indexserver.
+
+**Importance**: Provides the fast, indexed search capability that makes Sourcegraph search powerful.
+
+**Additional Details**:
+- Highly optimized for low-latency searches
+- Includes ranking algorithms for result relevance
+- Horizontally scalable to handle large search loads
+- Implements sophisticated query parsing and execution
+- Written in Go with performance as a primary design goal
+- Supports various search modifiers and operators
+- Memory-maps index files for fast access
+
+**Technical Implementation**:
+- **In-Memory Index**: Keeps critical parts of the index in memory for fast access
+- **Query Parser**: Parses complex search queries into executable search plans
+- **Search Executor**: Executes search plans against the index with parallelism
+- **Result Ranker**: Ranks search results by relevance using several signals
+- **Result Limiter**: Enforces result limits and timeouts to ensure responsiveness
+
+**Search Execution Flow**:
+1. Receives a query from frontend via the API
+2. Parses the query into a structured search plan
+3. Identifies which index shards need to be searched
+4. Executes the search in parallel across relevant shards
+5. Collects and ranks the results by relevance
+6. Applies post-processing filters (e.g., case sensitivity, regexp matching)
+7. Returns the formatted results to the caller
+
+**Performance Optimizations**:
+- Uses memory mapping for fast index access
+- Implements concurrent search execution
+- Employs early termination strategies for large result sets
+- Caches frequent queries and partial results
+- Prioritizes interactive search performance
+
+**Interactions**:
+- Receives search queries from frontend through HTTP API calls
+- Utilizes index files created by zoekt-indexserver stored on disk
+- Performs parallel searches across multiple index shards
+- Returns ranked and formatted search results to frontend
+- Communicates index status to frontend for search scoping decisions
+- Provides detailed metrics about search performance and throughput
+- Coordinates with other zoekt-webserver instances for multi-shard searches
+
+### Searcher
+
+**Purpose**: Performs non-indexed, on-demand searches for content not covered by zoekt.
+
+**Importance**: Provides search capability for non-default branches and unindexed repositories, ensuring comprehensive search coverage.
+
+**Additional Details**:
+- Used for searching branches other than the default branch
+- Performs structural search (non-regex pattern matching)
+- Slower than zoekt but more flexible
+- Written in Go and optimized for parallel execution
+- Processes repositories on demand rather than pre-indexing
+- Supports advanced search patterns including regular expressions
+- Implements a local file cache to improve performance for repeated searches
+
+**Technical Implementation**:
+- **Archive Fetcher**: Retrieves repository archives from gitserver
+- **Archive Extractor**: Extracts repository contents to temporary storage
+- **Search Executor**: Runs search patterns against repository contents
+- **Pattern Matcher**: Implements various pattern matching algorithms (regex, exact, structural)
+- **Cache Manager**: Manages a local cache of recently searched repositories
+
+**Search Process**:
+1. Receives a search request for a specific repository and revision
+2. Checks if the repository is already in the local cache
+3. If not cached, requests an archive from gitserver
+4. Extracts the archive to a temporary location
+5. Executes the search pattern against the extracted files
+6. Applies filters (file path, language, etc.)
+7. Formats and returns the matching results
+8. Optionally caches the repository for future searches
+
+**Performance Considerations**:
+- Uses streaming to return results as they're found
+- Implements timeouts to prevent long-running searches
+- Caches recently searched repositories to avoid repeated downloads
+- Applies heuristics to optimize search patterns before execution
+- Can be scaled horizontally to handle more concurrent searches
+
+**Interactions**:
+- Receives search requests from frontend through HTTP API calls
+- Requests repository archives from gitserver for each search query
+- Maintains a local cache of recently searched repositories
+- Returns search results to frontend as they are found (streaming)
+- Handles multiple concurrent search requests with appropriate limits
+- Coordinates timeout handling with frontend for long-running searches
+- Reports detailed metrics about search performance and cache efficiency
+- Implements fallback search when zoekt indexing is incomplete or unavailable
+
+### Syntect Server
+
+**Purpose**: Provides syntax highlighting for code in any language displayed in Sourcegraph.
+
+**Importance**: Enhances readability of code in search results, repository browsing, and other code views.
+
+**Additional Details**:
+- Based on the Rust Syntect library
+- Supports hundreds of programming languages and file formats
+- Optimized for high throughput and low latency
+
+**Interactions**:
+- Receives highlighting requests from frontend
+- Used by search UI and repository browsing
+
+## Code Intelligence 
+
+### Symbols
+
+**Purpose**: Extracts and indexes symbol information (functions, classes, etc.) from code for fast symbol search.
+
+**Importance**: Enables symbol search and contributes to basic code navigation features.
+
+**Additional Details**:
+- Language-agnostic symbol extraction using regular expressions
+- Complements precise code intelligence for languages without dedicated indexers
+
+**Interactions**:
+- Gets repository content from gitserver
+- Serves symbol search requests from frontend
+
+### Precise-code-intel-worker
+
+**Purpose**: Processes and converts uploaded LSIF/SCIP code intelligence data into queryable indexes.
+
+**Importance**: Enables precise code navigation (go-to-definition, find references) across repositories.
+
+**Additional Details**:
+- Handles processing of upload records in a queue
+- Converts LSIF/SCIP data into an optimized index format
+
+**Interactions**:
+- Stores processed data in the codeintel database
+- Accesses uploads from blob storage
+
+### Worker
+
+**Purpose**: A service for executing background jobs including batch changes processing, code insights computations, and other asynchronous tasks.
+
+**Importance**: Handles long-running operations that would otherwise block user interactions.
+
+**Additional Details**:
+- Implements a work queue for distributed processing
+- Handles retries and error recovery
+- Used for executing various background jobs based on configuration
+
+**Interactions**:
+- Communicates with frontend for job coordination
+- Accesses various databases depending on the job type
+- Interacts with gitserver for repository operations
+
+## Data Persistence
+
+### Frontend DB
+
+**Purpose**: Primary PostgreSQL database that stores user data, repository metadata, configuration, and other core application data.
+
+**Importance**: Stores critical data needed for almost all Sourcegraph operations.
+
+**Additional Details**:
+- Contains user accounts, repository metadata, and configuration
+- Used for transactional operations across the application
+- Stores settings, user accounts, repository metadata, and more
+- Uses PostgreSQL's advanced features for data integrity and performance
+- Employs database migrations for schema evolution
+- Configured with specific optimizations for Sourcegraph's workload
+
+**Schema Structure**:
+- **Users and Authentication**: Tables for users, organizations, credentials
+- **Repository Metadata**: Tables for repositories, external services, permissions
+- **Configuration**: Settings cascade for different scopes (global, org, user)
+- **API Metadata**: API tokens, client information, usage tracking
+- **Search Metadata**: Saved searches, search statistics, search contexts
+- **Various Feature Data**: Batch changes, code monitoring, notebooks, etc.
+
+**Data Access Patterns**:
+- High read-to-write ratio for most tables
+- Transactional integrity for critical operations
+- Heavy use of indexes for performance optimization
+- PostgreSQL-specific features (e.g., jsonb for settings, array types, etc.)
+- Connection pooling to handle concurrent requests efficiently
+
+**Scaling Characteristics**:
+- Vertical scaling for most deployments (larger DB instance)
+- Performance typically determined by index efficiency and query patterns
+- Read replicas can be configured for large-scale deployments
+- Designed to support thousands of repositories and users
+
+**Interactions**:
+- Primary database for the frontend service
+- Used by repo-updater for external service and repository metadata
+- Stores permissions data for authorization checks
+- Referenced by nearly all services for configuration and settings
+
+### Codeintel DB
+
+**Purpose**: PostgreSQL database dedicated to storing code intelligence data.
+
+**Importance**: Enables precise code navigation features by storing symbol relationships.
+
+**Additional Details**:
+- Stores processed LSIF/SCIP data in an optimized format
+- Separated from frontend DB for performance and scaling reasons
+
+**Interactions**:
+- Used by precise-code-intel-worker for writing processed data
+- Queried by frontend for code navigation requests
 
-## Repository syncing
+### Codeinsights DB
 
-At its core, Sourcegraph maintains a persistent cache of all repositories that are connected to it. It is persistent because this data is critical for Sourcegraph to function. Still, it is ultimately a cache because the code host is the source of truth, and our cache is eventually consistent.
+**Purpose**: PostgreSQL database that stores code insights data and time series information.
+
+**Importance**: Persists data for code insights dashboards and historical trend analysis.
 
-- `gitserver` is the sharded service that stores repositories and makes them accessible to other Sourcegraph services
-- `repo-updater` is the singleton service responsible for ensuring all repositories in gitserver are as up-to-date as possible while respecting code host rate limits. It is also responsible for syncing repository metadata from the code host that is stored in the repo table of our Postgres database
+**Additional Details**:
+- Stores time series data for tracking code metrics over time
+- Separated from other databases for performance and scaling reasons
 
-## Permission syncing
+**Interactions**:
+- Written to by worker service when computing insights
+- Queried by frontend when rendering code insights dashboards
 
-Repository permissions are mirrored from code hosts to Sourcegraph by default. This builds the foundation of Sourcegraph authorization for repositories to ensure users see consistent content on code hosts. Currently, the background permissions syncer resides in the repo-updater.
+### Blob Store
 
-<Callout type="note">Learn more in the [Permission Syncing docs](/admin/permissions/syncing)</Callout>
+**Purpose**: Object storage service for large binary data like LSIF/SCIP uploads and other artifacts.
 
-## Settings cascade
+**Importance**: Provides scalable storage for large data files that would be inefficient to store in PostgreSQL.
 
-Sourcegraph offers the flexibility of customizing user settings. A single user's settings are generally the result of merging user settings, organization settings, and global settings. Each of these is referred to as a settings subject, which is part of the settings cascade. They are all exposed to GraphQL.
+**Additional Details**:
+- Can be configured to use cloud storage (S3, GCS) or local disk
+- Used primarily for code intelligence uploads and other large artifacts
 
-## Search
+**Interactions**:
+- Stores raw LSIF/SCIP uploads before processing
+- Accessed by precise-code-intel-worker during processing
 
-Developers can search for the entire codebase that is connected to their Sourcegraph instance.
+### Redis
 
-By default, Sourcegraph uses `zoekt` to create a trigram index of the default branch of every repository, which makes searches fast. This trigram index is why Sourcegraph search is more powerful and faster than what is usually provided by code hosts.
+**Purpose**: In-memory data store used for caching, rate limiting, and other ephemeral data.
 
-- [zoekt-indexserver](https://sourcegraph.com/github.com/sourcegraph/zoekt/-/tree/cmd/zoekt-sourcegraph-indexserver)
-- [zoekt-webserver](https://sourcegraph.com/github.com/sourcegraph/zoekt/-/tree/cmd/zoekt-webserver)
+**Importance**: Improves performance by caching frequently accessed data and supporting distributed locking.
 
-Sourcegraph also has a fast search path for code that isn't indexed yet or will never be indexed (for example, code that is not on a default branch). Indexing every branch of every repository isn't a pragmatic use of resources for most customers, so this decision balances optimizing the common case (searching all default branches) with space savings (not indexing everything).
+**Additional Details**:
+- Used for session data, caching, and rate limiting
+- Supports pub/sub mechanisms used by some services
 
-- `searcher` implements the non-indexed search
-- Syntax highlighting for any code view, including search results, is provided by `Syntect` server
+**Interactions**:
+- Used by frontend for caching and session management
+- Used by repo-updater for coordination and caching
 
-<Callout type="note">Learn more in the [Code Search docs](/code-search)</Callout>
+## External Components
 
-## Code Navigation
+### Executors
 
-Unlike Search (which is completely text-based), Code Navigation surfaces data such as doc comments for a symbol and actions such as the "go to definition" or "find references" features based on our semantic understanding of code.
+**Purpose**: Isolated environments for running compute-intensive operations like Batch Changes and Code Insights computations.
 
-By default, Sourcegraph provides [search-based code navigation](/code-search/code-navigation/search_based_code_navigation). This reuses all the architecture that makes search fast, but it can result in false positives (for example, finding two definitions for a symbol or references that aren't actually references) or false negatives (for example, not being able to find the definition or all references).
+**Importance**: Enables secure, scalable execution of user-provided code and resource-intensive operations.
 
-This is the default because it works with no extra configuration and is good for many use cases and languages. We support many languages this way because it only requires writing a few regular expressions.
+**Additional Details**:
+- Runs as separate infrastructure from the main Sourcegraph instance
+- Provides isolated sandboxed environments
+- Horizontally scalable based on compute needs
 
-With some setup, customers can enable [precise code navigation](/code-search/code-navigation/precise_code_navigation). Repositories add a step to their build pipeline that computes the index for that code revision and uploads it to Sourcegraph. We must write language-specific indexers, so adding precise code navigation support for new languages is a non-trivial task.
+**Interactions**:
+- Receives jobs from the main Sourcegraph instance
+- Returns results to the worker service
 
-<Callout type="note">Learn more in the [Code Navigation docs](/code-search/code-navigation)</Callout>
+### Code Hosts
 
-### Dependencies
+**Purpose**: External systems (GitHub, GitLab, Bitbucket, etc.) that host the repositories Sourcegraph interacts with.
 
-- Search: Symbol search is used for basic code navigation
-- Sourcegraph extension API: Hover and definition providers
-- Native integrations (for code hosts): UI of hover tooltips on code hosts
+**Importance**: Source of truth for all code and repository metadata synchronized to Sourcegraph.
 
-## Batch Changes
+**Additional Details**:
+- Sourcegraph maintains connections to these systems via API tokens
+- Rate limits and permissions from code hosts must be respected
 
-Batch Changes creates and manages large-scale code changes across projects, repositories, and code hosts.
+**Interactions**:
+- Repo-updater syncs repository metadata and permissions from code hosts
+- Gitserver clones and fetches repositories from code hosts
+- Batch Changes creates and updates changesets (PRs/MRs) on code hosts
 
-To create a batch change, users write a [batch spec](/batch-changes/batch-spec-yaml-reference), which is a YAML file that specifies the changes that should be performed and the repositories that they should be performed upon — either through a Sourcegraph search or by declaring them directly. This spec is then executed by [src-cli](/cli/references/batch) on the user's machine, in CI or some other environment controlled by the user, or directly within the Sourcegraph UI by enabling Server-Side Batch Changes via executors. This results in changeset specs that are sent to Sourcegraph. Sourcegraph then applies these changeset specs to create one or more changesets per repository. (Depending on the code host, a changeset is a pull request or merge request.)
+## Observability Infrastructure
 
-Once created, Sourcegraph monitors changesets, and their current review and CI status can be viewed on the batch change page. This provides a single pane of glass view of all the changesets created as part of the batch change. The batch change can be updated at any time by re-applying the original batch spec: this will transparently add or remove changesets in repositories that now match or don't match the original search as needed.
+### Prometheus
 
-Read the [Batch Changes](/batch-changes) docs to learn more.
+**Purpose**: Time-series database that collects, stores, and serves metrics from all Sourcegraph services.
 
-### Dependencies
+**Importance**: Critical for monitoring service health, performance, and resource usage across the entire Sourcegraph deployment.
 
-- src-cli: Batch changes are currently executed client-side through the `src` CLI
-- Search: Repositories in which batch specs need to be executed are resolved through the search API
+**Additional Details**:
+- Scrapes metrics from all services at configurable intervals
+- Evaluates alerting rules to detect potential issues
+- Provides query language (PromQL) for metrics analysis
+- Stores time-series data with automatic downsampling
 
-## Code Insights
+**Interactions**:
+- Scrapes metrics endpoints exposed by all Sourcegraph services
+- Sends alerts to configured alert managers
+- Supplies metrics data to Grafana for visualization
 
-Code Insights surface higher-level, aggregated information to leaders in engineering organizations in dashboards. For example, code insights can track the number of matches of a search query over time, the number of code navigation diagnostic warnings in a codebase, or the usage of different programming languages. Sample use cases for this are tracking migrations, the usage of libraries across an organization, tech debt, code base health, and much more.
+### Grafana
 
-Code Insights persist in a separate database called `codeinsights-db`. The web application interacts with the backend through a [GraphQL API](/api/graphql).
+**Purpose**: Visualization platform that creates dashboards and graphs from Prometheus metrics data.
 
-Code Insights uses data from the `frontend` database for repository metadata and repository permissions to filter time series data.
+**Importance**: Provides visual insights into system performance and enables admins to diagnose issues quickly.
 
-Code Insights can generate data in the background or just-in-time when viewing charts. This decision is currently enforced in the product, depending on the type and scope of the insight. For code insights being run just-in-time in the client, the performance of code insights is bound to the performance of the underlying data source. These insights are relatively fast as long as the scope doesn't include many repositories (or large monorepos), but performance degrades when trying to include a lot of repositories. Insights that are processed in the background are rate-limited and will perform approximately 28,000 queries per hour when fully saturated on default settings.
+**Additional Details**:
+- Ships with pre-configured dashboards for all Sourcegraph services
+- Supports alerting based on metric thresholds
+- Allows for custom dashboard creation
 
-There is also a feature flag left over from the original development of the early-stage product that we retained in case a customer who doesn't purchase it ever has a justified need to disable insights. You can set `"experimentalFeatures": { "codeInsights": false }` in your settings to disable insights.
+**Interactions**:
+- Queries Prometheus for metrics data
+- Displays real-time and historical performance data
 
-You can learn more in the [Code Insights](/code_insights) docs.
+### CAdvisor
 
-### Dependencies
+**Purpose**: Analyzes and exposes resource usage and performance data from containers.
 
-- Search:
-  - GraphQL API for text search, in particular `search()`, `matchCount`, `stats.languages`
-  - Query syntax: Code insights "construct" search queries programmatically
-  - Exhaustive search (with `count:all/count:999999` operator)
-  - Historical search (= unindexed search, currently)
-  - Commit search to find historical commits to search over
-- Repository Syncing: The code insights backend has direct dependencies on `gitserver` and `repo-updater`
-- Permission syncing: The code insights backend depends on synced repository permissions for access control
-- Settings cascade:
-  - Insights and dashboard configuration are stored in user, organization, and global settings. This will change in the future and is planned to be moved to the database
-  - Insights contributed by extensions are configured through settings (this will stay the same)
+**Importance**: Provides container-level metrics that are essential for understanding resource utilization.
 
-## Code Monitoring
+**Additional Details**:
+- Automatically discovers all containers in a Sourcegraph deployment
+- Collects CPU, memory, network, and disk usage metrics
+- Zero configuration required in most deployments
 
-Code Monitoring allows users to get notified of changes to their codebase.
+**Interactions**:
+- Metrics are scraped by Prometheus
+- Data is visualized in Grafana dashboards
 
-Users can view, edit, and create code monitors through the code monitoring UI. A code monitor comprises a trigger and one or more actions.
+## Telemetry
 
-The **trigger** watches for new data; if there is new data, we call this an event. The only supported trigger is a search query of `type:diff` or `type:commit`, run every five minutes by the Go backend with an automatically added `after:` parameter narrowing down the diffs/commits that should be searched. The monitor's configured actions are run when this query returns a non-zero number of results.
+### Ping Service
 
-The actions are run in response to a trigger event. For now, the only supported action is an email notification to the primary email address of the code monitor's owner. To work, `email.address` and `email.smtp` must be configured in the site configuration. Code monitoring actions will be extended in the future to support webhooks.
+**Purpose**: Collects anonymous usage data about Sourcegraph instances and sends it to Sourcegraph.
 
-<Callout type="note">Learn more in the [Code Monitoring docs](/code_monitoring)</Callout>
+**Importance**: Provides Sourcegraph with critical insights about feature usage and deployment scales to guide product development.
 
-### Dependencies
+**Additional Details**:
+- Only sends high-level, anonymized usage statistics
+- Can be disabled by admins in site configuration
+- Runs daily as a scheduled job
+- No code or repository-specific data is ever transmitted
 
-- Search: Diff and commit search triggers
+**Interactions**:
+- Frontend service collects usage data from various services
+- Pings are sent to Sourcegraph cloud service via HTTPS
 
-## Browser extensions
+More details can be found in [Life of a ping](life-of-a-ping.md).
 
-The [Sourcegraph browser extensions](/integration/browser_extension) bring the features of Sourcegraph directly into the UI of code hosts such as GitHub, GitLab, and Bitbucket.
+## Cody Architecture
 
-With the Sourcegraph browser extension installed, users get Sourcegraph features (including Code Navigation) on their code host while browsing code, viewing diffs, or reviewing pull requests.
+Cody is Sourcegraph's AI-powered coding assistant. For detailed information on Cody's architecture and implementation, refer to the [Cody Enterprise Architecture](https://sourcegraph.com/docs/cody/core-concepts/enterprise-architecture) documentation.
 
-This lets users get value from Sourcegraph without leaving existing workflows on their code host. It also gives them a convenient way to jump into Sourcegraph anytime (by using the **Open in Sourcegraph** button on any repository or file). The browser extension also adds an address bar search shortcut, allowing you to search on Sourcegraph directly from the browser address bar.
+### Cody Gateway
 
-## Native integrations (for code hosts)
+**Purpose**: Manages connections to various AI providers (e.g., OpenAI, Anthropic) and handles request routing, authentication, and rate limiting.
 
-Native integrations bring Sourcegraph features directly into the UI of code hosts, similar to browser extensions.
+**Importance**: Enables Cody's AI code assistance features while abstracting away the complexity of multiple AI providers.
 
-Instead of requiring a browser extension, native integrations inject a script by extending the code host directly (for example, using the code host's plugin architecture). The advantage is that Sourcegraph can be enabled for all users of a code host instance without any action required from each user.
+**Additional Details**:
+- Supports multiple large language model providers
+- Handles fallback between providers when necessary
+- Manages rate limits and quotas
+- Authenticates requests to ensure proper access
 
-<Callout type="note">Learn more in the [Code host integrations docs](/admin/code_hosts)</Callout>
+**Interactions**:
+- Receives requests from Cody clients (web app, editor extensions)
+- Forwards appropriately formatted requests to AI providers
+- Returns AI-generated responses to clients
 
-#### Dependencies
+### Cody Context Fetcher
 
-- Repository Syncing: Uses the GraphQL API to resolve repositories and revisions on code hosts
-- Search: Query transformer API hooks into search in the web app
-- Settings cascade: Which extensions are enabled, and which configurations for extensions are stored in the settings. Extensions may also change settings
+**Purpose**: Gathers relevant code context from the repository to enhance AI prompts with local codebase knowledge.
 
-## src-cli
+**Importance**: Critical for making Cody's responses contextually aware of the user's codebase.
 
-`src-cli`, or `src`, is a command line tool that users can run locally to interact with Sourcegraph.
+**Additional Details**:
+- Uses embeddings and semantic search to find relevant code
+- Intelligently selects context based on query and available context window
+- Balances context quality with token limits
 
-`src-cli` is written in Go and distributed as a standalone binary for Windows, macOS, and Linux. Its features include running searches, managing Sourcegraph, and executing batch changes. `src-cli` is integral to the batch changes product.
+**Interactions**:
+- Uses search infrastructure to find relevant code snippets
+- Interacts with gitserver to access repository content
+- Provides enhanced context to Cody Gateway for AI requests
 
-<Callout type="note">`src-cli` is a standalone client, maintained and released separately from Sourcegraph</Callout>
+## Scaling Sourcegraph
 
-<Callout type="note">Learn more in the [src-cli docs](/admin/code_hosts) and [GitHub repo](https://github.com/sourcegraph/src-cli)</Callout>
+Sourcegraph is designed to scale from small deployments to large enterprise installations with thousands of repositories and users. The [Scaling Overview for Services](https://sourcegraph.com/docs/admin/deploy/scale) provides detailed information about how each service scales, including:
 
-### Dependencies
+- Resource requirements for each service
+- Scaling factors to consider (number of users, repositories, etc.)
+- Storage considerations for different components
+- Performance optimization recommendations
 
-- Search: GraphQL API
-- Batch Changes: GraphQL API
-- Code Intelligence: GraphQL API
+When planning to scale your Sourcegraph instance, consider using Grafana dashboards to monitor current resource usage and the [Resource Estimator](https://docs.sourcegraph.com/admin/deploy/resource_estimator) to plan for future growth.
 
-## Deployment
+## External Services and Dependencies
 
-Sourcegraph's recommended deployment methods are:
+Sourcegraph can be configured to use external services for improved performance, reliability, and scalability in production environments. While Sourcegraph provides bundled versions of these services, many deployments replace them with managed alternatives.
 
-1. Sourcegraph Cloud: This provides a fully managed solution where Sourcegraph handles all of the maintenance, monitoring, and upgrading tasks to give you an optimal Sourcegraph experience while immediately getting the latest features into your users' hands. This solution does require your code hosts to be connected to the Sourcegraph managed environment.
-2. Kubernetes Helm: Sourcegraph's Kubernetes deployment provides the most robust, scalable, and vetted self-hosted solution. This solution is ideal across many self-hosted customers capable of deploying a multi-node instance, and can be supported by all mainstream managed Kubernetes platforms.
-3. Docker Compose: Docker Compose provides the preferred single-node deployment solution for Sourcegraph. It can be a good option when the complexities and flexibility provided by Kubernetes Helm are not needed.
-4. Kubernetes Kustomize: Helm is Sourcegraph's more standardized and vetted approach to deploying with Kubernetes, but if Kustomize is your preferred deployment method it is a viable and supported approach.
-5. Machine Images: Sourcegraph can be deployed using dedicated Machine Images for specific Cloud providers. This can be a simple solution in specific circumstances, though has its own considerations. If you are considering this path, please discuss with your account team.
+### Database Services
 
-The [resource estimator](/admin/deploy/resource_estimator#sourcegraph-resource-estimator) can guide you on the requirements for each deployment type.
+**PostgreSQL Databases**:
+- **Purpose**: Sourcegraph uses PostgreSQL for all persistent relational data storage
+- **Variants**: 
+  - **Frontend DB**: Stores user data, repository metadata, configuration, and other core data
+  - **Codeintel DB**: Stores code intelligence data
+  - **Codeinsights DB**: Stores code insights time series data
+- **Cloud Alternatives**: AWS RDS for PostgreSQL, Google Cloud SQL, Azure Database for PostgreSQL
 
-<Callout type="note">Learn more in the [deployment docs](/admin/deploy)</Callout>
+### Caching and Session Storage
 
-## Observability
+**Redis Instances**:
+- **Purpose**: Provides in-memory data structure store for caching and ephemeral data
+- **Variants**:
+  - **Redis Cache**: Stores application cache data
+  - **Redis Store**: Stores short-term information such as user sessions
+- **Cloud Alternatives**: Amazon ElastiCache, Google Cloud Memorystore, Azure Cache for Redis
 
-Observability encapsulates the monitoring and debugging of Sourcegraph deployments. Sourcegraph is designed and ships several observability tools and out-of-the-box capabilities to enable visibility into the health and state of a Sourcegraph deployment.
+### Object Storage
 
-Monitoring includes [metrics and dashboards](/admin/observability/metrics), [alerting](/admin/observability/alerting), and [health checking](/admin/observability/health_checks) capabilities.
+**Blob Storage**:
+- **Purpose**: Stores large binary objects such as LSIF/SCIP uploads and other artifacts
+- **Default Implementation**: MinIO (S3-compatible)
+- **Cloud Alternatives**: Amazon S3, Google Cloud Storage, Azure Blob Storage
 
-- `grafana` is the frontend for service metrics and ships with customized dashboards for Sourcegraph services
-- prometheus handles the scraping of service metrics and ships with recording rules, alert rules, and alerting capabilities
-- `cadvisor` provides per-container performance metrics (scraped by Prometheus) in most Sourcegraph environments
-- Each Sourcegraph service provides health checks
+### Distributed Tracing
 
-Debugging includes [tracing](/admin/observability/tracing) and [logging](/admin/observability/logs).
+**Jaeger**:
+- **Purpose**: Provides end-to-end distributed tracing for debugging and monitoring
+- **Usage**: Optional component for advanced debugging and performance analysis
+- **Cloud Alternatives**: AWS X-Ray, Google Cloud Trace, Azure Monitor
 
-- jaeger is the distributed tracing service used by Sourcegraph
-- Each Sourcegraph service provides logs
+### External Code Hosts
 
-<Callout type="note">Learn more in the [Observability docs](/admin/observability).</Callout>
+Sourcegraph connects to various code hosts to synchronize repositories and metadata:
 
-## Cody
+- **GitHub/GitHub Enterprise**
+- **GitLab/GitLab Enterprise**
+- **Bitbucket Server/Bitbucket Cloud**
+- **Azure DevOps**
+- **Perforce**
+- **Gitolite**
+- **AWS CodeCommit**
+- **Gerrit**
+- **Pagure**
 
-This section covers the Enterprise architecture of our AI assistant, Cody. [Cody Enterprise](/cody/clients/enable-cody-enterprise) can be deployed via the Sourcegraph Cloud or on your self-hosted infrastructure.
+## Additional Resources
 
-### Cody with Sourcegraph Cloud deployment
-
-This is a recommended deployment for Cody Enterprise. It uses the Sourcegraph Cloud infrastructure and Cody gateway.
-
-<img src="https://sourcegraphstatic.com/docs/enterprise-architecture-cloud-v2.png" />
-
-### Sourcegraph Enterprise Server (self-hosted) on Amazon Bedrock
-
-This is an example of a more complex deployment that uses Sourcegraph Enterprise Server (self-hosted) and Amazon Bedrock.
-
-<img src="https://sourcegraphstatic.com/docs/enterprise-architecture-aws-v0.png" />
-
-### Data flow
-
-The following diagram describes the data flow between the different components of Cody Enterprise.
-
-<img src="https://sourcegraphstatic.com/docs/enterprise-architecture-data-flow-v0.png" />
+- [Life of a repository](life-of-a-repository.md) - Detailed explanation of repository syncing
+- [Life of a search query](life-of-a-search-query.md) - How search requests flow through the system
+- [Monitoring architecture](https://handbook.sourcegraph.com/engineering/observability/monitoring_architecture) - How Sourcegraph's observability system works
+- [Life of a ping](life-of-a-ping.md) - How usage data is collected
+- [Background permissions syncing](../../../admin/repo/permissions.md#background-permissions-syncing) - Details on permission synchronization
+- [Using external services with Sourcegraph](../../../admin/external_services/index.md) - How to configure external services
