@@ -46,8 +46,17 @@ These edges are omitted for clarity.
 ### Infrastructure
 - [Observability Infrastructure](#observability-infrastructure) - Prometheus, Grafana, and cAdvisor
 - [Telemetry](#telemetry) - Usage data collection
-- [Cody Architecture](#cody-architecture) - AI-assisted coding components
 - [External Services and Dependencies](#external-services-and-dependencies) - External services Sourcegraph can use
+
+### Cody Architecture
+- [Cody Gateway](#cody-gateway) - Routes requests to AI providers
+- [Cody Context Fetcher](#cody-context-fetcher) - Provides relevant code context
+- [Cody Agent](#cody-agent) - Client-side component in IDE
+- [Completions API](#completions-api) - Handles code completions
+- [Policy Service](#policy-service) - Enforces usage policies
+- [Cody Proxy](#cody-proxy) - Load balancing between AI providers
+- [Attribution Tracking](#attribution-tracking) - Tracks code origin
+- [Cody Assistant](#cody-assistant) - Interactive chat interface
 
 ## Core Services
 
@@ -60,10 +69,9 @@ These edges are omitted for clarity.
 **Additional Details**:
 - Handles user authentication and session management
 - Enforces repository permissions
-- Coordinates interactions between services
+- Coordinates interactions between most services
 - Manages the settings cascade (user, organization, and global settings)
 - Implements the GraphQL API layer that powers both the web UI and external API clients
-- Written in Go, with the web UI built in TypeScript/React
 - Stateless service that can be horizontally scaled
 - Organized into multiple internal packages with clear separation of concerns
 
@@ -97,18 +105,17 @@ These edges are omitted for clarity.
 
 ### Gitserver
 
-**Purpose**: Gitserver is a sharded service that clones and maintains local Git repositories from code hosts, making them available to other Sourcegraph services.
+**Purpose**: Gitserver is a shardedable service that clones and maintains local Git repositories from code hosts, making them available to other Sourcegraph services.
 
 **Importance**: Without gitserver, Sourcegraph cannot access repository content, making search, code navigation, and most other features non-functional.
 
 **Additional Details**:
-- Repositories are sharded across multiple gitserver instances for horizontal scaling
 - Maintains a persistent cache of repositories, but code hosts remain the source of truth
 - Performs Git operations like clone, fetch, archive, and rev-parse
 - Implements custom Git operations optimized for Sourcegraph's use cases
-- Written in Go with direct integration with Git binaries
 - Uses disk-based caching strategies to optimize performance
 - Handles repository cleanup and garbage collection
+- Repositories can sharded across multiple gitserver instances for horizontal scaling if necessary
 
 **Internal Architecture**:
 - **Repository Manager**: Manages the lifecycle of repositories (cloning, updating, cleaning)
@@ -153,7 +160,6 @@ These edges are omitted for clarity.
 - Handles code host API rate limiting and scheduling
 - Also responsible for permission syncing from code hosts
 - Manages external service connections (GitHub, GitLab, etc.)
-- Written in Go and designed as a central coordinator
 - Implements intelligent scheduling algorithms to prioritize updates
 - Handles authentication and authorization with various code host APIs
 - Maintains an in-memory queue of pending updates
@@ -196,15 +202,14 @@ These edges are omitted for clarity.
 
 ### Zoekt-indexserver
 
-**Purpose**: Creates and maintains the trigram-based search index for repositories' default branches.
+**Purpose**: Creates and maintains the search index for repositories' default branches.
 
 **Importance**: Enables fast, indexed code search across repositories, which is a core functionality of Sourcegraph.
 
 **Additional Details**:
 - Uses a trigram index for efficient substring matching
-- Only indexes default branches by default
+- Indexes default branches by default, but capable of indexing additional branches
 - Horizontally scalable for large codebases
-- Written in Go, forked and enhanced from the original Zoekt project
 - Optimized for handling large repositories and codebases
 - Builds specialized indices for different types of searches (content, symbols, etc.)
 - Performs incremental updates when repositories change
@@ -246,11 +251,10 @@ These edges are omitted for clarity.
 **Additional Details**:
 - Highly optimized for low-latency searches
 - Includes ranking algorithms for result relevance
-- Horizontally scalable to handle large search loads
 - Implements sophisticated query parsing and execution
-- Written in Go with performance as a primary design goal
 - Supports various search modifiers and operators
 - Memory-maps index files for fast access
+- Horizontally scalable to handle large search loads
 
 **Technical Implementation**:
 - **In-Memory Index**: Keeps critical parts of the index in memory for fast access
@@ -294,7 +298,6 @@ These edges are omitted for clarity.
 - Used for searching branches other than the default branch
 - Performs structural search (non-regex pattern matching)
 - Slower than zoekt but more flexible
-- Written in Go and optimized for parallel execution
 - Processes repositories on demand rather than pre-indexing
 - Supports advanced search patterns including regular expressions
 - Implements a local file cache to improve performance for repeated searches
@@ -406,7 +409,6 @@ These edges are omitted for clarity.
 - Contains user accounts, repository metadata, and configuration
 - Used for transactional operations across the application
 - Stores settings, user accounts, repository metadata, and more
-- Uses PostgreSQL's advanced features for data integrity and performance
 - Employs database migrations for schema evolution
 - Configured with specific optimizations for Sourcegraph's workload
 
@@ -631,6 +633,114 @@ Cody is Sourcegraph's AI-powered coding assistant. For detailed information on C
 - Interacts with gitserver to access repository content
 - Provides enhanced context to Cody Gateway for AI requests
 
+### Cody Agent
+
+**Purpose**: Client-side component that runs in the IDE to handle local processing, manage state, and communicate with Sourcegraph's backend services.
+
+**Importance**: Provides a smooth, responsive experience by managing the communication between the IDE and Sourcegraph services.
+
+**Additional Details**:
+- Manages local state and caching to reduce latency
+- Handles connection and authentication with Sourcegraph instance
+- Processes local context before sending requests
+- Implements IDE-specific interfaces for different editor platforms
+
+**Interactions**:
+- Communicates with Sourcegraph backend services via API
+- Interfaces with IDE extensions to provide UI integrations
+- Sends requests to Cody Gateway for AI completions and chat
+- Manages local file access to gather context
+
+### Completions API
+
+**Purpose**: Handles code completion requests and orchestrates interactions with various LLM providers.
+
+**Importance**: Core service that powers Cody's intelligent code completions feature.
+
+**Additional Details**:
+- Optimized for low-latency completion requests
+- Implements specialized prompts for code completion
+- Supports streaming completions for responsive UI
+- Applies post-processing to improve completion quality
+
+**Interactions**:
+- Receives completion requests from Cody Agent
+- Interfaces with Cody Gateway to access LLM providers
+- Utilizes Context Fetcher to enhance prompts with relevant code
+- Returns processed completions to clients
+
+### Policy Service
+
+**Purpose**: Enforces usage policies, rate limits, and access controls for Cody features.
+
+**Importance**: Ensures compliance with licensing, usage agreements, and prevents abuse of the system.
+
+**Additional Details**:
+- Manages user quotas and rate limits
+- Enforces feature access based on licensing tier
+- Tracks usage analytics for billing and optimization
+- Implements configurable policies for enterprise environments
+
+**Interactions**:
+- Validates requests against policy rules
+- Integrates with authentication and authorization systems
+- Provides usage metrics to telemetry systems
+- Communicates policy decisions to other Cody services
+
+### Cody Proxy
+
+**Purpose**: Handles routing, load balancing, and failover between different AI providers.
+
+**Importance**: Ensures high availability and optimal performance by managing connections to multiple AI backends.
+
+**Additional Details**:
+- Implements sophisticated routing algorithms
+- Monitors provider health and performance
+- Handles transparent failover between providers
+- Optimizes request distribution based on cost and performance
+
+**Interactions**:
+- Sits between Cody Gateway and external AI providers
+- Monitors response latency and error rates
+- Manages connection pooling to providers
+- Implements circuit breaking for unavailable services
+
+### Attribution Tracking
+
+**Purpose**: Tracks which code suggestions come from which sources for proper attribution and transparency.
+
+**Importance**: Critical for maintaining legal compliance, intellectual property rights, and transparency in AI-generated code.
+
+**Additional Details**:
+- Identifies the origin of code snippets in completions
+- Maintains records of source repositories and licenses
+- Provides attribution information to users
+- Helps enforce license compliance for suggested code
+
+**Interactions**:
+- Analyzes completions to identify code origins
+- Cross-references with repository metadata
+- Adds attribution metadata to completions
+- Integrates with policy service for license enforcement
+
+### Cody Assistant
+
+**Purpose**: Manages the chat interface component that provides interactive coding assistance.
+
+**Importance**: Provides an intuitive, conversational interface for developers to interact with Cody.
+
+**Additional Details**:
+- Maintains conversation context and history
+- Implements specialized commands for different coding tasks
+- Supports rich UI elements like code blocks and diagrams
+- Provides contextual help and suggestions
+
+**Interactions**:
+- Receives user queries through chat interface
+- Coordinates with Context Fetcher for relevant code lookup
+- Sends processed requests to Cody Gateway
+- Renders responses with appropriate formatting and UI elements
+
 ## Scaling Sourcegraph
 
 Sourcegraph is designed to scale from small deployments to large enterprise installations with thousands of repositories and users. The [Scaling Overview for Services](https://sourcegraph.com/docs/admin/deploy/scale) provides detailed information about how each service scales, including:
@@ -681,17 +791,7 @@ Sourcegraph can be configured to use external services for improved performance,
 
 ### External Code Hosts
 
-Sourcegraph connects to various code hosts to synchronize repositories and metadata:
-
-- **GitHub/GitHub Enterprise**
-- **GitLab/GitLab Enterprise**
-- **Bitbucket Server/Bitbucket Cloud**
-- **Azure DevOps**
-- **Perforce**
-- **Gitolite**
-- **AWS CodeCommit**
-- **Gerrit**
-- **Pagure**
+Sourcegraph connects to various code hosts to synchronize repositories and metadata.
 
 ## Additional Resources
 
