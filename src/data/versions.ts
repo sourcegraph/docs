@@ -12,7 +12,7 @@ export const versions: VersionI[] = [
     {
         name: `v${config.DOCS_LATEST_VERSION}`,
         label: 'latest',
-        url: '/',
+        url: '/docs',
     },
     {
         name: 'v6.1',
