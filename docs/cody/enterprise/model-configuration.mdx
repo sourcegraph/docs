@@ -215,7 +215,7 @@ This field is an array of items, each with the following fields:
     -   `${apiVersionId}` specifies the API version, which helps detect compatibility issues between models and Sourcegraph instances. For example, `"2023-06-01"` can indicate that the model uses that version of the Anthropic API. If unsure, you may set this to `"unknown"` when defining custom models
 -   `displayName`: An optional, user-friendly name for the model. If not set, clients should display the `ModelID` part of the `modelRef` instead (not the `modelName`)
 -   `modelName`: A unique identifier the API provider uses to specify which model is being invoked. This is the identifier that the LLM provider recognizes to determine the model you are calling
--   `capabilities`: A list of capabilities that the model supports. Supported values: **autocomplete** and **chat**
+-   `capabilities`: A list of capabilities that the model supports. Supported values: `autocomplete`, `chat`, `vision`, `reasoning`, `edit`, `tools`.
 -   `category`: Specifies the model's category with the following options:
     -   `"balanced"`: Typically the best default choice for most users. This category is suited for models like Sonnet 3.5 (as of October 2024)
     -   `"speed"`: Ideal for low-parameter models that may not suit general-purpose chat but are beneficial for specialized tasks, such as query rewriting
@@ -225,6 +225,9 @@ This field is an array of items, each with the following fields:
 -   `contextWindow`: An object that defines the **number of tokens** (units of text) that can be sent to the LLM. This setting influences response time and request cost and may vary according to the limits set by each LLM model or provider. It includes two fields:
     -   `maxInputTokens`: Specifies the maximum number of tokens for the contextual data in the prompt (e.g., question, relevant snippets)
     -   `maxOutputTokens`: Specifies the maximum number of tokens allowed in the response
+-   `reasoningEffort`: Specifies the effort on reasoning for reasoning models (having `reasoning` capability). Supported values: `high`, `medium`, `low`. How this value is treated depends on the specific provider.
+For example, for Anthropic models supporting thinking, `low` effort means that the minimum [`thinking.budget_tokens`](https://docs.anthropic.com/en/api/messages#body-thinking) value (1024) will be used. For other `reasoningEffort` values, the `contextWindow.maxOutputTokens / 2` value will be used.
+For OpenAI reasoning models, the `reasoningEffort` field value corresponds to the [`reasoning_effort`](https://platform.openai.com/docs/api-reference/chat/create#chat-create-reasoning_effort) request body value.
 -   `serverSideConfig`: Additional configuration for the model. It can be one of the following:
 
     -   `awsBedrockProvisionedThroughput`: Specifies provisioned throughput settings for AWS Bedrock models with the following fields:
@@ -326,7 +329,7 @@ In this modelOverrides config example:
 - The model is configured to use the `"chat"` and `"reasoning"` capabilities
 - The `reasoningEffort` can be set to 3 different options in the Model Config. These options are `high`, `medium` and `low`
 - The default `reasoningEffort` is set to `low`
-- When the reasoning effort is `low`, 1024 tokens is used as the thinking budget. With `medium` and `high` the thinking budget is set via `max_tokens_to_sample/2`
+- For Anthropic models supporting thinking, when the reasoning effort is `low`, 1024 tokens is used as the thinking budget. With `medium` and `high` the thinking budget is set to half of the maxOutputTokens value
 
 Refer to the [examples page](/cody/enterprise/model-config-examples) for additional examples.
 
