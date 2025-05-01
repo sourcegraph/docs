@@ -4,6 +4,465 @@ This page documents all notable changes to Sourcegraph. For more detailed change
 
 {/* CHANGELOG_START */}
 
+# 6.3 Patch 0
+
+## v6.3.0
+
+- [sourcegraph](https://github.com/sourcegraph/sourcegraph/releases/tag/v6.3.0)
+
+- [docker-compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/releases/tag/v6.3.0)
+
+- [helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/releases/tag/v6.3.0)
+
+- [kustomize](https://github.com/sourcegraph/deploy-sourcegraph-k8s/releases/tag/v6.3.0)
+
+### Features
+
+#### Agents
+
+- Add true positive and impact filters `(PR #4911)`
+- Improve task page, abstract out changeset header, add rerun buttons `(PR #4834)`
+- Implement agentic chat on top of conversation API `(PR #4809)`
+- New agent action menu added `(PR #4761)`
+- Allow grader to rewrite or relocate diagnostics [AGENT-302] `(PR #4728)`
+  - The grader service can now fix broken diagnostics that come out of a review, hopefully improving quality.
+- Add additional graphs and metrics to agent overview `(PR #4709)`
+- Reformat overview stats, add user list and CSS tidy ups `(PR #4668)`
+- Add feedback page `(PR #4656)`
+- Add filters for reviews and diagnostic pages `(PR #4564)`
+- Improved agents page `(PR #4557)`
+- Add review statuses everywhere `(PR #4520)`
+- Generic query param parser `(PR #4434)`
+- Add default rules `(PR #4418)`
+  - New default for the review setting `rules: ['builtin-rules', 'repo-rules']`. Builtin rules allow you to start using the review agent without creating any `*.rule.md` files.
+- Add a dropdown to access sibling reviews from the changeset `(PR #4375)`
+- Grade diagnostics before posting [AGENT-196] `(PR #4205)`
+  - Adds reflection to the review process to filter out bad diagnostics before posting.
+
+#### Auto-Edit
+
+- Add auto-edit long suggestion model `(PR #4965)`
+- Use user's sourcegraph instance endpoint for authentication `(PR #4759)`
+- Create a new fireworks backend for fine-tunes-proxy `(PR #4661)`
+- Implement websocket upgrade logic for the fine-tuned proxy proxy `(PR #4582)`
+- Create a new fireworks proxy service for Cody auto-edit `(PR #4538)`
+
+#### Batch Changes
+
+- Add search for batch changes template library `(PR #4280)`
+
+#### Code Intelligence
+
+- Dont upload empty syntactic indexes `(PR #4738)`
+
+#### Cody
+
+- Add OpenAI o3 and o4-mini models `(PR #4958)`
+- Add OpenAI 4.1 models support `(PR #4926)`
+- Add gemini 2.5 preview support `(PR #4802)`
+- Add entitlements UI to site admin `(PR #4742)`
+- Support tool results for anthropic and gemini `(PR #4493)`
+- Update context limits (CODY-5022) `(PR #4321)`
+
+#### Cody-Gateway
+
+- Add gemini 2.5 flash preview support `(PR #4970)`
+
+#### Codygateway
+
+- Block Enterprise usage of Google models `(PR #4534)`
+
+#### Completions
+
+- Enable system prompts for all newer Claude models `(PR #4989)`
+
+#### Gitserver
+
+- Add heuristic and eager strategies from Gitaly `(PR #4588)`
+
+#### Graph
+
+- Syntactic for C# `(PR #4236)`
+
+#### Msp
+
+- Allow configurable Cloud SQL version `(PR #4959)`
+
+#### Multi Tenant
+
+- Add coupon sale percentage UI `(PR #4699)`
+
+#### Release
+
+- Add a sg release steps command `(PR #4206)`
+  - New internal release command `sg release steps` to be used in pipeline gen
+
+#### Search
+
+- Diff comparison page UI enhancements `(PR #5097)`
+  - Users can now filter diffs on the diff comparison page
+ Backport a2725da3281de64d2d2e41438222d0f38700e441 from #4398
+- Expose ENVs for search jobs config `(PR #4975)`
+  -
+- Add tool selection and stats to deep search `(PR #4744)`
+- Add support for chaining multiple filePaths in URL `(PR #4333)`
+  - Add support for chaining multiple filePaths together in URL
+
+#### Searchplatform
+
+- Deep Search Client Side plumbing `(PR #4531)`
+
+#### Source
+
+- Gitserver: add env var for forcing all janitor optimizations to use eager strategy for debug purposes `(PR #4949)`
+- Support sub-repo perms for all repo types `(PR #4935)`
+- Gitserver: add new chaos testing for git maintenance commands `(PR #4929)`
+- Add prometheus dashboards and logs for new janitor `(PR #4861)`
+- Adapt Gitaly's stats package and adapt test suite to run in our codebase `(PR #4365)`
+  - N/A
+
+#### Telemetry
+
+- Add `billingMetadata` to batch change events `(PR #3732)`
+
+#### Workspaces
+
+- Show admin analytics menulink `(PR #5027)`
+  -  Backport 0b9ee7390bca046462737172c39d8ad2e13b99fb from #4652
+
+#### Others
+
+- Syntactic indexing support for C++ `(PR #4606)`
+  - Adds support for syntactic indexing for C++
+- Unsigned commits warning `(PR #4525)`
+  - It is possible for users to have `rejectUnverifiedCommits` site configuration enabled, and also apply changesets without having the necessary configurations for commit signing. This change provides a warning banner during the batch set preview stage in such a case.With commit signing fully configuredWarning showing because no GitHub commit signing configuredimageimage
+- Expose relationships through GraphQL API `(PR #4330)`
+- Add metrics for periodic goroutines `(PR #4317)`
+
+### Fix
+
+#### Agents
+
+- Delete agents codebase `(PR #4982)`
+- Agent intro banner css tweaks `(PR #4912)`
+- Fix chunker calculation bug `(PR #4904)`
+- Switch to non-thinking agent for diagnostic grader `(PR #4903)`
+- Use empty snippets when old revision cannot be found `(PR #4902)`
+- Enable new chat pages for old UI `(PR #4896)`
+- Update review and task page headers to more clearly show states `(PR #4891)`
+- Fixes commit sha badge on review item `(PR #4866)`
+- Show correct line range for diagnostics on `diagnostics` page `(PR #4860)`
+- Change changeset ordering by default `(PR #4840)`
+- Basic tidy ups for conversations page `(PR #4829)`
+- Improve changesets page `(PR #4828)`
+- Improve styling of repo page `(PR #4827)`
+- Minor CSS updates to `rule` page `(PR #4826)`
+- Improve `rules` page UX `(PR #4822)`
+- Post process diagnostics based on rule filters (AGENT-15) `(PR #4808)`
+- Tweaks to agents page `(PR #4757)`
+- CSS tweaks to the diagnostic page `(PR #4754)`
+- Handle empty impact string `(PR #4741)`
+- Improve page layout, agent navigation and breadcrumbs `(PR #4727)`
+- Minor spacing issues with layout `(PR #4712)`
+- Minor visual improvements to reviews page `(PR #4711)`
+- Rename fix rate to true positives `(PR #4706)`
+- Link to reviews when available `(PR #4698)`
+- Only show review tasks in latest runs `(PR #4686)`
+- Limit CSS height on authors filter `(PR #4673)`
+- Don't fail fast on missing revisions `(PR #4672)`
+- Skip diagnostics for hallucinated file paths `(PR #4608)`
+- Improved GitHub app creation step `(PR #4586)`
+- Improve review cards `(PR #4580)`
+- Rename agent "run" to agent "task" `(PR #4567)`
+- Updates run/review card linking `(PR #4560)`
+- Don't fail fast on invalid rule tag `(PR #4555)`
+- Make report diagnostic tool skippable `(PR #4542)`
+- Allow models to have "tools" capability in site-config `(PR #4529)`
+- Improve run animation `(PR #4523)`
+- Improve visually the review cards list `(PR #4505)`
+- Filter out diagnostics outside the diff (AGENT-6) `(PR #4283)`
+
+#### Auto-Edit
+
+- Fix invalid JSON string `(PR #4864)`
+- Fix incorrect naming of environment variables `(PR #4670)`
+
+#### Billing
+
+- Prevent applying coupons that expire before subscription period ends `(PR #4244)`
+
+#### Ci
+
+- Fix syntax in node heap size override `(PR #4595)`
+- Remove error logging to avoid OOMs in CI for react integration tests `(PR #4424)`
+
+#### Code Nav
+
+- Add client side caching for file content `(PR #5073)`
+
+#### Completions
+
+- Track context token usage in completions client `(PR #4208)`
+
+#### Dev
+
+- Fix running storybook `(PR #5013)`
+- Fix 'pnpm build' command in web-sveltekit `(PR #4851)`
+
+#### Entitlements
+
+- Fix interval handling, rename to window `(PR #4495)`
+
+#### Github
+
+- Synchronize at least 100 GitHub issue/PR comments, not 30 `(PR #4410)`
+  - When syncing conversations from GitHub, we now fetch 100 comments by default instead of the default 30 comments
+
+#### Modelconfig
+
+- Fix gemini-1.5-flash cost `(PR #4441)`
+
+#### Multi Tenant
+
+- Don't show no seats left tooltip always `(PR #4688)`
+- Do not show upsell banner when we have user space `(PR #4413)`
+- Do not show error in loading state in coupon field `(PR #4370)`
+
+#### Release
+
+- Set development branch name by default `(PR #4357)`
+  - NA
+
+#### Search
+
+- Fix global navigation grow/shrink functionality `(PR #5062)`
+- Improve global navigation overflowing `(PR #4804)`
+- Limit client range highlights `(PR #4354)`
+
+#### Source
+
+- Bump retry timeout on gqlutil tests to lessen flakiness `(PR #4952)`
+- Fix error that happens when adding an existing GitHub App `(PR #4558)`
+  - Fixed an error where Sourcegraph would display an error when an existing GitHub App was added in Site Admin, even though the adding succeeded.
+- Bump default user permission back-off time `(PR #4297)`
+
+#### Style
+
+- Fix a gomft issue that made it to main `(PR #4535)`
+
+#### Others
+
+- Create wrapper to reduce risk of `NewGaugeFunc` causing deadlocks `(PR #4960)`
+- Do not hard-fail when calculating file stats for large files `(PR #4950)`
+- Do not use store methods, which can deadlock because they make observation `(PR #4944)`
+- [SRCH-1387] workspace refresh caching using incorrect key `(PR #4859)`
+  - Fixes issue [https://linear.app/sourcegraph/issue/SRCH-1387/chime-workspaces-not-updating](https://linear.app/sourcegraph/issue/SRCH-1387/chime-workspaces-not-updating)The workspace preview components rely on the apollo client cache to coordinate the state. Queries are made in two places;
+- /client/web/src/enterprise/batches/batch-spec/edit/workspaces-preview/useWorkspacesPreview.ts
+- /client/web/src/enterprise/batches/batch-spec/edit/workspaces-preview/useWorkspaces.tsThe desired effect is that both queries are cached under the same cache-key by apollo, and so when a query finds new results it triggers a component refresh with the new data.The problem is that there is a subtle difference in the variables passed to the query - One has `after: null` and on does not provide the `after` field. This means that they are treated as different queries and the cache entries for the queries are separate.
+- Update auto-updating script to use correct scip-typescript Docker tag `(PR #4722)`
+  - Switch to Debian-based auto-indexing Docker image for scip-typescript, and official Node builds. The new image is compatible with recent Node versions (verified: 23.11.0).
+- Add docs link for github apps `(PR #4563)`
+
+### Chore
+
+#### Agents
+
+- Limit tool calls in grader `(PR #4813)`
+  - Added `ToolCallLimit` to `InternalCompletionParams` for limiting the number of allowed LLM tool calls in a loop.
+- Always trace and show traceID in run logs `(PR #4685)`
+- Enable string-enums in go-typespec code generation `(PR #4599)`
+- Bazel build hygiene `(PR #4556)`
+- Minor changes for localhost development `(PR #4554)`
+- Adds more information into de-duplicate error `(PR #4385)`
+
+#### Ci
+
+- Add test github action for partially published changesets flow `(PR #4807)`
+- Refactor web-sveltekit build process `(PR #4382)`
+- Bump typescript in bazel to 5.4.2 `(PR #4367)`
+- Update prechecks to handle bzl mod tidy and go mod tidy `(PR #4288)`
+
+#### Database/Entitlements
+
+- Test entitlements grants deletion `(PR #4838)`
+
+#### Dev
+
+- Cleanup client/vscode dependencies `(PR #4781)`
+- Cleanup client/ui dependencies `(PR #4769)`
+- Cleanup client/testing dependencies `(PR #4768)`
+- Cleanup client/template-parser dependencies `(PR #4714)`
+- Cleanup client/shared dependencies `(PR #4696)`
+- Cleanup client/observability-server dependencies `(PR #4695)`
+- Cleanup client/observability-client dependencies `(PR #4694)`
+- Cleanup client/jetbrains dependencies `(PR #4693)`
+- Cleanup client/http-client dependencies `(PR #4692)`
+- Cleanup client/common dependencies `(PR #4666)`
+- Cleanup client/codeintellify dependencies `(PR #4665)`
+- Cleanup client/client-api dependencies `(PR #4664)`
+- Cleanup client/build-config depdendencies `(PR #4663)`
+- Cleanup client/browser dependencies `(PR #4561)`
+- Cleanup client/branded dependencies `(PR #4552)`
+- Cleanup unused dependencies `(PR #4516)`
+
+#### Entitlements
+
+- Hide site admin navbar item behind feature flag `(PR #5058)`
+
+#### Gateway
+
+- Use Authorization: Bearer as header for reranker `(PR #4513)`
+- Change URL for reranker model `(PR #4511)`
+
+#### Local
+
+- Use docsite 1.9.6 `(PR #3823)`
+
+#### Release
+
+- Improve upgrade error message for out of policy upgrade attempts `(PR #4943)`
+  - Improve migrator error for invalid upgrade ranges
+
+#### Search
+
+- Batch Changes PAT dialog - Fix wording `(PR #4660)`
+- Migrate filter UI to svelte 5 `(PR #4479)`
+
+#### Searchplatform
+
+- Add deep search route to backend `(PR #4581)`
+
+#### Security
+
+- Update to s3proxy 2.6.0 `(PR #4515)`
+
+#### Telemetrygateway
+
+- Remove old proto symlink `(PR #4584)`
+
+#### Workspaces
+
+- Inject GoogleTagManagerContainer when serving index.html `(PR #4956)`
+
+#### Others
+
+- Update third-party licenses `(PR #4967)`
+- Remove unused pipeline job implementation `(PR #4951)`
+- Remove unused dbworker option `(PR #4920)`
+- Update third-party licenses `(PR #4919)`
+- Fix batch change codehost links `(PR #4707)`
+  - Fix some broken links to documentation
+- Update third-party licenses `(PR #4671)`
+- Remove non-nil pre-condition for pagination function `(PR #4473)`
+- Document nil propagation for PaginationArgs `(PR #4468)`
+- Summarize linked Slack thread in code `(PR #4460)`
+- Update third-party licenses `(PR #4448)`
+- Release anish from changelog duties `(PR #4435)`
+- Change default to match documented default `(PR #4429)`
+- Remove search from gitserver `(PR #4420)`
+- Bump up page size for repo cleanup scheduling `(PR #4419)`
+- Mark TotalCount method as unreachable `(PR #4254)`
+- Remove large.String -> replace back with []byte `(PR #4146)`
+
+### Refactor
+
+#### Others
+
+- Remove deprecated batchChangePreview component `(PR #4384)`
+  - Refactor to remove old duplicated component
+
+### Reverts
+
+- Revert pnpm upgrade (back to v9) `(PR #-1)`
+- Revert "Revert "fix(cody-gateway): migrate Google client from from Gemini to Vertex API"" `(PR #4705)`
+
+### Uncategorized
+
+#### Others
+
+- [Backport 6.3.x] Add ability for admins to set the default context for all users within an instance `(PR #5052)`
+- Authz: Don't error when external account isn't usable for sync `(PR #5011)`
+- Perforce: Remove top-level maxChanges setting `(PR #5010)`
+- Gitserver: Observe vcs syncer from other shard `(PR #5009)`
+- Gitserver: Rename variable and remove experimental disclaimer for v2 janitor `(PR #5008)`
+- Add KUBERNETES_IMAGE_PULL_POLICY environment variable for the Executor service to allow setting the image pull policy `(PR #4995)`
+  - Acepted values for KUBERNETES_IMAGE_PULL_POLICY:
+    - Always - Kubelet always attempts to pull the latest image. Container will fail If the pull fails.
+    - Never - Kubelet never pulls an image, but only uses a local image. Container will fail if the image isn't present.
+    - IfNotPresent - Kubelet pulls if the image isn't present on disk. Container will fail if the image isn't present and the pull fails.
+- Bump zoekt `(PR #4991)`
+- Gitserver: Add option to disable janitor `(PR #4980)`
+- Perforce: Don't drop rules for proxy catchalls `(PR #4978)`
+- Perforce: Make changelist mapper recover automatically `(PR #4954)`
+  - Fixed an issue where perforce changelist mapping could fall into an unrecoverable state after recloning.
+- Batches: Don't use stateful periodic goroutine `(PR #4946)`
+- Refactor cross domain login service to allow re-use in other services `(PR #4942)`
+  - Moved userauth and xdomain login service from workspaces to managed services, to allow import from other services
+  - Refactored userauth and xdomain login service to not be workspaces-specific, removing all workspaces references and allowing to specify the path for cross-domain login.## Test plan
+ Tetsted changes locally from workspaces service
+- Workerutil: Streamline heartbeat and stalled intervals `(PR #4934)`
+- Workerutil: Streamline maximum resets `(PR #4932)`
+- Fix(agents) use .at(0) instead of [0] for safe array access `(PR #4918)`
+- Mail-gatekeeper: increment abuse score for Google abusers `(PR #4916)`
+- Janitor: Don't schedule jobs too far into the future `(PR #4906)`
+- Workerutil: Unify settings for resetter interval `(PR #4870)`
+- Workerutil: Simplify resetter metrics `(PR #4865)`
+- Contributors: Fix updating last_processed `(PR #4841)`
+- Gitserver: Fix error parsing empty author/committer times `(PR #4832)`
+- Contributors: Add missing resetter job `(PR #4831)`
+- Tenant: Add deletion routine for searcher cache `(PR #4821)`
+- Replace python with explicit python3 for pre-commit hook `(PR #4803)`
+- Feat/Deep search: Show reasoning steps during execution `(PR #4795)`
+- Database: Add missing indexes for repo hard deletions `(PR #4789)`
+- Bug(agents): fixed spend page formatting `(PR #4763)`
+- Repoupdater: Initialize subrepoperms `(PR #4756)`
+- Bug(agents): fixed repo id bug `(PR #4755)`
+- Analytics(telemetry): trim whitespace in comma separated list `(PR #4750)`
+- Increase the max tokens to sample `(PR #4749)`
+- Adds github only badge to plans page (and style tweaks) `(PR #4747)`
+- Change the smart apply deployment to arizona region `(PR #4702)`
+- Dotcom: Some cleanups after migration `(PR #4683)`
+- Gitserver: Fix panic in ListRepositories error handling `(PR #4682)`
+- Telemetry: Add DB index to optimize sorting in memory `(PR #4667)`
+- Gitserver: Update error filter for backend metrics `(PR #4629)`
+- Mail-gatekeeper: gRPC client and DNS improvements `(PR #4628)`
+- Gitserver: Always disable gc.auto and maintenance.auto `(PR #4613)`
+- Perforce: Fixup changelist ID parsing `(PR #4597)`
+- Gitserver: Add gRPC method and basic UI for repo stats `(PR #4544)`
+- Gitserver: Add OptimizationStrategy interface and runner for it `(PR #4540)`
+- Gitserver: Add CleanStaleData function for new janitor `(PR #4532)`
+- Gitserver: Address a few compiler warnings `(PR #4458)`
+- Gitserver: Improve configuration for fetch `(PR #4439)`
+- Gitserver: Implement maintenance methods in Git backend `(PR #4438)`
+- Gitserver: Fix bad observable owner `(PR #4437)`
+- Gitserver: Cleanup leftovers of coursier `(PR #4436)`
+- Add no results page tutorial info `(PR #4432)`
+- Add telemetry `(PR #4274)`
+- Update subscription page `(PR #4241)`
+- Database: Add primary keys to all tables `(PR #4144)`
+- Gitserver: Implement scheduler for janitorial tasks `(PR #2519)`
+
+### Untracked
+
+The following PRs were merged onto the previous release branch but could not be automatically mapped to a corresponding commit in this release:
+
+- [backport 6.2] perforce: Don't drop rules for proxy catchalls (#4978) `(PR #4993)`
+- [backport 6.2.x] repoupdater: Initialize subrepoperms (#4756) `(PR #4760)`
+- [6.2.x] Auto-update all packages in Sourcegraph container images `(PR #4723)`
+- [6.2.x] Auto-update all packages in Sourcegraph container images `(PR #4601)`
+Revert "Revert "[Backport 6.2.x] fix(agents): filter out empty diagnostic paths"" `(PR #4427)`
+Revert "Revert "[Backport 6.2.x] fix(agents): make reviews and diagnostics pages order by -created_at"" `(PR #4428)`
+- [6.2.x] Auto-update all packages in Sourcegraph container images `(PR #4466)`
+- Add support for chaining multiple filePaths in URL (#4333) `(PR #4433)`
+Revert "[Backport 6.2.x] fix(agents): make reviews and diagnostics pages order by -created_at" `(PR #4403)`
+Revert "[Backport 6.2.x] fix(agents): filter out empty diagnostic paths" `(PR #4409)`
+- Update context limits (CODY-5022) (#4321) `(PR #4426)`
+- Add release as branch code owners `(PR #4421)`
+  - N/A - Not customer facing
+
+{/* RSS={"version":"v6.3.0", "releasedAt": "2025-04-30"} */}
+
+
 # 6.2 Patch 3
 
 ## v6.2.3841
