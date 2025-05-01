@@ -30,10 +30,12 @@ function sanitizeAnchors(children: any): any {
 
 		if (isValidElement(child)) {
 			if (child.type === 'a')
+				// @ts-ignore
 				return sanitizeAnchors(child.props.children);
 
 			return cloneElement(child, {
 				...child.props,
+				// @ts-ignore
 				children: sanitizeAnchors(child.props.children),
 			})
 		}
