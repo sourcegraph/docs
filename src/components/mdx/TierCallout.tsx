@@ -16,6 +16,7 @@ export function TierCallout({
   const [flagContent, userContent] = Children.toArray(children).reduce<[ReactNode, ReactNode]>(
     (acc, child) => {
       if (isValidElement(child) && child.type === 'user')
+        // @ts-ignore
         acc[1] = child.props.children;
       else 
         acc[0] = child;

@@ -21,7 +21,9 @@ export function Tabs({children}: TabsProps) {
 				React.Children.map(children, child => {
 					if (!React.isValidElement(child)) return null;
 
+					// @ts-ignore
 					const title = child.props.title;
+					// @ts-ignore
 					const content = child.props.children;
 					return {title, content};
 				}) as TabData[]

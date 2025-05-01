@@ -21,6 +21,7 @@ export function ContentTabs({ children, name }) {
   const updateTabFromURL = () => {
 
     const path = `/${params.slug.join('/')}`;
+    // @ts-ignore
     const allPaths = children.map(child => child.props.href)
 
     if (!allPaths.includes(path)) {

@@ -6,7 +6,7 @@ const {generateRssFeed} = require('./dev/rss');
 
 const nextConfig = {
 	reactStrictMode: true,
-	swcMinify: true,
+	// swcMinify: true,
 	// in prod, we serve the docs from sourcegraph.com/docs, and this requires special config on the GFE side
 	// in preview/development, this is not necessary.
 	//
