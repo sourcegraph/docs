@@ -18,13 +18,13 @@ If you're experiencing issues with Cody not responding in chat, follow these ste
 If you're experiencing issues with Cody's responses or completions being too slow:
 
 - Ensure you have the latest version of the [Cody VS Code extension](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-ai). Use the VS Code command `Extensions: Check for Extension Updates` to verify
-- Enable verbose logging, restart the extension and reproduce the issue seen again (see below `Access Cody logs` for how to do this
+- Enable verbose logging, restart the extension and reproduce the issue seen again (see below `Access Cody logs` for how to do this)
 - Send information to the our Support Team at support@sourcegraph.com
 
 Some additional information that will be valuable:
+
 - Where are you located? Any proxies or firewalls in use?
 - Does this happen with multiple providers/models? Which models have you used?
-
 
 ### Access Cody logs
 
@@ -236,6 +236,52 @@ This issue occurs because JCEF isn't supported in Android Studio and causes Cody
 1. Then go to `Help` > `Find Action: Choose Boot runtime for the IDE`.
 1. Select the last option.
 1. Restart Android Studio.
+
+## Visual Studio extension
+
+### Access Cody logs
+
+Visual Studio logs can be accessed via the **Output** panel. To access logs:
+
+- Open `View -> Output` from the main menu
+- Select `Cody` output pane
+
+![Cody Default Output](https://storage.googleapis.com/sourcegraph-assets/Docs/cody-ouput.png)
+
+### Autocomplete
+
+Cody autocomplete for Visual Studio uses the underlying VS API to display completions in the editor. It's turned on by default in VS (`Tools -> Options -> IntelliCode -> Show Inline Completions`). Without this setting enabled, autocomplete will not work, so this is the first thing to check.
+
+![Inline completions](https://storage.googleapis.com/sourcegraph-assets/Docs/Inline-completions.png)
+
+Also make sure that `Tools -> Options -> Cody -> Automatically trigger completions` is turned on (it is by default).
+
+![Autocomplete](https://storage.googleapis.com/sourcegraph-assets/Docs/Autocomplete.png)
+
+Autocomplete is supported from Visual Studio 17.6+ and includes support for the following languages:
+
+1. C/C++/C#
+2. Python
+3. JavaScript/TypeScript/TSX
+4. HTML
+5. CSS
+6. JSON
+
+#### Non-trusted certificates
+
+If autocomplete still doesn't work (or the Cody Chat), you could try **turning on** the option to `accept non-trusted certificates` (requires Visual Studio restart). This should help, especially in enterprise settings if you are behind a firewall.
+
+![Non-trusted-certificates](https://storage.googleapis.com/sourcegraph-assets/Docs/Non-trusted-certificates.png)
+
+### Detailed debugging logs
+
+The detailed logging configuration can be turned on by adding the `CODY_VS_DEV_CONFIG` environment variable containing the full path to [the configuration file](https://github.com/sourcegraph/cody-vs/blob/main/src/CodyDevConfig.json) placed somewhere in the filesystem.
+
+![Detailed logs](https://storage.googleapis.com/sourcegraph-assets/Docs/Detailed-logs.png)
+
+Two additional output panes, `Cody Agent` and `Cody Notifications`, will be created with more detailed logs. More information on how to configure them is available [here](https://github.com/sourcegraph/cody-vs/blob/main/CONTRIBUTING.md#developer-configuration-file).
+
+![Cody output panes](https://storage.googleapis.com/sourcegraph-assets/Docs/Cody-output-panes.png)
 
 ## Regular Expressions
 
