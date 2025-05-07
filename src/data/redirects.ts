@@ -11,7 +11,7 @@ const redirectsData = [
   },
   {
     source: "/dev/code_reviews",
-    destination: "https://docs.sourcegraph.com/dev/background-information/code_reviews",
+    destination: "https://sourcegraph.com/docs/dev/background-information/code_reviews",
     permanent: true
   },
   {
@@ -51,7 +51,7 @@ const redirectsData = [
   },
   {
     source: "/dev/go_style_guide",
-    destination: "https://docs.sourcegraph.com/dev/background-information/languages/go",
+    destination: "https://sourcegraph.com/docs/dev/background-information/languages/go",
     permanent: true
   },
   {
@@ -406,12 +406,12 @@ const redirectsData = [
   },
   {
     source: "/@v5.3.0/admin/observability/alerts",
-    destination: "https://docs.sourcegraph.com/@v5.3.0/admin/observability/alerts",
+    destination: "https://sourcegraph.com/docs/@v5.3.0/admin/observability/alerts",
     permanent: false
   },
   {
     source: "/@v5.3.0/admin/observability/dashboards",
-    destination: "https://docs.sourcegraph.com/@v5.3.0/admin/observability/dashboards",
+    destination: "https://sourcegraph.com/docs/@v5.3.0/admin/observability/dashboards",
     permanent: false
   },
   {
@@ -3920,7 +3920,7 @@ const redirectsData = [
   // },
   // {
   //   source: "/dev/code_reviews",
-  //   destination: "https://docs.sourcegraph.com/dev/background-information/code_reviews",
+  //   destination: "https://sourcegraph.com/docs/dev/background-information/code_reviews",
   //   permanent: true
   // },
   // {
@@ -3960,7 +3960,7 @@ const redirectsData = [
   // },
   // {
   //   source: "/dev/go_style_guide",
-  //   destination: "https://docs.sourcegraph.com/dev/background-information/languages/go",
+  //   destination: "https://sourcegraph.com/docs/dev/background-information/languages/go",
   //   permanent: true
   // },
   // {
@@ -4315,12 +4315,12 @@ const redirectsData = [
   },
   {
     source: "/@v5.3.0/admin/observability/alerts",
-    destination: "https://docs.sourcegraph.com/@v5.3.0/admin/observability/alerts",
+    destination: "https://sourcegraph.com/docs/@v5.3.0/admin/observability/alerts",
     permanent: false
   },
   {
     source: "/@v5.3.0/admin/observability/dashboards",
-    destination: "https://docs.sourcegraph.com/@v5.3.0/admin/observability/dashboards",
+    destination: "https://sourcegraph.com/docs/@v5.3.0/admin/observability/dashboards",
     permanent: false
   },
   {
