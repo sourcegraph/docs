@@ -4,7 +4,7 @@ import {usePathname, useParams} from 'next/navigation';
 
 import {NavigationItem, versionNavigations} from '@/data/navigation';
 import {ChevronRightIcon} from '@heroicons/react/20/solid';
-import {useEffect, useState} from 'react';
+import {useEffect, useState, Fragment} from 'react';
 
 export function Navigation({
 	className,
@@ -176,9 +176,8 @@ export function Navigation({
 										) && (
 											<ul className="my-4 space-y-2 border-l-2 border-slate-100 dark:border-slate-800  lg:border-slate-200">
 												{topic.sections.map(section => (
-													<>
+													<Fragment key={section.title}>
 														<li
-															key={section.title}
 															className="relative"
 														>
 															<div className="flex w-full items-center justify-between">
@@ -266,7 +265,7 @@ export function Navigation({
 																	)}
 																</ul>
 															)}
-													</>
+													</Fragment>
 												))}
 											</ul>
 										)}
