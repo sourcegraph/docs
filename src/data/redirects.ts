@@ -6782,12 +6782,21 @@ const redirectsData = [
     destination: "/pricing/faqs#how-are-active-users-calculated-for-sourcegraph-code-search-and-code-intelligence-platform",
     permanent: true
   },
-  
+
   {
     source: "/cody/embedded-repos",
     destination: "/cody",
     permanent: true
+  },
+
+  // Redirect for self-hosted analytics
+
+  {
+    source: "/analytics/self-hosted",
+    destination: "/analytics/air-gapped",
+    permanent: true
   }
+
 
 ];
 

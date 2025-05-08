@@ -58,13 +58,13 @@ function Anchor({id, children}: {id: string; children: ReactNode}) {
 }
 
 interface HeadingProps {
-	level?: '2' | '3';
+	level?: '2' | '3' | '4' | '5' | '6';
 	id: string;
 	props: any;
 }
 
 export function Heading({level = '2', id, props}: HeadingProps) {
-	let Component = `h${level}` as 'h2' | 'h3';
+	let Component = `h${level}` as 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 	return (
 		<Component {...props}>
 			<Anchor id={id}>{props.children}</Anchor>

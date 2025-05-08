@@ -8,14 +8,18 @@ For upgrade procedures or general info about sourcegraph versioning see the link
 - [General Upgrade Info](/admin/updates)
 - [Technical changelog](/technical-changelog)
 
-> ***Attention:** These notes may contain relevant information about the infrastructure update such as resource requirement changes or versions of depencies (Docker, kubernetes, externalized databases).*
+> ***Attention:** These notes may contain relevant information about the infrastructure update such as resource requirement changes or versions of dependencies (Docker, kubernetes, externalized databases).*
 >
 > ***If the notes indicate a patch release exists, target the highest one.***
+
+## v6.4.0
+
+- The repo-updater service is no longer needed and will be removed from deployment methods going forward.
 
 ## v6.0.0
 
 - Sourcegraph 6.0.0 no longer supports PostgreSQL 12, admins must upgrade to PostgreSQL 16. See our [postgres 12 end of life](/admin/postgres12_end_of_life_notice) notice! As well as [supporting documentation](/admin/postgres) and advisements on how to upgrade.
-- <Callout type="warning">The Kuberentes Helm deployment type does not support MVU from Sourcegraph `v5.9.45` versions and earlier to Sourcegraph `v6.0.0`. Admins seeking to upgrade to Sourcegraph `v6.0.0` should upgrade to `v5.11.6271` then use the standard upgrade procedure to get to `v6.0.0`. This is because migrator v6.0.0 will no longer connect to Postgres 12 databases. For more info see our [PostgreSQL upgrade docs](/admin/postgres#requirements).</Callout>
+- <Callout type="warning">The Kubernetes Helm deployment type does not support MVU from Sourcegraph `v5.9.45` versions and earlier to Sourcegraph `v6.0.0`. Admins seeking to upgrade to Sourcegraph `v6.0.0` should upgrade to `v5.11.6271` then use the standard upgrade procedure to get to `v6.0.0`. This is because migrator v6.0.0 will no longer connect to Postgres 12 databases. For more info see our [PostgreSQL upgrade docs](/admin/postgres#requirements).</Callout>
 
 ## v5.9.0 ➔ v5.10.1164
 
@@ -30,7 +34,7 @@ For upgrade procedures or general info about sourcegraph versioning see the link
 > Warning: `automatic` and migrator `upgrade` command will not work for this release, please upgrade directly to `v5.10.1164`, or to a 5.9 version and conduct a standard upgrade using migrator's default `up` command!
 
 #### Notes:
-- The container image for pgsql and codeintel-db have been renamed from `postgres-12-alpine` and `codeintel-db` respectively to `postgresql-16`. The `codeinsights-db` container has been renamed to `postgresql-16-codeinsights`. 
+- The container image for pgsql and codeintel-db have been renamed from `postgres-12-alpine` and `codeintel-db` respectively to `postgresql-16`. The `codeinsights-db` container has been renamed to `postgresql-16-codeinsights`.
 - **Admins using external dbs who have not yet upgraded from postgres 12 to postgres 16**, can expect to see database drift after upgrading to `5.10.0`. The new expected schema definition for Sourcegraph is based on postgres 16. The schema drift is the result of automatic changes made to the schema by pg_upgrade utils, and will not cause issues in the application.
   - Admins should not run migrators suggested drift fixes, and should instead upgrade their database from postgres 12 to postgres 16.
 - Postgres 12 image containers cannot be started with data volumes which have been upgraded by postgres 16.
@@ -40,7 +44,7 @@ For upgrade procedures or general info about sourcegraph versioning see the link
 
 #### Notes:
 
-- The GitHub proxy service has been removed and is no longer required. You can safely remove it. [#55290](https://github.com/sourcegraph/sourcegraph/issues/55290)
+- The GitHub proxy service has been removed and is no longer required. You can safely remove it.
 
 ## v5.1.6 ➔ v5.1.7
 
@@ -52,7 +56,7 @@ For upgrade procedures or general info about sourcegraph versioning see the link
 
 #### Notes:
 
-- Upgrades from versions `v5.0.3`, `v5.0.4`, `v5.0.5`, and `v5.0.6` to `v5.1.5` are affected by an ordering error in the `frontend` databases migration tree. Learn more from the [PR which resolves this bug](https://github.com/sourcegraph/sourcegraph/pull/55650) in `v5.1.6`. **For admins who have already attempted an upgrade to this release from one of the effected versions, see this issue which provides a description of [how to manually fix the frontend db](https://github.com/sourcegraph/sourcegraph/issues/55658).**
+- Upgrades from versions `v5.0.3`, `v5.0.4`, `v5.0.5`, and `v5.0.6` to `v5.1.5` are affected by an ordering error in the `frontend` databases migration tree.
 
 ## v4.4.2 ➔ v4.5.0
 
@@ -74,7 +78,7 @@ For upgrade procedures or general info about sourcegraph versioning see the link
 
 #### Notes:
 
-- Users attempting a multi-version upgrade to v4.4.0 may be affected by a [known bug](https://github.com/sourcegraph/sourcegraph/pull/46969) in which an outdated schema migration is included in the upgrade process. _This issue is fixed in patch v4.4.2_
+- Users attempting a multi-version upgrade to v4.4.0 may be affected by a bug in which an outdated schema migration is included in the upgrade process. _This issue is fixed in patch v4.4.2_
 
   - The error will be encountered while running `upgrade`, and contains the following text: `"frontend": failed to apply migration 1648115472`.
     - To resolve this issue run migrator with the args `'add-log', '-db=frontend', '-version=1648115472'`.

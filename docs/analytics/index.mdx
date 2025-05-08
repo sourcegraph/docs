@@ -1,22 +1,25 @@
 # Sourcegraph Analytics
 
-Enterprise customers can use Sourcegraph Analytics to get a clear view of usage, engagement, performance, and impact.
+Enterprise customers can use Sourcegraph Analytics to get a clear view of usage, engagement, performance, and impact. 
 
 ## Sourcegraph Cloud Analytics
+This solution is available to: 
+- [Sourcegraph Cloud](/cloud) customers
+- Self-hosted customers that have fully enabled usage telemetry, and that are running a supported version of Sourcegraph (5.9+) 
 
 [Sourcegraph Cloud](/cloud) customers can use our managed [cloud analytics service](https://cody-analytics.sourcegraph.com) for Cody and Code Search usage data.
-Self-hosted customers can also use this service, but they must
+Self-hosted customers can also use this service, but they must:
+- Upgrade to a supported version of Sourcegraph (5.9+)
+- Have fully enabled usage telemetry
+- [Enablement instructions](/analytics/cloud#enablement)
 
-Upgrade to a supported version of Sourcegraph (5.9+)
-Have fully enabled usage telemetry.
-
--   [Enablement instructions](/analytics/cloud#enablement)
+For more details on setting up Sourcegraph Analytics, see our [enablement instructions](/analytics/cloud#enablement)
 
 ![Sourcegraph-cloud-analytics](https://storage.googleapis.com/sourcegraph-assets/Docs/Sourcegraph-Analytics-2025-01-28.png)
 
-## Self-Hosted Analytics
+## Air-gapped Analytics
 
-Self-hosted customers will soon be able to use our self-hosted and locally deployed analytics service, built on Grafana, to see Sourcegraph usage data.
+Air-gapped customers will soon be able to use our self-hosted and locally deployed analytics service, built on Grafana, to see Sourcegraph usage data.
 
 This product is in development now. If you would like to learn more, please contact your Sourcegraph representative.
 
@@ -28,14 +31,14 @@ Learn more about how we think about [the ROI of Sourcegraph in our blog](https:/
 
 ### Overview metrics
 
-| Metric                          | Description                                                                                                                          |
+|           **Metric**            |                                                           **Description**                                                            |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | Percent of code written by Cody | Percentage of code written by Cody out of all code written during the selected time. [Learn more about this metric.](/analytics/pcw) |
 | Lines of code written by Cody   | Total lines of code written by Cody during the selected time                                                                         |
 
 ### User metrics
 
-| Metric                                              | Description                                                                                           |
+|                     **Metric**                      |                                            **Description**                                            |
 | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | Total active users                                  | Total number of unique users who have used any Sourcegraph product during the selected time           |
 | Average daily users                                 | The average number of unique users who use Sourcegraph per day during the selected time               |
@@ -51,14 +54,14 @@ Cody-only user metrics
 
 Many of the metrics above are also available for Cody only. However, some user definitions are slightly different:
 
-| User category       | Description                                                                                                                                                |
+|    User category    |                                                                        Description                                                                         |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Authenticated users | All users signed in to Cody in an editor or interacted with Cody on the web during the selected period. [Read more](/admin/pricing#authenticated-users).   |
 | Active users        | All users who sign in to Cody in an editor or interact with Cody on the web during the period selected. [Read more](/admin/pricing#billable-active-users). |
 
 ### Code Search & navigation metrics
 
-| Metric                                                       | Description                                                                                                                                  |
+|                          **Metric**                          |                                                               **Description**                                                                |
 | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | Total in-product searchers                                   | Number of unique users who performed searches using the Sourcegraph search interface during the selected time                                |
 | Total result clicks                                          | Count of times users clicked on search results to view files or other resources during the selected time                                     |
@@ -75,7 +78,7 @@ Many of the metrics above are also available for Cody only. However, some user d
 
 ### Autocompletion metrics
 
-| Metric                                     | Description                                                                                                                                                                                                 |
+|                 **Metric**                 |                                                                                               **Description**                                                                                               |
 | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Total accepted completions                 | Count of completions accepted by users during the selected time                                                                                                                                             |
 | Hours saved                                | The number of hours saved by Cody users, assuming 2 minutes saved per completion                                                                                                                            |
@@ -88,7 +91,7 @@ Many of the metrics above are also available for Cody only. However, some user d
 
 ### Chat and prompt metrics
 
-| Metric                                               | Description                                                                                                                                       |
+|                      **Metric**                      |                                                                  **Description**                                                                  |
 | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Total chat events                                    | Total number of chat interactions with Cody during the selected time                                                                              |
 | Hours saved by chats                                 | Total hours saved through Cody chat interactions during the selected time , assuming 5 minutes saved per chat                                     |
@@ -104,10 +107,51 @@ Many of the metrics above are also available for Cody only. However, some user d
 
 _As of Sourcegraph version 5.10, commands are being deprecated in favor of our new feature, chat prompts. As a result, if your Sourcegraph instance is running version 5.10 or later, you may see decreased command usage. In the coming weeks, these command metrics will be deprecated and replaced with new prompt metrics on the Chats tab._
 
-| Metric                  | Description                                                                                                 |
+|       **Metric**        |                                               **Description**                                               |
 | ----------------------- | ----------------------------------------------------------------------------------------------------------- |
 | Total command events    | Total number of command executions during the selected time                                                 |
 | Hours saved by commands | Total hours saved through command executions during the selected time, assuming 5 minutes saved per command |
 | Cody commands by day    | Daily count of command executions                                                                           |
 | Cody command users      | Daily count of command users                                                                                |
 | Most used commands      | Ranking of most frequently used Cody commands during the selected time                                      |
+
+### CSV export
+
+You can download underlying user activity data from Sourcegraph Analytics as a CSV export. To do this, click the `Export user-level data` button at the top right of any tab within the portal.
+
+When exporting, you can group the data by:
+
+- User
+- User and month
+- User and day
+- User, day, client, and language
+
+Each row in the CSV represents a user's activity for a specific combination of these groupings (e.g., a particular day, month, client, and/or language). The CSV includes metrics such as searches, code navigation actions, chat conversations, code completions, and more.
+
+#### Important Notes
+
+- Not all billable actions are included: Some Sourcegraph features, such as code monitors and batch changes, are not yet represented as columns in the CSV export. We plan to add these fields soon. If a user engages with these features, their activity may appear as a “blank” row in the export. If a user is listed as an “Active Sourcegraph User” (see column D), but the rest of the row is blank, they performed a billable action that isn’t currently tracked in the CSV
+- A zero or blank value in a row can also mean that the user did not perform tracked actions for that specific date, client, or language
+
+|          **Column Name**           |                                                                                                                                               **Description**                                                                                                                                                |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Instance user ID                   | Unique identifier assigned to each user in the system.                                                                                                                                                                                                                                                       |
+| User Email                         | Email address associated with the user's account. For self-hosted instances, customer must sign the user metadata export addendum for this column to populate.                                                                                                                                               |
+| Username                           | User's login identifier, usually matches the username from the auth provider (e.g., GitHub). For self-hosted instances, customer must sign the user metadata export addendum for this column to populate.                                                                                                    |
+| Active Sourcegraph User            | Indicates if the user activity in this row is considered billable. [Read more](/admin/pricing#billable-active-users)                                                                                                                                                                                         |
+| Client Name                        | Name of the client application or interface used. Common values: <br /> - `[IDE_name].cody`: Cody extension interactions from IDEs. <br /> - `server.web`: Interactions with the web interface (e.g., searches, code navigation, insights, and some chat events). Variations like `server.svelte-web` may exist. |
+| Timestamp Date (or Month)          | When the activity was recorded.                                                                                                                                                                                                                                                                              |
+| Language                           | Programming language of the interaction. This is only recorded for a subset of events, mostly completion and code navigation, and will therefore be blank for many rows.                                                                                                                                     |
+| Searches                           | Number of search queries performed by the user in the web UI. Searches via other methods (e.g., API) are not captured here.                                                                                                                                                                                  |
+| Code Navigation Events             | Number of times the user navigated through code structures (e.g., "find references", "go to definition").                                                                                                                                                                                                    |
+| Code Insight Views                 | Number of times a code insight was viewed.                                                                                                                                                                                                                                                                   |
+| Chat Events                        | Number of Cody chats executed.                                                                                                                                                                                                                                                                               |
+| Command Events                     | Number of Cody commands executed.                                                                                                                                                                                                                                                                            |
+| Combined Completion Suggestions    | Number of code completion suggestions offered.                                                                                                                                                                                                                                                               |
+| Combined Completion Acceptances    | Number of code completions accepted by the user.                                                                                                                                                                                                                                                             |
+| Total Accepted Char Count          | Sum of characters from the user’s accepted code completions (includes both full and partial acceptances).                                                                                                                                                                                                    |
+| Combined CAR                       | Completion acceptance rate (ratio of accepted to suggested completions), combined across editors.                                                                                                                                                                                                            |
+| Weighted CAR                       | Similar to CAR, but weighted by the number of characters presented in the completion. Gives more weight to accepted completions with more code.                                                                                                                                                              |
+| Total Characters Written by Cody   | Inserted code that Cody generates via chat, prompt responses, accepted autocompletions, or suggestions/fixes. Used as the numerator in the "Percentage of Code Written by Cody" ratio.                                                                                                                       |
+| Total Characters Written           | Total new code inserted into the editor (includes both user-generated and Cody-generated characters). Used as the denominator in the "Percentage of Code Written by Cody" ratio.                                                                                                                             |
+| Percentage of Code Written by Cody | Measures Cody's impact: (Total Characters Written by Cody ÷ Total Characters Written) × 100. [Learn more about this metric.](/analytics/pcw)                                                                                                                                                                 |
