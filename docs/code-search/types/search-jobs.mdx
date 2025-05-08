@@ -49,6 +49,16 @@ If the `blobstore` service is deployed, and you want to use it to store results 
 
 To use a third party managed object storage service, see instructions in [externalizing object storage](../../admin/external_services/object_storage#search-job-results).
 
+### Environment Variables
+
+You can configure Search Jobs behavior using the following environment variables on the worker service:
+
+| Environment Variable | Default Value | Description |
+| --- | --- | --- |
+| `SRC_SEARCH_JOB_WORKER_INTERVAL` | `1s` | Controls how frequently the system checks for new search jobs to process. You probably don't need to configure this.|
+| `SRC_SEARCH_JOB_MAXIMUM_RUNTIME_PER_JOB` | `5h` | Sets a maximum time limit for how long a search job can run per repository-revision pair. Note that a search job is run as a collection of many smaller searches, each targeting a single revision of a repository. This ENV targets the maximum runtime of individual searches.|
+| `SRC_SEARCH_JOB_NUM_HANDLERS` | `5` | Adjusts how many searches can run in parallel. A value of 5 (default) means that 5 searches, each targeting a different repository-revision pair, can run in parallel. More handlers put more pressure on the backend, particularly on Searcher and Zoekt. Make sure you have sufficient resources before increasing the number of handlers. |
+
 ## Supported result types
 
 Search jobs supports the following result types:

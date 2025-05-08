@@ -30,11 +30,11 @@ To restore the default behavior, you can either delete the `batchChanges.rollout
 
 Or, to put it another way:
 
-| `batchChanges.rolloutWindows` configuration | Behavior |
-|---------------------------------------------|-----------|
-| Omitted, or set to `null`                   | Changesets will be reconciled as fast as the code host allows; essentially the same as setting a single `{"rate": "unlimited"}` window. |
+| `batchChanges.rolloutWindows` configuration |                                                                                                                                           Behavior                                                                                                                                           |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Omitted, or set to `null`                   | Changesets will be reconciled as fast as the code host allows; essentially the same as setting a single `{"rate": "unlimited"}` window.                                                                                                                                                      |
 | Set to an array (even if empty)             | Changesets will be reconciled using the rate limit in the current window using [the leaky bucket behavior described below](#leaky-bucket-rate-limiting). If no window covers the current period, then no changesets will be reconciled until a window with a non-zero [`rate`](#rate) opens. |
-| Any other value                             | The configuration is invalid, and an error will appear. |
+| Any other value                             | The configuration is invalid, and an error will appear.                                                                                                                                                                                                                                      |
 
 #### Leaky bucket rate limiting
 
@@ -60,7 +60,7 @@ You may encounter this error when publishing changesets to GitHub:
 
 In addition to their normal API rate limits, GitHub also has an internal _content creation_ limit (also called [secondary rate limit](https://docs.github.com/en/rest/guides/best-practices-for-integrators?apiVersion=2022-11-28#dealing-with-secondary-rate-limits)), which is an [intentional](https://github.com/cli/cli/issues/4801#issuecomment-1029207971) restriction on the platform to combat abuse by automated actors. At the time of writing, the specifics of this limit remain undocumented, due largely to the fact that it is dynamically determined (see [this GitHub issue](https://github.com/cli/cli/issues/4801)). However, the behavior of the limit is that it only permits a fixed number of resources to be created per minute and per hour, and exceeding this limit triggers a temporary hour-long suspension during which time no additional resources of this type can be created.
 
-Presently, Batch Changes does not automatically work around this limit feature request tracked [here](https://github.com/sourcegraph/sourcegraph/issues/44631). The current guidance if you do encounter this issue is to wait an hour and then try again, setting a less frequent `rolloutWindows` rate until this issue is no longer encountered.
+Presently, Batch Changes does not automatically work around this limit feature request. The current guidance if you do encounter this issue is to wait an hour and then try again, setting a less frequent `rolloutWindows` rate until this issue is no longer encountered.
 
 ### Rollout window object
 
@@ -171,18 +171,53 @@ For those that require a separate API call, Batch Changes will only be able to d
 
 Refer to the table below to see the levels with which each code host is supported:
 
-Code Host | Changeset property or separate API call? | Support on merge | Support on close | Note
---------- | --------- | :-: | :-: | ----
-Azure DevOps | Changeset property | ✓ | ✗ |
-Bitbucket Cloud | Changeset property | ✓ | ✓ |
-Bitbucket Server | API call | ✓ | ✓ |
-GitHub | API call | ✓ | ✓ |
-GitLab | Changeset property | ✓ | ✓ |
-Gerrit | API call | ✗ | ✓ | Requires ["delete own changes" permission](https://gerrit-review.googlesource.com/Documentation/access-control.html#category_delete_own_changes) at minimum
+   Code Host     | Changeset property or separate API call? | Support on merge | Support on close |                                                                            Note
+---------------- | ---------------------------------------- | :--------------: | :--------------: | -----------------------------------------------------------------------------------------------------------------------------------------------------------
+Azure DevOps     | Changeset property                       |        ✓         |        ✗         |
+Bitbucket Cloud  | Changeset property                       |        ✓         |        ✓         |
+Bitbucket Server | API call                                 |        ✓         |        ✓         |
+GitHub           | API call                                 |        ✓         |        ✓         |
+GitLab           | Changeset property                       |        ✓         |        ✓         |
+Gerrit           | API call                                 |        ✗         |        ✓         | Requires ["delete own changes" permission](https://gerrit-review.googlesource.com/Documentation/access-control.html#category_delete_own_changes) at minimum
 
-## Commit signing for GitHub
+## Commit signing
 
-<Callout type="note"> The feature is currently in Beta stage and supported on Sourcegraph versions 5.1 or more.</Callout>
+Batch Changes supports commit signing with both GitHub apps and with SSH keys.
+
+### Commit signing with SSH keys (GitLab and GitHub)
+
+<Callout type="note">Commit signing with SSH keys is currently Experimental and is supported only with Sourcegraph v6.2 or more.</Callout>
+
+Commit signing with SSH keys can only be combined with a personal or fine-grained access token.
+
+Sourcegraph can be configured to sign commits using SSH keys with user and site admin credentials.
+
+To enable **commit signing for your Batch Changes user**, navigate to **Settings > Batch Changes** and click **Add credentials** for a GitHub or GitLab code host.
+
+![List of code hosts with an arrow pointing to add credential](https://storage.googleapis.com/sourcegraph-assets/docs/images/batch_changes/2025/code_host_add_credential.png)
+
+If you already have a credential for the given code host, remove it first.
+
+Enter your personal access token, and check the "Sign commits on this code host" box. This will add a step to the setup flow. Click "Next" and wait for Batch Changes to verify the access token.
+
+![The modal for adding a credential with an arrow pointing to the checkbox for commit signing](https://storage.googleapis.com/sourcegraph-assets/docs/images/batch_changes/2025/setup_commit_signing_checkbox.png)
+
+Once the credential is added, you can copy the public SSH key Batch Changes will use to sign commits. You can view the public key anytime by clicking **View Credentials**.
+
+![The modal displays the ssh key used for commit signing](https://storage.googleapis.com/sourcegraph-assets/docs/images/batch_changes/2025/setup_commit_signing_view_ssh_key.png)
+
+Add this public SSH key to your [GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account) or [GitLab](https://docs.gitlab.com/user/ssh/#add-an-ssh-key-to-your-gitlab-account) account.
+Make sure you add it as a signing key.
+
+![Add the key to your code host as a signing key](https://storage.googleapis.com/sourcegraph-assets/docs/images/batch_changes/2025/github_add_signing_key.png)
+
+To enable **commit signing as a site admin**, navigate to **Site Admin > Section: Batch Changes > Settings** and click **Add credentials** for a GitHub or GitLab code host. The rest of the setup is the same as above.
+
+![Site admin settings for batch changes](https://storage.googleapis.com/sourcegraph-assets/docs/images/batch_changes/2025/batch_changes_site_admin_settings.png)
+
+### Commit signing with GitHub apps
+
+<Callout type="note">Commit signing with GitHub apps is currently in Beta and is supported with Sourcegraph v5.1 or more.</Callout>
 
 Sourcegraph can be configured to [sign commits pushed to GitHub](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification) using a GitHub App. Commit signing prevents tampering by unauthorized parties and provides a way to ensure that commits pushed to branches created by Batch Changes actually do come from Sourcegraph. Enabling commit signing for Batch Changes can also help pass checks in build systems or CI/CD pipelines that require that all commits are signed and verified before they can be merged.
 
@@ -306,3 +341,32 @@ When a user is deleted, their Batch Changes become inaccessible in the UI but th
 This allows recovering the Batch Changes if the user is restored.
 
 However, if the user deletion is permanent, deleting both account and data, then the associated Batch Changes are also permanently deleted from the database. This frees storage space and removes dangling references.
+
+## Batch Spec Library
+
+<Callout type="note"> Batch Spec Library is currently in Experimental.</Callout>
+
+The Batch Spec Library is a collection of Batch Specs that can be used to create Batch Changes. Sourcegraph provides a few Batch Specs out of the box.
+
+Site admins can manage the library through the GraphQL mutations `createBatchSpecLibraryRecord`, `updateBatchSpecLibraryRecord`, and `deleteBatchSpecLibraryRecord`. Use the query `batchSpecLibrary` to list all available Batch Spec examples.
+
+```graphql
+createBatchSpecLibraryRecord(name: "example", spec: "version: 2\nname: example") {
+  id
+}
+
+updateBatchSpecLibraryRecord(id: "QmF0Y2hTcGVjTGlicmFyeVJlY29yZDo4", name: "example-2", spec: "version: 2\nname: example-2") {
+  id
+}
+
+deleteBatchSpecLibraryRecord(id: "QmF0Y2hTcGVjTGlicmFyeVJlY29yZDo4") {
+  alwaysNil
+}
+
+batchSpecLibrary(first: 100) {
+  nodes {
+    id
+    name
+  }
+}
+```

@@ -6783,6 +6783,20 @@ const redirectsData = [
     permanent: true
   },
 
+  {
+    source: "/cody/embedded-repos",
+    destination: "/cody",
+    permanent: true
+  },
+
+  // Redirect for self-hosted analytics
+
+  {
+    source: "/analytics/self-hosted",
+    destination: "/analytics/air-gapped",
+    permanent: true
+  }
+
 
 ];
 

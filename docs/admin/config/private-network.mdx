@@ -45,13 +45,13 @@ executor|frontend|gitserver|migrator|repo-updater|worker:
 ```
 
 <Callout type="info">
-After setting up your proxy in the override file, you may notice some pods like the frontend, gitserver and repo-updater failing health checks. In such a case, you'll need to add an '*' to the NO_PROXY environment variable. This should look like:
-</Callout>
+If the updated Sourcegraph pods fail to pass their readiness or health checks after configuring the HTTP proxy environment variables, you may also need to add your k8s cluster pod & service CIDR ranges to the `NO_PROXY` environment variable. Example:
 
-```
+```yaml
 - name: NO_PROXY
-    value: "blobstore,codeinsights-db,codeintel-db,sourcegraph-frontend-internal,sourcegraph-frontend,github-proxy,gitserver,grafana,indexed-search-indexer,indexed-search,jaeger-query,pgsql,precise-code-intel-worker,prometheus,redis-cache,redis-store,repo-updater,searcher,symbols,syntect-server,worker-executors,worker,cloud-sql-proxy,localhost,127.0.0.1,.svc,.svc.cluster.local,kubernetes.default.svc, *"
+    value: "blobstore,codeinsights-db,codeintel-db,sourcegraph-frontend-internal,sourcegraph-frontend,github-proxy,gitserver,grafana,indexed-search-indexer,indexed-search,jaeger-query,pgsql,precise-code-intel-worker,prometheus,redis-cache,redis-store,repo-updater,searcher,symbols,syntect-server,worker-executors,worker,cloud-sql-proxy,localhost,127.0.0.1,.svc,.svc.cluster.local,kubernetes.default.svc,10.10.0.0/16,10.20.0.0/16"
 ```
+</Callout>
 
 ### Docker Compose
 

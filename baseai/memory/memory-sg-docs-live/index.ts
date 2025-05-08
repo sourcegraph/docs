@@ -1,14 +1,14 @@
 import { MemoryI } from '@baseai/core';
 
 const memoryDocs = (): MemoryI => ({
-	name: 'docs',
-	description: 'Docs folder of sourcegraph docs repository as an auto-synced memory',
+	name: 'memory-sg-docs-live',
+	description: 'An AI memory storing all Sourcegraph docs.',
 	git: {
 		enabled: true,
 		include: ['**/*.mdx'],
 		gitignore: true,
-		deployedAt: '5f3fec8530280d01a783aadcdeb0ccc3f9cd8b70',
-		embeddedAt: ''
+		embeddedAt: '',
+		deployedAt: '1b67d5c14520a898e2b9933ab3d2a9fe28515e31'
 	},
 	documents: {
 		meta: doc => {
@@ -22,3 +22,6 @@ const memoryDocs = (): MemoryI => ({
 });
 
 export default memoryDocs;
+
+// Old
+// deployedAt: '5f3fec8530280d01a783aadcdeb0ccc3f9cd8b70',
