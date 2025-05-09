@@ -79,9 +79,24 @@ Code Insights does not yet support running over specific revisions.
 
 ## VCS limitations
 
-Code Insights only supports git based repositories and does not support perforce repositories that have sub-repo permissions enabled.
+Code Insights by default can **not** query repositories that have [sub-repo permissions](/admin/permissions/api#Setting-sub-repository-permissions-for-users) configured. Note that some repositories can sync sub-repo permissions from the code host - Perforce depots currently (6.3).
 
-<Callout type="note"> Perforce depots converted to git are also currently not supported for Code Insights.</Callout>
+The reason for that restriction is security concerns around exposing the code in those repositories to users who should not be able to access it.
+
+Code Insights exposes only aggregated analytics and counts of patterns, though, not the raw code, so the security concerns could be less for Code Insights.
+
+If desired, a Sourcegraph admin can enable Code Insights access to repositories that use sub-repo permissions in site config:
+
+```json
+"experimentalFeatures": {
+    "subRepoPermissions": {
+      "enabled": true,
+      "allowCodeInsights": true
+    }
+}
+```
+
+`allowCodeInsights` is `false` by default, preserving historical behavior. 
 
 ## Feature parity limitations
 
