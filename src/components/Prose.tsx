@@ -25,7 +25,7 @@ export function Prose<T extends React.ElementType = 'div'>({
 				// link underline
 				'prose-a:underline hover:prose-a:text-[#606060] hover:prose-a:underline dark:prose-a:underline dark:hover:prose-a:underline',
 				// pre
-				'prose-pre:rounded-xl prose-pre:bg-slate-900 prose-pre:shadow-lg dark:prose-pre:bg-slate-800/60 dark:prose-pre:shadow-none dark:prose-pre:ring-1 dark:prose-pre:ring-slate-300/10',
+				'prose-pre:rounded-xl prose-pre:bg-slate-900 prose-pre:shadow-lg dark:prose-pre:bg-slate-900 dark:prose-pre:shadow-none prose-pre:border prose-pre:border-slate-300 dark:prose-pre:border-slate-700',
 				// hr
 				'dark:prose-hr:border-slate-800',
 				//table head alignment
