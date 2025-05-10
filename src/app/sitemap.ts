@@ -1,22 +1,24 @@
 import { MetadataRoute } from 'next';
-import { allPosts } from 'contentlayer/generated';
+import { getAllMdxFiles } from '@/lib/mdx';
 
-const baseUrl = 'https://sourcegraph.com/docs'
+const baseUrl = 'https://sourcegraph.com/docs';
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap>  {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const links = [
     {
       url: baseUrl,
       lastModified: new Date(),
     },
-  ]
+  ];
 
-  allPosts.forEach(post => {
+  const posts = await getAllMdxFiles();
+
+  posts.forEach(post => {
     links.push({
-      url: `${baseUrl}${post.url}`,
-      lastModified: post.date ? new Date(post.date) : new Date()
+      url: `${baseUrl}/${post.slug.join('/')}`,
+      lastModified: post.frontmatter?.date ? new Date(post.frontmatter.date) : new Date()
     });
-  })
+  });
 
   return links;
 }

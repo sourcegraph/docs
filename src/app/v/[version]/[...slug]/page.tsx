@@ -1,29 +1,37 @@
 import { Breadcrumbs } from '@/components/Breadcrumbs';
-import MdxComponents from '@/components/MdxComponents';
+import MdxContent from '@/components/MdxContent';
 import { PrevNextLinks } from '@/components/PrevNextLinks';
 import { Prose } from '@/components/Prose';
 import { TableOfContents } from '@/components/Toc';
-import { allPosts } from 'contentlayer/generated';
-import { getMDXComponent } from 'next-contentlayer/hooks';
+import { getAllVersionedMdxFiles, getVersionedMdxFileBySlug } from '@/lib/mdx';
 import { notFound } from 'next/navigation';
 
 export const maxDuration = 300;
 
-
 export const generateStaticParams = async () => {
-	return allPosts.map(post => ({
-		params: { slug: post._raw.flattenedPath.split('/') }
-	}));
+	// This would need to be updated to include all versions
+	const versions = ['6.3']; // Example version
+
+	const allParams = [];
+
+	for (const version of versions) {
+		const posts = await getAllVersionedMdxFiles(version);
+		const params = posts.map(post => ({
+			version,
+			slug: post.slug
+		}));
+
+		allParams.push(...params);
+	}
+
+	return allParams;
 };
 
 export const generateMetadata = async (props: Props) => {
-    const params = await props.params;
-    const path = params.slug.join('/');
-    const post = allPosts.find(
-		post =>
-			post._raw.flattenedPath === `versioned/${params.version}/${path}`
-	);
-    if (post && post.headings && post.headings.length > 0) {
+	const params = await props.params;
+	const post = await getVersionedMdxFileBySlug(params.version, params.slug);
+
+	if (post && post.headings && post.headings.length > 0) {
 		return { title: post.headings[0].title };
 	}
 };
@@ -36,26 +44,23 @@ interface Props {
 }
 
 const PostLayout = async (props: Props) => {
-    const params = await props.params;
-    const path = params.slug.join('/');
-    const post = allPosts.find(
-		post =>
-			post._raw.flattenedPath === `versioned/${params.version}/${path}`
-	);
-    if (!post) return notFound();
-    const Content = getMDXComponent(post.body.code);
+	const params = await props.params;
+	const post = await getVersionedMdxFileBySlug(params.version, params.slug);
 
-    return (
+	if (!post) return notFound();
+
+	return (
 		<>
 			<div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none lg:pl-8 lg:pr-0 xl:px-16">
 				<Breadcrumbs path={params.slug} />
 				<article>
 					<Prose>
-						<Content components={MdxComponents(params.version)} />
+						<MdxContent source={post.source} version={params.version} />
 					</Prose>
 				</article>
 				<PrevNextLinks />
 			</div>
+			{/* @ts-ignore */}
 			<TableOfContents headings={post.headings} />
 		</>
 	);

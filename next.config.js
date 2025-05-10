@@ -1,5 +1,4 @@
 const config = require('./docs.config.js');
-const {withContentlayer} = require('next-contentlayer');
 const {updatedRedirectsData} = require('./src/data/redirects.ts');
 const {generateRssFeed} = require('./dev/rss');
 /** @type {import('next').NextConfig} */
@@ -14,6 +13,8 @@ const nextConfig = {
 	// https://vercel.com/docs/projects/environment-variables/system-environment-variables
 	// basePath: process.env.VERCEL_ENV === 'production' ? '/docs' : '',
 	basePath: process.env.VERCEL_ENV === 'production' ? '/docs' : '',
+	// Add transpilePackages for next-mdx-remote if using Turbopack
+	transpilePackages: ['next-mdx-remote'],
 	// async redirects() {
 	// 	return [
 	// 		...updatedRedirectsData,
@@ -49,5 +50,5 @@ const nextConfig = {
 module.exports = async () => {
 	// placing this here so its part of nextjs's build process
 	await generateRssFeed();
-	return withContentlayer(nextConfig);
+	return nextConfig;
 };
