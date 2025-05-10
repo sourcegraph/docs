@@ -1,7 +1,6 @@
 'use client';
 
 import clsx from 'clsx';
-import { allPosts } from 'contentlayer/generated';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
@@ -26,8 +25,8 @@ type ParamsType = {
 
 export function TableOfContents({ headings }: Props) {
 	let [currentSection, setCurrentSection] = useState(headings[0]?.id);
-	const [path, setPath] = useState('')
-	const params: ParamsType = useParams()
+	const [path, setPath] = useState('');
+	const params: ParamsType = useParams();
 
 	let getHeadings = useCallback((headings: Heading[]) => {
 		return headings
@@ -50,17 +49,15 @@ export function TableOfContents({ headings }: Props) {
 	}, []);
 
 	useEffect(() => {
-		const path = params.slug.join('/');
-
-		if (allPosts) {
-			const post = allPosts.find(post => post._raw.flattenedPath === path);
-			if (post) {
-				let currentPath = post._id;
-				if (params?.version) currentPath = `versioned/${params.version}/${currentPath}`;
-				setPath(currentPath);
-			}
+		const currentPath = params.slug.join('/');
+		let filePath = currentPath;
+		
+		if (params?.version) {
+			filePath = `versioned/${params.version}/${currentPath}`;
 		}
-	}, [params])
+		
+		setPath(filePath);
+	}, [params]);
 
 	useEffect(() => {
 		if (headings.length === 0) return;
@@ -148,7 +145,7 @@ export function TableOfContents({ headings }: Props) {
 						<hr className='mt-4' />
 						<div className="flex items-center mt-4 text-sm">
 							<a
-								href={`https://github.com/sourcegraph/docs/edit/main/docs/${path}`}
+								href={`https://github.com/sourcegraph/docs/edit/main/docs/${path}.mdx`}
 								target="_blank"
 								rel="noopener noreferrer"
 								className="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
