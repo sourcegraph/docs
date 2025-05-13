@@ -19,7 +19,6 @@ services hosted within an organization's private network
     * Connecting to external [LLM providers](../../cody/capabilities/supported-models) with Cody
 - **gitserver**: Executes git commands against externally hosted [code hosts](../external_service)
 - **migrator**: Connects to Postgres instances (which may be [externally hosted](../external_services/postgres)) to process database migrations
-- **repo-updater**: Communicates with [code hosts](../external_service) APIs to coordinate repository synchronization
 - **worker**: Sourcegraph [Worker](../workers) run various background jobs that may require establishing connections to
 services hosted within an organization's private network
 
@@ -34,14 +33,14 @@ variables will depend on your Sourcegraph deployment method.
 Add the proxy environment variables to your Sourcegraph Helm chart [override file](https://github.com/sourcegraph/deploy-sourcegraph-helm/blob/main/charts/sourcegraph/values.yaml):
 
 ```yaml
-executor|frontend|gitserver|migrator|repo-updater|worker:
+executor|frontend|gitserver|migrator|worker:
   env:
   - name: HTTP_PROXY
     value: http://proxy.example.com:8080
   - name: HTTPS_PROXY
     value: http://proxy.example.com:8080
   - name: NO_PROXY
-    value: "blobstore,codeinsights-db,codeintel-db,sourcegraph-frontend-internal,sourcegraph-frontend,github-proxy,gitserver,grafana,indexed-search-indexer,indexed-search,jaeger-query,pgsql,precise-code-intel-worker,prometheus,redis-cache,redis-store,repo-updater,searcher,symbols,syntect-server,worker-executors,worker,cloud-sql-proxy,localhost,127.0.0.1,.svc,.svc.cluster.local,kubernetes.default.svc"
+    value: "blobstore,codeinsights-db,codeintel-db,sourcegraph-frontend-internal,sourcegraph-frontend,github-proxy,gitserver,grafana,indexed-search-indexer,indexed-search,jaeger-query,pgsql,precise-code-intel-worker,prometheus,redis-cache,redis-store,searcher,syntect-server,worker-executors,worker,cloud-sql-proxy,localhost,127.0.0.1,.svc,.svc.cluster.local,kubernetes.default.svc"
 ```
 
 <Callout type="info">
@@ -49,7 +48,7 @@ If the updated Sourcegraph pods fail to pass their readiness or health checks af
 
 ```yaml
 - name: NO_PROXY
-    value: "blobstore,codeinsights-db,codeintel-db,sourcegraph-frontend-internal,sourcegraph-frontend,github-proxy,gitserver,grafana,indexed-search-indexer,indexed-search,jaeger-query,pgsql,precise-code-intel-worker,prometheus,redis-cache,redis-store,repo-updater,searcher,symbols,syntect-server,worker-executors,worker,cloud-sql-proxy,localhost,127.0.0.1,.svc,.svc.cluster.local,kubernetes.default.svc,10.10.0.0/16,10.20.0.0/16"
+    value: "blobstore,codeinsights-db,codeintel-db,sourcegraph-frontend-internal,sourcegraph-frontend,github-proxy,gitserver,grafana,indexed-search-indexer,indexed-search,jaeger-query,pgsql,precise-code-intel-worker,prometheus,redis-cache,redis-store,searcher,syntect-server,worker-executors,worker,cloud-sql-proxy,localhost,127.0.0.1,.svc,.svc.cluster.local,kubernetes.default.svc,10.10.0.0/16,10.20.0.0/16"
 ```
 </Callout>
 
@@ -62,7 +61,7 @@ services:
     environment:
       - HTTP_PROXY=http://proxy.example.com:8080
       - HTTPS_PROXY=http://proxy.example.com:8080
-      - NO_PROXY='blobstore,caddy,cadvisor,codeintel-db,codeintel-db-exporter,codeinsights-db,codeinsights-db-exporter,sourcegraph-frontend-0,sourcegraph-frontend-internal,gitserver-0,grafana,migrator,node-exporter,otel-collector,pgsql,pgsql-exporter,precise-code-intel-worker,prometheus,redis-cache,redis-store,repo-updater,searcher-0,symbols-0,syntect-server,worker,zoekt-indexserver-0,zoekt-webserver-0,localhost,127.0.0.1'
+      - NO_PROXY='blobstore,caddy,cadvisor,codeintel-db,codeintel-db-exporter,codeinsights-db,codeinsights-db-exporter,sourcegraph-frontend-0,sourcegraph-frontend-internal,gitserver-0,grafana,migrator,node-exporter,otel-collector,pgsql,pgsql-exporter,precise-code-intel-worker,prometheus,redis-cache,redis-store,searcher-0,syntect-server,worker,zoekt-indexserver-0,zoekt-webserver-0,localhost,127.0.0.1'
 ```
 
 <Callout type="warning">Failure to configure `NO_PROXY` correctly can cause the proxy configuration to interfere with
