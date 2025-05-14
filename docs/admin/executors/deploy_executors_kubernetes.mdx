@@ -13,7 +13,48 @@ Executors interact with the Kubernetes API to manage the lifecycle of individual
 | `batch`    | `jobs`             | `create`, `delete`     | Executors create Job pods to run processes. Once Jobs are completed, they are cleaned up. |
 |            | `pods`, `pods/log` | `get`, `list`, `watch` | Executors need to look up and steam logs from the Job Pods.                               |
 
-See the [example Role YAML](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@main/-/blob/cmd/executor/kubernetes/batches/executor-batches.Role.yml) for more details on the exact RBAC requirements for native Kubernetes Executors.
+Here's an example Role YAML to demonstrate the RBAC requirements for native Kubernetes Executors:
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: sg-executor-batches-role
+  namespace: default
+rules:
+  - apiGroups:
+      - batch
+    resources:
+      - jobs
+    verbs:
+      - create
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - pods/log
+    verbs:
+      - get
+      - list
+      - watch
+# Secrets are required post 5.5, when all pods run a single job
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - create
+      - delete
+  # PVCs are required if KUBERNETES_JOB_VOLUME_TYPE is "pvc"
+#  - apiGroups:
+#      - ""
+#    resources:
+#      - persistentvolumeclaims
+#    verbs:
+#      - create
+#      - delete
+```
 
 ## Deployment
 
