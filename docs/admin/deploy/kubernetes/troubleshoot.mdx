@@ -126,34 +126,34 @@ This error occurs because Envoy, the proxy used by Istio, [drops proxied trailer
 
 In a service mesh like Istio, communication between services is secured using a feature called mutual Transport Layer Security (mTLS). mTLS relies on services communicating with each other using DNS names, rather than IP addresses, to identify the specific services or pods that the communication is intended for.
 
-To illustrate this, consider the following examples of communication flows between the "frontend" component and the "symbols" component:
+To illustrate this, consider the following examples of communication flows between the "frontend" component and the "searcher" component:
 
 Example 1: Approved Communication Flow
 
-1. Frontend sends a request to `http://symbol_pod_ip:3184`
+1. Frontend sends a request to `http://searcher_pod_ip:3184`
 2. The Envoy sidecar intercepts the request
-3. Envoy looks up the upstream service using the DNS name "symbols"
-4. Envoy forwards the request to the symbols component
+3. Envoy looks up the upstream service using the DNS name "searcher"
+4. Envoy forwards the request to the searcher component
 
 Example 2: Disapproved Communication Flow
 
-1. Frontend sends a request to `http://symbol_pod_ip:3184`
+1. Frontend sends a request to `http://searcher_pod_ip:3184`
 2. The Envoy sidecar intercepts the request
-3. Envoy tries to look up the upstream service using the IP address `symbol_pod_ip`
+3. Envoy tries to look up the upstream service using the IP address `searcher_pod_ip`
 4. Envoy is unable to find the upstream service because it's an IP address not a DNS name
-5. Envoy will not forward the request to the symbols component
+5. Envoy will not forward the request to the searcher component
 
 > NOTE: When using mTLS, communication between services must be made using the DNS names of the services, rather than their IP addresses. This is to ensure that the service mesh can properly identify and secure the communication.
 
-To resolve this issue, the solution is to redeploy the frontend after specifying the service address for symbols by setting the SYMBOLS_URL environment variable in frontend.
+To resolve this issue, the solution is to redeploy the frontend after specifying the service address for searcher by setting the SEARCHER_URL environment variable in frontend.
 
 Please make sure the old frontend pods are removed.
 
 ```yaml
-SYMBOLS_URL=http:symbols:3184
+SEARCHER_URL=http:searcher:3184
 ```
 
-> WARNING: **This option is recommended only for symbols with a single replica**. Enabling this option will negatively impact the performance of the symbols service when it has multiple replicas, as it will no longer be able to distribute requests by repository/commit.
+> WARNING: **This option is recommended only for searcher with a single replica**. Enabling this option will negatively impact the performance of the searcher service when it has multiple replicas, as it will no longer be able to distribute requests by repository/commit.
 
 #### Squirrel.LocalCodeIntel http status 502
 

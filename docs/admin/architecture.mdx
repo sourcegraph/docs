@@ -11,11 +11,11 @@
 At its core, Sourcegraph maintains a persistent cache of all repositories that are connected to it. It is persistent because this data is critical for Sourcegraph to function. Still, it is ultimately a cache because the code host is the source of truth, and our cache is eventually consistent.
 
 - `gitserver` is the sharded service that stores repositories and makes them accessible to other Sourcegraph services
-- `repo-updater` is the singleton service responsible for ensuring all repositories in gitserver are as up-to-date as possible while respecting code host rate limits. It is also responsible for syncing repository metadata from the code host that is stored in the repo table of our Postgres database
+- `worker` is responsible for ensuring all repositories in gitserver are as up-to-date as possible while respecting code host rate limits. It is also responsible for syncing repository metadata from the code host that is stored in the repo table of our Postgres database
 
 ## Permission syncing
 
-Repository permissions are mirrored from code hosts to Sourcegraph by default. This builds the foundation of Sourcegraph authorization for repositories to ensure users see consistent content on code hosts. Currently, the background permissions syncer resides in the repo-updater.
+Repository permissions are mirrored from code hosts to Sourcegraph by default. This builds the foundation of Sourcegraph authorization for repositories to ensure users see consistent content on code hosts. Currently, the background permissions syncer resides in the `worker`.
 
 <Callout type="note">Learn more in the [Permission Syncing docs](/admin/permissions/syncing)</Callout>
 
@@ -94,7 +94,7 @@ You can learn more in the [Code Insights](/code_insights) docs.
   - Exhaustive search (with `count:all/count:999999` operator)
   - Historical search (= unindexed search, currently)
   - Commit search to find historical commits to search over
-- Repository Syncing: The code insights backend has direct dependencies on `gitserver` and `repo-updater`
+- Repository Syncing: The code insights backend has a direct dependency on `gitserver`
 - Permission syncing: The code insights backend depends on synced repository permissions for access control
 - Settings cascade:
   - Insights and dashboard configuration are stored in user, organization, and global settings. This will change in the future and is planned to be moved to the database
