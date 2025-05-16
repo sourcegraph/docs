@@ -1,0 +1,147 @@
+# Current limitations of Code Insights
+
+<p className="subtitle">This section outlines the current known limitations of Code Insights in Sourcegraph, helping you understand what to expect, how to work around certain issues, and when to reach out for support.</p>
+
+<Callout type="note" title="Note">Limitations that are no longer current are [documented at the bottom](#older-versions-limitations) for the benefit of customers who have not yet upgraded.</Callout>
+
+## Dashboard chart position and size do not persist
+You can resize and reorder charts on the dashboard for screenshots or presentations, but these changes won't persist after a page refresh.
+
+**If maintaining a specific order is important:**
+
+- Reorder charts by removing and re-adding them in your preferred order via the **add/remove insights to dashboard** flow.
+
+**If maintaining size is important:**
+
+- Use the **single-insight view page**, which displays an insight at a larger and consistent size.
+- Accessible by clicking the insight title or selecting **"Get shareable link"** from the three-dot menu.
+
+## Performance considerations for insights over many repositories
+Returning historical data over many repositories requires a large number of Sourcegraph searches. Unlike insights running on just a few repositories, these may take 20–120 minutes, depending on several factors:
+
+- **Repository size and count:** The more (and larger) the repositories connected to your instance, the longer it takes to complete searches.
+- **Instance performance:** The speed is influenced by the compute resources and query throughput (queries-per-second) of your Sourcegraph instance.
+- **Data compression efficiency:** If repositories haven't changed over time, we can skip redundant queries for certain historical data points—speeding up results.
+
+Importantly, the number of insights you create does not impact overall processing speed. Whether you queue multiple insights at once or sequentially, the system will take the same total time to complete them.
+
+<Callout type="note" title="Note">As of Sourcegraph version 4.4.0, the system prioritizes backfills based on expected completion speed. This means insights covering fewer repositories will complete first, while larger, multi-repo insights may temporarily pause to let those finish.</Callout>
+
+## Creating language insights for a very large repository
+
+<Callout type="note" title="Note">This applies to Sourcegraph versions greater than `5.3`</Callout>
+
+Creating a language insight over a very large repository can be slow, similar to [insights in general](#creating-insights-over-very-large-repositories).
+
+Language insights typically become faster as the internal cache populates. However, depending on your Sourcegraph instance and the size of the repository, this may take a few attempts.
+
+By default, the dashboard makes up to three attempts, with each query allowed to run for up to 5 minutes. It will automatically retry until all three attempts are exhausted.
+
+In addition to waiting and retrying, you can also contact your Sourcegraph administrator to [increase the number of concurrent queries or extend the query timeout](/code_insights/explanations/administration_and_security_of_code_insights).
+
+## Creating insights over very large repositories
+
+<Callout type="note" title="Note">The feature applies on Sourcegraph version greater than `3.42`</Callout>
+
+In some cases, depending on the size of your Sourcegraph instance and the repository, you may encounter unusual behavior or timeout errors when creating a code insight that runs over a single large repository. If this happens, try the following approach:
+
+1. **Create the insight**, but check the box to **"run over all repositories."** This routes the backfilling jobs to the Sourcegraph backend worker, which processes data point by data point. Otherwise, when running over a single repository, the jobs are processed in bulk for the live preview, which can cause issues.
+
+2. **Once the insight has finished processing**, [filter](/code_insights/explanations/code_insights_filters#filter-options) it to the specific repository you originally intended to use. This filter resolves instantly.
+
+If this doesn’t resolve the issue, please contact your Sourcegraph representative or reach out in your shared Slack channel. We’re actively working on experimental solutions to better support large repositories.
+
+## Accuracy considerations for an insight query returning a large result set
+
+If you create an insight with a search query that returns a large result set—typically over 1,000,000 results—and exceeds the search timeout, non-historical data points may be undercounted. This happens because non-historical data points are recorded using a global search query, unlike the per-repository queries used for historical backfilling. 
+
+For large result sets (e.g., a query like `test` with millions of matches), the global query is more likely to be affected by the global search timeout. You can learn more about search timeouts in the [documentation](/code-search/queries/language#timeout).
+
+To check if your query is impacted by this issue, try running it in the Search UI at `/search` with `count:all`. If you see results like `x results in 60s` (or whatever your configured timeout limit is), the query will also time out when used in Insights. Note that the timeout may slightly exceed the limit—for example, you might see `60.02s`.
+
+If this is the case, consider the following:
+
+1. Use a more granular query.
+2. Increase the timeout limit in your site configuration, if your instance setup allows it. [More information on timeouts](/code-search/queries/language#timeout).
+
+## General scale limitations
+
+Code Insights is disabled by default on single-Docker deployment methods.
+
+There are several factors to consider regarding scalability and expected performance:
+
+1. **General permissiveness** – Instances that are more open (i.e., users can access most repositories) perform better than those with stricter access controls. Insights have been tested with users having access to up to 100,000 restricted repositories.
+
+2. **Number of repositories** – Code Insights has been tested with insights running over approximately 35,000 repositories. It is recommended to scope insights to the smallest necessary set of repositories. Users should expect at least linear degradation in both insight calculation time and rendering performance as the number of repositories increases.
+
+3. **Large monorepos** – Code Insights allocates a fixed amount of time per query. Large repositories that cause query timeouts may not return exhaustive (and therefore accurate) results. As of version 4.4.0, this state is indicated with an icon on the insight. In earlier versions, a possible heuristic is observing sudden "jumps" (significant increases or decreases) between backfilled data points and real-time data points added after creation.
+
+4. **High-cardinality capture groups** – When using capture group insights, high-cardinality matches (e.g., 1,000 distinct matches per repository) can significantly increase chart loading times. In extreme cases, requests may exceed timeout limits due to the volume of distinct matches.
+
+5. **Concurrent usage**  
+   - If many users are creating insights simultaneously, calculation times will increase.  
+   - If many users are viewing insights at the same time, chart loading performance may be impacted.
+
+## Creating insights over specific branches and revisions
+
+Code Insights does not yet support running over specific revisions.
+
+## VCS limitations
+
+Code Insights supports only Git-based repositories. It does not support:
+
+- Perforce repositories with sub-repo permissions
+
+- Perforce depots converted to Git
+
+<Callout type="note" title="Note">Support for Perforce is currently not available for Code Insights.</Callout>
+
+## Feature parity limitations
+
+Different types of insights support different features based on how they're configured and the scope of repositories they cover.
+
+### Features currently available only on insights over all your repositories
+
+* **[Filtering insights](/code_insights/explanations/code_insights_filters)** (available in 3.41+): Currently, filtering is not supported for insights that run over explicitly defined repository lists—except for "detect and track" insights.
+
+### Features currently available only on insights over explicitly defined repository lists
+
+Because these insights run over a much smaller number of repositories, they require significantly fewer queries. As a result, the following features are supported for these insights but not yet available for insights that run over all repositories:
+
+* **Live previews**: View a real-time preview of your insight while creating it.
+* **[Released] Dynamic x-axis ranges** (available in 3.35+). ~~Configure a custom time range for the historical data displayed.~~
+* **[Released] Editing data series queries after creation** (available in 3.35+). Modify the query of an existing insight. ~~For insights over all repositories, a new insight must be created if you wish to run a different query.~~
+* **[Released] "Diff click"** (available in 3.36+). ~~Click on a datapoint to open a diff search showing the changes contributing to the difference from the previous datapoint.~~
+
+<Callout type="note" title="Note">Many of the features listed above will be added to insights over all repositories in future versions. The list is ordered from top to bottom based on the expected release timeline, with the topmost features arriving first.</Callout>
+
+
+### Limitations specific to "Detect and track patterns" insights (automatically generated data series)
+
+For more details, see [Current limitations of automatically generated data series](/code_insights/explanations/automatically_generated_data_series#current-limitations).
+
+## In certain cases, chart datapoints don't match the result count of a Sourcegraph search
+
+There are currently a few subtle differences in how code insights and Sourcegraph web app searches handle defaults when searching over all repositories. Refer to [Common reasons code insights may not match search results](/code_insights/references/common_reasons_code_insights_may_not_match_search_results).
+
+## Older versions' limitations
+
+### Version 3.30 (July 2021) or older
+
+#### Search-based Code Insights can only run over ~50-70 repositories
+
+Because this version of the prototype runs on frontend API calls to Sourcegraph searches, it may run slowly (or possibly timeout) if you're using it over many repositories or with many data series for each insight.
+
+#### The max match count is 5,000 matches per repository
+
+The current limit on searching over historical versions of repositories, which is an unindexed search, is 5,000 results per repository. If there are more than 5,000 matches, the search stops and returns a count of 5,000, and the code insight graph will calculate the overall chart using 5,000 as the match count for that repository. (This means if you query over two repositories and one of them hits this limit, the value shown on the graph will be 5,000 + [the match count in the other repository]).
+
+<Callout type="info">This limit was lifted in the August 2021 release of Sourcegraph `3.31`</Callout>
+
+
+
+
+
+
+
+
