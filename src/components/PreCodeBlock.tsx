@@ -64,7 +64,9 @@ export async function PreCodeBlock({ children, ...props }: PreProps) {
   // If raw prop is not available, try to extract content from children
   if (!codeContent && children) {
     React.Children.forEach(children, (child) => {
+      // @ts-ignore
       if (React.isValidElement(child) && child.props.children) {
+        // @ts-ignore
         codeContent += child.props.children
       }
     })
@@ -104,7 +106,9 @@ export async function PreCode({ children, ...props }: PreProps) {
   // If raw prop is not available, try to extract content from children
   if (!codeContent && children) {
     React.Children.forEach(children, (child) => {
+      // @ts-ignore
       if (React.isValidElement(child) && child.props.children) {
+        // @ts-ignore
         codeContent += child.props.children
       }
     })
