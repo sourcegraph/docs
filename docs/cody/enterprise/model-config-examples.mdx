@@ -505,6 +505,47 @@ In the configuration above,
     -   Set `clientSideConfig.openaicompatible` to `{}` to indicate to Cody clients that these models are OpenAI-compatible, ensuring the appropriate code paths are utilized
     -   Designate these models as the default choices for chat and autocomplete, respectively
 
+## Disabling legacy completions
+
+Available in Sourcegraph 6.4+ and 6.3.2692
+
+By default, Cody will send Autocomplete requests to the legacy OpenAI /completions endpoint (i.e. for pure-inference requests) - if your OpenAi-compatible API endpoint supports only /chat/completions, you may disable the use of the legacy completions endpoint by adding the following above your serverSideConfig endpoints list:
+
+```
+"serverSideConfig": {
+  "type": "openaicompatible",
+  "useLegacyCompletions": false,
+  // ^ add this to disable /completions and make Cody only use /chat/completions
+  "endpoints": [
+    {
+      "url": "https://api-inference.huggingface.co/models/meta-llama/CodeLlama-7b-hf/v1/",
+      "accessToken": "token"
+    }
+  ]
+}
+```
+
+## Sending custom HTTP headers
+
+Available in Sourcegraph 6.4+ and 6.3.2692
+
+By default, Cody will only send an Authorization: Bearer <accessToken> header to OpenAI-compatible endpoints. You may configure custom HTTP headers if you like under the url of endpoints:
+
+```
+"serverSideConfig": {
+  "type": "openaicompatible",
+  "endpoints": [
+    {
+      "url": "https://api-inference.huggingface.co/models/meta-llama/CodeLlama-7b-hf/v1/",
+      "headers": { "X-api-key": "foo", "My-Custom-Http-Header": "bar" },
+      // ^ add this to configure custom headers
+    }
+  ]
+}
+```
+
+**Note:** when using custom headers, both accessToken and accessTokenQuery configuration settings are ignored.
+
 </Accordion>
 
 <Accordion title="Google Gemini">
