@@ -18,13 +18,13 @@ You can always try Rockskip for a while and if it doesn't help then you can disa
 
 ## How do I enable Rockskip?
 
-**Step 1:** Set environment variables on the `symbols` container:
+**Step 1:** Set environment variables on the `searcher` container:
 
 For Docker Compose:
 
 ```yaml
 services:
-  symbols-0:
+  searcher-0:
     environment:
       # Enables Rockskip
       - USE_ROCKSKIP=true
@@ -36,7 +36,7 @@ For Helm:
 
 ```yaml
 # overrides.yaml
-symbols:
+searcher:
   env:
     # Enables Rockskip
     USE_ROCKSKIP:
@@ -49,12 +49,12 @@ symbols:
 For Kubernetes:
 
 ```yaml
-# base/symbols/symbols.Deployment.yaml
+# base/searcher/searcher.Deployment.yaml
 spec:
   template:
     spec:
       containers:
-      - name: symbols
+      - name: searcher
         env:
         # Enables Rockskip
         - name: USE_ROCKSKIP
@@ -66,8 +66,8 @@ spec:
 
 For all deployments, make sure that:
 
-- The `symbols` service has access to the codeintel DB
-- The `symbols` service has the environment variables set
+- The `searcher` service has access to the codeintel DB
+- The `searcher` service has the environment variables set
 - The `codeintel-db` has a few extra GB of RAM
 
 **Step 2:** Kick off indexing
@@ -98,21 +98,21 @@ Rockskip heavily relies on gitserver for data. Rockskip issues very long-running
 
 The easiest way to check the status of a single repository is to open the symbols sidebar and wait 5s for an error message to appear with the estimated time remaining.
 
-For more info, the symbols container responds to GET requests on the `localhost:3184/status` endpoint with the following info:
+For more info, the searcher container responds to GET requests on the `localhost:3184/status` endpoint with the following info:
 
 - Repository count
 - Size of the symbols table in Postgres
 - Most recently searched repositories
 - List of in-flight indexing and search requests
 
-For Kubernetes, find the symbols pod and `exec` a `curl` command in it:
+For Kubernetes, find the searcher pod and `exec` a `curl` command in it:
 
 ``` yaml
-$ kubectl get pods | grep symbols
-symbols-5ff7c67b57-mr5h4
+$ kubectl get pods | grep searcher
+searcher-5ff7c67b57-mr5h4
 
-$ kubectl exec -ti symbols-5ff7c67b57-mr5h4 -- curl localhost:3184/status
-This is the symbols service status page.
+$ kubectl exec -ti searcher-5ff7c67b57-mr5h4 -- curl localhost:3184/status
+This is the searcher service status page.
 
 Number of repositories: 1
 Size of symbols table: 3253 MB
@@ -127,7 +127,7 @@ progress 9.53% (indexed 49151 of 515574 commits), 36h55m18.227079912s remaining
 Tasks (14006.77s total, current AppendHop+): AppendHop+ 44.76% 49152x, InsertSymbol 18.67% 1997101x, AppendHop- 12.94% 49151x, UpdateSymbolHops 7.78% 825380x, parse 4.01% 369401x, GetCommitByHash 2.73% 515574x, get hops 2.39% 49152x, ArchiveEach 2.26% 98302x, GetSymbol 1.83% 325351x, CommitTx 1.26% 49151x, DeleteRedundant 0.79% 49151x, InsertCommit 0.30% 49152x, Log 0.28% 1x, RevList 0.00% 1x, iLock 0.00% 1x, idle 0.00% 1x, holding iLock
 ```
 
-In this example you can see there's 1 repository and the symbols service has indexed 9% of all commits with an ETA of 36H from now. There's also a breakdown of tasks that are part of Rockskip's internal workings mostly for Sourcegraph engineers, so you can ignore that.
+In this example you can see there's 1 repository and the searcher service has indexed 9% of all commits with an ETA of 36H from now. There's also a breakdown of tasks that are part of Rockskip's internal workings mostly for Sourcegraph engineers, so you can ignore that.
 
 ## When is indexing triggered?
 
