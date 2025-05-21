@@ -318,8 +318,8 @@ In the configuration above,
 -   Set up a provider override for OpenAI, routing requests for this provider directly to the specified OpenAI endpoint (bypassing Cody Gateway)
 -   Add three OpenAI models:
     -   `"openai::2024-02-01::gpt-4o"` with chat capability - used as a default model for chat
-    -   `"openai::unknown::gpt-4.1-nano"` with chat, edit and autocomplete capabilities - used as a default model for fast chat and autocomplete 
-    -   `"openai::unknown::o3"` with chat and reasoning capabilities - o-series model that supports thinking, can be used for chat (note: to enable thinking, model override should include "reasoning" capability and have "reasoningEffort" defined). 
+    -   `"openai::unknown::gpt-4.1-nano"` with chat, edit and autocomplete capabilities - used as a default model for fast chat and autocomplete
+    -   `"openai::unknown::o3"` with chat and reasoning capabilities - o-series model that supports thinking, can be used for chat (note: to enable thinking, model override should include "reasoning" capability and have "reasoningEffort" defined).
 
 </Accordion>
 
@@ -504,6 +504,48 @@ In the configuration above,
 -   Add two OpenAI-compatible models: `"fireworks::v1::llama-v3p1-70b-instruct"` and `"huggingface-codellama::v1::CodeLlama-7b-hf"`. Additionally:
     -   Set `clientSideConfig.openaicompatible` to `{}` to indicate to Cody clients that these models are OpenAI-compatible, ensuring the appropriate code paths are utilized
     -   Designate these models as the default choices for chat and autocomplete, respectively
+
+## Disabling legacy completions
+
+Available in Sourcegraph 6.4+ and 6.3.2692
+
+By default, Cody will send Autocomplete requests to the legacy OpenAI /completions endpoint (i.e. for pure-inference requests) - if your OpenAI-compatible API endpoint supports only /chat/completions, you may disable the use of the legacy completions endpoint by adding the following above your serverSideConfig endpoints list:
+
+```json
+"serverSideConfig": {
+  "type": "openaicompatible",
+  "useLegacyCompletions": false,
+  // ^ add this to disable /completions and make Cody only use /chat/completions
+  "endpoints": [
+    {
+      "url": "https://api-inference.huggingface.co/models/meta-llama/CodeLlama-7b-hf/v1/",
+      "accessToken": "token"
+    }
+  ]
+}
+```
+
+## Sending custom HTTP headers
+
+
+<Callout type="info">Available in Sourcegraph v6.4+ and v6.3.2692</Callout>
+
+By default, Cody will only send an `Authorization: Bearer <accessToken>` header to OpenAI-compatible endpoints. You may configure custom HTTP headers if you like under the URL of endpoints:
+
+```json
+"serverSideConfig": {
+  "type": "openaicompatible",
+  "endpoints": [
+    {
+      "url": "https://api-inference.huggingface.co/models/meta-llama/CodeLlama-7b-hf/v1/",
+      "headers": { "X-api-key": "foo", "My-Custom-Http-Header": "bar" },
+      // ^ add this to configure custom headers
+    }
+  ]
+}
+```
+
+<Callout type="note">When using custom headers, both `accessToken` and `accessTokenQuery` configuration settings are ignored.</Callout>
 
 </Accordion>
 
@@ -745,7 +787,7 @@ Provider override `serverSideConfig` fields:
 Provisioned throughput for Amazon Bedrock models can be configured using the `"awsBedrockProvisionedThroughput"` server-side configuration type. Refer to the [Model Overrides](/cody/enterprise/model-configuration#model-overrides) section for more details.
 
 <Callout type="note">
-	If using [IAM roles for EC2 / instance role binding](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html), 
+	If using [IAM roles for EC2 / instance role binding](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html),
   you may need to increase the [HttpPutResponseHopLimit
 ](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_InstanceMetadataOptionsRequest.html#:~:text=HttpPutResponseHopLimit) instance metadata option to a higher value (e.g., 2) to ensure that the metadata service can be accessed from the frontend container running in the EC2 instance. See [here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-IMDS-existing-instances.html) for instructions.
 </Callout>
