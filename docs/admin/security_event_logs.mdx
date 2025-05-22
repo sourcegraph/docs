@@ -1,10 +1,12 @@
 # Security Event Logs
+
 This guide goes into the details of Security Event Logging in Sourcegraph
 > Note: You can find more information about our audit logs setup [here](./audit_log)
 >
 > [Here](https://docs-legacy.sourcegraph.com/dev/how-to/add_logging) is a guide on how to add logging to Sourcegraph backend
 
 ## What are Security Event Logs
+
 - The purpose of Security Event Logs is to allow security specialists to be able to trace the steps of a user or an admin across the application.
 - Getting a full picture of how a user moves through the application, in a single location, is crucial for many reasons.
 - When a user takes an action on sensitive information within the application, this should be logged to make sure it can be retraced to the user and time.
@@ -15,7 +17,8 @@ This guide goes into the details of Security Event Logging in Sourcegraph
 
 
 ## How to log a security event
-- All the logging for security event is done through our [security_event_log.go](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/internal/database/security_event_logs.go) functions
+
+- All the logging for security event is done through our `security_event_log` functions
 - Previously, events were created within the function where the action was taking place and then pushed to the logging location like this:
   ```go
   event := &SecurityEvent{
@@ -30,10 +33,10 @@ This guide goes into the details of Security Event Logging in Sourcegraph
 
 	db.SecurityEventLogs().LogEvent(ctx, event)
 
-- With a recent change to streamline the process, to log an event, the [LogSecurityEvent](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/internal/database/security_event_logs.go?L253:34&popover=pinned) function can be invoked which takes care of marshaling the arguments and creating the SecurityEvent.
+- With a recent change to streamline the process, to log an event, the `LogSecurityEvent` function can be invoked which takes care of marshaling the arguments and creating the SecurityEvent.
 - This function takes following information to create a log event
   - Context contains information on the acting user
-  - SecurityEventName which is predefined [here](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/internal/database/security_event_logs.go?L22-101)
+  - `SecurityEventName` is predefined
   - URL if available
   - userID of the user that the action is applied towards
   - anonymousUserID for unauthenticated users
@@ -96,8 +99,6 @@ This guide goes into the details of Security Event Logging in Sourcegraph
 - UserID can be used to filter out actions taken on a particular user's information
 
 ## FAQ
-### What events are currently being logged as security events?
-- [These](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/internal/database/security_event_logs.go?L22-101) are the events that are currently being logged.
 
 ### What if I don't want these events to be logged?
 
