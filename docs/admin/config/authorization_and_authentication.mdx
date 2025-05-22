@@ -118,39 +118,35 @@ We support authentication through OAuth for Bitbucket Server / Bitbucket Data Ce
 
 We support authentication through OAuth for [Azure DevOps Services (dev.azure.com)](https://dev.azure.com) and it is also a prerequisite for [permissions syncing](/admin/permissions/).
 
-#### Register a new OAuth application
+#### Register a new Entra OAuth application
 
-[Create a new Azure DevOps OAuth application](https://app.vsaex.visualstudio.com/app/register) and follow the instructions below:
+[Create a new Entra OAuth application](https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/CreateApplicationBlade/quickStartType~/null/isMSAApp~/false) and follow the instructions below:
 
-1. In the `Application website` field set the URL of your Sourcegraph instance, for example if the instance is https://sourcegraph.com, then use `https://sourcegraph.com` as the value of this field
-2. Similarly, set the `Authorization callback URL` field to `https://sourcegraph.com/.auth/azuredevops/callback` if your Sourcegraph instance URL is https://sourcegraph.com
-3. Add the following scopes:
-   - `User profile (read)`
-   - `Identity (read)`
-   - `Code (read)`
-   - `Project and team (read)`
+1. In the `Name` field pick a descriptive name for this connection
+2. For `Supported account types` select `Accounts in this organizational directory only`
+3. For `Redirect URI` pick `Web`(!) for the type and set the URL field to `https://<myinstance.sourcegraph.com>/.auth/azuredevops/callback` if your Sourcegraph instance URL is https://myinstance.sourcegraph.com
+4. Click **Register**
+5. Now go to the [Microsoft Entra admin center](https://entra.microsoft.com/) as at least an **Application Developer**.
+6. Go to **App registrations** and select the one you just created.
+7. Go to **Manage > Certificates & secrets** and generate a new client secret. Keep the secret value.
+8. Go to **Manage > API Permissions** and click **+ Add a permission**. Select Azure DevOps, then `vso.code`, `vso.identity`, and `vso.project`.  Confirm with **Add permissions**.
+9. Go back to **Overview** from the sidebar. Now find the **Endpoints** button at the top center of the page, and take note of the value for **Authority URL (Accounts in this organizational directory only)** (which will look something like _https://login.microsoftonline.com/00000002-0000-0000-c000-000000000000_)
+10. The final value we need to get is the **Application (client) ID** from the **Overview** page. Take note of this UUID as well.
 
 #### Configuring Sourcegraph auth.providers
 
-Before you add the configuration please ensure that:
-
-1. The value of `App ID` from your OAuth application is set as the value of the `clientID` field in the config
-2. The value of `Client Secret` (and not the `App secret`) from your OAuth application is set as the value of the `clientSecret` field
-3. The value of `apiScope` string is a comma separated string and reflects the scopes from your OAuth application accurately
-4. The `type` field has no typos and is **exactly** the same as the example below
-
-Add the following to the `auth.providers` key in the site config:
+With all the values acquired above, you can now add the following to the `auth.providers` key in the site config:
 
 ```json
 {
   "auth.providers": [
     // Other auth providers may also be here.
     {
-      "type": "azureDevOps",
+      "type": "azureDevOps", // Casing is important!
       "displayName": "Azure DevOps",
-      "clientID": "replace-with-app-id-of-your-oauth-application",
-      "clientSecret": "replace-with-client-secret-of-your-oauth-application",
-      "apiScope": "vso.code,vso.identity,vso.project"
+      "url": "<Authority URL (Accounts in this organizational directory only)>",
+      "clientID": "<Application (client) ID>",
+      "clientSecret": "<Client secret>"
     }
   ]
 }
@@ -181,9 +177,9 @@ The final and complete `auth.providers` configuration may look like this:
     {
       "type": "azureDevOps",
       "displayName": "Azure DevOps",
+      "url": "https://login.microsoftonline.com/00000002-0000-0000-c000-000000000000",
       "clientID": "your-client-id-here",
       "clientSecret": "a-strong-client-secret-here",
-      "apiScope": "vso.code,vso.identity,vso.project",
       "allowOrgs": ["your-org-1", "your-org-2"],
       "allowSignup": false
     }
