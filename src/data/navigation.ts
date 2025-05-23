@@ -120,7 +120,8 @@ export const navigation: NavigationItem[] = [
 							{ title: "Search Snippets", href: "/code-search/working/snippets", },
 							{ title: "Search Subexpressions", href: "/code-search/working/search_subexpressions", },
 							{ title: "Saved Searches", href: "/code-search/working/saved_searches", },
-							{ title: "Structural Search", href: "/code-search/types/structural", }
+							{ title: "Structural Search", href: "/code-search/types/structural", },
+							{ title: "Deep Search", href: "/code-search/types/deep-search", },
 						]
 					},
 					{
