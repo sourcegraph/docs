@@ -13,6 +13,7 @@ import { LogoMark } from './LogoMark';
 import VersionSelector from './VersionSelector';
 import { Search } from './search/Search';
 import { DemoLayout } from '@/components/DemoLayout';
+import { TopBanner } from './TopBanner';
 
 function GitHubIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -103,10 +104,19 @@ function Header() {
 export function Layout({ children }: { children: React.ReactNode }) {
 	let pathname = usePathname();
 	let isHomePage = pathname === '/';
+	let isCody = pathname.includes('/cody');
 
 	return (
 		<div className="flex w-full flex-col">
 			<Header />
+
+			{isCody && <TopBanner
+				text="NEW: Introducing chat and search in a single input with Sourcegraph 6.0."
+				link="https://sourcegraph.com/blog/combining-chat-and-search"
+				linkText="Read here"
+				textColor="white"
+				backgroundColor="#F34E3F"
+			/>}
 
 			{isHomePage && <Hero />}
 			{/* {isHomePage && <DemoLayout />} */}
