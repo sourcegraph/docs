@@ -125,7 +125,7 @@ If you must use a `.netrc` file to store these credentials instead, follow the p
 
 ## Add replicas
 
-When adding replicas for `gitserver`, `indexed-search`, `searcher`, or `symbols`, you must update the corresponding environment variable on each of the frontend services in your docker-compose.override.yaml file, `SRC_GIT_SERVERS`, `INDEXED_SEARCH_SERVERS`, `SEARCHER_URL`, and `SYMBOLS_URL` to the number of replicas for each respective service. Sourcegraph will then automatically infer the endpoints for each replica.
+When adding replicas for `gitserver`, `searcher`, `symbols`, `zoekt-indexserver`, or `zoekt-webserver`, you must update the corresponding environment variable on each of the frontend services in your docker-compose.override.yaml file to the number of replicas for the respective service. Sourcegraph will then automatically infer the containers' endpoints for each replica.
 
 ```yaml
 # docker-compose.override.yaml
@@ -133,22 +133,24 @@ services:
 
   sourcegraph-frontend-0:
     environment:
-      - 'SRC_GIT_SERVERS=2'
-      - 'INDEXED_SEARCH_SERVERS=2'
+      - 'INDEXED_SEARCH_INDEXERS=1'
+      - 'INDEXED_SEARCH_SERVERS=1'
       - 'SEARCHER_URL=1'
+      - 'SRC_GIT_SERVERS=1'
       - 'SYMBOLS_URL=1'
 
   sourcegraph-frontend-internal:
     environment:
-      - 'SRC_GIT_SERVERS=2'
-      - 'INDEXED_SEARCH_SERVERS=2'
+      - 'INDEXED_SEARCH_INDEXERS=1'
+      - 'INDEXED_SEARCH_SERVERS=1'
       - 'SEARCHER_URL=1'
+      - 'SRC_GIT_SERVERS=1'
       - 'SYMBOLS_URL=1'
 ```
 
 ## Shard gitserver
 
-If you find that your gitserver container is performing poorly, you can shard it into multiple containers. This is especially helpful when your Docker Compose host can mount multiple storage volumes, and each gitserver shared can use its own storage IOPS limit.
+If you find that your gitserver container is performing poorly, you can shard it into multiple containers. This is especially helpful when your Docker Compose host can mount multiple storage volumes, and each gitserver shard can use its own storage IOPS limit.
 
 To split gitserver across multiple shards:
 
