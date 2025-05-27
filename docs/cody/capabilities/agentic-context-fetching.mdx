@@ -59,3 +59,61 @@ Agentic context fetching is enabled by default for all Cody users. It uses LLM r
 If a user doesn't have any of these models, the agentic context fetching experience will use the model selected from the model dropdown for the final output.
 
 Terminal access for Enterprise users is disabled by default. To enable it, set the `agentic-chat-cli-tool-experimental` feature flag [terminal access](#terminal-commands).
+
+## MCP support
+
+MCP (Model Context Protocol) tools are supported by agentic context fetching to connect to the external context. Users can configure multiple local MCP servers via their Cody's extension settings. Based on your query, agentic context will determine which MCP tools to invoke and what parameters to provide to the tools. Agentic context fetching experience will execute these tools and inject the context from the tool calls into Cody's context window.
+
+### Setting up MCP tools
+
+MCP is disabled by default. To enable it, add the `agentic-chat-mcp-enabled` feature flag to your Enterprise Sourcegraph instance.
+
+Once MCP is enabled, there are two ways to configure an MCP server:
+
+#### 1. From the editor extension UI
+
+To configure an MCP server from the editor extension UI, click your profile icon in the Cody extension and select the **MCP Settings** option.
+
+![mcp-via-ui](https://storage.googleapis.com/sourcegraph-assets/Docs/mcp-with-ui-2025.png)
+
+Create a new server configuration and input the necessary arguments provided by the server. You can disable individual tools in the UI by clicking on them.
+
+#### 2. From the editor extension settings
+
+- Edit your MCP configuration settings using the `cody.mcpServers` property in your extension settings.
+    - `settings.json` (VSCode)
+    - `cody_settings.json` (JetBrains)
+- Use the following format when adding a new server
+
+<Callout type= "tip">In JetBrains, you need the absolute path to the command. Use the `which` command in the terminal to find it. For example, `which npx`.</Callout>
+
+```json
+"cody.mcpServers": {
+    "<server_name>": {
+      "command": "...",
+      "args": [...],
+      "env": {
+	      ...
+      },
+      "disabledTools": [...]
+    }
+  }
+```
+
+When you submit a query, Cody will determine whether to use any of the server's tools.
+
+![mcp-via-settings](https://storage.googleapis.com/sourcegraph-assets/Docs/mcp-via-settings.png)
+
+### MCP Best Practices
+
+Since MCP is an open protocol and servers can be created by anyone, your mileage may vary. Tool names, descriptions, and the underlying models you have available may all affect the performance of MCP retrieval. To get the best results using your MCP servers, it's recommended the following:
+
+- Read through the tools of the servers you install and their parameters. Be as explicit as possible in your queries to provide all of the information the tool needs
+- If you don't get the desired results on the first try, iterate on your query. It may take a couple of tries to get the results you're expecting
+- Choose high-quality servers. Prefer servers from official sources over third parties. Read through the code to understand how the servers you are installing work
+
+### Limitations
+
+- Cody currently supports only local MCP servers
+- MCP offers three main capabilities: Tools, Resources, and Prompts. Currently, Cody supports only Tools
+- Since most MCP servers require users to create their access tokens, the servers will have the same access as whatever token you provide. For example, if a user has write permissions to Jira and creates an access token with write permissions, they can use Cody to write back into Jira via MCP. It is impossible to limit write access across all MCP tools broadly. You should use tools with this consideration in mind
