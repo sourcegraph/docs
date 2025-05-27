@@ -30,5 +30,34 @@ Deep Search can only be used on Sourcegraph instances with licenses for both Cod
 Deep Search is disabled by default. To enable it, ask your site administrator to set `experimentalFeatures.deepSearch.enabled = "true"` in your site configuration. 
 
 For optimal performance, we have specialized Deep Search to only use one model. __Currently, Deep Search only supports Claude Sonnet 4.__
-In case you are using Amazon Bedrock, set `experimentalFeatures.deepSearch.model` in your site configuration to a Bedrock model.
+
+### Configuring Deep Search on Amazon Bedrock
+Include configuration for Claude Sonnet 4 in [modelOverrides](/cody/enterprise/model-configuration#model-overrides) in your site configuration. Refer to [Model Configuration](/cody/enterprise/model-configuration) for more info on how to configure models. 
+
+Example for Sonnet 4 configuration inside `modelOverrides`:
+```json
+{
+    "modelRef": "aws-bedrock::v1::claude-sonnet-4",
+    "modelName": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+    "displayName": "Claude Sonnet 4 (AWS Bedrock)",
+    "capabilities": [
+        "chat",
+        "tools",
+    ],
+    "category": "balanced",
+    "status": "stable",
+    "contextWindow": {
+        "maxInputTokens": 200000,
+        "maxOutputTokens": 32000,
+    }
+},
+```
+
+Then, configure Deep Search to use this model in `experimentalFeatures`:
+```json
+"experimentalFeatures": {
+    "deepSearch.enabled": true,
+    "deepSearch.model": "aws-bedrock::v1::claude-sonnet-4"
+},
+```
 
