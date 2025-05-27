@@ -1,6 +1,6 @@
 import MdxContent from '@/components/MdxContent';
 import { Prose } from '@/components/Prose';
-import { getVersionedMdxFileBySlug } from '@/lib/mdx';
+import { getVersionedPostBySlug } from '@/lib/api';
 import { notFound } from 'next/navigation';
 
 interface Props {
@@ -11,7 +11,7 @@ interface Props {
 
 const PostLayout = async (props: Props) => {
 	const params = await props.params;
-	const post = await getVersionedMdxFileBySlug(params.version, []);
+	const post = await getVersionedPostBySlug(params.version, '');
 
 	if (!post) return notFound();
 

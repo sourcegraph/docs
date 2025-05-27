@@ -9,6 +9,10 @@ export async function GET() {
 
 		// Write to a file for static usage
 		const publicDir = path.join(process.cwd(), 'public');
+		if (!fs.existsSync(publicDir)) {
+			fs.mkdirSync(publicDir, { recursive: true });
+		}
+
 		fs.writeFileSync(
 			path.join(publicDir, 'search.json'),
 			JSON.stringify(searchItems)

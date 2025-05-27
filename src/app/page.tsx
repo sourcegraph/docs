@@ -1,7 +1,7 @@
 import { GoogleAnalytics } from '@next/third-parties/google';
 import MdxContent from '@/components/MdxContent';
 import { Prose } from '@/components/Prose';
-import { getMdxFileBySlug } from '@/lib/mdx';
+import { getPostBySlug } from '@/lib/api';
 import { notFound } from 'next/navigation';
 
 export const generateMetadata = () => {
@@ -15,7 +15,7 @@ export const generateMetadata = () => {
 };
 
 const PostLayout = async () => {
-	const post = await getMdxFileBySlug([]);
+	const post = await getPostBySlug('');
 	if (!post) return notFound();
 
 	return (

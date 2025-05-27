@@ -3,25 +3,24 @@ import MdxContent from '@/components/MdxContent';
 import { PrevNextLinks } from '@/components/PrevNextLinks';
 import { Prose } from '@/components/Prose';
 import { TableOfContents } from '@/components/Toc';
-import { getAllVersionedMdxFiles, getVersionedMdxFileBySlug } from '@/lib/mdx';
+import { getAllVersionedPosts, getVersionedPostBySlug } from '@/lib/api';
 import { notFound } from 'next/navigation';
 
 export const maxDuration = 300;
 
 export const generateStaticParams = async () => {
-	// This would need to be updated to include all versions
-	const versions = ['6.3']; // Example version
-
+	const versions = ['6.3']; // Add your versions here
 	const allParams = [];
 
 	for (const version of versions) {
-		const posts = await getAllVersionedMdxFiles(version);
-		const params = posts.map(post => ({
-			version,
-			slug: post.slug
-		}));
-
-		allParams.push(...params);
+		const posts = await getAllVersionedPosts(version);
+		if (posts) {
+			const params = posts.map(post => ({
+				version,
+				slug: post.slugPath.split('/')
+			}));
+			allParams.push(...params);
+		}
 	}
 
 	return allParams;
@@ -29,7 +28,8 @@ export const generateStaticParams = async () => {
 
 export const generateMetadata = async (props: Props) => {
 	const params = await props.params;
-	const post = await getVersionedMdxFileBySlug(params.version, params.slug);
+	const slugPath = params.slug.join('/');
+	const post = await getVersionedPostBySlug(params.version, slugPath);
 
 	if (post && post.headings && post.headings.length > 0) {
 		return { title: post.headings[0].title };
@@ -45,7 +45,8 @@ interface Props {
 
 const PostLayout = async (props: Props) => {
 	const params = await props.params;
-	const post = await getVersionedMdxFileBySlug(params.version, params.slug);
+	const slugPath = params.slug.join('/');
+	const post = await getVersionedPostBySlug(params.version, slugPath);
 
 	if (!post) return notFound();
 

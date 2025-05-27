@@ -3,22 +3,24 @@ import MdxContent from '@/components/MdxContent';
 import { PrevNextLinks } from '@/components/PrevNextLinks';
 import { Prose } from '@/components/Prose';
 import { TableOfContents } from '@/components/Toc';
-import { getAllMdxFiles, getMdxFileBySlug } from '@/lib/mdx';
+import { getAllPublishedPosts, getPostBySlug } from '@/lib/api';
 import { notFound } from 'next/navigation';
 
 export const maxDuration = 300;
 
 export const generateStaticParams = async () => {
-	const posts = await getAllMdxFiles();
+	const posts = await getAllPublishedPosts();
+	if (!posts) return [];
+
 	return posts.map(post => ({
-		slug: post.slug
+		slug: post.slugPath.split('/')
 	}));
 };
 
 export const generateMetadata = async (props: Props) => {
 	const params = await props.params;
-	const path = params.slug.join('/');
-	const post = await getMdxFileBySlug(params.slug);
+	const slugPath = params.slug.join('/');
+	const post = await getPostBySlug(slugPath);
 
 	if (post && post.headings && post.headings.length > 0) {
 		return {
@@ -40,7 +42,8 @@ interface Props {
 
 const PostLayout = async (props: Props) => {
 	const params = await props.params;
-	const post = await getMdxFileBySlug(params.slug);
+	const slugPath = params.slug.join('/');
+	const post = await getPostBySlug(slugPath);
 
 	if (!post) return notFound();
 
