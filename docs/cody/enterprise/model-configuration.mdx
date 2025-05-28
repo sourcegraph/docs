@@ -89,7 +89,7 @@ To disable all Sourcegraph-provided models and use only the models explicitly de
 
 ## Default models
 
-The `"modelConfiguration"` setting includes a `"defaultModels"` field, which allows you to specify the LLM model used for each Cody feature (`"chat"`, `"fastChat"`, and `"autocomplete"`). The values for each feature should be `modelRef`s of either Sourcegraph-provided models or models configured in the `modelOverrides` section.
+The `"modelConfiguration"` setting includes a `"defaultModels"` field, which allows you to specify the LLM model used for each Cody feature (`"chat"`, `"fastChat"`, and `"codeCompletion"`). The values for each feature should be `modelRef`s of either Sourcegraph-provided models or models configured in the `modelOverrides` section.
 
 If no default is specified or the specified model is not found, the configuration will silently fall back to a suitable alternative.
 
@@ -168,7 +168,7 @@ Example configuration:
   "defaultModels": {
     "chat": "google::v1::gemini-1.5-pro",
     "fastChat": "anthropic::2023-06-01::claude-3-haiku",
-    "autocomplete": "fireworks::v1::deepseek-coder-v2-lite-base"
+    "codeCompletion": "fireworks::v1::deepseek-coder-v2-lite-base"
   }
 }
 ```
@@ -291,7 +291,7 @@ For OpenAI reasoning models, the `reasoningEffort` field value corresponds to th
   "defaultModels": {
     "chat": "google::v1::gemini-1.5-pro",
     "fastChat": "anthropic::2023-06-01::claude-3-haiku",
-    "autocomplete": "huggingface-codellama::v1::CodeLlama-7b-hf"
+    "codeCompletion": "huggingface-codellama::v1::CodeLlama-7b-hf"
   }
 }
 ```
@@ -303,7 +303,7 @@ In the example above:
 -   A custom model, `"CodeLlama-7b-hf"`, is added using the `"huggingface-codellama"` provider
 -   Default models are set up as follows:
     -   Sourcegraph-provided models are used for `"chat"` and `"fastChat"` (accessed via Cody Gateway)
-    -   The newly configured model, `"huggingface-codellama::v1::CodeLlama-7b-hf"`, is used for `"autocomplete"` (connecting directly to Hugging Face’s OpenAI-compatible API)
+    -   The newly configured model, `"huggingface-codellama::v1::CodeLlama-7b-hf"`, is used for `"codeCompletion"` (connecting directly to Hugging Face’s OpenAI-compatible API)
 
 #### Example configuration with Claude 3.7 Sonnet
 
@@ -478,3 +478,44 @@ The response includes:
     "codeCompletion": "fireworks::v1::deepseek-coder-v2-lite-base"
 }
 ```
+
+## Reasoning models
+
+<Callout type="note">
+    Claude 3.7 and 4 support is available starting in Sourcegraph v6.4+ and v6.3.4167 out of-the-box when using Cody Gateway.
+    
+    This section is primarily relevant to Sourcegraph Enterprise customers using AWS Bedrock or Google Vertex.
+</Callout>
+
+Reasoning models can be added via `modelOverrides` in the site configuration by adding the `reasoning` capability to the `capabilities` list, and setting the `reasoningEffort` field on the model. Both must be set for the models' reasoning functionality to be used (otherwise the base model without reasoning / exteded thinking will be used.)
+
+For example, this `modelOverride` would create a `Claude Sonnet 4 with Thinking` option in the Cody model selector menu, and when the user chats with Cody with that model selected, it would use Claude Sonnet 4's Extended Thinking support with a `low` reasoning effort for the users' chat:
+
+```json
+{
+    "modelRef": "bedrock::2024-10-22::claude-sonnet-4-thinking-latest",
+    "displayName": "Claude Sonnet 4 with Thinking",
+    "modelName": "claude-sonnet-4-20250514",
+    "contextWindow": {
+      "maxInputTokens": 93000,
+      "maxOutputTokens": 64000,
+      "maxUserInputTokens": 18000
+    },
+    "capabilities": [
+      "chat",
+      "reasoning"
+    ],
+    "reasoningEffort": "low",
+    "category": "accuracy",
+    "status": "stable"
+}
+```
+
+<Accordion title="Understading reasoningEffort">
+
+The `reasoningEffort` field is only used by reasoning models (those having `reasoning` in their `capabilities` section). Supported values are `high`, `medium`, `low`. How this value is treated depends on the specific provider:
+
+* `anthropic` provider treats e.g. `low` effort to mean that the minimum [`thinking.budget_tokens`](https://docs.anthropic.com/en/api/messages#body-thinking) value (1024) will be used. For other `reasoningEffort` values, the `contextWindow.maxOutputTokens / 2` value will be used.
+* `openai` provider maps the `reasoningEffort` field value to the [OpenAI `reasoning_effort`](https://platform.openai.com/docs/api-reference/chat/create#chat-create-reasoning_effort) request body value.
+
+</Accordion>
