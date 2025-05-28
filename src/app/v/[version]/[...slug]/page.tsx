@@ -9,10 +9,10 @@ import { notFound } from 'next/navigation';
 export const maxDuration = 300;
 
 export const generateStaticParams = async () => {
-	const versions = ['6.3']; // Add your versions here
+	const supportedVersions = ['6.3', '6.2'];
 	const allParams = [];
 
-	for (const version of versions) {
+	for (const version of supportedVersions) {
 		const posts = await getAllVersionedPosts(version);
 		if (posts) {
 			const params = posts.map(post => ({

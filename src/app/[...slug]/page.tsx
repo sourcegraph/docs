@@ -58,7 +58,6 @@ const PostLayout = async (props: Props) => {
 				</article>
 				<PrevNextLinks />
 			</div>
-			{/* @ts-ignore */}
 			<TableOfContents headings={post.headings} />
 		</>
 	);

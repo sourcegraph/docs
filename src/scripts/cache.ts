@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
+import {globby} from 'globby';
 
 const CONTENT_PARENT_DIRECTORY = path.join(process.cwd(), 'docs');
 const CACHE_DIR = path.join(process.cwd(), 'public', 'data');
@@ -15,11 +16,6 @@ interface FileRecord {
 interface FileCache {
 	lastGenerated: number;
 	records: Record<string, FileRecord>;
-}
-
-interface SlugCache {
-	lastGenerated: number;
-	slugs: string[];
 }
 
 const ensureCacheDir = () => {
@@ -59,15 +55,11 @@ const shouldIncludeFile = (frontmatter: Record<string, any>): boolean => {
 const generateFileCache = async (): Promise<FileCache> => {
 	console.log('Generating file cache...');
 
-	// Dynamic import globby inside the function
-	const {globby} = await import('globby');
-
 	const cache: FileCache = {
 		lastGenerated: Date.now(),
 		records: {}
 	};
 
-	// Get all MDX files from the docs directory
 	const baseDirectory = CONTENT_PARENT_DIRECTORY;
 	const getFiles = await globby('**/*.mdx', {cwd: baseDirectory});
 
@@ -99,22 +91,6 @@ const generateFileCache = async (): Promise<FileCache> => {
 	return cache;
 };
 
-const generateSlugCache = (fileCache: FileCache): SlugCache => {
-	console.log('Generating slug cache...');
-
-	const slugs = Object.keys(fileCache.records).filter(slug => {
-		const record = fileCache.records[slug];
-		return shouldIncludeFile(record.frontmatter);
-	});
-
-	console.log(`Generated slug cache with ${slugs.length} slugs`);
-
-	return {
-		lastGenerated: Date.now(),
-		slugs
-	};
-};
-
 const saveCache = (filename: string, data: any) => {
 	const filePath = path.join(CACHE_DIR, filename);
 	fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
@@ -127,16 +103,12 @@ const main = async () => {
 		ensureCacheDir();
 
 		const fileCache = await generateFileCache();
-		const slugCache = generateSlugCache(fileCache);
-
 		saveCache('fileCache.json', fileCache);
-		saveCache('slugCache.json', slugCache);
 
 		console.log('Cache generation completed successfully!');
 		console.log(
 			`Total files cached: ${Object.keys(fileCache.records).length}`
 		);
-		console.log(`Total slugs cached: ${slugCache.slugs.length}`);
 	} catch (error) {
 		console.error('Error generating cache:', error);
 		process.exit(1);

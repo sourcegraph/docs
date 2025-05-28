@@ -374,4 +374,6 @@ export const navigation: NavigationItem[] = [
 
 export const versionNavigations: VersionNavigations = {
 	navigation, // latest version
+	'6.3': navigation, // Add v6.3 navigation - same as latest for now
+	'6.2': navigation, // Add v6.2 navigation - same as latest for now
 }
