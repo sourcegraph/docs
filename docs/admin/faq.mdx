@@ -11,7 +11,7 @@ The directories should contain just a few files and directories, namely: HEAD, c
 ## Does Sourcegraph support svn?
 
 For Subversion and other non-Git code hosts, the recommended way to make these accessible in
-Sourcegraph is through [`src-expose`](/admin/external_service/other#experimental-src-expose).
+Sourcegraph is through [`src-expose`](/admin/code_hosts/other#experimental-src-expose).
 
 Alternatively, you can use [`git-svn`](https://git-scm.com/docs/git-svn) or
 [`svg2git`](https://github.com/svn-all-fast-export/svn2git) to convert Subversion repositories to
@@ -55,23 +55,23 @@ https://$SOURCEGRAPH_BASE_URL/healthz. Some users choose to set up their own ext
 
 ## Monitoring
 
-Please visit our [Observability Docs](https://docs.sourcegraph.com/admin/observability) for more in-depth information about observability in Sourcegraph.
+Please visit our [Observability Docs](/admin/observability) for more in-depth information about observability in Sourcegraph.
 
 ### What should I look at when my instance is having performance issues?
 
-Sourcegraph comes with built-in monitoring in the form of [Grafana](https://docs.sourcegraph.com/admin/observability/metrics#grafana), connected to [Prometheus](https://docs.sourcegraph.com/admin/observability/metrics#prometheus) for metrics and alerting.
+Sourcegraph comes with built-in monitoring in the form of [Grafana](/admin/observability/metrics#grafana), connected to [Prometheus](/admin/observability/metrics#prometheus) for metrics and alerting.
 
-Generally, Grafana should be the first stop you make when experiencing a system performance issue. From there you can look for system alerts or metrics that would provide you with more insights on what’s causing the performance issue. You can learn more about [accessing Grafana here](https://docs.sourcegraph.com/admin/observability/metrics#grafana).
+Generally, Grafana should be the first stop you make when experiencing a system performance issue. From there you can look for system alerts or metrics that would provide you with more insights on what’s causing the performance issue. You can learn more about [accessing Grafana here](/admin/observability/metrics#grafana).
 
 ### What are the key values/alerts to look for when looking at the Grafana Dashboard?
 
-Please refer to the [Dashboards](https://docs.sourcegraph.com/admin/observability/metrics#dashboards) guide for more on how to use our Grafana dashboards.
+Please refer to the [Dashboards](/admin/observability/metrics#dashboards) guide for more on how to use our Grafana dashboards.
 
-Please refer to [Understanding alerts](https://docs.sourcegraph.com/admin/observability/alerting#understanding-alerts) for examples and suggested actions for alerts.
+Please refer to [Understanding alerts](/admin/observability/alerting#understanding-alerts) for examples and suggested actions for alerts.
 
 ### How do I know when more resources are needed for a specified service?
 
-All resource dashboards contain a section called `Provisioning indicators` that provide information about the current resource usage of containers. These can be used to determine if a scale-up is needed ([example panel](https://docs.sourcegraph.com/admin/observability/dashboards#frontend-provisioning-container-cpu-usage-long-term)).
+All resource dashboards contain a section called `Provisioning indicators` that provide information about the current resource usage of containers. These can be used to determine if a scale-up is needed ([example panel](/admin/observability/dashboards#frontend-provisioning-container-cpu-usage-long-term)).
 
 More information on each available panel in the dashboards is available in the [Dashboards reference](/admin/observability/dashboards).
 
@@ -81,7 +81,7 @@ See [Alert solutions](/admin/observability/alerts) to learn about each alert and
 
 ### What’s the threshold for each resource?
 
-All resources dashboards contain a section called `Container monitoring` that indicate thresholds at which alerts will fire for each resource ([example alert](https://docs.sourcegraph.com/admin/observability/alerts#frontend-container-cpu-usage)).
+All resources dashboards contain a section called `Container monitoring` that indicate thresholds at which alerts will fire for each resource ([example alert](/admin/observability/alerts#frontend-container-cpu-usage)).
 
 More information on each available panel in the dashboards is available in the [Dashboards reference](/admin/observability/dashboards).
 
@@ -91,11 +91,11 @@ You should make the decision based on the metrics from the relevant Grafana dash
 
 ### What are some of the important alerts that I should be aware of?
 
-We recommend paying closer attention to [critical alerts](https://docs.sourcegraph.com/admin/observability/alerting#understanding-alerts).
+We recommend paying closer attention to [critical alerts](/admin/observability/alerting#understanding-alerts).
 
 ### How do I set up alerts?
 
-Please refer to our guide on [setting up alerting](https://docs.sourcegraph.com/admin/observability/alerting#setting-up-alerting).
+Please refer to our guide on [setting up alerting](/admin/observability/alerting#setting-up-alerting).
 
 ### How do I create a custom alert?
 
@@ -110,6 +110,21 @@ Sourcegraph provides [high-level alerting metrics](/admin/observability/metrics#
 While it is technically possible to consume all of Sourcegraph's metrics in an external system, our recommendation is to utilize the builtin monitoring tools and configure Sourcegraph to [send alerts to your own PagerDuty, Slack, email, etc.](/admin/observability/alerting). Metrics and thresholds can change with each release, therefore manually defining the alerts required to monitor Sourcegraph's health is not recommended. Sourcegraph automatically updates the dashboards and alerts on each release to ensure the displayed information is up-to-date.
 
 Other monitoring systems that support Prometheus scraping (for example, Datadog and New Relic) or [Prometheus federation](https://prometheus.io/docs/prometheus/latest/federation/) can be configured to federate Sourcegraph's [high-level alerting metrics](/admin/observability/metrics#high-level-alerting-metrics). For information on how to configure those systems, please check your provider's documentation.
+
+The `/-/debug/grafana` endpoint is specifically designed for the built-in Grafana instance that comes with Sourcegraph. When using an external Grafana instance, this endpoint won't automatically redirect to your custom Grafana URL.
+ 
+To properly integrate your external Grafana and Prometheus instances with Sourcegraph, you'll want to:
+Ensure your configuration in values.yaml is correct:
+```
+frontend:
+  env:
+    GRAFANA_SERVER_URL:
+      value: https://grafana.mycompany.com
+    PROMETHEUS_URL:
+      value: http://prometheus.mycompany.com
+ ```
+
+You can then access your dashboards directly through your Grafana instance URL.
 
 ### I am getting "Error: Cluster information not available" in the Instrumentation page, what should I do?
 

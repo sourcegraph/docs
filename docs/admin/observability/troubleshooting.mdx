@@ -9,8 +9,7 @@ issue or generating a high-quality issue report.
    any do, follow the instructions in the subsection.
 1. Scan through [General scenarios](#general-scenarios) to find which scenario(s) applies to you. If any do,
    follow the instructions to update your instance or collect information for the issue report.
-1. If you cannot resolve the issue on your own, file an issue on the [Sourcegraph issue
-   tracker](https://github.com/sourcegraph/sourcegraph/issues) with the collected
+2. If you cannot resolve the issue on your own, [contact us](https://help.sourcegraph.com/hc/en-us/requests/new) with the collected
    information. Enterprise customers may alternatively file a support ticket or email
    `support@sourcegraph.com`.
 
@@ -33,7 +32,7 @@ If this is the case, this could indicate high gitserver load. To confirm, take t
       metric) and "Commands running concurrently" dashboard (tracks the `src_gitserver_exec_running`
       metric). If either of these is high (> 1s echo duration or 100s simultaneous execs), then this
       indicates gitserver is under heavy load and likely the bottleneck.
-1. Confirm your gitserver is not under-provisioned, by e.g. comparing its allocated resources with what the [resource estimator](https://docs.sourcegraph.com/admin/deploy/resource_estimator) shows.
+2. Confirm your gitserver is not under-provisioned, by e.g. comparing its allocated resources with what the [resource estimator](/admin/deploy/resource_estimator) shows.
 
 Solution: set `USE_ENHANCED_LANGUAGE_DETECTION=false` in the Sourcegraph runtime
 environment.
@@ -109,8 +108,6 @@ find a repro if possible. If that isn't possible, file an issue with the followi
    components of the request are slow. Remember that many Sourcegraph API requests identify the
    Jaeger trace ID in the `x-trace` HTTP response header, which makes it easy to look up the trace
    corresponding to a particular request.
-   1. If Jaeger is unavailable or unreliable, you can collect trace data from [the Go net/trace
-   endpoint](#examine-go-net-trace).
 1. Copy the [Sourcegraph configuration](#copy-configuration) to the error report.
 
 #### Scenario: the issue is performance-related and there is NOT a consistent reproduction
@@ -127,10 +124,8 @@ find a repro if possible. If that isn't possible, try the following:
    around a certain time, [check the logs](#examine-logs) around that time.
 1. If the issue is ongoing or if you know the time during which the issue occurred, [search
    Jaeger](#collect-a-jaeger-trace) for long-running request traces in the appropriate time window.
-  1. If Jaeger is unavailable, you can alternatively use the Go net/trace endpoint. (You will have
-     to scan the traces for each service to look for slow traces.)
 1. If tracing points to a specific service as the source of high latency, [examine the
-   logs](#examine-logs) and [net/trace info](#examine-go-net-trace) for that service.
+   logs](#examine-logs) for that service.
 
 #### Scenario: multiple actions are slow or Sourcegraph as a whole feels sluggish
 
@@ -164,8 +159,6 @@ If Sourcegraph feels sluggish overall, the likely culprit is resource allocation
         when loading search results. This can be a problem when dealing with large monorepos.
 1. If it is unclear which service is underallocated, [examine Jaeger](#collect-a-jaeger-trace) to
    identify long-running traces and see which services take up the most time.
-   1. Alternatively, you can use the [Go net/trace endpoint](#examine-go-net-trace) to pull trace
-      data.
 
 #### Scenario: Prometheus scraping metrics outside Sourcegraph Kubernetes namespace
 
@@ -344,29 +337,6 @@ If you are using Kubernetes,
   $POD_ID`. This can be useful for diagnosing why a container crashed.
 * You can tail logs for all pods associated with a given deployment: `kubectl logs -f
   deployment/sourcegraph-frontend --container=frontend --since=10m`
-
-
-### Examine Go net/trace
-
-Each core service has an endpoint which displays traces using Go's
-[net/trace](https://pkg.go.dev/golang.org/x/net/trace) package.
-
-To access this data,
-
-1. First ensure you are logged in as a site admin.
-1. Go to the URL path `/-/debug`. This page should show a list of links with the names of each core
-   service (e.g., `frontend`, `gitserver`, etc.)
-1. Click on the service you'd like to examine.
-1. Click "Requests`. This brings you to a page where you can view traces for that service.
-  * You can filter to traces by duration or error state.
-  * You can show histograms of durations by minute, hour, or in total (since the process started)
-
-On older versions of Sourcegraph on Kubernetes, the `/-/debug` URL path may be inaccessible. If this
-is the case, you'll need to forward port 6060 on the main container of a given pod to access its
-traces. For example, to access to traces of the first gitserver shard,
-
-1. `kubectl port-forward gitserver-0 6060`
-1. Go to `http://localhost:6060` in your browser, and click on "Requests".
 
 ### Copy configuration
 

@@ -4,7 +4,7 @@ Some teams require Sourcegraph configuration to be stored in version control as 
 UI.
 
 As of Sourcegraph v3.4+, this is possible for [site configuration](/admin/config/site_config)
-, [code host configuration](/admin/external_service/), and [global settings](/admin/config/settings). As of Sourcegraph v3.34+, Sourcegraph
+, [code host configuration](/admin/code_hosts/), and [global settings](/admin/config/settings). As of Sourcegraph v3.34+, Sourcegraph
 supports merging multiple site config files.
 
 ## Benefits
@@ -90,8 +90,6 @@ Where `extsvc.json` contains a JSON object that specifies _all_ of your code hos
 }
 ```
 
-You can find a full list of [valid top-level keys here](https://sourcegraph.com/github.com/sourcegraph/sourcegraph@b7ebb9024e3a95109fdedfb8057795b9a7c638bc/-/blob/cmd/frontend/graphqlbackend/schema.graphql#L1104-1110).
-
 If you want to _allow_ edits to be made through the web UI (which will be overwritten with what is in the file on a subsequent restart), you may additionally set `EXTSVC_CONFIG_ALLOW_EDITS=true`. **Note** that if you do enable this, it is your responsibility to ensure the configuration on your instance and in the file remain in sync.
 
 ## Global settings
@@ -119,7 +117,7 @@ When you upgrade Sourcegraph, you should do the following to ensure your configu
 
 It is essential to follow the above steps after **every** Sourcegraph version update, because we only guarantee migrations remain valid across two minor versions. If you fail to apply a migration and later upgrade Sourcegraph twice more, you may effectively "skip" an important migration.
 
-We're planning to improve this by having Sourcegraph notify you as a site admin when you should do the above, since today it is not actually required in most upgrades. See https://github.com/sourcegraph/sourcegraph/issues/4650 for details. In the meantime, we will do our best to communicate when this is needed to you through the changelog.
+We're planning to improve this by having Sourcegraph notify you as a site admin when you should do the above, since today it is not actually required in most upgrades. In the meantime, we will do our best to communicate when this is needed to you through the changelog.
 
 ## Kubernetes ConfigMap
 
@@ -135,9 +133,9 @@ metadata:
     deploy: sourcegraph
   name: frontend-config-files
 data:
-  # IMPORTANT: see https://docs.sourcegraph.com/admin/config/advanced_config_file for details on how this works.
+  # IMPORTANT: see https://sourcegraph.com/docs/admin/config/advanced_config_file for details on how this works.
 
-  # Global user settings, see: https://docs.sourcegraph.com/admin/config/advanced_config_file#global-settings
+  # Global user settings, see: https://sourcegraph.com/docs/admin/config/advanced_config_file#global-settings
   global-settings.json: |
     {
         "search.scopes": [
@@ -155,7 +153,7 @@ data:
         }
       }
 
-  # Site configuration, see: https://docs.sourcegraph.com/admin/config/advanced_config_file#site-configuration
+  # Site configuration, see: https://sourcegraph.com/docs/admin/config/advanced_config_file#site-configuration
   site.json: |
     {
       "auth.providers": [
@@ -169,7 +167,7 @@ data:
       }
     }
 
-  # Code host configuration, see: https://docs.sourcegraph.com/admin/config/advanced_config_file#code-host-configuration
+  # Code host configuration, see: https://sourcegraph.com/docs/admin/config/advanced_config_file#code-host-configuration
   extsvc.json: |
     {
       "GITHUB": [

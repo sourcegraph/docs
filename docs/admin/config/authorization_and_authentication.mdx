@@ -64,7 +64,7 @@ In this way, access to Sourcegraph will still be managed by your identity provid
 
 Follow these steps to [configure authentication with GitHub via OAuth](/admin/auth/#github).
 
-Once authentication with GitHub via OAuth is configured, follow [these steps to configure access permissions](/admin/external_service/github#repository-permissions). Users will log into Sourcegraph using Github OAuth, and permissions will be synced in the background.
+Once authentication with GitHub via OAuth is configured, follow [these steps to configure access permissions](/admin/code_hosts/github#repository-permissions). Users will log into Sourcegraph using Github OAuth, and permissions will be synced in the background.
 
 ### GitLab Enterprise or GitLab Cloud authentication and authorization
 
@@ -75,13 +75,13 @@ We support both authentication and permissions syncing (through OAuth) for GitLa
 1. Use SAML (or another auth mechanism) to log in to GitLab
 2. Use GitLab OAuth to log in to Sourcegraph
 
-In this way, access to Sourcegraph will still be managed by your identity provider, using the code host as a middle step. This option is the simplest to configure. To do so, [set up GitLab as an authentication option](/admin/auth/#gitlab), and then [enable permissions syncing](/admin/external_service/gitlab#oauth-application).
+In this way, access to Sourcegraph will still be managed by your identity provider, using the code host as a middle step. This option is the simplest to configure. To do so, [set up GitLab as an authentication option](/admin/auth/#gitlab), and then [enable permissions syncing](/admin/code_hosts/gitlab#oauth-application).
 
 #### Option 2
 
 Alternatively, you can configure SAML authentication in Sourcegraph, and use GitLab permissions syncing in the background to control access permissions. To implement this method, you will need to make sure that GitLab is able to return a value in `identities.provider` for the `GET /users` endpoint ([GitLab documentation](https://docs.gitlab.com/ee/api/users.html#for-admins)) that your identity provider is able to pass as the `nameID` in the SAML response. If that isn’t possible, you will need to use the first option.
 
-To configure SAML auth with GitLab permissions, you will need to first [configure permissions from GitLab](/admin/external_service/gitlab#administrator-sudo-level-access-token). Then, [configure SAML authentication](/admin/auth/saml/). The `nameID` passed by the identity provider will need to match the value of `identities.provider`.
+To configure SAML auth with GitLab permissions, you will need to first [configure permissions from GitLab](/admin/code_hosts/gitlab#administrator-sudo-level-access-token). Then, [configure SAML authentication](/admin/auth/saml/). The `nameID` passed by the identity provider will need to match the value of `identities.provider`.
 
 For example, if the GitLab API returns:
 
@@ -112,51 +112,41 @@ And configure the identity provider to pass the email address as the `nameID`.
 
 ### Bitbucket Server / Bitbucket Data Center authorization
 
-We do not currently support OAuth for Bitbucket Server or Bitbucket Data Center. You will need to combine permissions syncing from Bitbucket Server / Bitbucket Data Center with another authentication mechanism (SAML, built-in auth, HTTP authentication proxies). Bitbucket Server and Bitbucket Data Center only pass usernames to Sourcegraph, so you’ll need to make sure that those usernames are matched by whatever mechanism you choose to use for access.
-
-Follow the steps to [sync Bitbucket Server / Bitbucket Data Center permissions](/admin/external_service/bitbucket_server#repository-permissions). Then, do one of the following:
-
-1. Create the user accounts in Sourcegraph with matching usernames. (Access using `builtin` auth.)
-2. [Configure SAML authentication](/admin/auth/saml/). If you are using Bitbucket Server / Bitbucket Data Center, the `login` attribute is _not_ optional. You need to pass the Bitbucket Server username as the `login` attribute.
-3. [Configure an HTTP authentication proxy](/admin/auth/#http-authentication-proxies), passing the Bitbucket Server username value as the `usernameHeader`.
+We support authentication through OAuth for Bitbucket Server / Bitbucket Data Center. See the [Bitbucket Server auth provider docs](/admin/auth/#bitbucket-server).
 
 ### Azure DevOps Services
 
 We support authentication through OAuth for [Azure DevOps Services (dev.azure.com)](https://dev.azure.com) and it is also a prerequisite for [permissions syncing](/admin/permissions/).
 
-#### Register a new OAuth application
+#### Register a new Entra OAuth application
 
-[Create a new Azure DevOps OAuth application](https://app.vsaex.visualstudio.com/app/register) and follow the instructions below:
+[Create a new Entra OAuth application](https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/CreateApplicationBlade/quickStartType~/null/isMSAApp~/false) and follow the instructions below:
 
-1. In the `Application website` field set the URL of your Sourcegraph instance, for example if the instance is https://sourcegraph.com, then use `https://sourcegraph.com` as the value of this field
-2. Similarly, set the `Authorization callback URL` field to `https://sourcegraph.com/.auth/azuredevops/callback` if your Sourcegraph instance URL is https://sourcegraph.com
-3. Add the following scopes:
-   - `User profile (read)`
-   - `Identity (read)`
-   - `Code (read)`
-   - `Project and team (read)`
+1. In the `Name` field pick a descriptive name for this connection
+2. For `Supported account types` select `Accounts in this organizational directory only`
+3. For `Redirect URI` pick `Web`(!) for the type and set the URL field to `https://<myinstance.sourcegraph.com>/.auth/azuredevops/callback` if your Sourcegraph instance URL is https://myinstance.sourcegraph.com
+4. Click **Register**
+5. Now go to the [Microsoft Entra admin center](https://entra.microsoft.com/) as at least an **Application Developer**.
+6. Go to **App registrations** and select the one you just created.
+7. Go to **Manage > Certificates & secrets** and generate a new client secret. Keep the secret value.
+8. Go to **Manage > API Permissions** and click **+ Add a permission**. Select Azure DevOps, then `vso.code`, `vso.identity`, and `vso.project`.  Confirm with **Add permissions**.
+9. Go back to **Overview** from the sidebar. Now find the **Endpoints** button at the top center of the page, and take note of the value for **Authority URL (Accounts in this organizational directory only)** (which will look something like _https://login.microsoftonline.com/00000002-0000-0000-c000-000000000000_)
+10. The final value we need to get is the **Application (client) ID** from the **Overview** page. Take note of this UUID as well.
 
 #### Configuring Sourcegraph auth.providers
 
-Before you add the configuration please ensure that:
-
-1. The value of `App ID` from your OAuth application is set as the value of the `clientID` field in the config
-2. The value of `Client Secret` (and not the `App secret`) from your OAuth application is set as the value of the `clientSecret` field
-3. The value of `apiScope` string is a comma separated string and reflects the scopes from your OAuth application accurately
-4. The `type` field has no typos and is **exactly** the same as the example below
-
-Add the following to the `auth.providers` key in the site config:
+With all the values acquired above, you can now add the following to the `auth.providers` key in the site config:
 
 ```json
 {
   "auth.providers": [
     // Other auth providers may also be here.
     {
-      "type": "azureDevOps",
+      "type": "azureDevOps", // Casing is important!
       "displayName": "Azure DevOps",
-      "clientID": "replace-with-app-id-of-your-oauth-application",
-      "clientSecret": "replace-with-client-secret-of-your-oauth-application",
-      "apiScope": "vso.code,vso.identity,vso.project"
+      "url": "<Authority URL (Accounts in this organizational directory only)>",
+      "clientID": "<Application (client) ID>",
+      "clientSecret": "<Client secret>"
     }
   ]
 }
@@ -187,9 +177,9 @@ The final and complete `auth.providers` configuration may look like this:
     {
       "type": "azureDevOps",
       "displayName": "Azure DevOps",
+      "url": "https://login.microsoftonline.com/00000002-0000-0000-c000-000000000000",
       "clientID": "your-client-id-here",
       "clientSecret": "a-strong-client-secret-here",
-      "apiScope": "vso.code,vso.identity,vso.project",
       "allowOrgs": ["your-org-1", "your-org-2"],
       "allowSignup": false
     }

@@ -1,0 +1,86 @@
+# Batch Changes
+
+<TierCallout>
+  Supported on [Enterprise](/pricing/enterprise) plans.
+  <user>
+    Currently available via the Web app.
+  </user>
+</TierCallout>
+
+<p className="subtitle">This section is about Batch Changes, which helps you automate and ship large-scale code changes across many repositories and code hosts.</p>
+
+Batch Changes helps you ship large-scale code changes across many repositories and code hosts. You can create pull requests on all affected repositories, and it tracks their progress until they're all merged. You can also preview the changes and update them at any time.
+
+<video width="1920" height="1080" loop playsInline controls style={{ width: '100%', height: 'auto' }}>
+ <source src="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/batch-changes.webm" type="video/webm"/>
+</video>
+
+## Get Started
+
+<QuickLinks>
+<QuickLink title="Quickstart" icon='lightbulb' href="/batch-changes/quickstart" description="Get started with Batch Changes." />
+<QuickLink title="Create a Batch Change" icon='presets' href="/batch-changes/create-a-batch-change" description="Learn how to create a Batch Change." />
+<QuickLink title="Examples" icon='theming' href="/batch-changes/examples" description="Learn about some examples of running Batch Changes." />
+<QuickLink title="Batch Spec Reference" icon='installation' href="/batch-changes/batch-spec-yaml-reference" description="Learn about the reference guide to the batch spec YAML format in which batch specs are defined." />
+</QuickLinks>
+
+## Key Concepts
+
+As you learn about Batch Changes, it's helpful to understand the following terms:
+
+|           **Term**           |                                                                                                                                            **Description**                                                                                                                                            |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **batch-change**             | A group of related changes to code, along with a title and description                                                                                                                                                                                                                                |
+| **batch-spec**               | A YAML file that defines a batch change, including target repositories, commands to execute, and templates for changesets and commits. It represents your high-level intent, like "linting files in repositories with a `package.json` file"                                                          |
+| **changesets**               | Refers to associated pull requests, merge requests, or any reviewable code segments linked to a batch change                                                                                                                                                                                          |
+| **published-changeset**      | A **published changeset** is a commit, branch, and changeset that has been created on the code host. An **unpublished changeset** is a preview visible in the batch change but not yet existing on the code host                                                                                      |
+| **spec**                     | A spec is a record of intent for batch changes or changesets. It guides the system to align the actual outcomes with your specified intent continuously                                                                                                                                               |
+| **changeset-spec**           | A batch change has many **changeset specs**, which are produced by executing the batch spec (i.e., running the commands on each selected repository) and then using its changeset template to produce a list of changesets, including the diffs, commit messages, changeset title, and changeset body |
+| **batch-changes-controller** | The **batch change controller** reconciles the actual state of the batch change's changesets on the code host to match your desired intent (as described in the changeset specs)                                                                                                                      |
+
+## Create a Batch Change
+
+To create a batch change, use [Code Search](/code-search) to run a [search query](/code-search/queries) to find all occurrences of code to change and make every change with a single declarative spec file.
+
+A batch change then tracks all of its changesets (a generic term for pull requests or merge requests) for updates to:
+
+- **Status**: Open, merged, or closed
+- **Checks**: Passed (green), failed (red), or pending (yellow)
+- **Review status**: Approved, changes requested, pending, or other statuses (depending on your code host or code review tool)
+
+![batch-changes-tracking](https://storage.googleapis.com/sourcegraph-assets/Docs/bc-new-ui.png)
+
+You can see the overall trend of a batch change in the burndown chart, which shows the proportion of changesets that have been merged over time since the batch change was created.
+
+![batch-changes-charts](https://storage.googleapis.com/sourcegraph-assets/Docs/bc-charts-062024.png)
+
+You can also [create a batch change on a monorepo](/batch-changes/creating-changesets-per-project-in-monorepos) by specifying which projects to run the script on. A batch change can also be used to track and manage manually created changesets.
+
+## Supported code hosts and changeset types
+
+A single batch change can span many repositories and many code hosts. The generic term **changeset** is used to refer to any of the following:
+
+- GitHub pull requests
+- Bitbucket Server/Bitbucket Data Center and Bitbucket Data Center pull requests
+- GitLab merge requests
+- Bitbucket Cloud pull requests
+- Gerrit changes
+- Perforce changelists (Beta)
+- Phabricator diffs (not yet supported)
+
+## Common use cases
+
+You can use Batch Changes to make the following kinds of changes:
+
+- Upgrading dependencies
+- Patching critical security issues
+- Updating uses of deprecated library APIs
+- Cleaning up common problems using linters
+- Standardizing build, configuration, and deployment files
+
+## More Resources
+
+<QuickLinks>
+<QuickLink title="Batch Changes design theory" icon='lightbulb' href="/batch-changes/design" description="Learn everything about how is the Batch Changes feature designed." />
+<QuickLink title="Requirements" icon='presets' href="/batch-changes/requirements" description="Learn about the requirements before getting started with Batch Changes with the Sourcegraph CLI." />
+</QuickLinks>

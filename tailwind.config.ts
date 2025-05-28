@@ -31,41 +31,60 @@ export default {
     colors: {
       transparent: 'transparent',
       current: 'currentColor',
-      // Docs colors
-      'dark-bg': '#14171F',
-      'light-bg': '#F9FAFB',
-      'link': {
-        light: '#3098aa',
-        DEFAULT: '#62BECC',
+      // Primary Vermilion Colors
+      vermilion: {
+        '00': '#060000',
+        '01': '#200302',
+        '02': '#410604',
+        '07': '#F34E3F', // Hero color
+        '08': '#FF7867',
+        '11': '#FFF3F0',
       },
-      'link-underline': '#2a7c90',
-      'link-underline-light': '#00CBEC',
+      // Secondary Violet Colors
       violet: {
-        100: '#EEDFFF',
-        200: '#E8D1FF',
-        300: '#CE9CFF',
-        400: '#A112FF',
-        500: '#820DDE',
-        600: '#6112A3',
-        700: '#270741',
-        750: '#1e0632',
-        800: '#160425',
+        '00': '#030106',
+        '01': '#120720',
+        '02': '#291242',
+        '06': '#914BDC',
+        '07': '#A96AF3',
+        '08': '#BE8CFF',
+        '11': '#FAF4FF',
       },
+      // Secondary Teal Colors
+      teal: {
+        '00': '#000204',
+        '01': '#001118',
+        '02': '#002533',
+        '07': '#00A0C8',
+        '08': '#4DB8DA',
+        '11': '#EAFCFF',
+      },
+      // Theme colors
+      'dark-bg': '#060000', // Vermilion-00
+      'light-bg': '#fffcfc',
+      'link': {
+        light: '#F34E3F', // Teal-07
+        DEFAULT: '#FF7867', // Teal-08
+      },
+      'link-underline': '#606060', // Teal-02
+      'link-underline-light': '#EAFCFF', // Teal-11
       // Brand Colors
-      black: '#0F111A',
+      black: '#060000',
       white: colors.white,
-      'dark-bg-1': '#181B26',
-      'dark-bg-2': '#1D212F',
-      'dark-bg-3': '#343A4D',
+      'dark-bg-1': '#0e0808', // Vermilion-01
+      'dark-bg-2': '#0e0808', // Vermilion-02
       'light-bg-1': '#FFF',
-      'light-bg-2': '#E6EBF2',
-      'light-bg-3': '#DBE2F0',
+      'light-bg-2': '#FFF3F0', // Vermilion-11
+      'light-bg-3': '#FFF3F0', // Vermilion-11
       'dark-border': '#262B38',
       'dark-border-2': '#343A4C',
       'light-border': '#E6EBF2',
       'light-border-2': '#DBE2F0',
-      'dark-text-muted': '#A6B6D9',
-      'light-text-muted': '#5E6E8C',
+      'dark-text-muted': '#fff3f0', // Vermilion-08
+      'light-text-muted': '#060000', // Vermilion-07
+      'dark-text-primary': '#FFF3F0', // Vermilion-11
+      'dark-text-secondary': '#A9A9A9',
+      'dark-paragraph-text': '#FFF3F0',
       'sggray': {
         100: '#F5F7FB',
         200: '#DBE2F0',
@@ -102,9 +121,15 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['-apple-system', 'var(--font-inter)'],
-        display: ['var(--font-lexend)', { fontFeatureSettings: '"ss01"' }],
-        mono: ['SFMono-Regular', 'ui-monospace', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace']
+        sans: ['var(--font-polysans)', 'system-ui'],
+        display: ['var(--font-polysans)', { fontFeatureSettings: '"ss01"' }],
+        mono: ['var(--font-polysans-mono)', 'ui-monospace', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
+      },
+      fontWeight: {
+        bulky: '700',
+        mono: '500',
+        slim: '400',
+        thin: '300',
       },
       maxWidth: {
         '8xl': '88rem',
@@ -162,6 +187,9 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+      },
+      borderWidth: {
+        '0.1': '0.1px',
       },
     },
   },

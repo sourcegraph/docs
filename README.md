@@ -2,6 +2,8 @@
 
 # Sourcegraph Docs
 
+<!-- Working branch for SG 6.3 Release -->
+
 Welcome to the Sourcegraph documentation! We're excited to have you contribute to our docs. We've recently rearchitectured our docs tech stack — powered by Next.js, TailwindCSS and deployed on Vercel. This guide will walk you through the process of contributing to our documentation using the new tech stack.
 
 ## Get started
@@ -18,7 +20,7 @@ Navigate to the project directory by typing the following command in your termin
 cd sourcegraph-docs
 ```
 
-Before the dependencies are install make sure your local machine has the following versions of `node` and `pnpm`:
+Before the dependencies are install make sure your local machine has the following versions of `node` and `pnpm` installed:
 
 * node: `v20.8.1`
 * pnpm: `8.13.1`
@@ -118,7 +120,7 @@ Here are the list of all the supported components we have:
 - `<LinkCards>`
 - `<Callout>`
 
-For a better docs experience we'll continue adding more components in future.
+For a better docs experience, we'll continue adding more components in the future.
 
 ### Adding a link
 
@@ -134,9 +136,9 @@ For example, if you want to link to the Cody Quickstart somewhere in the Code Se
 - This is a way to hash-link to [Cody for VSCode installation](/cody/clients/install-vscode#verifying-the-installation) in Code Search docs
 ```
 
-### Adding images and binary assets
+### Adding media assets (images, videos and gifs)
 
-For large images and other binary assets, upload them to the `sourcegraph-assets` Google Cloud Storage bucket instead with `gsutil cp -a public-read local/path/to/myasset.png gs://sourcegraph-assets/` (and refer to them as `https://sourcegraphstatic.com/myasset.png`). For a more detailed instructions visit [this page](https://handbook.sourcegraph.com/handbook/editing/handbook-images-video/).
+You can upload images, videos and gifs to Sourcegraph docs. For a more detailed instructions visit [this page](https://www.notion.so/sourcegraph/How-to-host-blog-assets-using-GCP-file-storage-a2cae02bd0c74166a12eaff5062c41ad).
 
 > Note: Make sure to use [ImageOptim.app](https://imageoptim.com/mac) to reduce the size of the images before uploading, since large images degrade page loading speed.
 
@@ -145,6 +147,12 @@ For large images and other binary assets, upload them to the `sourcegraph-assets
 ### Locally
 
 As you make changes to the documentation, the development server will automatically update. Review your changes by navigating to `http://localhost:3000` in your browser.
+
+### Previewing Vercel Deployments
+
+When you open a PR Vercel deploys and provides you with a preview deployment link. To view your deployment, click the **Visit Preview** link from Vercel's deployment panel in your PRs and you get a preview of your docs
+
+![CleanShot 2024-11-05 at 10 11 29@2x](https://github.com/user-attachments/assets/b0911e2e-95a7-4f56-b2ff-b659d13077d8)
 
 ## Submitting your Contribution
 

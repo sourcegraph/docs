@@ -226,9 +226,7 @@ All site configuration options and their default values are shown below.
 	// - {
 	//     "level": "warning",
 	//     "notifier": {
-	//       "addresses": [
-	//         "alerts@example.com"
-	//       ],
+	//       "address": "alerts@example.com",
 	//       "type": "email"
 	//     }
 	//   }
@@ -258,7 +256,7 @@ All site configuration options and their default values are shown below.
 	//     "warning_high_load"
 	//   ]
 
-	// Configures distributed tracing within Sourcegraph. To learn more, refer to https://docs.sourcegraph.com/admin/observability/tracing
+	// Configures distributed tracing within Sourcegraph. To learn more, refer to https://sourcegraph.com/docs/admin/observability/tracing
 	"observability.tracing": null,
 	// Other example values:
 	// - {
@@ -270,7 +268,7 @@ All site configuration options and their default values are shown below.
 	// - {
 	//     "debug": true,
 	//     "sampling": "all",
-	//     "type": "jaeger",
+	//     "type": "opentelemetry", // Jaeger now uses the OpenTelemetry format, the old jaeger format is deprecated
 	//     "urlTemplate": "{{ .ExternalURL }}/-/debug/jaeger/trace/{{ .TraceID }}"
 	//   }
 
@@ -306,8 +304,11 @@ All site configuration options and their default values are shown below.
 	// Don't sync a user's permissions if they have synced within the last n seconds.
 	"permissions.syncUsersBackoffSeconds": 60,
 
-	// The maximum number of user-centric permissions syncing jobs that can be spawned concurrently. Service restart is required to take effect for changes.
+	// The maximum number of user-centric permissions syncing jobs that can be spawned concurrently. Server restart is required for changes to take effect.
 	"permissions.syncUsersMaxConcurrency": 1,
+
+	// The maximum number of repo-centric permissions syncing jobs that can be spawned concurrently. Server restart is required for changes to take effect.
+	"permissions.syncReposMaxConcurrency": 5,
 
 	"rateLimits": null,
 
@@ -555,7 +556,7 @@ All site configuration options and their default values are shown below.
 	// Enable or disable Cody instance-wide. When Cody is disabled, all Cody endpoints and GraphQL queries will return errors, Cody will not show up in the site-admin sidebar, and Cody in the global navbar will only show a call-to-action for site-admins to enable Cody.
 	"cody.enabled": false,
 
-	// Restrict Cody to only be enabled for users that have a feature flag labeled "cody" set to true. You must create a feature flag with this ID after enabling this setting: https://docs.sourcegraph.com/dev/how-to/use_feature_flags#create-a-feature-flag. This setting only has an effect if cody.enabled is true.
+	// Restrict Cody to only be enabled for users that have a feature flag labeled "cody" set to true. You must create a feature flag with this ID after enabling this setting: https://sourcegraph.com/docs/dev/how-to/use_feature_flags#create-a-feature-flag. This setting only has an effect if cody.enabled is true.
 	"cody.restrictUsersFeatureFlag": false,
 
 //////////////////////////////////////////////////////////////
@@ -587,7 +588,7 @@ All site configuration options and their default values are shown below.
 //////////////////////////////////////////////////////////////
 
 	// The "from" address for emails sent by this server.
-	// Please see https://docs.sourcegraph.com/admin/config/email
+	// Please see https://sourcegraph.com/docs/admin/config/email
 	"email.address": null,
 	// Other example values:
 	// - "noreply@sourcegraph.example.com"
@@ -599,7 +600,7 @@ All site configuration options and their default values are shown below.
 	// - "Example Inc Sourcegraph"
 
 	// The SMTP server used to send transactional emails.
-	// Please see https://docs.sourcegraph.com/admin/config/email
+	// Please see https://sourcegraph.com/docs/admin/config/email
 	"email.smtp": null,
 	// Other example values:
 	// - {
@@ -803,7 +804,6 @@ All site configuration options and their default values are shown below.
 	// - {
 	//     "commitDiffMaxRepos": 50,
 	//     "commitDiffWithTimeFilterMaxRepos": 5000,
-	//     "displayLimit": 1500,
 	//     "maxRepos": 200,
 	//     "maxTimeoutSeconds": 60
 	//   }
@@ -923,7 +923,7 @@ You can check the container logs to see if you have made any typos or mistakes i
 	// The builtin auth provider with signup disallowed (shown below) means that
 	// after the initial site admin signs in, all other users must be invited.
 	//
-	// Other providers are documented at https://docs.sourcegraph.com/admin/auth.
+	// Other providers are documented at https://sourcegraph.com/docs/admin/auth.
 	"auth.providers": [
 		{
 			"type": "builtin",

@@ -8,34 +8,32 @@ Following these docs will provision the following resources:
 - A root EBS volume with 50GB of storage
 - An additional EBS volume with 500GB of storage for storing code and search indices
 
-### Instance size chart
+### Sourcegraph AMI account ID
 
-Select an AMI according and instance type to the number of users and repositories you have using this table. If you fall between two sizes, choose the larger of the two.
+All Sourcegraph AMIs are published from one of the following AWS accounts:
 
-For example, if you have 8,000 users with 80,000 repositories, your instance size would be **L**. If you have 1,000 users with 80,000 repositories, you should still go with size **M**.
+- Account ID: `840044800169`
+- Account ID: `870751268155`
 
-|                      | **XS**                                                                                                              | **S**                                                                                                             | **M**                                                                                                             | **L**                                                                                                             | **XL**                                                                                                              |
-|----------------------|---------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
-| **Users**            | greater than or equal to 500                                                                                        | greater than or equal to 1,000                                                                                    | greater than or equal to 5,000                                                                                    | greater than or equal to 10,000                                                                                   | greater than or equal to 20,000                                                                                     |
-| **Repositories**     | greater than or equal to 5,000                                                                                      | greater than or equal to 10,000                                                                                   | greater than or equal to 50,000                                                                                   | greater than or equal to 100,000                                                                                  | greater than or equal to 250,000                                                                                    |
-| **Recommended Type** | m6a.2xlarge                                                                                                         | m6a.4xlarge                                                                                                       | m6a.8xlarge                                                                                                       | m6a.12xlarge                                                                                                      | m6a.24xlarge                                                                                                        |
-| **Minimum Type**     | m6a.2xlarge                                                                                                         | m6a.2xlarge                                                                                                       | m6a.4xlarge                                                                                                       | m6a.8xlarge                                                                                                       | m6a.12xlarge                                                                                                        |
-| **AMIs List**        | [size-XS AMIs](https://console.aws.amazon.com/ec2/v2/home#Images:visibility=public-images;imageName=Sourcegraph-XS) | [size-S AMIs](https://console.aws.amazon.com/ec2/v2/home#Images:visibility=public-images;imageName=Sourcegraph-S) | [size-M AMIs](https://console.aws.amazon.com/ec2/v2/home#Images:visibility=public-images;imageName=Sourcegraph-M) | [size-L AMIs](https://console.aws.amazon.com/ec2/v2/home#Images:visibility=public-images;imageName=Sourcegraph-L) | [size-XL AMIs](https://console.aws.amazon.com/ec2/v2/home#Images:visibility=public-images;imageName=Sourcegraph-XL) |
+
+### Instance sizing
+
+Refer to our [AWS Instance Sizing](/how-to/aws-instance-sizing) guide to determine the appropriate EC2 instance type for your Sourcegraph deployment based on the number of users and repositories.
 
 Click [here](https://github.com/sourcegraph/deploy#amazon-ec2-amis) to see the completed list of AMI IDs published in each region.
 
 **The default AMI username is `ec2-user`.**
 
-<Callout type="note">AMIs are optimized for the specific set of resources provided by the instance type, please ensure you use the correct AMI for the associated EC2 instance type. You can [resize your EC2 instance anytime](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-resize.html), but your Sourcegraph AMI must match accordingly. If needed, follow the [upgrade steps](#upgrade) to switch to the correct AMI image that is optimized for your EC2 instance type.</Callout>
-
 ---
 
 ## Deploy Sourcegraph
 
-1. In the [instance size chart](#instance-size-chart), click the link for the AMI that matches your deployment size.
+<img width="1256" alt="Screenshot 2025-05-06 at 3 52 51 PM" src="https://github.com/user-attachments/assets/8e98792b-16d9-4c0c-a3a1-981246a811b8" />
+
+1. Search for Sourcegraph in the AWS Marketplace or AMI catalog (see screenshot in the introduction).
 2. Choose **Launch instance from AMI**.
 3. Name your instance.
-4. Select an **instance type** according to [the sizing chart](#instance-size-chart).
+4. Select an **instance type** according to [our sizing guide](/how-to/aws-instance-sizing) or your specific requirements.
 5. **Key pair (login)**: Select or create a new Key Pair for connecting to your instance securely (this may be required in the event you need support).
 6. **Network settings**:
    - Under "Auto-assign public IP" select "Enable".
@@ -57,24 +55,30 @@ To configure SSL, and lock down the instance from the public internet, see the [
 <Callout type="note">If you cannot access the Sourcegraph homepage after 10 minutes, please try reboot your instance.</Callout>
 
 ### Executors
+
 Executors are supported using [native kubernetes executors](/admin/executors/deploy_executors_kubernetes).
 
-Executors support [auto-indexing](/code-search/code-navigation/auto_indexing) and [server-side batch changes](/batch_changes/explanations/server_side).
+Executors support [auto-indexing](/code-search/code-navigation/auto_indexing) and [server-side batch changes](/batch-changes/server-side).
 
 To enable executors you must do the following:
+
 1. Connect to the AMI instance using `ssh`
 2. Run `cd /home/ec2-user/deploy/install/`
 3. Replace the placeholder `executor.frontendPassword` in `override.yaml`
 4. Run the following command to update the executor
+
 ```
 helm upgrade -i -f ./override.yaml --version "$(cat /home/ec2-user/.sourcegraph-version)" executor ./sourcegraph-executor-k8s-charts.tgz
 ```
+
 1. Add the following to the site-admin config using the password you chose previously
+
 ```
 "executors.accessToken": "<exector.frontendPassword>",
 "executors.frontendURL": "http://sourcegraph-frontend:30080",
 "codeIntelAutoIndexing.enabled": true
 ```
+
 1. Check `Site-Admin > Executors > Instances` to verify the executor connected successfully. If it does not appear try reboot the instance
 
 To use server-side batch changes you will need to enable the `native-ssbc-execution` [feature flag](/admin/executors/native_execution#enable).
@@ -164,12 +168,13 @@ Now that your instance is confirmed to be working, and you have HTTPS working th
 
 <Callout type="warning">This upgrade process works with **Sourcegraph AWS AMI instances only**. Do not use these if you deployed Sourcegraph through other means.</Callout>
 
+<Callout type="warning">Please be aware that our AMI deployment types do not support multi-version upgrades at this time, nor do they support Automatic Upgrade State. The Automatic Upgrade State toggle can be found on your Sourcegraph instance's `site-admin/updates` screen.</Callout>
+
 Please take time to review the following before proceeding with the upgrades:
 
-- [Changelog](https://docs.sourcegraph.com/CHANGELOG)
-- [Update policy](https://docs.sourcegraph.com/admin/updates#update-policy)
-- [Update notes](https://docs.sourcegraph.com/admin/updates/kubernetes)
-- [Multi-version upgrade procedure](https://docs.sourcegraph.com/admin/updates/kubernetes#multi-version-upgrade-procedure)
+- [Technical changelog](/technical-changelog)
+- [Update policy](/admin/updates#update-policy)
+- [Update notes](/admin/updates/kubernetes)
 
 <Callout type="warning">Back up your volumes before each upgrade!</Callout>
 

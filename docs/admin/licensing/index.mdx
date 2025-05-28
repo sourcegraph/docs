@@ -1,5 +1,12 @@
 # Licensing
 
+<TierCallout>
+  Supported on [Enterprise](/pricing/enterprise) plans.
+  <user>
+    Available via the Web app.
+  </user>
+</TierCallout>
+
 Sourcegraph requires a valid license key to enable many of its more prominent features.
 
 License keys should not be shared across instances of Sourcegraph. If an additional license key is required for something like a dev environment, please [contact customer support](https://about.sourcegraph.com/contact) for an additional license key.
@@ -38,3 +45,25 @@ UPDATE global_state SET site_id = gen_random_uuid();
 ```
 
 You will still require a unique license key for each site ID.
+
+### How does Sourcegraph calculate user licenses?
+
+Sourcegraph calculates user license numbers using several key values:
+
+  1. `currentUserCount`: Which represents the total number of users currently on the Sourcegraph.
+
+  2. `license.userCount`: Which is the total number of user licenses allowed by the current subscription.
+
+  3. `actualUserCount`: Which represents the maximum number of users that have ever been active on the Sourcegraph instance for the current license.
+
+The component displays these numbers in the following format:
+
+```
+"{currentUserCount} currently used / {license.userCount - currentUserCount} remaining ({actualUserCount} maximum ever used)"
+```
+
+These values are fetched from the GraphQL API using the `queryProductLicenseInfo` function, which queries the site's product subscription information and user count.
+
+The component also checks if the number of users exceeds the licensed amount `(license.userCount - actualUserCount < 0)` and displays a warning if this is the case.
+
+This approach allows Sourcegraph to provide clear information about license usage and encourage upgrades and scaling licenses when necessary.

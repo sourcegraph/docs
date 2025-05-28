@@ -1,7 +1,5 @@
 # Sourcegraph Stream API
 
-<Callout type="note">The Stream API is still evolving. Although parts of it can be considered stable, we don't guarantee backward compatibility just yet. This means it is possible that fields are added, removed, or renamed. All backward incompatible changes to the event stream format will be documented in the [CHANGELOG](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/CHANGELOG).</Callout>
-
 With the Stream API you can consume search results and related metadata as
 a stream of events. The Sourcegraph UI calls the Stream API for all interactive searches.
 Compared to our [GraphQL API](/api/graphql/), it offers shorter times to first results and
@@ -9,6 +7,7 @@ supports running exhaustive searches returning a large volume of results without
 putting pressure on the backend.
 
 ## Endpoint
+
 `/.api/search/stream`
 
 ## Request
@@ -19,15 +18,25 @@ curl --header "Accept: text/event-stream" \
      --get \
      --url "<Sourcegraph URL>/.api/search/stream" \
      --data-urlencode "q=<query>" \
-     ["display=<display-limit>"]
+     --data-urlencode "v=<version>" \
+     --data-urlencode "t=<pattern type>" \
+     --data-urlencode "max-line-len=<maximum line length>" \
+     --data-urlencode "cm=<enable chunk matches>" \
+     --data-urlencode "display=<display limit>" \
+     --data-urlencode "cl=<context lines>"
 ```
 
-|    parameter    |                                                                                                                                                                                       description                                                                                                                                                                                       |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| access token    | [Sourcegraph access token](https://docs.sourcegraph.com/cli/how-tos/creating_an_access_token)                                                                                                                                                                                                                                                                                           |
-| Sourcegraph URL | The URL of your Sourcegraph instance, or https://sourcegraph.com.                                                                                                                                                                                                                                                                                                                       |
-| query           | A Sourcegraph query string, see our [search query syntax](/code-search/queries)                                                                                                                                                                                                                                                                                       |
-| display-limit   | The maximum number of matches the backend returns. Defaults to -1 (no limit). If the backend finds more then display-limit results, it will keep searching and aggregating statistics, but the matches will not be returned anymore. Note that the display-limit is different from the query filter `count:` which causes the search to stop and return once we found `count:` matches. |
+| Parameter                       | Description                                                                                                                                                                                                                                                                                                                                                                           |
+|---------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| access token                    | [Sourcegraph access token](/cli/how-tos/creating_an_access_token)                                                                                                                                                                                                                                                                                                                     |
+| Sourcegraph URL                 | The URL of your Sourcegraph instance, or https://sourcegraph.com.                                                                                                                                                                                                                                                                                                                     |
+| query                           | A Sourcegraph query string, see our [search query syntax](/code-search/queries)                                                                                                                                                                                                                                                                                                       |
+| version (optional)              | The version of the search query syntax. We recommend to explicitly set the version. The latest version is "V3". (Default: "V3")                                                                                                                                                                                                                                                       |
+| pattern type (optional)         | Either "keyword", "standard", or "regexp". This pattern type is only used if the query doesn't already contain a `patternType:` filter. (Default: "standard")                                                                                                                                                                                                                         |
+| maximum line length (optional)  | If set, will truncate the context field of `ChunkMatch` such that no line is longer than max-line-len. (Default: -1 (no limit))                                                                                                                                                                                                                                                       |
+| enable chunk matches (optional) | Enables chunk matches. Must be parseable as boolean. (Default: false)                                                                                                                                                                                                                                                                                                                 |
+| display limit (optional)        | The maximum number of matches the backend returns. If the backend finds more than display-limit results, it will keep searching and aggregating statistics, but the matches will not be returned anymore. Note that the display-limit is different from the query filter `count:` which causes the search to stop and return once we found `count:` matches. (Default: -1 (no limit)) |
+| context lines (optional)        | The number of lines around a match that should be returned. Works only in conjunction with `cm=true`. Must be parseable as boolean. (Default: 1)                                                                                                                                                                                                                                      |
 
 See [Example](#example-curl).
 
@@ -52,8 +61,9 @@ data: {}
 ```
 
 > NOTE:
-> Our format is a subset of the event stream format for [server-sent
-> events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#event_stream_format). However, we do not guarantee compatibility with any third-party clients written for server-sent events.
+> The search stream API follows the [server-sent
+> events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#event_stream_format) format. However, we do not guarantee compatibility
+> with any third-party clients written for server-sent events, and recommend using the src-cli tool or writing your own wrapper around the API.
 
 ### Event-types
 
@@ -67,8 +77,6 @@ Events can be of the following types:
 | alert      | info, warning and error messages                                                 |
 | done       | always the last event                                                            |
 
-Refer to the [interface definitions of our typescript client](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/client/shared/src/search/stream.ts?L12) to learn about the schema of the event-types.
-
 ## Example (curl)
 
 On Sourcegraph.com we can run queries without authentication.
@@ -77,19 +85,27 @@ On Sourcegraph.com we can run queries without authentication.
 $ curl --header "Accept: text/event-stream" \
      --get \
      --url "https://sourcegraph.com/.api/search/stream" \
-     --data-urlencode "q=r:sourcegraph/sourcegraph doResults count:1"
+     --data-urlencode "q=r:sourcegraph/sourcegraph stream results patternType:keyword count:1" \
+     --data-urlencode "v=V3"
 
-event: matches
-data: [{"type":"content","path":"cmd/frontend/graphqlbackend/search_results_stats_languages.go","repositoryID":42693708,"repository":"gitlab.com/rluna-open-source/code-management/sourcegraph/sourcegraph-2020","repoLastFetched":"2021-11-19T21:54:27.009309Z","branches":[""],"commit":"0725aa021040f3c864bd5043caf965e7bc1e7a51","hunks":null,"lineMatches":[{"line":"\t\tresults, err := srs.sr.doResults(ctx, args, jobs)","lineNumber":44,"offsetAndLengths":[[25,9]]}]}]
-
-event: progress
-data: {"done":false,"matchCount":1,"durationMs":39,"skipped":[{"reason":"shard-match-limit","title":"result limit hit","message":"Not all results have been returned due to hitting a match limit. Sourcegraph has limits for the number of results returned from a line, document and repository.","severity":"info","suggested":{"title":"increase limit","queryExpression":"count:1000"}}]}
 
 event: filters
-data: [{"value":"lang:go","label":"lang:go","count":3,"limitHit":false,"kind":"lang"},{"value":"repo:^gitlab\\.com/rluna-open-source/code-management/sourcegraph/sourcegraph-2020$","label":"gitlab.com/rluna-open-source/code-management/sourcegraph/sourcegraph-2020","count":3,"limitHit":true,"kind":"repo"}]
+data: [{"value":"archived:yes","label":"Include archived repos","count":15,"exhaustive":false,"kind":"utility"}]
 
 event: progress
-data: {"done":true,"repositoriesCount":1,"matchCount":1,"durationMs":39,"skipped":[{"reason":"shard-match-limit","title":"result limit hit","message":"Not all results have been returned due to hitting a match limit. Sourcegraph has limits for the number of results returned from a line, document and repository.","severity":"info","suggested":{"title":"increase limit","queryExpression":"count:1000"}}]}
+data: {"done":false,"matchCount":0,"durationMs":206,"skipped":[{"reason":"excluded-archive","title":"15 archived","message":"By default we exclude archived repositories. Include them with `archived:yes` in your query.","severity":"info","suggested":{"title":"include archived","queryExpression":"archived:yes"}}],"trace":"https://sourcegraph.com/-/debug/jaeger/trace/b1be66f71a79e0dbeda6bb200dae8326"}
+
+event: filters
+data: [{"value":"archived:yes","label":"Include archived repos","count":15,"exhaustive":false,"kind":"utility"},{"value":"type:file","label":"Code","count":1,"exhaustive":false,"kind":"type"},{"value":"type:path","label":"Paths","count":1,"exhaustive":false,"kind":"type"},{"value":"lang:go","label":"Go","count":1,"exhaustive":false,"kind":"lang"},{"value":"repo:^github\\.com/sourcegraph/sourcegraph$","label":"github.com/sourcegraph/sourcegraph","count":1,"exhaustive":false,"kind":"repo"}]
+
+event: matches
+data: [{"type":"content","path":"cmd/frontend/graphqlbackend/search_results.go","pathMatches":[{"start":{"offset":35,"line":0,"column":35},"end":{"offset":42,"line":0,"column":42}}],"repositoryID":36809250,"repository":"github.com/sourcegraph/sourcegraph","repoStars":9918,"repoLastFetched":"2024-07-11T13:40:33.306273Z","branches":[""],"commit":"be0cd097f5f20d1444786ed7bb6c34cbad85c676","hunks":null,"lineMatches":[{"line":"// Results are the results found by the search. It respects the limits set. To","lineNumber":124,"offsetAndLengths":[[3,7]]}],"language":"Go"}]
+
+event: filters
+data: [{"value":"archived:yes","label":"Include archived repos","count":15,"exhaustive":false,"kind":"utility"},{"value":"type:file","label":"Code","count":1,"exhaustive":false,"kind":"type"},{"value":"type:path","label":"Paths","count":1,"exhaustive":false,"kind":"type"},{"value":"lang:go","label":"Go","count":1,"exhaustive":false,"kind":"lang"},{"value":"repo:^github\\.com/sourcegraph/sourcegraph$","label":"github.com/sourcegraph/sourcegraph","count":1,"exhaustive":false,"kind":"repo"}]
+
+event: progress
+data: {"done":true,"repositoriesCount":1,"matchCount":1,"durationMs":359,"skipped":[{"reason":"shard-match-limit","title":"result limit hit","message":"Not all results have been returned due to hitting a match limit. Sourcegraph has limits for the number of results returned from a line, document and repository.","severity":"info","suggested":{"title":"increase limit","queryExpression":"count:1000"}},{"reason":"excluded-archive","title":"15 archived","message":"By default we exclude archived repositories. Include them with `archived:yes` in your query.","severity":"info","suggested":{"title":"include archived","queryExpression":"archived:yes"}}],"trace":"https://sourcegraph.com/-/debug/jaeger/trace/b1be66f71a79e0dbeda6bb200dae8326"}
 
 event: done
 data: {}

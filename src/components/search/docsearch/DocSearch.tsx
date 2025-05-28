@@ -18,6 +18,7 @@ import { useDocSearchKeyboardEvents } from './useDocSearchKeyboardEvents';
 
 import type { ButtonTranslations } from './DocSearchButton';
 import type { ModalTranslations } from './DocSearchModal';
+import Modal from './Modal';
 
 export type DocSearchTranslations = Partial<{
     button: ButtonTranslations;
@@ -88,17 +89,16 @@ export function DocSearch(props: DocSearchProps) {
                 onClick={onOpen}
             />
 
-            {isOpen &&
-                createPortal(
-                    <DocSearchModal
-                        {...props}
-                        initialScrollY={window.scrollY}
-                        initialQuery={initialQuery}
-                        translations={props?.translations?.modal}
-                        onClose={onClose}
-                    />,
-                    document.body
-                )}
+
+            {isOpen && <Modal wrapperId='doc-search-modal'>
+                <DocSearchModal
+                    {...props}
+                    initialScrollY={window.scrollY}
+                    initialQuery={initialQuery}
+                    translations={props?.translations?.modal}
+                    onClose={onClose}
+                />
+            </Modal>}
         </>
     );
 }

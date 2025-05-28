@@ -1,4 +1,4 @@
-# Sourcegraph with Docker Compose
+# Docker Compose
 
 Setting up Docker applications with [multiple containers](https://www.docker.com/resources/what-container) like Sourcegraph using Docker Compose allows us to start all the applications with a single command. It also makes configuring the applications easier through updating the docker-compose.yaml and docker-compose.override.yaml files. Please see the [official Docker Compose docs](https://docs.docker.com/compose/) to learn more about Docker Compose.
 
@@ -18,7 +18,7 @@ This guide will take you through how to install Sourcegraph with Docker Compose 
   - Install [Docker Compose](https://docs.docker.com/compose/) on the server
     - Minimum Docker [v20.10.0](https://docs.docker.com/engine/release-notes/#20100) and Docker Compose [v1.29.0](https://docs.docker.com/compose/release-notes/#1290)
     - Docker Swarm mode is **not** supported
-  - Check the [resource estimator](https://docs.sourcegraph.com/admin/deploy/resource_estimator) for resource requirements
+  - Check the [resource estimator](/admin/deploy/resource_estimator) for resource requirements
   - Obtain a [Sourcegraph license](https://about.sourcegraph.com/pricing/)
     - License is required for instances with **more than 10 users**
   - <span class="badge badge-beta">optional</span> Configure ingress firewall rules to enable secure access to the server
@@ -33,7 +33,7 @@ A step by step guide to install Sourcegraph with Docker Compose.
 
 ### Overview
 
- 1. [Fork the deployment repository] (recommended)(#step-1-fork-the-deployment-repository)
+ 1. [Fork the deployment repository (recommended)](#step-1-fork-the-deployment-repository)
  2. [Customize the instance](#step-2-configure-the-instance)
  3. [Clone the release branch](#step-3-clone-the-release-branch)
  4. [Build and start the Sourcegraph containers](#step-4-start-sourcegraph)
@@ -115,9 +115,10 @@ Continue with the following steps *after* you have created a public or private c
   - This branch will be used to [upgrade Sourcegraph](/admin/deploy/docker-compose/upgrade) and install your Sourcegraph instance.
   - It also allows us to track all of the customizations made to your Sourcegraph instance.
 
-```bash
+
+```
   # Specify the version you want to install
-  export SOURCEGRAPH_VERSION="v5.3.9104"
+  export SOURCEGRAPH_VERSION={CURRENT_VERSION}
   # Check out the selected version for use, in a new branch called "release"
   git checkout $SOURCEGRAPH_VERSION -b release
 ```
@@ -136,7 +137,6 @@ If you would like to make changes to the default configurations, we highly recom
   - Expose debug port
   - Git SSH configuration
   - Update or add new environment variables
-  - Enable the Embeddings service
   - And more!
 
 Please make sure to commit any changes to your `release` branch.
@@ -163,9 +163,9 @@ On the production server, run the following command inside the [./docker-compose
   # Go to the docker-compose configuration directory
   cd docker-compose
   # Start Sourcegraph with Docker Compose
-  docker-compose up
+  docker compose up
   # OR you can start Sourcegraph with Docker Compose in a detached mode
-  docker-compose up -d
+  docker compose up -d
 ```
 
 To check if the server is ready, the `sourcegraph-frontend-0` service must be displayed as healthy:

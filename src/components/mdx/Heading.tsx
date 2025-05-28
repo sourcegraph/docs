@@ -1,8 +1,15 @@
 'use client';
 
 import Link from 'next/link';
+import React, {Children, isValidElement, cloneElement, ReactNode, ComponentPropsWithoutRef} from 'react';
 
-function AnchorIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
+interface childProps {
+	props: {
+		children: any
+	}
+}
+
+function AnchorIcon(props: ComponentPropsWithoutRef<'svg'>) {
 	return (
 		<svg
 			viewBox="0 0 20 20"
@@ -16,7 +23,27 @@ function AnchorIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	);
 }
 
-function Anchor({id, children}: {id: string; children: React.ReactNode}) {
+function sanitizeAnchors(children: any): any {
+	return Children.map(children, (child: childProps) => {
+		if (typeof child === 'string')
+			return child;
+
+		if (isValidElement(child)) {
+			if (child.type === 'a')
+				return sanitizeAnchors(child.props.children);
+
+			return cloneElement(child, {
+				...child.props,
+				children: sanitizeAnchors(child.props.children),
+			})
+		}
+
+		return child;
+	})
+}
+
+function Anchor({id, children}: {id: string; children: ReactNode}) {
+	const sanitizedChildren = sanitizeAnchors(children)
 	return (
 		<Link
 			href={`#${id}`}
@@ -25,19 +52,19 @@ function Anchor({id, children}: {id: string; children: React.ReactNode}) {
 			<div className="absolute ml-[-28px] mt-1 hidden opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus:opacity-100 md:block lg:z-50">
 				<AnchorIcon className="h-5 w-5 stroke-black transition group-focus:stroke-link-light dark:stroke-slate-200 dark:group-focus:stroke-link" />
 			</div>
-			{children}
+			{sanitizedChildren}
 		</Link>
 	);
 }
 
 interface HeadingProps {
-	level?: '2' | '3';
+	level?: '2' | '3' | '4' | '5' | '6';
 	id: string;
 	props: any;
 }
 
 export function Heading({level = '2', id, props}: HeadingProps) {
-	let Component = `h${level}` as 'h2' | 'h3';
+	let Component = `h${level}` as 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 	return (
 		<Component {...props}>
 			<Anchor id={id}>{props.children}</Anchor>

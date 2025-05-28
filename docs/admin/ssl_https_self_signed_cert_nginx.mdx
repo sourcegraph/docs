@@ -1,3 +1,5 @@
+import { CURRENT_VERSION_STRING_NO_V, CURRENT_VERSION_STRING } from 'src/components/PreCodeBlock'
+
 # Adding SSL (HTTPS) to Sourcegraph with a self-signed certificate
 
 This is for external Sourcegraph instances that need a self-signed certificate because they don't yet have a certificate from a [globally trusted Certificate Authority (CA)](https://en.wikipedia.org/wiki/Certificate_authority#Providers). It includes how to get the self-signed certificate trusted by your browser.
@@ -12,6 +14,7 @@ Configuring NGINX with a self-signed certificate to support SSL requires:
   - [3. Adding SSL support to NGINX](#3-adding-ssl-support-to-nginx)
   - [4. Changing the Sourcegraph container to listen on port 443](#4-changing-the-sourcegraph-container-to-listen-on-port-443)
   - [5. Getting the self-signed certificate to be trusted (valid) on external instances](#5-getting-the-self-signed-certificate-to-be-trusted-valid-on-external-instances)
+    - [Getting the self-signed cert trusted on other developer machines](#getting-the-self-signed-cert-trusted-on-other-developer-machines)
   - [Next steps](#next-steps)
 
 ## 1. Installing mkcert
@@ -47,7 +50,7 @@ Run `sudo ls -la ~/.sourcegraph/config` and you should see the CA and SSL certif
 ## 3. Adding SSL support to NGINX
 
 Edit the [default
-`~/.sourcegraph/config/nginx.conf`](https://github.com/sourcegraph/sourcegraph/blob/main/cmd/server/shared/assets/nginx.conf),
+`~/.sourcegraph/config/nginx.conf`](https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/cmd/server/shared/assets/nginx.conf),
 so that port `7080` redirects to `7443` and `7443` is served with SSL. It should look like this:
 
 ```nginx
@@ -91,7 +94,7 @@ docker container run \
   \
   --volume ~/.sourcegraph/config:/etc/sourcegraph  \
   --volume ~/.sourcegraph/data:/var/opt/sourcegraph  \
-  sourcegraph/server:5.3.9104
+  sourcegraph/server:{CURRENT_VERSION_NO_V}
 ```
 
 > NOTE: We recommend removing `--publish 7080:7080` as it's not needed and traffic sent to that port is un-encrypted.

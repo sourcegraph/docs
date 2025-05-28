@@ -171,7 +171,7 @@ export function DocSearchModal({
         initialState: {
           query: initialQuery,
           context: {
-            searchSuggestions: [],
+            searchSuggestions: ["Cody","Code Search"],
           },
         },
         insights,
@@ -460,7 +460,7 @@ export function DocSearchModal({
       className={[
         'DocSearch',
         'DocSearch-Container',
-        'z-50 bg-slate-300/50 p-4 backdrop-blur backdrop-filter dark:bg-dark-bg/50',
+        'z-50 bg-slate-300/50 p-4 backdrop-blur backdrop-filter dark:bg-dark-bg',
         state.status === 'stalled' && 'DocSearch-Container--Stalled',
         state.status === 'error' && 'DocSearch-Container--Errored',
       ]
@@ -474,7 +474,7 @@ export function DocSearchModal({
         }
       }}
     >
-      <div className="DocSearch-Modal w-full max-w-xl border-light-border-2 dark:border-dark-border dark:bg-dark-bg-1 bg-light-bg overflow-hidden rounded-2xl border" ref={modalRef} style={{
+      <div className="DocSearch-Modal w-full max-w-xl border-light-border-2 dark:border-dark-border dark:bg-dark-bg bg-light-bg overflow-hidden rounded-2xl border" ref={modalRef} style={{
         transform: `scale(0.99)`,
         pointerEvents: `auto`,
       }}>

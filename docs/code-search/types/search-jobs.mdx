@@ -1,12 +1,32 @@
 # Search Jobs
 
-<p className="subtitle">Use Search Jobs to search code at scale for large-scale organizations.</p>
+<TierCallout>
+  Supported on [Enterprise](/pricing/enterprise) plans.
+  <user>
+    Currently available via the Web app.
+  </user>
+</TierCallout>
 
-<Callout type="note" title="Beta"> Search Jobs feature is in Beta stage and only available for Enterprise accounts. It is enabled by default since 5.3.0.</Callout>
+Use Search Jobs to search code at scale for large-scale organizations.
 
 Search Jobs allows you to run search queries across your organization's codebase (all repositories, branches, and revisions) at scale. It enhances the existing Sourcegraph's search capabilities, enabling you to run searches without query timeouts or incomplete results.
 
 With Search Jobs, you can start a search, let it run in the background, and then download the results from the Search Jobs UI when it's done. Site administrators can **enable** or **disable** the Search Jobs feature, making it accessible to all users on the Sourcegraph instance.
+
+## Using Search Jobs
+
+To use Search Jobs, you need to:
+
+- Run a search query from your Sourcegraph instance
+- Click the result menu below the search bar to see if your query is supported by Search Jobs
+
+![run-query-for-search-jobs](https://storage.googleapis.com/sourcegraph-assets/Docs/search-jobs/search-jobs-create.png)
+
+- If your query is valid, click **Create a search job** to initiate the search job
+- You will be redirected to the "Search Jobs UI" page at `/search-jobs`, where you can view all your created search jobs. If you're a site admin, you can also view search jobs from other users on the instance
+- For each search job, you can download the results by clicking the **Download** button. The results are formatted as JSON lines, see [Search results format](#search-results-format) for more details.
+
+![view-search-jobs](https://storage.googleapis.com/sourcegraph-assets/Docs/search-jobs/search-jobs-manage-with-frame.png)
 
 ## Search results format
 
@@ -27,60 +47,17 @@ Search Jobs requires an object storage to store the results of your search jobs.
 By default, Search Jobs stores results using our bundled `blobstore` service.
 If the `blobstore` service is deployed, and you want to use it to store results from Search Jobs, you don't need to configure anything.
 
-To use a third party managed object storage service, you must set a handful of environment variables for configuration and authentication to the target service.
+To use a third party managed object storage service, see instructions in [externalizing object storage](../../admin/external_services/object_storage#search-job-results).
 
-- If you are running a `sourcegraph/server` deployment, set the environment variables on the server container
-- If you are running via Docker-compose or Kubernetes, set the environment variables on the `frontend` and `worker` containers
+### Environment Variables
 
-### Using S3
+You can configure Search Jobs behavior using the following environment variables on the worker service:
 
-Set the following environment variables to target an S3 bucket you've already provisioned. Authentication can be done through [an access and secret key pair](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys) (and optionally through session token) or via the EC2 metadata API.
-
-<Callout type="tip"> Never commit AWS access keys in Git. You should consider using a secret handling service offered by your cloud provider.</Callout>
-
-- `SEARCH_JOBS_UPLOAD_BACKEND=S3`
-- `SEARCH_JOBS_UPLOAD_BUCKET=<my bucket name>`
-- `SEARCH_JOBS_UPLOAD_AWS_ENDPOINT=https://s3.us-east-1.amazonaws.com`
-- `SEARCH_JOBS_UPLOAD_AWS_ACCESS_KEY_ID=<your access key>`
-- `SEARCH_JOBS_UPLOAD_AWS_SECRET_ACCESS_KEY=<your secret key>`
-- `SEARCH_JOBS_UPLOAD_AWS_SESSION_TOKEN=<your session token>` (optional)
-- `SEARCH_JOBS_UPLOAD_AWS_USE_EC2_ROLE_CREDENTIALS=true` (optional; set to use EC2 metadata API over static credentials)
-- `SEARCH_JOBS_UPLOAD_AWS_REGION=us-east-1` (default)
-
-<Callout type="note"> If a non-default region is supplied, ensure that the subdomain of the endpoint URL (the `AWS_ENDPOINT` value) matches the target region.</Callout>
-
-<Callout type="note"> You don't need to set the `SEARCH_JOBS_UPLOAD_AWS_ACCESS_KEY_ID` environment variable when using `SEARCH_JOBS_UPLOAD_AWS_USE_EC2_ROLE_CREDENTIALS=true` because role credentials will be automatically resolved.</Callout>
-
-### Using GCS
-
-Set the following environment variables to target a GCS bucket you've already provisioned. Authentication is done through a service account key, either as a path to a volume-mounted file or the contents read in as an environment variable payload.
-
-- `SEARCH_JOBS_UPLOAD_BACKEND=GCS`
-- `SEARCH_JOBS_UPLOAD_BUCKET=<my bucket name>`
-- `SEARCH_JOBS_UPLOAD_GCP_PROJECT_ID=<my project id>`
-- `SEARCH_JOBS_UPLOAD_GOOGLE_APPLICATION_CREDENTIALS_FILE=</path/to/file>`
-- `SEARCH_JOBS_UPLOAD_GOOGLE_APPLICATION_CREDENTIALS_FILE_CONTENT=<{"my": "content"}>`
-
-### Provisioning buckets
-
-If you would like to allow your Sourcegraph instance to control the creation and lifecycle configuration management of the target buckets, set the following environment variables:
-
-- `SEARCH_JOBS_UPLOAD_MANAGE_BUCKET=true`
-
-## Using Search Jobs
-
-To use Search Jobs, you need to:
-
-- Run a search query from your Sourcegraph instance
-- Click the result menu below the search bar to see if your query is valid for the long search
-
-![run-query-for-search-jobs](https://storage.googleapis.com/sourcegraph-assets/Docs/query-serach-jobs.png)
-
-- If your query is valid, click **Run search job** to initiate the search job
-- You will be redirected to the "Search Jobs UI" page at `/search-jobs`, where you can view all your created search jobs. If you're a site admin, you can also view search jobs from other users on the instance
-
-![view-search-jobs](https://storage.googleapis.com/sourcegraph-assets/Docs/view-search-jobs.png)
-
+| Environment Variable | Default Value | Description |
+| --- | --- | --- |
+| `SRC_SEARCH_JOB_WORKER_INTERVAL` | `1s` | Controls how frequently the system checks for new search jobs to process. You probably don't need to configure this.|
+| `SRC_SEARCH_JOB_MAXIMUM_RUNTIME_PER_JOB` | `5h` | Sets a maximum time limit for how long a search job can run per repository-revision pair. Note that a search job is run as a collection of many smaller searches, each targeting a single revision of a repository. This ENV targets the maximum runtime of individual searches.|
+| `SRC_SEARCH_JOB_NUM_HANDLERS` | `5` | Adjusts how many searches can run in parallel. A value of 5 (default) means that 5 searches, each targeting a different repository-revision pair, can run in parallel. More handlers put more pressure on the backend, particularly on Searcher and Zoekt. Make sure you have sufficient resources before increasing the number of handlers. |
 
 ## Supported result types
 
@@ -99,20 +76,20 @@ The following result types are not supported:
 The following elements of our query language are not supported:
 
 - file predicates, such as `file:has.content`, `file:has.owner`, `file:has.contributor`, `file:contains.content`
-- `.*` regexp search
+- catch-all `.*` regexp search
 - Multiple `rev` filters
 - Queries with `index: filter`
 
-<Callout type="note"> Sourcegraph already offers an [Exhaustive Search](/code-search/types/exhaustive) with the `count:all` operator. However, there are certain limitations when generating results within your codebase.</Callout>
+
+<Callout type="note">
+    Alternatively, the search bar supports the `count:all` operator which increases result limits and timeouts.
+    This works well if the search completes within a few minutes and the number of results is less than the configured display limit.
+    For longer running searches and searches with huge result sets, Search Jobs is the better choice.
+</Callout>
 
 ## Disable Search Jobs
 
-Follow these steps to disable Search Jobs and to hide the feature in the Sourcegraph UI:
-
-- Login to your Sourcegraph instance and go to the site admin
-- Next, click the site configuration
-- From here, you'll see `experimentalFeatures`
-- Set `searchJobs` to `false` and then refresh the page
+To disable Search Jobs, set `DISABLE_SEARCH_JOBS=true` in your frontend and worker services.
 
 ## FAQ
 
