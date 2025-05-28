@@ -6795,7 +6795,14 @@ const redirectsData = [
     source: "/analytics/self-hosted",
     destination: "/analytics/air-gapped",
     permanent: true
-  }
+  },
+
+  //Agentic chat redirect
+  {
+    source: "/cody/capabilities/agentic-chat",
+    destination: "/cody/capabilities/agentic-context-fetching",
+    permanent: true
+  },
 
 
 ];
