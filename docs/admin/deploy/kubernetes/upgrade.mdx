@@ -120,41 +120,46 @@ For example, if you use [overlays to make changes to the manifests](https://gith
 
 ## Multi-version upgrades
 
+If you are upgrading to **Sourcegraph 5.1 or later**, we encourage you to perform an [**automatic multi-version upgrade**](/admin/updates/automatic). The following procedure has been automated, but is still applicable should errors occur in an automated upgrade.
+
+---
+
 > **⚠️ Attention:** please see our [cautionary note](/admin/updates/#best-practices) on upgrades, if you have any concerns about running a multiversion upgrade, please reach out to us at [support@sourcegraph.com](mailto:support@sourcegraph.com) for advisement.
 
-To perform a multi-version upgrade via migrators [upgrade](/admin/updates/migrator/migrator-operations#upgrade) command on a Sourcegraph instance deployed with our [kustomize repo](https://github.com/sourcegraph/deploy-sourcegraph-k8s) follow the procedure below:
+To perform a **manual** multi-version upgrade on a Sourcegraph instance running on our **kubernetes** repo follow the procedure below:
 
 1. **Check Upgrade Readiness**:
    - Check the [upgrade notes](/admin/updates/kubernetes#kubernetes-upgrade-notes) for the version range you're passing through.
    - Check the `Site Admin > Updates` page to determine [upgrade readiness](/admin/updates/#upgrade-readiness).
 
-2. **Pull and merge upstream changes**:
-     - Follow the [standard legacy upgrade procedure](#upgrade-with-legacy-kubernetes) to pull and merge upstream changes from the version you are upgrading to to your `release` branch.
+2. **Disable Connections to the Database**:
+   - The following services must have their replicas scaled to 0:
+     - Deployments (e.g., `kubectl scale deployment <name> --replicas=0`)
+       - precise-code-intel-worker
+       - repo-updater
+       - searcher
+       - sourcegraph-frontend
+       - sourcegraph-frontend-internal
+       - symbols
+       - worker
+     - Stateful sets (e.g., `kubectl scale sts <name> --replicas=0`):
+       - gitserver
+       - indexed-search
 
-3. **Update cluster.yaml and scale down non-database deployments and replicas**:
-   - In your cluster kustomization file (`instances/my-sourcegraph/kustomize.yaml`), uncomment the [multi-version-upgrade util](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/instances/template/kustomization.template.yaml#L155). This will scale down all non-database deployments and statefulSets replicas to 0.
-   ```yaml
-     # - ../../components/utils/uid # -- Run all Postgres database with valid users on host
-     - ../../components/utils/multi-version-upgrade # -- Scale down non-database pods to 0 for multi-version upgrade
-     # - ../../components/utils/migrate-to-nonprivileged # -- Component for migrating from privileged to non-privileged
-     #
-   ```
-   - Generate and apply a new cluster.yaml file.
-   ```sh
-   kubectl kustomize instances/my-sourcegraph -o cluster.yaml
-   kubectl apply --prune -l deploy=sourcegraph -f cluster.yaml
-   ```
-   > Note: This step will ensure that any PostgreSQL upgrade performed as an entrypoint script will have a chance to execute before the migrator is run. For more information see [Upgradeing PostgreSQL](/admin/postgres#upgrading-postgresql).
+    *convenience command:*
+    ```sh
+    $ kubectl scale deployment precise-code-intel-worker repo-updater searcher sourcegraph-frontend sourcegraph-frontend-internal symbols worker --replicas=0 && kubectl scale sts gitserver indexed-search --replicas=0
+    ```
 
-4. **Run Migrator with the `upgrade` command**:
-   - *For more detailed instructions and available command flags see our [migrator docs](/admin/updates/migrator/migrator-operations#upgrade).*
-     1. In the `configure/migrator/migrator.Job.yaml` [manifest](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/components/utils/migrator/resources/migrator.Job.yaml):
+3. **Run Migrator with the `upgrade` command**:
+   - The following procedure describes running migrator in brief, for more detailed instructions and available command flags see our [migrator docs](/admin/updates/migrator/migrator-operations#kubernetes-kustomize).
+     1. In the `configure/migrator/migrator.Job.yaml` manifest ([kustomize](https://github.com/sourcegraph/deploy-sourcegraph/blob/master/configure/migrator/migrator.Job.yaml) or [legacy](https://github.com/sourcegraph/deploy-sourcegraph/blob/master/configure/migrator/migrator.Job.yaml)):
         - set the `image:` to the **latest** release of `migrator`
         - set the `args:` value to `upgrade`. **Example:**
      ```yaml
-      - name: migrator
-        image: "index.docker.io/sourcegraph/migrator:6.0.0" // here we use a later version of migrator than the version we're upgrading too.
-        args: ["upgrade", "--from=v5.9.0", "--to=5.11.0"]
+           - name: migrator
+        image: "index.docker.io/sourcegraph/migrator:5.0.3"
+        args: ["upgrade", "--from=v3.41.0", "--to=v4.5.1"]
         env:
      ```
       > *Note:*
@@ -163,11 +168,11 @@ To perform a multi-version upgrade via migrators [upgrade](/admin/updates/migrat
      2. Run the following commands to schedule the migrator job with the upgrade command and monitor its progress:
      ```sh
      # To ensure no previous job invocations will conflict with our current invocation
-     kubectl delete job migrator
+     kubectl delete -f configure/migrator/migrator.Job.yaml
      # Start the migrator job
-     kubectl apply -f components/utils/migrator/resources/migrator.Job.yaml
+     kubectl apply -f configure/migrator/migrator.Job.yaml
      # Stream the migrator's stdout logs for progress
-     kubectl logs job/migrator -f
+     kubectl logs job.batch/migrator -f
      ```
      **Example:**
      ```sh
@@ -183,7 +188,7 @@ To perform a multi-version upgrade via migrators [upgrade](/admin/updates/migrat
 
         Execution will continue, but please report this, along with your operating
         system, terminal, and any other details, to:
-          https://sourcegraph.com/contact
+          https://github.com/sourcegraph/sourcegraph/issues/new
 
      ✱ Sourcegraph migrator 4.5.1
      👉 Migrating to v3.43 (step 1 of 3)
@@ -204,19 +209,14 @@ To perform a multi-version upgrade via migrators [upgrade](/admin/updates/migrat
      migrator   1/1           9s         35s
      ```
 
-5. **Generate and apply a new cluster.yaml file**:
-     1. Comment out the [multi-version-upgrade util](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/instances/template/kustomization.template.yaml#L155) in your cluster kustomization file (`instances/my-sourcegraph/kustomize.yaml`).
-     ```yaml
-     # - ../../components/utils/uid # -- Run all Postgres database with valid users on host
-     # - ../../components/utils/multi-version-upgrade # -- Scale down non-database pods to 0 for multi-version upgrade
-     # - ../../components/utils/migrate-to-nonprivileged # -- Component for migrating from privileged to non-privileged
-     ```
-     2. Generate and apply a new cluster.yaml with the new images from Step 2.
-     ```sh
-     kubectl kustomize instances/my-sourcegraph -o cluster.yaml
-     kubectl apply --prune -l deploy=sourcegraph -f cluster.yaml
-     ```
-     Your instance should now be up and running in the new version!
+4. **Pull and merge upstream changes**:
+     - Follow the [standard legacy upgrade procedure](#upgrade-with-legacy-kubernetes) to pull and merge upstream changes from the version you are upgrading to to your `release` branch.
+
+5. **Scale your replicas back up and apply new manifests**:
+     - The [legacy kubernetes upgrade procedure](#upgrade-with-legacy-kubernetes) describes this step in more detail.
+       - Ensure that the replica counts adjusted in the previous steps are turned back up.
+       - Run `./kubectl-apply-all.sh` to deploy the new pods to the Kubernetes cluster.
+       - Monitor the status of the deployment via `kubectl get pods -o wide --watch`.
 
 ---
 

@@ -1,8 +1,8 @@
 import clsx from 'clsx';
 import Link from 'next/link';
-import {usePathname, useParams} from 'next/navigation';
+import {usePathname} from 'next/navigation';
 
-import {NavigationItem, versionNavigations} from '@/data/navigation';
+import {NavigationItem, navigation} from '@/data/navigation';
 import {ChevronRightIcon} from '@heroicons/react/20/solid';
 import {useEffect, useState} from 'react';
 
@@ -14,14 +14,10 @@ export function Navigation({
 	onLinkClick?: React.MouseEventHandler<HTMLAnchorElement>;
 }) {
 	let pathname = usePathname();
-	const params = useParams()
-
 	const [version, setVersion] = useState<string | null>(null);
 	const [expandedTopics, setExpandedTopics] = useState<string[]>([]);
 	const [expandedSections, setExpandedSections] = useState<string[]>([]);
 	const [expandUsingPath, setExpandUsingPath] = useState<boolean>(true);
-
-	const navigation = versionNavigations[params.version as string || 'navigation']
 
 	const handleTopicClick = (topicTitle: string, maximize?: boolean) => {
 		setExpandedTopics(prevExpandedTopics => {
@@ -121,7 +117,7 @@ export function Navigation({
 			<ul role="list" className="space-y-9">
 				{navigation.map(separator => (
 					<li key={separator.separator}>
-						<h2 className="mb-8 font-semibold tracking-wide text-slate-900 dark:text-dark-text-primary lg:mb-3">
+						<h2 className="mb-8 font-semibold tracking-wide text-slate-900 dark:text-slate-200 lg:mb-3">
 							{separator.separator}
 						</h2>
 						<ul
@@ -141,7 +137,7 @@ export function Navigation({
 												'flex w-full transition-colors',
 												topic.href === pathname
 													? 'font-semibold text-link-light before:bg-link-light dark:text-link dark:before:bg-link'
-													: 'text-slate-500 hover:text-slate-900 dark:text-dark-text-secondary dark:hover:text-slate-100'
+													: 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'
 											)}
 										>
 											{topic.title}
@@ -158,7 +154,7 @@ export function Navigation({
 											>
 												<ChevronRightIcon
 													className={clsx(
-														'pointer-cursor duration-400 h-4 w-4 text-slate-500 transition-transform dark:text-dark-text-secondary',
+														'pointer-cursor duration-400 h-4 w-4 text-slate-500 transition-transform dark:text-slate-400',
 														{
 															'rotate-90 transform':
 																expandedTopics.includes(
@@ -198,7 +194,7 @@ export function Navigation({
 																		section.href ===
 																			pathname
 																			? 'font-semibold text-link-light before:bg-link-light dark:text-link dark:before:bg-link'
-																			: 'text-slate-500 before:hidden before:bg-slate-900 hover:text-slate-900 hover:before:block dark:text-dark-text-secondary dark:before:bg-slate-100 dark:hover:text-slate-100'
+																			: 'text-slate-500 before:hidden before:bg-slate-900 hover:text-slate-900 hover:before:block dark:text-slate-400 dark:before:bg-slate-100 dark:hover:text-slate-100'
 																	)}
 																>
 																	{
@@ -216,7 +212,7 @@ export function Navigation({
 																	>
 																		<ChevronRightIcon
 																			className={clsx(
-																				'pointer-cursor duration-400 h-4 w-4 text-slate-500 transition-transform dark:text-dark-text-secondary',
+																				'pointer-cursor duration-400 h-4 w-4 text-slate-500 transition-transform dark:text-slate-400',
 																				{
 																					'rotate-90 transform':
 																						expandedSections.includes(
@@ -254,7 +250,7 @@ export function Navigation({
 																						subsection.href ===
 																							pathname
 																							? 'font-semibold text-link-light before:bg-link-light dark:text-link dark:before:bg-link'
-																							: 'text-slate-500 before:hidden before:bg-slate-900 hover:text-slate-900 hover:before:block dark:text-dark-text-secondary dark:before:bg-slate-100 dark:hover:text-slate-100'
+																							: 'text-slate-500 before:hidden before:bg-slate-900 hover:text-slate-900 hover:before:block dark:text-slate-400 dark:before:bg-slate-100 dark:hover:text-slate-100'
 																					)}
 																				>
 																					{

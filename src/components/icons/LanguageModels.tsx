@@ -32,10 +32,10 @@ export function LanguageModelsIcon(
 					gradientUnits="userSpaceOnUse"
 					gradientTransform="translate(63.0762 67.711) rotate(42.777) scale(97.2778 98.6191)"
 				>
-					<stop offset="0.12479" stopColor="#F34E3F" />
-					<stop offset="0.308435" stopColor="#F34E3F" />
-					<stop offset="0.642062" stopColor="#F34E3F" />
-					<stop offset="1" stopColor="#F34E3F" />
+					<stop offset="0.12479" stopColor="#7048E8" />
+					<stop offset="0.308435" stopColor="#00CBEC" />
+					<stop offset="0.642062" stopColor="#A112FF" />
+					<stop offset="1" stopColor="#FF5543" />
 				</radialGradient>
 				<radialGradient
 					id="paint1_angular_32_3365"
@@ -45,10 +45,10 @@ export function LanguageModelsIcon(
 					gradientUnits="userSpaceOnUse"
 					gradientTransform="translate(63.0762 67.711) rotate(42.777) scale(97.2778 98.6191)"
 				>
-					<stop offset="0.12479" stopColor="#F34E3F" />
-					<stop offset="0.308435" stopColor="#F34E3F" />
-					<stop offset="0.642062" stopColor="#F34E3F" />
-					<stop offset="1" stopColor="#F34E3F" />
+					<stop offset="0.12479" stopColor="#7048E8" />
+					<stop offset="0.308435" stopColor="#00CBEC" />
+					<stop offset="0.642062" stopColor="#A112FF" />
+					<stop offset="1" stopColor="#FF5543" />
 				</radialGradient>
 			</defs>
 		</svg>

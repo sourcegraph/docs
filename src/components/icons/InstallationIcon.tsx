@@ -19,8 +19,8 @@ export function InstallationIcon({
 
 			<path
 				d="m4 4 10.286 24 2.285-11.429L28 14.286 4 4Z"
-				fill="#F34E3F"
-				stroke="#F34E3F"
+				fill={`url(#${id}-gradient)`}
+				stroke={`url(#${id}-gradient)`}
 				strokeWidth={2}
 				strokeLinecap="round"
 				strokeLinejoin="round"

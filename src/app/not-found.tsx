@@ -10,7 +10,7 @@ export default function NotFound() {
         <h1 className="mt-3 font-display text-3xl tracking-tight text-slate-900 dark:text-white">
           Page not found
         </h1>
-        <p className="mt-2 text-sm text-slate-500 dark:text-dark-paragraph-text">
+        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
           Sorry, we couldn’t find the page you’re looking for.
         </p>
         <Link

@@ -1,13 +1,8 @@
 'use client';
 
-import clsx from 'clsx';
-import { allPosts } from 'contentlayer/generated';
+import {useCallback, useEffect, useState} from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
-import { BugIcon } from './icons/BugIcon';
-import { Globe } from './icons/Globe';
-import { PencilIcon } from './icons/PencilIcon';
+import clsx from 'clsx';
 
 interface Heading {
 	level: number;
@@ -19,15 +14,8 @@ interface Props {
 	headings: Heading[];
 }
 
-type ParamsType = {
-	version?: string;
-	slug: string[];
-}
-
-export function TableOfContents({ headings }: Props) {
+export function TableOfContents({headings}: Props) {
 	let [currentSection, setCurrentSection] = useState(headings[0]?.id);
-	const [path, setPath] = useState('')
-	const params: ParamsType = useParams()
 
 	let getHeadings = useCallback((headings: Heading[]) => {
 		return headings
@@ -43,24 +31,11 @@ export function TableOfContents({ headings }: Props) {
 						window.scrollY +
 						el.getBoundingClientRect().top -
 						scrollMt;
-					return { id: heading.id, top };
+					return {id: heading.id, top};
 				}
 			})
-			.filter((x): x is { id: string; top: number } => x !== null);
+			.filter((x): x is {id: string; top: number} => x !== null);
 	}, []);
-
-	useEffect(() => {
-		const path = params.slug.join('/');
-
-		if (allPosts) {
-			const post = allPosts.find(post => post._raw.flattenedPath === path);
-			if (post) {
-				let currentPath = post._id;
-				if (params?.version) currentPath = `versioned/${params.version}/${currentPath}`;
-				setPath(currentPath);
-			}
-		}
-	}, [params])
 
 	useEffect(() => {
 		if (headings.length === 0) return;
@@ -82,7 +57,7 @@ export function TableOfContents({ headings }: Props) {
 			setCurrentSection(current);
 		}
 
-		window.addEventListener('scroll', onScroll, { passive: true });
+		window.addEventListener('scroll', onScroll, {passive: true});
 		onScroll();
 
 		return () => {
@@ -115,7 +90,7 @@ export function TableOfContents({ headings }: Props) {
 												className={clsx(
 													isActive(heading)
 														? 'font-semibold text-link-light dark:text-link'
-														: 'font-normal text-slate-500 hover:text-slate-700 dark:text-dark-text-secondary dark:hover:text-slate-300'
+														: 'font-normal text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
 												)}
 											>
 												{heading.title}
@@ -125,7 +100,7 @@ export function TableOfContents({ headings }: Props) {
 									{heading.level === 2 && (
 										<ol
 											role="list"
-											className="mt-2 space-y-3 pl-5 text-slate-500 dark:text-dark-text-secondary"
+											className="mt-2 space-y-3 pl-5 text-slate-500 dark:text-slate-400"
 										>
 											<li key={heading.id}>
 												<Link
@@ -144,41 +119,6 @@ export function TableOfContents({ headings }: Props) {
 								</li>
 							))}
 						</ol>
-						{/* Edit doc with GitHub button */}
-						<hr className='mt-4' />
-						<div className="flex items-center mt-4 text-sm">
-							<a
-								href={`https://github.com/sourcegraph/docs/edit/main/docs/${path}`}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-							>
-								<PencilIcon className="mr-1 h-4 w-4" />
-								Edit this page on GitHub
-							</a>
-						</div>
-						<div className="flex items-center mt-2 text-sm">
-							<a
-								href={`https://sourcegraph.com/`}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-							>
-								<Globe className="mr-1 h-4 w-4" />
-								Go to Sourcegraph.com
-							</a>
-						</div>
-						<div className="flex items-center mt-2 text-sm">
-							<a
-								href="https://community.sourcegraph.com"
-								target="_blank"
-								rel="noopener noreferrer"
-								className="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-							>
-								<BugIcon className="mr-1 h-4 w-4" />
-								Questions? Give us feedback
-							</a>
-						</div>
 					</>
 				)}
 			</nav>

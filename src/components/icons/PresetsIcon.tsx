@@ -16,7 +16,7 @@ export function PresetsIcon({
 					gradientTransform="matrix(0 22.75 -22.75 0 16 6.25)"
 				/>
 			</defs>
-			<g fill="#F34E3F">
+			<g fill={`url(#${id}-gradient)`}>
 				<path
 					fillRule="evenodd"
 					clipRule="evenodd"

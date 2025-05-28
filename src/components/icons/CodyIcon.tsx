@@ -34,8 +34,8 @@ export function CodyIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 					gradientUnits="userSpaceOnUse"
 					gradientTransform="translate(55.3544 53.2401) rotate(-9.72479) scale(55.7772 67.5301)"
 				>
-					<stop offset="0.5" stopColor="#F34E3F" />
-					<stop offset="0.88" stopColor="#F34E3F" />
+					<stop offset="0.5" stopColor="#FF291F" />
+					<stop offset="0.88" stopColor="#FF5543" />
 				</radialGradient>
 				<linearGradient
 					id="paint1_linear_75_19"
@@ -45,15 +45,15 @@ export function CodyIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 					y2="11.5468"
 					gradientUnits="userSpaceOnUse"
 				>
-					<stop stopColor="#F34E3F" />
-					<stop offset="0.21" stopColor="#F34E3F" />
-					<stop offset="0.36" stopColor="#F34E3F" />
-					<stop offset="0.5" stopColor="#F34E3F" />
-					<stop offset="0.62" stopColor="#F34E3F" />
-					<stop offset="0.74" stopColor="#F34E3F" />
-					<stop offset="0.85" stopColor="#F34E3F" />
-					<stop offset="0.96" stopColor="#F34E3F" />
-					<stop offset="1" stopColor="#F34E3F" />
+					<stop stopColor="#A112FF" />
+					<stop offset="0.21" stopColor="#A213FB" />
+					<stop offset="0.36" stopColor="#A716F2" />
+					<stop offset="0.5" stopColor="#AF1CE2" />
+					<stop offset="0.62" stopColor="#BA24CB" />
+					<stop offset="0.74" stopColor="#C92FAD" />
+					<stop offset="0.85" stopColor="#DB3C89" />
+					<stop offset="0.96" stopColor="#F14B5F" />
+					<stop offset="1" stopColor="#FA524E" />
 				</linearGradient>
 				<linearGradient
 					id="paint2_linear_75_19"
@@ -63,8 +63,8 @@ export function CodyIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 					y2="94.5386"
 					gradientUnits="userSpaceOnUse"
 				>
-					<stop offset="0.15" stopColor="#F34E3F" />
-					<stop offset="0.98" stopColor="#F34E3F" />
+					<stop offset="0.15" stopColor="#00CBEC" />
+					<stop offset="0.98" stopColor="#7048E8" />
 				</linearGradient>
 				<clipPath id="clip0_75_19">
 					<rect width="126" height="114" fill="white" />

@@ -2,21 +2,27 @@
 
 <p className="subtitle">Learn and understand more about Sourcegraph's Code Search features and core functionality.</p>
 
-<LinkCards>
-  <LinkCard href="https://about.sourcegraph.com/get-started?t=enterprise" imgSrc="https://storage.googleapis.com/sourcegraph-assets/Docs/sg-new-logo.svg" imgAlt="Sourcegraph" title="Get single-tenant instance managed by Sourcegraph." description="Sign up and get a 30 day free trial for your team." />
-</LinkCards>
-
 ## Powerful, flexible queries
 
 Sourcegraph code search performs full-text searches and supports both regular expression and exact queries. By default, Sourcegraph searches across all your repositories. Our search query syntax allows for advanced queries, such as searching over any branch or commit, narrowing searches by programming language or file pattern, and more.
 
-See the [search query syntax](/code-search/queries) documentation for a comprehensive overview of supported syntax.
+See the [query syntax](/code-search/queries) and [query language reference](/code-search/queries/language) documentation for a comprehensive overview of supported syntax.
 
 ## Data freshness
 
 Searches scoped to specific repositories are always up-to-date. Sourcegraph automatically fetches repository contents with any user action specific to the repository and makes new commits and branches available for searching and browsing immediately.
 
 Unscoped search results over large repository sets may trail latest default branch revisions by some interval of time. This interval is a function of the number of repositories and the computational resources devoted to search indexing.
+
+## Max file size
+
+By default, files larger than 1 MB are excluded from search results. Use the [search.largeFiles](/admin/config/site_config#search-largeFiles) keyword to specify files to be indexed and searched regardless of size. Regardless of where you set the `search.largeFiles` environment variable, Sourcegraph will continue to ignore binary files, even if the size of the file is less than the limit you set.
+
+## Language-aware structural code search
+
+Sourcegraph supports advanced code search for specifically matching patterns inside code structures, like function parameters and loop bodies.
+
+See the [structural search](/code-search/types/structural) documentation for a detailed explanation of this search mode.
 
 ## Commit diff search
 
@@ -40,6 +46,14 @@ Searching for symbols makes it easier to find specific functions, variables, and
 
 Saved searches let you save and describe search queries so you can easily monitor the results on an ongoing basis. You can create a saved search for anything, including diffs and commits across all branches of your repositories. Saved searches can be an early warning system for common problems in your code and a way to monitor best practices, the progress of refactors, etc.
 
+See the [saved searches](/code-search/types/saved_searches) documentation for instructions for setting up and configuring saved searches.
+
+## Suggestions
+
+As you type a query, the menu below will contain suggestions based on the query. Use the keyboard or mouse to select a suggestion. For example, if your query is `repo:foo file:\.js$ hello`, the suggestions will consist of the list of files that match your query.
+
+You can also type in the partial name of a repository or filename to quickly jump to it. For example, typing in just `foo` would show you a list of repositories (first) and files with names containing _foo_.
+
 ## Search contexts
 
 Search contexts help you search the code you care about on Sourcegraph. A search context represents a set of repositories at specific revisions on a Sourcegraph instance that will be targeted by search queries by default.
@@ -52,11 +66,86 @@ See the [search contexts](/code-search/working/search_contexts) documentation to
 
 ## Multi-branch indexing
 
-The most common branch to search is your default branch. To speed up this common operation, Sourcegraph maintains an index of the source code on your default branch. Some organizations have other branches that are regularly searched. To speed up search for those branches, Sourcegraph can be configured to index up to 64 branches per repository. Your site admin can configure multi-branch indexing through [site configuration](/admin/search#multi-branch-indexing).
+<Callout type="note"> Multi-branch indexing is in the Experimental stage and must be enabled by a Sourcegraph site admin in site configuration.</Callout>
+
+The most common branch to search is your default branch. To speed up this common operation, Sourcegraph maintains an index of the source code on your default branch. Some organizations have other branches that are regularly searched. To speed up search for those branches, Sourcegraph can be configured to index up to 64 branches per repository.
+
+Your site admin can configure indexed branches in site configuration under the `experimentalFeatures.search.index.branches` setting. For example:
+
+``` json
+"experimentalFeatures": {
+  "search.index.branches": {
+   "github.com/sourcegraph/sourcegraph": ["3.15", "develop"],
+   "github.com/sourcegraph/src-cli": ["next"]
+  }
+}
+```
+
+Indexing multiple branches will add additional resource requirements to Sourcegraph (particularly memory). The indexer will deduplicate documents between branches. So the size of your index will grow in relation to the number of unique documents. Refer to our [resource estimator](https://docs.sourcegraph.com/admin/deploy/resource_estimator) to estimate whether additional resources are required.
+
+<Callout type="note"> The default branch (HEAD) and all revisions specified in version contexts are always indexed.</Callout>
 
 ## Exclude files and directories
 
-You can exclude files and directories from search by adding the file `.sourcegraph/ignore` to the root directory of your repository. Files or directories matching the glob patterns will not show up in the search results. For more information on creating `.sourcegraph/ignore` files, see the [configuration reference](/admin/search#exclude-files-and-directories).
+You can exclude files and directories from search by adding the file `.sourcegraph/ignore` to the root directory of your repository. Sourcegraph interprets each line in the _ignore_ file as a glob pattern. Files or directories matching those patterns will not show up in the search results.
+
+The `ignore` file is tied to a commit. This means that if you committed an `ignore` file to a feature branch but not to your default branch, then only search results for the feature branch will be filtered, while the default branch will show all results.
+
+For example:
+
+```bash
+// .sourcegraph/ignore
+// lines starting with "//" are comments and are ignored
+// empty lines are ignored, too
+
+// ignore the directory node_modules/
+node_modules/
+
+// ignore the directory src/data/
+src/data/
+
+// ** matches all characters, while * matches all characters except /
+// ignore all JSON files
+**.json
+
+// ignore all JSON files at the root of the repository
+*.json
+
+// ignore all JSON files within the directory data/
+data/**.json
+
+// ignore all data folders
+data/
+**/data/
+
+// ignore all files that start with numbers
+[0-9]*.*
+**/[0-9]*.*
+```
+
+Our syntax follows closely what is documented in [the linux documentation project](https://tldp.org/LDP/GNU-Linux-Tools-Summary/html/x11655.htm). However, we distinguish between `*` and `**`: While `**` matches all characters, `*` matches all characters except the path separator `/`.
+
+Note that invalid globbing patterns will cause an error and searches over commits containing a broken `ignore` file
+will not return any result.
+
+## Shard merging
+
+Shard merging is a feature of Zoekt that enables the combination of smaller index files, or shards, into one larger file, a compound shard. This can reduce memory costs for Zoekt webserver. This feature is particularly useful for
+customers with many small and rarely updated repositories, and can result in a significant reduction in memory. Shard merging can be enabled by setting `SRC_ENABLE_SHARD_MERGING="1"` for Zoekt indexserver.
+
+Shard merging can be fine-tuned by setting ENV variables for Zoekt indexserver:
+
+|     **Env Variable**      |                                          **Description**                                           | **Default**  |
+| ---------------------- | ---------------------------------------------------------------------------------------------- | -------- |
+| SRC_VACUUM_INTERVAL    | Run vacuum this often, specified as a duration                                                 | 24 hours |
+| SRC_MERGE_INTERVAL     | Run merge this often, specified as a duration                                                  | 8 hours  |
+| SRC_MERGE_TARGET_SIZE  | The target size of compound shards in MiB                                                      | 2000     |
+| SRC_MERGE_MIN_SIZE     | The minimum size of a compound shard in MiB                                                    | 1800     |
+| SRC_MERGE_MIN_AGE      | The time since the last commit in days. Shards with newer commits are excluded from merging.   | 7        |
+| SRC_MERGE_MAX_PRIORITY | The maximum priority a shard can have to be considered for merging, specified as a float value | 100.0    |
+
+When repostiories receive udpates, Zoekt reindexes them and tombstones their old index data. As a result, compound shards can shrink and be dismantled into individual shards once they reach a critical minimum size. These individual
+shards are then considered for future merge operations. Shard merging can be monitored via the "Compound shards" panel in Zoekt's Grafana dashboard.
 
 ## RE2 Regular Expressions
 
@@ -65,7 +154,7 @@ The Sourcegraph search language supports [RE2](https://golang.org/s/re2syntax) s
 - It's well-supported in Go, allowing us to take advantage of a rich ecosystem (notably including [Zoekt](https://github.com/sourcegraph/zoekt))
 - Our API and tooling makes it straightforward to use Sourcegraph with other tools that provide facilities not built in to the search language.
 
-As an example of how you can use Sourcegraph tooling with other tools, we can use `jq` (which supports Perl regexes) along with `src` to post-filter search results. In this case, we want to use backreferences to find go functions that take a single pointer argument and return a non-pointer of the same type as the input.
+As an example of how you can use Sourcegraph tooling with other tools, we can use `jq` (which supports Perl regexes) along with `src` to post-filter search results. In this case, we want to use backreferences to find go functions take a single pointer argument and return a non-pointer of the same type as the input.
 
 ```shell
 re2_regex='func \w+\(\w+ \*\w+\) \w+'
@@ -84,53 +173,8 @@ src search --json --stream -- "/$re2_regex/" \
   ' --args "$pcre2_regex"
 ```
 
-## Search experience
-
-Users on Sourcegraph instance `v5.9.0` or more get the improved and new Code Search experience set by default. Sourcegraph Enterprise users' site admins can optionally opt-out and revert to the old view.
-
-You get the following improvements:
-
-- **In-line diff view**: Easily compare commits and see how a file changed over time, all in-line
-- **Revamped code navigation**: Quickly find a list of references of a given symbol, or immediately jump to the definition
-- **Reworked fuzzy finder ⌘K**: Find files and symbols quickly and easily with our whole new fuzzy finder
-- **File actions**: Like open in editor and open on code host
-
-## Personalized search ranking
-
-Sourcegraph Enterprise users can get more personalized and better-ranked search results in the search bar for their codebases. With this feature, you get:
-
-- Improved ranking for keyword searches like "data router". This capability is enabled by default and cannot be configured
-- Personalized ranking, specifically boosted results from repos you recently contributed to. This is controlled by the setting `experimentalFeatures.boostRelevantRepositories`
-
-These boosted results from your recently contributed repositories make finding the code you care about easier.
-
-The personalized search ranking works best if you have large codebases, especially for new users who may otherwise get overwhelmed by results from unfamiliar or irrelevant repositories.
-
-Personalized search ranking is enabled by default, but you can disable it from your settings via:
-
-```json
-experimentalFeatures: {
-  boostRelevantRepositories: false
-}
-```
-
-Here is an example of search results with personalized search ranking enabled:
-
-![search-ranking-enabled](https://storage.googleapis.com/sourcegraph-assets/Docs/personalized-search-rankings.png)
-
-As you can see, the results are now ranked based on their relevance to the query, and the results from repositories you've recently contributed to are boosted.
-
-## Compare changes across revisions
-
-When you run a search, you can compare the results from two different revisions of the codebase. From your search query results page, click the three-dot **...** icon next to the **Contributors** tab. Then select the **Compare** option.
-
-From here, you can execute file and directory filtering and compare large diffs, making it easier to navigate and manage.
-
-This file picker is useful when comparing branches with thousands of changed files and allows you to select specific files or directories to focus on. You can [filter files directly](/code-search/compare-file-filtering) by constructing a URL with multiple file paths or use a compressed file list for even larger selections.
-
-![file-and-directory-filtering](https://storage.googleapis.com/sourcegraph-assets/Docs/filter-by-file-dir-on-compare.png)
-
 ## Other search tips
 
 - When viewing a file or directory, press the `y` key to expand the URL to its canonical form (with the full 40-character Git commit SHA).
 - To share a link to multi-line range in a file, click on the starting line number and shift-click on the ending line number (in the left-hand gutter).
+- The dynamic filter currently allows up to 40 results returned under the repo filter and 40 results returned under other (Total:80)

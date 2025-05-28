@@ -5,27 +5,26 @@ import {
 	LightBulbIcon,
 	ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
-import { NotebookPen } from 'lucide-react';
 
 const styles = {
 	note: {
 		container:
-			'border-sky-500/20 bg-sky-50/50 dark:border-[#002533] dark:bg-[#001118]',
+			'border-sky-500/20 bg-sky-50/50 dark:border-sky-500/30 dark:bg-sky-500/10',
 		icon: 'text-sky-500',
 
-		body: 'text-sky-800 [--tw-prose-background:theme(colors.sky.50)] prose-a:text-sky-900 prose-code:text-sky-900 dark:text-[#85cfe9] dark:prose-code:text-[#85cfe9]'
+		body: 'text-sky-800 [--tw-prose-background:theme(colors.sky.50)] prose-a:text-sky-900 prose-code:text-sky-900 dark:text-slate-300 dark:prose-code:text-slate-300'
 	},
 	info: {
 		container:
-			'border-sky-500/20 bg-sky-50/50 dark:border-[#002533] dark:bg-[#001118]',
-		icon: 'text-sky-500',
-		body: 'text-sky-800 [--tw-prose-background:theme(colors.sky.50)] prose-a:text-sky-900 prose-code:text-sky-900 dark:text-[#85cfe9] dark:prose-code:text-[#85cfe9]'
+			'dark:bg-slate-900 border-slate-300 dark:border-slate-200/20',
+		icon: 'text-inherit',
+		body: 'text-sky-800 [--tw-prose-background:theme(colors.sky.50)] prose-a:text-sky-900 prose-code:text-sky-900 dark:text-slate-300 dark:prose-code:text-slate-300'
 	},
 	tip: {
 		container:
-			'border-sky-500/20 bg-sky-50/50 dark:border-[#002533] dark:bg-[#001118]',
+			'border-sky-500/20 bg-sky-50/50 dark:border-sky-500/30 dark:bg-sky-500/10',
 		icon: 'text-sky-500',
-		body: 'text-sky-800 [--tw-prose-background:theme(colors.sky.50)] prose-a:text-sky-900 prose-code:text-sky-900 dark:text-[#85cfe9] dark:prose-code:text-[#85cfe9]'
+		body: 'text-sky-800 [--tw-prose-background:theme(colors.sky.50)] prose-a:text-sky-900 prose-code:text-sky-900 dark:text-slate-300 dark:prose-code:text-slate-300'
 	},
 	warning: {
 		container:
@@ -37,7 +36,7 @@ const styles = {
 
 const icons = {
 	note: (props: {className?: string}) => (
-		<NotebookPen className={props.className} />
+		<InformationCircleIcon className={props.className} />
 	),
 	info: (props: {className?: string}) => (
 		<InformationCircleIcon className={props.className} />

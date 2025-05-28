@@ -12,7 +12,6 @@ import { useEffect, useState } from 'react';
 import { LogoMark } from './LogoMark';
 import VersionSelector from './VersionSelector';
 import { Search } from './search/Search';
-import { DemoLayout } from '@/components/DemoLayout';
 
 function GitHubIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -57,20 +56,6 @@ function Header() {
 					>
 						<Logo className="h-9 w-auto" />
 					</Link>
-					{/* <Link
-						href="/"
-						aria-label="Home page"
-						className="relative z-10 md:block text-vermilion-08 hover:text-vermilion-07 ml-2"
-					>
-						Documentation
-					</Link>
-					<Link
-						href="https://community.sourcegraph.com"
-						aria-label="Home page"
-						className="relative z-10 hidden md:block text-vermilion-08 hover:text-vermilion-07 ml-4"
-					>
-						Help
-					</Link> */}
 					<Link
 						href="/"
 						className="relative z-10 block md:hidden"
@@ -109,7 +94,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 			<Header />
 
 			{isHomePage && <Hero />}
-			{/* {isHomePage && <DemoLayout />} */}
 
 			<div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-12">
 				<div className="hidden lg:relative lg:block lg:flex-none">

@@ -1,173 +1,71 @@
 # Chat
 
-<p className="subtitle">Chat with the AI assistant in your code editor or via the Sourcegraph web app to get intelligent suggestions, code autocompletions, and contextually aware answers.</p>
+<p className="subtitle">Use Cody's chat to get contextually-aware answers to your questions.</p>
 
-<Tabs>
-  <Tab title="Free/Pro">
- You can **chat** with Cody to ask questions about your code, generate code, and edit code. By default, Cody has the context of your open file and entire repository, and you can use `@` to add context for specific files, symbols, remote repositories, or other non-code artifacts.
+Cody **chat** allows you to ask coding-related questions about your entire codebase or a specific code snippet. You can do it from the **Chat** panel of the supported editor extensions (VS Code, JetBrains, and Neovim) or in the web app.
 
-You can do it from the **chat** panel of the supported editor extensions ([VS Code](/cody/clients/install-vscode), [JetBrains](/cody/clients/install-jetbrains), [Visual Studio](/cody/clients/install-visual-studio)) or in the [web](/cody/clients/cody-with-sourcegraph) app.
+Key functionalities in the VS Code extension include support for multiple simultaneous chats, enhanced chat context configurability through `@` commands, detailed visibility into the code that Cody read before providing a response, and more.
+
+You can learn more about the IDE support for these functionalities in the [feature parity reference](/cody/clients/feature-reference#chat).
 
 ## Prerequisites
 
-To use Cody's chat, you'll need the following:
+To use Cody's chat, you'll need to have the following:
 
-- [Sourcegraph Enterprise Starter](https://sourcegraph.com/pricing) or [Enterprise account](https://sourcegraph.com/pricing)
-- A supported editor extension [VS Code](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-ai), [JetBrains](https://plugins.jetbrains.com/plugin/9682-cody-ai-coding-assistant-with-autocomplete--chat) installed or use via Web app
+- A Free or Pro account via Sourcegraph.com or a Sourcegraph Enterprise account
+- A supported editor extension (VS Code, JetBrains, and Neovim) installed
 
 ## How does chat work?
 
-Cody answers questions by searching your codebase and retrieving context relevant to your questions. Cody uses several methods to search for context, including Sourcegraph's native search and keyword search. Finding and using context allows Cody to make informed responses based on your code rather than being limited to general knowledge. When Cody retrieves context to answer a question, it will tell you which code files it reads to generate its response.
+Cody can use several methods (including keyword search and optional embeddings context) to ask relevant questions. For VS Code extension users, Cody also uses context from the files to provide an informed response based on your codebase. Cody also tells you which code files it reads to generate its responses.
 
-Cody can assist you with various use cases, such as:
+Cody can assist you with various use cases such as:
 
 - Generating an API call: Cody can analyze your API schema to provide context for the code it generates
 - Locating a specific component in your codebase: Cody can identify and describe the files where a particular component is defined
 - Handling questions that involve multiple files, like understanding data population in a React app: Cody can locate React component definitions, helping you understand how data is passed and where it originates
 
-## Chat features
+## Ask Cody your first question
 
-There are several features that you can use to make your chat experience better. These features may vary depending on the [client](/cody/clients) you are using. You can learn more about the support for these functionalities in the [feature parity reference](/cody/clients/feature-reference#chat).
+Let's use Cody VS Code extension's chat interface to answer your first question.
 
-## Default context
+- Click the Cody icon in the sidebar to view the detailed panel
+- Next, click the icon for **New Chat** to open a new chat window
+- Write your question or instruction to Cody and then press **Enter**.
 
-When you start a new Cody chat, the input window opens with a default `@-mention` context chips for the opened file and the current repository.
+For example, ask Cody "What does this file do?"
 
-![context-retrieval](https://storage.googleapis.com/sourcegraph-assets/Docs/context-retrieval-repo-file-2025.png)
+Cody will take a few seconds to process your question, providing contextual information about the files it reads and generating the answer.
 
-At any point in time, you can edit these context chips or remove them entirely if you do not want to use these as context. Any chat without a context chip will instruct Cody to use no codebase context. However, you can always provide an alternate `@-mention` file or symbols to let Cody use it as a new context source.
-
-When you have both a repository and files @-mentioned, Cody will search the repository for context while prioritizing the mentioned files.
-
-## Add new context
-
-You can add new custom context by adding `@-mention` context chips to the chat. At any point, you can use `@-mention` a repository, file, line range, or symbol, to ask questions about your codebase. Cody will use this new context to generate contextually relevant code.
-
-## OpenCtx context providers
-
-<Callout type="info">OpenCtx context providers are in the Experimental stage for all Cody VS Code users. Enterprise users can also use this but with limited support. If you have feedback or questions, please visit our [support forum](https://community.sourcegraph.com/c/openctx/10).</Callout>
-
-[OpenCtx](https://openctx.org/) is an open standard for bringing contextual info about code into your dev tools. Cody Free and Pro users can use OpenCtx providers to fetch and use context from the following sources:
-
-- [Webpages](https://openctx.org/docs/providers/web) (via URL)
-- [Jira tickets](https://openctx.org/docs/providers/jira)
-- [Linear issues](https://openctx.org/docs/providers/linear-issues)
-- [Notion pages](https://openctx.org/docs/providers/notion)
-- [Google Docs](https://openctx.org/docs/providers/google-docs)
-- [Sourcegraph code search](https://openctx.org/docs/providers/sourcegraph-search)
-
-You can use `@-mention` web URLs to pull live information like docs. You can connect Cody to OpenCtx to `@-mention` non-code artifacts like Google Docs, Notion pages, Jira tickets, and Linear issues.
-
-## LLM selection
-
-Cody allows you to select the LLM you want to use for your chat, which is optimized for speed versus accuracy. Cody Free and Pro users can select multiple models. Enterprise users with the new [model configuration](/cody/clients/model-configuration) can use the LLM selection dropdown to choose a chat model.
-
-You can read about these supported LLM models [here](/cody/capabilities/supported-models#chat-and-commands).
-
-![LLM-models-for-cody-free](https://storage.googleapis.com/sourcegraph-assets/Docs/llm-dropdown-options-free-pro-2025.png)
-
-## Smart Apply and Execute code suggestions
-
-Cody lets you dynamically insert code from chat into your files with **Smart Apply**. Whenever Cody provides a code suggestion, you can click the **Apply** button. Cody will then analyze your open code file, find where that relevant code should live, and add a diff. For chat messages where Cody provides multiple code suggestions, you can apply each in sequence to go from chat suggestions to written code.
-
-Smart Apply also supports the executing of commands in the terminal. When you ask Cody a question related to terminal commands, you can now execute the suggestion in your terminal by clicking the `Execute` button in the chat window.
-
-![smart-apply](https://storage.googleapis.com/sourcegraph-assets/Docs/smart-apply-2025.png)
-
-### Model used for Smart Apply
-
-To ensure low latency, Cody uses a more targeted Qwen 2.5 Coder model for Smart Apply. This model improves the responsiveness of the Smart Apply feature in both VS Code and JetBrains while preserving edit quality. Users on Cody Free, Pro, Enterprise Starter, and Enterprise plans get this default Qwen 2.5 Coder model for Smart Apply suggestions.
-
-Enterprise users not using Cody Gateway get a Claude Sonnet-based model for Smart Apply.
-
-## Chat history
-
-Cody keeps a history of your chat sessions. You can view it by clicking the **History** button in the chat panel. You can **Export** it to a JSON file for later use or click the **Delete all** button to clear the chat history.
-
-## Prompts
-
-Cody offers quick, ready-to-use [prompts](/cody/capabilities/commands) for common actions to write, describe, fix, and smell code. Read more about [prompts](/cody/capabilities/commands) here.
+        <video width="1920" height="1080" loop playsInline controls style={{ width: '100%', height: 'auto' }}>
+                    <source src="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/ask-cody-question.mp4" type="video/mp4" />
+                    </video>
 
 ## Ask Cody to write code
 
-Cody chat can also write code for your questions. For example, in VS Code, ask Cody to "write a function that sorts an array in ascending order".
+The chat feature can also write code for your questions. For example, in VS Code, ask Cody to "write a function that sorts an array in ascending order".
 
-You are provided with code suggestions in the chat window and the following options for using the code.
+You are provided with code suggestions in the chat window along with the following options for using the code.
 
 - The **Copy Code** icon to your clipboard and paste the code suggestion into your code editor
 - Insert the code suggestion at the current cursor location by the **Insert Code at Cursor** icon
 - The **Save Code to New File** icon to save the code suggestion to a new file in your project
 
-If Cody's answer isn't helpful, you can try asking again with a different context:
+During the chat, if Cody needs additional context, it can ask you to provide more information with a follow-up question. If your question is beyond the scope of the context, Cody will ask you to provide an alternate question aligned with the context of your codebase.
 
-- **Public knowledge only**: Cody will not use your own code files as context; it’ll only use knowledge trained into the base model.
-- **Current file only**: Re-run the prompt again using the current file as context.
-- **Add context**: Provides @-mention context options to improve the response by explicitly including files, symbols, remote repositories, or even web pages (by URL).
-</Tab>
-  <Tab title="Enterprise Starter/Enterprise">
+<video width="1920" height="1080" loop playsInline controls style={{ width: '100%', height: 'auto' }}>
+  <source src="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/cody-write-code.mp4" type="video/mp4" />
+</video>
 
-The enhanced chat experience input can be accessed from the chat panel of the supported editor extensions (VS Code and JetBrains) and the web app. It combines light code search, AI-powered chat, and agentic capabilities into a unified developer interface. It's designed to accelerate the entire developer workflow by providing a more intuitive and powerful way to interact with code.
+## Selecting Context
 
-## Prerequisites
+Cody's chat allows you to add files and symbols as context in your messages.
 
-To use Cody's chat, you'll need the following:
+- Type `@` and then a filename to include a file as context
+- Type `@#` and then a symbol name to include the symbol's definition as context. Functions, methods, classes, types, etc., are all symbols
 
-- [Sourcegraph Enterprise Starter](https://sourcegraph.com/pricing) or [Enterprise account](https://sourcegraph.com/pricing)
-- A supported editor extension [VS Code](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-ai), [JetBrains](https://plugins.jetbrains.com/plugin/9682-cody-ai-coding-assistant-with-autocomplete--chat) installed or use via Web app
+### Chat vs Commands
 
-## Key features
+There could be scenarios when Cody's chat might not be able to answer your question. Or the answer lacks the context that you need. In these cases, it's recommended to use Cody **commands**. Cody's responses to commands might be better at times than responses to chats since they've been pre-packaged and prompt-engineered.
 
-The enhanced chat experience includes everything in the Free plan, plus the following:
-
-## Smart search integration
-
-The smart search integration enhances Sourcegraph's chat experience by providing lightweight code search capabilities directly within the chat interface. This feature simplifies developer workflows by offering quick access to code search without leaving the chat environment.
-
-The integration delivers personalized search results ranked by your contribution history, with frequently accessed repositories appearing higher in results. Users can view code snippets with relevant context and open files directly in their editor.
-
-Search results automatically become available as context for follow-up queries, with flexible controls for selecting which results to include. While optimized for keyword-style queries and searching across a few repositories, this integration complements rather than replaces the full [Code Search](/code-search) product, which remains the recommended tool for comprehensive enterprise-wide code search.
-
-## Context-aware responses
-
-Search results generated through smart search integration can be automatically used as context for follow-up queries. Here's what happens with each scenario:
-
-### Search responses
-
-* Search results can be used directly as context for follow-up queries
-* Users can select which search results to include as context using checkboxes
-* By default, all search results are added as context
-* A context chip shows the number of search results being used (e.g., "10 code search results")
-* Users can remove the context chip if they don't want to use it for follow-ups
-
-### Chat responses
-
-<Callout type="info">Executing terminal commands for additional context is an experimental feature.</Callout>
-
-* Performs background searches for context
-* Retrieves full context from files, symbols, remote repos, and web pages
-* Can execute terminal commands (with permission) for additional context
-* Creates personal notes usable across chat sessions
-* Pulls in [OpenCtx](/cody/capabilities/openctx) providers for additional context
-
-## How does chat work?
-
-The following is a general walkthrough of the chat experience:
-
-1. The user enters a query in the chat interface
-2. By default a user gets a chat response for the query
-3. To get integrated search results, toggle to **Run as search** from the drop-down selector or alternatively use `Cmd+Opt+Enter` (macOS)
-4. For search:
-   - Displays ranked results with code snippets
-   - Shows personalized repository ordering
-   - Provides checkboxes to select context for follow-ups
-5. For chat:
-   - Delivers AI-powered responses
-   - Can incorporate previous search results as context
-6. Users can:
-   - Switch between search and chat modes
-   - Click on results to open files in their editor
-   - Ask follow-up questions using selected context
-   - Use `@` to add context for specific files, symbols, remote repositories, or other non-code artifacts
-
-</Tab>
-</Tabs>
+<Callout type="note"> Commands are only supported in the VS Code and JetBrains extension.</Callout>

@@ -7,8 +7,6 @@ import {allPosts} from 'contentlayer/generated';
 import {getMDXComponent} from 'next-contentlayer/hooks';
 import {notFound} from 'next/navigation';
 
-export const maxDuration = 300;
-
 export const generateStaticParams = async () => {
 	return allPosts.map(post => ({
 		params: {slug: post._raw.flattenedPath.split('/')}
@@ -19,14 +17,7 @@ export const generateMetadata = ({params}: Props) => {
 	const path = params.slug.join('/');
 	const post = allPosts.find(post => post._raw.flattenedPath === path);
 	if (post && post.headings && post.headings.length > 0) {
-		return {
-			title: post.headings[0].title,
-			openGraph: {
-				images: [
-					{url: 'https://sourcegraph.com/docs/sourcegraph-og-nw.png'}
-				]
-			}
-		};
+		return {title: post.headings[0].title};
 	}
 };
 

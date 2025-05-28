@@ -20,10 +20,10 @@ export function CodebaseIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 					gradientUnits="userSpaceOnUse"
 					gradientTransform="translate(58.5068 70.9589) rotate(48.7732) scale(90.9807 91.7122)"
 				>
-					<stop offset="0.12479" stopColor="#F34E3F" />
-					<stop offset="0.308435" stopColor="#F34E3F" />
-					<stop offset="0.642062" stopColor="#F34E3F" />
-					<stop offset="1" stopColor="#F34E3F" />
+					<stop offset="0.12479" stopColor="#7048E8" />
+					<stop offset="0.308435" stopColor="#00CBEC" />
+					<stop offset="0.642062" stopColor="#A112FF" />
+					<stop offset="1" stopColor="#FF5543" />
 				</radialGradient>
 			</defs>
 		</svg>

@@ -1,52 +1,67 @@
-# Feature Parity Reference for Sourcegraph Clients
+# Feature Parity Reference for Cody Clients
 
-<p className="subtitle">This document compares features and capabilities across different clients and platforms like VS Code, JetBrains, and Sourcegraph.com (Web UI).</p>
+<p className="subtitle">This document compares Cody's features and capabilities across different clients.</p>
+
+Here's a feature parity matrix that compares the capabilities of Cody Clients across different platforms like VS Code, JetBrains, Neovim, and Sourcegraph.com (Web UI).
 
 ## Chat
 
-|               **Feature**                | **VS Code** | **JetBrains** | **Visual Studio** |       **Web**        | **CLI** |
-| ---------------------------------------- | ----------- | ------------- | ----------------- | -------------------- | ------- |
-| Chat                                     | ✅           | ✅             | ✅                 | ✅                    | ✅       |
-| Chat history                             | ✅           | ✅             | ✅                 | ✅                    | ❌       |
-| Clear chat history                       | ✅           | ✅             | ✅                 | ✅                    | ❌       |
-| Edit sent messages                       | ✅           | ✅             | ✅                 | ✅                    | ❌       |
-| SmartApply/Execute                       | ✅           | ❌             | ❌                 | ❌                    | ❌       |
-| Show context files                       | ✅           | ✅             | ✅                 | ✅                    | ❌       |
-| @-file                                   | ✅           | ✅             | ✅                 | ✅                    | ❌       |
-| @-symbol                                 | ✅           | ❌             | ✅                 | ✅                    | ❌       |
-| LLM Selection                            | ✅           | ✅             | ✅                 | ✅                    | ❌       |
-| **Context Selection**                    |             |               |                   |                      |         |
-| Single-repo context                      | ✅           | ✅             | ✅                 | ✅                    | ❌       |
-| Multi-repo context                       | ❌           | ❌             | ❌                 | ✅ (public code only) | ❌       |
-| Local context                            | ✅           | ✅             | ✅                 | ❌                    | ✅       |
-| OpenCtx context providers (experimental) | ✅           | ❌             | ❌                 | ❌                    | ❌       |
-| **Prompts**                              |             |               |                   |                      |         |
-| Access to prompts and Prompt library     | ✅           | ✅             | ✅                 | ✅                    | ❌       |
-| Promoted Prompts                         | ✅           | ❌             | ❌                 | ✅                    | ❌       |
+| **Feature**                     | **VS Code** | **JetBrains** | **Neovim** | **Web** |
+|---------------------------------|-------------|---------------|------------|---------|
+| Talk to Cody                    | ✓           | ✓             | ✓          | ✓       |
+| Chat history                    | ✓           | ✓             | x          | ✓       |
+| Stop chat generating            | ✓           | ✓             | x          | ✓       |
+| Edit sent messages              | ✓           | x             | x          | ✓       |
+| Show context files              | ✓           | ✓             | ✓          | ✓       |
+| Custom commands                 | ✓           | x             | x          | x       |
+| Clear chat history              | ✓           | ✓             | x          | ✓       |
+| LLM Selection                   | ✓           | ✓             | x          | x       |
+| Enhanced  Context Selection     | ✓           | ✓             | x          | x       |
+| `@-file` support for context    | ✓           | ✓             | x          | x       |
+| `@#-symbol` support for context | ✓           | x             | x          | x       |
+| Ollama support (experimental)   | ✓           | x             | x          | x       |
 
-## Code Autocomplete and Auto-edit
+<Callout type="note">LLM selection is only supported for Cody Pro plan. On Cody Free you get the Claude 3 Sonnet as the default LLM.</Callout>
 
-|                      **Feature**                       | **VS Code** | **JetBrains** | **Visual Studio** |
-| ------------------------------------------------------ | ----------- | ------------- | ----------------- |
-| Single and multi-line autocompletion                   | ✅           | ✅             | ✅                 |
-| Cycle through multiple completion suggestions          | ✅           | ✅             | ✅                 |
-| Accept suggestions word-by-word                        | ✅           | ❌             | ❌                 |
-| Auto-edit suggestions via cursor movements and typing | ✅           | ✅             | ❌                 |
+## Code Autocomplete
 
-Few exceptions that apply to Cody Pro and Cody Enterprise users:
+| **Feature**                                   | **VS Code** | **JetBrains** | **Neovim** | **Web** |
+|-----------------------------------------------|-------------|---------------|------------|---------|
+| Single-line autocompletion                    | ✓           | ✓             | ✓          | x       |
+| Single-line, multi-part autocompletion        | ✓           | ✓             | ✓          | x       |
+| Multi-line, inline autocompletion             | ✓           | ✓             | ✓          | x       |
+| Dynamic multi-line autocompletion             | ✓           | ✓             | x          | x       |
+| Enable/Disable by language                    | ✓           | ✓             | ✓          | x       |
+| Customize autocomplete colors                 | x           | ✓             | ✓          | x       |
+| Cycle through multiple completion suggestions | ✓           | ✓             | ✓          | x       |
+| Ollama support (experimental)                 | ✓           | x             | x          | x       |
 
-<Accordion title="For Cody Pro">
+## Code Context
 
-- Multi-repo context is not supported in VS Code, JetBrains, or the Web UI for Cody Pro
+| **Feature**                | **VS Code** | **JetBrains** | **Neovim** | **Web** |
+|----------------------------|-------------|---------------|------------|---------|
+| Multi-repo context         | ✓           | ✓             | x          | ✓       |
+| Repo selection for context | ✓           | ✓             | x          | ✓       |
+| Local repo context         | ✓           | ✓             | x          | x       |
+| Embeddings                 | ✓           | x             | ✓          | x       |
 
-</Accordion>
+<Callout type="note">Please refer to the tier-wise [context fetching mechanism](/cody/core-concepts/context#context-fetching-mechanism) and [context scope](/cody/core-concepts/context#context-scope) docs for detailed breakdown.</Callout>
 
-<Accordion title="For Cody Enterprise">
+## Commands
 
-- Admin LLM selection is suported on VS Code, JetBrains, Visual Studio, and Web both for chat and code autocomplete
-- Multi-repo context is supported on VS Code, JetBrains, Visual Studio, and Web
-- [Guardrails](/cody/clients/enable-cody-enterprise#guardrails) are supported on VS Code, JetBrains, and Web
-- [Repo-based Cody Context Filters](/cody/capabilities/ignore-context#cody-context-filters) are supported on all Cody clients.
-- `@-mention` directories are supported on VS Code, JetBrains, Visual Studio, and Web
-
-</Accordion>
+| **Feature**                   | **VS Code** | **JetBrains** | **Neovim** | **Web** |
+|-------------------------------|-------------|---------------|------------|---------|
+| Edit code                     | ✓           | x             | x          | x       |
+| Generate `docstring`          | ✓           | x             | ✓          | ✓       |
+| Generate unit test  (inline)  | ✓           | x             | x          | x       |
+| Generate unit test  (chat)    | x           | ✓             | ✓          | ✓       |
+| Explain code                  | ✓           | ✓             | ✓          | ✓       |
+| Smell code                    | ✓           | ✓             | ✓          | ✓       |
+| Ask Cody to fix               | ✓           | x             | x          | x       |
+| Ask a question                | ✓           | x             | ✓          | ✓       |
+| Reset chat                    | ✓           | x             | x          | x       |
+| Task instruction              | x           | x             | ✓          | x       |
+| Restart Cody/Sourcegraph      | x           | x             | ✓          | x       |
+| Toggle chat window            | x           | x             | ✓          | x       |
+| Improve variable names        | x           | x             | x          | ✓       |
+| Ollama support (experimental) | ✓           | x             | x          | x       |

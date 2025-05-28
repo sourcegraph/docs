@@ -1,19 +1,9 @@
 import MdxComponents from '@/components/MdxComponents';
-import {Prose} from '@/components/Prose';
-import {GoogleAnalytics} from '@next/third-parties/google';
-import {allPosts} from 'contentlayer/generated';
-import {getMDXComponent} from 'next-contentlayer/hooks';
-import {notFound} from 'next/navigation';
-
-export const generateMetadata = () => {
-	return {
-		openGraph: {
-			images: [
-				{url: 'https://sourcegraph.com/docs/sourcegraph-og-nw.png'}
-			]
-		}
-	};
-};
+import { Prose } from '@/components/Prose';
+import { GoogleAnalytics } from '@next/third-parties/google';
+import { allPosts } from 'contentlayer/generated';
+import { getMDXComponent } from 'next-contentlayer/hooks';
+import { notFound } from 'next/navigation';
 
 const PostLayout = () => {
 	const post = allPosts.find(post => post._raw.flattenedPath === '');
@@ -31,6 +21,7 @@ const PostLayout = () => {
 			</div>
 			<GoogleAnalytics gaId="GTM-TB4NLS7" />
 		</>
+
 	);
 };
 

@@ -13,7 +13,6 @@ Sourcegraph aggregates usage and performance metrics for some product features i
 - Randomly generated site identifier
 - The email address of the initial site installer (or if deleted, the first active site admin), to know who to contact regarding sales, product updates, security updates, and policy updates
 - The external URL of the instance (e.g. "https://sourcegraph.example.com")
-- The IP address of the instance (e.g. "172.xx.xx.xx")
 - Sourcegraph version string (e.g. "vX.X.X")
 - Dependency versions (e.g. "6.0.9" for Redis, or "13.0" for Postgres)
 - Deployment type (single Docker image, Docker Compose, Kubernetes cluster, Helm, or pure Docker cluster)
@@ -212,7 +211,6 @@ Sourcegraph aggregates usage and performance metrics for some product features i
 
 Starting 5.2.0:
 - For `pings.sourcegraph.com`, allowlist the IP address: `34.36.231.254`
-- For `telemetry-gateway.sourcegraph.com`, allowlist the IP address: `34.107.157.31`
 - For `sourcegraph.com`, allowlist the full [Cloudflare IP ranges](https://www.cloudflare.com/ips/)
 
 Prior to 5.2.0, allowlist the full [Cloudflare IP ranges](https://www.cloudflare.com/ips/).
@@ -252,7 +250,7 @@ The Cody app connects to Sourcegraph.com to send a limited selection of the ping
 
 It may happen that Sourcegraph will stop sending critical telemetry to Sourcegraph.com, if this happens it may indicate a problem with Sourcegraphs frontend database, or a site settings misconfiguration. Below are some debugging steps.
 
-Sourcegraph telemetry pings are handled by a goroutine running on Sourcegraphs frontend service called `updatecheck`, `updatecheck` is started on container startup and periodically requests a variety of queries be run in the `pgsql` database.
+Sourcegraph telemetry pings are handled by a goroutine running on Sourcegraphs frontend service called [`updatecheck`](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/cmd/frontend/internal/app/updatecheck/client.go?subtree=true), `updatecheck` is [started](https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+file:%5Ecmd/frontend/internal/cli/serve_cmd%5C.go+updatecheck.Start%28db%29&patternType=literal) on container startup and periodically requests a variety of queries be run in the `pgsql` database.
 
 
 ### Misconfigured update.channel
@@ -260,12 +258,12 @@ The most common scenario in which Sourcegraph stops sending pings is a change to
 ```
 "update.channel": "release",
 ```
-*This setting must be set to "release" in order for the telemetry goroutine to run.*
+*This setting [must be set to "release"](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/internal/updatecheck/client.go?L803-806) in order for the telemetry goroutine to run.*
 
 
 ### Check if the goroutine is running
 
-*This section is under development and currently only applies for docker-compose instances.*
+*This section is under development and currently only applies for docker-compose instances: [39710](https://github.com/sourcegraph/sourcegraph/issues/39710)*
 
 If it's reported that pings aren't being sent to the Sourcegraph.com, you can check that the goroutine is running with the following command:
 ```

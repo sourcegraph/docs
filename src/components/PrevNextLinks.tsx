@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import {usePathname, useParams} from 'next/navigation';
+import {usePathname} from 'next/navigation';
 import clsx from 'clsx';
 
-import {versionNavigations} from '@/data/navigation';
+import {navigation} from '@/data/navigation';
 
 function ArrowIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -33,7 +33,7 @@ function PageLink({
 				<Link
 					href={href}
 					className={clsx(
-						'flex items-center gap-x-1 text-base font-semibold text-slate-500 hover:text-slate-600 dark:text-dark-text-secondary dark:hover:text-slate-300',
+						'flex items-center gap-x-1 text-base font-semibold text-slate-500 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-300',
 						dir === 'previous' && 'flex-row-reverse'
 					)}
 				>
@@ -52,9 +52,6 @@ function PageLink({
 
 export function PrevNextLinks() {
 	let pathname = usePathname();
-	const params = useParams()
-	
-	const navigation = versionNavigations[params.version as string || 'navigation']
 
 	const allLinks = navigation.flatMap(item =>
 		item.topics.flatMap(topic => [

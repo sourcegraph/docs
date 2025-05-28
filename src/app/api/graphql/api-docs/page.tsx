@@ -15,8 +15,7 @@ const PostLayout = () => {
                 <div id="page" className="drawer-layout">
                   <div id="sidebar">
                     <div className="sidebar-top-container">
-                    <h2 className="font-display text-sm font-medium text-slate-900 dark:text-white">Table of Contents</h2>
-
+                      <h3 className="text-sm uppercase">Table of Contents</h3>
 
                       {/* <div id="logo"></div>
                       <button className="close-button" type="button">
@@ -46838,15 +46837,15 @@ const PostLayout = () => {
                                       <p>
                                         DEPRECATED: Webhook logs linked directly to an
                                         external service will be removed. See{" "}
-                                        <a href="https://sourcegraph.com/docs/admin/config/webhooks/incoming#deprecation-notice">
-                                          https://sourcegraph.com/docs/admin/config/webhooks/incoming#deprecation-notice
+                                        <a href="https://docs.sourcegraph.com/admin/config/webhooks/incoming#deprecation-notice">
+                                          https://docs.sourcegraph.com/admin/config/webhooks/incoming#deprecation-notice
                                         </a>
                                       </p>
                                       <span className="deprecation-reason">
                                         Webhook logs linked directly to an external service
                                         will be removed. See{" "}
-                                        <a href="https://sourcegraph.com/docs/admin/config/webhooks/incoming#deprecation-notice">
-                                          https://sourcegraph.com/docs/admin/config/webhooks/incoming#deprecation-notice
+                                        <a href="https://docs.sourcegraph.com/admin/config/webhooks/incoming#deprecation-notice">
+                                          https://docs.sourcegraph.com/admin/config/webhooks/incoming#deprecation-notice
                                         </a>
                                       </span>
                                     </td>
@@ -57180,8 +57179,8 @@ const PostLayout = () => {
                   <h5>Description</h5>
                   <p>
                     A high-level monitoring alert, for details see{" "}
-                    <a href="https://sourcegraph.com/docs/admin/observability/metrics#high-level-alerting-metrics">
-                      https://sourcegraph.com/docs/admin/observability/metrics#high-level-alerting-metrics
+                    <a href="https://docs.sourcegraph.com/admin/observability/metrics#high-level-alerting-metrics">
+                      https://docs.sourcegraph.com/admin/observability/metrics#high-level-alerting-metrics
                     </a>
                   </p>
                 </div>
@@ -69023,12 +69022,12 @@ const PostLayout = () => {
                           it is better to configure alerting or query Prometheus
                           directly in order to ensure that if the frontend goes
                           down you still receive alerts: Configure alerting:{" "}
-                          <a href="https://sourcegraph.com/docs/admin/observability/alerting">
-                            https://sourcegraph.com/docs/admin/observability/alerting
+                          <a href="https://docs.sourcegraph.com/admin/observability/alerting">
+                            https://docs.sourcegraph.com/admin/observability/alerting
                           </a>{" "}
                           Query Prometheus directly:{" "}
-                          <a href="https://sourcegraph.com/docs/admin/observability/alerting_custom_consumption">
-                            https://sourcegraph.com/docs/admin/observability/alerting_custom_consumption
+                          <a href="https://docs.sourcegraph.com/admin/observability/alerting_custom_consumption">
+                            https://docs.sourcegraph.com/admin/observability/alerting_custom_consumption
                           </a>{" "}
                         </td>
                       </tr>

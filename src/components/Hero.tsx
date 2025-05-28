@@ -22,7 +22,7 @@ export function Hero() {
 						<div className="relative">
 							<h1
 								className={clsx(
-									'inline dark:text-white bg-clip-text font-display text-4xl tracking-tight text-black dark:text-transparent sm:text-5xl'
+									'inline bg-gradient-to-l from-[#FF5543] to-[#A112FF] bg-clip-text font-display text-4xl tracking-tight text-black dark:text-transparent sm:text-5xl'
 								)}
 							>
 								Documentation
@@ -30,7 +30,7 @@ export function Hero() {
 
 							<p
 								className={clsx(
-									'mt-3 text-xl tracking-tight text-slate-700 dark:text-[#A9A9A9] sm:text-2xl'
+									'mt-3 text-xl tracking-tight text-slate-700 dark:text-slate-200 sm:text-2xl'
 								)}
 							>
 								Sourcegraph allows developers to rapidly search, write, and understand code by bringing insights from their entire codebase right into the editor.

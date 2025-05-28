@@ -46,10 +46,10 @@ export function CodeGraphIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 					gradientUnits="userSpaceOnUse"
 					gradientTransform="translate(60.6499 70.3005) rotate(47.6943) scale(92.0225 93.1593)"
 				>
-					<stop offset="0.12479" stopColor="#F34E3F" />
-					<stop offset="0.308435" stopColor="#F34E3F" />
-					<stop offset="0.642062" stopColor="#F34E3F" />
-					<stop offset="1" stopColor="#F34E3F" />
+					<stop offset="0.12479" stopColor="#7048E8" />
+					<stop offset="0.308435" stopColor="#00CBEC" />
+					<stop offset="0.642062" stopColor="#A112FF" />
+					<stop offset="1" stopColor="#FF5543" />
 				</radialGradient>
 				<radialGradient
 					id="paint1_angular_32_3357"
@@ -59,10 +59,10 @@ export function CodeGraphIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 					gradientUnits="userSpaceOnUse"
 					gradientTransform="translate(60.6499 70.3005) rotate(47.6943) scale(92.0225 93.1593)"
 				>
-					<stop offset="0.12479" stopColor="#F34E3F" />
-					<stop offset="0.308435" stopColor="#F34E3F" />
-					<stop offset="0.642062" stopColor="#F34E3F" />
-					<stop offset="1" stopColor="#F34E3F" />
+					<stop offset="0.12479" stopColor="#7048E8" />
+					<stop offset="0.308435" stopColor="#00CBEC" />
+					<stop offset="0.642062" stopColor="#A112FF" />
+					<stop offset="1" stopColor="#FF5543" />
 				</radialGradient>
 				<radialGradient
 					id="paint2_angular_32_3357"
@@ -72,10 +72,10 @@ export function CodeGraphIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 					gradientUnits="userSpaceOnUse"
 					gradientTransform="translate(60.6499 70.3005) rotate(47.6943) scale(92.0225 93.1593)"
 				>
-					<stop offset="0.12479" stopColor="#F34E3F" />
-					<stop offset="0.308435" stopColor="#F34E3F" />
-					<stop offset="0.642062" stopColor="#F34E3F" />
-					<stop offset="1" stopColor="#F34E3F" />
+					<stop offset="0.12479" stopColor="#7048E8" />
+					<stop offset="0.308435" stopColor="#00CBEC" />
+					<stop offset="0.642062" stopColor="#A112FF" />
+					<stop offset="1" stopColor="#FF5543" />
 				</radialGradient>
 				<radialGradient
 					id="paint3_angular_32_3357"
@@ -85,10 +85,10 @@ export function CodeGraphIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 					gradientUnits="userSpaceOnUse"
 					gradientTransform="translate(60.6499 70.3005) rotate(47.6943) scale(92.0225 93.1593)"
 				>
-					<stop offset="0.12479" stopColor="#F34E3F" />
-					<stop offset="0.308435" stopColor="#F34E3F" />
-					<stop offset="0.642062" stopColor="#F34E3F" />
-					<stop offset="1" stopColor="#F34E3F" />
+					<stop offset="0.12479" stopColor="#7048E8" />
+					<stop offset="0.308435" stopColor="#00CBEC" />
+					<stop offset="0.642062" stopColor="#A112FF" />
+					<stop offset="1" stopColor="#FF5543" />
 				</radialGradient>
 			</defs>
 		</svg>

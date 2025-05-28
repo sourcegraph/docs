@@ -1,8 +1,8 @@
 'use client';
 
+import React, {ReactNode, useMemo} from 'react';
 import {Tab as HeadlessTab} from '@headlessui/react';
 import clsx from 'clsx';
-import React, {ReactNode, useMemo} from 'react';
 
 interface TabData {
 	title: string;
@@ -31,10 +31,10 @@ export function Tabs({children}: TabsProps) {
 
 	return (
 		<>
-			<div className="w-full rounded-lg">
+			<div className="w-full rounded-lg border border-light-border-2 dark:border-dark-border ">
 				<HeadlessTab.Group>
 					<HeadlessTab.List
-						className="flex flex-wrap space-x-6 rounded-md border-light-border-2 bg-light-bg-2/70 px-4 text-center text-sm font-medium dark:border-dark-border dark:bg-dark-bg-2"
+						className="flex flex-wrap space-x-6 rounded-t-md border-b border-light-border-2 bg-light-bg-2/70 px-4 text-center text-sm font-medium dark:border-dark-border dark:bg-dark-bg-2"
 						id="defaultTab"
 						data-tabs-toggle="#defaultTabContent"
 					>

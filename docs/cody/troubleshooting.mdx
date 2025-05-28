@@ -13,29 +13,15 @@ If you're experiencing issues with Cody not responding in chat, follow these ste
 - Ensure you have the latest version of the [Cody VS Code extension](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-ai). Use the VS Code command `Extensions: Check for Extension Updates` to verify
 - Check the VS Code error console for relevant error messages. To open it, run the VS Code command `Developer: Toggle Developer Tools` and then look in the `Console` for relevant messages
 
-### Cody responses/completions are slow
-
-If you're experiencing issues with Cody's responses or completions being too slow:
-
-- Ensure you have the latest version of the [Cody VS Code extension](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-ai). Use the VS Code command `Extensions: Check for Extension Updates` to verify
-- Enable verbose logging, restart the extension and reproduce the issue seen again (see below `Access Cody logs` for how to do this)
-- Send information to the our Support Team at support@sourcegraph.com
-
-Some additional information that will be valuable:
-
-- Where are you located? Any proxies or firewalls in use?
-- Does this happen with multiple providers/models? Which models have you used?
-
 ### Access Cody logs
 
-VS Code logs can be accessed via the **Outputs** view. You will need to set Cody to verbose mode to ensure important information to debug is on the logs. To do so:
+VS Code logs can be accessed via the **Outputs** view. To access logs, you need to enable Cody logs in verbose mode. To do so:
 
-- Go to the Cody Extension Settings and enable: `Cody › Debug: Verbose`
+- Go to the Cody Extension Settings and enable: `Cody › Debug: Enable` and `Cody › Debug: Verbose`
 - Restart or reload your VS Code editor
 - You can now see the logs in the Outputs view
 - Open the view via the menu bar: `View > Output`
 - Select **Cody by Sourcegraph** from the dropdown list
-- You can export the logs by using the command palette (Cmd+Shift+P on Mac, Ctrl+Shift+P on Windows/Linux) and searching for the "Cody Debug: Export Logs" command
 
 ![View Cody's autocomplete logs from the Output View in VS Code](https://storage.googleapis.com/sourcegraph-assets/Docs/autocomplete-logs.png)
 
@@ -65,15 +51,16 @@ If you find yourself being automatically signed out of Cody every time you resta
 
 ### No context files were included by Cody
 
-If Cody's answers don't seem accurate, it may be because Cody is unable to find the right relevant files to use as context. You can see which files Cody used in the **Context** row right below your message.
+If Cody is not responding with answers relevant to your codebase, it might be missing context files. To make sure that context files are included, follow these steps:
 
-To troubleshoot further:
-
-1. Enable the `cody.debug.verbose` setting in your VS Code user settings.
-1. Open the **Cody by Sourcegraph** output channel in VS Code.
-1. Look for log messages such as the following:
+- From your Cody chat window enable the checkbox for **[Enhanced Context](/cody/clients/install-vscode#enhanced-context-selector)** panel
+- Next, go to the **Output** log panel in VS Code and select **Cody by Sourcegraph** from the dropdown menu
+- Finally, copy the output log. We're specifically looking for log messages like these:
 
 ```bash
+█ SimpleChatPanelProvider: getEnhancedContext > embeddings (start)
+█ SimpleChatPanelProvider: getEnhancedContext > searching local embeddings
+█ SimpleChatPanelProvider: getEnhancedContext > embeddings (end)
 █ SimpleChatPanelProvider: getEnhancedContext > search
 █ symf: using downloaded symf "/Users/beyang/Library/Application Support/Code/User/globalStorage/sourcegraph.cody-ai/symf/symf-v0.0.6-aarch64-macos"
 █ SimpleChatPanelProvider: getEnhancedContext > search (end)
@@ -82,15 +69,11 @@ To troubleshoot further:
 
 ### Rate limits
 
-Cody Free provides **unlimited autocomplete suggestions** and **200 chat invocations** per user per month.
+On the free plan, Cody provides **500 autocomplete suggestions** and **20 chat and command invokations** per user per month.
 
-On Cody Pro and Enterprise plans, usage limits are increased, and controlled by **Fair Usage**. This means that some users occasionally experience a limitation placed on their account. This limitation resets within 24 hours. If this issue persists, contact us through our [community forum](https://community.sourcegraph.com), Discord, or email support@sourcegraph.com.
+On the Pro and Enterprise plans, there are much higher limits that are used to keep our services operational. These limits reset within a day.
 
-#### 429 errors
-
-A 429 status code means you are on a free account and hit your usage limit/quota for the day. It can also mean you were sending too many requests in a short period of time. If you have Cody Pro and you are seeing 429 errors, you can contact us at [support@sourcegraph.com](mailto:support@sourcegraph.com) to resolve this.
-
-### Error logging in VS Code on Linux and Windows
+### Error logging in VS Code on Linux
 
 If you encounter difficulties logging in to Cody on Linux using your Sourcegraph instance URL, along with a valid access token, and notice that the sign-in process in VS Code hangs, it might be related to underlying networking rules concerning SSL certificates.
 
@@ -99,45 +82,6 @@ To address this, follow these steps:
 - Close your VS Code editor
 - In your terminal, type and run the following command: `echo "export NODE_TLS_REJECT_UNAUTHORIZED=0">> ~/.bashrc`
 - Restart VS Code and try the sign in process again
-
-On Windows,
-
-- Close Visual Studio Code
-- In your Command Prompt or PowerShell window, run the following command: `setx NODE_TLS_REJECT_UNAUTHORIZED 0`
-- Restart Visual Studio Code and try the sign in process again
-
-### Cloudflare Request Failed
-
- If you encounter this error:
-
-```
-Request Failed: Request to https://sourcegraph.com/.api/completions/stream?api-version=1&client-name=vscode&client-version=1.34.3 failed with 403 Forbidden
-```
-
-It indicates that our web application firewall provider, Cloudflare, has flagged the source IP as suspicious.
-
-Consider disabling anonymizers, VPNs, or open proxies. If using a VPN is essential, you can try [1.1.1.1](https://one.one.one.one), which is recognized to be compatible with our services.
-
-### Error with Cody `contextFilters` during chat or editing code
-
-The `contextFilters` setting in Cody is used to control which files are included or excluded when Cody searches for relevant context while answering questions or providing code assistance. Sometimes, you can see the following error:
-
-```
-Edit failed to run: file is ignored (due to cody.contextFilters Enterprise configuration setting)
-```
-
-This error occurs when you're trying to work with a file that's been excluded by Cody's enterprise-level `contextFilters` configuration. At times, this can happen to files that also haven't been excluded. First, check with your organization's admin to understand which files are excluded.
-
-If the error occurs with a file that's not been excluded, the workaround is to uninstall the Cody plugin, restart your IDE and then reinstall the latest version of the extension.
-
-This should clear the error.
-
-### VS Code Pro License Issues
-
-If VS Code prompts you to upgrade to Pro despite already having a Pro license, this usually happens because you're logged into a free Cody/Sourcegraph account rather than your Pro account. To fix this:
-
-- Check which account you're currently logged into
-- If needed, log out and sign in with your PRO account credentials
 
 ### Error exceeding `localStorage` quota
 
@@ -149,7 +93,7 @@ Failed to execute 'setItem' on 'Storage': Setting the value of 'user-history:$us
 
 This error indicates that the chat history size surpasses the capacity of your browser's local storage. Cody stores comprehensive context data with each chat message, contributing to this limitation.
 
-To fix this, navigate to https://sourcegraph.your-domain.com/cody/chat and click `Clear Chat History` if your instance is on v5.2.3+. For older versions, clear your browsing data or browser history.
+To fix this, navigate to https://sourcegraph.example.com/cody/chat and click `Clear Chat History` if your instance is on v5.2.3+. For older versions, clear your browsing data or browser history.
 
 ### Record performance traces for Cody
 
@@ -160,7 +104,6 @@ You can get performance traces from the Cody VS Code extension in production wit
 ```bash
 /Applications/Visual\ Studio\ Code.app/Contents/MacOS/Electron --inspect-extensions=9333
 ```
-
 Note that you may need to quit VSCode first, then run that command to re-launch it. It will open all of your windows and tabs again.
 - After VS Code is started, head over to Chrome and go to `chrome://inspect`, which takes you to the following:
 
@@ -178,36 +121,13 @@ Note that you may need to quit VSCode first, then run that command to re-launch 
 
 ![](https://gist.github.com/assets/458591/d590636b-31e5-4436-8039-ee62b7a8e59f)
 
-### Record a CPU profile for Cody in VSCode
-
-If you are experiencing performance issues with Cody in VSCode, recording a CPU profile can help diagnose the problem. Here’s how you can capture a CPU profile:
-
-1. **Open Developer Tools**:
-   - In VSCode, go to the Command Palette (`Ctrl+Shift+P` on Windows/Linux, `Cmd+Shift+P` on macOS).
-   - Type `Developer: show running extensions` and select it to open running extensions.
-
-2. **Record the CPU Profile**:
-   - There you should see Cody in the list. Right click on it and start a host profile.
-   - This will show you the running profile in the bottom right of the window.
-   - Reproduce the issue you are experiencing with Cody.
-   - Once you have reproduced the issue, click the message in the bottom right you stop the trace.
-
-3. **Save the CPU Profile**:
-   - After stopping the trace, you need to go back to the Developer: show running extensions view.
-   - Right click Cody and click `Save extension profile`.
-
-4. **Share the CPU Profile**:
-   - Attach the `.cpuprofile` file to your issue report on GitHub or share it with the support team for further analysis.
-
-Following these steps will help the team understand and resolve the performance issues more effectively.
-
 ## JetBrains IntelliJ extension
 
 ### Access Cody logs
 
 JetBrains logs can be accessed via the **Output** panel. To access logs, you must first enable Cody logs from the Settings menu.  To do so:
 
-- Open the Settings panel (`⌘,` for macOS) (`Ctrl+Alt+S` for Windows/Linux)
+- Open the Settings panel (⌘, for MacOS) (Ctrl Alt 0S for Windows)
 - Go to `Sourcegraph & Cody`
 - Click on `Cody`
 - Check the box to Enable debug
@@ -215,182 +135,3 @@ JetBrains logs can be accessed via the **Output** panel. To access logs, you mus
 - Click Apply
 - To access the logs, go to Help - Show Log in Finder
 - Open the `idea.log` file
-
-### High CPU Usage with Cody Agent
-
-If you notice the Cody agent reaching 100% CPU utilization, try the following:
-
-1. Disable the Cody plugin.
-1. Re-enable the plugin.
-This simple action of turning the plugin off and on again can often resolve the high CPU usage issue.
-
-## Android Studio extension
-
-### Cody cannot start. Stuck on spinning icon.
-
-This issue occurs because JCEF isn't supported in Android Studio and causes Cody to not start. The suggested workaround is to:
-
-1. Go to `Help` > `Find Action: Registry`.
-1. Scroll to `ide.browser.jcef.sandbox.enable`.
-1. Disable that key and close.
-1. Then go to `Help` > `Find Action: Choose Boot runtime for the IDE`.
-1. Select the last option.
-1. Restart Android Studio.
-
-## Visual Studio extension
-
-### Access Cody logs
-
-Visual Studio logs can be accessed via the **Output** panel. To access logs:
-
-- Open `View -> Output` from the main menu
-- Select `Cody` output pane
-
-![Cody Default Output](https://storage.googleapis.com/sourcegraph-assets/Docs/cody-ouput.png)
-
-### Autocomplete
-
-Cody autocomplete for Visual Studio uses the underlying VS API to display completions in the editor. It's turned on by default in VS (`Tools -> Options -> IntelliCode -> Show Inline Completions`). Without this setting enabled, autocomplete will not work, so this is the first thing to check.
-
-![Inline completions](https://storage.googleapis.com/sourcegraph-assets/Docs/Inline-completions.png)
-
-Also make sure that `Tools -> Options -> Cody -> Automatically trigger completions` is turned on (it is by default).
-
-![Autocomplete](https://storage.googleapis.com/sourcegraph-assets/Docs/Autocomplete.png)
-
-Autocomplete is supported from Visual Studio 17.6+ and includes support for the following languages:
-
-1. C/C++/C#
-2. Python
-3. JavaScript/TypeScript/TSX
-4. HTML
-5. CSS
-6. JSON
-
-#### Non-trusted certificates
-
-If autocomplete still doesn't work (or the Cody Chat), you could try **turning on** the option to `accept non-trusted certificates` (requires Visual Studio restart). This should help, especially in enterprise settings if you are behind a firewall.
-
-![Non-trusted-certificates](https://storage.googleapis.com/sourcegraph-assets/Docs/Non-trusted-certificates.png)
-
-### Detailed debugging logs
-
-The detailed logging configuration can be turned on by adding the `CODY_VS_DEV_CONFIG` environment variable containing the full path to [the configuration file](https://github.com/sourcegraph/cody-vs/blob/main/src/CodyDevConfig.json) placed somewhere in the filesystem.
-
-![Detailed logs](https://storage.googleapis.com/sourcegraph-assets/Docs/Detailed-logs.png)
-
-Two additional output panes, `Cody Agent` and `Cody Notifications`, will be created with more detailed logs. More information on how to configure them is available [here](https://github.com/sourcegraph/cody-vs/blob/main/CONTRIBUTING.md#developer-configuration-file).
-
-![Cody output panes](https://storage.googleapis.com/sourcegraph-assets/Docs/Cody-output-panes.png)
-
-## Regular Expressions
-
-### Asterisks being removed
-
-If you send Cody a prompt with a query string like `$filteredResults = preg_grep('*\.' . basename($inputPath) . '\.*', $fileList);`, the asterisks may be removed because Cody interprets the content as a literal string rather than code.
-
-When sharing code with Cody, wrap your code in triple backticks (```) to ensure it's recognized as a code block rather than plain text. For example:
-
-````regex
-```
-$filteredResults = preg_grep('*\.' . basename($inputPath) . '\.*', $fileList);
-```
-````
-
-## Forked Repos As Context
-
-If you would like to add a forked repository as Cody context, you may need to add `"search.includeForks": true` to the [global settings](/admin/config/settings#editing-global-settings-for-site-admins) for your instance.
-
-{/* ## Eclipse extension
-
-### See a white screen the first time you open Cody chat
-
-This can happen if Eclipse prompts you to set up a password for secure storage and Cody timeouts while waiting. Simply close and re-open the Cody chat.
-
-### "No password provided" in the error log
-
-If you see this error in the error log, it happens because the default OS password integration has been corrupted. Go to **Preferences > General > Security > Secure Storage** and ensure your OS integration is checked.
-
-Then click **Clear Passwords** at the top, and then click **Change Password**. If you see a dialog saying **An error occurred while decrypting stored values... Do you want to cancel password change?** Click **No**.
-
-This will reset the secure storage master password for OS integration. You will be asked if you want to provide additional information for password recovery, which is optional. Click **Apply and Close** and then restart Eclipse.
-
-### General Tips
-
-You can open the Cody Log view using the same steps as above, but instead, select **Cody Log**.
-
-![cody-logs](https://storage.googleapis.com/sourcegraph-assets/Docs/eclipse-cody-log-1124.png)
-
-This will include more information about what Cody is doing, including any errors. There is a copy button at the top right of the log view that you can use to copy the log to your clipboard and send it to us. Be careful not to include any sensitive information, as the log communication is verbose and may contain tokens.
-
-Additionally, Eclipse's built-in Error Log can be used to view any uncaught exceptions and their stack traces. You can open the Error Log using the **Window > Show View > Error Log** menu.  */}
-
-## OpenAI o1
-
-### Context Deadline Exceeded Error
-
-Symptoms:
-
-- "Request Failed: Request to... failed with 500 Internal Server Error: context deadline exceeded"
-- Happens even with relatively small inputs (~220 lines)
-
-Solutions:
-
-- Keep input context smaller - aim for less than 200 lines of code initially
-- Break down larger requests into smaller chunks
-- Start a new chat session if errors persist
-- Add "Keep your answer brief!" to prompts when possible
-
-Prevention:
-
-- Import only the most relevant files
-- Use file range syntax (e.g., @file:1-100) to limit context
-- Focus on specific sections rather than entire codebases
-
-### Truncated Outputs
-
-Symptoms:
-
-- Response cuts off mid-sentence
-- Unable to get complete code examples
-- "Continue" requests also result in truncation
-
-Solutions:
-
-- Break down complex requests into smaller steps
-- Consider using Sonnet 3.5 for tasks requiring longer outputs
-
-Limits:
-
-- Input tokens: 45k
-- Output tokens: 4k
-
-### Model Switching Issues
-
-Symptoms:
-
-- Model reverts to Sonnet 3.5 unexpectedly
-- "On waitlist" message appears after previously having access
-- Unable to select o1 models in command palette
-
-Solutions:
-
-- Restart IDE/VS Code
-- Sign out and sign back in
-- Check Pro subscription status
-- Contact support if issues persist
-
-### Response Format Errors
-
-Symptoms:
-
-- "Request Failed: Unexpected response format"
-- Model stops responding
-- Inconsistent output formatting
-
-Solutions:
-
-- Cancel and retry the request
-- Start a new chat session
-- Reduce context complexity
-- Use one-shot prompts with clear requirements
