@@ -24,7 +24,7 @@ For Sourcegraph Analytics, you can generate an access token for programmatic acc
 
 ### Token management APIs
 
-Token management is currently only available via the Sourcegraph Analytics UI.
+Token management is currently only available via the Sourcegraph Analytics API.
 Authentication is done via the `cas` session cookie.
 
 - Sign in to [Sourcegraph Analytics](https://analytics.sourcegraph.com).
@@ -36,7 +36,8 @@ $ export CAS_COOKIE="<CAS_COOKIE_VALUE>"
 
 #### Token creation
 
-- Create the token by running the following command:
+Create the token by running the following command:
+
 ```sh
 $ curl -X POST https://analytics.sourcegraph.com/api/service-access-tokens \
   -H "Content-Type: application/json" \
@@ -44,12 +45,13 @@ $ curl -X POST https://analytics.sourcegraph.com/api/service-access-tokens \
   -d '{}'
 
 # Optionally include `displayName`, `expiresAt`, or both in the request body.
-# If `expiresAt` is not provided, the token will never expire.
+# If `expiresAt` is not provided, the token will never expire and must be revoked manually.
 # -d '{"displayName": "My Analytics Token", "expiresAt": "2025-12-31T23:59:59Z"}'  
 ```
-- The response will include the token ID, secret, creation date, and, if provided, display name and expiration date.
+
+The response will include the token ID, secret, creation date, and, if provided, display name and expiration date. For example:
+
 ```json
-// example response
 {
   "id": "4cf96e80-d5f3-4af0-a28d-3c70ba97abb4",
   "displayName": "My Analytics Token",
@@ -61,14 +63,14 @@ $ curl -X POST https://analytics.sourcegraph.com/api/service-access-tokens \
 
 #### Token listing
 
-- List the tokens by running the following command:
+List the tokens by running the following command:
 ```sh
-$ curl -X GET https://analytics.sourcegraph.com/api/service-access-tokens \
+curl -X GET https://analytics.sourcegraph.com/api/service-access-tokens \
   -H "Cookie: cas=$CAS_COOKIE"
 ```
-- The response will include the token ID, secret, creation date, and, if provided, display name and expiration date.
+Each token in the response will include the token ID, creation date, a boolean indicating if the token is expired, and if provided: display name and expiration date. For example:
 ```json
-// example response
+
 {
   "tokens": [
      {
@@ -101,10 +103,11 @@ $ curl -X GET https://analytics.sourcegraph.com/api/service-access-tokens \
 
 #### Token revocation
 
-- Revoke a token by running the following command:
-    - Replace `:id` with the token ID.
+Revoke a token by running the following commands:
 ```sh
-$ curl -X DELETE https://analytics.sourcegraph.com/api/service-access-tokens/:id \
+export TOKEN_ID="<TOKEN_ID>"
+
+curl -X DELETE https://analytics.sourcegraph.com/api/service-access-tokens/$TOKEN_ID \
   -H "Cookie: cas=$CAS_COOKIE"
 ```
 
