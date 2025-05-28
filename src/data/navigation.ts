@@ -55,7 +55,7 @@ export const navigation: NavigationItem[] = [
 						subsections: [
 							{ title: "Chat", href: "/cody/capabilities/chat", },
 							{ title: "Query Types", href: "/cody/capabilities/query-types", },
-							{ title: "Agentic chat", href: "/cody/capabilities/agentic-chat", },
+							{ title: "Agentic Context Fetching", href: "/cody/capabilities/agentic-context-fetching", },
 							{ title: "Autocomplete", href: "/cody/capabilities/autocomplete", },
 							{ title: "Auto-edit", href: "/cody/capabilities/auto-edit", },
 							{ title: "Prompts", href: "/cody/capabilities/prompts", },
@@ -120,7 +120,8 @@ export const navigation: NavigationItem[] = [
 							{ title: "Search Snippets", href: "/code-search/working/snippets", },
 							{ title: "Search Subexpressions", href: "/code-search/working/search_subexpressions", },
 							{ title: "Saved Searches", href: "/code-search/working/saved_searches", },
-							{ title: "Structural Search", href: "/code-search/types/structural", }
+							{ title: "Structural Search", href: "/code-search/types/structural", },
+							{ title: "Deep Search", href: "/code-search/types/deep-search", },
 						]
 					},
 					{

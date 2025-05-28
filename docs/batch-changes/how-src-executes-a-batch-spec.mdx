@@ -23,6 +23,7 @@ Here, you will learn what happens when a user applies or previews a Batch Spec b
   - [Sending changeset specs](#sending-changeset-specs)
   - [Sending the batch spec](#sending-the-batch-spec)
   - [Preview or apply the batch spec](#preview-or-apply-the-batch-spec)
+    - [Halt execution](#halt-execution)
 
 The only difference is the last step, i.e., Preview or apply the batch spec. Here, the `src batch apply` command applies the batch spec, and the `src batch preview` prints a URL that gives you a preview of what would change if you applied the batch spec.
 
@@ -185,3 +186,7 @@ That request yields an ID uniquely identifying this expanded batch spec version.
 If `src batch apply` was used, then the ID of the batch change is used to send another request to the Sourcegraph instance to apply the batch spec.
 
 If `src batch preview` was used to execute and create the batch spec, then a URL is printed, pointing to a preview page on the Sourcegraph instance, on which you can see what would happen if you were to apply the batch spec.
+
+### Halt execution
+
+If you encounter an error while running the `src batch preview` command, there is a fail-fast mode that halts the batch change execution immediately. To implement this, you can add a `-fail-fast` flag to the `src batch preview` and `src batch apply` commands. Once added, your execution should immediately halt on the first error instead of continuing with other repositories. This streamlines the iteration loop for users building a batch change who want to identify errors quickly.
