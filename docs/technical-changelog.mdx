@@ -4,6 +4,448 @@ This page documents all notable changes to Sourcegraph. For more detailed change
 
 {/* CHANGELOG_START */}
 
+# 6.4 Patch 0
+
+## v6.4.0
+
+- [sourcegraph](https://github.com/sourcegraph/sourcegraph/releases/tag/v6.4.0)
+
+- [docker-compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/releases/tag/v6.4.0)
+
+- [helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/releases/tag/v6.4.0)
+
+- [kustomize](https://github.com/sourcegraph/deploy-sourcegraph-k8s/releases/tag/v6.4.0)
+
+### Features
+
+#### Auto-Edit
+
+- update the deployment to IOWA region `(PR #5166)`
+- Update the next cursor prediction model `(PR #5092)`
+
+#### Autoedit
+
+- Propogate the rewrite speculation parameter for completions `(PR #5190)`
+
+#### Batch Changes
+
+- site admins can feature library records `(PR #5415)`
+  - feat(batches): site admins can feature library records
+- Add site admin setting to configure the number of displayed batch spec library records `(PR #5317)`
+  - feat(batches): Add site admin setting to configure the number of displayed batch spec library records
+- add partial changesets, part 1 `(PR #5172)`
+- auto-merge for github code hosts `(PR #4977)`
+  - feat(batches): auto-merge for github code hosts
+
+#### Code Intelligence
+
+- Syntactic indexing for C `(PR #5163)`
+- TypeScript syntactic indexing support `(PR #5044)`
+  - Add TypeScript syntactic indexing support
+
+#### Cody
+
+- Update the Context Limit for Gemini 2.5 Models `(PR #5322)`
+- support client provided URL, model and apiKey for websocket proxy `(PR #5030)`
+- create a new loopback endpoint in cody-gateway `(PR #4941)`
+
+#### Codygateway
+
+- instrument events publishing with metric `(PR #5347)`
+- insert 'metadata.event_id' for manual dedupe `(PR #5084)`
+
+#### Deepsearch
+
+- Make stop button cooler `(PR #5449)`
+- add AI disclaimer `(PR #5436)`
+- Improved NLS Search Tool block `(PR #5427)`
+- add follow up question suggestions [SPLF-1022] `(PR #5410)`
+  - Added suggested follow ups to deepsearch
+- add codegraph tool cards `(PR #5404)`
+  - Custom tool cards for GoToDefinition and FindReferences
+- add go-to-definition and find-references tools [SPLF-992] `(PR #5373)`
+- Add copy button to code blocks in answer `(PR #5342)`
+- Add syntax highlighting to markdown rendering (SPLF-977) `(PR #5297)`
+- Render separate block for diagrams (SPLF-982) `(PR #5267)`
+- Allow continuation after 20 turns [UI] (SPLF-974) `(PR #5253)`
+  - When a deep search reaches it's turn limit, the user will be shown a summary of the search thus far and the next steps to determine if the search should continue
+- Mermaid enhancements and fixes `(PR #5245)`
+- Add commit and diff search tools to deep search (SPLF-959) `(PR #5223)`
+
+#### Enterprise-Portal
+
+- Added GetEnterpriseSubscription handler for administrationservice ep `(PR #5337)`
+  - Adds database-to-proto conversion for enterprise subscriptions and implements the GetEnterpriseSubscription handler in the AdministrationService. This enables user-authenticated access to subscription data via the Administration API.
+
+#### Ep
+
+- Add ListEnterpriseSubscriptions RPC handler to administrationservice `(PR #5396)`
+  - This PR adds the ListEnterpriseSubscriptions RPC to the administrationservice, allowing Enterprise Portal to retrieve subscriptions.
+It has support for multiple filter types: subscription IDs, archived status, display name, Salesforce data, instance domains, verified domains, and instance types
+
+#### Msp
+
+- support configuring secondary cidr in vpc network `(PR #5264)`
+- add http-to-https support when cloudflare.proxied: false `(PR #5131)`
+- suggest 'sg update' if validation failed `(PR #5105)`
+- add option to configure session affinity `(PR #5102)`
+- add deploy type 'ignore' for custom deploy `(PR #5087)`
+- support apex domains `(PR #5086)`
+- configure prevent_destroy explicitly on Cloud Run `(PR #5060)`
+- security logs sink `(PR #3683)`
+
+#### Msp/Operationdocs
+
+- improve rollouts section `(PR #5085)`
+
+#### Release
+
+- add releaseworker health check `(PR #5367)`
+  - N/A - internal change
+- add connectRPC handlers to API `(PR #5089)`
+  - N/A - not customer facing
+- add release worker service `(PR #4990)`
+  - N/A - internal tooling
+
+#### Search
+
+- add TotalFiles to the inventory that powers language usage insights `(PR #5340)`
+- Add config for an admin to allow Code Insights to ignore sub-repo permissions `(PR #5187)`
+  - In the site config, set `experimentalSettings.subRepoPermissions.allowInsights` to `true`
+  - Admins can decide if it is safe in their environment to allow Code Insights to generate graphs using data from repositories that use sub-repo permissions.
+- added eval tool for deepsearch `(PR #5160)`
+- collapse/expand search results `(PR #5099)`
+  - Adds the ability to collapse/expand search results
+
+#### Searchplatform
+
+- Initial mermaid chart support `(PR #5209)`
+
+#### Sg/Msp
+
+- improve 'sg msp db' usability `(PR #5078)`
+- allow usage from almost anywhere `(PR #4996)`
+
+#### Source
+
+- gitserver: have gitserver try re-running commands before marking repositories as corrupt `(PR #5584)`
+  - N/A
+  Backport 4e0ca00f1e5fb1951a0f24bb7ccb3af918ce33ec from #5531
+- disable janitor if DISABLE_GITSERVER_JANITOR env var is set `(PR #5475)`
+  - If the DISABLE_GITSERVER_JANITOR is set, the janitor routines for gitserver will no longer run.
+- remove stale temporary files like .tmp-2128506-pack-abacabadabacaba.pack `(PR #5401)`
+- gitserver: include repoID, CWD, and command arguments when reporting corruption error `(PR #5399)`
+  - N/A
+- disable .api/llm/chat/completions for Enterprise Starter `(PR #5200)`
+- add reminder to Amp to clean up binaries that it creates when checking the build `(PR #5134)`
+- oauth: github: add tests to clarify allowOrgs and allowOrgsMap interaction `(PR #5098)`
+  - N/A
+
+#### Workspaces
+
+- track longest duration since destroy_pending or destroy_failed state change `(PR #5135)`
+- fixup google tag manager `(PR #5023)`
+
+#### Others
+
+- buildtracker tracks nightly builds `(PR #5126)`
+
+### Fix
+
+#### Auto-Edit
+
+- use integer with unit of millisecond for fireworks latency metrics `(PR #4869)`
+
+#### Cody
+
+- [CORE-827] Added support for Thinking capability for Bedrock Anthropic `(PR #5479)`
+- Update MaxOutputTokens for Gemini Thinking Models `(PR #5384)`
+- crashes after adding model selection support `(PR #5171)`
+
+#### Completioncredits
+
+- fix CompletionCreditsUsage condition `(PR #5153)`
+
+#### Deepsearch
+
+- adds preview badge to title `(PR #5493)`
+- fix -z-index for conversation title bar `(PR #5489)`
+- Fix new answer autoscroll (SPLF-1036) `(PR #5476)`
+- Tidy up response blocks in left pane during streaming `(PR #5459)`
+- Fix scrolling to new answer `(PR #5456)`
+- Reset searcher to null after cancellation `(PR #5454)`
+- Improve response blocks `(PR #5420)`
+- fix right pane scrolling and navigation `(PR #5416)`
+- Fix bugs with opening and closing diagrams `(PR #5406)`
+- Fix indices and navigation for follow up questions `(PR #5405)`
+- UI fixes for continuations after hitting turn limit `(PR #5403)`
+- Fix and improve UI for diagrams `(PR #5400)`
+- Fix typo `(PR #5352)`
+- Bump default number of results for commit and diff search `(PR #5296)`
+- Fix hardcoded run count `(PR #5248)`
+
+#### Ep
+
+- add ep web bundle into final binary `(PR #5269)`
+
+#### Gitserver
+
+- move grafana dashboards for retry to proper section `(PR #5603)`
+  - N/A  Backport 413705d76b9e4b258f3718f884e3c3c2ddf4f6fd from #5602
+
+#### Msp
+
+- support apex domains for no-CF-proxy configuration `(PR #5088)`
+
+#### Msp/Rollouts
+
+- properly support regional stages `(PR #5458)`
+
+#### Search
+
+- Fix repository package names `(PR #5581)`
+
+#### Sg/Sams
+
+- use internaldoer when targetting localhost `(PR #5321)`
+
+#### Source
+
+- gitserver: janitor: emit a log when we fail to gather statistics for optimizing a repository `(PR #5371)`
+  - N/A
+- gitserver: janitor: make janitor emit an ERROR level log when optimizing a repository fails `(PR #5370)`
+  - N/A
+- gitserver: errors.Wrap call to OptimizeRepository so that we have a shared prefix `(PR #5369)`
+  - N/A
+- fix no tenant in context error for gitserver locker debug handler `(PR #5104)`
+
+#### Workspaces
+
+- fix error message when name is shorter than regex `(PR #5295)`
+
+#### Others
+
+- accept a blank string in addition to null for feature flag type `(PR #5270)`
+- map ui feature flag type to internal type `(PR #5217)`
+- show correct number of filtered feature flags `(PR #5110)`
+  - fix: show correct number of filtered feature flags
+- Exact string match for similar bundle names `(PR #4719)`
+
+### Chore
+
+#### Analytics
+
+- added interaction id to deep search [SPLF-970] `(PR #5324)`
+- add basic telemetry for deep search for S2 [SPLF-981] `(PR #5320)`
+
+#### Batch Changes
+
+- add telemetry to record number of changesets merged `(PR #4938)`
+
+#### Code Intelligence
+
+- Syntactic evaluation for C++ `(PR #5258)`
+- Syntactic evaluation for C `(PR #5256)`
+
+#### Cody
+
+- fix token limit `(PR #5368)`
+
+#### Deepsearch
+
+- add research preview label and feedback mechanism `(PR #5433)`
+- Switch Deep Search to use the experimental feature setting `(PR #5429)`
+- Handle large files `(PR #5428)`
+- Fix icon on react app and add query param support `(PR #5402)`
+
+#### Dev
+
+- Cleanup client/web-sveltekit dependencies `(PR #5360)`
+- Cleanup more dependencies from root package.json `(PR #5083)`
+- Cleanup client/web dependencies `(PR #4913)`
+
+#### Graphql/Entitlements
+
+- convert type field to use GraphQL enum `(PR #4892)`
+
+#### Local
+
+- add check with mise tool <name> --json to check if bazelisk is installed `(PR #5141)`
+
+#### Msp
+
+- upgrade cloudsqlproxy, enable debug logs on --verbose `(PR #5133)`
+- bump pinned cloud-sql-proxy version to latest `(PR #5100)`
+
+#### Msp/Monitoring
+
+- remove extra reader permission `(PR #5020)`
+
+#### Prompt-Library
+
+- make copy for automatically running prompts clearer `(PR #5029)`
+
+#### Release
+
+- release prep for 6.3.0 (#5033) `(PR #5034)`
+  - N/A - internal facing
+
+#### Search
+
+- Show deep search icon on react pages `(PR #5154)`
+
+#### Sg
+
+- make interrupt quieter `(PR #5077)`
+
+#### Source
+
+- Remove "Outdated" stats on permissions page `(PR #5553)`
+  -  Backport 484e546eca171cc184c86cf2cf7119f358f4bc02 from #5515
+- format code and imports `(PR #5364)`
+- use constants for feature names in workspace gating check `(PR #5363)`
+
+#### Telemetrygateway
+
+- deploy pipeline is in us-west1 now INC-406 `(PR #5453)`
+- reduce cardinality of workspaces data metrics `(PR #5066)`
+
+#### Workspaces
+
+- allow routerreconciler.upsert to be disabled `(PR #5183)`
+- fixup GTM container again `(PR #5031)`
+- fixup GTM body container injection `(PR #5024)`
+
+#### Others
+
+- update third-party licenses `(PR #5302)`
+- update third-party licenses `(PR #5192)`
+- Update teams.yml for changes in product platform `(PR #5185)`
+- update third-party licenses `(PR #5091)`
+- update @sourcegraph/cody-web version to 0.32.5 `(PR #5026)`
+
+### Reverts
+
+  There were no reverts for this release
+
+### Uncategorized
+
+#### Others
+
+- [Backport 6.4.x] bitbucket: Fix panic with nil logger `(PR #5605)`
+- [Backport 6.4.x] feat(deep search): add current stats to telemetry `(PR #5563)`
+- [Backport 6.4.x] feat(cody gateway): Claude 4 models `(PR #5536)`
+- [Backport 6.4.x] cody-gateway-config: allow Enterprise tier, rename misleading method `(PR #5535)`
+- [Backport 6.4.x] azure-devops: Add support for Entra OAuth apps `(PR #5520)`
+- authz: Refactor database schema for pending permissions to be more performant `(PR #5466)`
+- Add riazanovskiy to team.yml `(PR #5423)`
+- deepsearch(fix): update styling of ReadFileTool `(PR #5421)`
+- authz: Remove writing to old legacy tables `(PR #5407)`
+- add the warm start auto-edit model in backend `(PR #5393)`
+- feat(deep search): Improvements to tools & prompts `(PR #5382)`
+- deepsearch: major layout update `(PR #5380)`
+- modelconfig: fix typo s/unlimited/fallback/g `(PR #5379)`
+- Update read file tool prompt to verify files before reading `(PR #5372)`
+- Marshal the optional Stop field in CreateChatCompletionRequest more correctly `(PR #5362)`
+- Upgrade Cody Web 0.32.6 `(PR #5358)`
+- bug(deepsearch): increment turns by max turns when search is continued `(PR #5350)`
+- Add highlighted code block for read file tool call `(PR #5349)`
+- deepsearch: fix height of conversation title header `(PR #5346)`
+- deepsearch: don't cover content at the bottom of the screen `(PR #5345)`
+- deepsearch: fix show more button `(PR #5334)`
+- deepsearch: move diagrams into answer and cap excerpt content `(PR #5330)`
+- agent.md: connectrpc hints `(PR #5323)`
+- Remove duplicate mode icon `(PR #5319)`
+- gateway: add ability to mark models as 'unlimited', mark gemini-2.0-flash as unlimited `(PR #5301)`
+  - gateway: added ability to mark models as 'fallback' in model configuration `capabilities` section, which gives models effectively-unlimited rate limits for Cody Pro and Workspaces users.
+  - model config: configuring the default fallback model (similar to default chat/autocomplete model) to use when rate limits have been exceeded is now possible. Future versions of Cody Clients will support this functionality.
+  - gateway: gemini-2.0-flash is now an fallback model, and is the default fallback model.
+- deepsearch: tweak sidebar `(PR #5293)`
+- deepsearch: move stats to turns header `(PR #5291)`
+- add slightly more margin top to query examples `(PR #5289)`
+- deepsearch: move tools button to top left `(PR #5288)`
+- deepsearch: add icon to homescreen `(PR #5287)`
+- deepsearch: remove follow up input background `(PR #5286)`
+- deepsearch: minor UI adjustments `(PR #5285)`
+- deepsearch: fix conversation title `(PR #5284)`
+- deepsearch: add search cancelled label `(PR #5281)`
+- deepsearch: centralise textarea initially `(PR #5280)`
+- update gitlab code host exclude property description `(PR #5277)`
+- agent.md: add guidance for managed services `(PR #5272)`
+- Fix spelling: Change 'By organisation' to 'By organization' in Prompt… `(PR #5265)`
+  - Not a substantial change. Purely cosmetic. No Changelog needed.
+- Fix typo in SingleServiceMainWithoutConf documentation comment `(PR #5259)`
+- deepsearch: make conversation titles responsive `(PR #5247)`
+- deepsearch: Transform prompt editor input into textarea `(PR #5244)`
+- deepsearch: add search examples `(PR #5243)`
+- deepsearch: fix turn ordering and remove autoscrolling `(PR #5242)`
+- deepsearch: change deep search icon in global nav `(PR #5241)`
+- deepsearch: add thread title, layout tidyups `(PR #5239)`
+- deepsearch: simplify layout `(PR #5236)`
+- deepsearch: move input to bottom of viewport `(PR #5235)`
+- deepsearch: split panes `(PR #5230)`
+- cody-gateway: Fallback event logger is used if no big query configuration is available `(PR #5224)`
+- codemonitors: Move webhooks to stable `(PR #5213)`
+- Update Prompts Library Order By `(PR #5211)`
+  - Adds new way to sort prompts by relevance.
+  - Minor updates to the UI including
+a. Make Create new prompt button primary
+b. Remove order by name
+c. Add order by relevance by default
+d. Add pencil icon for edit prompts
+- cody-gatway: Removed legacy cody-gateway code `(PR #5198)`
+- Fix TelemetryEventsExportMode docstrings after moving to gating package `(PR #5189)`
+- deps: Bump alertmanager and prometheus dependencies `(PR #5176)`
+- gitserver: Try to fix superfluous WriteHeader logs `(PR #5164)`
+- fix(models.json): mark smart-apply-qwen-default as "stable" `(PR #5151)`
+  - Fixed issue where smart-apply-qwen-default model was marked as experimental instead of stable, sometimes leading to a smart apply issue if modelConfiguration excludes experimental models.
+- bug(source): Fix alignment on security dialog `(PR #5150)`
+- Remove required login redirect handler for xdomainlogin service `(PR #5142)`
+  - Adding RedirectToLoginHandler to the xdomainlogin service is no longer required. If an unauthorized request comes and RedirectToLoginHandler is not registered, we return an unauthorised error. This helps generalise the service for better reuse.
+- squirrel: Add integration smoke test `(PR #5140)`
+- Add 'model' key to allowed private metadata for smart apply context `(PR #5123)`
+- Reduce number of snapshots and testdata files `(PR #5119)`
+- symbols: Move symbol search to searcher `(PR #5115)`
+- symbols: Refactor config to not use globals `(PR #5114)`
+- symbols: Move LocalCodeIntel implementation to caller `(PR #5113)`
+- symbols: Move SymbolInfo implementation to caller `(PR #5112)`
+- symbols: Move squirrel package to internal `(PR #5111)`
+- Only rank non-deleted repositories in position calculation `(PR #5108)`
+- symbols: Remove DisableFileSymbolsParsing setting `(PR #5096)`
+- symbols: Remove Healthz endpoint `(PR #5095)`
+- gitserver: Use instrumented gitservice client `(PR #5093)`
+- queuemetrics: Use ViewName for max duration queued `(PR #5074)`
+- Update prompt list UI `(PR #5070)`
+- repoupdater: Move background jobs to worker `(PR #5057)`
+- Only check if tracing is enabled when tracelog.logger is created `(PR #5054)`
+- cody-gateway: Allowed to override BigQuery configuration in MSP based version `(PR #5051)`
+- repoupdater: Move monitoring to worker dashboard `(PR #5049)`
+- repoupdater: Replace remaining APIs by service library `(PR #5047)`
+- repoupdater: Replace scheduling API by service library `(PR #5046)`
+- repoupdater: Move scheduler and janitor to internal `(PR #5045)`
+- batches: Remove EnqueueChangesetSync from repoupdater API `(PR #5043)`
+- codeintel: Remove unused PreDequeue condition `(PR #5042)`
+- queuemetrics: Only count jobs ready to be dequeued `(PR #5041)`
+- queuemetrics: Improve name of executor metrics `(PR #5040)`
+- Fix merge conflict `(PR #5036)`
+- singleflight: Add tenant aware wrapper `(PR #5028)`
+- amp: Add info about databases and migrations to memory `(PR #5021)`
+- batches: Migrate changeset registry to db-backed pattern `(PR #5019)`
+- gitserver: Use new janitor for all instances `(PR #4981)`
+- dbworker: Add queue metrics `(PR #4961)`
+- Treat Gerrit auth provider URL as a NormalizedURL `(PR #4945)`
+- Changes spaces to "-" on the edit search contexts page `(PR #4933)`
+- feat(batch changes): [SRCH-1873] rerun change sets from preview page `(PR #4806)`
+  - Allow changesets to be rerun from the preview step of batch changes.
+- cody-gateway: Synced default values for MSP and non-MSP versions of configuration `(PR #4737)`
+- repo-updater: Add repo cleanup scheduling and optimization UI `(PR #4547)`
+- database: Cleanup duplicative unique constraints `(PR #4355)`
+- gitserver: Drop gitserver_repos.shard_id column `(PR #4092)`
+- saml: Keep old metadata for longer when upstream is down `(PR #4078)`
+
+{/* RSS={"version":"v6.4.0", "releasedAt": "2025-05-28"} */}
+
+
 # 6.3 Patch 2
 
 ## v6.3.4167
