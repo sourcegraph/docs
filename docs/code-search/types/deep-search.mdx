@@ -1,40 +1,29 @@
 # Deep Search
 
-<p className="subtitle">Learn more about Sourcegraph's Deep Search.</p>
+<p className="subtitle">Learn more about Sourcegraph's agentic Code Search tool Deep Search.</p>
 
-<Callout type="note"> New in version 6.4. Deep Search is a feature currently in research preview for Enterprise customers with access to Cody and Code Search. Because Deep Search is in research preview, the feature might change significantly in the future as we make improvements and adjust to user feedback. Please reach out to your account team to request access. </Callout>
+<Callout type="note"> Deep Search is currently in research preview for Enterprise customers with access to Cody and Code Search. The feature is going through continuous development and improvement. Please reach out to your Sourcegraph account team to request access. </Callout>
 
-Deep Search is an agentic code search tool. 
-It receives a natural language question about a codebase, performs an in-depth search, and returns a detailed answer. The user can also ask follow-up questions to further improve the answer.
+Deep Search is an agentic code search tool. It receives a natural language question about a codebase, performs an in-depth search, and returns a detailed answer. The user can also ask follow-up questions to improve the answer further.
 
-Under the hood, Deep Search is an AI agent that uses a variety of tools to generate its answer. The tools include various modes of Sourcegraph's code search and code navigation tools. The use of tools in an agentic loop enables Deep Search to iteratively refine its understanding of the question and codebase, searching until it is confident in its answer.
+Under the hood, Deep Search is an AI agent that uses various tools to generate its answer. These tools include multiple modes of Sourcegraph's Code Search and Code Navigation tools. Using tools in an agentic loop enables Deep Search to iteratively refine its understanding of the question and codebase, searching until it is confident in its answer.
 
-Deep Search displays a list of sources it used to generate the answer. The sources are the various types of searches it performs as well as the files it reads. 
-The answer is formatted in Markdown. If prompted to do so, Deep Search can also generate diagrams as part of its answer.
-
-## Best practices
-- Give the agent a starting point for the search: mention relevant repositories, files, directories or symbol names. The more specific you are, the faster the search will be.
-- Provide reasonably scoped questions. The agent will perform much better if it does not have to read the entire codebase at once.
-- Check the list of sources. This is extremely useful for debugging and for understanding where the answer came from. If something is missing, ask a follow-up question and mention the missing source.
-
-### Examples of prompts
-- Find examples of logger usage and show examples of the different types of logging we use.
-- I want to know when the indexing queue functionality was last changed in `sourcegraph/zoekt`. Show me the last few commit diffs touching this code and explain the changes.
-- Look at the GraphQL APIs available in `sourcegraph/sourcegraph`. Are any of them unused? The client code is in `sourcegraph/cody`. 
-- Which tools do we use in our build processes defined in `BUILD.bazel` files?
-- Generate a diagram of the request flow in `src/backend`. Mark the auth and rate limit points.
+Deep Search displays a list of sources used to generate the answer. The sources are the various types of searches it performs and the files it reads. The answer is formatted in markdown. If prompted to do so, Deep Search can also generate diagrams as part of its answer.
 
 ## Enabling Deep Search
-Deep Search can only be used on Sourcegraph instances with licenses for both Code Search and Cody.
 
-Deep Search is disabled by default. To enable it, ask your site administrator to set `experimentalFeatures.deepSearch.enabled = "true"` in your site configuration. 
+Deep Search can only be used on Sourcegraph instances with Code Search and Cody licenses.
 
-For optimal performance, we have specialized Deep Search to only use one model. __Currently, Deep Search only supports Claude Sonnet 4.__
+Deep Search is disabled by default. To enable it, ask your site administrator to set `experimentalFeatures.deepSearch.enabled = "true"` in your site configuration.
+
+For optimal performance, Deep Search is specialized to only use one model. Currently, Deep Search only supports Claude Sonnet 4.
 
 ### Configuring Deep Search on Amazon Bedrock
-Include configuration for Claude Sonnet 4 in [modelOverrides](/cody/enterprise/model-configuration#model-overrides) in your site configuration. Refer to [Model Configuration](/cody/enterprise/model-configuration) for more info on how to configure models. 
+
+Include Claude Sonnet 4's configuration in [modelOverrides](/cody/enterprise/model-configuration#model-overrides) in your site configuration. For more information on configuring models, refer to [Model Configuration](/cody/enterprise/model-configuration).
 
 Example for Sonnet 4 configuration inside `modelOverrides`:
+
 ```json
 {
     "modelRef": "aws-bedrock::v1::claude-sonnet-4",
@@ -54,6 +43,7 @@ Example for Sonnet 4 configuration inside `modelOverrides`:
 ```
 
 Then, configure Deep Search to use this model in `experimentalFeatures`:
+
 ```json
 "experimentalFeatures": {
     "deepSearch.enabled": true,
@@ -61,3 +51,16 @@ Then, configure Deep Search to use this model in `experimentalFeatures`:
 },
 ```
 
+## Best practices
+
+- Give the agent a starting point for the search: Mention relevant repositories, files, directories, or symbol names. The more specific you are, the faster the search will be.
+- Provide reasonably scoped questions. The agent will perform much better if it does not have to read the entire codebase at once.
+Check the list of sources. This is extremely useful for debugging and understanding where the answer came from. If something is missing, ask a follow-up question and mention the missing source.
+
+### Examples of prompts
+
+- Find examples of logger usage and show examples of the different types of logging we use.
+- I want to know when the indexing queue functionality was last changed in `sourcegraph/zoekt`. Show me the last few commit diffs touching this code and explain the changes.
+- Look at the GraphQL APIs available in `sourcegraph/sourcegraph`. Are any of them unused? The client code is in `sourcegraph/cody`.
+- Which tools do we use in our build processes defined in `BUILD.bazel` files?
+- Generate a request flow diagram in `src/backend`. Mark the auth and rate limit points.
