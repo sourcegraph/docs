@@ -1,6 +1,6 @@
 # Sourcegraph Cloud Analytics
 
-The following instructions are for all Sourcegraph Cloud and self-hosted customers who have upgraded to a sufficient version of Sourcegraph (5.9+) and fully enabled usage telemetry. 
+The following instructions are for all Sourcegraph Cloud and self-hosted customers who have upgraded to a sufficient version of Sourcegraph (5.9+) and fully enabled usage telemetry.
 
 ![Sourcegraph-cloud-analytics](https://storage.googleapis.com/sourcegraph-assets/cloud-analytics.png)
 
@@ -15,22 +15,23 @@ To enable Sourcegraph Analytics:
 
 ## Data export
 
-Sourcegraph Analytics also includes a CSV export option with key metrics like the number of searches, chats, autocomplete suggestions, completion acceptance rate (CAR %), and more. The data is split by user, day, client/editor, and programming language, perfect for automating retrieval and analyzing data in ways that make the most sense to your organization.
-
+Sourcegraph Analytics also includes a CSV export option with key metrics like the number of searches, chats, autocomplete suggestions, Completion Acceptance Rate (CAR%), and more. The data is split by user, day, client/editor, and programming language, perfect for automating retrieval and analyzing data in ways that make the most sense to your organization.
 
 ## Access tokens
 
-For Sourcegraph Analytics, you can generate an access token for programmatic access. Tokens are long lived with an optional expiry and have the same permissions to access instance data as the user who created them.
+For Sourcegraph Analytics, you can generate an access token for programmatic access. Tokens are long-lived with an optional expiry and have the same permissions to access instance data as the user who created them.
 
 ### Token management APIs
 
-Token management is currently only available via the Sourcegraph Analytics API.
-Authentication for token management APIs is done via the `cas` session cookie.
+Token management is currently only available via the Sourcegraph Analytics API. Token management APIs are authenticated via the `cas` session cookie.
 
 - Sign in to [Sourcegraph Analytics](https://analytics.sourcegraph.com).
 - Retrieve your session cookie, `cas`, from your browser's developer tools.
+
 ![Sourcegraph Analytics session cookie](https://storage.googleapis.com/sourcegraph-assets/Docs/analytics-cookie.png)
+
 - Export the cookie as an environment variable to use in the following commands:
+
 ```sh
 export CAS_COOKIE="<CAS_COOKIE_VALUE>"
 ```
@@ -41,13 +42,13 @@ Create the token by running the following command:
 
 ```sh
 curl -X POST https://analytics.sourcegraph.com/api/service-access-tokens \
-  -H "Content-Type: application/json" \
+ -H "Content-Type: application/json" \
   -H "Cookie: cas=$CAS_COOKIE" \
-  -d '{}'
+ -d '{}'
 
 # Optionally include displayName, expiresAt, or both in the request body.
 # If expiresAt is not provided, the token will never expire and must be revoked manually.
-# -d '{"displayName": "My Analytics Token", "expiresAt": "2025-12-31T23:59:59Z"}'  
+# -d '{"displayName": "My Analytics Token", "expiresAt": "2025-12-31T23:59:59Z"}'
 ```
 
 The response will include the token ID, secret, creation date, and, if provided, display name and expiration date. For example:
@@ -65,11 +66,14 @@ The response will include the token ID, secret, creation date, and, if provided,
 #### Token listing
 
 List the tokens by running the following command:
+
 ```sh
 curl -X GET https://analytics.sourcegraph.com/api/service-access-tokens \
-  -H "Cookie: cas=$CAS_COOKIE"
+ -H "Cookie: cas=$CAS_COOKIE"
 ```
-Each token in the response will include the token ID, creation date, a boolean indicating if the token is expired, and if provided: display name and expiration date. For example:
+
+Each token in the response will include the token ID, creation date, a boolean indicating if the token has expired, and display name and expiration date if provided. For example:
+
 ```json
 {
   "tokens": [
@@ -104,20 +108,22 @@ Each token in the response will include the token ID, creation date, a boolean i
 #### Token revocation
 
 Revoke a token by running the following commands:
+
 ```sh
 export TOKEN_ID="<TOKEN_ID>"
 
 curl -X DELETE https://analytics.sourcegraph.com/api/service-access-tokens/$TOKEN_ID \
-  -H "Cookie: cas=$CAS_COOKIE"
+ -H "Cookie: cas=$CAS_COOKIE"
 ```
 
-> NOTE: There is no output from the revocation request. To verify that the token has been revoked, list the tokens and verify `isExpired` is `true`.
+<Callout type="note">The revocation request does not produce output. To verify that a token has been revoked, list the tokens and verify that `isExpired` is `true`.</Callout>
 
 ## API reference
 
-Sourcegraph Analytics API is a RESTful API that allows access to Sourcegraph Analytics data. For authenticating to the API follow the [token creation](#token-creation) instructions.
+Sourcegraph Analytics API is a RESTful API that allows access to Sourcegraph Analytics data. To authenticate to the API, follow the instructions for [token creation](#token-creation).
 
-Export your access token as en environment variable:
+Export your access token as an environment variable:
+
 ```sh
 export ACCESS_TOKEN="<ACCESS_TOKEN>"
 ```
@@ -125,17 +131,19 @@ export ACCESS_TOKEN="<ACCESS_TOKEN>"
 ### CSV export
 
 To generate a CSV export of the data for a specific instance, run the following commands:
+
 ```sh
 export INSTANCE_URL="<INSTANCE URL>" # e.g. example.sourcegraphcloud.com
 
 curl -X GET "https://analytics.sourcegraph.com/api/reports/by-user-client-date?instanceURL=$INSTANCE_URL" \
-  -H "Authorization: Bearer $ACCESS_TOKEN"
+ -H "Authorization: Bearer $ACCESS_TOKEN"
 ```
 
-Optional granularity values can be specified. If not specified the default is `by_user_day_client_language`.
-- `by_user`, 
-- `by_user_month`, 
-- `by_user_day`, 
+Optional granularity values can be specified. If not specified, the default is `by_user_day_client_language`.
+
+- `by_user`,
+- `by_user_month`,
+- `by_user_day`,
 - `by_user_day_client_language`
 
 ```sh
@@ -143,5 +151,5 @@ export INSTANCE_URL="<INSTANCE_URL>" # e.g. example.sourcegraphcloud.com
 export GRANULARITY="<GRANULARITY>"
 
 curl -X GET "https://analytics.sourcegraph.com/api/reports/by-user-client-date?instanceURL=$INSTANCE_URL&granularity=$GRANULARITY" \
-  -H "Authorization: Bearer $ACCESS_TOKEN"
+ -H "Authorization: Bearer $ACCESS_TOKEN"
 ```
