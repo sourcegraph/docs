@@ -15,7 +15,7 @@ To enable Sourcegraph Analytics:
 
 ## Data export
 
-Sourcegraph Cloud Analytics also includes a CSV export option with key metrics like the number of searches, chats, autocomplete suggestions, completion acceptance rate (CAR %), and more. The data is split by user, day, client/editor, and programming language, perfect for automating retrieval and analyzing data in ways that make the most sense to your organization.
+Sourcegraph Analytics also includes a CSV export option with key metrics like the number of searches, chats, autocomplete suggestions, completion acceptance rate (CAR %), and more. The data is split by user, day, client/editor, and programming language, perfect for automating retrieval and analyzing data in ways that make the most sense to your organization.
 
 
 ## Access Tokens
@@ -112,3 +112,36 @@ curl -X DELETE https://analytics.sourcegraph.com/api/service-access-tokens/$TOKE
 ```
 
 > NOTE: There is no output from the revocation request. To verify that the token has been revoked, list the tokens and verify `isExpired` is `true`.
+
+## API Reference
+
+Sourcegraph Analytics API is a RESTful API that allows access to Sourcegraph Analytics data. For authenticating to the API follow the [token creation](#token-creation) instructions.
+
+Export your access token as en environment variable:
+```sh
+export ACCESS_TOKEN="<ACCESS_TOKEN>"
+```
+
+### CSV Export
+
+To generate a CSV export of the data for a specific instance, run the following commands:
+```sh
+export INSTANCE_URL="<INSTANCE URL>" # e.g. example.sourcegraphcloud.com
+
+curl -X GET "https://analytics.sourcegraph.com/api/reports/by-user-client-date?instanceURL=$INSTANCE_URL" \
+  -H "Authorization: Bearer $ACCESS_TOKEN"
+```
+
+Optional granularity values can be specified. If not specified the default is `by_user_day_client_language`.
+- `by_user`, 
+- `by_user_month`, 
+- `by_user_day`, 
+- `by_user_day_client_language`
+
+```sh
+export INSTANCE_URL="<INSTANCE_URL>" # e.g. example.sourcegraphcloud.com
+export GRANULARITY="<GRANULARITY>"
+
+curl -X GET "https://analytics.sourcegraph.com/api/reports/by-user-client-date?instanceURL=$INSTANCE_URL&granularity=$GRANULARITY" \
+  -H "Authorization: Bearer $ACCESS_TOKEN"
+```
