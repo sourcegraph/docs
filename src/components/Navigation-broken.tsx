@@ -13,8 +13,6 @@ interface NavigationProps {
 export function Navigation({className, onLinkClick}: NavigationProps) {
 	const pathname = usePathname();
 	const params = useParams();
-	
-	// Use Sets for better performance
 	const [expandedTopics, setExpandedTopics] = useState<Set<string>>(new Set());
 	const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
@@ -35,7 +33,7 @@ export function Navigation({className, onLinkClick}: NavigationProps) {
 		return version ? `/v/${version}${path}` : path;
 	}, [version]);
 
-	// Optimized expansion logic with useCallback
+	// Optimized expansion logic
 	const handleTopicClick = useCallback((topicTitle: string, maximize?: boolean) => {
 		setExpandedTopics(prev => {
 			const newSet = new Set(prev);
@@ -43,7 +41,7 @@ export function Navigation({className, onLinkClick}: NavigationProps) {
 				newSet.delete(topicTitle);
 			} else {
 				if (!maximize) {
-					// If not maximizing, collapse other topics first
+					// If not maximizing, collapse other topics
 					newSet.clear();
 				}
 				newSet.add(topicTitle);
@@ -67,40 +65,31 @@ export function Navigation({className, onLinkClick}: NavigationProps) {
 		});
 	}, []);
 
-	// Optimized path-based expansion - only run when pathname changes
+	// Initialize expanded state based on current path
 	useEffect(() => {
-		if (!currentNavigation || !pathname) return;
-
 		const newExpandedTopics = new Set<string>();
 		const newExpandedSections = new Set<string>();
 
-		// Find the current page and expand its hierarchy
-		outerLoop: for (const separator of currentNavigation) {
+		for (const separator of currentNavigation) {
 			for (const topic of separator.topics) {
-				// Check if current page is a topic
 				if (topic.href === pathname) {
+					newExpandedTopics.add(separator.separator);
 					newExpandedTopics.add(topic.title);
-					break outerLoop;
+					return;
 				}
-				
-				// Check sections
-				if (topic.sections) {
-					for (const section of topic.sections) {
-						if (section.href === pathname) {
+				for (const section of topic.sections || []) {
+					if (section.href === pathname) {
+						newExpandedTopics.add(separator.separator);
+						newExpandedTopics.add(topic.title);
+						newExpandedSections.add(section.title);
+						return;
+					}
+					for (const subsection of section.subsections || []) {
+						if (subsection.href === pathname) {
+							newExpandedTopics.add(separator.separator);
 							newExpandedTopics.add(topic.title);
 							newExpandedSections.add(section.title);
-							break outerLoop;
-						}
-						
-						// Check subsections
-						if (section.subsections) {
-							for (const subsection of section.subsections) {
-								if (subsection.href === pathname) {
-									newExpandedTopics.add(topic.title);
-									newExpandedSections.add(section.title);
-									break outerLoop;
-								}
-							}
+							return;
 						}
 					}
 				}
@@ -110,14 +99,6 @@ export function Navigation({className, onLinkClick}: NavigationProps) {
 		setExpandedTopics(newExpandedTopics);
 		setExpandedSections(newExpandedSections);
 	}, [pathname, currentNavigation]);
-
-	// Memoized link click handler
-	const handleLinkClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>, topicTitle?: string) => {
-		onLinkClick?.(e);
-		if (topicTitle) {
-			handleTopicClick(topicTitle);
-		}
-	}, [onLinkClick, handleTopicClick]);
 
 	return (
 		<nav className={clsx('text-base lg:text-sm', className)}>
@@ -133,7 +114,10 @@ export function Navigation({className, onLinkClick}: NavigationProps) {
 									<div className="flex w-full items-center justify-between">
 										<Link
 											href={prependVersion(topic.href)}
-											onClick={(e) => handleLinkClick(e, topic.title)}
+											onClick={(e) => {
+												onLinkClick?.(e);
+												handleTopicClick(topic.title);
+											}}
 											className={clsx(
 												'flex w-full transition-colors',
 												topic.href === pathname
@@ -147,11 +131,10 @@ export function Navigation({className, onLinkClick}: NavigationProps) {
 											<button
 												className="pointer-cursor rounded-md p-1 hover:bg-slate-200 dark:hover:bg-slate-800"
 												onClick={() => handleTopicClick(topic.title, true)}
-												aria-label={`Toggle ${topic.title} sections`}
 											>
 												<ChevronRightIcon
 													className={clsx(
-														'pointer-cursor duration-200 h-4 w-4 text-slate-500 transition-transform dark:text-dark-text-secondary',
+														'pointer-cursor duration-400 h-4 w-4 text-slate-500 transition-transform dark:text-dark-text-secondary',
 														{
 															'rotate-90 transform': expandedTopics.has(topic.title)
 														}
@@ -185,11 +168,10 @@ export function Navigation({className, onLinkClick}: NavigationProps) {
 																<button
 																	className="pointer-cursor rounded-md p-1 hover:bg-slate-200 dark:hover:bg-slate-800"
 																	onClick={() => handleSectionClick(section.title)}
-																	aria-label={`Toggle ${section.title} subsections`}
 																>
 																	<ChevronRightIcon
 																		className={clsx(
-																			'pointer-cursor duration-200 h-4 w-4 text-slate-500 transition-transform dark:text-dark-text-secondary',
+																			'pointer-cursor duration-400 h-4 w-4 text-slate-500 transition-transform dark:text-dark-text-secondary',
 																			{
 																				'rotate-90 transform': expandedSections.has(section.title)
 																			}
@@ -205,7 +187,9 @@ export function Navigation({className, onLinkClick}: NavigationProps) {
 																<li key={subsection.title} className="relative">
 																	<Link
 																		href={prependVersion(subsection.href)}
-																		onClick={(e) => onLinkClick?.(e)}
+																		onClick={(e) => {
+																			onLinkClick?.(e);
+																		}}
 																		className={clsx(
 																			'flex items-center py-0.5 pl-3.5 transition-colors before:pointer-events-none before:absolute before:-left-0.5 before:h-full before:w-[2px]',
 																			subsection.href === pathname

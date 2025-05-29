@@ -1,28 +1,26 @@
-import MdxComponents from '@/components/MdxComponents';
-import {Prose} from '@/components/Prose';
-import {allPosts} from 'contentlayer/generated';
-import {getMDXComponent} from 'next-contentlayer/hooks';
-import {notFound} from 'next/navigation';
+import MdxContent from '@/components/MdxContent';
+import { Prose } from '@/components/Prose';
+import { getVersionedPostBySlug } from '@/lib/api';
+import { notFound } from 'next/navigation';
 
 interface Props {
-	params: {
+	params: Promise<{
 		version: string;
-	};
+	}>;
 }
 
-const PostLayout = ({params}: Props) => {
-	const post = allPosts.find(
-		post => post._raw.flattenedPath === `versioned/${params.version}`
-	);
+const PostLayout = async (props: Props) => {
+	const params = await props.params;
+	const post = await getVersionedPostBySlug(params.version, '');
+
 	if (!post) return notFound();
-	const Content = getMDXComponent(post.body.code);
 
 	return (
 		<>
 			<div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none lg:pl-8 lg:pr-0 xl:px-16">
 				<article>
 					<Prose suppressHydrationWarning>
-						<Content components={MdxComponents(params.version)} />
+						<MdxContent source={post.source} version={params.version} />
 					</Prose>
 				</article>
 			</div>
