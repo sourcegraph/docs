@@ -104,17 +104,28 @@ function Header() {
 export function Layout({ children }: { children: React.ReactNode }) {
 	let pathname = usePathname();
 	let isHomePage = pathname === '/';
-	let isCody = pathname.includes('/cody');
+	let isCodyDocs = pathname.includes('/cody');
+	let isopenCtxDocs = pathname.includes('/cody/capabilities/openctx');
 
 	return (
 		<div className="flex w-full flex-col">
 			<Header />
 
-			{isCody && <TopBanner
+			{/* Cody docs banner */}
+			{/* {isCodyDocs && !isopenCtxDocs && <TopBanner
 				text="NEW: Introducing chat and search in a single input with Sourcegraph 6.0."
 				link="https://sourcegraph.com/blog/combining-chat-and-search"
 				linkText="Read here"
-				textColor="white"
+				textColor="#ffffff"
+				backgroundColor="#F34E3F"
+			/>} */}
+
+			{/* Openctx docs banner */}
+			{isopenCtxDocs && <TopBanner
+				text="NEW: Introducing chat and search in a single input with Sourcegraph 6.0."
+				link="https://sourcegraph.com/blog/combining-chat-and-search"
+				linkText="Read here"
+				textColor="#ffffff"
 				backgroundColor="#F34E3F"
 			/>}
 
