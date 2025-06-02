@@ -353,20 +353,58 @@ Site admins can manage the library through the GraphQL mutations `createBatchSpe
 ```graphql
 createBatchSpecLibraryRecord(name: "example", spec: "version: 2\nname: example") {
   id
+  labels
 }
 
 updateBatchSpecLibraryRecord(id: "QmF0Y2hTcGVjTGlicmFyeVJlY29yZDo4", name: "example-2", spec: "version: 2\nname: example-2") {
   id
-}
-
-deleteBatchSpecLibraryRecord(id: "QmF0Y2hTcGVjTGlicmFyeVJlY29yZDo4") {
-  alwaysNil
+  labels
 }
 
 batchSpecLibrary(first: 100) {
   nodes {
     id
     name
+    labels
+  }
+}
+```
+
+### Featured Templates
+
+<span class="badge badge-note">Sourcegraph 6.4+</span>
+
+Site-admins can mark a template as featured by either clicking the star button next to the list of library records. Featured records will automatically move to a section atop the remaining library records.
+
+### Labels
+
+<span class="badge badge-note">Sourcegraph 6.4+</span>
+
+Batch Spec Library records support an optional `labels` field for categorization and filtering. Common labels include:
+
+- `"featured"` - Marks popular or recommended batch specs that are displayed in a "Featured Templates" section above the remaining examples
+- Custom labels for organizational categorization (not exposed to Batch Changes users yet)
+
+To remove the featured status, you can update the library record with an empty list of labels (`[]`).
+
+```graphql
+createBatchSpecLibraryRecord(name: "example", spec: "version: 2\nname: example", labels: ["featured"]) {
+  id
+  labels
+}
+
+updateBatchSpecLibraryRecord(id: "QmF0Y2hTcGVjTGlicmFyeVJlY29yZDo4", name: "example-2", spec: "version: 2\nname: example-2", labels: ["featured"]) {
+  id
+  labels
+}
+
+# Query only featured batch specs
+batchSpecLibrary(first: 100, labels: ["featured"]) {
+  nodes {
+    id
+    name
+    labels
+    spec
   }
 }
 ```
