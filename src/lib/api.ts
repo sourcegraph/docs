@@ -1,4 +1,5 @@
 import fs from 'fs/promises';
+import defaultFs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import {serialize} from 'next-mdx-remote/serialize';
@@ -7,6 +8,8 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypePrettyCode from 'rehype-pretty-code';
 import remarkGfm from 'remark-gfm';
 import GithubSlugger from 'github-slugger';
+
+import shadesOfPurple from '../styles/shades-of-purple.json'
 
 interface FileRecord {
 	filePath: string;
@@ -78,7 +81,10 @@ const extractHeadings = (content: string) => {
 };
 
 // Optimized MDX serialization with caching
-const serializeMdxSource = async (markdownContent: string, cacheKey: string) => {
+const serializeMdxSource = async (
+	markdownContent: string,
+	cacheKey: string
+) => {
 	// Check if we've already serialized this content
 	if (serializedContentCache.has(cacheKey)) {
 		return serializedContentCache.get(cacheKey);
@@ -86,7 +92,7 @@ const serializeMdxSource = async (markdownContent: string, cacheKey: string) => 
 
 	const prettyCodeOptions = {
 		keepBackground: true,
-		theme: 'github-light',
+		theme: shadesOfPurple,
 		defaultLang: 'plaintext'
 	};
 
@@ -288,7 +294,9 @@ export const getAllSlugs = async (): Promise<string[]> => {
 };
 
 // Helper function to get all versioned slugs for static generation
-export const getAllVersionedSlugs = async (version: string): Promise<string[]> => {
+export const getAllVersionedSlugs = async (
+	version: string
+): Promise<string[]> => {
 	const fileCache = await getFileCache();
 	if (!fileCache) {
 		return [];
