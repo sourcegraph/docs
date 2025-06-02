@@ -124,7 +124,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 			{isopenCtxDocs && <TopBanner
 				text="NEW: MCP is the recommended method for adding external context in Cody due to its broad community adoption and extensive tool support.
 				link="https://sourcegraph.com/docs/cody/capabilities/agentic-context-fetching#mcp-support"
-				linkText="Read here"
+				linkText="Read docs to learn more about configuring MCP."
 				textColor="#ffffff"
 				backgroundColor="#F34E3F"
 			/>}
