@@ -122,7 +122,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 			{/* Openctx docs banner */}
 			{isopenCtxDocs && <TopBanner
-				text="NEW: Introducing chat and search in a single input with Sourcegraph 6.0."
+				text="NEW: MCP is the recommended method for adding external context in Cody due to its broad community adoption and extensive tool support. [Read the docs](https://sourcegraph.com/docs/cody/capabilities/agentic-context-fetching#mcp-support) to learn more about configuring MCP.
 				link="https://sourcegraph.com/blog/combining-chat-and-search"
 				linkText="Read here"
 				textColor="#ffffff"
