@@ -1,0 +1,252 @@
+# PostgreSQL Collation Version Mismatch Resolution
+
+# Issue Summary
+
+Customers who initially deployed Sourcegraph versions prior to v6.2.2553 using the Sourcegraph provided PostgreSQL containers may encounter PostgreSQL collation version mismatch warnings after upgrading to more recent Sourcegraph versions due to an underlying glibc version update.
+
+# Impact
+
+Mismatched collation versions can lead to database index corruption if left unchecked.
+
+# Affected Services
+
+* `pgsql` container
+* `codeintel-db` container
+* `codeinsights-db` container
+
+Only self-hosted customers using the Sourcegraph provided PostgreSQL container images are affected.
+
+Self-hosted customers using external databases, such as AWS RDS, GCP CloudSQL, or another self-managed solution are **NOT** affected.
+
+Sourcegraph Cloud customers are not affected.
+
+# Symptoms
+
+When logging into the database via `psql` or similar tools you may see the following warning:
+
+```shell
+WARNING: database "sg" has a collation version mismatch DETAIL: The database was created using collation version 2.40, but the operating system provides version 2.41.
+```
+
+# Backup Instructions (Required Before Proceeding)
+
+Before performing any reindexing operations, it is critical to back up your data to prevent potential data loss. Use the method applicable to your deployment and your current environment.
+
+Docker example:
+
+```
+docker exec -t <database-container-name> pg_dumpall -U sg > backup_<container>.sql
+```
+
+# Resolution Steps
+
+Each affected database requires a reindex to be performed. This requires downtime, and should be done in the next available maintenance window.
+
+Before reindexing, check the current collation versions. Run the following SQL to compare current and OS collation versions:
+
+```
+SELECT
+    datname,
+    datcollversion,
+    pg_database_collation_actual_version(oid) AS current_os_version
+FROM pg_database;
+```
+
+`datcollversion` should not match `current_os_version`
+
+## Docker Compose deployments
+
+1. Stop all Sourcegraph containers
+
+```
+docker compose down
+```
+
+2. Start only the database containers
+
+```
+docker compose up pgsql codeinsights-db codeintel-db -d
+```
+
+3. Access each database container
+
+```
+docker exec -it <database-container-name> bash
+```
+
+4. Reindex the databases in the container
+
+```
+reindexdb --no-password --username sg --verbose --echo --system
+reindexdb --no-password --username sg --verbose --echo --all
+```
+
+5. Refresh the collation version for each database
+
+```
+psql --no-password --username "sg" --tuples-only -c "SELECT 'ALTER DATABASE ' || datname || ' REFRESH COLLATION VERSION;' FROM pg_database WHERE datname != 'template0';" | psql --no-password --username "sg"
+```
+
+\* For the above commands, replace `sg` with your custom username if one was configured in your environment.
+\*\* For the `codeinsights-db` container, the default username is `postgres` instead of `sg`.
+
+Repeat steps 3 through 5 with all containers:
+
+* `pgsql` container
+* `codeintel-db` container
+* `codeinsights-db` container
+
+Once this is complete, you may start your Sourcegraph deployment
+
+```
+docker compose up -d
+```
+
+## Helm Deployments
+
+1. Stop all non-database Sourcegraph pods (assuming a namespace of `sourcegraph`)
+
+```
+kubectl get -n sourcegraph deploy --no-headers | awk '{print $1}' | xargs -n 1 -P 8 -I % kubectl -n sourcegraph scale deployment % --replicas=0
+```
+
+```
+kubectl -n sourcegraph get sts --selector 'app.kubernetes.io/component!=codeinsights-db,app.kubernetes.io/component!=codeintel-db,app.kubernetes.io/component!=pgsql' --no-headers | awk '{print $1}' | xargs -n 1 -P 8 -I % kubectl -n sourcegraph scale sts % --replicas=0
+```
+
+2. Access each database pod
+
+```
+kubectl exec -it <database-pod-name> -n sourcegraph -- /bin/sh
+```
+
+3. Reindex the databases in the container
+
+```
+reindexdb --no-password --username sg --verbose --echo --system
+reindexdb --no-password --username sg --verbose --echo --all
+```
+
+4. Refresh the collation version for each database
+
+```
+psql --no-password --username "sg" --tuples-only -c "SELECT 'ALTER DATABASE ' || datname || ' REFRESH COLLATION VERSION;' FROM pg_database WHERE datname != 'template0';" | psql --no-password --username "sg"
+```
+
+\* For the above commands, replace `sg` with your custom username if one was configured in your environment.
+\*\* For the `codeinsights-db` container, the default username is `postgres` instead of `sg`.
+
+Repeat steps 2 through 4 with all pods:
+
+* `pgsql-0` pod
+* `codeintel-db-0` pod
+* `codeinsights-db-0` pod
+
+Once this is complete, you may start your Sourcegraph deployment, for example
+
+```
+helm upgrade -n sourcegraph <your-helm-charts>
+```
+
+## Kustomize Deployments
+
+1. Stop all non-database Sourcegraph pods (assuming a namespace of `sourcegraph`). In your cluster Kustomization file (`instances/my-sourcegraph/kustomize.yaml`), uncomment the [multi-version-upgrade util](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/instances/template/kustomization.template.yaml#L155). This will scale down all non-database deployments and statefulSets replicas to 0\.
+
+```
+  # - ../../components/utils/uid # -- Run all Postgres database with valid users on host
+  - ../../components/utils/multi-version-upgrade # -- Scale down non-database pods to 0 for multi-version upgrade
+  # - ../../components/utils/migrate-to-nonprivileged # -- Component for migrating from privileged to non-privileged
+  #
+```
+
+2. Generate and apply a new \`cluster.yaml\` file
+
+```
+kubectl kustomize instances/my-sourcegraph -o cluster.yaml
+kubectl apply --prune -l deploy=sourcegraph -f cluster.yaml
+```
+
+3. Access each database pod
+
+```
+kubectl exec -it <database-pod-name> -n sourcegraph -- /bin/sh
+```
+
+4. Reindex the databases in the container
+
+```
+reindexdb --no-password --username sg --verbose --echo --system
+reindexdb --no-password --username sg --verbose --echo --all
+```
+
+5. Refresh the collation version for each database
+
+```
+psql --no-password --username "sg" --tuples-only -c "SELECT 'ALTER DATABASE ' || datname || ' REFRESH COLLATION VERSION;' FROM pg_database WHERE datname != 'template0';" | psql --no-password --username "sg"
+```
+
+\* For the above commands, replace `sg` with your custom username if one was configured in your environment.
+\*\* For the `codeinsights-db` container, the default username is `postgres` instead of `sg`.
+
+Repeat steps 3 through 5 with all pods:
+
+* `pgsql-0` pod
+* `codeintel-db-0` pod
+* `codeinsights-db-0` pod
+
+Once this is complete, you may start your Sourcegraph deployment.
+
+Comment out the [multi-version-upgrade util](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/instances/template/kustomization.template.yaml#L155) in your cluster Kustomization file (`instances/my-sourcegraph/kustomize.yaml`).
+
+```
+# - ../../components/utils/uid # -- Run all Postgres database with valid users on host
+# - ../../components/utils/multi-version-upgrade # -- Scale down non-database pods to 0 for multi-version upgrade
+# - ../../components/utils/migrate-to-nonprivileged # -- Component for migrating from privileged to non-privileged
+```
+
+Generate and apply a new \`cluster.yaml\` file
+
+```
+kubectl kustomize instances/my-sourcegraph -o cluster.yaml
+kubectl apply --prune -l deploy=sourcegraph -f cluster.yaml
+```
+
+## AMI/Machine Image based deployments
+
+Our AMI and GCP machine image deployments run Kubernetes internally, and thus follow the same general directions as our Helm Deployments described above.
+
+To access the deployment you must SSH into your AMI/Machine image first.
+
+* For AWS AMIs, the default username is `ec2-user`
+* For GCP machine images, the default username is `sourcegraph`
+
+Follow the directions laid out in the Helm Deployments section.
+
+# Expected Downtime
+
+* Reindexing may take 15-60 minutes in most cases, but depends on the database size, disk speed, and available CPU/RAM
+* For customers with larger databases \- greater than 100Gb \- or low resource allocation, reindexing may take longer
+
+# Verification
+
+Check that warnings no longer appear when connecting to the database:
+
+```
+psql --no-password --username "$PGUSER" -d sg
+```
+
+After Reindexing: Verify Collation Version:
+
+```
+SELECT
+    datname,
+    datcollversion,
+    pg_database_collation_actual_version(oid) AS current_os_version
+FROM pg_database;
+```
+
+Ensure `datcollversion` matches `current_os_version` for all databases listed.
+
+# Questions?
+
+Contact Sourcegraph Support ([support@sourcegraph.com](mailto:support@sourcegraph.com)) if you encounter issues during this process.
