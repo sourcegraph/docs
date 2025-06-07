@@ -1,47 +1,54 @@
 import { Breadcrumbs } from '@/components/Breadcrumbs';
-import MdxComponents from '@/components/MdxComponents';
+import MdxContent from '@/components/MdxContent';
 import { PrevNextLinks } from '@/components/PrevNextLinks';
 import { Prose } from '@/components/Prose';
 import { TableOfContents } from '@/components/Toc';
-import { allPosts } from 'contentlayer/generated';
-import { getMDXComponent } from 'next-contentlayer/hooks';
+import { getAllVersionedPosts, getVersionedPostBySlug } from '@/lib/api';
 import { notFound } from 'next/navigation';
 
 export const maxDuration = 300;
 
-
 export const generateStaticParams = async () => {
-	return allPosts.map(post => ({
-		params: { slug: post._raw.flattenedPath.split('/') }
-	}));
+	const supportedVersions = ['6.3', '6.2'];
+	const allParams = [];
+
+	for (const version of supportedVersions) {
+		const posts = await getAllVersionedPosts(version);
+		if (posts) {
+			const params = posts.map(post => ({
+				version,
+				slug: post.slugPath.split('/')
+			}));
+			allParams.push(...params);
+		}
+	}
+
+	return allParams;
 };
 
-export const generateMetadata = ({ params }: Props) => {
-	const path = params.slug.join('/');
-	const post = allPosts.find(
-		post =>
-			post._raw.flattenedPath === `versioned/${params.version}/${path}`
-	);
+export const generateMetadata = async (props: Props) => {
+	const params = await props.params;
+	const slugPath = params.slug.join('/');
+	const post = await getVersionedPostBySlug(params.version, slugPath);
+
 	if (post && post.headings && post.headings.length > 0) {
 		return { title: post.headings[0].title };
 	}
 };
 
 interface Props {
-	params: {
+	params: Promise<{
 		version: string;
 		slug: string[];
-	};
+	}>;
 }
 
-const PostLayout = ({ params }: Props) => {
-	const path = params.slug.join('/');
-	const post = allPosts.find(
-		post =>
-			post._raw.flattenedPath === `versioned/${params.version}/${path}`
-	);
+const PostLayout = async (props: Props) => {
+	const params = await props.params;
+	const slugPath = params.slug.join('/');
+	const post = await getVersionedPostBySlug(params.version, slugPath);
+
 	if (!post) return notFound();
-	const Content = getMDXComponent(post.body.code);
 
 	return (
 		<>
@@ -49,11 +56,12 @@ const PostLayout = ({ params }: Props) => {
 				<Breadcrumbs path={params.slug} />
 				<article>
 					<Prose>
-						<Content components={MdxComponents(params.version)} />
+						<MdxContent source={post.source} version={params.version} />
 					</Prose>
 				</article>
 				<PrevNextLinks />
 			</div>
+			{/* @ts-ignore */}
 			<TableOfContents headings={post.headings} />
 		</>
 	);
