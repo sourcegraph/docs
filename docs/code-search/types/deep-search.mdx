@@ -32,12 +32,13 @@ Deep Search is disabled by default. To enable it, ask your site administrator to
 
 For optimal performance, Deep Search is specialized to only use one model. Currently, Deep Search only supports Claude Sonnet 4.
 
-### Configuring Deep Search on Amazon Bedrock
+### Configuring Deep Search on Amazon Bedrock or GCP Vertex
 
 Include configuration for Claude Sonnet 4 in [modelOverrides](/cody/enterprise/model-configuration#model-overrides) in your site configuration. For more information on configuring models, refer to [Model Configuration](/cody/enterprise/model-configuration).
 
-Example for Sonnet 4 configuration inside `modelOverrides`:
+Examples for Sonnet 4 configuration inside `modelOverrides`:
 
+Amazon Bedrock:
 ```json
 {
     "modelRef": "aws-bedrock::v1::claude-sonnet-4",
@@ -56,11 +57,39 @@ Example for Sonnet 4 configuration inside `modelOverrides`:
 },
 ```
 
+GCP Vertex:
+```json
+{
+    "modelRef": "google-anthropic::v2::claude-sonnet-4",
+    "modelName": "claude-sonnet-4@20250514",
+    "displayName": "Claude Sonnet 4 (GCP Vertex)",
+    "capabilities": [
+        "chat",
+        "tools",
+    ],
+    "category": "balanced",
+    "status": "stable",
+    "contextWindow": {
+        "maxInputTokens": 200000,
+        "maxOutputTokens": 32000,
+    }
+},
+```
+
 Then, configure Deep Search to use this model in `experimentalFeatures`:
 
+Amazon Bedrock:
 ```json
 "experimentalFeatures": {
     "deepSearch.enabled": true,
     "deepSearch.model": "aws-bedrock::v1::claude-sonnet-4"
+},
+```
+
+GCP Vertex:
+```json
+"experimentalFeatures": {
+    "deepSearch.enabled": true,
+    "deepSearch.model": "google-anthropic::v2::claude-sonnet-4"
 },
 ```
