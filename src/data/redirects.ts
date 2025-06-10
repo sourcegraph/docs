@@ -6804,6 +6804,13 @@ const redirectsData = [
     permanent: true
   },
 
+  //Rmv embeddings permanentaly:https://sourcegraph.com/docs/cody/core-concepts/embeddings
+  {
+    source: "/cody/core-concepts/embeddings",
+    destination: "/cody/",
+    permanent: true
+  },
+
 
 ];
 
