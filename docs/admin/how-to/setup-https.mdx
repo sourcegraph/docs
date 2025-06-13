@@ -1,106 +1,226 @@
-# How to setup HTTPS connection with Ingress controller on your Kubernetes instance
+# How to setup HTTPS/TLS for your Kubernetes Sourcegraph instance
 
-This document will take you through how to setup HTTPS connection using the preinstalled [Ingress controller](/admin/deploy/kubernetes/configure#ingress-controller), which allows external users to access your main web server over the network. It installs rules for the default ingress, see comments to restrict it to a specific host. This is our recommended method to configure network access for production environments.
+This document explains how to configure HTTPS/TLS for your Sourcegraph instance deployed with [deploy-sourcegraph-k8s](https://github.com/sourcegraph/deploy-sourcegraph-k8s) using Kustomize.
 
 ## Prerequisites
 
-- This document assumes that your Sourcegraph instance is deployed into a Kubernetes cluster and that ingress has already been installed for [sourcegraph-frontend](https://github.com/sourcegraph/deploy-sourcegraph/blob/master/base/frontend/sourcegraph-frontend.Ingress.yaml) (by default).
+- Sourcegraph deployed using [deploy-sourcegraph-k8s](https://github.com/sourcegraph/deploy-sourcegraph-k8s)
+- An ingress controller installed in your cluster
+- A domain name pointing to your ingress controller's external IP
 
-## Steps for GCE-GKE user
+## Option 1: TLS with existing certificates
 
-> WARNING: Please visit our [Kubernetes Configuration Docs](/admin/deploy/kubernetes/configure#ingress-controller) for more detail on Network-related topics
->
+If you already have TLS certificates, you can use the built-in TLS component.
 
-### 1. Install the NGINX ingress controller (ingress-nginx)
-Install the NGINX ingress controller by following the instructions at [https://kubernetes.github.io/ingress-nginx/deploy/](https://kubernetes.github.io/ingress-nginx/deploy/)
+### Step 1: Create a TLS secret
 
-For example, GCE-GKE user would simply run [this command](https://kubernetes.github.io/ingress-nginx/deploy/#gce-gke) `kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.47.0/deploy/static/provider/cloud/deploy.yaml` to install the NGINX ingress controller
-
-### 2. Update the create-new-cluster.sh file
-Add the [configure/ingress-nginx/install.sh](https://github.com/sourcegraph/deploy-sourcegraph/blob/master/configure/ingress-nginx/install.sh) command to the [create-new-cluster.sh](https://github.com/sourcegraph/deploy-sourcegraph/blob/master/create-new-cluster.sh) file at root, and commit the change.
-Your file should look similar to this:
-```sh
-echo ./configure/ingress-nginx/install.sh >> create-new-cluster.sh
-./kubectl-apply-all.sh $@
-```
-
-### 3. Once the ingress has acquired an external address
-You should be able to access Sourcegraph using the external address returns from the following `kubectl -n ingress-nginx get svc`.
+Create a Kubernetes secret containing your TLS certificate and private key:
 
 ```bash
-$kubectl -n ingress-nginx get svc
-NAME                                 TYPE           CLUSTER-IP    EXTERNAL-IP     PORT(S)                      AGE
-ingress-nginx-controller             LoadBalancer   10.XX.8.XXX   XX.XXX.XXX.XX   80:32695/TCP,443:31722/TCP   5d13h
-ingress-nginx-controller-admission   ClusterIP      10.XX.8.X     <none>          443/TCP                      5d13h
+kubectl create secret tls sourcegraph-frontend-tls \
+  --cert=path/to/your/certificate.crt \
+  --key=path/to/your/private.key \
+  --namespace=YOUR_NAMESPACE
 ```
 
-## Configure TLS/SSL
+### Step 2: Configure your Kustomization
 
-After your Sourcegraph instance is exposed via an ingress controller, you should consider using TLS so that all traffic will be served over HTTPS.
-
-### 1. Create TLS certificate and private key
-
-Place the newly created certificate and private key in a secured place. We will be using `.envrc/private.key` and `.envrc/public.pem` in this example.
-
-### 2. Create a TLS secret for your Cluster
-
-Create a TLS secret that contains your TLS certificate and private key by running the following command:
-
-```bash
-kubectl create secret tls sourcegraph-tls --key .envrc/private.key --cert .envrc/public.pem
-```
-
-> NOTE: You can delete it by running `kubectl delete secret sourcegraph-tls`
-
-### 3. Update the create-new-cluster.sh file
-
-Add the previous command to the [create-new-cluster.sh](https://github.com/sourcegraph/deploy-sourcegraph/blob/master/create-new-cluster.sh) file at root, and commit the change. Your file should look similar to this:
-
-```bash
-echo ./configure/ingress-nginx/install.sh >> create-new-cluster.sh
-echo kubectl create secret tls sourcegraph-tls --key .envrc/private.key --cert .envrc/public.pem  >> create-new-cluster.sh
-./kubectl-apply-all.sh $@
-```
-
-### 4. Update the ingress sourcegraph-frontend.Ingress.yaml file
-
-Add the tls configuration to [base/frontend/sourcegraph-frontend.Ingress.yaml](https://github.com/sourcegraph/deploy-sourcegraph/blob/master/base/frontend/sourcegraph-frontend.Ingress.yaml) file by commenting out the `tls` section, and replace `sourcegraph.example.com` with your domain.
-
-> NOTE: It must be a DNS name, not an IP address
+In your `instances/YOUR_INSTANCE/kustomization.yaml` file, uncomment the TLS component:
 
 ```yaml
-   # base/frontend/sourcegraph-frontend.Ingress.yaml
-   tls:
-     - hosts:
-         #  Replace 'sourcegraph.example.com' with the real domain that you want to use for your Sourcegraph instance.
-         - sourcegraph.example.com
-       secretName: sourcegraph-tls
-   rules:
-     - http:
-         paths:
-         - path: /
-           backend:
-             serviceName: sourcegraph-frontend
-             servicePort: 30080
-       # Replace 'sourcegraph.example.com' with the real domain that you want to use for your Sourcegraph instance.
-       host: sourcegraph.example.com
-
+components:
+  # Enable TLS with existing certificates
+  - ../../components/network/tls
 ```
 
-### 5. Update Site Configuration
+### Step 3: Set environment variables
 
-Update your externalURL in the [site configuration](/admin/config/site_config) to e.g. https://sourcegraph.example.com:
+Add the required configuration to your `instances/YOUR_INSTANCE/.env` file:
+
+```bash
+TLS_HOST=sourcegraph.example.com
+TLS_INGRESS_CLASS_NAME=nginx
+TLS_CLUSTER_ISSUER=your-cluster-issuer  # if using cert-manager
+```
+
+### Step 4: Apply the configuration
+
+```bash
+# Generate updated manifests
+kubectl kustomize instances/YOUR_INSTANCE -o cluster.yaml
+
+# Apply the changes
+kubectl apply --prune -l deploy=sourcegraph -f cluster.yaml
+```
+
+## Option 2: Cloud provider managed certificates
+
+### AWS with Application Load Balancer (ALB)
+
+For AWS deployments, you can use AWS Certificate Manager (ACM) certificates:
+
+```yaml
+components:
+  # Use AWS managed certificates
+  - ../../components/clusters/aws/managed-cert
+  - ../../components/ingress/alb
+```
+
+Set the required environment variables:
+
+```bash
+AWS_CERTIFICATE_ARN=arn:aws:acm:region:account:certificate/certificate-id
+HOST_DOMAIN=sourcegraph.example.com
+```
+
+### Google Kubernetes Engine (GKE)
+
+For GKE deployments, you can use Google-managed SSL certificates:
+
+```yaml
+components:
+  # Use GKE managed certificates
+  - ../../components/clusters/gke/managed-cert
+  - ../../components/ingress/gke
+```
+
+Set the required environment variables:
+
+```bash
+HOST_DOMAIN=sourcegraph.example.com
+```
+
+## Option 3: cert-manager integration
+
+If you have [cert-manager](https://cert-manager.io/) installed in your cluster, you can automatically provision certificates:
+
+### Step 1: Install cert-manager (if not already installed)
+
+```bash
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.0/cert-manager.yaml
+```
+
+### Step 2: Create a ClusterIssuer
+
+Create a ClusterIssuer for Let's Encrypt:
+
+```yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: your-email@example.com
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
+```
+
+### Step 3: Configure Sourcegraph with cert-manager
+
+In your `instances/YOUR_INSTANCE/kustomization.yaml`:
+
+```yaml
+components:
+  - ../../components/network/tls
+```
+
+Set the environment variables:
+
+```bash
+TLS_HOST=sourcegraph.example.com
+TLS_INGRESS_CLASS_NAME=nginx
+TLS_CLUSTER_ISSUER=letsencrypt-prod
+```
+
+## Step 4: Update Site Configuration
+
+After configuring TLS, update your Sourcegraph site configuration to use HTTPS:
+
+1. Navigate to **Site admin > Configuration**
+2. Update the `externalURL` setting:
 
 ```json
 {
-"externalURL": "https://sourcegraph.example.com"
+  "externalURL": "https://sourcegraph.example.com"
 }
 ```
 
-### 6. Update the ingress controller
+## Verification
 
-Update the ingress controller with the previous changes with the following command:
+### Check ingress configuration
 
 ```bash
-kubectl apply -f base/frontend/sourcegraph-frontend.Ingress.yaml
+kubectl get ingress sourcegraph-frontend -o yaml
 ```
+
+You should see TLS configuration in the output:
+
+```yaml
+spec:
+  tls:
+  - hosts:
+    - sourcegraph.example.com
+    secretName: sourcegraph-frontend-tls
+```
+
+### Test the HTTPS connection
+
+```bash
+curl -I https://sourcegraph.example.com
+```
+
+You should receive a response with `HTTP/2 200` or `HTTP/1.1 200` status.
+
+### Check certificate details
+
+```bash
+echo | openssl s_client -servername sourcegraph.example.com -connect sourcegraph.example.com:443 2>/dev/null | openssl x509 -noout -dates
+```
+
+## Troubleshooting
+
+### Certificate not loading
+
+1. Verify the TLS secret exists and contains valid certificate data:
+   ```bash
+   kubectl get secret sourcegraph-frontend-tls -o yaml
+   ```
+
+2. Check ingress controller logs:
+   ```bash
+   kubectl logs -n ingress-nginx deployment/ingress-nginx-controller
+   ```
+
+### cert-manager certificate issues
+
+1. Check certificate status:
+   ```bash
+   kubectl get certificate
+   kubectl describe certificate sourcegraph-frontend-tls
+   ```
+
+2. Check cert-manager logs:
+   ```bash
+   kubectl logs -n cert-manager deployment/cert-manager
+   ```
+
+### DNS issues
+
+Ensure your domain name points to your ingress controller's external IP:
+
+```bash
+kubectl get service -n ingress-nginx ingress-nginx-controller
+nslookup sourcegraph.example.com
+```
+
+## Additional Resources
+
+- [Kubernetes Ingress TLS documentation](https://kubernetes.io/docs/concepts/services-networking/ingress/#tls)
+- [cert-manager documentation](https://cert-manager.io/docs/)
+- [deploy-sourcegraph-k8s TLS component](https://github.com/sourcegraph/deploy-sourcegraph-k8s/tree/main/components/network/tls)
