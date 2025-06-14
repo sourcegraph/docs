@@ -13,6 +13,7 @@ import { LogoMark } from './LogoMark';
 import VersionSelector from './VersionSelector';
 import { Search } from './search/Search';
 import { DemoLayout } from '@/components/DemoLayout';
+import { TopBanner } from './TopBanner';
 
 function GitHubIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -103,10 +104,30 @@ function Header() {
 export function Layout({ children }: { children: React.ReactNode }) {
 	let pathname = usePathname();
 	let isHomePage = pathname === '/';
+	let isCodyDocs = pathname.includes('/cody');
+	let isopenCtxDocs = pathname.includes('/cody/capabilities/openctx');
 
 	return (
 		<div className="flex w-full flex-col">
 			<Header />
+
+			{/* Cody docs banner */}
+			{/* {isCodyDocs && !isopenCtxDocs && <TopBanner
+				text="NEW: Introducing chat and search in a single input with Sourcegraph 6.0."
+				link="https://sourcegraph.com/blog/combining-chat-and-search"
+				linkText="Read here"
+				textColor="#ffffff"
+				backgroundColor="#F34E3F"
+			/>} */}
+
+			{/* Openctx docs banner */}
+			{isopenCtxDocs && <TopBanner
+				text="NEW: MCP is the recommended method for adding external context in Cody due to its broad community adoption and extensive tool support."
+				link="https://sourcegraph.com/docs/cody/capabilities/agentic-context-fetching#mcp-support"
+				linkText="Read docs to learn more about configuring MCP."
+				textColor="#ffffff"
+				backgroundColor="#F34E3F"
+			/>}
 
 			{isHomePage && <Hero />}
 			{/* {isHomePage && <DemoLayout />} */}
