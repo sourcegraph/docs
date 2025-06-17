@@ -47,13 +47,11 @@ However, if you’ve applied security measures or have firewall restrictions on 
 - **Protocol Description**: gRPC runs on-top of [HTTP/2](https://en.wikipedia.org/wiki/HTTP/2) (which, in turn, runs on top of [TCP](https://en.wikipedia.org/wiki/Transmission_Control_Protocol). It transfers (binary-encoded, not human-readable plain-text) [Protocol Buffer](https://protobuf.dev/) payloads. Our current gRPC implementation does not use any encryption.
 
 - **List of services**: The following services will now _speak mainly gRPC in addition_ to their previous traffic:
-  - [frontend](https://github.com/sourcegraph/deploy-sourcegraph/blob/master/base/frontend/sourcegraph-frontend.Service.yaml)
-  - [gitserver](https://github.com/sourcegraph/deploy-sourcegraph-cloud/blob/release/base/gitserver/gitserver.Service.yaml)
-  - [searcher](https://github.com/sourcegraph/deploy-sourcegraph-cloud/blob/release/base/searcher/searcher.Service.yaml)
-  - [zoekt-webserver](https://github.com/sourcegraph/deploy-sourcegraph-cloud/blob/release/base/indexed-search/indexed-search.StatefulSet.yaml)
-  - [zoekt-indexserver](https://github.com/sourcegraph/deploy-sourcegraph-cloud/blob/release/base/indexed-search/indexed-search.StatefulSet.yaml)
-  - [symbols](https://github.com/sourcegraph/deploy-sourcegraph-cloud/blob/release/base/symbols/symbols.Deployment.yaml)
-  - [repo-updater](https://github.com/sourcegraph/deploy-sourcegraph-cloud/blob/release/base/repo-updater/repo-updater.Deployment.yaml)
+  - [frontend](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/base/sourcegraph/frontend/sourcegraph-frontend.Service.yaml)
+  - [gitserver](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/base/sourcegraph/gitserver/gitserver.Service.yaml)
+  - [searcher](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/base/sourcegraph/searcher/searcher.StatefulSet.yaml)
+  - [zoekt-webserver](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/base/sourcegraph/indexed-search/indexed-search.StatefulSet.yaml)
+  - [zoekt-indexserver](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/base/sourcegraph/indexed-search/indexed-search.StatefulSet.yaml)
 
 - The following aspects about Sourcegraph’s networking configuration **aren’t changing**:
   - **Ports**: all Sourcegraph services will use the same ports as they were in the **5.1.X** release.
@@ -89,7 +87,7 @@ Set the environment variable `SG_FEATURE_FLAG_GRPC="false"` for every service.
 
 #### `zoekt-indexserver` service: disable via environment variable
 
-Set the environment variable `GRPC_ENABLED="false"` on the `zoekt-indexserver` container. (See [https://github.com/sourcegraph/deploy-sourcegraph-cloud/blob/18e5f9e450878705b7a99ee7c3bcf74c3fb68514/base/indexed-search/indexed-search.StatefulSet.yaml#L105-L106](https://github.com/sourcegraph/deploy-sourcegraph-cloud/blob/18e5f9e450878705b7a99ee7c3bcf74c3fb68514/base/indexed-search/indexed-search.StatefulSet.yaml#L105-L106) for an example:
+Set the environment variable `GRPC_ENABLED="false"` on the `zoekt-indexserver` container. (See [indexed-search.StatefulSet.yaml](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/base/sourcegraph/indexed-search/indexed-search.StatefulSet.yaml) for the configuration):
 
 ```yaml
 - name: zoekt-indexserver
