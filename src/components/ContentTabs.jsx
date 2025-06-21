@@ -1,68 +1,91 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { getMDXComponent } from 'next-contentlayer/hooks';
+import {useState, useEffect} from 'react';
+import {MDXRemote} from 'next-mdx-remote';
 import clsx from 'clsx';
-import { useParams, useRouter } from 'next/navigation';
-import { allPosts } from 'contentlayer/generated';
+import {useParams, useRouter} from 'next/navigation';
 import MdxComponents from '@/components/MdxComponents';
+import {getPostBySlug} from '@/lib/api';
 
-export function ContentTabs({ children, name }) {
-  const params = useParams();
-  const router = useRouter();
-  const [onTab, setOnTab] = useState(true)
-  const [selectedTab, setSelectedTab] = useState(null);
-  const [postContent, setPostContent] = useState(null);
+export function ContentTabs({children, name}) {
+	const params = useParams();
+	const router = useRouter();
+	const [onTab, setOnTab] = useState(true);
+	const [selectedTab, setSelectedTab] = useState(null);
+	const [postContent, setPostContent] = useState(null);
+	const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    updateTabFromURL();
-  }, []);
+	useEffect(() => {
+		updateTabFromURL();
+	}, []);
 
-  const updateTabFromURL = () => {
+	const updateTabFromURL = async () => {
+		const path = `/${params.slug?.join('/') || ''}`;
+		const allPaths = children.map(child => child.props.href);
 
-    const path = `/${params.slug.join('/')}`;
-    const allPaths = children.map(child => child.props.href)
+		if (!allPaths.includes(path)) {
+			setSelectedTab(allPaths[0]);
+			setLoading(true);
 
-    if (!allPaths.includes(path)) {
-      setSelectedTab(allPaths[0])
-      const selectedPost = allPosts.find(post => `/${post._raw.flattenedPath}` === allPaths[0] && name == 'main');
+			try {
+				const cleanPath = allPaths[0].startsWith('/')
+					? allPaths[0].substring(1)
+					: allPaths[0];
+				const post = await getPostBySlug(cleanPath);
 
-      if (selectedPost) {
-        const Content = getMDXComponent(selectedPost.body.code);
-        setPostContent(<Content components={MdxComponents()} />);
-        setOnTab(false)
-        
-        const url = new URL(window.location.href);
-        url.pathname = allPaths[0];
-        window.history.replaceState(null, null, url.toString());
-        console.log('allPaths__', allPaths[0])
-      }
-    } else setSelectedTab(path)
-  };
+				if (post) {
+					setPostContent(
+						<MDXRemote
+							{...post.source}
+							components={MdxComponents()}
+						/>
+					);
+					setOnTab(false);
 
-  if (!onTab) return <div>{postContent}</div>
+					const url = new URL(window.location.href);
+					url.pathname = allPaths[0];
+					window.history.replaceState(null, null, url.toString());
+				}
+			} catch (error) {
+				console.error('Failed to load MDX content:', error);
+			} finally {
+				setLoading(false);
+			}
+		} else {
+			setSelectedTab(path);
+		}
+	};
 
-  return (
-    <div>
-      <div className="flex flex-wrap border-b overflow-auto">
-        {children.map((child, index) => (
-          <button
-            key={index}
-            className={clsx(
-              'py-2 px-3 mr-4 text-sm transition-colors duration-300 whitespace-nowrap',
-              selectedTab === child.props.href ? 'font-semibold border-b-2 border-[#3098AA] text-[#3098AA]' : 'hover:border-b-2 hover:border-gray-300 text-gray-500 dark:text-white'
-            )}
-            onClick={() => router.push(child.props.href)}
-          >
-            {child.props.title}
-          </button>
-        ))}
-      </div>
-      <div className="mt-4">{postContent}</div>
-    </div>
-  );
+	if (!onTab) {
+		if (loading) {
+			return <div>Loading content...</div>;
+		}
+		return <div>{postContent}</div>;
+	}
+
+	return (
+		<div>
+			<div className="flex flex-wrap overflow-auto border-b">
+				{children.map((child, index) => (
+					<button
+						key={index}
+						className={clsx(
+							'mr-4 whitespace-nowrap px-3 py-2 text-sm transition-colors duration-300',
+							selectedTab === child.props.href
+								? 'border-b-2 border-[#3098AA] font-semibold text-[#3098AA]'
+								: 'text-gray-500 hover:border-b-2 hover:border-gray-300 dark:text-white'
+						)}
+						onClick={() => router.push(child.props.href)}
+					>
+						{child.props.title}
+					</button>
+				))}
+			</div>
+			<div className="mt-4">{postContent}</div>
+		</div>
+	);
 }
 
-export function ContentTab({ title, href, selected }) {
-  return null;
+export function ContentTab({title, href, selected}) {
+	return null;
 }

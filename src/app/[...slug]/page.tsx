@@ -1,29 +1,33 @@
-import {Breadcrumbs} from '@/components/Breadcrumbs';
-import MdxComponents from '@/components/MdxComponents';
-import {PrevNextLinks} from '@/components/PrevNextLinks';
-import {Prose} from '@/components/Prose';
-import {TableOfContents} from '@/components/Toc';
-import {allPosts} from 'contentlayer/generated';
-import {getMDXComponent} from 'next-contentlayer/hooks';
-import {notFound} from 'next/navigation';
+import { Breadcrumbs } from '@/components/Breadcrumbs';
+import MdxContent from '@/components/MdxContent';
+import { PrevNextLinks } from '@/components/PrevNextLinks';
+import { Prose } from '@/components/Prose';
+import { TableOfContents } from '@/components/Toc';
+import { getAllPublishedPosts, getPostBySlug } from '@/lib/api';
+import { notFound } from 'next/navigation';
 
 export const maxDuration = 300;
 
 export const generateStaticParams = async () => {
-	return allPosts.map(post => ({
-		params: {slug: post._raw.flattenedPath.split('/')}
+	const posts = await getAllPublishedPosts();
+	if (!posts) return [];
+
+	return posts.map(post => ({
+		slug: post.slugPath.split('/')
 	}));
 };
 
-export const generateMetadata = ({params}: Props) => {
-	const path = params.slug.join('/');
-	const post = allPosts.find(post => post._raw.flattenedPath === path);
+export const generateMetadata = async (props: Props) => {
+	const params = await props.params;
+	const slugPath = params.slug.join('/');
+	const post = await getPostBySlug(slugPath);
+
 	if (post && post.headings && post.headings.length > 0) {
 		return {
 			title: post.headings[0].title,
 			openGraph: {
 				images: [
-					{url: 'https://sourcegraph.com/docs/sourcegraph-og-nw.png'}
+					{ url: 'https://sourcegraph.com/docs/sourcegraph-og-nw.png' }
 				]
 			}
 		};
@@ -31,16 +35,17 @@ export const generateMetadata = ({params}: Props) => {
 };
 
 interface Props {
-	params: {
+	params: Promise<{
 		slug: string[];
-	};
+	}>;
 }
 
-const PostLayout = ({params}: Props) => {
-	const path = params.slug.join('/');
-	const post = allPosts.find(post => post._raw.flattenedPath === path);
+const PostLayout = async (props: Props) => {
+	const params = await props.params;
+	const slugPath = params.slug.join('/');
+	const post = await getPostBySlug(slugPath);
+
 	if (!post) return notFound();
-	const Content = getMDXComponent(post.body.code);
 
 	return (
 		<>
@@ -48,7 +53,7 @@ const PostLayout = ({params}: Props) => {
 				<Breadcrumbs path={params.slug} />
 				<article>
 					<Prose>
-						<Content components={MdxComponents()} />
+						<MdxContent source={post.source} />
 					</Prose>
 				</article>
 				<PrevNextLinks />
