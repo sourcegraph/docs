@@ -187,7 +187,7 @@ export const navigation: NavigationItem[] = [
 						]
 					},
 					{
-						title: "Working with CLI", href: "/batch-changes/how-src-executes-a-batch-spec",
+						title: "Working with the CLI", href: "/batch-changes/how-src-executes-a-batch-spec",
 						subsections: [
 							{ title: "Re-executing Batch Specs", href: "/batch-changes/reexecuting-batch-specs-multiple-times", },
 							{ title: "CLI Subcommands", href: "/cli/references/batch", },
