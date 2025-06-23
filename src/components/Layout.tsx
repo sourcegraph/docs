@@ -1,18 +1,18 @@
 'use client';
 
-import { Hero } from '@/components/Hero';
-import { Logo } from '@/components/Logo';
-import { MobileNavigation } from '@/components/MobileNavigation';
-import { Navigation } from '@/components/Navigation';
-import { ThemeSelector } from '@/components/ThemeSelector';
+import {Hero} from '@/components/Hero';
+import {Logo} from '@/components/Logo';
+import {MobileNavigation} from '@/components/MobileNavigation';
+import {Navigation} from '@/components/Navigation';
+import {ThemeSelector} from '@/components/ThemeSelector';
 import clsx from 'clsx';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { LogoMark } from './LogoMark';
+import {usePathname} from 'next/navigation';
+import {useEffect, useState} from 'react';
+import {LogoMark} from './LogoMark';
 import VersionSelector from './VersionSelector';
-import { Search } from './search/Search';
-import { DemoLayout } from '@/components/DemoLayout';
+import {Search} from './search/Search';
+import {TopBanner} from './TopBanner'
 
 function GitHubIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -30,7 +30,7 @@ function Header() {
 			setIsScrolled(window.scrollY > 0);
 		}
 		onScroll();
-		window.addEventListener('scroll', onScroll, { passive: true });
+		window.addEventListener('scroll', onScroll, {passive: true});
 		return () => {
 			window.removeEventListener('scroll', onScroll);
 		};
@@ -100,13 +100,34 @@ function Header() {
 	);
 }
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export function Layout({children}: {children: React.ReactNode}) {
 	let pathname = usePathname();
 	let isHomePage = pathname === '/';
+	let isCodyDocs = pathname.includes('/cody');
+	let isopenCtxDocs = pathname.includes('/cody/capabilities/openctx');
 
 	return (
 		<div className="flex w-full flex-col">
 			<Header />
+
+			{/* Cody docs banner */}
+			{isCodyDocs && !isopenCtxDocs && <TopBanner
+				text="NEW: Introducing chat and search in a single input with Sourcegraph 6.0."
+				link="https://sourcegraph.com/blog/combining-chat-and-search"
+				linkText="Read here"
+				textColor="#ffffff"
+				backgroundColor="#F34E3F"
+				opacity='0.75'
+			/>}
+
+			{/* Openctx docs banner */}
+			{/* {isopenCtxDocs && <TopBanner
+				text="NEW: MCP is the recommended method for adding external context in Cody due to its broad community adoption and extensive tool support."
+				link="https://sourcegraph.com/docs/cody/capabilities/agentic-context-fetching#mcp-support"
+				linkText="Read docs to learn more about configuring MCP."
+				textColor="#ffffff"
+				backgroundColor="#F34E3F"
+			/>} */}
 
 			{isHomePage && <Hero />}
 			{/* {isHomePage && <DemoLayout />} */}
