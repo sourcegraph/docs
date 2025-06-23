@@ -1,0 +1,32 @@
+# Telemetry Development Reference
+
+ <p className="subtitle">This page provides a development reference for telemetry.</p>
+
+ Telemetry describes the logging of user events, such as a page view or search, from various components of the Sourcegraph and Cody applications. There are currently two ways to log product telemetry:
+
+- Legacy mechanisms outlined in DEPRECATED: Telemetry, including writing directly to the `event_logs` database table or using `mutation { logEvent }`
+- The new telemetry framework introduced in Sourcegraph for 5.2 and later (documented on this page)
+
+All usages of old telemetry mechanisms should be migrated to the new framework.
+
+## Why a new framework and APIs?
+
+The new telemetry framework and API aims to address the following issues:
+
+- The existing `event_logs` parameters are arbitrarily shaped - to provide stronger guarantees against accidentally exporting sensitive data, the new APIs enforce stricter requirements, such as numeric metadata - see [recording events](#recording-events) for more details
+- The shape of existing `event_logs` have grown organically over time without a clear structured schema. Callsites must construct full events on their own, and we cannot easily prune event objects of potentially [sensitive attributes](#sensitive-attributes) before export
+
+Events recorded in the new framework and APIs are still translated into the existing `event_logs` table for admin analytics on a best-effort basis - see [event lifecycle](#event-lifecycle) for more details.
+
+## Event lifecycle
+
+All events stay in the instance that events are recording in until they get exported - users of standalone Sourcegraph instances should no longer report any telemetry directly to the [Sourcegraph.com](https://sourcegraph.com/search) deployment, and should instead report events to their own Sourcegraph instance.
+
+In general, the lifecycle of an event in the new system looks like this:
+
+1. [A telemetry event is recorded](#recording-events). This can happen in clients using SDKs like [`@sourcegraph/telemetry`](https://github.com/sourcegraph/telemetry), or using `internal/telemetry/telemetryrecorder` in the backend.
+2. Within each telemetry SDK, additional metadata is automatically injected - in clients through [processors](https://github.com/sourcegraph/telemetry/blob/main/src/processors/index.ts) and the GraphQL mutation, and in the backend through the events adapter.
+3. The telemetry event is translated into the existing `event_logs` table (for use in [admin analytics](/admin/analytics)), and stored in a temporary queue for export - see [storing events](/architecture#storing-events).
+4. Periodically, events are exported from the cache and exported to Sourcegraph's Telemetry Gateway service, which forwards it to our data warehouse - see [exported events](#exported-events) and [exporting events](/architecture#exporting-events).
+
+See [telemetry export architecture](./architecture.md) for more details.
