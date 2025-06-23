@@ -1,17 +1,17 @@
 'use client';
 
-import {Hero} from '@/components/Hero';
-import {Logo} from '@/components/Logo';
-import {MobileNavigation} from '@/components/MobileNavigation';
-import {Navigation} from '@/components/Navigation';
-import {ThemeSelector} from '@/components/ThemeSelector';
+import { Hero } from '@/components/Hero';
+import { Logo } from '@/components/Logo';
+import { MobileNavigation } from '@/components/MobileNavigation';
+import { Navigation } from '@/components/Navigation';
+import { ThemeSelector } from '@/components/ThemeSelector';
 import clsx from 'clsx';
 import Link from 'next/link';
-import {usePathname} from 'next/navigation';
-import {useEffect, useState} from 'react';
-import {LogoMark} from './LogoMark';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { LogoMark } from './LogoMark';
+import { Search } from './search/Search';
 import VersionSelector from './VersionSelector';
-import {Search} from './search/Search';
 
 function GitHubIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -29,7 +29,7 @@ function Header() {
 			setIsScrolled(window.scrollY > 0);
 		}
 		onScroll();
-		window.addEventListener('scroll', onScroll, {passive: true});
+		window.addEventListener('scroll', onScroll, { passive: true });
 		return () => {
 			window.removeEventListener('scroll', onScroll);
 		};
@@ -99,7 +99,7 @@ function Header() {
 	);
 }
 
-export function Layout({children}: {children: React.ReactNode}) {
+export function Layout({ children }: { children: React.ReactNode }) {
 	let pathname = usePathname();
 	let isHomePage = pathname === '/';
 	let isCodyDocs = pathname.includes('/cody');
@@ -110,13 +110,14 @@ export function Layout({children}: {children: React.ReactNode}) {
 			<Header />
 
 			{/* Cody docs banner */}
-			{/* {isCodyDocs && !isopenCtxDocs && <TopBanner
+			{/*isCodyDocs && !isopenCtxDocs && <TopBanner
 				text="NEW: Introducing chat and search in a single input with Sourcegraph 6.0."
 				link="https://sourcegraph.com/blog/combining-chat-and-search"
 				linkText="Read here"
 				textColor="#ffffff"
 				backgroundColor="#F34E3F"
-			/>} */}
+				opacity='0.80'
+			/>/*}
 
 			{/* Openctx docs banner */}
 			{/* {isopenCtxDocs && <TopBanner
