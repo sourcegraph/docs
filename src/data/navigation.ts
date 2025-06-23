@@ -152,8 +152,10 @@ export const navigation: NavigationItem[] = [
 						title: "Bulk Operations", href: "/batch-changes/bulk-operations-on-changesets",
 						subsections: [
 							{ title: "Publishing Changesets", href: "/batch-changes/publishing-changesets", },
+							{ title: "Pushing Code", href: "/batch-changes/push-only-changesets", },
 							{ title: "Tracking Changesets", href: "/batch-changes/tracking-existing-changesets", },
 							{ title: "Rebasing Changesets", href: "/batch-changes/rebasing-changesets", },
+
 						]
 					},
 					{
