@@ -91,15 +91,60 @@ For `accessToken`, you can either:
 -   Set it to `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>` if directly configuring the credentials
 -   Set it to `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>:<SESSION_TOKEN>` if a session token is also required
 
-<Callout type="warning">
-	We only recommend configuring AWS Bedrock to use an accessToken for
-	authentication. Specifying no accessToken (e.g. to use [IAM roles for EC2 /
-	instance role
-	binding](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html))
-	is not currently recommended (there is a known performance bug with this
-	method which will prevent autocomplete from working correctly. (internal
-	issue: PRIME-662)
+#### AWS Bedrock: Latency Optimization
+
+<Callout type="note">
+This feature is available in Sourcegraph v6.5+
 </Callout>
+
+AWS Bedrock supports Latency Optimized Inference which can reduce autocomplete latency with models like Claude 3.5 Haiku by up to ~40%.
+
+To use Bedrock's latency optimized inference feature for a specific model with Cody, configure the `"latencyOptimization": "optimized"` setting under the `serverSideConfig` of any model in `modelOverrides`. For example:
+
+```json
+"modelOverrides": [
+  {
+    "modelRef": "aws-bedrock::v1::claude-3-5-haiku-latency-optimized",
+    "modelName": "us.anthropic.claude-3-5-haiku-20241022-v1:0",
+    "displayName": "Claude 3.5 Haiku (latency optimized)",
+    "capabilities": [
+      "chat",
+      "autocomplete"
+    ],
+    "category": "speed",
+    "status": "stable",
+    "contextWindow": {
+      "maxInputTokens": 200000,
+      "maxOutputTokens": 4096
+    },
+    "serverSideConfig": {
+      "type": "awsBedrock",
+      "latencyOptimization": "optimized"
+    }
+  },
+  {
+    "modelRef": "aws-bedrock::v1::claude-3-5-haiku",
+    "modelName": "us.anthropic.claude-3-5-haiku-20241022-v1:0",
+    "displayName": "Claude 3.5 Haiku",
+    "capabilities": [
+      "chat",
+      "autocomplete"
+    ],
+    "category": "speed",
+    "status": "stable",
+    "contextWindow": {
+      "maxInputTokens": 200000,
+      "maxOutputTokens": 4096
+    },
+    "serverSideConfig": {
+      "type": "awsBedrock",
+      "latencyOptimization": "standard"
+    }
+  }
+]
+```
+
+See also [Debugging: running a latency test](#debugging-running-a-latency-test).
 
 ### Example: Using GCP Vertex AI
 
@@ -194,3 +239,42 @@ To enable StarCoder, go to **Site admin > Site configuration** (`/site-admin/con
 ```
 
 Users of the Cody extensions will automatically pick up this change when connected to your Enterprise instance.
+
+## Debugging: running a latency test
+
+<Callout type="note">
+This feature is available in Sourcegraph v6.5+
+</Callout>
+
+Site administrators can test completions latency by sending a special debug command in any Cody chat window (in the web, in the editor, etc.):
+
+```
+cody_debug:::{"latencytest": 100}
+```
+
+Cody will then perform `100` quick `Hello, please respond with a short message.` requests to the LLM model selected in the dropdown, and measure the time taken to get the first streaming event back (e.g. first token from the model.) It records all of these requests timing information, and then responds with a report indicating the latency between the Sourcegraph `frontend` container and the LLM API:
+
+```
+Starting latency test with 10 requests...
+
+Individual timings:
+
+[... how long each request took ...]
+
+Summary:
+
+* Requests: 10/10 successful
+* Average: 882ms
+* Minimum: 435ms
+* Maximum: 1.3s
+```
+
+This can be helpful to get a feel for the latency of particular models, or models with different configurations - such as when using the AWS Bedrock Latency Optimized Inference feature.
+
+<Callout type="note">
+Debug commands are only available to site administrators and have no effect when used by regular users.
+</Callout>
+
+<Callout type="note">
+Sourcegraph's builtin Grafana monitoring also has a full `Completions` dashboard for monitoring LLM requests, performance, etc.
+</Callout>
