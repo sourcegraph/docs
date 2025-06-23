@@ -9,6 +9,16 @@ interface TopBannerProps {
   backgroundColor?: string;
   textColor?: string;
   linkText?: string;
+  opacity?: string;
+}
+
+const hexToRgb = (hex: string) => {
+  hex = hex.replace(/^#/, '');
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+
+  return `${r}, ${g}, ${b}`;
 }
 
 export function TopBanner({
@@ -17,6 +27,7 @@ export function TopBanner({
   backgroundColor = "#F34E3F",
   textColor = "white",
   linkText = 'new docs',
+  opacity = '1'
 }: TopBannerProps) {
   const [isVisible, setIsVisible] = useState(true);
 
@@ -24,7 +35,7 @@ export function TopBanner({
 
   return (
     <div
-      style={{ backgroundColor, color: textColor }}
+      style={{ backgroundColor: `rgba(${hexToRgb(backgroundColor)}, ${opacity})`, color: textColor }}
       className="fixed top-0 z-[100] min-h-[42px] w-full flex items-center justify-center px-4 py-2 md:py-0 md:h-[42px]"
     >
       <div className="flex items-center gap-2 text-xs sm:text-sm max-w-[90%] md:max-w-none text-center">
