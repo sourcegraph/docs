@@ -11,7 +11,6 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { LogoMark } from './LogoMark';
 import { Search } from './search/Search';
-import { TopBanner } from './TopBanner';
 import VersionSelector from './VersionSelector';
 
 function GitHubIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
@@ -46,24 +45,24 @@ function Header() {
 			className="sticky top-0 z-50"
 		>
 			{/* Cody docs banner */}
-			{isCodyDocs && !isopenCtxDocs && <TopBanner
+			{/*isCodyDocs && !isopenCtxDocs && <TopBanner
 				text="UPDATE: Starting July 23, 2025, we're making changes to Cody Free, Pro, and Enterprise Starter plans."
 				link="https://sourcegraph.com/blog/changes-to-cody-free-pro-and-enterprise-starter-plans"
 				linkText="Read here"
 				textColor="#ffffff"
 				backgroundColor="#F34E3F"
 				opacity='0.80'
-			/>}
+			/>*/}
 
 			{/* Pricing docs banner */}
-			{isPricingDocs && !isopenCtxDocs && <TopBanner
+			{/*isPricingDocs && !isopenCtxDocs && <TopBanner
 				text="UPDATE: Starting July 23, 2025, we're making changes to Cody Free, Pro, and Enterprise Starter plans."
 				link="https://sourcegraph.com/blog/changes-to-cody-free-pro-and-enterprise-starter-plans"
 				linkText="Read here"
 				textColor="#ffffff"
 				backgroundColor="#F34E3F"
 				opacity='0.80'
-			/>}
+			/>*/}
 
 			{/* Openctx docs banner */}
 			{/* {isopenCtxDocs && <TopBanner
