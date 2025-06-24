@@ -24,19 +24,24 @@ Now, you can perform all the actions you can on other Code Insights, such as edi
 
 ## Inventory environment variables
 
-<Callout type="note">We have made some changes to the inventory environment variables for our self-hosted customers. Cloud customers are not impacted by this change.</Callout>
+<Callout type="note">Inventory environment variables have been moved into site configuration. This impacts any self-hosted customer using these environment variables. Cloud customers are not impacted by this change.</Callout>
 
-If you are a self-hosted Sourcegraph Enterprise user, we have moved the inventory environment variables into the **Site configuration** settings in your **Site admin** page. You can find it under the **inventory** section.
+If you are a self-hosted Sourcegraph Enterprise user, we have moved the inventory environment variables into the **inventory** section of the **Site configuration** settings in your **Site admin** page.
 
-Here's a list of all the inventory environment variables and their default values:
+Here's a list oI the Inventory environment variables and their new site configuration settings, with default values:
 
-- `USE_ENHANCED_LANGUAGE_DETECTION: "disableEnhancedLanguageDetection"`: defaults to false
-- `GET_INVENTORY_GIT_SERVER_CONCURRENCY: "gitServerConcurrency"`: defaults to  4
-- `GET_INVENTORY_REDIS_CONCURRENCY: "redisConcurrency"`: defaults to 20
-- `GET_INVENTORY_MAX_INV_IN_MEMORY: "maxInventoryInMemory"`: defaults to 1000
-- `GET_INVENTORY_TIMEOUT: "timeoutInMinutes"`: defaults to 5
+- `USE_ENHANCED_LANGUAGE_DETECTION` ==> `"disableEnhancedLanguageDetection"`
+  - defaults to `false`
+- `GET_INVENTORY_GIT_SERVER_CONCURRENCY` ==> `"gitServerConcurrency"`
+  - defaults to  `4`
+- `GET_INVENTORY_REDIS_CONCURRENCY` ==> `"redisConcurrency"`
+  - defaults to `20`
+- `GET_INVENTORY_MAX_INV_IN_MEMORY` ==> `"maxInventoryInMemory"`
+  - defaults to `1000`
+- `GET_INVENTORY_TIMEOUT` ==> `"timeoutInMinutes"`
+  - defaults to `5`
 
-Here's an example from the site configuration section:
+Here's an example of the site configuration section:
 
 ```json
 "inventory" :  {
@@ -49,3 +54,11 @@ Here's an example from the site configuration section:
 ```
 
 <Callout type="info">To accommodate default values in your Site configuration vs. environment variables, the positive `USE_ENHANCED_LANGUAGE_DETECTION` env var has been changed to the negative `disableEnhancedLanguageDetection`.</Callout>
+
+There is a new environment variable for managing `worker` resources when processing Inventory insights:
+
+```json
+INSIGHTS_INVENTORY_BATCH_SIZE
+```
+
+This environment variable controls the number of repositories to process in a single batch for inventory insights in the code insights worker. It affects memory usage while processing repos. Lower number is less memory used. It does not affect the speed of the process.
