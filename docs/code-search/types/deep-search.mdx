@@ -1,16 +1,16 @@
 # Deep Search
 
-<p className="subtitle">Learn more about Sourcegraph's agentic Code Search tool Deep Search.</p>
+<p className= "subtitle">Learn more about Sourcegraph's agentic Code Search tool Deep Search.</p>
 
-<Callout type="note"> New in version 6.5. Deep Search is currently in research preview for Enterprise and Enterprise Starter customers. Because Deep Search is in research preview, it might change significantly in the future as we make improvements and adjust to user feedback. Please reach out to your Sourcegraph account team to request access. </Callout>
+<Callout type="note"> New in version 6.5. Deep Search is currently in research preview for Enterprise and Enterprise Starter customers. Because Deep Search is in research preview, it might change significantly as we improve and adjust to user feedback. Please reach out to your Sourcegraph account team to request access. </Callout>
 
 Deep Search is an agentic code search tool that understands natural language questions about your codebase. When a question is submitted, Deep Search performs an in-depth search and returns a detailed answer. The conversation can be continued with follow-up questions to dive deeper into relevant code.
 
-Under the hood, Deep Search is an AI agent that uses various tools to generate its answer. The tools are functionalities available in Sourcegraph. They include multiple modes of Sourcegraph's Code Search and Code Navigation features. All processing happens within your Sourcegraph instance and the only external calls are to the configured LLM.
+Under the hood, Deep Search is an AI agent that uses various tools to generate its answer. The tools are functionalities available in Sourcegraph. They include multiple modes of Sourcegraph's Code Search and Code Navigation features. All processing happens within your Sourcegraph instance. Only external calls are made to the configured LLM.
 
 The core of Deep Search is an agentic loop. The AI agent can intelligently use tools to explore the codebase. In each loop iteration, the agent gradually refines its understanding of the question and codebase, searching until it is confident in its answer.
 
-Every Deep Search response includes a detailed list of sources that contributed to the answer. These sources show exactly which searches were performed and which files were read. The list of sources is extremely useful for understanding where the answer came from and for further explorations of the codebase.
+Every Deep Search response includes a detailed list of sources contributing to the answer. These sources show exactly which searches were performed and which files were read. The list of sources is extremely useful for understanding where the answer came from and for further explorations of the codebase.
 
 The answer is formatted in Markdown and can include links to relevant files, directories, or repositories. If prompted to do so, Deep Search can also generate diagrams as part of its answer.
 
@@ -18,9 +18,9 @@ The answer is formatted in Markdown and can include links to relevant files, dir
 
 - Give the agent a starting point for the search: use @-mentions to mention relevant repositories, files, directories, or symbol names. The more specific you are, the faster the search will be.
 - Provide reasonably scoped questions. The agent will perform much better if it does not have to read the entire codebase at once.
-- Check the list of sources. This is extremely useful for debugging and understanding where the answer came from. If something is missing, ask a follow-up question and mention the missing source.
+- Check the list of sources. This is extremely useful for debugging and understanding where the answer came from. Ask a follow-up question and mention the missing source if something is missing.
 
-For use cases where you're looking for exhaustive answers (e.g. "Find all files with the `.XYZ` file extension in `foo` repo that contain the word `bar`), Code Search still excels, while Deep Search will only utilize a sample of the results. Deep Search will perform a Code Search query as a source, which you can then use to continue with an exhaustive search within the Code Search product.
+For use cases where you're looking for exhaustive answers (for example, "Find all files with the `.XYZ` file extension in `foo' repo that contain the word `bar`), Code Search still excels, while Deep Search will only utilize a sample of the results. Deep Search will perform a Code Search query as a source, which you can use to continue an exhaustive search within the Code Search product.
 
 ### Examples of prompts
 
@@ -31,43 +31,44 @@ For use cases where you're looking for exhaustive answers (e.g. "Find all files 
 - Generate a request flow diagram for `src/backend`. Mark the auth and rate limit points.
 
 ## Conversation sharing
-<Callout type="note">Conversation sharing is disabled by default - see below for instructions on enabling it. </Callout>
 
-You can share Deep Search conversations with other users in your Sourcegraph instance. To share a conversation, click the "Share" button in the top left, then copy the link. Once you share a conversation, any user on your instance is able to view it with the link. You can also reset the share link and generate a new one, which invalidates the previous link. 
+<Callout type= "note">Conversation sharing is disabled by default - see below for instructions on enabling it. </Callout>
 
-Currently, we do not enforce [repository permissions](/admin/permissions) for viewing shared Deep Search conversations. This means that a user can view a conversation shared to them, regardless of which repositories they have access to. We plan to revisit this in the future.
+You can share Deep Search conversations with other users in your Sourcegraph instance. To share a conversation, click the "Share" button in the top left, then copy the link. Once you share a conversation, any user on your instance can view it with the link. You can also reset the share link and generate a new one, invalidating the previous link.
+
+We do not enforce [repository permissions](/admin/permissions) for viewing shared Deep Search conversations. This means that a user can view a conversation shared with them, regardless of which repositories they can access. We plan to revisit this in the future.
 
 ## Enabling Deep Search
 
 If Deep Search is disabled, ask your site administrator to enable the following setting in your site configuration:
-```json
+"`json
 "experimentalFeatures": {
     "deepSearch.enabled": true,
 },
 ```
 
-For optimal performance, Deep Search is specialized to only use one model. Currently, Deep Search only supports Claude Sonnet 4.
+For optimal performance, Deep Search is specialized only to use one model. Currently, Deep Search only supports Claude Sonnet 4.
 
-If you are not using [Cody Gateway](/cody/core-concepts/cody-gateway), you will also need to configure the model through either Amazon Bedrock or GCP Vertex.
+If you are not using [Cody Gateway](/cody/core-concepts/cody-gateway), you must also configure the model through Amazon Bedrock or GCP Vertex.
 
 ### Enabling conversation sharing
 Conversation sharing is disabled by default. To enable conversation sharing, ask your site administrator to enable the following setting in your site configuration:
 
-```json
+"`json
 "experimentalFeatures": {
     "deepSearch.enabled": true,
-    "deepSearch.sharing.enabled": true,
+    "deepSearch.sharing.enabled ": true,
 },
 ```
 
 ### Configuring Deep Search on Amazon Bedrock or GCP Vertex
 
-Include configuration for Claude Sonnet 4 in [modelOverrides](/cody/enterprise/model-configuration#model-overrides) in your site configuration. For more information on configuring models, refer to [Model Configuration](/cody/enterprise/model-configuration).
+In your site configuration, include the configuration for Claude Sonnet 4 in [modelOverrides](/cody/enterprise/model-configuration#model-overrides). For more information on configuring models, refer to [Model Configuration](/cody/enterprise/model-configuration).
 
-Examples for Sonnet 4 configuration inside `modelOverrides`:
+Examples of Sonnet 4 configuration inside `modelOverrides`:
 
 Amazon Bedrock:
-```json
+"`json
 {
     "modelRef": "aws-bedrock::v1::claude-sonnet-4",
     "modelName": "us.anthropic.claude-sonnet-4-20250514-v1:0",
@@ -86,7 +87,7 @@ Amazon Bedrock:
 ```
 
 GCP Vertex:
-```json
+"`json
 {
     "modelRef": "google-anthropic::v2::claude-sonnet-4",
     "modelName": "claude-sonnet-4@20250514",
@@ -107,7 +108,7 @@ GCP Vertex:
 Then, configure Deep Search to use this model in `experimentalFeatures`:
 
 Amazon Bedrock:
-```json
+"`json
 "experimentalFeatures": {
     "deepSearch.enabled": true,
     "deepSearch.model": "aws-bedrock::v1::claude-sonnet-4"
@@ -115,7 +116,7 @@ Amazon Bedrock:
 ```
 
 GCP Vertex:
-```json
+"`json
 "experimentalFeatures": {
     "deepSearch.enabled": true,
     "deepSearch.model": "google-anthropic::v2::claude-sonnet-4"
