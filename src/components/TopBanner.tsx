@@ -36,7 +36,7 @@ export function TopBanner({
   return (
     <div
       style={{ backgroundColor: `rgba(${hexToRgb(backgroundColor)}, ${opacity})`, color: textColor }}
-      className="fixed top-0 z-[100] min-h-[42px] w-full flex items-center justify-center px-4 py-2 md:py-0 md:h-[42px]"
+      className="sticky top-0 z-[100] min-h-[42px] w-full flex items-center justify-center px-4 py-2 md:py-0 md:h-[42px]"
     >
       <div className="flex items-center gap-2 text-xs sm:text-sm max-w-[90%] md:max-w-none text-center">
         <span className="line-clamp-2 md:line-clamp-1">{text}</span>
