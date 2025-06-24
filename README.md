@@ -2,7 +2,7 @@
 
 # Sourcegraph Docs
 
-<!-- Working branch for Sourcegraph 6.4 Release -->
+<!-- Working branch for Sourcegraph 6.5 Release -->
 
 Welcome to the Sourcegraph documentation! We're excited to have you contribute to our docs. We've recently rearchitectured our docs tech stack — powered by Next.js, TailwindCSS and deployed on Vercel. This guide will walk you through the process of contributing to our documentation using the new tech stack.
 
