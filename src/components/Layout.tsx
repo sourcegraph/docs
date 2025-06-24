@@ -12,7 +12,6 @@ import { useEffect, useState } from 'react';
 import { LogoMark } from './LogoMark';
 import { Search } from './search/Search';
 import VersionSelector from './VersionSelector';
-import { TopBanner } from './TopBanner';
 
 function GitHubIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -45,14 +44,14 @@ function Header() {
 			className="sticky top-0 z-50"
 		>
 			{/* Cody docs banner */}
-			{isCodyDocs && !isopenCtxDocs && <TopBanner
+			{/*isCodyDocs && !isopenCtxDocs && <TopBanner
 				text="NEW: Introducing chat and search in a single input with Sourcegraph 6.0."
 				link="https://sourcegraph.com/blog/combining-chat-and-search"
 				linkText="Read here"
 				textColor="#ffffff"
 				backgroundColor="#F34E3F"
 				opacity='0.80'
-			/>}
+			/>*/}
 
 			{/* Openctx docs banner */}
 			{/* {isopenCtxDocs && <TopBanner
