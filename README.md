@@ -11,16 +11,16 @@ Welcome to the Sourcegraph documentation! We're excited to have you contribute t
 To get started with this template, clone this repository to your local machine using the following command:
 
 ```sh
-git clone https://github.com/sourcegraph/docs.git sourcegraph-docs
+git clone https://github.com/sourcegraph/docs.git docs
 ```
 
 Navigate to the project directory by typing the following command in your terminal:
 
 ```sh
-cd sourcegraph-docs
+cd docs
 ```
 
-Before the dependencies are install make sure your local machine has the following versions of `node` and `pnpm` installed:
+Before the dependencies are installed make sure your local machine has the following versions of `node` and `pnpm` installed:
 
 * node: `v20.8.1`
 * pnpm: `8.13.1`
