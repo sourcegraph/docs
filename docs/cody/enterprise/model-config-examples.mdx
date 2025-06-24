@@ -104,7 +104,7 @@ In the configuration above, we:
 -   Define a new provider with the ID `"anthropic-byok"` and configure it to use the Anthropic API
 -   Since this provider is unknown to Sourcegraph, no Sourcegraph-supplied models are available. Therefore, we add a custom model in the `"modelOverrides"` section
 -   Use the custom model configured in the previous step (`"anthropic-byok::2024-10-22::claude-3.5-sonnet"`) for `"chat"`. Requests are sent directly to the Anthropic API as set in the provider override
--   For `"fastChat"` and `"autocomplete"`, we use Sourcegraph-provided models via Cody Gateway
+-   For `"fastChat"` and `"codeCompletion"`, we use Sourcegraph-provided models via Cody Gateway
 
 ## Config examples for various LLM providers
 
@@ -244,7 +244,7 @@ In the configuration above,
 -   Set up a provider override for Fireworks, routing requests for this provider directly to the specified Fireworks endpoint (bypassing Cody Gateway)
 -   Add two Fireworks models:
     -   `"fireworks::v1::mixtral-8x7b-instruct"` with "chat" capabiity - used for "chat" and "fastChat"
-    -   `"fireworks::v1::starcoder-16b"` with "autocomplete" capability - used for "autocomplete"
+    -   `"fireworks::v1::starcoder-16b"` with "autocomplete" capability - used for "codeCompletion"
 
 </Accordion>
 
@@ -318,8 +318,8 @@ In the configuration above,
 -   Set up a provider override for OpenAI, routing requests for this provider directly to the specified OpenAI endpoint (bypassing Cody Gateway)
 -   Add three OpenAI models:
     -   `"openai::2024-02-01::gpt-4o"` with chat capability - used as a default model for chat
-    -   `"openai::unknown::gpt-4.1-nano"` with chat, edit and autocomplete capabilities - used as a default model for fast chat and autocomplete 
-    -   `"openai::unknown::o3"` with chat and reasoning capabilities - o-series model that supports thinking, can be used for chat (note: to enable thinking, model override should include "reasoning" capability and have "reasoningEffort" defined). 
+    -   `"openai::unknown::gpt-4.1-nano"` with chat, edit and autocomplete capabilities - used as a default model for fast chat and autocomplete
+    -   `"openai::unknown::o3"` with chat and reasoning capabilities - o-series model that supports thinking, can be used for chat (note: to enable thinking, model override should include "reasoning" capability and have "reasoningEffort" defined).
 
 </Accordion>
 
@@ -505,6 +505,48 @@ In the configuration above,
     -   Set `clientSideConfig.openaicompatible` to `{}` to indicate to Cody clients that these models are OpenAI-compatible, ensuring the appropriate code paths are utilized
     -   Designate these models as the default choices for chat and autocomplete, respectively
 
+## Disabling legacy completions
+
+Available in Sourcegraph 6.4+ and 6.3.2692
+
+By default, Cody will send Autocomplete requests to the legacy OpenAI /completions endpoint (i.e. for pure-inference requests) - if your OpenAI-compatible API endpoint supports only /chat/completions, you may disable the use of the legacy completions endpoint by adding the following above your serverSideConfig endpoints list:
+
+```json
+"serverSideConfig": {
+  "type": "openaicompatible",
+  "useLegacyCompletions": false,
+  // ^ add this to disable /completions and make Cody only use /chat/completions
+  "endpoints": [
+    {
+      "url": "https://api-inference.huggingface.co/models/meta-llama/CodeLlama-7b-hf/v1/",
+      "accessToken": "token"
+    }
+  ]
+}
+```
+
+## Sending custom HTTP headers
+
+
+<Callout type="info">Available in Sourcegraph v6.4+ and v6.3.2692</Callout>
+
+By default, Cody will only send an `Authorization: Bearer <accessToken>` header to OpenAI-compatible endpoints. You may configure custom HTTP headers if you like under the URL of endpoints:
+
+```json
+"serverSideConfig": {
+  "type": "openaicompatible",
+  "endpoints": [
+    {
+      "url": "https://api-inference.huggingface.co/models/meta-llama/CodeLlama-7b-hf/v1/",
+      "headers": { "X-api-key": "foo", "My-Custom-Http-Header": "bar" },
+      // ^ add this to configure custom headers
+    }
+  ]
+}
+```
+
+<Callout type="note">When using custom headers, both `accessToken` and `accessTokenQuery` configuration settings are ignored.</Callout>
+
 </Accordion>
 
 <Accordion title="Google Gemini">
@@ -679,7 +721,7 @@ In the configuration above,
 In the configuration above,
 
 -   Set up a provider override for Google Anthropic, routing requests for this provider directly to the specified endpoint (bypassing Cody Gateway)
--   Add two Anthropic models: - `"google::unknown::claude-3-5-sonnet"` with "chat" capabiity - used for "chat" and "fastChat" - `"google::unknown::claude-3-haiku"` with "autocomplete" capability - used for "autocomplete"
+-   Add two Anthropic models: - `"google::unknown::claude-3-5-sonnet"` with "chat" capabiity - used for "chat" and "fastChat" - `"google::unknown::claude-3-haiku"` with "autocomplete" capability - used for "codeCompletion"
 
 </Accordion>
 
@@ -745,19 +787,9 @@ Provider override `serverSideConfig` fields:
 Provisioned throughput for Amazon Bedrock models can be configured using the `"awsBedrockProvisionedThroughput"` server-side configuration type. Refer to the [Model Overrides](/cody/enterprise/model-configuration#model-overrides) section for more details.
 
 <Callout type="note">
-	If using [IAM roles for EC2 / instance role binding](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html), 
+	If using [IAM roles for EC2 / instance role binding](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html),
   you may need to increase the [HttpPutResponseHopLimit
 ](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_InstanceMetadataOptionsRequest.html#:~:text=HttpPutResponseHopLimit) instance metadata option to a higher value (e.g., 2) to ensure that the metadata service can be accessed from the frontend container running in the EC2 instance. See [here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-IMDS-existing-instances.html) for instructions.
-</Callout>
-
-<Callout type="warning">
-	We only recommend configuring AWS Bedrock to use an accessToken for
-	authentication. Specifying no accessToken (e.g. to use [IAM roles for EC2 /
-	instance role
-	binding](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html))
-	is not currently recommended. There is a known performance bug with this
-	method which will prevent autocomplete from working correctly (internal
-	issue: CORE-819)
 </Callout>
 
 </Accordion>

@@ -6795,7 +6795,21 @@ const redirectsData = [
     source: "/analytics/self-hosted",
     destination: "/analytics/air-gapped",
     permanent: true
-  }
+  },
+
+  //Agentic chat redirect
+  {
+    source: "/cody/capabilities/agentic-chat",
+    destination: "/cody/capabilities/agentic-context-fetching",
+    permanent: true
+  },
+
+  //Rmv embeddings permanentaly:https://sourcegraph.com/docs/cody/core-concepts/embeddings
+  {
+    source: "/cody/core-concepts/embeddings",
+    destination: "/cody/",
+    permanent: true
+  },
 
 
 ];

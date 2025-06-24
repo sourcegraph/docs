@@ -11,9 +11,34 @@ For upgrade procedures or general info about sourcegraph versioning see the link
 >
 > ***If the notes indicate a patch release exists, target the highest one.***
 
-## v6.3 patch 1
+## v6.3 patch 1 
 
 - Grafana's port 3370 is no longer open by default for unauthenticated access for Docker Compose and Pure Docker deployments. Admins can still access Grafana by logging in to their Sourcegraph instance, navigating to the Site Admin page, then clicking Monitoring from the left navigation menu. If customers require port 3370 to be open, see [[PR 1204](https://github.com/sourcegraph/deploy-sourcegraph-docker/pull/1204/files)] for insight on how to add this port to their `docker-compose.override.yaml` file.
+
+## v6.2.2553
+
+### Known issues
+
+Customers running Sourcegraph versions prior to v6.2.2553 and using the Sourcegraph provided PostgreSQL containers may encounter PostgreSQL collation version mismatch warnings after upgrading to more recent Sourcegraph versions due to an underlying glibc version update.
+
+When logging into the database via psql or similar tools you may see the following warning:
+
+```shell
+WARNING: database "sg" has a collation version mismatch DETAIL: The database was created using collation version 2.40, but the operating system provides version 2.41.
+```
+
+Mismatched collation versions can lead to database index corruption if left unchecked.
+
+Affected Services
+- pgsql container
+- codeintel-db container
+- codeinsights-db container
+
+Only self-hosted customers using the Sourcegraph provided PostgreSQL container images are affected.
+
+Self-hosted customers using external databases, such as AWS RDS, GCP CloudSQL, or another self-managed solution are NOT affected.
+
+See our [PostgreSQL Collation Version Mismatch Resolution](/admin/postgresql_collation_version_mismatch_resolution) notes for more details.
 
 ## v6.0.0
 
