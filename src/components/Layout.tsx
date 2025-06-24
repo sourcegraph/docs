@@ -27,6 +27,7 @@ function Header() {
 
 	const pathname = usePathname();
 	const isCodyDocs = pathname.includes('/cody');
+	const isPricingDocs = pathname.includes('/pricing/plans');
 	const isopenCtxDocs = pathname.includes('/cody/capabilities/openctx');
 
 	useEffect(() => {
@@ -46,6 +47,16 @@ function Header() {
 		>
 			{/* Cody docs banner */}
 			{isCodyDocs && !isopenCtxDocs && <TopBanner
+				text="UPDATE: Starting July 23, 2025, we're making changes to Cody Free, Pro, and Enterprise Starter plans."
+				link="https://sourcegraph.com/blog/changes-to-cody-free-pro-and-enterprise-starter-plans"
+				linkText="Read here"
+				textColor="#ffffff"
+				backgroundColor="#F34E3F"
+				opacity='0.80'
+			/>}
+
+			{/* Pricing docs banner */}
+			{isPricingDocs && !isopenCtxDocs && <TopBanner
 				text="UPDATE: Starting July 23, 2025, we're making changes to Cody Free, Pro, and Enterprise Starter plans."
 				link="https://sourcegraph.com/blog/changes-to-cody-free-pro-and-enterprise-starter-plans"
 				linkText="Read here"
