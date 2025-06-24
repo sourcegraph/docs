@@ -12,6 +12,7 @@ import { useEffect, useState } from 'react';
 import { LogoMark } from './LogoMark';
 import { Search } from './search/Search';
 import VersionSelector from './VersionSelector';
+import { TopBanner } from './TopBanner';
 
 function GitHubIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -23,6 +24,10 @@ function GitHubIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 
 function Header() {
 	let [isScrolled, setIsScrolled] = useState(false);
+
+	const pathname = usePathname();
+	const isCodyDocs = pathname.includes('/cody');
+	const isopenCtxDocs = pathname.includes('/cody/capabilities/openctx');
 
 	useEffect(() => {
 		function onScroll() {
@@ -37,62 +42,69 @@ function Header() {
 
 	return (
 		<header
-			className={clsx(
-				'sticky top-0 z-50 flex flex-none flex-wrap items-center justify-between bg-light-bg px-4 py-6 shadow-md shadow-slate-900/5 transition duration-500 dark:border-dark-border dark:shadow-none sm:px-6 lg:border-b lg:border-light-border lg:px-8',
+			className="sticky top-0 z-50"
+		>
+			{/* Cody docs banner */}
+			{isCodyDocs && !isopenCtxDocs && <TopBanner
+				text="NEW: Introducing chat and search in a single input with Sourcegraph 6.0."
+				link="https://sourcegraph.com/blog/combining-chat-and-search"
+				linkText="Read here"
+				textColor="#ffffff"
+				backgroundColor="#F34E3F"
+				opacity='0.80'
+			/>}
+
+			{/* Openctx docs banner */}
+			{/* {isopenCtxDocs && <TopBanner
+				text="NEW: MCP is the recommended method for adding external context in Cody due to its broad community adoption and extensive tool support."
+				link="https://sourcegraph.com/docs/cody/capabilities/agentic-context-fetching#mcp-support"
+				linkText="Read docs to learn more about configuring MCP."
+				textColor="#ffffff"
+				backgroundColor="#F34E3F"
+				/>} */}
+
+			<div className={clsx(
+				'flex flex-none flex-wrap items-center justify-between bg-light-bg px-4 py-6 shadow-md shadow-slate-900/5 transition duration-500 dark:border-dark-border dark:shadow-none sm:px-6 lg:border-b lg:border-light-border lg:px-8',
 				isScrolled
 					? 'dark:bg-dark-bg-1 dark:backdrop-blur dark:[@supports(backdrop-filter:blur(0))]:bg-dark-bg-1/80'
 					: 'dark:bg-transparent'
-			)}
-		>
-			<div className="mx-auto flex w-full max-w-8xl items-center justify-between sm:px-2 lg:px-8">
-				<div className="mr-6 flex lg:hidden">
-					<MobileNavigation />
-				</div>
-				<div className="relative flex flex-grow basis-0 items-center">
-					<Link
-						href="/"
-						aria-label="Home page"
-						className="relative z-10 hidden md:block"
-					>
-						<Logo className="h-9 w-auto" />
-					</Link>
-					{/* <Link
-						href="/"
-						aria-label="Home page"
-						className="relative z-10 md:block text-vermilion-08 hover:text-vermilion-07 ml-2"
-					>
-						Documentation
-					</Link>
-					<Link
-						href="https://community.sourcegraph.com"
-						aria-label="Home page"
-						className="relative z-10 hidden md:block text-vermilion-08 hover:text-vermilion-07 ml-4"
-					>
-						Help
-					</Link> */}
-					<Link
-						href="/"
-						className="relative z-10 block md:hidden"
-						aria-label="Home page"
-					>
-						<LogoMark className="h-6 w-6" />
-					</Link>
-				</div>
-				<div className="-my-5 mr-6 sm:mr-8 md:mr-0">
-					<Search />
-				</div>
-				<div className="relative flex basis-0 items-center justify-end gap-6 sm:gap-6 md:flex-grow">
-					<VersionSelector />
-					<ThemeSelector className="relative z-10" />
-					<Link
-						href="https://github.com/sourcegraph/docs"
-						className="group"
-						aria-label="GitHub"
-					>
-						<span className="flex h-7 w-7 items-center justify-center rounded-lg shadow-md shadow-black/5 ring-1 ring-light-border-2 dark:bg-dark-bg-2 dark:ring-inset dark:ring-dark-border">
-							<GitHubIcon className="h-5 w-5 fill-slate-400 group-hover:fill-slate-500 dark:group-hover:fill-slate-300" />
-						</span>
-					</Link>
+			)}>
+				<div className="mx-auto flex w-full max-w-8xl items-center justify-between sm:px-2 lg:px-8">
+					<div className="mr-6 flex lg:hidden">
+						<MobileNavigation />
+					</div>
+					<div className="relative flex flex-grow basis-0 items-center">
+						<Link
+							href="/"
+							aria-label="Home page"
+							className="relative z-10 hidden md:block"
+						>
+							<Logo className="h-9 w-auto" />
+						</Link>
+						<Link
+							href="/"
+							className="relative z-10 block md:hidden"
+							aria-label="Home page"
+						>
+							<LogoMark className="h-6 w-6" />
+						</Link>
+					</div>
+					<div className="-my-5 mr-6 sm:mr-8 md:mr-0">
+						<Search />
+					</div>
+					<div className="relative flex basis-0 items-center justify-end gap-6 sm:gap-6 md:flex-grow">
+						<VersionSelector />
+						<ThemeSelector className="relative z-10" />
+						<Link
+							href="https://github.com/sourcegraph/docs"
+							className="group"
+							aria-label="GitHub"
+						>
+							<span className="flex h-7 w-7 items-center justify-center rounded-lg shadow-md shadow-black/5 ring-1 ring-light-border-2 dark:bg-dark-bg-2 dark:ring-inset dark:ring-dark-border">
+								<GitHubIcon className="h-5 w-5 fill-slate-400 group-hover:fill-slate-500 dark:group-hover:fill-slate-300" />
+							</span>
+						</Link>
+					</div>
 				</div>
 			</div>
 		</header>
@@ -102,31 +114,9 @@ function Header() {
 export function Layout({ children }: { children: React.ReactNode }) {
 	let pathname = usePathname();
 	let isHomePage = pathname === '/';
-	let isCodyDocs = pathname.includes('/cody');
-	let isopenCtxDocs = pathname.includes('/cody/capabilities/openctx');
-
 	return (
 		<div className="flex w-full flex-col">
 			<Header />
-
-			{/* Cody docs banner */}
-			{/*isCodyDocs && !isopenCtxDocs && <TopBanner
-				text="NEW: Introducing chat and search in a single input with Sourcegraph 6.0."
-				link="https://sourcegraph.com/blog/combining-chat-and-search"
-				linkText="Read here"
-				textColor="#ffffff"
-				backgroundColor="#F34E3F"
-				opacity='0.80'
-			/>/*}
-
-			{/* Openctx docs banner */}
-			{/* {isopenCtxDocs && <TopBanner
-				text="NEW: MCP is the recommended method for adding external context in Cody due to its broad community adoption and extensive tool support."
-				link="https://sourcegraph.com/docs/cody/capabilities/agentic-context-fetching#mcp-support"
-				linkText="Read docs to learn more about configuring MCP."
-				textColor="#ffffff"
-				backgroundColor="#F34E3F"
-			/>} */}
 
 			{isHomePage && <Hero />}
 			{/* {isHomePage && <DemoLayout />} */}
