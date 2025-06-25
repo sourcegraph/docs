@@ -152,8 +152,10 @@ export const navigation: NavigationItem[] = [
 						title: "Bulk Operations", href: "/batch-changes/bulk-operations-on-changesets",
 						subsections: [
 							{ title: "Publishing Changesets", href: "/batch-changes/publishing-changesets", },
+							{ title: "Pushing Code", href: "/batch-changes/push-only-changesets", },
 							{ title: "Tracking Changesets", href: "/batch-changes/tracking-existing-changesets", },
 							{ title: "Rebasing Changesets", href: "/batch-changes/rebasing-changesets", },
+
 						]
 					},
 					{
@@ -164,7 +166,7 @@ export const navigation: NavigationItem[] = [
 					},
 					{ title: "Access Permissions", href: "/batch-changes/permissions-in-batch-changes" },
 					{
-						title: "Changesets in Monorepo", href: "/batch-changes/creating-changesets-per-project-in-monorepos",
+						title: "Changesets in Monorepos", href: "/batch-changes/creating-changesets-per-project-in-monorepos",
 						subsections: [
 							{ title: "Changesets in Large Repos", href: "/batch-changes/creating-multiple-changesets-in-large-repositories", },
 						]
@@ -187,7 +189,7 @@ export const navigation: NavigationItem[] = [
 						]
 					},
 					{
-						title: "Working with CLI", href: "/batch-changes/how-src-executes-a-batch-spec",
+						title: "Working with the CLI", href: "/batch-changes/how-src-executes-a-batch-spec",
 						subsections: [
 							{ title: "Re-executing Batch Specs", href: "/batch-changes/reexecuting-batch-specs-multiple-times", },
 							{ title: "CLI Subcommands", href: "/cli/references/batch", },
