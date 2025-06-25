@@ -6811,6 +6811,13 @@ const redirectsData = [
     permanent: true
   },
 
+  //Rmv Query types permanentaly:https://sourcegraph.com/docs/cody/capabilities/query-types
+  {
+    source: "/cody/capabilities/query-types",
+    destination: "/cody/capabilities/chat",
+    permanent: true
+  },
+
 
 ];
 
