@@ -937,6 +937,87 @@ You can check the container logs to see if you have made any typos or mistakes i
 ```
 {/* SCHEMA_SYNC_END: admin/config/site.schema.json */}
 
+## Configuration Notes
+
+### Core Settings
+- **`externalURL`** - This is the most important setting and must be configured for Sourcegraph to work correctly
+- **`auth.providers`** - Controls how users authenticate. The builtin provider with `allowSignup: false` means only the initial admin can invite other users
+- **`licenseKey`** - Required to activate Enterprise features. Contact Sourcegraph for a license
+
+### Performance & Scaling
+- **Repository Limits** - `maxReposToSearch` (deprecated, use `search.limits.maxRepos`) prevents resource exhaustion on large instances
+- **Git Operations** - `gitMaxConcurrentClones` and `gitMaxCodehostRequestsPerSecond` control git operation throttling
+- **Permissions Sync** - Multiple settings control how often and how many permissions jobs run concurrently
+
+### Security Considerations
+- **Token Security** - All access tokens (`executors.accessToken`, external service tokens) should contain at least 20 characters
+- **Session Management** - `auth.sessionExpiry` defaults to 90 days; consider shorter durations for sensitive environments
+- **Permission Enforcement** - `authz.enforceForSiteAdmins` ensures even site admins respect repository permissions
+- **Username Changes** - Set `auth.enableUsernameChanges: false` when using external auth to prevent privilege escalation
+
+## Common Examples
+
+### Basic Production Setup
+```json
+{
+  "externalURL": "https://sourcegraph.company.com",
+  "auth.providers": [
+    {
+      "type": "saml",
+      "configID": "saml",
+      "displayName": "Company SSO"
+    }
+  ],
+  "corsOrigin": "https://gitlab.company.com",
+  "email.address": "sourcegraph@company.com",
+  "email.smtp": {
+    "host": "smtp.company.com",
+    "port": 587,
+    "username": "sourcegraph@company.com",
+    "password": "smtp-password"
+  }
+}
+```
+
+### Development Instance
+```json
+{
+  "externalURL": "http://localhost:3080",
+  "auth.providers": [
+    {
+      "type": "builtin",
+      "allowSignup": true
+    }
+  ],
+  "disableAutoGitUpdates": false,
+  "observability.tracing": {
+    "type": "opentelemetry",
+    "debug": true,
+    "sampling": "all"
+  }
+}
+```
+
+## Best Practices
+
+### Authentication & Authorization
+- Use external authentication providers (SAML, OIDC) rather than builtin auth for production
+- Configure repository permissions to match your organization's access control
+- Set appropriate session expiry times based on security requirements
+- Disable username changes when using external auth
+
+### Monitoring & Observability
+- Configure email settings for system notifications
+- Set up tracing for debugging performance issues
+- Use `observability.alerts` to route critical alerts to your team
+- Monitor git operation timeouts and adjust based on repository sizes
+
+### Resource Management
+- Set reasonable search limits to prevent resource exhaustion
+- Configure git operation concurrency based on your gitserver capacity
+- Use rate limiting for external service API calls
+- Set up proper cleanup intervals for background jobs
+
 ## Accessing global settings
 
 Global settings should rarely need to be accessed. You will need to direct database access to change this setting.

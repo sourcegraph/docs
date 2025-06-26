@@ -150,6 +150,98 @@ Settings options and their default values are shown below.
 ```
 {/* SCHEMA_SYNC_END: admin/config/settings.schema.json */}
 
+## Configuration Notes
+
+### Search Settings
+- **`search.defaultPatternType`** - Controls default search behavior. Set to `"standard"` to disable keyword search if needed
+- **`search.contextLines`** - Default is 1 line of context above/below results. Increase for more context
+- **`search.displayLimit`** - Default 1500 results. Higher values may impact performance
+- **`search.includeArchived`** and **`search.includeForks`** - Control whether archived/forked repos appear in search by default
+
+### Code Intelligence
+- **`codeIntel.disableSearchBased`** - Set to true to only use precise code intelligence
+- **`codeIntel.mixPreciseAndSearchBasedReferences`** - Combines precise and search-based results for better coverage
+- **`basicCodeIntel.globalSearchesEnabled`** - May need to be disabled on large instances to prevent performance issues
+
+### UI Behavior
+- **`fileSidebarVisibleByDefault`** - Controls whether the file tree sidebar is open by default
+- **`history.preferAbsoluteTimestamps`** - Choose between relative ("5 days ago") or absolute timestamps
+- **`search.hideSuggestions`** - Disable search suggestions if they interfere with workflows
+
+## Security Considerations
+
+### Notifications & Alerts
+- **Notices** can be used to communicate security updates or maintenance windows
+- **`alerts.hideObservabilitySiteAlerts`** should be used carefully as it may hide important system alerts
+- Use **`dismissible: false`** for critical security notifications that users must see
+
+### Organization Settings
+- **`orgs.allMembersBatchChangesAdmin`** - Gives all org members admin rights to batch changes; use with caution
+- Consider the implications of allowing all org members to have admin privileges
+
+## Common Examples
+
+### Search-Optimized Configuration
+```json
+{
+  "search.defaultPatternType": "standard",
+  "search.contextLines": 3,
+  "search.displayLimit": 2000,
+  "search.includeArchived": false,
+  "search.includeForks": false,
+  "search.hideSuggestions": false,
+  "search.defaultCaseSensitive": false
+}
+```
+
+### Code Intelligence Configuration
+```json
+{
+  "codeIntel.disableSearchBased": false,
+  "codeIntel.mixPreciseAndSearchBasedReferences": true,
+  "basicCodeIntel.globalSearchesEnabled": true,
+  "basicCodeIntel.includeArchives": false,
+  "basicCodeIntel.includeForks": false
+}
+```
+
+### UI Customization
+```json
+{
+  "fileSidebarVisibleByDefault": true,
+  "history.preferAbsoluteTimestamps": false,
+  "history.defaultPageSize": 25,
+  "notices": [
+    {
+      "message": "Welcome to our code search platform!",
+      "location": "home",
+      "dismissible": true,
+      "variant": "info"
+    }
+  ]
+}
+```
+
+## Best Practices
+
+### Performance Optimization
+- Monitor search performance and adjust `search.displayLimit` accordingly
+- Consider disabling global searches (`basicCodeIntel.globalSearchesEnabled: false`) on large instances
+- Use search scopes to help users focus on relevant repositories
+- Set appropriate timeouts for unindexed searches
+
+### User Experience
+- Use notices strategically to communicate important information without overwhelming users
+- Configure search defaults that match your team's typical workflow
+- Consider enabling absolute timestamps for better auditability
+- Customize the file sidebar visibility based on your team's preferences
+
+### Code Intelligence
+- Start with mixed precise and search-based references for better coverage
+- Monitor performance impact of global code intelligence searches
+- Consider excluding archived repositories from code intelligence to improve relevance
+- Use precise-only mode for critical codebases where accuracy is paramount
+
 ## Additional details on settings
 
 ### Notices

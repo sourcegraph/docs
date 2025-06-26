@@ -584,3 +584,116 @@ If you would like to sync all public repositories while omitting archived repos,
 }
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/github.schema.json */}
+
+## Configuration Notes
+
+### Authorization Field Requirements
+When configuring repository permissions, the `authorization` field requires a corresponding GitHub authentication provider in the site configuration's `auth.providers` section with matching `url` values.
+
+### Certificate Configuration
+For GitHub Enterprise instances using self-signed or internal CA certificates, use the `certificate` field. Extract the certificate using:
+```bash
+openssl s_client -connect HOST:443 -showcerts < /dev/null 2> /dev/null | openssl x509 -outform PEM
+```
+
+### Repository Path Patterns
+The `repositoryPathPattern` controls how GitHub repositories map to Sourcegraph URLs. The pattern `{host}/{nameWithOwner}` ensures unique repository names across different code hosts. For example:
+- GitHub Enterprise at `https://github.example.com`
+- Repository `myorg/myrepo` 
+- Becomes `https://src.example.com/github.example.com/myorg/myrepo` on Sourcegraph
+
+### Repository Query Options
+Special `repositoryQuery` values have specific behaviors:
+- `public`: All public repos (GitHub Enterprise only, equivalent to `none` on GitHub.com)
+- `internal`: Internal repos (GitHub Enterprise only, uses Search API)
+- `affiliated`: Repos accessible to the token user (private with read access, owned public repos, public repos with write access)
+- `none`: No automatic syncing (manual configuration only)
+- Custom queries: Use GitHub advanced search syntax
+
+## Security Considerations
+
+### Token Scope Requirements
+**Critical**: The account associated with your token must have actual access to resources, not just the token scopes:
+- **Read access**: Token needs `repo` scope AND account must have read access to repositories
+- **Write access**: Token needs `repo` scope AND account must have write access to all repositories  
+- **Organization access**: Token needs `write:org` scope AND account must have admin access to organizations
+
+### Certificate Handling
+For internal certificates, escape the PEM format properly when adding to JSON configuration. Consider using tools like https://json-escape-text.now.sh for proper JSON escaping.
+
+### Rate Limit Bypass
+Always include a token for GitHub.com connections to avoid unauthenticated rate limits, even if you don't want automatic repository synchronization. A token without `repo` scope can be used solely for rate limit bypass.
+
+## Common Examples
+
+### Basic Single Repository
+```json
+{
+  "url": "https://github.com",
+  "token": "<access token>",
+  "orgs": [],
+  "repos": ["kubernetes/kubernetes"]
+}
+```
+
+### Organization with Excluded Repositories
+```json
+{
+  "url": "https://github.example.com",
+  "token": "<access token>",
+  "orgs": ["myorg"],
+  "exclude": [
+    {"name": "myorg/secret-repo"},
+    {"pattern": "^myorg/temp-.*"}
+  ]
+}
+```
+
+### Public Repositories Excluding Archived
+```json
+{
+  "url": "https://github.example.com",
+  "gitURLType": "http",
+  "repositoryPathPattern": "devs/{nameWithOwner}",
+  "repositoryQuery": ["affiliated"],
+  "token": "TOKEN_WITH_PUBLIC_ACCESS",
+  "exclude": [{"archived": true}]
+}
+```
+
+### GitHub Enterprise with Internal Repository Access
+```json
+{
+  "url": "https://github.enterprise.com",
+  "token": "<access token>",
+  "repositoryQuery": ["internal"],
+  "authorization": {
+    "markInternalReposAsPublic": true
+  }
+}
+```
+
+## Best Practices
+
+### Permission Syncing Setup
+1. Configure both read and write access for the token account when using repository permissions
+2. Without write access, conflicts occur between user-centric and repo-centric sync
+3. Consider disabling repo-centric permission sync if write access cannot be granted
+4. Set up webhooks for real-time permission updates
+
+### Repository Selection Strategy
+- Use `orgs` for complete organization syncing
+- Use `repos` for specific repository lists  
+- Use `repositoryQuery: ["affiliated"]` for user-accessible repositories
+- Combine with `exclude` patterns for fine-grained control
+
+### Rate Limit Management
+- Monitor search API usage when using custom `repositoryQuery` values
+- Use special values (`affiliated`, `public`, `none`) to avoid search API limits
+- Increase `repoListUpdateInterval` in site config if hitting search rate limits
+- Consider switching to `orgs` configuration instead of complex queries
+
+### GitHub App vs Token Selection
+- **GitHub Apps**: Recommended for better security, automatic token rotation, and webhook integration
+- **Personal Access Tokens**: Simpler setup, broader API compatibility
+- **Fine-grained Tokens**: Limited scope access, unsupported for GraphQL features like batch changes

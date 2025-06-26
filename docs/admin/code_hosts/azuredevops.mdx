@@ -129,6 +129,118 @@ Azure DevOps connections support the following configuration options, which are 
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/azuredevops.schema.json */}
 
+## Configuration Notes
+
+### Authentication Requirements
+- Azure DevOps requires Personal Access Tokens (PAT) for API access
+- Tokens must have access to "All accessible organizations" for connection checks
+- Required scopes: Code (Read), Project and Team, User Profile
+
+### Repository Discovery
+- Configure `orgs` to sync all repositories from specific organizations
+- Configure `projects` to sync repositories from specific projects (format: "org/project")
+- Use `exclude` to prevent specific repositories from being synced
+
+### Permission Model
+- Set `enforcePermissions: true` to sync user-level permissions
+- Requires OAuth provider configuration and third-party access enablement
+- Initial permissions sync may take time to complete
+
+## Security Considerations
+
+### Token Management
+- Personal Access Tokens provide broad access to Azure DevOps resources
+- Store tokens securely and rotate them regularly according to your security policy
+- Consider using dedicated service accounts for production deployments
+- Monitor token usage and expiration dates
+
+### OAuth Configuration
+- Third-party OAuth access must be enabled at the organization level
+- Users must authenticate with Azure DevOps to access private repositories
+- Consider organizational policies around external application access
+
+### Network Security
+- Ensure Sourcegraph can access dev.azure.com on port 443
+- Consider firewall rules for on-premises Azure DevOps Server instances
+- SSH access requires additional key management if using SSH cloning
+
+## Common Examples
+
+### Basic Organization Sync
+```json
+{
+  "url": "https://dev.azure.com/",
+  "username": "service-account",
+  "token": "personal-access-token",
+  "orgs": ["my-organization"],
+  "gitURLType": "http"
+}
+```
+
+### Project-Specific Configuration
+```json
+{
+  "url": "https://dev.azure.com/",
+  "username": "service-account", 
+  "token": "personal-access-token",
+  "projects": [
+    "my-org/project-1",
+    "my-org/project-2"
+  ],
+  "exclude": [
+    {"name": "my-org/project-1/legacy-repo"}
+  ]
+}
+```
+
+### Permissions Enforcement Setup
+```json
+{
+  "url": "https://dev.azure.com/",
+  "username": "service-account",
+  "token": "personal-access-token",
+  "orgs": ["my-organization"],
+  "enforcePermissions": true
+}
+```
+
+### SSH Cloning Configuration
+```json
+{
+  "url": "https://dev.azure.com/",
+  "username": "service-account",
+  "token": "personal-access-token",
+  "orgs": ["my-organization"],
+  "gitURLType": "ssh"
+}
+```
+
+## Best Practices
+
+### Setup and Configuration
+- Create dedicated service accounts with minimal required permissions
+- Use project-specific configurations when possible to limit scope
+- Test connections with small repository sets before full deployment
+- Configure exclude patterns to avoid syncing unnecessary repositories
+
+### Security
+- Regularly audit and rotate Personal Access Tokens
+- Enable permissions enforcement for sensitive repositories
+- Monitor OAuth application access at the organization level
+- Use HTTPS cloning unless SSH is specifically required
+
+### Performance
+- Prefer `projects` over `orgs` configuration for better performance
+- Monitor rate limit usage and adjust polling intervals if needed
+- Consider repository size and complexity when planning sync schedules
+- Use exclude patterns to optimize sync performance
+
+### Maintenance
+- Plan for OAuth application access policy changes
+- Monitor permissions sync status for users
+- Keep webhook configurations updated
+- Regularly review organization and project configurations
+
 ## Webhooks
 
 Please consult [this page](/admin/config/webhooks/incoming) in order to configure webhooks.

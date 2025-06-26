@@ -208,6 +208,115 @@ Bitbucket Cloud connections support the following configuration options, which a
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/bitbucket_cloud.schema.json */}
 
+## Configuration Notes
+
+### Authentication Methods
+Bitbucket Cloud supports two authentication approaches:
+- **Username and App Password**: Standard user credentials with application-specific password
+- **Workspace Access Token**: OAuth-based token scoped to specific workspace
+
+### Repository Discovery
+- The connection syncs all repositories for the configured user by default
+- Use `teams` to limit syncing to specific workspaces
+- Use `exclude` to prevent specific repositories from being synced (takes precedence over `teams`)
+
+### Rate Limiting Behavior
+- Sourcegraph respects Bitbucket Cloud's rate limits with exponential backoff
+- Requests are retried for up to 5 minutes before being dropped
+- Default internal rate limit: 7200 requests per hour
+
+## Security Considerations
+
+### Credential Management
+- App passwords provide repository-level access control
+- Workspace access tokens offer more granular permissions
+- Store credentials securely and rotate them regularly
+- Use separate service accounts for production deployments
+
+### Repository Access
+- Public repositories are accessible without authentication
+- Private repositories require proper credentials
+- Authorization enforcement requires matching authentication provider configuration
+
+### SSH vs HTTPS
+- HTTPS is the default and recommended clone method
+- SSH cloning requires additional key management setup
+- Consider firewall rules for SSH access (port 22)
+
+## Common Examples
+
+### Basic Username/App Password Setup
+```json
+{
+  "url": "https://bitbucket.org",
+  "username": "service-account",
+  "appPassword": "app-password-value",
+  "teams": ["my-workspace"],
+  "repositoryPathPattern": "{host}/{nameWithOwner}"
+}
+```
+
+### Workspace Access Token Configuration
+```json
+{
+  "url": "https://bitbucket.org",
+  "accessToken": "workspace-token-value",
+  "teams": ["my-workspace"],
+  "exclude": [
+    {"name": "my-workspace/legacy-repo"},
+    {"pattern": ".*-archive$"}
+  ]
+}
+```
+
+### SSH Cloning Setup
+```json
+{
+  "url": "https://bitbucket.org",
+  "username": "service-account",
+  "appPassword": "app-password-value",
+  "gitURLType": "ssh",
+  "teams": ["my-workspace"]
+}
+```
+
+### Repository Permissions Enforcement
+```json
+{
+  "url": "https://bitbucket.org",
+  "username": "service-account",
+  "appPassword": "app-password-value",
+  "authorization": {},
+  "teams": ["my-workspace"]
+}
+```
+
+## Best Practices
+
+### Setup and Configuration
+- Create dedicated service accounts for Sourcegraph integration
+- Use workspace access tokens when working with multiple workspaces
+- Configure `repositoryPathPattern` to avoid naming conflicts
+- Test connections with minimal repository sets before full deployment
+
+### Security
+- Regularly audit and rotate authentication credentials
+- Use repository permissions when dealing with sensitive code
+- Monitor rate limit usage and adjust request patterns if needed
+- Implement proper network security for SSH connections
+
+### Performance
+- Use exclude patterns to filter out unnecessary repositories
+- Configure appropriate rate limits based on your usage patterns
+- Monitor repository sync times and optimize large workspace configurations
+- Consider workspace-specific tokens for better performance isolation
+
+### Maintenance
+- Keep webhook configurations up to date
+- Monitor sync errors and connection health
+- Regularly review team and repository configurations
+- Plan for authentication provider changes when enforcing permissions
+
 ## Webhooks
 
 Using the `webhooks` property on the external service has been deprecated.

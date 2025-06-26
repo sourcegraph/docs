@@ -154,3 +154,122 @@ Gerrit connections support the following configuration options, which are specif
 }
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/gerrit.schema.json */}
+
+## Configuration Notes
+
+### Authentication Requirements
+- Gerrit requires HTTP credentials for API access and repository cloning
+- The configured user must have access to all repositories intended for syncing
+- HTTP credentials are generated from the Gerrit web interface
+
+### Repository Discovery
+- Without `projects` configuration, all accessible projects are synced
+- Use `projects` to limit syncing to specific project names
+- Use `exclude` to prevent specific projects from being synced (takes precedence over `projects`)
+
+### Permission Integration
+- Setting `authorization: {}` enables repository permissions enforcement
+- Requires matching Gerrit authentication provider in site configuration
+- Users authenticate with their Gerrit HTTP credentials
+
+## Security Considerations
+
+### Credential Management
+- HTTP credentials provide access to Gerrit repositories and metadata
+- Store credentials securely using environment variables or secret management
+- Consider using dedicated service accounts with appropriate permissions
+- Regularly rotate credentials according to security policies
+
+### Access Control
+- Gerrit's built-in permission system integrates with Sourcegraph
+- Users must have valid Gerrit credentials to access private repositories
+- Repository visibility is controlled through Gerrit's project permissions
+
+### Network Security
+- Ensure Sourcegraph can access Gerrit server on configured ports
+- HTTPS is recommended for secure credential transmission
+- SSH cloning requires additional key management setup
+
+## Common Examples
+
+### Basic HTTP Authentication
+```json
+{
+  "url": "https://gerrit.example.com/",
+  "username": "service-account",
+  "password": "http-password",
+  "projects": [
+    "platform/core",
+    "platform/ui"
+  ]
+}
+```
+
+### Full Project Sync with Exclusions
+```json
+{
+  "url": "https://gerrit.example.com/",
+  "username": "service-account", 
+  "password": "http-password",
+  "exclude": [
+    {"name": "archived-project"},
+    {"name": "experimental/prototype"}
+  ]
+}
+```
+
+### SSH Cloning Configuration
+```json
+{
+  "url": "https://gerrit.example.com/",
+  "username": "service-account",
+  "password": "http-password",
+  "projects": ["platform/core"],
+  "gitSSHCredential": {
+    "privateKey": "base64-encoded-private-key"
+  }
+}
+```
+
+### Repository Permissions Enforcement
+```json
+{
+  "url": "https://gerrit.example.com/",
+  "username": "service-account",
+  "password": "http-password",
+  "projects": ["platform/core"],
+  "authorization": {}
+}
+```
+
+## Best Practices
+
+### Setup and Configuration
+- Create dedicated service accounts for Sourcegraph integration
+- Use specific project configurations rather than syncing all projects
+- Test connections with a minimal set of projects first
+- Ensure service account has appropriate access to target projects
+
+### Security
+- Implement regular credential rotation schedules
+- Use HTTPS for secure communication with Gerrit servers
+- Enable repository permissions when dealing with sensitive code
+- Monitor Gerrit access logs for unusual activity
+
+### Performance
+- Prefer specific project lists over syncing all projects
+- Use exclude patterns to filter out unnecessary repositories
+- Consider project size and complexity when planning sync schedules
+- Monitor sync performance and adjust configurations as needed
+
+### Maintenance
+- Keep authentication provider configurations synchronized
+- Regularly review project inclusion/exclusion patterns
+- Plan for Gerrit server upgrades and configuration changes
+- Monitor user permission sync status and resolve issues promptly
+
+### Integration Notes
+- Gerrit is in beta and may have limitations
+- Consider Gerrit's deprecation timeline when planning long-term usage
+- Test authentication provider integration thoroughly
+- Document any custom configuration requirements for your environment

@@ -267,6 +267,147 @@ With this setting, Sourcegraph will ignore any rules with a host other than `*`,
 }
 ```
 
+## Configuration Notes
+
+### Authentication Requirements
+- Perforce requires user credentials with appropriate permissions
+- Use `p4 login -p -a` to obtain ticket values for authentication
+- Service accounts should have "super" access level for permissions syncing
+
+### Repository Conversion
+- Perforce depots are converted to Git repositories using p4-fusion
+- Only "local" type depots are supported
+- Repository names follow the `repositoryPathPattern` configuration
+
+### Performance Considerations
+- p4-fusion client is strongly recommended over git-p4
+- Configure `fusionClient.lookAhead` for optimal performance
+- Large depot conversions may require significant time and resources
+
+## Security Considerations
+
+### Credential Management
+- Store P4PASSWD tickets securely using environment variables
+- Create dedicated service accounts for Sourcegraph integration
+- Use tickets that never expire for long-running integrations
+- Regularly audit P4 user permissions and access levels
+
+### Access Control
+- Repository-level permissions are enforced when `authorization` is configured
+- File-level permissions require experimental feature enablement
+- IP-based restrictions can be configured for enhanced security
+- Consider sub-repo permissions for granular access control
+
+### Network Security
+- Ensure Sourcegraph can access Perforce server on configured ports
+- Use SSL/TLS protocols (ssl:) for secure communication
+- Configure firewall rules for Perforce server access
+- Monitor P4 server logs for unusual access patterns
+
+## Common Examples
+
+### Basic p4-fusion Configuration
+```json
+{
+  "p4.port": "ssl:perforce.example.com:1666",
+  "p4.user": "sourcegraph-service",
+  "p4.passwd": "ticket-value-from-p4-login",
+  "depots": [
+    "//main/",
+    "//platform/ui/"
+  ],
+  "fusionClient": {
+    "enabled": true,
+    "lookAhead": 2000
+  }
+}
+```
+
+### Repository Permissions Setup
+```json
+{
+  "p4.port": "ssl:perforce.example.com:1666",
+  "p4.user": "sourcegraph-admin",
+  "p4.passwd": "admin-ticket-value",
+  "depots": ["//main/"],
+  "authorization": {},
+  "fusionClient": {
+    "enabled": true,
+    "lookAhead": 2000
+  }
+}
+```
+
+### File-Level Permissions Configuration
+```json
+{
+  "p4.port": "ssl:perforce.example.com:1666",
+  "p4.user": "sourcegraph-admin",
+  "p4.passwd": "admin-ticket-value",
+  "depots": ["//main/"],
+  "authorization": {
+    "subRepoPermissions": true
+  },
+  "fusionClient": {
+    "enabled": true,
+    "lookAhead": 2000
+  }
+}
+```
+
+### Custom Repository Path Pattern
+```json
+{
+  "p4.port": "tcp:internal-p4:1666",
+  "p4.user": "build-service",
+  "p4.passwd": "build-ticket",
+  "depots": [
+    "//products/app1/",
+    "//products/app2/"
+  ],
+  "repositoryPathPattern": "perforce/{depot}",
+  "maxChanges": 5000
+}
+```
+
+## Best Practices
+
+### Setup and Configuration
+- Use p4-fusion client for better performance than git-p4
+- Create dedicated Perforce users for Sourcegraph integration
+- Configure meaningful `repositoryPathPattern` to avoid conflicts
+- Test with small depots before configuring large-scale syncing
+
+### Security
+- Use SSL/TLS connections for secure communication
+- Implement proper P4 user permission structures
+- Enable file-level permissions for sensitive codebases
+- Regularly audit and rotate P4 tickets and credentials
+
+### Performance
+- Configure appropriate `lookAhead` values for p4-fusion
+- Use `maxChanges` to limit initial sync scope
+- Monitor changelist mapping performance for large depots
+- Plan for background computation overhead
+
+### Maintenance
+- Keep P4 tickets refreshed and valid
+- Monitor sync performance and error rates
+- Plan for depot renames and structural changes
+- Regularly review depot inclusion patterns
+
+### Permissions Management
+- Use sub-repo permissions for granular access control
+- Configure IP restrictions when network security is required
+- Plan for permissions sync delays with large user bases
+- Monitor user permission sync status and resolve issues
+
+### Migration and Integration
+- Plan changelist ID mapping for URL compatibility
+- Consider Batch Changes limitations with file-level permissions
+- Test experimental features in non-production environments
+- Document custom configuration requirements for your environment
+
 ## Known issues and limitations
 
 We are actively working to significantly improve Sourcegraph's Perforce support. Please [contact us](https://help.sourcegraph.com/hc/en-us/requests/new) to help us prioritize any specific improvements you'd like to see.

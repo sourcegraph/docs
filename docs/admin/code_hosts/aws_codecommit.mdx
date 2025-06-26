@@ -114,6 +114,116 @@ To add CodeCommit repositories in Docker Container:
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/aws_codecommit.schema.json */}
 
+## Configuration Notes
+
+### Authentication Requirements
+- AWS CodeCommit requires Git credentials (username/password) for HTTPS cloning
+- IAM user must have `AWSCodeCommitReadOnly` policy attached
+- Git credentials are generated through AWS IAM console
+
+### Repository Discovery
+- All repositories in the specified region are synced by default
+- Use `exclude` to prevent specific repositories from being synced
+- Supports exclusion by repository name or ARN
+
+### Regional Configuration
+- Each AWS region requires a separate code host connection
+- Default region is `us-east-1` if not specified
+- Ensure `repositoryPathPattern` includes region for uniqueness
+
+## Security Considerations
+
+### IAM and Access Management
+- Use dedicated IAM users with minimal required permissions
+- Git credentials are separate from AWS API keys
+- Consider using IAM roles for EC2-hosted Sourcegraph instances (future enhancement)
+- Regularly rotate Git credentials according to security policies
+
+### Network Security
+- Ensure Sourcegraph can access CodeCommit endpoints for your region
+- HTTPS cloning uses port 443
+- SSH cloning requires port 22 and key management
+
+### Credential Storage
+- Store Git credentials securely
+- Use environment variables or secure secret management
+- Avoid committing credentials to configuration files
+
+## Common Examples
+
+### Basic HTTPS Configuration
+```json
+{
+  "region": "us-west-2",
+  "accessKeyID": "AKIA...",
+  "secretAccessKey": "secret-key",
+  "gitCredentials": {
+    "username": "git-username",
+    "password": "git-password"
+  },
+  "repositoryPathPattern": "codecommit-{region}/{name}"
+}
+```
+
+### Multi-Region Setup
+```json
+{
+  "region": "eu-central-1",
+  "accessKeyID": "AKIA...",
+  "secretAccessKey": "secret-key", 
+  "gitCredentials": {
+    "username": "git-username",
+    "password": "git-password"
+  },
+  "repositoryPathPattern": "git-codecommit.eu-central-1.amazonaws.com/{name}",
+  "exclude": [
+    {"name": "legacy-repo"},
+    {"id": "arn:aws:codecommit:eu-central-1:123456789012:archive-repo"}
+  ]
+}
+```
+
+### SSH Configuration
+```json
+{
+  "region": "us-east-1",
+  "accessKeyID": "AKIA...",
+  "secretAccessKey": "secret-key",
+  "gitURLType": "ssh",
+  "gitSSHKeyID": "ssh-key-id",
+  "gitSSHCredential": {
+    "privateKey": "base64-encoded-private-key",
+    "passphrase": "optional-passphrase"
+  }
+}
+```
+
+## Best Practices
+
+### Setup and Configuration
+- Create dedicated IAM users for Sourcegraph integration
+- Use meaningful `repositoryPathPattern` to avoid naming conflicts
+- Configure separate connections for different AWS regions
+- Test connections with a small set of repositories first
+
+### Security
+- Follow AWS IAM best practices for access keys
+- Use Git credentials with appropriate scope limitations
+- Implement regular credential rotation schedules
+- Monitor CloudTrail logs for CodeCommit access patterns
+
+### Performance
+- Use exclude patterns to limit repository scope
+- Consider repository size when planning sync schedules
+- Monitor AWS service limits and quotas
+- Plan for regional latency considerations
+
+### Maintenance
+- Keep IAM policies updated with AWS service changes
+- Monitor for deprecated authentication methods
+- Plan migration strategies for future IAM role support
+- Regularly review repository inclusion/exclusion patterns
+
 ### Mounting SSH keys into the container
 
 1. Copy all the files at your `$HOME/.ssh directory` to `$HOME/.sourcegraph/config/ssh` directory. See [docs](/admin/deploy/docker-single-container/#ssh-authentication-config-keys-knownhosts) for more information about our ssh file system.

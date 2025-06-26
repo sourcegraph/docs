@@ -338,6 +338,115 @@ The Sourcegraph instance's site admin must [update the `corsOrigin` site config 
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/gitlab.schema.json */}
 
+## Configuration Notes
+
+### Repository Discovery
+- **`projectQuery`** accepts multiple formats: simple queries like `"?archived=false"`, API endpoints like `"groups/mygroup/projects"`, or the special value `"none"` to disable auto-discovery
+- **`projects`** allows explicit specification by name (`{"name": "group/name"}`) or ID (`{"id": 42}`)
+- **`exclude`** takes precedence over both `projects` and `projectQuery`, supporting name, ID, or regex patterns
+
+### Authentication & Permissions
+- **OAuth Application** (recommended) - Uses user's OAuth token for repository access, requires GitLab as auth provider
+- **Administrator Token** - Requires sudo-level token with SAML/OIDC auth provider
+- **Username Matching** - Only safe with `http-header` authentication where usernames are immutable
+
+### Performance Settings
+- **`rateLimit`** - Default 36,000 requests/hour (10/second) to GitLab API
+- **`markInternalReposAsPublic`** - Makes internal GitLab repos public in Sourcegraph, bypassing permission syncs
+
+## Security Considerations
+
+### Token Security
+- Always use tokens with GitLab.com to avoid unauthenticated rate limits
+- **`read_api`** and **`read_repository`** scopes are minimum required
+- **`sudo`** scope needed only for external identity provider setup
+- Store tokens securely and rotate them regularly
+
+### Permission Synchronization
+- Repository permissions sync can take significant time with large user/repo counts
+- **OAuth method** is most secure and doesn't require admin privileges
+- **Username matching** method has security risks if usernames can change
+- **Administrator token** method requires careful identity provider configuration
+
+### Internal Repository Access
+- `markInternalReposAsPublic` bypasses GitLab's permission model
+- Only use when all Sourcegraph users should access all internal repositories
+- Consider security implications of making internal repos globally accessible
+
+## Common Examples
+
+### Basic GitLab.com Connection
+```json
+{
+  "url": "https://gitlab.com",
+  "token": "glpat-xxxxxxxxxxxxxxxxxxxx",
+  "projectQuery": [
+    "projects?membership=true&archived=no",
+    "groups/myorg/projects"
+  ]
+}
+```
+
+### Self-hosted GitLab with OAuth Permissions
+```json
+{
+  "url": "https://gitlab.company.com",
+  "token": "glpat-xxxxxxxxxxxxxxxxxxxx", 
+  "certificate": "-----BEGIN CERTIFICATE-----\n...",
+  "projectQuery": ["projects?membership=true"],
+  "authorization": {
+    "identityProvider": {
+      "type": "oauth"
+    }
+  },
+  "markInternalReposAsPublic": true
+}
+```
+
+### Filtered Repository Selection
+```json
+{
+  "url": "https://gitlab.com",
+  "token": "glpat-xxxxxxxxxxxxxxxxxxxx",
+  "projects": [
+    {"name": "myorg/backend"},
+    {"name": "myorg/frontend"},
+    {"id": 12345}
+  ],
+  "exclude": [
+    {"pattern": ".*-archived$"},
+    {"name": "myorg/deprecated-project"}
+  ]
+}
+```
+
+## Best Practices
+
+### Repository Management
+- Use `projectQuery` for dynamic discovery based on GitLab attributes
+- Combine with `exclude` patterns to filter out unwanted repositories
+- Regularly review and clean up repository selections
+- Use specific project inclusion for sensitive or critical repos
+
+### Performance Optimization
+- Monitor rate limit usage and adjust `requestsPerHour` if needed
+- Use `markInternalReposAsPublic` carefully to reduce permission sync overhead
+- Consider excluding archived/forked repositories to reduce sync time
+- Implement repository name transformations to maintain consistent naming
+
+### Security & Compliance
+- Implement proper certificate validation for self-hosted instances
+- Use OAuth authentication for better security posture
+- Regularly audit repository access permissions
+- Set up monitoring for permission sync failures
+- Document your permission model for compliance audits
+
+### Troubleshooting
+- Test token permissions with curl commands against GitLab API
+- Monitor Sourcegraph logs for rate limit or permission errors
+- Verify SSL certificates for self-hosted GitLab instances
+- Check webhook configuration for real-time updates
+
 ## Access token scopes
 
 Sourcegraph requires an access token with `api` permissions (and `sudo`, if you are using an `external` identity provider type). These permissions are required for the following reasons:

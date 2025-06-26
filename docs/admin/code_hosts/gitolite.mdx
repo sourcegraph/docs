@@ -63,3 +63,113 @@ To connect Gitolite to Sourcegraph:
 }
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/gitolite.schema.json */}
+
+## Configuration Notes
+
+### Authentication Requirements
+- Gitolite connections require SSH authentication setup
+- SSH keys must be configured before creating the code host connection
+- The SSH user must have access to all repositories intended for syncing
+
+### Repository Discovery
+- All accessible repositories are synced by default
+- Use `exclude` to prevent specific repositories from being synced
+- Supports exclusion by exact name or regular expression pattern
+
+### Connection Setup
+- SSH authentication must be configured prior to adding the code host
+- The `host` field specifies the SSH connection string
+- The `prefix` field determines the repository naming pattern in Sourcegraph
+
+## Security Considerations
+
+### SSH Key Management
+- Use dedicated SSH keys for Sourcegraph integration
+- Store private keys securely using proper file permissions
+- Consider using SSH key passphrases for additional security
+- Regularly rotate SSH keys according to security policies
+
+### Access Control
+- Gitolite's repository access control is not enforced by Sourcegraph
+- All repositories accessible to the configured SSH user will be visible
+- Consider using dedicated Gitolite users with limited repository access
+
+### Network Security
+- Ensure Sourcegraph can access Gitolite server on SSH port (typically 22)
+- Configure firewall rules appropriately for SSH access
+- Consider using non-standard SSH ports for additional security
+
+## Common Examples
+
+### Basic SSH Configuration
+```json
+{
+  "host": "git@gitolite.example.com",
+  "prefix": "gitolite.example.com/",
+  "exclude": [
+    {"name": "test-repo"},
+    {"pattern": ".*-temp$"}
+  ]
+}
+```
+
+### Custom SSH Port Setup
+```json
+{
+  "host": "ssh://git@gitolite.example.com:2222/",
+  "prefix": "gitolite.example.com/",
+  "exclude": [
+    {"pattern": "^archive/.*"}
+  ]
+}
+```
+
+### Multiple Gitolite Instances
+```json
+{
+  "host": "git@internal-gitolite.company.com",
+  "prefix": "internal-git/",
+  "exclude": [
+    {"pattern": ".*secret.*"},
+    {"name": "legacy-system"}
+  ]
+}
+```
+
+## Best Practices
+
+### Setup and Configuration
+- Test SSH connectivity manually before configuring the code host
+- Use meaningful prefix patterns to avoid repository name conflicts
+- Configure exclude patterns to filter out temporary or test repositories
+- Verify SSH key permissions and ownership on the Sourcegraph server
+
+### Security
+- Use dedicated SSH keys specifically for Sourcegraph integration
+- Implement proper SSH key rotation schedules
+- Consider using SSH key passphrases with secure key storage
+- Monitor SSH access logs for unusual activity
+
+### Performance
+- Use exclude patterns to limit the scope of repository syncing
+- Consider the size and number of repositories when planning sync schedules
+- Monitor network performance for large repository synchronizations
+- Plan for SSH connection limits and timeouts
+
+### Maintenance
+- Regularly review repository inclusion/exclusion patterns
+- Keep SSH configurations updated with infrastructure changes
+- Plan for Gitolite server migrations and key rotations
+- Monitor sync errors and connectivity issues
+
+### Migration Considerations
+- Gitolite is not actively recommended for new installations
+- Consider migrating to more actively supported Git hosting solutions
+- Plan transition strategies for existing Gitolite repositories
+- Evaluate alternatives like GitLab, GitHub Enterprise, or Bitbucket
+
+### Troubleshooting
+- Verify SSH connectivity using `ssh -T git@gitolite.example.com`
+- Check SSH key permissions (600 for private key, 644 for public key)
+- Ensure SSH agent is configured properly if using key passphrases
+- Review Gitolite server logs for access and authentication issues

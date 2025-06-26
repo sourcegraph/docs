@@ -95,3 +95,117 @@ The Sourcegraph instance's site admin must [update the `corsOrigin` site config 
 }
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/phabricator.schema.json */}
+
+## Configuration Notes
+
+### Authentication Options
+- Phabricator supports optional Conduit API token authentication
+- Tokens are used to automatically discover available repositories
+- Manual repository configuration is possible without tokens
+
+### Repository Association
+- Repositories can be discovered via API token or configured manually
+- Manual configuration requires mapping Sourcegraph paths to Phabricator callsigns
+- Callsigns are case-sensitive and must match exactly
+
+### Integration Purpose
+- Phabricator connections provide outbound links from Sourcegraph to Phabricator
+- Native extension offers better integration than browser extensions
+- CORS configuration is required for native extension functionality
+
+## Security Considerations
+
+### API Token Management
+- Conduit API tokens provide read access to repository metadata
+- Store tokens securely using environment variables or secret management
+- Consider using dedicated Phabricator users for integration
+- Regularly audit token usage and permissions
+
+### Access Control
+- Phabricator repository permissions are not enforced by Sourcegraph
+- All configured repositories will be accessible to Sourcegraph users
+- Consider using dedicated Phabricator instances for integration
+
+### Network Security
+- Ensure Sourcegraph can access Phabricator server on configured ports
+- CORS configuration must allow Sourcegraph domain for native extension
+- HTTPS is recommended for secure API communication
+
+## Common Examples
+
+### API Token Configuration
+```json
+{
+  "url": "https://phabricator.example.com",
+  "token": "api-abcdefghijklmnop"
+}
+```
+
+### Manual Repository Mapping
+```json
+{
+  "url": "https://phabricator.example.com",
+  "repos": [
+    {
+      "path": "github.com/myorg/myrepo",
+      "callsign": "MR"
+    },
+    {
+      "path": "internal.git.company.com/platform/core",
+      "callsign": "CORE"
+    }
+  ]
+}
+```
+
+### Combined Configuration
+```json
+{
+  "url": "https://phabricator.example.com",
+  "token": "api-abcdefghijklmnop",
+  "repos": [
+    {
+      "path": "custom.git.server.com/special/repo",
+      "callsign": "SPECIAL"
+    }
+  ]
+}
+```
+
+## Best Practices
+
+### Setup and Configuration
+- Use API tokens when possible for automatic repository discovery
+- Verify repository path mappings match Phabricator's normalized URIs
+- Test outbound links to ensure proper configuration
+- Document callsign mappings for manual configurations
+
+### Security
+- Use dedicated Phabricator users for API token generation
+- Implement proper CORS configuration for native extension
+- Regularly audit API token access and permissions
+- Consider Phabricator's authentication and authorization settings
+
+### Performance
+- Prefer API token configuration over manual repository mapping
+- Monitor API usage and respect Phabricator's rate limits
+- Consider caching strategies for large repository lists
+- Plan for Phabricator server maintenance windows
+
+### Maintenance
+- Keep CORS configurations updated with Sourcegraph URL changes
+- Monitor Phabricator server upgrades and API compatibility
+- Regularly review repository mappings for accuracy
+- Plan for Phabricator end-of-support migration
+
+### Integration Notes
+- Phabricator support is limited due to end-of-support announcement
+- Native extension is recommended over browser extension
+- Consider migration to actively supported code review platforms
+- Evaluate alternatives like GitHub, GitLab, or Bitbucket for new projects
+
+### Troubleshooting
+- Use Phabricator's Conduit API console to test token permissions
+- Verify normalized URI output matches Sourcegraph repository paths
+- Check CORS configuration for native extension issues
+- Review Phabricator server logs for API access errors

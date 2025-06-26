@@ -331,3 +331,139 @@ Bitbucket Server / Bitbucket Data Center connections support the following confi
 }
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/bitbucket_server.schema.json */}
+
+## Configuration Notes
+
+### Repository Discovery
+- **`repos`** - Explicit list in `"projectKey/repositorySlug"` format, with ordering preserved for sync priority
+- **`repositoryQuery`** - Supports special values (`"none"`, `"all"`) or Bitbucket API query parameters
+- **`exclude`** - Takes precedence over `repos` and `repositoryQuery`, supports name, ID, and pattern matching
+- **`excludePersonalRepositories`** - Useful for organizational policies that restrict personal repo access
+
+### Authentication Methods
+- **Personal Access Tokens** - Recommended for Bitbucket Server 5.5+ with read/write permissions as needed
+- **Username/Password** - Legacy method for older Bitbucket versions (5.4 and earlier)
+- **OAuth2** - Simplest permission setup, requires Bitbucket Server auth provider
+- **OAuth1** - More complex setup but works without requiring Bitbucket as auth provider
+
+### Performance & Security
+- **`rateLimit`** - Default 28,800 requests/hour (8/second) for API calls
+- **`gitURLType`** - Choose between `"http"` (default) or `"ssh"` for repository access
+- **Certificate validation** - Required for self-signed or internal CA certificates
+
+## Security Considerations
+
+### Token Management
+- Personal access tokens require **read** permissions minimum
+- **Write** permissions needed for Batch Changes functionality
+- Store tokens securely and implement regular rotation
+- For older versions, username/password credentials pose higher security risk
+
+### Permission Synchronization
+- Requires **exact username matching** between Sourcegraph and Bitbucket Server
+- **`auth.enableUsernameChanges: false`** must be set to prevent privilege escalation
+- Large user/repository counts significantly impact sync duration
+- Consider installing Sourcegraph Bitbucket Server plugin for faster sync
+
+### OAuth Configuration Security
+- OAuth1 setup requires generating and securely storing RSA key pairs
+- Consumer keys should use cryptographically random values
+- Allow user impersonation flag has security implications - use carefully
+- OAuth2 is generally more secure and simpler to configure
+
+## Common Examples
+
+### Basic Connection with Personal Access Token
+```json
+{
+  "url": "https://bitbucket.company.com",
+  "username": "sourcegraph-service",
+  "token": "[REDACTED:bitbucket-pat]",
+  "repositoryQuery": ["?name=backend&projectname=WEB"],
+  "excludePersonalRepositories": true
+}
+```
+
+### OAuth2 with Repository Permissions
+```json
+{
+  "url": "https://bitbucket.company.com", 
+  "username": "sourcegraph-service",
+  "token": "[REDACTED:bitbucket-pat]",
+  "repos": ["WEB/backend", "WEB/frontend", "MOBILE/ios-app"],
+  "authorization": {
+    "oauth2": true
+  }
+}
+```
+
+### OAuth1 Permission Setup
+```json
+{
+  "url": "https://bitbucket.company.com",
+  "username": "admin-user",
+  "token": "[REDACTED:bitbucket-pat]",
+  "repositoryQuery": ["all"],
+  "exclude": [
+    {"pattern": "^ARCHIVE/.*"},
+    {"name": "TEST/deprecated-repo"}
+  ],
+  "authorization": {
+    "identityProvider": {
+      "type": "username"
+    },
+    "oauth": {
+      "consumerKey": "sourcegraph12345abcdef",
+      "signingKey": "[REDACTED:base64-encoded-private-key]"
+    }
+  }
+}
+```
+
+### Fast Permission Sync with Plugin
+```json
+{
+  "url": "https://bitbucket.company.com",
+  "username": "sourcegraph-service", 
+  "token": "[REDACTED:bitbucket-pat]",
+  "repositoryQuery": ["?visibility=private"],
+  "authorization": {
+    "oauth2": true
+  },
+  "plugin": {
+    "permissions": "enabled"
+  }
+}
+```
+
+## Best Practices
+
+### Repository Management
+- Use `repositoryQuery` with specific filters rather than `"all"` for better performance
+- Implement `exclude` patterns for archived or deprecated projects
+- Set `excludePersonalRepositories: true` for organizational policies
+- Order `repos` list by sync priority (most important repositories first)
+
+### Authentication & Security
+- Prefer OAuth2 over OAuth1 for simpler and more secure setup
+- Use dedicated service accounts with minimal required permissions
+- Implement certificate validation for self-hosted instances
+- Regularly audit and rotate access tokens
+
+### Performance Optimization
+- Install the Sourcegraph Bitbucket Server plugin for faster permission syncing
+- Monitor and adjust rate limits based on Bitbucket Server capacity
+- Use specific repository queries rather than syncing all repositories
+- Consider excluding personal repositories to reduce sync overhead
+
+### Compliance & Monitoring
+- Document your permission synchronization strategy
+- Monitor sync duration and failures in large environments
+- Set up alerts for authentication failures or rate limit hits
+- Regularly review repository access patterns and cleanup unused repos
+
+### Troubleshooting
+- Test personal access token permissions through Bitbucket Server UI
+- Verify SSL certificates and network connectivity
+- Check Sourcegraph logs for OAuth setup errors
+- Monitor Bitbucket Server logs for API request patterns

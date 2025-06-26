@@ -114,3 +114,134 @@ Repositories must be listed individually:
 }
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/other_external_service.schema.json */}
+
+## Configuration Notes
+
+### Use Cases
+- Generic Git host connections are for unsupported or custom Git hosting solutions
+- Use only when your Git host doesn't have a dedicated Sourcegraph integration
+- Requires manual specification of repository lists
+
+### Repository Management
+- Repositories must be listed individually in the `repos` array
+- Repository names should match the path after the base URL
+- Use `exclude` patterns to filter out unwanted repositories
+
+### URL Configuration
+- Supports HTTP, HTTPS, SSH, and Git protocols
+- SSH access requires proper key configuration
+- Include authentication tokens in URLs when necessary
+
+## Security Considerations
+
+### Authentication
+- Embed authentication tokens directly in URLs when required
+- Use environment variables for sensitive credentials
+- Consider using SSH keys for private repository access
+- Regularly rotate authentication credentials
+
+### Access Control
+- Generic Git hosts do not enforce repository permissions
+- All configured repositories will be accessible to Sourcegraph users
+- Consider using dedicated Git users with limited repository access
+
+### Network Security
+- Ensure Sourcegraph can access Git host on required ports
+- SSH connections require port 22 access and key exchange
+- HTTPS connections require port 443 access
+- Consider firewall rules for custom Git protocols
+
+## Common Examples
+
+### HTTPS with Authentication Token
+```json
+{
+  "url": "https://git.example.com/",
+  "repos": [
+    "myorg/project1",
+    "myorg/project2"
+  ],
+  "repositoryPathPattern": "git.example.com/{repo}"
+}
+```
+
+### SSH Configuration
+```json
+{
+  "url": "ssh://git@git.example.com:2222/",
+  "repos": [
+    "platform/core",
+    "platform/ui"
+  ],
+  "repositoryPathPattern": "internal-git/{repo}"
+}
+```
+
+### Custom Git Protocol
+```json
+{
+  "url": "git://git.example.com:9418/",
+  "repos": [
+    "public/project1",
+    "public/project2"
+  ],
+  "repositoryPathPattern": "{base}/{repo}",
+  "exclude": [
+    {"pattern": ".*-backup$"},
+    {"name": "public/archive"}
+  ]
+}
+```
+
+### Local Repository Discovery
+```json
+{
+  "repos": ["src-serve-local"],
+  "root": "/path/to/local/repos",
+  "repositoryPathPattern": "local/{repo}"
+}
+```
+
+## Best Practices
+
+### Setup and Configuration
+- Test Git connectivity manually before configuring the code host
+- Use meaningful `repositoryPathPattern` to avoid naming conflicts
+- Start with a small set of repositories for initial testing
+- Verify repository paths match your Git hosting structure
+
+### Security
+- Use SSH keys for private repository access when possible
+- Store authentication tokens securely using environment variables
+- Implement proper access controls on the Git host side
+- Regularly audit repository access and permissions
+
+### Performance
+- Use exclude patterns to limit repository scope
+- Consider repository size when planning sync schedules
+- Monitor network performance for large repository sets
+- Plan for Git protocol limitations and timeouts
+
+### Maintenance
+- Keep repository lists updated with infrastructure changes
+- Monitor sync errors and connectivity issues
+- Regularly review exclude patterns and repository configurations
+- Plan for Git host migrations and URL changes
+
+### Protocol Considerations
+- HTTPS is recommended for most configurations
+- SSH requires additional key management but offers better security
+- Git protocol is efficient but less secure than HTTPS
+- Consider protocol-specific firewall and network requirements
+
+### Repository Organization
+- Use consistent naming patterns across repositories
+- Group related repositories using path prefixes
+- Document repository inclusion criteria
+- Consider using separate connections for different repository groups
+
+### Troubleshooting
+- Test Git clone operations manually using the same URLs
+- Verify network connectivity to Git host and required ports
+- Check authentication credentials and permissions
+- Review Git host logs for access and error information
