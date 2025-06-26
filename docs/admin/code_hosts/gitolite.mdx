@@ -63,3 +63,56 @@ To connect Gitolite to Sourcegraph:
 }
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/gitolite.schema.json */}
+
+## Configuration Notes
+
+- **SSH Authentication Required**: Gitolite requires SSH key-based authentication. Ensure your Sourcegraph instance has proper SSH access to the Gitolite server.
+- **Prefix Configuration**: The `prefix` field determines how repository names appear in Sourcegraph. Use a unique prefix to avoid conflicts with other code hosts.
+- **Host Format**: The `host` field accepts both simple Git SSH URLs (e.g., `git@gitolite.example.com`) and full SSH URLs with custom ports (e.g., `ssh://git@gitolite.example.com:2222/`).
+
+## Security Considerations
+
+- **SSH Key Management**: Store SSH private keys securely and rotate them regularly. Use dedicated service accounts for Sourcegraph access.
+- **Network Access**: Ensure Sourcegraph can reach the Gitolite server on the required SSH port (typically 22).
+- **Repository Visibility**: By default, all configured repositories are visible to all Sourcegraph users. Configure repository permissions appropriately.
+- **Deprecated Fields**: The `phabricator` and `phabricatorMetadataCommand` fields are deprecated and should not be used.
+
+## Common Examples
+
+### Basic Gitolite Configuration
+
+```json
+{
+  "host": "git@gitolite.example.com",
+  "prefix": "gitolite.example.com/",
+  "exclude": [
+    {
+      "name": "secret-repo"
+    },
+    {
+      "pattern": ".*private.*"
+    }
+  ]
+}
+```
+
+### Custom SSH Port
+
+```json
+{
+  "host": "ssh://git@gitolite.example.com:2222/",
+  "prefix": "gitolite.example.com/",
+  "exclude": [
+    {
+      "pattern": ".*test.*"
+    }
+  ]
+}
+```
+
+## Best Practices
+
+- **Use Meaningful Prefixes**: Choose descriptive prefixes that clearly identify the Gitolite instance (e.g., `gitolite.mycompany.com/`).
+- **Regular Exclusion Patterns**: Use the `exclude` field to filter out test repositories, temporary branches, or sensitive repositories.
+- **Monitor SSH Connectivity**: Regularly verify that SSH authentication continues to work between Sourcegraph and Gitolite.
+- **Documentation**: Document your Gitolite configuration for team members, especially SSH key management procedures.

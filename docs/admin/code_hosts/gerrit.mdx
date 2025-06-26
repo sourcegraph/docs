@@ -154,3 +154,137 @@ Gerrit connections support the following configuration options, which are specif
 }
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/gerrit.schema.json */}
+
+## Configuration Notes
+
+### HTTP Credentials Setup
+Gerrit requires HTTP credentials for API access and repository cloning:
+- Generate credentials in Gerrit web UI under Settings → HTTP Credentials
+- The configured user must have access to all repositories that need to be mirrored
+- HTTP credentials are separate from Gerrit user passwords
+
+### Project vs Repository Mirroring
+Gerrit organizes code in projects, not individual repositories:
+- Use `"projects": ["docs", "kubernetes/kubernetes"]` to specify which projects to mirror
+- If `projects` is empty or omitted, all projects on the Gerrit instance will be mirrored
+- Project names follow the format shown in Gerrit's project list
+
+### Authentication and Authorization
+The `authorization` field controls access to private repositories:
+- Include `"authorization": {}` to mark all repositories as private
+- Requires corresponding Gerrit authentication provider in site configuration
+- Users must authenticate with their Gerrit HTTP credentials to access repositories
+
+## Security Considerations
+
+### Access Control
+- **Private Repository Access**: Enable authorization to enforce Gerrit permissions in Sourcegraph
+- **Authentication Provider Required**: Configure Gerrit as an auth provider when using authorization
+- **User Permission Sync**: Sourcegraph respects Gerrit's project-level access controls
+
+### Credential Management
+- **Service Account**: Use a dedicated Gerrit account with appropriate permissions for mirroring
+- **HTTP Credentials**: Store HTTP username and password securely using Sourcegraph's secret management
+- **SSH Keys**: For SSH cloning, ensure private keys are base64 encoded and securely stored
+
+### Network Security
+- **HTTPS Communication**: Always use HTTPS URLs for Gerrit connections
+- **SSH Configuration**: If using SSH, properly manage SSH keys and known_hosts configuration
+- **Firewall Rules**: Ensure Sourcegraph can reach Gerrit endpoints on required ports
+
+### Permission Synchronization
+- **Real-time Sync**: User permissions may take time to synchronize from Gerrit
+- **Access Validation**: Users without proper Gerrit access will be denied repository access
+- **Project-Level Control**: Permissions are enforced at the Gerrit project level
+
+## Common Examples
+
+### Basic Public Repository Setup
+```json
+{
+  "url": "https://gerrit.example.com/",
+  "username": "sourcegraph-service",
+  "password": "http-credentials-password",
+  "projects": [
+    "public-docs",
+    "open-source-project"
+  ]
+}
+```
+
+### Private Repository with Authorization
+```json
+{
+  "url": "https://gerrit.example.com/",
+  "username": "sourcegraph-service", 
+  "password": "http-credentials-password",
+  "projects": [
+    "internal/backend",
+    "internal/frontend",
+    "shared/libraries"
+  ],
+  "authorization": {}
+}
+```
+
+### SSH-Based Cloning
+```json
+{
+  "url": "https://gerrit.example.com/",
+  "username": "sourcegraph-service",
+  "password": "http-credentials-password", 
+  "projects": [
+    "docs",
+    "kubernetes/kubernetes"
+  ],
+  "gitSSHCredential": {
+    "privateKey": "LS0tLS1CRUdJTi5CRUdJTiBPUE..."
+  },
+  "authorization": {}
+}
+```
+
+### Selective Project Exclusion
+```json
+{
+  "url": "https://gerrit.example.com/",
+  "username": "sourcegraph-service",
+  "password": "http-credentials-password",
+  "projects": [
+    "active-project-1",
+    "active-project-2", 
+    "legacy-project"
+  ],
+  "exclude": [
+    {"name": "legacy-project"}
+  ]
+}
+```
+
+## Best Practices
+
+### Setup and Configuration
+- **Service Account**: Create a dedicated Gerrit account for Sourcegraph with minimal required permissions
+- **Project Selection**: Be selective about which projects to mirror to avoid unnecessary resource usage
+- **URL Consistency**: Ensure the Gerrit URL in code host config matches the auth provider URL exactly
+
+### Authentication Management
+- **Auth Provider Setup**: Always configure Gerrit authentication provider when using authorization
+- **User Onboarding**: Educate users on how to connect their Gerrit accounts to Sourcegraph
+- **Permission Testing**: Test that users can access appropriate repositories after connecting accounts
+
+### Performance Optimization
+- **Selective Mirroring**: Use specific project lists rather than mirroring all projects
+- **Exclusion Patterns**: Use exclude rules to skip archived or inactive projects
+- **Connection Monitoring**: Monitor Gerrit API usage and response times
+
+### Operational Considerations
+- **Credential Rotation**: Implement regular rotation of HTTP credentials
+- **Permission Sync Monitoring**: Monitor user permission synchronization status
+- **Project Changes**: Update project lists when new projects are created or old ones archived
+
+### Troubleshooting
+- **Connection Issues**: Verify HTTP credentials and Gerrit instance accessibility
+- **Missing Projects**: Check project names match exactly as shown in Gerrit
+- **Permission Problems**: Ensure auth provider configuration matches code host URL
+- **User Access Issues**: Verify users have connected their Gerrit accounts and permissions have synced
