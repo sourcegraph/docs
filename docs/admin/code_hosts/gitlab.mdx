@@ -338,6 +338,177 @@ The Sourcegraph instance's site admin must [update the `corsOrigin` site config 
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/gitlab.schema.json */}
 
+## Configuration Notes
+
+GitLab connections provide flexible configuration options for different deployment scenarios:
+
+- **Project Selection**: Use `projects` for specific repositories, `projectQuery` for API-based filtering, and `exclude` for fine-grained exclusions
+- **API Queries**: The `projectQuery` field supports GitLab API parameters like `?membership=true&archived=false` and group paths like `groups/mygroup/projects`
+- **Path Patterns**: The `repositoryPathPattern` field controls repository naming in Sourcegraph - ensure uniqueness across code hosts
+- **Internal Repositories**: GitLab's internal repository visibility can be handled via `markInternalReposAsPublic` for easier access
+
+### Rate Limiting Configuration
+
+GitLab connections include rate limiting to manage API usage:
+- Default: 36,000 requests per hour with rate limiting enabled
+- GitLab.com enforces stricter rate limits for unauthenticated requests
+- Self-managed instances may have different limits based on configuration
+
+### Token Configuration
+
+The `token` field supports different token types:
+- **Personal Access Token (PAT)**: Recommended for most use cases with `api` and `read_repository` scopes
+- **OAuth Token**: Used with OAuth authentication flows, includes refresh token support
+- **Project Access Token**: GitLab 13.10+ feature for project-specific access
+
+## Security Considerations
+
+### Token Security and Scoping
+
+**Personal Access Tokens**: Grant broad access equivalent to the user's permissions:
+- Use dedicated service accounts rather than personal tokens when possible
+- Required scopes: `api` for repository discovery, `read_repository` for cloning
+- Add `sudo` scope only when using external identity providers for permission syncing
+- Regularly rotate tokens and audit their usage
+
+**OAuth Tokens**: Provide more secure, time-limited access:
+- Tokens automatically refresh when expired
+- Support for fine-grained permissions
+- Better audit trail through OAuth application logs
+
+### Certificate Validation
+
+For self-managed GitLab instances with custom certificates:
+- Use the `certificate` field to specify custom CA certificates
+- Obtain certificates using: `openssl s_client -connect HOST:443 -showcerts`
+- Ensure certificate chain is complete for proper validation
+
+### Repository Permissions
+
+GitLab permission syncing has specific security requirements:
+- **OAuth Method**: Most secure, uses user's OAuth token for permission checks
+- **External Identity**: Requires admin token with `sudo` scope, matches users via external auth providers
+- **Username Method**: Least secure, assumes username equivalency - only use with `http-header` auth
+
+### Internal Repository Access
+
+GitLab's internal repositories require careful configuration:
+- Setting `markInternalReposAsPublic: true` makes internal repos visible to all Sourcegraph users
+- Consider organizational policies before enabling this setting
+- Alternative: Use proper permission syncing to maintain GitLab's access controls
+
+## Common Examples
+
+### Basic Project Sync
+```json
+{
+  "url": "https://gitlab.com",
+  "token": "glpat-xxxxxxxxxxxxxxxxxxxx",
+  "projects": [
+    {"name": "gitlab-org/gitlab"},
+    {"name": "my-group/my-project"}
+  ]
+}
+```
+
+### Organization-wide Sync with Exclusions
+```json
+{
+  "url": "https://gitlab.example.com",
+  "token": "glpat-xxxxxxxxxxxxxxxxxxxx",
+  "projectQuery": [
+    "groups/engineering/projects?archived=false",
+    "?membership=true&visibility=private"
+  ],
+  "exclude": [
+    {"name": "engineering/deprecated-project"},
+    {"pattern": "^experimental/.*"}
+  ]
+}
+```
+
+### Self-managed GitLab with Authorization
+```json
+{
+  "url": "https://gitlab.company.com",
+  "token": "glpat-xxxxxxxxxxxxxxxxxxxx",
+  "projectQuery": ["?membership=true"],
+  "authorization": {
+    "identityProvider": {
+      "type": "oauth"
+    }
+  },
+  "certificate": "-----BEGIN CERTIFICATE-----\n..."
+}
+```
+
+### Advanced Query with Custom Path Pattern
+```json
+{
+  "url": "https://gitlab.com",
+  "token": "glpat-xxxxxxxxxxxxxxxxxxxx",
+  "projectQuery": [
+    "groups/kubernetes/projects?visibility=public&order_by=last_activity_at",
+    "?search=docker&sort=desc"
+  ],
+  "repositoryPathPattern": "gitlab/{pathWithNamespace}",
+  "markInternalReposAsPublic": true
+}
+```
+
+### High-volume Configuration
+```json
+{
+  "url": "https://gitlab.enterprise.com",
+  "token": "glpat-xxxxxxxxxxxxxxxxxxxx",
+  "projectQuery": ["groups/bigorg/projects"],
+  "rateLimit": {
+    "enabled": true,
+    "requestsPerHour": 20000
+  },
+  "exclude": [
+    {"emptyRepos": true}
+  ]
+}
+```
+
+## Best Practices
+
+### Token Management
+
+1. **Use dedicated service accounts** instead of personal tokens for production deployments
+2. **Implement token rotation** policies to regularly refresh access tokens
+3. **Audit token permissions** regularly to ensure least-privilege access
+4. **Use OAuth tokens** when possible for better security and automatic refresh
+
+### Repository Organization
+
+1. **Use consistent naming patterns** with `repositoryPathPattern` to maintain organization
+2. **Leverage project queries** for dynamic repository discovery rather than static lists
+3. **Implement exclusion patterns** to filter out unwanted repositories (archived, empty, experimental)
+4. **Group related projects** using GitLab groups and subgroups for better organization
+
+### Performance Optimization
+
+1. **Configure appropriate rate limits** based on your GitLab instance's capacity
+2. **Use specific project queries** rather than broad searches to reduce API calls
+3. **Monitor API usage** to avoid hitting GitLab's rate limits
+4. **Enable proper caching** by configuring reasonable sync intervals
+
+### Permission Management
+
+1. **Choose the right permission method** for your authentication setup
+2. **Test permission syncing** thoroughly before deploying to production
+3. **Use OAuth authentication** when possible for better security and user experience
+4. **Regularly audit repository access** to ensure permissions remain appropriate
+
+### Maintenance
+
+1. **Monitor connection health** through the site admin interface
+2. **Keep certificates updated** for self-managed GitLab instances
+3. **Review and update project queries** as your repository landscape changes
+4. **Test configuration changes** in a staging environment when possible
+
 ## Access token scopes
 
 Sourcegraph requires an access token with `api` permissions (and `sudo`, if you are using an `external` identity provider type). These permissions are required for the following reasons:

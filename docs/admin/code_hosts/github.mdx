@@ -592,6 +592,7 @@ GitHub connections support the following configuration options, which are specif
 	//   ]
 }
 ```
+{/* SCHEMA_SYNC_END: admin/code_hosts/github.schema.json */}
 
 ## Default branch
 
@@ -627,4 +628,161 @@ If you would like to sync all public repositories while omitting archived repos,
     ]
 }
 ```
-{/* SCHEMA_SYNC_END: admin/code_hosts/github.schema.json */}
+## Configuration Notes
+
+The GitHub connection schema provides several configuration patterns for different use cases:
+
+- **Repository Selection**: Use `repos` for specific repositories, `orgs` for all repositories in organizations, and `repositoryQuery` for advanced filtering with search queries
+- **Path Patterns**: The `repositoryPathPattern` field controls how repository names appear in Sourcegraph URLs - ensure patterns are unique across code hosts to avoid collisions
+- **Token Configuration**: The `token` field supports personal access tokens, fine-grained tokens, and machine user tokens depending on your access requirements
+
+### Rate Limiting Configuration
+
+The `rateLimit` configuration allows fine-tuning of API request rates:
+- Default: 5000 requests per hour with rate limiting enabled
+- Adjust `requestsPerHour` based on your GitHub instance's limits and usage patterns
+- Setting `enabled: false` disables rate limiting but may result in API errors
+
+### Repository Query Options
+
+The `repositoryQuery` field accepts several special values:
+- `public`: All public repositories (GitHub Enterprise only)
+- `affiliated`: Repositories the token user has access to
+- `internal`: Internal repositories (GitHub Enterprise only)  
+- `none`: No automatic repository discovery
+- Custom search queries: GitHub advanced search syntax for complex filtering
+
+## Security Considerations
+
+### Token Security and Scoping
+
+**Personal Access Tokens**: Grant broad access equivalent to the token owner's permissions. Consider these security practices:
+- Use dedicated service accounts rather than personal tokens when possible
+- Apply the principle of least privilege - only grant necessary scopes
+- Regularly rotate tokens and audit their usage
+
+**Fine-grained Access Tokens**: Provide repository-specific permissions but have limitations:
+- Only work with repositories owned by the token creator
+- Cannot access GitHub's GraphQL API (required for `repositoryQuery` and Batch Changes)
+- Limited to REST API functionality
+
+### Certificate Validation
+
+For GitHub Enterprise instances with self-signed certificates:
+- Use the `certificate` field to specify custom CA certificates
+- Obtain certificates using: `openssl s_client -connect HOST:443 -showcerts`
+- For Sourcegraph 5.1.5+, also configure `experimentalFeatures.tls.external` in site configuration
+
+### Repository Permissions
+
+When enabling `authorization`, consider these security implications:
+- Requires tokens with both read and write access to repositories for proper permission syncing
+- Without write access, conflicts may arise between user-centric and repo-centric permission sync
+- Internal repositories can be marked as public with `markInternalReposAsPublic` if organizational structure permits
+
+### Webhook Security
+
+GitHub webhooks configured through the deprecated `webhooks` property should be migrated to the new [incoming webhooks configuration](/admin/config/webhooks/incoming):
+- Webhook secrets provide authentication and prevent spoofing
+- Proper webhook configuration enables real-time permission updates
+
+## Common Examples
+
+### Basic Repository Sync
+```json
+{
+  "url": "https://github.com",
+  "token": "ghp_xxxxxxxxxxxxxxxxxxxx",
+  "repos": [
+    "kubernetes/kubernetes",
+    "golang/go"
+  ]
+}
+```
+
+### Organization-wide Sync with Exclusions
+```json
+{
+  "url": "https://github.com", 
+  "token": "ghp_xxxxxxxxxxxxxxxxxxxx",
+  "orgs": ["myorg"],
+  "exclude": [
+    {"name": "myorg/legacy-repo"},
+    {"archived": true}
+  ]
+}
+```
+
+### Advanced Query with Custom Path Pattern
+```json
+{
+  "url": "https://github.enterprise.com",
+  "token": "ghp_xxxxxxxxxxxxxxxxxxxx", 
+  "repositoryQuery": ["org:myorg language:go stars:>10"],
+  "repositoryPathPattern": "code/{nameWithOwner}",
+  "gitURLType": "ssh"
+}
+```
+
+### GitHub Enterprise with Authorization
+```json
+{
+  "url": "https://github.enterprise.com",
+  "token": "ghp_xxxxxxxxxxxxxxxxxxxx",
+  "orgs": ["engineering", "devops"],
+  "authorization": {
+    "markInternalReposAsPublic": true
+  },
+  "certificate": "-----BEGIN CERTIFICATE-----\n..."
+}
+```
+
+### Rate Limited Configuration
+```json
+{
+  "url": "https://github.com",
+  "token": "ghp_xxxxxxxxxxxxxxxxxxxx", 
+  "repositoryQuery": ["affiliated"],
+  "rateLimit": {
+    "enabled": true,
+    "requestsPerHour": 3000
+  }
+}
+```
+
+## Best Practices
+
+### Token Management
+
+1. **Use GitHub Apps** when possible instead of personal access tokens for better security and scalability
+2. **Create dedicated service accounts** for Sourcegraph rather than using personal tokens
+3. **Implement token rotation** policies to regularly refresh access tokens
+4. **Audit token permissions** regularly to ensure they follow least-privilege principles
+
+### Repository Organization
+
+1. **Use consistent naming patterns** with `repositoryPathPattern` to maintain organization
+2. **Leverage exclusion patterns** to filter out unwanted repositories efficiently
+3. **Prefer specific repository lists** over broad queries when possible for better performance
+4. **Implement repository archival policies** to exclude archived repositories from active search
+
+### Performance Optimization
+
+1. **Configure appropriate rate limits** based on your GitHub instance's capacity
+2. **Use repository queries wisely** - avoid complex search queries that may hit rate limits
+3. **Enable caching for large organizations** using `authorization.groupsCacheTTL` when appropriate
+4. **Monitor sync performance** and adjust `repoListUpdateInterval` in site configuration if needed
+
+### Permission Management
+
+1. **Enable authorization** for private repositories to ensure proper access control
+2. **Configure webhook support** for real-time permission updates
+3. **Use write access tokens** for permission syncing to avoid conflicts
+4. **Regularly audit repository access** to ensure permissions remain appropriate
+
+### Maintenance
+
+1. **Monitor connection health** through the site admin interface
+2. **Keep certificates updated** for GitHub Enterprise instances
+3. **Review and update exclusion patterns** as your repository landscape changes
+4. **Test configuration changes** in a staging environment when possible

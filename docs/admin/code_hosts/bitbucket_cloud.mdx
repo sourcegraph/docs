@@ -208,6 +208,165 @@ Bitbucket Cloud connections support the following configuration options, which a
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/bitbucket_cloud.schema.json */}
 
+## Configuration Notes
+
+Bitbucket Cloud connections provide streamlined configuration for cloud-hosted repositories:
+
+- **Authentication Options**: Support for both username/app password and workspace access tokens
+- **Repository Selection**: Uses `teams` for workspace-based syncing and `exclude` for filtering unwanted repositories
+- **Path Patterns**: The `repositoryPathPattern` field uses `{host}` and `{nameWithOwner}` variables for repository naming
+- **Workspace Access**: Workspace access tokens provide more granular control than user-based app passwords
+
+### Authentication Methods
+
+Bitbucket Cloud supports two primary authentication approaches:
+- **Username/App Password**: User-scoped access with app passwords created in personal settings
+- **Workspace Access Token**: Workspace-scoped access tokens with fine-grained permissions
+- **Projects/Repositories Permissions**: Both methods require `Projects: Read` and `Repositories: Read` permissions
+
+### Rate Limiting Configuration
+
+Bitbucket Cloud connections include rate limiting for API management:
+- Default: 7,200 requests per hour with rate limiting enabled
+- Bitbucket Cloud enforces [API request limits](https://support.atlassian.com/bitbucket-cloud/docs/api-request-limits/) based on plan type
+- Sourcegraph implements exponential backoff for rate limit handling
+
+## Security Considerations
+
+### Authentication Security
+
+**App Passwords**: Provide user-level access with specific permissions:
+- Create app passwords with minimal required permissions (`Projects: Read`, `Repositories: Read`)
+- Use dedicated service accounts rather than personal accounts when possible
+- App passwords inherit the user's repository access permissions
+- Regularly audit and rotate app passwords
+
+**Workspace Access Tokens**: Provide workspace-level access control:
+- More secure than user-based app passwords for organizational use
+- Scoped to specific workspaces, limiting access surface
+- Support fine-grained permissions for better security posture
+- Recommended for production deployments
+
+### Repository Permissions
+
+Bitbucket Cloud permission syncing considerations:
+- Permission syncing requires Bitbucket Cloud as an authentication provider
+- User access is determined by their Bitbucket Cloud account permissions
+- Workspace access tokens provide read-only access to repositories
+- OAuth flow ensures proper user authentication and authorization
+
+### HTTPS Security
+
+Bitbucket Cloud connections use HTTPS by default:
+- All API communication is encrypted using TLS
+- Git operations use HTTPS with authentication credentials
+- SSH access is supported but requires additional key configuration
+- No custom certificate configuration needed for cloud service
+
+## Common Examples
+
+### Basic Team Sync with App Password
+```json
+{
+  "url": "https://bitbucket.org",
+  "username": "sourcegraph-bot",
+  "appPassword": "ATBBxxxxxxxxxxxxxxxxxx",
+  "teams": [
+    "engineering-team",
+    "platform-team"
+  ]
+}
+```
+
+### Workspace Access Token Configuration
+```json
+{
+  "url": "https://bitbucket.org",
+  "accessToken": "BBAR-xxxxxxxxxxxxxxxxxx",
+  "teams": ["my-workspace"],
+  "exclude": [
+    {"name": "my-workspace/legacy-project"},
+    {"pattern": "^.*-archive$"}
+  ]
+}
+```
+
+### SSH Access with Custom Path Pattern
+```json
+{
+  "url": "https://bitbucket.org",
+  "username": "deployment-user",
+  "appPassword": "ATBBxxxxxxxxxxxxxxxxxx",
+  "teams": ["mobile-apps"],
+  "gitURLType": "ssh",
+  "repositoryPathPattern": "bitbucket/{nameWithOwner}"
+}
+```
+
+### Repository Permissions with OAuth
+```json
+{
+  "url": "https://bitbucket.org",
+  "accessToken": "BBAR-xxxxxxxxxxxxxxxxxx",
+  "teams": ["enterprise-workspace"],
+  "authorization": {},
+  "exclude": [
+    {"name": "enterprise-workspace/internal-docs"}
+  ]
+}
+```
+
+### High-volume Configuration with Rate Limiting
+```json
+{
+  "url": "https://bitbucket.org",
+  "accessToken": "BBAR-xxxxxxxxxxxxxxxxxx", 
+  "teams": ["large-organization"],
+  "rateLimit": {
+    "enabled": true,
+    "requestsPerHour": 5000
+  },
+  "webhookSecret": "your-webhook-secret-here"
+}
+```
+
+## Best Practices
+
+### Authentication Management
+
+1. **Use workspace access tokens** for production deployments instead of personal app passwords
+2. **Create dedicated service accounts** when using username/app password authentication
+3. **Apply least-privilege principles** by granting only necessary permissions
+4. **Regularly audit token usage** and rotate credentials periodically
+
+### Repository Organization
+
+1. **Organize by workspaces** using the `teams` field to sync relevant repositories
+2. **Use exclusion patterns** to filter out archived, experimental, or sensitive repositories
+3. **Implement consistent naming** with `repositoryPathPattern` for better organization
+4. **Monitor workspace changes** as team membership affects repository access
+
+### Performance Optimization
+
+1. **Configure appropriate rate limits** to stay within Bitbucket Cloud's API limits
+2. **Use workspace access tokens** for better rate limit handling
+3. **Monitor API usage** to avoid hitting plan-based limits
+4. **Optimize team selections** to sync only necessary repositories
+
+### Security Management
+
+1. **Enable repository permissions** by configuring Bitbucket Cloud as an auth provider
+2. **Use workspace access tokens** for better security isolation
+3. **Implement webhook security** with strong shared secrets
+4. **Regularly review team membership** to ensure appropriate repository access
+
+### Maintenance
+
+1. **Monitor connection health** through the site admin interface
+2. **Review team configurations** as organizational structure changes
+3. **Update exclusion patterns** when repository naming conventions change
+4. **Test authentication changes** in staging environments before production deployment
+
 ## Webhooks
 
 Using the `webhooks` property on the external service has been deprecated.

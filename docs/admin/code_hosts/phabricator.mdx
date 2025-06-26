@@ -95,3 +95,59 @@ The Sourcegraph instance's site admin must [update the `corsOrigin` site config 
 }
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/phabricator.schema.json */}
+
+## Configuration Notes
+
+- **Limited Support**: Phabricator support is limited and not expected to evolve due to Phabricator's end-of-life announcement.
+- **Token vs Repos**: At least one of `token` or `repos` must be provided. Use `token` for automatic discovery or `repos` for manual mapping.
+- **Case-Sensitive Callsigns**: Repository callsigns are case-sensitive and must match exactly as configured in Phabricator.
+- **Repository Association**: Sourcegraph creates links to Phabricator pages but doesn't sync the actual repository content from Phabricator.
+
+## Security Considerations
+
+- **API Token Management**: Store Conduit API tokens securely and limit their scope to necessary operations.
+- **CORS Configuration**: Update Sourcegraph's `corsOrigin` setting to allow the Phabricator extension to communicate with your instance.
+- **Network Access**: Ensure Sourcegraph can reach your Phabricator instance over HTTPS.
+- **Token Rotation**: Regularly rotate API tokens and update configurations accordingly.
+
+## Common Examples
+
+### Basic Configuration with Token
+
+```json
+{
+  "url": "https://phabricator.example.com",
+  "token": "api-abcdefghijklmnop"
+}
+```
+
+### Manual Repository Mapping
+
+```json
+{
+  "url": "https://phabricator.example.com",
+  "repos": [
+    { "path": "github.com/myorg/frontend", "callsign": "FRONT" },
+    { "path": "github.com/myorg/backend", "callsign": "BACK" }
+  ]
+}
+```
+
+### Mixed Configuration
+
+```json
+{
+  "url": "https://phabricator.example.com",
+  "token": "api-abcdefghijklmnop",
+  "repos": [
+    { "path": "gitolite.example.com/special-repo", "callsign": "SPEC" }
+  ]
+}
+```
+
+## Best Practices
+
+- **Verify Repository Paths**: Use Phabricator's `diffusion.repository.search` API to verify that Sourcegraph repository paths match normalized URIs.
+- **Test Native Extension**: Install the native Phabricator extension for better user experience compared to browser extensions.
+- **Monitor Deprecation**: Plan migration away from Phabricator due to its announced end-of-life status.
+- **Troubleshooting**: Use the Conduit API testing interface to verify token permissions and repository accessibility.

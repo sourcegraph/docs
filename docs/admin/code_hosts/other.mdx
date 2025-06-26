@@ -114,3 +114,83 @@ Repositories must be listed individually:
 }
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/other_external_service.schema.json */}
+
+## Configuration Notes
+
+- **Repository Path Pattern**: The `repositoryPathPattern` field controls how repository names appear in Sourcegraph. Use `{base}` for the clone URL base and `{repo}` for the repository path.
+- **Manual Repository Listing**: Unlike other code hosts, repositories must be listed individually in the `repos` array - automatic discovery is not supported.
+- **SSH Configuration**: SSH access requires proper authentication setup between Sourcegraph and your Git server.
+- **Local Repository Support**: Use the `root` field for syncing local Git repositories when using Cody App with `src-serve-local`.
+
+## Security Considerations
+
+- **SSH Key Management**: For SSH URLs, ensure SSH keys are properly configured and securely stored.
+- **Network Access**: Verify Sourcegraph can reach your Git server on the required ports (SSH: 22, HTTP/HTTPS: 80/443).
+- **Authentication Tokens**: For HTTPS URLs with tokens, store access tokens securely and rotate them regularly.
+- **Repository Visibility**: Consider using `makeReposPublicOnDotCom` carefully to avoid exposing private repositories.
+
+## Common Examples
+
+### HTTPS Git Server
+
+```json
+{
+  "url": "https://git.example.com/repos",
+  "repos": [
+    "project1/app",
+    "project1/api",
+    "project2/frontend"
+  ],
+  "repositoryPathPattern": "git.example.com/{repo}"
+}
+```
+
+### SSH Git Server with Custom Port
+
+```json
+{
+  "url": "ssh://git@git.example.com:2222/",
+  "repos": [
+    "infrastructure/ansible",
+    "infrastructure/terraform"
+  ],
+  "repositoryPathPattern": "{base}/{repo}",
+  "exclude": [
+    {
+      "pattern": ".*temp.*"
+    }
+  ]
+}
+```
+
+### Local Repository Sync
+
+```json
+{
+  "repos": ["src-serve-local"],
+  "root": "/path/to/local/repos",
+  "repositoryPathPattern": "local/{repo}"
+}
+```
+
+### Git Server with Authentication Token
+
+```json
+{
+  "url": "https://git.example.com/?access_token=ghp_xxxxxxxxxxxx",
+  "repos": [
+    "team-a/service1",
+    "team-a/service2",
+    "team-b/frontend"
+  ],
+  "repositoryPathPattern": "internal/{repo}"
+}
+```
+
+## Best Practices
+
+- **Unique Repository Names**: Ensure the `repositoryPathPattern` generates unique names that don't conflict with other code hosts.
+- **Meaningful Patterns**: Use descriptive patterns that help users identify the source of repositories (e.g., `internal-git/{repo}`).
+- **Regular Exclusions**: Use `exclude` patterns to filter out temporary, test, or sensitive repositories.
+- **Test Connectivity**: Verify network connectivity and authentication before adding large numbers of repositories.
+- **Monitor Performance**: Be mindful that manual repository listing doesn't scale as well as automatic discovery from other code hosts.

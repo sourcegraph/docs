@@ -937,6 +937,181 @@ You can check the container logs to see if you have made any typos or mistakes i
 ```
 {/* SCHEMA_SYNC_END: admin/config/site.schema.json */}
 
+## Configuration Notes
+
+### Critical Restart Requirements
+
+The following configuration options require a server restart to take effect:
+- `auth.providers` - Changes to authentication providers
+- `externalURL` - External URL modifications
+- `insights.query.worker.concurrency` - Code Insights query worker settings
+- `insights.commit.indexer.interval` - Code Insights indexer intervals
+- `permissions.syncUsersMaxConcurrency` - Permission sync concurrency limits
+
+### Configuration Dependencies
+
+Several configuration options depend on each other:
+- `corsOrigin` is required when using native integrations for Phabricator, GitLab, or Bitbucket Server
+- `email.address` and `email.smtp` must both be configured for transactional email functionality
+- `executors.accessToken` requires at least 20 characters for executor authentication
+- `licenseKey` is necessary to activate Enterprise features
+
+### Performance Considerations
+
+- `gitMaxConcurrentClones` controls clone concurrency per gitserver - increase for better performance on powerful hardware
+- `permissions.syncUsersMaxConcurrency` and `permissions.syncReposMaxConcurrency` affect authorization sync performance
+- `insights.query.worker.concurrency` and related rate limits impact Code Insights performance
+- `search.limits.maxRepos` prevents resource exhaustion from overly broad searches
+
+## Security Considerations
+
+### Authentication & Authorization
+
+- **Never** set `auth.enableUsernameChanges` to `true` if using external authentication or username-based repository permissions
+- `authz.enforceForSiteAdmins` should be `true` in environments with strict access controls
+- `auth.sessionExpiry` should be shortened in high-security environments
+- `auth.passwordPolicy` should be configured to enforce strong password requirements
+
+### Token Management
+
+- `executors.accessToken` must be securely generated and stored
+- `auth.unlockAccountLinkSigningKey` should be a strong, randomly generated key
+- `organizationInvitations.signingKey` requires secure key generation
+- `scim.authToken` should be treated as a high-privilege credential
+
+### Encryption & Privacy
+
+- `encryption.keys` configuration must use secure key management practices
+- `redactOutboundRequestHeaders` is automatically enabled in production environments
+- Webhook secrets in external service configurations should be randomly generated
+
+### Network Security
+
+- `corsOrigin` should be strictly limited to trusted domains
+- `externalURL` must use HTTPS in production environments
+- `observability.tracing` configurations may expose sensitive data - configure carefully
+
+## Common Examples
+
+### Basic Authentication Setup
+
+```json
+{
+  "externalURL": "https://sourcegraph.example.com",
+  "auth.providers": [
+    {
+      "type": "builtin",
+      "allowSignup": false
+    }
+  ]
+}
+```
+
+### Email Configuration
+
+```json
+{
+  "email.address": "noreply@example.com",
+  "email.smtp": {
+    "host": "smtp.example.com",
+    "port": 587,
+    "username": "smtp-user",
+    "password": "smtp-password",
+    "authentication": "PLAIN"
+  }
+}
+```
+
+### Executor Configuration
+
+```json
+{
+  "executors.accessToken": "your-super-secret-access-token-here",
+  "executors.frontendURL": "https://sourcegraph.example.com"
+}
+```
+
+### Code Intelligence Optimization
+
+```json
+{
+  "codeIntelAutoIndexing.enabled": true,
+  "codeIntelAutoIndexing.allowGlobalPolicies": false,
+  "codeIntelAutoIndexing.policyRepositoryMatchLimit": 1000
+}
+```
+
+### Search Performance Tuning
+
+```json
+{
+  "search.limits": {
+    "maxRepos": 500,
+    "maxTimeoutSeconds": 60,
+    "commitDiffMaxRepos": 100
+  },
+  "search.largeFiles": [
+    "package-lock.json",
+    "yarn.lock",
+    "go.sum"
+  ]
+}
+```
+
+### Batch Changes Configuration
+
+```json
+{
+  "batchChanges.enabled": true,
+  "batchChanges.restrictToAdmins": false,
+  "batchChanges.rolloutWindows": [
+    {
+      "days": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+      "start": "09:00",
+      "end": "17:00",
+      "rate": "5/hour"
+    }
+  ]
+}
+```
+
+## Best Practices
+
+### Initial Setup
+
+1. **Always configure `externalURL` first** - This is required for Sourcegraph to function correctly
+2. **Set up authentication** before adding users - Use `allowSignup: false` for controlled user onboarding
+3. **Configure email early** - Required for password resets and notifications
+4. **Plan your license key deployment** - Enterprise features require valid licensing
+
+### Performance Optimization
+
+1. **Monitor resource usage** - Adjust concurrency limits based on system capacity
+2. **Tune search limits** - Prevent resource exhaustion with appropriate `maxRepos` settings
+3. **Configure git update intervals** - Balance freshness with system load using `gitUpdateInterval`
+4. **Optimize permission syncing** - Adjust sync intervals and concurrency based on user count
+
+### Security Hardening
+
+1. **Use strong authentication** - Implement SAML/OIDC instead of built-in auth for production
+2. **Enable authorization enforcement** - Set `authz.enforceForSiteAdmins` in strict environments
+3. **Secure external communications** - Use HTTPS for all external URLs and webhooks
+4. **Implement proper key management** - Use secure key generation and rotation practices
+
+### Operational Excellence
+
+1. **Plan for restarts** - Schedule configuration changes requiring restarts during maintenance windows
+2. **Monitor configuration drift** - Regularly audit settings against organizational policies
+3. **Document customizations** - Maintain records of non-default configuration choices
+4. **Test in staging** - Validate complex configuration changes in non-production environments
+
+### Backup & Recovery
+
+1. **Backup site-config.json** - Include configuration in disaster recovery procedures
+2. **Version control settings** - Track configuration changes in source control
+3. **Document dependencies** - Maintain clear documentation of configuration relationships
+4. **Test recovery procedures** - Regularly verify ability to restore from backups
+
 ## Accessing global settings
 
 Global settings should rarely need to be accessed. You will need to direct database access to change this setting.
