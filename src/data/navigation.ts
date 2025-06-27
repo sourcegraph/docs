@@ -54,7 +54,6 @@ export const navigation: NavigationItem[] = [
 						title: "Capabilities", href: "/cody/capabilities",
 						subsections: [
 							{ title: "Chat", href: "/cody/capabilities/chat", },
-							{ title: "Query Types", href: "/cody/capabilities/query-types", },
 							{ title: "Agentic Context Fetching", href: "/cody/capabilities/agentic-context-fetching", },
 							{ title: "Autocomplete", href: "/cody/capabilities/autocomplete", },
 							{ title: "Auto-edit", href: "/cody/capabilities/auto-edit", },
