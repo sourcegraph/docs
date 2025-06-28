@@ -78,6 +78,7 @@ export function DocSearch(props: DocSearchProps) {
         onOpen,
         onClose,
         onInput,
+        // @ts-ignore
         searchButtonRef,
     });
 
