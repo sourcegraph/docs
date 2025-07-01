@@ -27,11 +27,10 @@ To connect Gitolite to Sourcegraph:
 
 {/* SCHEMA_SYNC_START: admin/code_hosts/gitolite.schema.json */}
 {/* WARNING: This section is auto-generated during releases. Do not edit manually. */}
-{/* Last updated: Manual setup - will be automated via sourcegraph/sourcegraph releases */}
+{/* Last updated: 2025-07-01T23:03:27Z via sourcegraph/sourcegraph@v6.5.1211 */}
 ```json
 {
 	// A list of repositories to never mirror from this Gitolite instance. Supports excluding by exact name ({"name": "foo"}).
-	"exclude": null,
 	// Other example values:
 	// - [
 	//     {
@@ -41,29 +40,41 @@ To connect Gitolite to Sourcegraph:
 	//       "pattern": ".*secret.*"
 	//     }
 	//   ]
+	"exclude": null,
 
+	// SSH cipher to use when cloning via SSH. Must be a valid choice from `ssh -Q cipher`.
+	"gitSSHCipher": null,
+
+	// SSH keys to use when cloning Git repo.
+	"gitSSHCredential": null,
+
+	// REQUIRED:
 	// Gitolite host that stores the repositories (e.g., git@gitolite.example.com, ssh://git@gitolite.example.com:2222/).
-	"host": null,
 	// Other example values:
 	// - "git@gitolite.example.com"
 	// - "ssh://git@gitolite.example.com:2222/"
+	"host": null,
 
+	// ⚠️  DEPRECATED: DEPRECATED: the Phabricator integration with Gitolite code hosts is deprecated
 	// This is DEPRECATED
-	"phabricator": null,
+	"phabricator": {
+		"callsignCommand": null,
+		"url": null
+	},
 
+	// ⚠️  DEPRECATED: DEPRECATED: the Phabricator integration with Gitolite code hosts is deprecated
 	// This is DEPRECATED
 	"phabricatorMetadataCommand": null,
 
+	// REQUIRED:
 	// Repository name prefix that will map to this Gitolite host. This should likely end with a trailing slash. E.g., "gitolite.example.com/".
-	//
 	// It is important that the Sourcegraph repository name generated with this prefix be unique to this code host. If different code hosts generate repository names that collide, Sourcegraph's behavior is undefined.
-	"prefix": null
 	// Other example values:
 	// - "gitolite.example.com/"
+	"prefix": null
 }
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/gitolite.schema.json */}
-
 ## Configuration Notes
 
 - **SSH Authentication Required**: Gitolite requires SSH key-based authentication. Ensure your Sourcegraph instance has proper SSH access to the Gitolite server.
