@@ -79,23 +79,85 @@ The Sourcegraph instance's site admin must [update the `corsOrigin` site config 
 
 {/* SCHEMA_SYNC_START: admin/code_hosts/phabricator.schema.json */}
 {/* WARNING: This section is auto-generated during releases. Do not edit manually. */}
-{/* Last updated: Manual setup - will be automated via sourcegraph/sourcegraph releases */}
+{/* Last updated: 2025-07-01T19:22:30Z via sourcegraph/sourcegraph@v6.5.1211 */}
 ```json
 {
-	// The list of repositories available on Phabricator.
-	"repos": null,
-
-	// API token for the Phabricator instance.
-	"token": null,
-
-	// URL of a Phabricator instance, such as https://phabricator.example.com
-	"url": null
-	// Other example values:
-	// - "https://phabricator.example.com"
+	"$id": "phabricator.schema.json#",
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"additionalProperties": false,
+	"allowComments": true,
+	"anyOf": [
+		{
+			"required": [
+				"token"
+			]
+		},
+		{
+			"required": [
+				"repos"
+			]
+		}
+	],
+	"description": "Configuration for a connection to Phabricator.",
+	"properties": {
+		"gitSSHCipher": {
+			"$ref": "git.schema.json#/definitions/gitSSHCipher",
+			"description": "SSH cipher to use when cloning via SSH. Must be a valid choice from `ssh -Q cipher`."
+		},
+		"gitSSHCredential": {
+			"$ref": "git.schema.json#/definitions/gitSSHCredential",
+			"description": "SSH keys to use when cloning Git repo."
+		},
+		"gitURLType": {
+			"default": "http",
+			"description": "The type of Git URLs to use for cloning and fetching Git repositories.",
+			"enum": [
+				"http",
+				"ssh"
+			],
+			"type": "string"
+		},
+		"repos": {
+			"description": "The list of repositories available on Phabricator.",
+			"items": {
+				"additionalProperties": false,
+				"properties": {
+					"callsign": {
+						"description": "The unique Phabricator identifier for the repository, like 'MUX'.",
+						"type": "string"
+					},
+					"path": {
+						"description": "Display path for the url e.g. gitolite/my/repo",
+						"type": "string"
+					}
+				},
+				"required": [
+					"path",
+					"callsign"
+				],
+				"type": "object"
+			},
+			"minItems": 1,
+			"type": "array"
+		},
+		"token": {
+			"description": "API token for the Phabricator instance.",
+			"minLength": 1,
+			"type": "string"
+		},
+		"url": {
+			"description": "URL of a Phabricator instance, such as https://phabricator.example.com",
+			"examples": [
+				"https://phabricator.example.com"
+			],
+			"type": "string"
+		}
+	},
+	"title": "PhabricatorConnection",
+	"type": "object"
 }
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/phabricator.schema.json */}
-
 ## Configuration Notes
 
 - **Limited Support**: Phabricator support is limited and not expected to evolve due to Phabricator's end-of-life announcement.
