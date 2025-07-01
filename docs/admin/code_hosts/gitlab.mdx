@@ -187,104 +187,110 @@ See [Internal rate limits](/admin/code_hosts/rate_limits#internal-rate-limits).
 
 {/* SCHEMA_SYNC_START: admin/code_hosts/gitlab.schema.json */}
 {/* WARNING: This section is auto-generated during releases. Do not edit manually. */}
-{/* Last updated: Manual setup - will be automated via sourcegraph/sourcegraph releases */}
+{/* Last updated: 2025-07-01T21:51:48Z via sourcegraph/sourcegraph@v6.5.1211 */}
 ```json
 {
 	// If non-null, enforces GitLab repository permissions. This requires that there be an item in the `auth.providers` field of type "gitlab" with the same `url` field as specified in this `GitLabConnection`.
-	"authorization": null,
+	"authorization": {
+		"identityProvider": {
+			"type": null
+		}
+	},
 
 	// TLS certificate of the GitLab instance. This is only necessary if the certificate is self-signed or signed by an internal CA. To get the certificate run `openssl s_client -connect HOST:443 -showcerts < /dev/null 2> /dev/null | openssl x509 -outform PEM`. To escape the value into a JSON string, you may want to use a tool like https://json-escape-text.now.sh.
-	"certificate": null,
 	// Other example values:
 	// - "-----BEGIN CERTIFICATE-----\n..."
+	"certificate": null,
 
-	// Only used to override the cloud_default column from a config file specified by EXTSVC_CONFIG_FILE
-	"cloudDefault": false,
-
-	// When set to true, this external service will be chosen as our 'Global' GitLab service. Only valid on Sourcegraph.com. Only one service can have this flag set.
-	"cloudGlobal": false,
-
-	// A list of projects to never mirror from this GitLab instance. Takes precedence over \"projects\" and \"projectQuery\" configuration. You can exclude projects by: name ({"name": "group/name"}), ID ({"id": 42}), regular expression matching pattern ({"pattern": "^group/project-.*"}), or by excluding empty repositories ({"emptyRepos": true}).
-	"exclude": null,
+	// A list of projects to never mirror from this GitLab instance. Takes precedence over "projects" and "projectQuery" configuration. You can exclude projects by: name ({"name": "group/name"}), ID ({"id": 42}), regular expression matching pattern ({"pattern": "^group\/project-.*"}), or by excluding empty repositories ({"emptyRepos": true}).
 	// Other example values:
 	// - [
-	//     {
-	//       "name": "group/name"
-	//     },
-	//     {
-	//       "id": 42
-	//     },
-	//     {
-	//       "emptyRepos": true
-	//     }
-	//   ]
+	// -   {
+	// -     "name": "group/name"
+	// -   },
+	// -   {
+	// -     "id": 42
+	// -   },
+	// -   {
+	// -     "emptyRepos": true
+	// -   }
+	// - ]
 	// - [
-	//     {
-	//       "name": "gitlab-org/gitlab-ee"
-	//     },
-	//     {
-	//       "name": "gitlab-com/www-gitlab-com"
-	//     }
-	//   ]
+	// -   {
+	// -     "name": "gitlab-org/gitlab-ee"
+	// -   },
+	// -   {
+	// -     "name": "gitlab-com/www-gitlab-com"
+	// -   }
+	// - ]
+	"exclude": null,
+
+	// SSH cipher to use when cloning via SSH. Must be a valid choice from `ssh -Q cipher`.
+	"gitSSHCipher": null,
+
+	// SSH keys to use when cloning Git repo.
+	"gitSSHCredential": null,
 
 	// The type of Git URLs to use for cloning and fetching Git repositories on this GitLab instance.
-	//
 	// If "http", Sourcegraph will access GitLab repositories using Git URLs of the form http(s)://gitlab.example.com/myteam/myproject.git (using https: if the GitLab instance uses HTTPS).
-	//
 	// If "ssh", Sourcegraph will access GitLab repositories using Git URLs of the form git@example.gitlab.com:myteam/myproject.git. See the documentation for how to provide SSH private keys and known_hosts: https://sourcegraph.com/docs/admin/repo/auth#repositories-that-need-http-s-or-ssh-authentication.
+	// Valid options: "http", "ssh"
 	"gitURLType": "http",
 
 	// Deprecated and ignored field which will be removed entirely in the next release. GitLab repositories can no longer be enabled or disabled explicitly.
-	"initialRepositoryEnablement": null,
+	"initialRepositoryEnablement": false,
 
 	// If true, internal repositories will be accessible to all users on Sourcegraph as if they were public, and user permission syncs will no longer check for public repositories. This overrides repository permissions but allows easier discovery and access to internal repositories, and may be desirable if all users on the Sourcegraph instance should have access to all internal repositories anyways. Defaults to false.
 	"markInternalReposAsPublic": false,
 
+	// The maximum number of repos that will be deleted per sync. A value of 0 or less indicates no maximum.
+	"maxDeletions": 0,
+
 	// An array of transformations will apply to the repository name. Currently, only regex replacement is supported. All transformations happen after "repositoryPathPattern" is processed.
-	"nameTransformations": null,
 	// Other example values:
 	// - [
-	//     {
-	//       "regex": "\\.d/",
-	//       "replacement": "/"
-	//     },
-	//     {
-	//       "regex": "-git$",
-	//       "replacement": ""
-	//     }
-	//   ]
+	// -   {
+	// -     "regex": "\\.d/",
+	// -     "replacement": "/"
+	// -   },
+	// -   {
+	// -     "regex": "-git$",
+	// -     "replacement": ""
+	// -   }
+	// - ]
+	"nameTransformations": null,
 
+	// REQUIRED:
 	// An array of strings specifying which GitLab projects to mirror on Sourcegraph. Each string is a URL path and query that targets a GitLab API endpoint returning a list of projects. If the string only contains a query, then "projects" is used as the path. Examples: "?membership=true&search=foo", "groups/mygroup/projects".
-	//
 	// The special string "none" can be used as the only element to disable this feature. Projects matched by multiple query strings are only imported once. Here are a few endpoints that return a list of projects: https://docs.gitlab.com/ee/api/projects.html#list-all-projects, https://docs.gitlab.com/ee/api/groups.html#list-a-groups-projects, https://docs.gitlab.com/ee/api/search.html#scope-projects.
+	// Other example values:
+	// - [
+	// -   "?membership=true\u0026search=foo",
+	// -   "groups/mygroup/projects"
+	// - ]
 	"projectQuery": [
 		"none"
 	],
-	// Other example values:
-	// - [
-	//     "?membership=true\u0026search=foo",
-	//     "groups/mygroup/projects"
-	//   ]
 
 	// A list of projects to mirror from this GitLab instance. Supports including by name ({"name": "group/name"}) or by ID ({"id": 42}).
-	"projects": null,
 	// Other example values:
 	// - [
-	//     {
-	//       "name": "group/name"
-	//     },
-	//     {
-	//       "id": 42
-	//     }
-	//   ]
+	// -   {
+	// -     "name": "group/name"
+	// -   },
+	// -   {
+	// -     "id": 42
+	// -   }
+	// - ]
 	// - [
-	//     {
-	//       "name": "gnachman/iterm2"
-	//     },
-	//     {
-	//       "name": "gitlab-org/gitlab-ce"
-	//     }
-	//   ]
+	// -   {
+	// -     "name": "gnachman/iterm2"
+	// -   },
+	// -   {
+	// -     "name": "gitlab-org/gitlab-ce"
+	// -   }
+	// - ]
+	"projects": null,
 
 	// Rate limit applied when making background API requests to GitLab.
 	"rateLimit": {
@@ -293,51 +299,37 @@ See [Internal rate limits](/admin/code_hosts/rate_limits#internal-rate-limits).
 	},
 
 	// The pattern used to generate a the corresponding Sourcegraph repository name for a GitLab project. In the pattern, the variable "{host}" is replaced with the GitLab URL's host (such as gitlab.example.com), and "{pathWithNamespace}" is replaced with the GitLab project's "namespace/path" (such as "myteam/myproject").
-	//
 	// For example, if your GitLab is https://gitlab.example.com and your Sourcegraph is https://src.example.com, then a repositoryPathPattern of "{host}/{pathWithNamespace}" would mean that a GitLab project at https://gitlab.example.com/myteam/myproject is available on Sourcegraph at https://src.example.com/gitlab.example.com/myteam/myproject.
-	//
 	// It is important that the Sourcegraph repository name generated with this pattern be unique to this code host. If different code hosts generate repository names that collide, Sourcegraph's behavior is undefined.
 	"repositoryPathPattern": "{host}/{pathWithNamespace}",
 
-	// A GitLab access token with "api" scope. Can be a personal access token (PAT) or an OAuth token. If you are enabling permissions with identity provider type "external", this token should also have "sudo" scope.
+	// REQUIRED:
+	// A GitLab access token with "api" scope. Can be a personal access token (PAT) or an OAuth token. If you are enabling permissions with identity provider type "username", this token should also have "sudo" scope.
 	"token": null,
 
 	// The OAuth token expiry (Unix timestamp in seconds)
-	"token.oauth.expiry": null,
+	"token.oauth.expiry": 0,
 
 	// The OAuth refresh token
 	"token.oauth.refresh": null,
 
 	// The type of the token
+	// Valid options: "pat", "oauth"
 	"token.type": "pat",
 
+	// REQUIRED:
 	// URL of a GitLab instance, such as https://gitlab.example.com or (for GitLab.com) https://gitlab.com.
-	"url": null,
 	// Other example values:
 	// - "https://gitlab.com"
 	// - "https://gitlab.example.com"
+	"url": null,
 
+	// ⚠️  DEPRECATED: Deprecated in favour of first class webhooks. See https://sourcegraph.com/docs/admin/config/webhooks/incoming#deprecation-notice
 	// An array of webhook configurations
 	"webhooks": null
 }
 ```
-
-## Native integration
-
-To provide out-of-the-box code navigation features to your users on GitLab, you will need to [configure your GitLab instance](https://docs.gitlab.com/ee/integration/sourcegraph.html). If you are using an HTTPS connection to GitLab, you will need to [configure HTTPS](/admin/http_https_configuration) for your Sourcegraph instance.
-
-The Sourcegraph instance's site admin must [update the `corsOrigin` site config property](/admin/config/site_config) to allow the GitLab instance to communicate with the Sourcegraph instance. For example:
-
-```json
-{
-  // ...
-  "corsOrigin":
-    "https://my-gitlab.example.com"
-  // ...
-}
-```
 {/* SCHEMA_SYNC_END: admin/code_hosts/gitlab.schema.json */}
-
 ## Configuration Notes
 
 GitLab connections provide flexible configuration options for different deployment scenarios:
