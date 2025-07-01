@@ -221,122 +221,36 @@ With this setting, Sourcegraph will ignore any rules with a host other than `*`,
 
 {/* SCHEMA_SYNC_START: admin/code_hosts/perforce.schema.json */}
 {/* WARNING: This section is auto-generated during releases. Do not edit manually. */}
-{/* Last updated: Manual setup - will be automated via sourcegraph/sourcegraph releases */}
+{/* Last updated: 2025-07-01T21:34:16Z via sourcegraph/sourcegraph@v6.5.1211 */}
 ```json
 {
-	// If non-null, enforces Perforce depot permissions.
-	"authorization": null,
-
-	// Depots can have arbitrary paths, e.g. a path to depot root or a subdirectory.
+	"authorization": {
+		"ignoreRulesWithHost": false,
+		"subRepoPermissions": false
+	},
 	"depots": null,
-	// Other example values:
-	// - [
-	//     "//Sourcegraph/",
-	//     "//Engineering/Cloud/"
-	//   ]
-
-	// Configuration for the experimental p4-fusion client
-	"fusionClient": null,
-
-	// Only import at most n changes when possible (git p4 clone --max-changes).
-	"maxChanges": 1000,
-
-	// Client specified as an option for p4 CLI (P4CLIENT, also enables '--use-client-spec')
+	"fusionClient": {
+		"cacheLabels": false,
+		"enabled": false,
+		"fsyncEnable": false,
+		"includeBinaries": false,
+		"lookAhead": 2000,
+		"maxChanges": -1,
+		"networkThreads": 12,
+		"networkThreadsFetch": 12,
+		"noConvertLabels": false,
+		"printBatch": 100,
+		"refresh": 1000,
+		"retries": 10
+	},
 	"p4.client": null,
-
-	// The ticket value for the user (P4PASSWD). You can get this by running `p4 login -p` or `p4 login -pa`. It should look like `6211C5E719EDE6925855039E8F5CC3D2`.
 	"p4.passwd": null,
-
-	// The Perforce Server address to be used for p4 CLI (P4PORT). It's recommended to specify the protocol prefix (e.g. tcp: or ssl:) as part of the address.
 	"p4.port": null,
-	// Other example values:
-	// - "ssl:111.222.333.444:1666"
-	// - "tcp:111.222.333.444:1666"
-
-	// The user to be authenticated for p4 CLI (P4USER).
 	"p4.user": null,
-	// Other example values:
-	// - "admin"
-
-	// The pattern used to generate the corresponding Sourcegraph repository name for a Perforce depot. In the pattern, the variable "{depot}" is replaced with the Perforce depot's path.
-	//
-	// For example, if your Perforce depot path is "//Sourcegraph/" and your Sourcegraph URL is https://src.example.com, then a repositoryPathPattern of "perforce/{depot}" would mean that the Perforce depot is available on Sourcegraph at https://src.example.com/perforce/Sourcegraph.
-	//
-	// It is important that the Sourcegraph repository name generated with this pattern be unique to this Perforce Server. If different Perforce Servers generate repository names that collide, Sourcegraph's behavior is undefined.
 	"repositoryPathPattern": "{depot}"
 }
 ```
-
-## Known issues and limitations
-
-We are actively working to significantly improve Sourcegraph's Perforce support. Please [contact us](https://help.sourcegraph.com/hc/en-us/requests/new) to help us prioritize any specific improvements you'd like to see.
-
-- Sourcegraph was initially built for Git repositories only, so it stores Perforce depots as Git repositories when syncing. Perforce concepts and languages are expressed in the UI, but under the hood, Git tools are used.
-- Batch Changes does not support [file-level permissions](#file-level-permissions) (also known as sub-repo permissions)
-- Batch Changes does not handle the shelved changelist other than to query the Perforce server for its status.
-- Permalinks with Changelist Id do not work yet
-
-## Configure experimental features
-
-As of Sourcegraph 5.1, there are the following experimental features for Perforce depots. These are merely for providing feedback and have [limited support](/admin/beta_and_experimental_features#experimental-features).
-
-### Changelist ID in URLs
-
-Note: When enabling changelist IDs in URLs for the first time, Perforce depots can be unavailable for a few minutes on the Sourcegraph instance, due to the initial mapping of changelist IDs to generated commit ID happening in the background. If you have a large number of Perforce depots, we recommend proceeding with the following steps in a maintenance window in which you don't expect large amounts of traffic on your Sourcegraph instance.
-
-Add `"perforceChangelistMapping": "enabled",` to `experimentalFeatures` in the [site configuration](/admin/config/site_config):
-
-```json
-{
-  "experimentalFeatures": {
-    "perforceChangelistMapping": "enabled"
-  }
-}
-```
-
-When enabled, URLs for Perforce code hosts will use the Changelist (CL) ID instead of commit SHAs. Areas that benefit from this at the moment are:
-
-- Viewing a specific CL
-- Viewing the files of a depot at a specific CL
-- Viewing a specific file added / removed / modified in a specific CL
-- Viewing the list of CLs
-
-
-### Searching within a specific changelist
-As of Sourcegraph 5.5, you can search within a specific changelist by referring the the changelist as a reference path like `changelist/123` where 123 is the changelist id. For example, given a repo path of `Talkhouse/main` and a changelist id of `123`, you can search within that changelist by using the following query:
-```
-repo:^Talkhouse/main$@changelist/123 text to find
-```
-
-or
-```
-repo:^Talkhouse/main$ rev:changelist/123 text to find
-```
-
-#### Limitations
-
-- After a depot is cloned or fetched, Sourcegraph computes and stores mappings of CL IDs to commit SHAs. This mapping can take several minutes for large clones/fetches. When a background mapping job is running, the depot won't be serviceable as URLs referring to CL IDs may not resolve and users may see an error while interacting with the depot.
-- This experimental configuration can not be selectively enabled for a specific perforce depot.
-
-#### Mechanism
-
-To support CLs natively in the URLs, Sourcegraph performs background computation after syncing the contents of a depot. That's done by parsing each generated commit to retrieve the corresponding CL ID and store it in the `repo_commits_changelists` table. This is currently performed on only one depot at a time and we are working to support this for multiple depots in parallel in an upcoming release.
-
-Additionally, while removing a depot from a code host config will mark it as "deleted", the mapped information will **not** be deleted to prevent forced re-computation after an accidental removal of depot from a code host config. Similarly recloning a depot will **not** trigger a computation of all the CLs from the beginning of the depot's source control history. If site admins are recloning or deleting and re-adding a depot to Sourcegraph as a result of history rewrite of a depot in Perforce, they should get in [touch with us](mailto:support@sourcegraph.com) for next steps.
-
-### Batch Changes support for Perforce depots
-
-Add `"batchChanges.enablePerforce": true` to `experimentalFeatures` in the [site configuration](/admin/config/site_config):
-
-```json
-{
-  "experimentalFeatures": {
-   "batchChanges.enablePerforce": true,
-  }
-}
-```
 {/* SCHEMA_SYNC_END: admin/code_hosts/perforce.schema.json */}
-
 ## Configuration Notes
 
 - **p4-fusion Recommended**: Use the `fusionClient` configuration for better performance compared to `git p4`.
