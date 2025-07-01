@@ -447,82 +447,105 @@ GitHub connections support the following configuration options, which are specif
 
 {/* SCHEMA_SYNC_START: admin/code_hosts/github.schema.json */}
 {/* WARNING: This section is auto-generated during releases. Do not edit manually. */}
-{/* Last updated: Manual setup - will be automated via sourcegraph/sourcegraph releases */}
+{/* Last updated: 2025-07-01T21:51:47Z via sourcegraph/sourcegraph@v6.5.1211 */}
 ```json
+	// Authentication alternatives: token OR gitHubAppDetails OR externalAccount OR useRandomExternalAccount
+
 {
 	// If non-null, enforces GitHub repository permissions. This requires that there is an item in the [site configuration json](https://sourcegraph.com/docs/admin/config/site_config#auth-providers) `auth.providers` field, of type "github" with the same `url` field as specified in this `GitHubConnection`.
-	"authorization": null,
+	"authorization": {
+		"groupsCacheTTL": 72,
+		"markInternalReposAsPublic": false,
+		"syncInternalRepoPermissions": false
+	},
 
 	// TLS certificate of the GitHub Enterprise instance. This is only necessary if the certificate is self-signed or signed by an internal CA. To get the certificate run `openssl s_client -connect HOST:443 -showcerts < /dev/null 2> /dev/null | openssl x509 -outform PEM`. To escape the value into a JSON string, you may want to use a tool like https://json-escape-text.now.sh.
-	"certificate": null,
 	// Other example values:
 	// - "-----BEGIN CERTIFICATE-----\n..."
+	"certificate": null,
 
-	// Only used to override the cloud_default column from a config file specified by EXTSVC_CONFIG_FILE
-	"cloudDefault": false,
-
-	// When set to true, this external service will be chosen as our 'Global' GitHub service. Only valid on Sourcegraph.com. Only one service can have this flag set.
-	"cloudGlobal": false,
-
-	// A list of repositories to never mirror from this GitHub instance. Takes precedence over "orgs", "repos", and "repositoryQuery" configuration.
-	//
-	// Supports excluding by name ({"name": "owner/name"}) or by ID ({"id": "MDEwOlJlcG9zaXRvcnkxMTczMDM0Mg=="}).
-	//
+	// A list of repository entries that define which repositories to never mirror from this GitHub instance. Takes precedence over "orgs", "repos", and "repositoryQuery" configuration.
+	// Each entry in the list can be either a name ({"name": "owner/name"}), an ID ({"id": "MDEwOlJlcG9zaXRvcnkxMTczMDM0Mg=="}), or a set of conditions like pattern, size, stars, etc. If multiple conditions are specified within a single entry, ALL of those conditions must be met for a repository to be excluded (AND). If multiple entries exist in the exclude list, a repository matching ANY of the entries (OR) will be excluded from syncing.
 	// Note: ID is the GitHub GraphQL ID, not the GitHub database ID. eg: "curl https://api.github.com/repos/vuejs/vue | jq .node_id"
-	"exclude": null,
 	// Other example values:
-	// - [{"forks":true}]
 	// - [
-	//     {
-	//       "name": "owner/name"
-	//     },
-	//     {
-	//       "id": "MDEwOlJlcG9zaXRvcnkxMTczMDM0Mg=="
-	//     }
-	//   ]
+	// -   {
+	// -     "forks": true
+	// -   }
+	// - ]
 	// - [
-	//     {
-	//       "name": "vuejs/vue"
-	//     },
-	//     {
-	//       "name": "php/php-src"
-	//     },
-	//     {
-	//       "pattern": "^topsecretorg/.*"
-	//     }
-	//   ]
+	// -   {
+	// -     "name": "owner/name"
+	// -   },
+	// -   {
+	// -     "id": "MDEwOlJlcG9zaXRvcnkxMTczMDM0Mg=="
+	// -   }
+	// - ]
 	// - [
-	//     {
-	//       "size": "\u003e= 1GB",
-	//       "stars": "\u003c 100"
-	//     }
-	//   ]
+	// -   {
+	// -     "name": "vuejs/vue"
+	// -   },
+	// -   {
+	// -     "name": "php/php-src"
+	// -   },
+	// -   {
+	// -     "pattern": "^topsecretorg/.*"
+	// -   }
+	// - ]
+	// - [
+	// -   {
+	// -     "size": "\u003e= 1GB",
+	// -     "stars": "\u003c 100"
+	// -   }
+	// - ]
+	"exclude": null,
+
+	// GitHub external account to use for authentication.
+	"externalAccount": {
+		"accountID": null,
+		"clientID": null
+	},
 
 	// If non-null, this is a GitHub App connection with some additional properties.
-	"gitHubAppDetails": null,
+	"gitHubAppDetails": {
+		"appID": 0,
+		"baseURL": null,
+		"cloneAllRepositories": false,
+		"installationID": 0
+	},
+
+	// SSH cipher to use when cloning via SSH. Must be a valid choice from `ssh -Q cipher`.
+	"gitSSHCipher": null,
+
+	// SSH keys to use when cloning Git repo.
+	"gitSSHCredential": null,
 
 	// The type of Git URLs to use for cloning and fetching Git repositories on this GitHub instance.
-	//
 	// If "http", Sourcegraph will access GitHub repositories using Git URLs of the form http(s)://github.com/myteam/myproject.git (using https: if the GitHub instance uses HTTPS).
-	//
-	// If "ssh", Sourcegraph will access GitHub repositories using Git URLs of the form git@github.com:myteam/myproject.git. See the documentation for how to provide SSH private keys and known_hosts: https://sourcegraph.com/docs/admin/repo/auth#repositories-that-need-http-s-or-ssh-authentication.
+	// If "ssh", Sourcegraph will access GitHub repositories using Git URLs of the form git@github.com:myteam/myproject.git. See the documentation for how to provide SSH private keys and known_hosts: https://sourcegraph.com/docs/admin/repo/auth.
+	// Valid options: "http", "ssh"
 	"gitURLType": "http",
 
 	// DEPRECATED: The installation ID of the GitHub App.
 	"githubAppInstallationID": null,
 
 	// Deprecated and ignored field which will be removed entirely in the next release. GitHub repositories can no longer be enabled or disabled explicitly. Configure repositories to be mirrored via "repos", "exclude" and "repositoryQuery" instead.
-	"initialRepositoryEnablement": null,
+	"initialRepositoryEnablement": false,
+
+	// The maximum number of repos that will be deleted per sync. A value of 0 or less indicates no maximum.
+	"maxDeletions": 0,
 
 	// An array of organization names identifying GitHub organizations whose repositories should be mirrored on Sourcegraph.
-	"orgs": null,
 	// Other example values:
-	// - ["name"]
 	// - [
-	//     "kubernetes",
-	//     "golang",
-	//     "facebook"
-	//   ]
+	// -   "name"
+	// - ]
+	// - [
+	// -   "kubernetes",
+	// -   "golang",
+	// -   "facebook"
+	// - ]
+	"orgs": null,
 
 	// Whether the code host connection is in a pending state.
 	"pending": false,
@@ -534,66 +557,63 @@ GitHub connections support the following configuration options, which are specif
 	},
 
 	// An array of repository "owner/name" strings specifying which GitHub or GitHub Enterprise repositories to mirror on Sourcegraph.
-	"repos": null,
 	// Other example values:
-	// - ["owner/name"]
 	// - [
-	//     "kubernetes/kubernetes",
-	//     "golang/go",
-	//     "facebook/react"
-	//   ]
+	// -   "owner/name"
+	// - ]
+	// - [
+	// -   "kubernetes/kubernetes",
+	// -   "golang/go",
+	// -   "facebook/react"
+	// - ]
+	"repos": null,
 
 	// The pattern used to generate the corresponding Sourcegraph repository name for a GitHub or GitHub Enterprise repository. In the pattern, the variable "{host}" is replaced with the GitHub host (such as github.example.com), and "{nameWithOwner}" is replaced with the GitHub repository's "owner/path" (such as "myorg/myrepo").
-	//
 	// For example, if your GitHub Enterprise URL is https://github.example.com and your Sourcegraph URL is https://src.example.com, then a repositoryPathPattern of "{host}/{nameWithOwner}" would mean that a GitHub repository at https://github.example.com/myorg/myrepo is available on Sourcegraph at https://src.example.com/github.example.com/myorg/myrepo.
-	//
 	// It is important that the Sourcegraph repository name generated with this pattern be unique to this code host. If different code hosts generate repository names that collide, Sourcegraph's behavior is undefined.
 	"repositoryPathPattern": "{host}/{nameWithOwner}",
 
 	// An array of strings specifying which GitHub or GitHub Enterprise repositories to mirror on Sourcegraph. The valid values are:
-	//
 	// - `public` mirrors all public repositories for GitHub Enterprise and is the equivalent of `none` for GitHub
-	//
 	// - `internal` mirrors all internal repositories for GitHub Enterprise and is the equivalent of `none` for GitHub
-	//
 	// - `affiliated` mirrors all repositories affiliated with the configured token's user:
-	// 	- Private repositories with read access
-	// 	- Public repositories owned by the user or their orgs
-	// 	- Public repositories with write access
-	//
+	// - Private repositories with read access
+	// - Public repositories owned by the user or their orgs
+	// - Public repositories with write access
 	// - `none` mirrors no repositories (except those specified in the `repos` configuration property or added manually)
-	//
 	// - All other values are executed as a GitHub advanced repository search as described at https://github.com/search/advanced. Example: to sync all repositories from the "sourcegraph" organization including forks the query would be "org:sourcegraph fork:true".
-	//
 	// If multiple values are provided, their results are unioned.
-	//
 	// If you need to narrow the set of mirrored repositories further (and don't want to enumerate it with a list or query set as above), create a new bot/machine user on GitHub or GitHub Enterprise that is only affiliated with the desired repositories.
 	"repositoryQuery": [
 		"none"
 	],
 
-	// A GitHub personal access token. Create one for GitHub.com at https://github.com/settings/tokens/new?description=Sourcegraph (for GitHub Enterprise, replace github.com with your instance's hostname). See https://sourcegraph.com/docs/admin/code_host_connection/github#github-api-token-and-access for which scopes are required for which use cases.
+	// A GitHub personal access token. Create one for GitHub.com at https://github.com/settings/tokens/new?description=Sourcegraph (for GitHub Enterprise, replace github.com with your instance's hostname). See https://sourcegraph.com/docs/admin/code_hosts/github#github-api-access for which scopes are required for which use cases.
 	"token": null,
 
+	// REQUIRED:
 	// URL of a GitHub instance, such as https://github.com or https://github-enterprise.example.com.
-	"url": null,
 	// Other example values:
 	// - "https://github.com"
 	// - "https://github-enterprise.example.com"
+	"url": null,
 
+	// Use a random user external account for authentication. When set, the code host connection will only be able to add public repositories.
+	"useRandomExternalAccount": false,
+
+	// ⚠️  DEPRECATED: Deprecated in favour of first class webhooks. See https://sourcegraph.com/docs/admin/config/webhooks/incoming#deprecation-notice
 	// An array of configurations defining existing GitHub webhooks that send updates back to Sourcegraph.
-	"webhooks": null
 	// Other example values:
 	// - [
-	//     {
-	//       "org": "yourorgname",
-	//       "secret": "webhook-secret"
-	//     }
-	//   ]
+	// -   {
+	// -     "org": "yourorgname",
+	// -     "secret": "webhook-secret"
+	// -   }
+	// - ]
+	"webhooks": null
 }
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/github.schema.json */}
-
 ## Default branch
 
 Sourcegraph displays search results from the default branch of a repository when no `revision:` [parameter](/code-search/queries#repository-revisions) is specified. If you'd like the search results to be displayed from another branch by default, you may [change a repo's default branch on the github repo settings page](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-branches-in-your-repository/changing-the-default-branch). If this is not an option, consider using [search contexts](/code-search/working/search_contexts) instead.
