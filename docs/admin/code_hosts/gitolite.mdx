@@ -27,43 +27,129 @@ To connect Gitolite to Sourcegraph:
 
 {/* SCHEMA_SYNC_START: admin/code_hosts/gitolite.schema.json */}
 {/* WARNING: This section is auto-generated during releases. Do not edit manually. */}
-{/* Last updated: Manual setup - will be automated via sourcegraph/sourcegraph releases */}
+{/* Last updated: 2025-07-01T19:22:29Z via sourcegraph/sourcegraph@v6.5.1211 */}
 ```json
 {
-	// A list of repositories to never mirror from this Gitolite instance. Supports excluding by exact name ({"name": "foo"}).
-	"exclude": null,
-	// Other example values:
-	// - [
-	//     {
-	//       "name": "myrepo"
-	//     },
-	//     {
-	//       "pattern": ".*secret.*"
-	//     }
-	//   ]
-
-	// Gitolite host that stores the repositories (e.g., git@gitolite.example.com, ssh://git@gitolite.example.com:2222/).
-	"host": null,
-	// Other example values:
-	// - "git@gitolite.example.com"
-	// - "ssh://git@gitolite.example.com:2222/"
-
-	// This is DEPRECATED
-	"phabricator": null,
-
-	// This is DEPRECATED
-	"phabricatorMetadataCommand": null,
-
-	// Repository name prefix that will map to this Gitolite host. This should likely end with a trailing slash. E.g., "gitolite.example.com/".
-	//
-	// It is important that the Sourcegraph repository name generated with this prefix be unique to this code host. If different code hosts generate repository names that collide, Sourcegraph's behavior is undefined.
-	"prefix": null
-	// Other example values:
-	// - "gitolite.example.com/"
+	"$id": "gitolite.schema.json#",
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"additionalProperties": false,
+	"allowComments": true,
+	"description": "Configuration for a connection to Gitolite.",
+	"properties": {
+		"exclude": {
+			"description": "A list of repositories to never mirror from this Gitolite instance. Supports excluding by exact name ({\"name\": \"foo\"}).",
+			"examples": [
+				[
+					{
+						"name": "myrepo"
+					},
+					{
+						"pattern": ".*secret.*"
+					}
+				]
+			],
+			"items": {
+				"additionalProperties": false,
+				"anyOf": [
+					{
+						"required": [
+							"name"
+						]
+					},
+					{
+						"required": [
+							"pattern"
+						]
+					}
+				],
+				"properties": {
+					"name": {
+						"description": "The name of a Gitolite repo (\"my-repo\") to exclude from mirroring.",
+						"minLength": 1,
+						"type": "string"
+					},
+					"pattern": {
+						"description": "Regular expression which matches against the name of a Gitolite repo to exclude from mirroring.",
+						"format": "regex",
+						"type": "string"
+					}
+				},
+				"title": "ExcludedGitoliteRepo",
+				"type": "object"
+			},
+			"minItems": 1,
+			"type": "array"
+		},
+		"gitSSHCipher": {
+			"$ref": "git.schema.json#/definitions/gitSSHCipher",
+			"description": "SSH cipher to use when cloning via SSH. Must be a valid choice from `ssh -Q cipher`."
+		},
+		"gitSSHCredential": {
+			"$ref": "git.schema.json#/definitions/gitSSHCredential",
+			"description": "SSH keys to use when cloning Git repo."
+		},
+		"host": {
+			"description": "Gitolite host that stores the repositories (e.g., git@gitolite.example.com, ssh://git@gitolite.example.com:2222/).",
+			"examples": [
+				"git@gitolite.example.com",
+				"ssh://git@gitolite.example.com:2222/"
+			],
+			"not": {
+				"pattern": "example\\.com",
+				"type": "string"
+			},
+			"type": "string"
+		},
+		"phabricator": {
+			"additionalProperties": false,
+			"deprecationMessage": "DEPRECATED: the Phabricator integration with Gitolite code hosts is deprecated",
+			"description": "This is DEPRECATED",
+			"properties": {
+				"callsignCommand": {
+					"description": " Bash command that prints out the Phabricator callsign for a Gitolite repository. This will be run with environment variable $REPO set to the name of the repository and used to obtain the Phabricator metadata for a Gitolite repository. (Note: this requires `bash` to be installed.)",
+					"type": "string"
+				},
+				"url": {
+					"!go": {
+						"typeName": "NormalizedURL"
+					},
+					"description": "URL of the Phabricator instance that integrates with this Gitolite instance. This should be set ",
+					"format": "uri",
+					"type": "string"
+				}
+			},
+			"required": [
+				"url",
+				"callsignCommand"
+			],
+			"type": "object"
+		},
+		"phabricatorMetadataCommand": {
+			"deprecationMessage": "DEPRECATED: the Phabricator integration with Gitolite code hosts is deprecated",
+			"description": "This is DEPRECATED",
+			"type": "string"
+		},
+		"prefix": {
+			"description": "Repository name prefix that will map to this Gitolite host. This should likely end with a trailing slash. E.g., \"gitolite.example.com/\".\n\nIt is important that the Sourcegraph repository name generated with this prefix be unique to this code host. If different code hosts generate repository names that collide, Sourcegraph's behavior is undefined.",
+			"examples": [
+				"gitolite.example.com/"
+			],
+			"not": {
+				"pattern": "example\\.com",
+				"type": "string"
+			},
+			"type": "string"
+		}
+	},
+	"required": [
+		"prefix",
+		"host"
+	],
+	"title": "GitoliteConnection",
+	"type": "object"
 }
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/gitolite.schema.json */}
-
 ## Configuration Notes
 
 - **SSH Authentication Required**: Gitolite requires SSH key-based authentication. Ensure your Sourcegraph instance has proper SSH access to the Gitolite server.
