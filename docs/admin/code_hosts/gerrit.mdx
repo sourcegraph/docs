@@ -110,51 +110,145 @@ Gerrit connections support the following configuration options, which are specif
 
 {/* SCHEMA_SYNC_START: admin/code_hosts/gerrit.schema.json */}
 {/* WARNING: This section is auto-generated during releases. Do not edit manually. */}
-{/* Last updated: Manual setup - will be automated via sourcegraph/sourcegraph releases */}
+{/* Last updated: 2025-07-01T19:22:28Z via sourcegraph/sourcegraph@v6.5.1211 */}
 ```json
 {
-	// If non-null, enforces Gerrit repository permissions. This requires that there is an item in the [site configuration json](https://sourcegraph.com/docs/admin/config/site_config#auth-providers) `auth.providers` field, of type "gerrit" with the same `url` field as specified in this `GerritConnection`.
-	"authorization": null,
-
-	// The password associated with the Gerrit username used for authentication.
-	"password": null,
-
-	// An array of project strings specifying which Gerrit projects to mirror on Sourcegraph. If empty, all projects will be mirrored.
-	"projects": null,
-	// Other example values:
-	// - ["name","owner/name"]
-	// - [
-	//     "docs",
-	//     "kubernetes/kubernetes",
-	//     "golang/go",
-	//     "facebook/react"
-	//   ]
-
-	// A list of repositories to never mirror from this Gerrit instance. Takes precedence over \"projects\" configuration.
-	//
-	// Supports excluding by name ({"name": "owner/name"})
-	"exclude": null,
-	// Other example values:
-	// - [
-	//     {
-	//       "name": "docs"
-	//     },
-	//     {
-	//       "name": "php/php-src"
-	//     }
-	//   ]
-
-	// URL of a Gerrit instance, such as https://gerrit.example.com.
-	"url": null,
-	// Other example values:
-	// - "https://gerrit.example.com"
-
-	// A username for authentication withe the Gerrit code host.
-	"username": null
+	"$id": "gerrit.schema.json#",
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"additionalProperties": false,
+	"allowComments": true,
+	"description": "Configuration for a connection to Gerrit.",
+	"properties": {
+		"authorization": {
+			"description": "If non-null, enforces Gerrit repository permissions. This requires that there is an item in the [site configuration json](https://sourcegraph.com/docs/admin/config/site_config#auth-providers) `auth.providers` field, of type \"gerrit\" with the same `url` field as specified in this `GerritConnection`.",
+			"properties": {
+				"identityProvider": {
+					"description": "The identity provider to use for user information. If not set, the `url` field is used.",
+					"type": "string"
+				}
+			},
+			"title": "GerritAuthorization",
+			"type": "object"
+		},
+		"exclude": {
+			"description": "A list of repositories to never mirror from this Gerrit instance. Takes precedence over \"projects\" configuration.\n\nSupports excluding by name ({\"name\": \"owner/name\"})",
+			"examples": [
+				[
+					{
+						"name": "docs"
+					},
+					{
+						"name": "php/php-src"
+					}
+				]
+			],
+			"items": {
+				"additionalProperties": false,
+				"anyOf": [
+					{
+						"required": [
+							"name"
+						]
+					}
+				],
+				"properties": {
+					"name": {
+						"description": "The name of a Gerrit project to exclude from mirroring.",
+						"type": "string"
+					}
+				},
+				"title": "ExcludedGerritProject",
+				"type": "object"
+			},
+			"minItems": 1,
+			"type": "array"
+		},
+		"gitSSHCipher": {
+			"$ref": "git.schema.json#/definitions/gitSSHCipher",
+			"description": "SSH cipher to use when cloning via SSH. Must be a valid choice from `ssh -Q cipher`."
+		},
+		"gitSSHCredential": {
+			"$ref": "git.schema.json#/definitions/gitSSHCredential",
+			"description": "SSH keys to use when cloning Git repo."
+		},
+		"gitURLType": {
+			"default": "http",
+			"description": "The type of Git URLs to use for cloning and fetching Git repositories on this Gerrit instance.\n\nIf \"http\", Sourcegraph will access Gerrit repositories using Git URLs of the form http(s)://gerrit.example.com/a/myteam/myproject.git (using https: if the Gerrit instance uses HTTPS).\n\nIf \"ssh\", Sourcegraph will access Gerrit repositories using Git URLs of the form git@gerrit.example.com:myteam/myproject.git. The exact hostname and port will be fetched from /ssh_info. See the documentation for how to provide SSH private keys and known_hosts: https://sourcegraph.com/docs/admin/repo/auth.",
+			"enum": [
+				"http",
+				"ssh"
+			],
+			"type": "string"
+		},
+		"password": {
+			"description": "The password associated with the Gerrit username used for authentication.",
+			"minLength": 1,
+			"type": "string"
+		},
+		"projectQuery": {
+			"description": "Any number of query parameters as supported by the Gerrit REST API: https://gerrit-review.googlesource.com/Documentation/rest-api-projects.html",
+			"examples": [
+				"query=name:kubernetes",
+				"r=.*test"
+			],
+			"type": "string"
+		},
+		"projects": {
+			"description": "An array of project strings specifying which Gerrit projects to mirror on Sourcegraph. If empty, all projects will be mirrored.",
+			"examples": [
+				[
+					"name",
+					"owner/name"
+				],
+				[
+					"docs",
+					"kubernetes/kubernetes",
+					"golang/go",
+					"facebook/react"
+				]
+			],
+			"items": {
+				"type": "string"
+			},
+			"type": "array"
+		},
+		"repositoryPathPattern": {
+			"default": "{host}/{name}",
+			"description": "The pattern used to generate the corresponding Sourcegraph repository name for a Gerrit repository. In the pattern, the variable \"{host}\" is replaced with the Gerrit host (such as gerrit.example.com), and \"{name}\" is replaced with the Gerrit repository's name (such as \"myrepo\").\n\nFor example, if your Gerrit URL is https://gerrit.example.com and your Sourcegraph URL is https://src.example.com, then a repositoryPathPattern of \"{host}/{name}\" would mean that a Gerrit repository at https://gerrit.example.com/myrepo is available on Sourcegraph at https://src.example.com/gerrit.example.com/myrepo.\n\nIt is important that the Sourcegraph repository name generated with this pattern be unique to this code host. If different code hosts generate repository names that collide, Sourcegraph's behavior is undefined.",
+			"type": "string"
+		},
+		"url": {
+			"!go": {
+				"typeName": "NormalizedURL"
+			},
+			"description": "URL of a Gerrit instance, such as https://gerrit.example.com.",
+			"examples": [
+				"https://gerrit.example.com"
+			],
+			"format": "uri",
+			"not": {
+				"pattern": "example\\.com",
+				"type": "string"
+			},
+			"pattern": "^https?://",
+			"type": "string"
+		},
+		"username": {
+			"description": "A username for authentication with the Gerrit code host.",
+			"minLength": 1,
+			"type": "string"
+		}
+	},
+	"required": [
+		"url",
+		"username",
+		"password"
+	],
+	"title": "GerritConnection",
+	"type": "object"
 }
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/gerrit.schema.json */}
-
 ## Configuration Notes
 
 ### HTTP Credentials Setup
