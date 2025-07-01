@@ -27,129 +27,652 @@ Settings options and their default values are shown below.
 
 {/* SCHEMA_SYNC_START: admin/config/settings.schema.json */}
 {/* WARNING: This section is auto-generated during releases. Do not edit manually. */}
-{/* Last updated: Manual setup - will be automated via sourcegraph/sourcegraph releases */}
+{/* Last updated: 2025-07-01T19:22:22Z via sourcegraph/sourcegraph@v6.5.1211 */}
 ```json
 {
-	// Disables observability-related site alert banners.
-	"alerts.hideObservabilitySiteAlerts": true,
-
-	// Whether to show alerts for major and minor version updates. Alerts for patch version updates will be shown if `alerts.showPatchUpdates` is true.
-	"alerts.showMajorMinorUpdates": true,
-
-	// Whether to show alerts for patch version updates. Alerts for major and minor version updates will be shown if `alerts.showMajorMinorUpdatess` is true.
-	"alerts.showPatchUpdates": true,
-
-	// Whether to run global searches over all repositories. On instances with many repositories, this can lead to issues such as: low quality results, slow response times, or significant load on the Sourcegraph instance. Defaults to true.
-	"basicCodeIntel.globalSearchesEnabled": null,
-
-	// Whether to include archived repositories in search results.
-	"basicCodeIntel.includeArchives": null,
-
-	// Whether to include forked repositories in search results.
-	"basicCodeIntel.includeForks": null,
-
-	// Whether to use only indexed requests to the search API.
-	"basicCodeIntel.indexOnly": null,
-
-	// The timeout (in milliseconds) for un-indexed search requests.
-	"basicCodeIntel.unindexedSearchTimeout": null,
-
-	// Whether to fetch multiple precise definitions and references on hover.
-	"codeIntel.disableRangeQueries": null,
-
-	// Never fall back to search-based code intelligence.
-	"codeIntel.disableSearchBased": null,
-
-	// Whether to supplement precise references with search-based results.
-	"codeIntel.mixPreciseAndSearchBasedReferences": null,
-
-	// Whether to enable trace logging on the extension.
-	"codeIntel.traceExtension": null,
-
-	// Whether the sidebar on the repo view should be open by default.
-	"fileSidebarVisibleByDefault": true,
-
-	// Custom page size for the history tab. If set, the history tab will populate that number of commits the first time the history tab is opened and then double the number of commits progressively.
-	"history.defaultPageSize": null,
-
-	// Show absolute timestamps in the history panel and only show relative timestamps (e.g.: "5 days ago") in tooltip when hovering.
-	"history.preferAbsoluteTimestamps": false,
-
-	// DEPRECATED: Use `notices` instead.
-	//
-	// An array (often with just one element) of messages to display at the top of all pages, including for unauthenticated users. Users may dismiss a message (and any message with the same string value will remain dismissed for the user).
-	//
-	// Markdown formatting is supported.
-	//
-	// Usually this setting is used in global and organization settings. If set in user settings, the message will only be displayed to that user. (This is useful for testing the correctness of the message's Markdown formatting.)
-	//
-	// MOTD stands for "message of the day" (which is the conventional Unix name for this type of message).
-	"motd": null,
-
-	// Custom informational messages to display to users at specific locations in the Sourcegraph user interface.
-	//
-	// Usually this setting is used in global and organization settings. If set in user settings, the message will only be displayed to that single user.
-	"notices": null,
-
-	// Group of settings related to opening files in an editor.
-	"openInEditor": null,
-
-	// If enabled, all members of the org will be treated as admins (e.g. can edit, apply, delete) for all batch changes created in that org.
-	"orgs.allMembersBatchChangesAdmin": false,
-
-	// Key-value pairs of code host URLs to Swarm URLs. Keys should have no prefix and should not end with a slash, like "perforce.company.com:1666". Values should look like "https://swarm.company.com/", with a slash at the end.
-	"perforce.codeHostToSwarmMap": {},
-
-	// DEPRECATED: This setting will be removed in a future version of Sourcegraph.
-	"quicklinks": null,
-
-	// The default number of lines to show as context below and above search results. Default is 1.
-	"search.contextLines": 1,
-
-	// Whether query patterns are treated case sensitively. Patterns are case insensitive by default.
-	"search.defaultCaseSensitive": false,
-
-	// Defines default properties for search behavior. The default is `smart`, which provides query assistance that automatically runs alternative queries when appropriate. When `precise`, search behavior strictly searches for the precise meaning of the query.
-	"search.defaultMode": null,
-
-	// The default pattern type for search queries. Note: to disable keyword search and use the previous behavior, set "search.defaultPatternType: standard".
-	"search.defaultPatternType": null,
-
-	// The number of results we send down during a search. Note: this is different to the count: in the query. The search will continue once we hit displayLimit and updated filters and statistics will continue to stream down. Defaults to 1500.
-	"search.displayLimit": 1500,
-
-	// Disable search suggestions below the search bar when constructing queries. Defaults to false.
-	"search.hideSuggestions": false,
-
-	// Whether searches should include searching archived repositories.
-	"search.includeArchived": false,
-
-	// Whether searches should include searching forked repositories.
-	"search.includeForks": false,
-
-	// DEPRECATED: Saved search queries
-	"search.savedQueries": null,
-
-	// Predefined search snippets that can be appended to any search (also known as search scopes)
-	"search.scopes": null,
-
-//////////////////////////////////////////////////////////////
-// CodeInsights
-//////////////////////////////////////////////////////////////
-
-	// The number of seconds to execute the aggregation for when running in extended timeout mode. This value should always be less than any proxy timeout if one exists. The maximum value is equal to searchLimits.maxTimeoutSeconds
-	"insights.aggregations.extendedTimeout": 55,
-
-//////////////////////////////////////////////////////////////
-// Experimental
-//////////////////////////////////////////////////////////////
-
-	// Experimental features and settings.
-	"experimentalFeatures": null
+	"$id": "settings.schema.json#",
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"additionalProperties": true,
+	"allowComments": true,
+	"definitions": {
+		"QuickLink": {
+			"additionalProperties": false,
+			"properties": {
+				"description": {
+					"description": "A description for this quick link",
+					"type": "string"
+				},
+				"name": {
+					"description": "The human-readable name for this quick link",
+					"type": "string"
+				},
+				"url": {
+					"description": "The URL of this quick link (absolute or relative)",
+					"pattern": "^(https?://|/)",
+					"type": "string"
+				}
+			},
+			"required": [
+				"name",
+				"url"
+			],
+			"type": "object"
+		},
+		"SearchScope": {
+			"additionalProperties": false,
+			"properties": {
+				"name": {
+					"description": "The human-readable name for this search scope",
+					"type": "string"
+				},
+				"value": {
+					"description": "The query string of this search scope",
+					"type": "string"
+				}
+			},
+			"required": [
+				"name",
+				"value"
+			],
+			"type": "object"
+		}
+	},
+	"description": "Configuration settings for users and organizations on Sourcegraph.",
+	"properties": {
+		"alerts.hideObservabilitySiteAlerts": {
+			"!go": {
+				"pointer": true
+			},
+			"default": true,
+			"description": "Disables observability-related site alert banners.",
+			"type": "boolean"
+		},
+		"alerts.showMajorMinorUpdates": {
+			"default": true,
+			"description": "Whether to show alerts for major and minor version updates. Alerts for patch version updates will be shown if `alerts.showPatchUpdates` is true.",
+			"type": "boolean"
+		},
+		"alerts.showPatchUpdates": {
+			"default": true,
+			"description": "Whether to show alerts for patch version updates. Alerts for major and minor version updates will be shown if `alerts.showMajorMinorUpdatess` is true.",
+			"type": "boolean"
+		},
+		"basicCodeIntel.globalSearchesEnabled": {
+			"description": "Whether to run global searches over all repositories. On instances with many repositories, this can lead to issues such as: low quality results, slow response times, or significant load on the Sourcegraph instance. Defaults to true.",
+			"type": "boolean"
+		},
+		"basicCodeIntel.includeArchives": {
+			"description": "Whether to include archived repositories in search results.",
+			"type": "boolean"
+		},
+		"basicCodeIntel.includeForks": {
+			"description": "Whether to include forked repositories in search results.",
+			"type": "boolean"
+		},
+		"basicCodeIntel.indexOnly": {
+			"description": "Whether to use only indexed requests to the search API.",
+			"type": "boolean"
+		},
+		"basicCodeIntel.unindexedSearchTimeout": {
+			"description": "The timeout (in milliseconds) for un-indexed search requests.",
+			"type": "number"
+		},
+		"codeIntel.disableRangeQueries": {
+			"description": "Whether to fetch multiple precise definitions and references on hover.",
+			"type": "boolean"
+		},
+		"codeIntel.disableSearchBased": {
+			"description": "Never fall back to search-based code intelligence.",
+			"type": "boolean"
+		},
+		"codeIntel.mixPreciseAndSearchBasedReferences": {
+			"description": "Whether to supplement precise references with search-based results.",
+			"type": "boolean"
+		},
+		"codeIntel.traceExtension": {
+			"description": "Whether to enable trace logging on the extension.",
+			"type": "boolean"
+		},
+		"cody.notices": {
+			"description": "Custom informational messages to display to users at Cody clients locations.\n\nUsually this setting is used in global and organization settings. If set in user settings, the message will only be displayed to that single user.",
+			"items": {
+				"additionalProperties": false,
+				"properties": {
+					"key": {
+						"description": "The notice key, everytime this field is updated the notice message appears in the cody client even if it was previously dismissed.",
+						"type": "string"
+					},
+					"message": {
+						"description": "The message to display. Markdown formatting is supported.",
+						"type": "string"
+					},
+					"title": {
+						"description": "The title of the notice/message.",
+						"type": "string"
+					}
+				},
+				"required": [
+					"key",
+					"title",
+					"message"
+				],
+				"title": "Cody Notice",
+				"type": "object"
+			},
+			"type": "array"
+		},
+		"experimentalFeatures": {
+			"additionalProperties": true,
+			"description": "Experimental features and settings.",
+			"group": "Experimental",
+			"properties": {
+				"batchChangesExecution": {
+					"!go": {
+						"pointer": true
+					},
+					"default": true,
+					"description": "Enables/disables the Batch Changes server side execution feature.",
+					"type": "boolean"
+				},
+				"boostRelevantRepositories": {
+					"!go": {
+						"pointer": true
+					},
+					"default": true,
+					"description": "Boosts repositories that users have contributed to in the search results.",
+					"type": "boolean"
+				},
+				"clientSearchResultRanking": {
+					"!go": {
+						"pointer": true
+					},
+					"default": "by-zoekt-ranking",
+					"description": "How to rank search results in the client",
+					"examples": [
+						"by-line-number",
+						"by-zoekt-ranking"
+					],
+					"type": "string"
+				},
+				"codeInsightsCompute": {
+					"!go": {
+						"pointer": true
+					},
+					"default": false,
+					"description": "Enables Compute powered Code Insights",
+					"type": "boolean"
+				},
+				"codeInsightsRepoUI": {
+					"!go": {
+						"pointer": true
+					},
+					"default": "single-search-query",
+					"description": "Specifies which (code insight repo) editor to use for repo query UI",
+					"enum": [
+						"old-strict-list",
+						"single-search-query",
+						"search-query-or-strict-list"
+					],
+					"type": "string"
+				},
+				"disableOrderBySimilarity": {
+					"default": false,
+					"description": "Disables ordering of repository search results by similarity.",
+					"type": "boolean"
+				},
+				"enableLazyBlobSyntaxHighlighting": {
+					"!go": {
+						"pointer": true
+					},
+					"default": true,
+					"description": "Fetch un-highlighted blob contents to render immediately, decorate with syntax highlighting once loaded.",
+					"type": "boolean"
+				},
+				"enableLazyFileResultSyntaxHighlighting": {
+					"!go": {
+						"pointer": true
+					},
+					"default": true,
+					"description": "Fetch un-highlighted file result contents to render immediately, decorate with syntax highlighting once loaded.",
+					"type": "boolean"
+				},
+				"enableSearchFilePrefetch": {
+					"!go": {
+						"pointer": true
+					},
+					"default": true,
+					"description": "Pre-fetch plaintext file revisions from search results on hover/focus.",
+					"type": "boolean"
+				},
+				"enableSidebarFilePrefetch": {
+					"!go": {
+						"pointer": true
+					},
+					"default": true,
+					"description": "Pre-fetch plaintext file revisions from sidebar on hover/focus.",
+					"type": "boolean"
+				},
+				"fuzzyFinder": {
+					"!go": {
+						"pointer": true
+					},
+					"description": "Enables fuzzy finder with the keyboard shortcut `Cmd+K` on macOS and `Ctrl+K` on Linux/Windows.",
+					"type": "boolean"
+				},
+				"fuzzyFinderActions": {
+					"!go": {
+						"pointer": true
+					},
+					"description": "Enables the 'Actions' tab of the fuzzy finder",
+					"type": "boolean"
+				},
+				"fuzzyFinderAll": {
+					"!go": {
+						"pointer": true
+					},
+					"description": "Enables the 'All' tab of the fuzzy finder",
+					"type": "boolean"
+				},
+				"fuzzyFinderCaseInsensitiveFileCountThreshold": {
+					"!go": {
+						"pointer": true
+					},
+					"default": 25000,
+					"description": "The maximum number of files a repo can have to use case-insensitive fuzzy finding",
+					"type": "number"
+				},
+				"fuzzyFinderNavbar": {
+					"!go": {
+						"pointer": true
+					},
+					"description": "Enables the 'Fuzzy finder' action in the global navigation bar",
+					"type": "boolean"
+				},
+				"fuzzyFinderRepositories": {
+					"!go": {
+						"pointer": true
+					},
+					"description": "Enables the 'Repositories' tab of the fuzzy finder",
+					"type": "boolean"
+				},
+				"fuzzyFinderSymbols": {
+					"!go": {
+						"pointer": true
+					},
+					"description": "Enables the 'Symbols' tab of the fuzzy finder",
+					"type": "boolean"
+				},
+				"goCodeCheckerTemplates": {
+					"!go": {
+						"pointer": true
+					},
+					"default": false,
+					"description": "Shows a panel with code insights templates for go code checker results.",
+					"type": "boolean"
+				},
+				"keywordSearch": {
+					"default": true,
+					"description": "DEPRECATED: this setting is no longer used. To disable keyword search, set `search.defaultPatternType: standard` instead.",
+					"type": "boolean"
+				},
+				"newSearchNavigationUI": {
+					"!go": {
+						"pointer": true
+					},
+					"default": false,
+					"description": "Enables new experimental search UI navigation",
+					"type": "boolean"
+				},
+				"newSearchResultFiltersPanel": {
+					"!go": {
+						"pointer": true
+					},
+					"default": false,
+					"description": "Enables new experimental search results filters panel",
+					"type": "boolean"
+				},
+				"newSearchResultsUI": {
+					"!go": {
+						"pointer": true
+					},
+					"default": true,
+					"description": "Enables new experimental search results UI, such as preview panel feature and updated search and filter layouts.",
+					"type": "boolean"
+				},
+				"proactiveSearchResultsAggregations": {
+					"!go": {
+						"pointer": true
+					},
+					"default": true,
+					"description": "Search results aggregations are triggered automatically with a search.",
+					"type": "boolean"
+				},
+				"searchContextsQuery": {
+					"!go": {
+						"pointer": true
+					},
+					"default": false,
+					"description": "DEPRECATED: This feature is now permanently enabled. Enables query based search contexts",
+					"type": "boolean"
+				},
+				"searchQueryInput": {
+					"!go": {
+						"pointer": true
+					},
+					"default": "v1",
+					"description": "Specify which version of the search query input to use",
+					"enum": [
+						"v1",
+						"v2"
+					],
+					"type": "string"
+				},
+				"searchResultsAggregations": {
+					"!go": {
+						"pointer": true
+					},
+					"default": false,
+					"description": "Display aggregations for your search results on the search screen.",
+					"type": "boolean"
+				},
+				"showCodeMonitoringLogs": {
+					"!go": {
+						"pointer": true
+					},
+					"default": false,
+					"description": "Shows code monitoring logs tab.",
+					"type": "boolean"
+				},
+				"symbolKindTags": {
+					"default": false,
+					"description": "Show the initial letter of the symbol kind instead of icons.",
+					"type": "boolean"
+				}
+			},
+			"title": "SettingsExperimentalFeatures",
+			"type": "object"
+		},
+		"fileSidebarVisibleByDefault": {
+			"default": true,
+			"description": "Whether the sidebar on the repo view should be open by default.",
+			"type": "boolean"
+		},
+		"history.defaultPageSize": {
+			"description": "Custom page size for the history tab. If set, the history tab will populate that number of commits the first time the history tab is opened and then double the number of commits progressively.",
+			"maximum": 100,
+			"minimum": 1,
+			"type": "integer"
+		},
+		"history.preferAbsoluteTimestamps": {
+			"default": false,
+			"description": "Show absolute timestamps in the history panel and only show relative timestamps (e.g.: \"5 days ago\") in tooltip when hovering.",
+			"type": "boolean"
+		},
+		"insights.aggregations.extendedTimeout": {
+			"default": 55,
+			"description": "The number of seconds to execute the aggregation for when running in extended timeout mode. This value should always be less than any proxy timeout if one exists. The maximum value is equal to searchLimits.maxTimeoutSeconds",
+			"group": "CodeInsights",
+			"type": "integer"
+		},
+		"motd": {
+			"description": "DEPRECATED: Use `notices` instead.\n\nAn array (often with just one element) of messages to display at the top of all pages, including for unauthenticated users. Users may dismiss a message (and any message with the same string value will remain dismissed for the user).\n\nMarkdown formatting is supported.\n\nUsually this setting is used in global and organization settings. If set in user settings, the message will only be displayed to that user. (This is useful for testing the correctness of the message's Markdown formatting.)\n\nMOTD stands for \"message of the day\" (which is the conventional Unix name for this type of message).",
+			"items": {
+				"type": "string"
+			},
+			"type": "array"
+		},
+		"notices": {
+			"description": "Custom informational messages to display to users at specific locations in the Sourcegraph user interface.\n\nUsually this setting is used in global and organization settings. If set in user settings, the message will only be displayed to that single user.",
+			"items": {
+				"additionalProperties": false,
+				"properties": {
+					"dismissible": {
+						"default": false,
+						"description": "Whether this notice can be dismissed (closed) by the user.",
+						"type": "boolean"
+					},
+					"location": {
+						"description": "The location where this notice is shown: \"top\" for the top of every page, \"home\" for the homepage.",
+						"enum": [
+							"top",
+							"home"
+						],
+						"type": "string"
+					},
+					"message": {
+						"description": "The message to display. Markdown formatting is supported.",
+						"type": "string"
+					},
+					"styleOverrides": {
+						"description": "Overrides for the notice's default style. You probably want to use notice 'variant' setting instead.",
+						"properties": {
+							"backgroundColor": {
+								"description": "The hex code of the background color for this notice.",
+								"type": "string"
+							},
+							"textCentered": {
+								"description": "Whether the notice text should be centered.",
+								"type": "boolean"
+							},
+							"textColor": {
+								"description": "The hex code of the text color for this notice.",
+								"type": "string"
+							}
+						},
+						"type": "object"
+					},
+					"variant": {
+						"enum": [
+							"primary",
+							"secondary",
+							"success",
+							"danger",
+							"warning",
+							"info",
+							"note"
+						],
+						"type": "string"
+					}
+				},
+				"required": [
+					"message",
+					"location"
+				],
+				"title": "Notice",
+				"type": "object"
+			},
+			"type": "array"
+		},
+		"openInEditor": {
+			"additionalProperties": false,
+			"description": "Group of settings related to opening files in an editor.",
+			"properties": {
+				"custom.urlPattern": {
+					"description": "If you add \"custom\" to openineditor.editorIds, this must be set. Use the placeholders \"%file\", \"%line\", and \"%col\" to mark where the file path, line number, and column number must be insterted. Example URL for IntelliJ IDEA: \"idea://open?file=%file\u0026line=%line\u0026column=%col\"",
+					"type": "string"
+				},
+				"editorIds": {
+					"description": "The editor to open files in. If set to this to \"custom\", you must also set \"custom.urlPattern\"",
+					"items": {
+						"enum": [
+							"appcode",
+							"atom",
+							"clion",
+							"goland",
+							"idea",
+							"phpstorm",
+							"pycharm",
+							"rider",
+							"rubymine",
+							"sublime",
+							"vscode",
+							"webstorm",
+							"custom"
+						],
+						"type": "string"
+					},
+					"type": "array"
+				},
+				"jetbrains.forceApi": {
+					"description": "Forces using protocol handlers (like ikea://open?file=...) or the built-in REST API (http://localhost:63342/api/file...). If omitted, protocol handlers are used if available, otherwise the built-in REST API is used.",
+					"enum": [
+						"protocolHandler",
+						"builtInServer"
+					],
+					"type": "string"
+				},
+				"projectPaths.default": {
+					"description": "The absolute path on your computer where your git repositories live. All git repos to open have to be cloned under this path with their original names. \"/Users/yourusername/src\" is a valid absolute path, \"~/src\" is not. Works both with and without a trailing slash.",
+					"type": "string"
+				},
+				"projectPaths.linux": {
+					"description": "Overrides the default path when the browser detects Linux. Works both with and without a trailing slash.",
+					"type": "string"
+				},
+				"projectPaths.mac": {
+					"description": "Overrides the default path when the browser detects macOS. Works both with and without a trailing slash.",
+					"type": "string"
+				},
+				"projectPaths.windows": {
+					"description": "Overrides the default path when the browser detects Windows. Doesn't need a trailing backslash.",
+					"type": "string"
+				},
+				"replacements": {
+					"additionalProperties": {
+						"description": "Replace string. For backreferences to capturing groups, use $1, $2, ...",
+						"type": "string"
+					},
+					"description": "Each key will be replaced by the corresponding value in the final URL. Keys are regular expressions, values can contain backreferences ($1, $2, ...).",
+					"propertyNames": {
+						"description": "A regular expression to match against URLs.",
+						"type": "string"
+					},
+					"type": "object"
+				},
+				"vscode.isProjectPathUNCPath": {
+					"default": false,
+					"description": "Indicates that the given project path is a UNC (Universal Naming Convention) path.",
+					"type": "boolean"
+				},
+				"vscode.remoteHostForSSH": {
+					"description": "The remote host as \"USER@HOSTNAME\". This needs you to install the extension called \"Remote Development by Microsoft\" in your VS Code.",
+					"type": "string"
+				},
+				"vscode.useInsiders": {
+					"default": false,
+					"description": "If set, files will open in VS Code Insiders rather than VS Code.",
+					"type": "boolean"
+				},
+				"vscode.useSSH": {
+					"default": false,
+					"description": "If set, files will open on a remote server via SSH. This requires vscode.remoteHostForSSH to be specified and VS Code extension \"Remote Development by Microsoft\" installed in your VS Code.",
+					"type": "boolean"
+				}
+			},
+			"title": "SettingsOpenInEditor",
+			"type": "object"
+		},
+		"orgs.allMembersBatchChangesAdmin": {
+			"!go": {
+				"pointer": true
+			},
+			"default": false,
+			"description": "If enabled, all members of the org will be treated as admins (e.g. can edit, apply, delete) for all batch changes created in that org.",
+			"type": "boolean"
+		},
+		"perforce.codeHostToSwarmMap": {
+			"additionalProperties": {
+				"type": "string"
+			},
+			"default": {},
+			"description": "Key-value pairs of code host URLs to Swarm URLs. Keys should have no prefix and should not end with a slash, like \"perforce.company.com:1666\". Values should look like \"https://swarm.company.com/\", with a slash at the end.",
+			"type": "object"
+		},
+		"quicklinks": {
+			"description": "DEPRECATED: This setting will be removed in a future version of Sourcegraph.",
+			"items": {
+				"$ref": "#/definitions/QuickLink"
+			},
+			"type": "array"
+		},
+		"search.contextLines": {
+			"!go": {
+				"pointer": true
+			},
+			"default": 1,
+			"description": "The default number of lines to show as context below and above search results. Default is 1.",
+			"minimum": 0,
+			"type": "integer"
+		},
+		"search.defaultCaseSensitive": {
+			"default": false,
+			"description": "Whether query patterns are treated case sensitively. Patterns are case insensitive by default.",
+			"type": "boolean"
+		},
+		"search.defaultMode": {
+			"description": "DEPRECATED: this setting is no longer read when the default 'keyword' patterntype is enabled, which always uses the 'precise' mode. Smart search will be removed in a future release.",
+			"pattern": "precise|smart",
+			"type": "string"
+		},
+		"search.defaultPatternType": {
+			"description": "The default pattern type that search queries will be interpreted as.",
+			"pattern": "standard|literal|regexp|keyword|codycontext",
+			"type": "string"
+		},
+		"search.displayLimit": {
+			"!go": {
+				"pointer": true
+			},
+			"default": 1500,
+			"description": "The number of results we send down during a search. Note: this is different to the count: in the query. The search will continue once we hit displayLimit and updated filters and statistics will continue to stream down. Defaults to 1500.",
+			"minimum": 1,
+			"type": "integer"
+		},
+		"search.hideSuggestions": {
+			"!go": {
+				"pointer": true
+			},
+			"default": false,
+			"description": "Disable search suggestions below the search bar when constructing queries. Defaults to false.",
+			"type": "boolean"
+		},
+		"search.includeArchived": {
+			"!go": {
+				"pointer": true
+			},
+			"default": false,
+			"description": "Whether searches should include searching archived repositories.",
+			"type": "boolean"
+		},
+		"search.includeForks": {
+			"!go": {
+				"pointer": true
+			},
+			"default": false,
+			"description": "Whether searches should include searching forked repositories.",
+			"type": "boolean"
+		},
+		"search.scopes": {
+			"description": "Predefined search snippets that can be appended to any search (also known as search scopes)",
+			"items": {
+				"$ref": "#/definitions/SearchScope"
+			},
+			"type": "array"
+		},
+		"siteWideSearchContext": {
+			"!go": {
+				"pointer": true
+			},
+			"description": "Enables default site wide search context. Only admins can set this. Individual users can override with their own search context.",
+			"title": "SettingsSiteWideSearchContext",
+			"type": "string"
+		}
+	},
+	"title": "Settings",
+	"type": "object"
 }
 ```
 {/* SCHEMA_SYNC_END: admin/config/settings.schema.json */}
-
 ## Configuration Notes
 
 ### Settings Hierarchy and Inheritance
