@@ -344,9 +344,37 @@ However, if the user deletion is permanent, deleting both account and data, then
 
 ## Batch Spec Library
 
-<Callout type="note"> Batch Spec Library is currently in Experimental.</Callout>
+The Batch Spec Library accelerates batch change adoption by offering curated examples and guided templates that make large-scale code modifications accessible to developers at every skill level.
 
-The Batch Spec Library is a collection of Batch Specs that can be used to create Batch Changes. Sourcegraph provides a few Batch Specs out of the box.
+The library distinguishes between templates and library examples, where library examples are complete batch specs and templates are library examples with placeholders. Both types are managed through the same GraphQL APIs.
+
+### Library examples
+
+Library examples are complete batch specs intended for advanced users who are comfortable working with YAML and writing code. These examples serve as inspiration and starting points for custom batch changes, providing reference implementations that can be adapted to specific use cases.
+
+Sourcegraph instances come with a couple of library examples out of the box. You can use the GraphQL APIs to modify the list of library examples by adding, updating, or removing entries to match your organization's needs.
+
+As a site admin, you can click the star next to a library record to feature or unfeature that record. Featured records will move to a separate list at the top.
+
+### Templates
+
+<Callout type="note">Templates are supported in Sourcegraph v6.6 and more.</Callout>
+
+Parameterized Batch Specs designed for easy reuse across multiple batch changes. Templates provide the simplest path for users to create batch changes without needing to learn Batch Spec YAML syntax. Users select from a curated list of templates and complete a form with the required parameters, making batch change creation accessible to all team members regardless of their technical background.
+
+#### Variables
+
+Templates use variables to make batch specs adaptable to different scenarios. When creating a template, you can define placeholders for values that will vary between different uses of the template. Users filling out the template see these variables as form fields where they can enter specific values like repository names, file paths, or commit messages.
+
+Each variable has the following configuration options:
+
+- **Name**: The variable identifier used in the template
+- **Display name**: Optional human-readable name shown in the form interface
+- **Pattern**: Regular expression for input validation
+- **Mandatory**: Boolean field indicating whether the variable is required
+- **Warning level**: Validation message severity level (`info`, `warning`, or `error`)
+
+### Managing the Batch Spec Library
 
 Site admins can manage the library through the GraphQL mutations `createBatchSpecLibraryRecord`, `updateBatchSpecLibraryRecord`, and `deleteBatchSpecLibraryRecord`. Use the query `batchSpecLibrary` to list all available Batch Spec examples.
 
