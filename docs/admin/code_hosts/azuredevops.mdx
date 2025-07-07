@@ -67,14 +67,15 @@ Azure DevOps connections support the following configuration options, which are 
 
 {/* SCHEMA_SYNC_START: admin/code_hosts/azuredevops.schema.json */}
 {/* WARNING: This section is auto-generated during releases. Do not edit manually. */}
-{/* Last updated: Manual setup - will be automated via sourcegraph/sourcegraph releases */}
+{/* Last updated: 2025-07-07T17:35:37Z via sourcegraph/sourcegraph@v6.5.1211 */}
 ```json
+	// Authentication alternatives: token OR windowsPassword
+
 {
 	// A flag to enforce Azure DevOps repository access permissions
 	"enforcePermissions": false,
 
 	// A list of repositories to never mirror from Azure DevOps Services.
-	"exclude": null,
 	// Other example values:
 	// - [
 	//     {
@@ -92,43 +93,77 @@ Azure DevOps connections support the following configuration options, which are 
 	//       "pattern": "^topsecretproject/.*"
 	//     }
 	//   ]
+	"exclude": null,
+
+	// SSH cipher to use when cloning via SSH. Must be a valid choice from `ssh -Q cipher`.
+	"gitSSHCipher": null,
+
+	// SSH keys to use when cloning Git repo.
+	"gitSSHCredential": null,
 
 	// The type of Git URLs to use for cloning and fetching Git repositories.
-	//
 	// If "http", Sourcegraph will access repositories using Git URLs of the form http(s)://dev.azure.com/myrepo.git.
-	//
-	// If "ssh", Sourcegraph will access repositories using Git URLs of the form git@ssh.dev.azure.com:v3/myrepo. See the documentation for how to provide SSH private keys and known_hosts: https://sourcegraph.com/docs/admin/repo/auth#repositories-that-need-http-s-or-ssh-authentication.
+	// If "ssh", Sourcegraph will access repositories using Git URLs of the form git@ssh.dev.azure.com:v3/myrepo. See the documentation for how to provide SSH private keys and known_hosts: https://sourcegraph.com/docs/admin/repo/auth.
+	// Valid options: "http", "ssh"
 	"gitURLType": "http",
 
+	// The maximum number of repos that will be deleted per sync. A value of 0 or less indicates no maximum.
+	"maxDeletions": 0,
+
 	// An array of organization names identifying Azure DevOps organizations whose repositories should be mirrored on Sourcegraph.
-	"orgs": null,
 	// Other example values:
-	// - ["name"]
+	// - [
+	//     "name"
+	//   ]
 	// - [
 	//     "kubernetes",
 	//     "golang",
 	//     "facebook"
 	//   ]
+	"orgs": null,
 
 	// An array of projects "org/project" strings specifying which Azure DevOps projects' repositories should be mirrored on Sourcegraph.
-	"projects": null,
 	// Other example values:
-	// - ["org/project"]
+	// - [
+	//     "org/project"
+	//   ]
+	"projects": null,
+
+	// Rate limit applied when making background API requests.
+	"rateLimit": {
+		"enabled": false,
+		"requestsPerHour": 0
+	},
+
+	// The pattern used to generate the corresponding Sourcegraph repository name for a Azure DevOps repository.
+	// - "{host}" is replaced with the Azure DevOps URL's host (such as dev.azure.com)
+	// - "{orgName}" is replaced with the repository's parent projects owning organization (or collection on DevOps server)
+	// - "{projectName}" is replaced with the repository's parent project
+	// - "{repositoryName}" is replaced with the repository's name.
+	// For example, if your Azure DevOps is https://dev.azure.com and your Sourcegraph is https://src.example.com, then a repositoryPathPattern of "{host}/{orgName}/{projectName}/{repositoryName}" would mean that a Azure DevOps repository at https://dev.azure.com/MYORG/MYPROJECT/MYREPO is available on Sourcegraph at https://src.example.com/dev.azure.com/MYORG/MYPROJECT/MYREPO.
+	// It is important that the Sourcegraph repository name generated with this pattern be unique to this code host. If different code hosts generate repository names that collide, Sourcegraph's behavior is undefined.
+	// Other example values:
+	// - "{projectName}/{repositoryName}"
+	"repositoryPathPattern": "{host}/{orgName}/{projectName}/{repositoryName}",
 
 	// The Personal Access Token associated with the Azure DevOps username used for authentication.
 	"token": null,
 
+	// REQUIRED:
 	// URL for Azure DevOps Services, set to https://dev.azure.com.
-	"url": null,
 	// Other example values:
 	// - "https://dev.azure.com"
+	"url": null,
 
-	// A username for authentication with the Azure DevOps code host.
-	"username": null
+	// REQUIRED:
+	// A username for authentication with the Azure DevOps code host. Typically an email address when connect to Azure DevOps Services (cloud) and a domain\username when connecting to Azure DevOp Server (onPrem)
+	"username": null,
+
+	// Windows account password (Azure Devops Server OnPrem Only): This is needed to clone the repo, the Token will be used for REST API calls
+	"windowsPassword": null
 }
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/azuredevops.schema.json */}
-
 ## Webhooks
 
 Please consult [this page](/admin/config/webhooks/incoming) in order to configure webhooks.

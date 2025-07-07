@@ -34,16 +34,15 @@ AWS CodeCommit connections support the following configuration options, which ar
 
 {/* SCHEMA_SYNC_START: admin/code_hosts/aws_codecommit.schema.json */}
 {/* WARNING: This section is auto-generated during releases. Do not edit manually. */}
-{/* Last updated: Manual setup - will be automated via sourcegraph/sourcegraph releases */}
+{/* Last updated: 2025-07-07T17:35:38Z via sourcegraph/sourcegraph@v6.5.1211 */}
 ```json
 {
+	// REQUIRED:
 	// The AWS access key ID to use when listing and updating repositories from AWS CodeCommit. Must have the AWSCodeCommitReadOnly IAM policy.
 	"accessKeyID": null,
 
 	// A list of repositories to never mirror from AWS CodeCommit.
-	//
 	// Supports excluding by name ({"name": "git-codecommit.us-west-1.amazonaws.com/repo-name"}) or by ARN ({"id": "arn:aws:codecommit:us-west-1:999999999999:name"}).
-	"exclude": null,
 	// Other example values:
 	// - [
 	//     {
@@ -61,35 +60,55 @@ AWS CodeCommit connections support the following configuration options, which ar
 	//       "name": "go-client"
 	//     }
 	//   ]
+	"exclude": null,
 
+	// REQUIRED:
 	// The Git credentials used for authentication when cloning an AWS CodeCommit repository over HTTPS.
-	//
 	// See the AWS CodeCommit documentation on Git credentials for CodeCommit: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_ssh-keys.html#git-credentials-code-commit.
 	// For detailed instructions on how to create the credentials in IAM, see this page: https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-gc.html
-	"gitCredentials": null,
+	"gitCredentials": {
+		"password": null,
+		"username": null
+	},
+
+	// SSH cipher to use when cloning via SSH. Must be a valid choice from `ssh -Q cipher`.
+	"gitSSHCipher": null,
+
+	// SSH keys to use when cloning Git repo.
+	"gitSSHCredential": null,
+
+	// The ID of the SSH key created for your IAM users. It is required when using SSH to clone repositories.
+	"gitSSHKeyID": null,
+
+	// The type of Git URLs to use for cloning and fetching Git repositories.
+	// Valid options: "http", "ssh"
+	"gitURLType": "http",
 
 	// Deprecated and ignored field which will be removed entirely in the next release. AWS CodeCommit repositories can no longer be enabled or disabled explicitly. Configure which repositories should not be mirrored via "exclude" instead.
 	"initialRepositoryEnablement": false,
 
+	// The maximum number of repos that will be deleted per sync. A value of 0 or less indicates no maximum.
+	"maxDeletions": 0,
+
+	// REQUIRED:
 	// The AWS region in which to access AWS CodeCommit. See the list of supported regions at https://docs.aws.amazon.com/codecommit/latest/userguide/regions.html#regions-git.
+	// Valid options: "ap-northeast-1", "ap-northeast-2", "ap-south-1", "ap-southeast-1", "ap-southeast-2", "ca-central-1", "eu-central-1", "eu-west-1", "eu-west-2", "eu-west-3", "sa-east-1", "us-east-1", "us-east-2", "us-west-1", "us-west-2"
 	"region": "us-east-1",
 
 	// The pattern used to generate a the corresponding Sourcegraph repository name for an AWS CodeCommit repository. In the pattern, the variable "{name}" is replaced with the repository's name.
-	//
 	// For example, if your Sourcegraph instance is at https://src.example.com, then a repositoryPathPattern of "awsrepos/{name}" would mean that a AWS CodeCommit repository named "myrepo" is available on Sourcegraph at https://src.example.com/awsrepos/myrepo.
-	//
 	// It is important that the Sourcegraph repository name generated with this pattern be unique to this code host. If different code hosts generate repository names that collide, Sourcegraph's behavior is undefined.
-	"repositoryPathPattern": "{name}",
 	// Other example values:
 	// - "git-codecommit.us-west-1.amazonaws.com/{name}"
 	// - "git-codecommit.eu-central-1.amazonaws.com/{name}"
+	"repositoryPathPattern": "{name}",
 
+	// REQUIRED:
 	// The AWS secret access key (that corresponds to the AWS access key ID set in `accessKeyID`).
 	"secretAccessKey": null
 }
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/aws_codecommit.schema.json */}
-
 ## Setup steps for SSH connections to AWS CodeCommit repositories
 
 To add CodeCommit repositories in Docker Container:
