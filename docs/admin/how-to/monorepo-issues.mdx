@@ -9,18 +9,17 @@ The following bullets provide a general guidline to which service may require mo
 * `sourcegraph-frontend` CPU/memory resource allocations
 * `searcher` CPU/memory resource allocations (allocate enough memory to hold all non-binary files in your repositories)
 * `indexedSearch` CPU/memory resource allocations (for the `zoekt-indexserver` pod, allocate enough memory to hold all non-binary files in your largest repository; for the `zoekt-webserver` pod, allocate enough memory to hold ~2.7x the size of all non-binary files in your repositories)
-* `symbols` CPU/memory resource allocations
 * `gitserver` CPU/memory resource allocations (allocate enough memory to hold your Git packed bare repositories)
 
 ## Symbols sidebar - Processing symbols
 
 ![Screen Shot 2021-11-15 at 12 35 07 AM](https://user-images.githubusercontent.com/13024338/141749036-95759cbe-abd5-4d78-91eb-618423d2f66c.png)
 
-If you are regularly seeing the `Processing symbols is taking longer than expected. Try again in a while` warning in your sidebar, its likely that your symbols and/or gitserver services are underprovisioned and need more CPU/mem resources.
+If you are regularly seeing the `Processing symbols is taking longer than expected. Try again in a while` warning in your sidebar, its likely that your searcher and/or gitserver services are underprovisioned and need more CPU/mem resources.
 
-The symbols sidebar is dependent on the symbols and gitserver services. Upon opening the symbols sidebar, a search query is made to the GraphQL API to retrieve the symbols associated with the current git commit. You can read more about the [symbol search behavior and performance](/code-search/types/symbol#symbol-search-behavior-and-performance).
+The symbols sidebar is dependent on the searcher and gitserver services. Upon opening the symbols sidebar, a search query is made to the GraphQL API to retrieve the symbols associated with the current git commit. You can read more about the [symbol search behavior and performance](/code-search/types/symbol#symbol-search-behavior-and-performance).
 
-To address this concern, allocate more resources to the symbols service (to provide more processing power for indexing operations) and allocate more resources to the gitserver (to provide for the extra load associated with responding to fetch requests from symbols, and speed up sending the large repo).
+To address this concern, allocate more resources to the searcher service (to provide more processing power for indexing operations) and allocate more resources to the gitserver (to provide for the extra load associated with responding to fetch requests from searcher, and speed up sending the large repo).
 
 Here's an example of a diff to improve symbols performance in a k8s deployment:
 
