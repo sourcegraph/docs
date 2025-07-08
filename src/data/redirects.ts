@@ -6868,6 +6868,11 @@ const redirectsData = [
     destination: '/analytics',
     permanent: true
   },
+  {
+    source: '/code-search/types/deep-search',
+    destination: '/deep-search',
+    permanent: true
+  },
 ];
 
 const updatedRedirectsData = redirectsData.map(redirect => {
