@@ -499,6 +499,10 @@ export const navigation: NavigationItem[] = [
 				]
 			},
 			{
+				title: 'Sourcegraph Enterprise Portal',
+				href: '/enterprise-portal'
+			},
+			{
 				title: 'Sourcegraph Cloud',
 				href: '/cloud'
 			},
