@@ -252,16 +252,22 @@ export const navigation: NavigationItem[] = [
 							{
 								title: 'Structural Search',
 								href: '/code-search/types/structural'
-							},
-							{
-								title: 'Deep Search',
-								href: '/code-search/types/deep-search'
 							}
 						]
 					},
 					{
 						title: 'FAQs',
 						href: '/code-search/faq'
+					}
+				]
+			},
+			{
+				title: 'Deep Search',
+				href: '/deep-search',
+				sections: [
+					{
+						title: 'Deep Search',
+						href: '/deep-search'
 					}
 				]
 			}
@@ -499,6 +505,10 @@ export const navigation: NavigationItem[] = [
 						href: '/analytics/air-gapped'
 					}
 				]
+			},
+			{
+				title: 'Sourcegraph Enterprise Portal',
+				href: '/enterprise-portal'
 			},
 			{
 				title: 'Sourcegraph Cloud',

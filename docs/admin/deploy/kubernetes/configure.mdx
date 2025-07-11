@@ -996,7 +996,7 @@ patches:
 
 You can update environment variables for **searcher** with `patches`.
 
-For example, to update the value for `SEARCHER_CACHE_SIZE_MB`:
+For example, to update the value for `SEARCHER_CACHE_SIZE_MB` and `SEARCHER_CACHE_SIZE_MB`:
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
@@ -1010,21 +1010,6 @@ For example, to update the value for `SEARCHER_CACHE_SIZE_MB`:
           value:
             name: SEARCHER_CACHE_SIZE_MB
             value: "50000"
-```
-
-### Symbols
-
-You can update environment variables for **searcher** with `patches`.
-
-For example, to update the value for `SYMBOLS_CACHE_SIZE_MB`:
-
-```yaml
-# instances/$INSTANCE_NAME/kustomization.yaml
-  patches:
-    - target:
-        name: symbols
-        kind: StatefulSet|Deployment
-      patch: |-
         - op: replace
           path: /spec/template/spec/containers/0/env/0
           value:
@@ -1100,12 +1085,9 @@ Sourcegraph supports specifying an external Redis server with these environment 
 
 When using an external Redis server, the corresponding environment variable must also be added to the following services:
 
-
 - `sourcegraph-frontend`
-- `repo-updater`
 - `gitserver`
 - `searcher`
-- `symbols`
 - `worker`
 
 **Step 1**: Include the `services/redis` component in your components:
