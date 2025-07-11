@@ -47,9 +47,7 @@ If Deep Search is disabled, ask your site administrator to enable the following 
 },
 ```
 
-For optimal performance, Deep Search is specialized only to use one model. Currently, Deep Search only supports Claude Sonnet 4.
-
-If you are not using [Cody Gateway](/cody/core-concepts/cody-gateway), you must also configure the model through Amazon Bedrock or GCP Vertex.
+For optimal performance, Deep Search is specialized only to use one model (Claude Sonnet 4).
 
 ### Enabling conversation sharing
 
@@ -62,68 +60,6 @@ Conversation sharing is disabled by default. To enable conversation sharing, ask
 },
 ```
 
-### Configuring Deep Search on Amazon Bedrock or GCP Vertex
 
-In your site configuration, include the configuration for Claude Sonnet 4 in [modelOverrides](/cody/enterprise/model-configuration#model-overrides). For more information on configuring models, refer to [Model Configuration](/cody/enterprise/model-configuration).
-
-Examples of Sonnet 4 configuration inside `modelOverrides`:
-
-Amazon Bedrock:
-
-```json
-{
-    "modelRef": "aws-bedrock::v1::claude-sonnet-4",
-    "modelName": "us.anthropic.claude-sonnet-4-20250514-v1:0",
-    "displayName": "Claude Sonnet 4 (AWS Bedrock)",
-    "capabilities": [
-        "chat",
-        "tools",
-    ],
-    "category": "balanced",
-    "status": "stable",
-    "contextWindow": {
-        "maxInputTokens": 200000,
-        "maxOutputTokens": 32000,
-    }
-},
-```
-
-GCP Vertex:
-
-```json
-{
-    "modelRef": "google-anthropic::v2::claude-sonnet-4",
-    "modelName": "claude-sonnet-4@20250514",
-    "displayName": "Claude Sonnet 4 (GCP Vertex)",
-    "capabilities": [
-        "chat",
-        "tools",
-    ],
-    "category": "balanced",
-    "status": "stable",
-    "contextWindow": {
-        "maxInputTokens": 200000,
-        "maxOutputTokens": 32000,
-    }
-},
-```
-
-Then, configure Deep Search to use this model in `experimentalFeatures`:
-
-Amazon Bedrock:
-
-```json
-"experimentalFeatures": {
-    "deepSearch.enabled": true,
-    "deepSearch.model": "aws-bedrock::v1::claude-sonnet-4"
-},
-```
-
-GCP Vertex:
-
-```json
-"experimentalFeatures": {
-    "deepSearch.enabled": true,
-    "deepSearch.model": "google-anthropic::v2::claude-sonnet-4"
-},
-```
+### Custom model configuration and BYOK (Bring Your Own Key) 
+Deep Search is only available to customers using Sourcegraph’s built-in model gateway. Customers who configure and access their own models via BYOK cannot use the Deep Search feature.
