@@ -344,29 +344,29 @@ However, if the user deletion is permanent, deleting both account and data, then
 
 ## Batch Spec Library
 
-The Batch Spec Library accelerates batch change adoption by offering curated examples and guided templates that make large-scale code modifications accessible to developers at every skill level.
+The Batch Spec Library offers curated examples and guided templates that make large-scale code modifications accessible to developers at every skill level. As a site admin you can manage the library.
 
-The library distinguishes between [templates](#templates) and [library examples](#library-examples), where library examples are complete batch specs and templates are library examples with variables.
+The library distinguishes between [templates](#templates) and [examples](#library-examples). Examples are batch specs that are meant to be modified by power users who are comfortable with the batch spec syntax. Templates, on the other hand, are batch specs that contain variables that the user can provide data for through form fields without having to modify the batch spec code.
 
-Sourcegraph instances come with a couple of library examples out of the box. You can use the GraphQL APIs to [manage the Batch Spec Library](#managing-the-batch-spec-library).
+Sourcegraph instances come with a couple of examples out of the box. You can use the GraphQL APIs to [manage the Batch Spec Library](#managing-the-batch-spec-library).
 
-As a site admin, you can [feature records](#featured-records) to highlight the most useful examples for your organization.
+As a site admin, you can [feature records](#featured-records) to highlight the most useful templates and examples for your organization.
 
-### Library examples
+### Examples
 
-Library examples are complete batch specs intended for advanced users who are comfortable working with YAML and writing code. These examples serve as inspiration and starting points for custom batch changes, providing reference implementations that can be adapted to specific use cases.
+Examples are complete batch specs intended for advanced users who are comfortable working with YAML and writing code. These examples serve as inspiration and starting points for custom batch changes.
 
-Library examples are visible in the library pane when you are in the batch spec editor. They are not displayed by default in the templates list which is the entry point for users creating a batch change. See [choosing a template](/batch-changes/create-a-batch-change#choosing-a-template) for more details.
+Examples are visible in the library pane when you are in the batch spec editor. They are not displayed by default in the templates list which is the entry point for users creating a batch change. See [choosing a template](/batch-changes/create-a-batch-change#choosing-a-template) for more details.
 
 ### Templates
 
 <Callout type="note">Templates are supported in Sourcegraph v6.6 and more.</Callout>
 
-Templates are like library examples, but with variables for easy reuse across multiple batch changes. Templates provide the simplest path for users to create batch changes without needing to learn Batch Spec YAML syntax. Users select from a curated list of templates and complete a form with the required parameters, making batch change creation accessible to all team members regardless of their technical background.
+Templates are like examples, but with variables for easy reuse across multiple batch changes. Templates provide the simplest path for users to create batch changes without needing to learn Batch Spec YAML syntax. Users select from a curated list of templates and complete a form with the required parameters, making batch change creation accessible to all team members regardless of their technical background.
 
-A library example becomes a template once it has at least one [variable](#variables) defined. It will then be displayed on the list of templates that a user sees when they click on [create a batch change](/batch-changes/create-a-batch-change).
+An example becomes a template once it has at least one [variable](#variables) defined. It will then be displayed in the list of templates that a user sees when they click on [create a batch change](/batch-changes/create-a-batch-change).
 
-You can use variables to replace any text in the batch spec, allowing for flexible customization of repository queries, commands, commit messages, and more, but not for the name of the batch change.
+Variables can be used to replace any text in the batch spec except the batch change's name.
 
 ### Managing the Batch Spec Library
 
@@ -398,14 +398,13 @@ batchSpecLibrary(first: 100) {
 
 ### Featured Records
 
-Site-admins can mark a record as featured by either clicking the star button next to the list of library records. Featured records will automatically move to a section atop the remaining library records. This will add or remove the `"featured"` [label](#labels).
+Site-admins can mark a record as featured by either clicking the star button next to the list of library records or adding the `"featured"` [label](#labels) label with a GraphQL mutation. Featured records will automatically move to a section atop the remaining library records.
 
 ### Labels
 
-Batch Spec Library records support an optional `labels` field for categorization and filtering. Common labels include:
+Library records support an optional `labels` field for categorization and filtering.
 
-- `"featured"` - Marks popular or recommended batch specs that are displayed in a "Featured Templates" section above the remaining examples
-- Custom labels for organizational categorization (not exposed to Batch Changes users yet)
+The `"featured"` label marks popular or recommended batch specs that are displayed in a featured section above the remaining examples and templates.
 
 To remove the featured status, you can update the library record with an empty list of labels (`[]`).
 
@@ -435,7 +434,7 @@ batchSpecLibrary(first: 100, labels: ["featured"]) {
 
 <Callout type="note">Variables are supported in Sourcegraph v6.6 and more.</Callout>
 
-Templates use variables to make batch specs adaptable to different scenarios. When creating a template, you can define placeholders for values that will vary between different uses of the template. Users filling out the template see these variables as form fields where they can enter specific values like repository names, file paths, or commit messages.
+When creating a template, you can define placeholders for values that will vary between different uses of the template. Users filling out the template see these variables as form fields where they can enter specific values like repository names, file paths, or commit messages.
 
 <Callout type="note">You cannot use a variable for the batch change name.</Callout>
 
@@ -464,4 +463,4 @@ libraryVariables: [{
   }
 ```
 
-To update or remove variables from an existing template, you will need to recreate the entire batch spec library record using the `deleteBatchSpecLibraryRecord` and `createBatchSpecLibraryRecord` mutations.
+To update or remove variables from an existing template, you will need to recreate the record using the `deleteBatchSpecLibraryRecord` and `createBatchSpecLibraryRecord` mutations.
