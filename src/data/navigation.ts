@@ -30,7 +30,7 @@ export const navigation: NavigationItem[] = [
 				title: 'Cody',
 				href: '/cody',
 				sections: [
-					{title: 'Quickstart', href: '/cody/quickstart'},
+					{ title: 'Quickstart', href: '/cody/quickstart' },
 					{
 						title: 'Installation',
 						href: '/cody/clients',
@@ -80,26 +80,22 @@ export const navigation: NavigationItem[] = [
 						title: 'Capabilities',
 						href: '/cody/capabilities',
 						subsections: [
-							{title: 'Chat', href: '/cody/capabilities/chat'},
+							{ title: 'Chat', href: '/cody/capabilities/chat' },
 							{
 								title: 'Agentic Context Fetching',
 								href: '/cody/capabilities/agentic-context-fetching'
-							},
-							{
-								title: 'Autocomplete',
-								href: '/cody/capabilities/autocomplete'
 							},
 							{
 								title: 'Auto-edit',
 								href: '/cody/capabilities/auto-edit'
 							},
 							{
-								title: 'Prompts',
-								href: '/cody/capabilities/prompts'
+								title: 'Autocomplete',
+								href: '/cody/capabilities/autocomplete'
 							},
 							{
-								title: 'OpenCtx',
-								href: '/cody/capabilities/openctx'
+								title: 'Prompts',
+								href: '/cody/capabilities/prompts'
 							},
 							{
 								title: 'Debug Code',
@@ -156,15 +152,15 @@ export const navigation: NavigationItem[] = [
 						title: 'Usage and Pricing',
 						href: '/cody/usage-and-pricing'
 					},
-					{title: 'Troubleshooting', href: '/cody/troubleshooting'},
-					{title: 'FAQs', href: '/cody/faq'}
+					{ title: 'Troubleshooting', href: '/cody/troubleshooting' },
+					{ title: 'FAQs', href: '/cody/faq' }
 				]
 			},
 			{
 				title: 'Code Search',
 				href: '/code-search',
 				sections: [
-					{title: 'Features', href: '/code-search/features'},
+					{ title: 'Features', href: '/code-search/features' },
 					{
 						title: 'Search Query Syntax',
 						href: '/code-search/queries',
@@ -280,7 +276,7 @@ export const navigation: NavigationItem[] = [
 				title: 'Batch Changes',
 				href: '/batch-changes',
 				sections: [
-					{title: 'Quickstart', href: '/batch-changes/quickstart'},
+					{ title: 'Quickstart', href: '/batch-changes/quickstart' },
 					{
 						title: 'Create a Batch Change',
 						href: '/batch-changes/create-a-batch-change',
@@ -403,19 +399,19 @@ export const navigation: NavigationItem[] = [
 						title: 'Troubleshooting',
 						href: '/batch-changes/troubleshooting'
 					},
-					{title: 'FAQs', href: '/batch-changes/faq'}
+					{ title: 'FAQs', href: '/batch-changes/faq' }
 				]
 			},
 			{
 				title: 'Code Monitoring',
 				href: '/code_monitoring',
 				sections: [
-					{title: 'Quickstart', href: '/code_monitoring/quickstart'},
+					{ title: 'Quickstart', href: '/code_monitoring/quickstart' },
 					{
 						title: 'Explanations',
 						href: '/code_monitoring/explanations'
 					},
-					{title: 'How-to Guides', href: '/code_monitoring/how-tos'}
+					{ title: 'How-to Guides', href: '/code_monitoring/how-tos' }
 				]
 			},
 			{
@@ -444,13 +440,13 @@ export const navigation: NavigationItem[] = [
 				title: 'Code Insights',
 				href: '/code_insights',
 				sections: [
-					{title: 'Quickstart', href: '/code_insights/quickstart'},
+					{ title: 'Quickstart', href: '/code_insights/quickstart' },
 					{
 						title: 'Explanations',
 						href: '/code_insights/explanations'
 					},
-					{title: 'How-to Guides', href: '/code_insights/how-tos'},
-					{title: 'References', href: '/code_insights/references'}
+					{ title: 'How-to Guides', href: '/code_insights/how-tos' },
+					{ title: 'References', href: '/code_insights/references' }
 				]
 			}
 		]
@@ -462,24 +458,24 @@ export const navigation: NavigationItem[] = [
 				title: 'Sourcegraph Admin',
 				href: '/admin',
 				sections: [
-					{title: 'Deploy', href: '/admin/deploy'},
-					{title: 'Architecture', href: '/admin/architecture'},
-					{title: 'Upgrade', href: '/admin/updates'},
-					{title: 'Configuration', href: '/admin/config'},
-					{title: 'Licensing', href: '/admin/licensing'},
-					{title: 'Codehosts', href: '/admin/code_hosts'},
-					{title: 'User Authentication', href: '/admin/auth'},
-					{title: 'Access Control', href: '/admin/access_control'},
+					{ title: 'Deploy', href: '/admin/deploy' },
+					{ title: 'Architecture', href: '/admin/architecture' },
+					{ title: 'Upgrade', href: '/admin/updates' },
+					{ title: 'Configuration', href: '/admin/config' },
+					{ title: 'Licensing', href: '/admin/licensing' },
+					{ title: 'Codehosts', href: '/admin/code_hosts' },
+					{ title: 'User Authentication', href: '/admin/auth' },
+					{ title: 'Access Control', href: '/admin/access_control' },
 					{
 						title: 'Repository Permissions',
 						href: '/admin/permissions'
 					},
-					{title: 'Observability', href: '/admin/observability'},
-					{title: 'Analytics', href: '/admin/analytics'},
-					{title: 'Executors', href: '/admin/executors'},
-					{title: 'FAQs', href: '/admin/faq'},
-					{title: 'Troubleshooting', href: '/admin/troubleshooting'},
-					{title: 'How-to Guides', href: '/admin/how-to'},
+					{ title: 'Observability', href: '/admin/observability' },
+					{ title: 'Analytics', href: '/admin/analytics' },
+					{ title: 'Executors', href: '/admin/executors' },
+					{ title: 'FAQs', href: '/admin/faq' },
+					{ title: 'Troubleshooting', href: '/admin/troubleshooting' },
+					{ title: 'How-to Guides', href: '/admin/how-to' },
 					{
 						title: 'Enterprise Getting Started',
 						href: '/admin/enterprise_getting_started_guide'
@@ -490,8 +486,8 @@ export const navigation: NavigationItem[] = [
 				title: 'Sourcegraph Analytics',
 				href: '/analytics',
 				sections: [
-					{title: 'Metrics', href: '/analytics#metrics'},
-					{title: 'API', href: '/analytics/api'},
+					{ title: 'Metrics', href: '/analytics#metrics' },
+					{ title: 'API', href: '/analytics/api' },
 					{
 						title: 'Air-Gapped Analytics',
 						href: '/analytics/air-gapped'
@@ -514,7 +510,7 @@ export const navigation: NavigationItem[] = [
 						title: 'Browser Extension',
 						href: '/integration/browser_extension'
 					},
-					{title: 'Editors', href: '/integration/editor'},
+					{ title: 'Editors', href: '/integration/editor' },
 					{
 						title: 'Browser Search Engine',
 						href: '/integration/browser_extension/how-tos/browser_search_engine'
@@ -530,11 +526,11 @@ export const navigation: NavigationItem[] = [
 				title: 'Sourcegraph & Cody CLI',
 				href: '/cli',
 				sections: [
-					{title: 'Quickstart', href: '/cli/quickstart'},
-					{title: 'Explanations', href: '/cli/explanations'},
-					{title: 'How-to Guides', href: '/cli/how-tos'},
-					{title: 'References', href: '/cli/references'},
-					{title: 'Cody CLI', href: '/cody/clients/install-cli'}
+					{ title: 'Quickstart', href: '/cli/quickstart' },
+					{ title: 'Explanations', href: '/cli/explanations' },
+					{ title: 'How-to Guides', href: '/cli/how-tos' },
+					{ title: 'References', href: '/cli/references' },
+					{ title: 'Cody CLI', href: '/cody/clients/install-cli' }
 				]
 			},
 			{
@@ -554,12 +550,12 @@ export const navigation: NavigationItem[] = [
 				title: 'Plans',
 				href: '/pricing/plans',
 				sections: [
-					{title: 'Free', href: '/pricing/plans/free'},
+					{ title: 'Free', href: '/pricing/plans/free' },
 					{
 						title: 'Enterprise Starter',
 						href: '/pricing/plans/enterprise-starter'
 					},
-					{title: 'Enterprise', href: '/pricing/plans/enterprise'}
+					{ title: 'Enterprise', href: '/pricing/plans/enterprise' }
 				]
 			},
 			{
@@ -583,8 +579,8 @@ export const navigation: NavigationItem[] = [
 				title: 'How to videos',
 				href: '/how-to-videos',
 				sections: [
-					{title: 'Code Search', href: '/how-to-videos/code-search'},
-					{title: 'Cody', href: '/how-to-videos/cody'}
+					{ title: 'Code Search', href: '/how-to-videos/code-search' },
+					{ title: 'Cody', href: '/how-to-videos/cody' }
 				]
 			},
 			{
