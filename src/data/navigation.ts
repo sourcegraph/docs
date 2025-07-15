@@ -135,9 +135,6 @@ export const navigation: NavigationItem[] = [
 								title: 'Prompts Guide',
 								href: '/cody/prompts-guide'
 							},
-							// { title: "Embeddings", href: "/cody/core-concepts/embeddings", },
-							// { title: "Keyword Search", href: "/cody/core-concepts/keyword-search", },
-							// { title: "Code Graph", href: "/cody/core-concepts/code-graph", },
 							{
 								title: 'Cody Gateway',
 								href: '/cody/core-concepts/cody-gateway'
@@ -147,10 +144,6 @@ export const navigation: NavigationItem[] = [
 								href: '/cody/core-concepts/enterprise-architecture'
 							}
 						]
-					},
-					{
-						title: 'Usage and Pricing',
-						href: '/cody/usage-and-pricing'
 					},
 					{ title: 'Troubleshooting', href: '/cody/troubleshooting' },
 					{ title: 'FAQs', href: '/cody/faq' }
