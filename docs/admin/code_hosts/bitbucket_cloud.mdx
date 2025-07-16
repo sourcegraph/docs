@@ -117,113 +117,214 @@ Bitbucket Cloud connections support the following configuration options, which a
 ### admin/code_hosts/bitbucket_cloud.schema.json
 
 {/* SCHEMA_SYNC_START: admin/code_hosts/bitbucket_cloud.schema.json */}
-{/* WARNING: This section is auto-generated during releases. Do not edit manually. */}
-{/* Last updated: 2025-07-10T00:07:29Z via sourcegraph/sourcegraph@v6.5.2654 */}
 ```json
-	// Authentication alternatives: username + appPassword
-
 {
-	// The workspace access token to use when authenticating with Bitbucket Cloud.
-	"accessToken": null,
-
-	// The API URL of Bitbucket Cloud, such as https://api.bitbucket.org. Generally, admin should not modify the value of this option because Bitbucket Cloud is a public hosting platform.
-	// Other example values:
-	// - "https://api.bitbucket.org"
-	"apiURL": null,
-
-	// The app password to use when authenticating to the Bitbucket Cloud. Also set the corresponding "username" field.
-	"appPassword": null,
-
-	// If non-null, enforces Bitbucket Cloud repository permissions. This requires that there is an item in the [site configuration json](https://sourcegraph.com/docs/admin/config/site_config#auth-providers) `auth.providers` field, of type "bitbucketcloud" with the same `url` field as specified in this `BitbucketCloudConnection`.
-	"authorization": {
-		"identityProvider": null
-	},
-
-	// A list of repositories to never mirror from Bitbucket Cloud. Takes precedence over "teams" configuration.
-	// Supports excluding by name ({"name": "myorg/myrepo"}) or by UUID ({"uuid": "{fceb73c7-cef6-4abe-956d-e471281126bd}"}).
-	// Other example values:
-	// - [
-	//     {
-	//       "name": "myorg/myrepo"
-	//     },
-	//     {
-	//       "uuid": "{fceb73c7-cef6-4abe-956d-e471281126bc}"
-	//     }
-	//   ]
-	// - [
-	//     {
-	//       "name": "myorg/myrepo"
-	//     },
-	//     {
-	//       "name": "myorg/myotherrepo"
-	//     },
-	//     {
-	//       "pattern": "^topsecretproject/.*"
-	//     }
-	//   ]
-	"exclude": null,
-
-	// SSH cipher to use when cloning via SSH. Must be a valid choice from `ssh -Q cipher`.
-	"gitSSHCipher": null,
-
-	// SSH keys to use when cloning Git repo.
-	"gitSSHCredential": null,
-
-	// The type of Git URLs to use for cloning and fetching Git repositories on this Bitbucket Cloud.
-	// If "http", Sourcegraph will access Bitbucket Cloud repositories using Git URLs of the form https://bitbucket.org/myteam/myproject.git.
-	// If "ssh", Sourcegraph will access Bitbucket Cloud repositories using Git URLs of the form git@bitbucket.org:myteam/myproject.git. See the documentation for how to provide SSH private keys and known_hosts: https://sourcegraph.com/docs/admin/repo/auth#repositories-that-need-http-s-or-ssh-authentication.
-	// Valid options: "http", "ssh"
-	// Other example values:
-	// - "ssh"
-	"gitURLType": "http",
-
-	// The maximum number of repos that will be deleted per sync. A value of 0 or less indicates no maximum.
-	"maxDeletions": 0,
-
-	// Rate limit applied when making background API requests to Bitbucket Cloud.
-	"rateLimit": {
-		"enabled": true,
-		"requestsPerHour": 7200
-	},
-
-	// An array of repository "projectKey/repositorySlug" strings specifying repositories to mirror on Sourcegraph.
-	// Other example values:
-	// - [
-	//     "myproject/myrepo",
-	//     "myproject/myotherrepo"
-	//   ]
-	"repos": null,
-
-	// The pattern used to generate the corresponding Sourcegraph repository name for a Bitbucket Cloud repository.
-	// - "{host}" is replaced with the Bitbucket Cloud URL's host (such as bitbucket.org),  and "{nameWithOwner}" is replaced with the Bitbucket Cloud repository's "owner/path" (such as "myorg/myrepo").
-	// For example, if your Bitbucket Cloud is https://bitbucket.org and your Sourcegraph is https://src.example.com, then a repositoryPathPattern of "{host}/{nameWithOwner}" would mean that a Bitbucket Cloud repository at https://bitbucket.org/alice/my-repo is available on Sourcegraph at https://src.example.com/bitbucket.org/alice/my-repo.
-	// It is important that the Sourcegraph repository name generated with this pattern be unique to this code host. If different code hosts generate repository names that collide, Sourcegraph's behavior is undefined.
-	"repositoryPathPattern": "{host}/{nameWithOwner}",
-
-	// An array of team names identifying Bitbucket Cloud teams whose repositories should be mirrored on Sourcegraph.
-	// Other example values:
-	// - [
-	//     "name"
-	//   ]
-	// - [
-	//     "kubernetes",
-	//     "golang",
-	//     "facebook"
-	//   ]
-	"teams": null,
-
-	// REQUIRED:
-	// URL of Bitbucket Cloud, such as https://bitbucket.org. Generally, admin should not modify the value of this option because Bitbucket Cloud is a public hosting platform.
-	// Other example values:
-	// - "https://bitbucket.org"
-	"url": null,
-
-	// The username to use when authenticating to the Bitbucket Cloud. Also set the corresponding "appPassword" field.
-	"username": null,
-
-	// ⚠️  DEPRECATED: Deprecated in favour of first class webhooks. See https://sourcegraph.com/docs/admin/config/webhooks/incoming#deprecation-notice
-	// A shared secret used to authenticate incoming webhooks (minimum 12 characters).
-	"webhookSecret": null
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "bitbucket_cloud.schema.json#",
+  "title": "BitbucketCloudConnection",
+  "description": "Configuration for a connection to Bitbucket Cloud.",
+  "allowComments": true,
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["url"],
+  "oneOf": [
+    {
+      "allOf": [
+        {
+          "required": ["accessToken"]
+        },
+        {
+          "not": { "required": ["username"] }
+        },
+        {
+          "not": { "required": ["appPassword"] }
+        },
+        {
+          "not": { "required": ["apiToken"] }
+        }
+      ]
+    },
+    {
+      "allOf": [
+        {
+          "required": ["username", "appPassword"]
+        },
+        {
+          "not": { "required": ["accessToken"] }
+        },
+        {
+          "not": { "required": ["apiToken"] }
+        }
+      ]
+    },
+    {
+      "allOf": [
+        {
+          "required": ["username", "apiToken"]
+        },
+        {
+          "not": { "required": ["accessToken"] }
+        },
+        {
+          "not": { "required": ["appPassword"] }
+        }
+      ]
+    }
+  ],
+  "properties": {
+    "url": {
+      "description": "URL of Bitbucket Cloud, such as https://bitbucket.org. Generally, admin should not modify the value of this option because Bitbucket Cloud is a public hosting platform.",
+      "type": "string",
+      "not": {
+        "type": "string",
+        "pattern": "example\\.com"
+      },
+      "pattern": "^https?://",
+      "format": "uri",
+      "examples": ["https://bitbucket.org"],
+      "!go": {
+        "typeName": "NormalizedURL"
+      }
+    },
+    "apiURL": {
+      "description": "The API URL of Bitbucket Cloud, such as https://api.bitbucket.org. Generally, admin should not modify the value of this option because Bitbucket Cloud is a public hosting platform.",
+      "type": "string",
+      "not": {
+        "type": "string",
+        "pattern": "example\\.com"
+      },
+      "pattern": "^https?://",
+      "format": "uri",
+      "examples": ["https://api.bitbucket.org"]
+    },
+    "rateLimit": {
+      "description": "Rate limit applied when making background API requests to Bitbucket Cloud.",
+      "title": "BitbucketCloudRateLimit",
+      "type": "object",
+      "required": ["enabled", "requestsPerHour"],
+      "properties": {
+        "enabled": {
+          "description": "true if rate limiting is enabled.",
+          "type": "boolean",
+          "default": true
+        },
+        "requestsPerHour": {
+          "description": "Requests per hour permitted. This is an average, calculated per second. Internally, the burst limit is set to 500, which implies that for a requests per hour limit as low as 1, users will continue to be able to send a maximum of 500 requests immediately, provided that the complexity cost of each request is 1.",
+          "type": "number",
+          "default": 7200,
+          "minimum": 0
+        }
+      },
+      "default": {
+        "enabled": true,
+        "requestsPerHour": 7200
+      }
+    },
+    "authorization": {
+      "title": "BitbucketCloudAuthorization",
+      "description": "If non-null, enforces Bitbucket Cloud repository permissions. This requires that there is an item in the [site configuration json](https://sourcegraph.com/docs/admin/config/site_config#auth-providers) `auth.providers` field, of type \"bitbucketcloud\" with the same `url` field as specified in this `BitbucketCloudConnection`.",
+      "type": "object",
+      "properties": {
+        "identityProvider": {
+          "description": "The identity provider to use for user information. If not set, the `url` field is used.",
+          "type": "string"
+        }
+      }
+    },
+    "username": {
+      "description": "The username to use when authenticating to the Bitbucket Cloud. Also set the corresponding \"appPassword\" field.",
+      "type": "string"
+    },
+    "appPassword": {
+      "description": "The app password to use when authenticating to the Bitbucket Cloud. Also set the corresponding \"username\" field.\n🚨 NOTE 🚨: Please use the \"apiToken\" field instead of this field, since Bitbucket Cloud is deprecating app passwords as of June 9, 2026. See https://www.atlassian.com/blog/bitbucket/bitbucket-cloud-transitions-to-api-tokens-enhancing-security-with-app-password-deprecation for more details.",
+      "type": "string"
+    },
+    "accessToken": {
+      "description": "The workspace access token to use when authenticating with Bitbucket Cloud.",
+      "type": "string"
+    },
+    "apiToken": {
+      "description": "The API token to use when authenticating with Bitbucket Cloud.",
+      "type": "string"
+    },
+    "gitURLType": {
+      "description": "The type of Git URLs to use for cloning and fetching Git repositories on this Bitbucket Cloud.\n\nIf \"http\", Sourcegraph will access Bitbucket Cloud repositories using Git URLs of the form https://bitbucket.org/myteam/myproject.git.\n\nIf \"ssh\", Sourcegraph will access Bitbucket Cloud repositories using Git URLs of the form git@bitbucket.org:myteam/myproject.git. See the documentation for how to provide SSH private keys and known_hosts: https://sourcegraph.com/docs/admin/repo/auth#repositories-that-need-http-s-or-ssh-authentication.",
+      "type": "string",
+      "enum": ["http", "ssh"],
+      "default": "http",
+      "examples": ["ssh"]
+    },
+    "gitSSHCredential": {
+      "description": "SSH keys to use when cloning Git repo.",
+      "$ref": "git.schema.json#/definitions/gitSSHCredential"
+    },
+    "gitSSHCipher": {
+      "description": "SSH cipher to use when cloning via SSH. Must be a valid choice from `ssh -Q cipher`.",
+      "$ref": "git.schema.json#/definitions/gitSSHCipher"
+    },
+    "repositoryPathPattern": {
+      "description": "The pattern used to generate the corresponding Sourcegraph repository name for a Bitbucket Cloud repository.\n\n - \"{host}\" is replaced with the Bitbucket Cloud URL's host (such as bitbucket.org),  and \"{nameWithOwner}\" is replaced with the Bitbucket Cloud repository's \"owner/path\" (such as \"myorg/myrepo\").\n\nFor example, if your Bitbucket Cloud is https://bitbucket.org and your Sourcegraph is https://src.example.com, then a repositoryPathPattern of \"{host}/{nameWithOwner}\" would mean that a Bitbucket Cloud repository at https://bitbucket.org/alice/my-repo is available on Sourcegraph at https://src.example.com/bitbucket.org/alice/my-repo.\n\nIt is important that the Sourcegraph repository name generated with this pattern be unique to this code host. If different code hosts generate repository names that collide, Sourcegraph's behavior is undefined.",
+      "type": "string",
+      "default": "{host}/{nameWithOwner}"
+    },
+    "teams": {
+      "description": "An array of team names identifying Bitbucket Cloud teams whose repositories should be mirrored on Sourcegraph.",
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[\\w-]+$" },
+      "examples": [["name"], ["kubernetes", "golang", "facebook"]]
+    },
+    "repos": {
+      "description": "An array of repository \"projectKey/repositorySlug\" strings specifying repositories to mirror on Sourcegraph.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^~?[\\w-]+/[\\w.-]+$"
+      },
+      "examples": [["myproject/myrepo", "myproject/myotherrepo"]]
+    },
+    "exclude": {
+      "description": "A list of repositories to never mirror from Bitbucket Cloud. Takes precedence over \"teams\" configuration.\n\nSupports excluding by name ({\"name\": \"myorg/myrepo\"}) or by UUID ({\"uuid\": \"{fceb73c7-cef6-4abe-956d-e471281126bd}\"}).",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "title": "ExcludedBitbucketCloudRepo",
+        "additionalProperties": false,
+        "anyOf": [{ "required": ["name"] }, { "required": ["uuid"] }, { "required": ["pattern"] }],
+        "properties": {
+          "name": {
+            "description": "The name of a Bitbucket Cloud repo (\"myorg/myrepo\") to exclude from mirroring.",
+            "type": "string",
+            "pattern": "^[\\w-]+/[\\w.-]+$"
+          },
+          "uuid": {
+            "description": "The UUID of a Bitbucket Cloud repo (as returned by the Bitbucket Cloud's API) to exclude from mirroring.",
+            "type": "string",
+            "pattern": "^\\{[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\}$"
+          },
+          "pattern": {
+            "description": "Regular expression which matches against the name of a Bitbucket Cloud repo.",
+            "type": "string",
+            "format": "regex"
+          }
+        }
+      },
+      "examples": [
+        [{ "name": "myorg/myrepo" }, { "uuid": "{fceb73c7-cef6-4abe-956d-e471281126bc}" }],
+        [{ "name": "myorg/myrepo" }, { "name": "myorg/myotherrepo" }, { "pattern": "^topsecretproject/.*" }]
+      ]
+    },
+    "webhookSecret": {
+      "description": "A shared secret used to authenticate incoming webhooks (minimum 12 characters).",
+      "deprecationMessage": "Deprecated in favour of first class webhooks. See https://sourcegraph.com/docs/admin/config/webhooks/incoming#deprecation-notice",
+      "type": "string",
+      "minLength": 12
+    },
+    "maxDeletions": {
+      "description": "The maximum number of repos that will be deleted per sync. A value of 0 or less indicates no maximum.",
+      "type": "integer",
+      "default": 0
+    }
+  }
 }
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/bitbucket_cloud.schema.json */}
