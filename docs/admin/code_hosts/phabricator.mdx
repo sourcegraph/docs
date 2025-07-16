@@ -78,30 +78,62 @@ The Sourcegraph instance's site admin must [update the `corsOrigin` site config 
 ### admin/code_hosts/phabricator.schema.json
 
 {/* SCHEMA_SYNC_START: admin/code_hosts/phabricator.schema.json */}
-{/* WARNING: This section is auto-generated during releases. Do not edit manually. */}
-{/* Last updated: 2025-07-10T00:07:34Z via sourcegraph/sourcegraph@v6.5.2654 */}
 ```json
 {
-	// SSH cipher to use when cloning via SSH. Must be a valid choice from `ssh -Q cipher`.
-	"gitSSHCipher": null,
-
-	// SSH keys to use when cloning Git repo.
-	"gitSSHCredential": null,
-
-	// The type of Git URLs to use for cloning and fetching Git repositories.
-	// Valid options: "http", "ssh"
-	"gitURLType": "http",
-
-	// The list of repositories available on Phabricator.
-	"repos": null,
-
-	// API token for the Phabricator instance.
-	"token": null,
-
-	// URL of a Phabricator instance, such as https://phabricator.example.com
-	// Other example values:
-	// - "https://phabricator.example.com"
-	"url": null
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "phabricator.schema.json#",
+  "title": "PhabricatorConnection",
+  "description": "Configuration for a connection to Phabricator.",
+  "allowComments": true,
+  "type": "object",
+  "additionalProperties": false,
+  "anyOf": [{ "required": ["token"] }, { "required": ["repos"] }],
+  "properties": {
+    "url": {
+      "description": "URL of a Phabricator instance, such as https://phabricator.example.com",
+      "type": "string",
+      "examples": ["https://phabricator.example.com"]
+    },
+    "token": {
+      "description": "API token for the Phabricator instance.",
+      "type": "string",
+      "minLength": 1
+    },
+    "repos": {
+      "description": "The list of repositories available on Phabricator.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "callsign"],
+        "properties": {
+          "path": {
+            "description": "Display path for the url e.g. gitolite/my/repo",
+            "type": "string"
+          },
+          "callsign": {
+            "description": "The unique Phabricator identifier for the repository, like 'MUX'.",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "gitURLType": {
+      "description": "The type of Git URLs to use for cloning and fetching Git repositories.",
+      "type": "string",
+      "enum": ["http", "ssh"],
+      "default": "http"
+    },
+    "gitSSHCredential": {
+      "description": "SSH keys to use when cloning Git repo.",
+      "$ref": "git.schema.json#/definitions/gitSSHCredential"
+    },
+    "gitSSHCipher": {
+      "description": "SSH cipher to use when cloning via SSH. Must be a valid choice from `ssh -Q cipher`.",
+      "$ref": "git.schema.json#/definitions/gitSSHCipher"
+    }
+  }
 }
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/phabricator.schema.json */}
