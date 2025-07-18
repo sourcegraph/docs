@@ -6873,6 +6873,14 @@ const redirectsData = [
     destination: '/deep-search',
     permanent: true
   },
+
+  // Cody Pricing docs redirect
+
+  {
+    source: '/cody/usage-and-pricing',
+    destination: 'https://sourcegraph.com/pricing',
+    permanent: true
+  },
 ];
 
 const updatedRedirectsData = redirectsData.map(redirect => {
