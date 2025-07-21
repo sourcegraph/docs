@@ -24,16 +24,8 @@ export default function Chat() {
 						prompt: `Tell me about Sourcegraph.`
 					},
 					{
-						title: `What are the input/output token limits for Cody?`,
-						prompt: `What are the input/output token limits for Cody?`
-					},
-					{
-						title: `Why doesn't Cody work with VPN?`,
-						prompt: `Why doesn't Cody work with VPN?`
-					},
-					{
-						title: `How do I add all open files to context in Cody?`,
-						prompt: `How do I add all open files to context in Cody?`
+						title: `What is Deep Search?`,
+						prompt: `What is Deep Search?`
 					},
 					{
 						title: `What is Sourcegraph search query syntax?`,
@@ -42,7 +34,16 @@ export default function Chat() {
 					{
 						title: `Give me language specific query examples?`,
 						prompt: `Give me language specific query examples?`
-					}
+					},
+					{
+						title: `How to create a Batch Change?`,
+						prompt: `How to create a Batch Change?`
+					},
+					{
+						title: `Create a Code Insight`,
+						prompt: `How to create a Code Insight?`
+					},
+
 				]}
 			/>
 		</div>
