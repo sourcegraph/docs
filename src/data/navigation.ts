@@ -275,18 +275,26 @@ export const navigation: NavigationItem[] = [
 						href: '/batch-changes/create-a-batch-change',
 						subsections: [
 							{
-								title: 'Update a Batch Change',
-								href: '/batch-changes/update-a-batch-change'
+								title: 'Sourcegraph UI',
+								href: '/batch-changes/create-a-batch-change#on-your-sourcegraph-instance'
 							},
 							{
-								title: 'Close a Batch Change',
-								href: '/batch-changes/delete-a-batch-change'
-							},
-							{
-								title: 'Run Server Side',
-								href: '/batch-changes/server-side'
+								title: 'Sourcegraph CLI',
+								href: '/batch-changes/create-a-batch-change#using-the-sourcegraph-cli'
 							}
 						]
+					},
+					{
+						title: 'View Batch Changes',
+						href: '/batch-changes/view-batch-changes'
+					},
+					{
+						title: 'Update a Batch Change',
+						href: '/batch-changes/update-a-batch-change'
+					},
+					{
+						title: 'Close a Batch Change',
+						href: '/batch-changes/delete-a-batch-change'
 					},
 					{
 						title: 'Bulk Operations',
