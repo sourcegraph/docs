@@ -2,7 +2,7 @@
 
 <p className="subtitle">Auto-edit suggests code changes by analyzing cursor movements and typing. After you've made at least one character edit in your codebase, it begins proposing contextual modifications based on your cursor position and recent changes.</p>
 
-<Callout type="info">Auto-edit is currently supported with Sourcegraph v6.0+ for Pro, Enterprise Starter, and Enterprise accounts on Cody Gateway. Auto-edit requires Fireworks to be enabled as a provider. Enterprise customers without Fireworks enabled can disable the feature flag.</Callout>
+<Callout type="info">Auto-edit is currently supported with Sourcegraph v6.0+ for Enterprise accounts on Cody Gateway. Auto-edit requires Fireworks to be enabled as a provider. Enterprise customers without Fireworks enabled can disable the feature flag.</Callout>
 
 ## Capabilities of auto-edit
 
@@ -41,29 +41,24 @@ The auto-edit feature can help you with various repetitive tasks in your code:
 - **Parameter refactoring**: Assists in adding, removing, or reorganizing function parameters. When you unpack a function to handle more cases, auto-edit helps restructure the parameter list and suggests corresponding changes at call sites.
 - **Type system modifications**: Auto-edit identifies and suggests consistent changes across your codebase when updating type definitions or interfaces. This includes updating variable declarations, function parameters, and return types to maintain type consistency.
 
-Auto-edit is supported by both Cody VS Code and JetBrains plugins.
+Auto-edit is supported by Cody VS Code, JetBrains, and Visual Studio plugins.
 
 <Tabs>
 <Tab title="VS Code">
 
-<Callout type="info">Auto-edit for VS Code is currently in Beta. It's available for Pro, Enterprise Starter, and Enterprise users on Cody Gateway. Auto-edit requires Fireworks to be enabled as a provider. Enterprise customers without Fireworks enabled can disable the feature flag.</Callout>
+<Callout type="info">Auto-edit is available for Enterprise users on Cody Gateway. Auto-edit requires Fireworks to be enabled as a provider. Enterprise customers without Fireworks enabled can disable the feature flag.</Callout>
 
 ## Enabling auto-edit in VS Code
 
-Auto-edit is enabled by default for Cody Pro Enterprise Starter and Enterprise users. You can opt out and switch back to autocomplete by selecting it from the suggestion mode in the Cody VS Code extension settings.
+Auto-edit is enabled by default for Cody Enterprise users. You can opt out and switch back to autocomplete by selecting it from the suggestion mode in the Cody VS Code extension settings.
 
 Site admins can opt their organization out of the auto-edit feature by disabling it from their config settings.
 
-### Auto-edit access for Enterprise customers
+### Configure auto-edit access
 
-Auto-edit is available for Enterprise customers with [Sourcegraph Cody Gateway](/cody/core-concepts/cody-gateway#sourcegraph-cody-gateway) access. Enabling the feature requires two steps:
+Auto-edit is available as default for Enterprise customers with [Sourcegraph Cody Gateway](/cody/core-concepts/cody-gateway#sourcegraph-cody-gateway) access. To configure auto-edit:
 
-1. Site administrators must:
-   - Ensure the feature flag `cody-autoedit-experiment-enabled-flag` is enabled (enabled by default)
-   - Add `fireworks::*` as an [allowed provider](https://sourcegraph.com/docs/cody/enterprise/model-configuration#model-filters) (see below)
-2. Once enabled, auto-edit will become the default suggestion mode for all users
-3. Users can optionally switch back to autocomplete from the Cody extension settings
-4. Site admins can opt out of auto-edits using the `cody-autoedit-experiment-enabled-flag` feature flag
+- Add `fireworks::*` as an [allowed provider](https://sourcegraph.com/docs/cody/enterprise/model-configuration#model-filters)
 
 The following example demonstrates how to add Fireworks as an allowed LLM provider:
 
@@ -93,11 +88,13 @@ The following example demonstrates how to add Fireworks as an allowed LLM provid
 
 <Tab title="JetBrains">
 
-<Callout type="info">Auto-edit for JetBrains IDEs is Experimental and supports JetBrains versions 7.84.0+. It's available for Pro, Enterprise Starter, and Enterprise users on Cody Gateway. Auto-edit requires Fireworks to be enabled as a provider. Enterprise customers without Fireworks enabled can disable the feature flag.</Callout>
+<Callout type="info">JetBrains IDEs support auto-edit for versions 7.84.0+. It's available for Enterprise users on Cody Gateway. Auto-edit requires Fireworks to be enabled as a provider. Enterprise customers without Fireworks enabled can disable the feature flag.</Callout>
 
 ## Enabling auto-edit in JetBrains
 
-You can opt-in the auto-edit feature from the JetBrains Cody plugin settings.
+Auto-edit is enabled by default for Cody Enterprise users. You can opt out and switch back to autocomplete by selecting it from the suggestion mode in the Cody JetBrains extension settings.
+
+Site admins can opt their organization out of the auto-edit feature by disabling it from their config settings.
 
 - Click the three-dot menu on the top right of the Cody plugin window and select **Open Cody Settings Editor**
 - This will open the `cody_settings.json` file in your editor
@@ -105,16 +102,58 @@ You can opt-in the auto-edit feature from the JetBrains Cody plugin settings.
 
 ![JetBrains-Cody-Settings-Editor](https://storage.googleapis.com/sourcegraph-assets/Docs/jb-cody-settings.png)
 
-### Auto-edit access for Enterprise customers
+### Configure auto-edit access
 
-Auto-edit is available for Enterprise customers with [Sourcegraph Cody Gateway](/cody/core-concepts/cody-gateway#sourcegraph-cody-gateway) access. Enabling the feature requires two steps:
+Auto-edit is available as default for Enterprise customers with [Sourcegraph Cody Gateway](/cody/core-concepts/cody-gateway#sourcegraph-cody-gateway) access. To configure auto-edit:
 
-1. Site administrators must:
-   - Ensure the feature flag `cody-autoedit-experiment-enabled-flag` is enabled from the settings editor
-   - Add `fireworks::*` as an [allowed provider](https://sourcegraph.com/docs/cody/enterprise/model-configuration#model-filters) (see below)
-2. Once enabled, auto-edit will become the default suggestion mode for all users
-3. Users can optionally switch back to autocomplete from the Cody extension settings
-4. Site admins can opt out of auto-edits using the `cody-autoedit-experiment-enabled-flag` feature flag
+- Add `fireworks::*` as an [allowed provider](https://sourcegraph.com/docs/cody/enterprise/model-configuration#model-filters)
+
+The following example demonstrates how to add Fireworks as an allowed LLM provider:
+
+```json
+
+"cody.enabled": true,
+"modelConfiguration": {
+  "sourcegraph": {
+    "modelFilters": {
+      // Only allow "beta" and "stable" models.
+      // Not "experimental" or "deprecated".
+      "statusFilter": ["beta", "stable"],
+
+      // Allow any models provided by Anthropic, OpenAI, Google and Fireworks.
+      "allow": [
+        "anthropic::*", // Anthropic models
+        "openai::*", // OpenAI models
+        "google::*", // Google Gemini models
+        "fireworks::*", // Open source models hosted by Sourcegraph
+      ],
+    }
+  }
+}
+```
+
+</Tab>
+
+<Tab title="Visual Studio">
+
+<Callout type="info">Visual Studio supports auto-edit for versions 17.6 and above. It's available for Enterprise users on Cody Gateway. Auto-edit requires Fireworks to be enabled as a provider. Enterprise customers without Fireworks enabled can disable the feature flag.</Callout>
+
+## Enabling auto-edit in Visual Studio
+
+Auto-edit is enabled by default for Cody Enterprise users. Two settings must be enabled by default in the Visual Studio Cody extension settings to make the auto-edit feature work.
+
+1. Automatically trigger completions
+2. Enable Cody Auto-edit
+
+You can opt out and switch back to autocomplete by deselecting it from the Cody Visual Studio extension settings.
+
+![Visual-Studio-Cody-Settings-Editor](https://storage.googleapis.com/sourcegraph-assets/Docs/visual-studio-auto-edit-settings.png)
+
+### Configure auto-edit access
+
+Auto-edit is available as default for Enterprise customers with [Sourcegraph Cody Gateway](/cody/core-concepts/cody-gateway#sourcegraph-cody-gateway) access. To configure auto-edit:
+
+- Add `fireworks::*` as an [allowed provider](https://sourcegraph.com/docs/cody/enterprise/model-configuration#model-filters)
 
 The following example demonstrates how to add Fireworks as an allowed LLM provider:
 
@@ -142,3 +181,9 @@ The following example demonstrates how to add Fireworks as an allowed LLM provid
 
 </Tab>
 </Tabs>
+
+<Callout type="info">Self-hosted customers get autocomplete as default. They cannot opt-in for auto-edit until they allow gateway access to Cody.</Callout>
+
+## Disable auto-edit
+
+To turn-off the auto-edit feature, set the feature flag `cody-autoedit-experiment-enabled-flag` as `disabled` in your site configuration. Doing so will switch back to autocomplete as your default suggestion mode.

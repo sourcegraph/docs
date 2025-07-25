@@ -6811,7 +6811,76 @@ const redirectsData = [
     permanent: true
   },
 
+  //Rmv Query types permanentaly:https://sourcegraph.com/docs/cody/capabilities/query-types
+  {
+    source: "/cody/capabilities/query-types",
+    destination: "/cody/capabilities/chat",
+    permanent: true
+  },
 
+  {
+    source: '/analytics/cloud#access-tokens',
+    destination: '/analytics/api#access-tokens',
+    permanent: true
+  },
+  {
+    source: '/analytics/cloud#token-management-apis',
+    destination: '/analytics/api#token-management-apis',
+    permanent: true
+  },
+  {
+    source: '/analytics/cloud#enablement-instructions',
+    destination: '/analytics#enablement-instructions',
+    permanent: true
+  },
+  {
+    source: '/analytics/cloud#data-export',
+    destination: '/analytics#data-export-and-api',
+    permanent: true
+  },
+  {
+    source: '/analytics/cloud#token-creation',
+    destination: '/analytics/api#token-creation',
+    permanent: true
+  },
+  {
+    source: '/analytics/cloud#token-listing',
+    destination: '/analytics/api#token-listing',
+    permanent: true
+  },
+  {
+    source: '/analytics/cloud#token-revocation',
+    destination: '/analytics/api#token-revocation',
+    permanent: true
+  },
+  {
+    source: '/analytics/cloud#api-reference',
+    destination: '/analytics/api#api-reference',
+    permanent: true
+  },
+  {
+    source: '/analytics/cloud#csv-export',
+    destination: '/analytics/api#csv-export',
+    permanent: true
+  },
+  {
+    source: '/analytics/cloud',
+    destination: '/analytics',
+    permanent: true
+  },
+  {
+    source: '/code-search/types/deep-search',
+    destination: '/deep-search',
+    permanent: true
+  },
+
+  // Cody Pricing docs redirect
+
+  {
+    source: '/cody/usage-and-pricing',
+    destination: 'https://sourcegraph.com/pricing',
+    permanent: true
+  },
 ];
 
 const updatedRedirectsData = redirectsData.map(redirect => {

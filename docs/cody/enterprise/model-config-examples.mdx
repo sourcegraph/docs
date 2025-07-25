@@ -668,63 +668,6 @@ In the configuration above,
 
 </Accordion>
 
-<Accordion title="Google Vertex (Gemini)">
-
-```json
-"modelConfiguration": {
-  "sourcegraph": null,
-  "providerOverrides": [
-      {
-          "id": "google",
-          "displayName": "Google Gemini",
-          "serverSideConfig": {
-            "type": "google",
-            "accessToken": "token",
-            "endpoint": "https://us-east5-aiplatform.googleapis.com/v1/projects/project-name/locations/us-east5/publishers/anthropic/models"
-          }
-      }
-  ],
-  "modelOverrides": [
-      {
-          "modelRef": "google::unknown::claude-3-5-sonnet",
-          "displayName": "Claude 3.5 Sonnet (via Google Vertex)",
-          "modelName": "claude-3-5-sonnet@20240620",
-          "contextWindow": {
-            "maxInputTokens": 45000,
-            "maxOutputTokens": 4000
-          },
-          "capabilities": ["chat"],
-          "category": "accuracy",
-          "status": "stable"
-      },
-      {
-          "modelRef": "google::unknown::claude-3-haiku",
-          "displayName": "Claude 3 Haiku",
-          "modelName": "claude-3-haiku@20240307",
-          "capabilities": ["autocomplete", "chat"],
-          "category": "speed",
-          "status": "stable",
-          "contextWindow": {
-            "maxInputTokens": 7000,
-            "maxOutputTokens": 4000
-          }
-      },
-  ],
-  "defaultModels": {
-    "chat": "google::unknown::claude-3-5-sonnet",
-    "fastChat": "google::unknown::claude-3-5-sonnet",
-    "codeCompletion": "google::unknown::claude-3-haiku"
-  }
-}
-```
-
-In the configuration above,
-
--   Set up a provider override for Google Anthropic, routing requests for this provider directly to the specified endpoint (bypassing Cody Gateway)
--   Add two Anthropic models: - `"google::unknown::claude-3-5-sonnet"` with "chat" capabiity - used for "chat" and "fastChat" - `"google::unknown::claude-3-haiku"` with "autocomplete" capability - used for "codeCompletion"
-
-</Accordion>
-
 <Accordion title="Amazon Bedrock">
 
 ```json
@@ -792,14 +735,91 @@ Provisioned throughput for Amazon Bedrock models can be configured using the `"a
 ](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_InstanceMetadataOptionsRequest.html#:~:text=HttpPutResponseHopLimit) instance metadata option to a higher value (e.g., 2) to ensure that the metadata service can be accessed from the frontend container running in the EC2 instance. See [here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-IMDS-existing-instances.html) for instructions.
 </Callout>
 
-<Callout type="warning">
-	We only recommend configuring AWS Bedrock to use an accessToken for
-	authentication. Specifying no accessToken (e.g. to use [IAM roles for EC2 /
-	instance role
-	binding](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html))
-	is not currently recommended. There is a known performance bug with this
-	method which will prevent autocomplete from working correctly (internal
-	issue: CORE-819)
-</Callout>
+## AWS Bedrock: Latency optimization
+
+<Callout type="note">Optimization for latency with AWS Bedrock is available in Sourcegraph v6.5 and more.</Callout>
+
+AWS Bedrock supports [Latency Optimized Inference](https://docs.aws.amazon.com/bedrock/latest/userguide/latency-optimized-inference.html) which can reduce autocomplete latency with models like Claude 3.5 Haiku by up to ~40%.
+
+To use Bedrock's latency optimized inference feature for a specific model with Cody, configure the `"latencyOptimization": "optimized"` setting under the `serverSideConfig` of any model in `modelOverrides`. For example:
+
+```json
+"modelOverrides": [
+  {
+    "modelRef": "aws-bedrock::v1::claude-3-5-haiku-latency-optimized",
+    "modelName": "us.anthropic.claude-3-5-haiku-20241022-v1:0",
+    "displayName": "Claude 3.5 Haiku (latency optimized)",
+    "capabilities": [
+      "chat",
+      "autocomplete"
+    ],
+    "category": "speed",
+    "status": "stable",
+    "contextWindow": {
+      "maxInputTokens": 200000,
+      "maxOutputTokens": 4096
+    },
+    "serverSideConfig": {
+      "type": "awsBedrock",
+      "latencyOptimization": "optimized"
+    }
+  },
+  {
+    "modelRef": "aws-bedrock::v1::claude-3-5-haiku",
+    "modelName": "us.anthropic.claude-3-5-haiku-20241022-v1:0",
+    "displayName": "Claude 3.5 Haiku",
+    "capabilities": [
+      "chat",
+      "autocomplete"
+    ],
+    "category": "speed",
+    "status": "stable",
+    "contextWindow": {
+      "maxInputTokens": 200000,
+      "maxOutputTokens": 4096
+    },
+    "serverSideConfig": {
+      "type": "awsBedrock",
+      "latencyOptimization": "standard"
+    }
+  }
+]
+```
+
+See also [Debugging: running a latency test](#debugging-running-a-latency-test).
+
+### Debugging: Running a latency test
+
+<Callout type="note">Debugging latency optimizated inference is supported in Sourcegraph v6.5 and more.</Callout>
+
+Site administrators can test completions latency by sending a special debug command in any Cody chat window (in the web, in the editor, etc.):
+
+```shell
+cody_debug:::{"latencytest": 100}
+```
+
+Cody will then perform `100` quick `Hello, please respond with a short message.` requests to the LLM model selected in the dropdown, and measure the time taken to get the first streaming event back (for example first token from the model.) It records all of these requests timing information, and then responds with a report indicating the latency between the Sourcegraph `frontend` container and the LLM API:
+
+```shell
+Starting latency test with 10 requests...
+
+Individual timings:
+
+[... how long each request took ...]
+
+Summary:
+
+* Requests: 10/10 successful
+* Average: 882ms
+* Minimum: 435ms
+* Maximum: 1.3s
+```
+
+This can be helpful to get a feel for the latency of particular models, or models with different configurations - such as when using the AWS Bedrock Latency Optimized Inference feature.
+
+Few important considerations:
+
+- Debug commands are only available to site administrators and have no effect when used by regular users.
+- Sourcegraph's built-in Grafana monitoring also has a full `Completions` dashboard for monitoring LLM requests, performance, etc.
 
 </Accordion>

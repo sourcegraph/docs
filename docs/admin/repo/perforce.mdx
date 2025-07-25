@@ -219,51 +219,68 @@ With this setting, Sourcegraph will ignore any rules with a host other than `*`,
 
 ### `admin/code_hosts/perforce.schema.json`
 
+{/* SCHEMA_SYNC_START: admin/code_hosts/perforce.schema.json */}
+{/* WARNING: This section is auto-generated during releases. Do not edit manually. */}
+{/* Last updated: 2025-07-24T01:50:58Z via sourcegraph/sourcegraph@v6.6.0 */}
 ```json
 {
 	// If non-null, enforces Perforce depot permissions.
-	"authorization": null,
+	"authorization": {
+		"ignoreRulesWithHost": false,
+		"subRepoPermissions": false
+	},
 
 	// Depots can have arbitrary paths, e.g. a path to depot root or a subdirectory.
-	"depots": null,
 	// Other example values:
 	// - [
 	//     "//Sourcegraph/",
 	//     "//Engineering/Cloud/"
 	//   ]
+	"depots": null,
 
 	// Configuration for the experimental p4-fusion client
-	"fusionClient": null,
-
-	// Only import at most n changes when possible (git p4 clone --max-changes).
-	"maxChanges": 1000,
+	"fusionClient": {
+		"cacheLabels": false,
+		"enabled": false,
+		"fsyncEnable": false,
+		"includeBinaries": false,
+		"lookAhead": 2000,
+		"maxChanges": -1,
+		"networkThreads": 12,
+		"networkThreadsFetch": 12,
+		"noConvertLabels": false,
+		"printBatch": 100,
+		"refresh": 1000,
+		"retries": 10
+	},
 
 	// Client specified as an option for p4 CLI (P4CLIENT, also enables '--use-client-spec')
 	"p4.client": null,
 
+	// REQUIRED:
 	// The ticket value for the user (P4PASSWD). You can get this by running `p4 login -p` or `p4 login -pa`. It should look like `6211C5E719EDE6925855039E8F5CC3D2`.
 	"p4.passwd": null,
 
+	// REQUIRED:
 	// The Perforce Server address to be used for p4 CLI (P4PORT). It's recommended to specify the protocol prefix (e.g. tcp: or ssl:) as part of the address.
-	"p4.port": null,
 	// Other example values:
 	// - "ssl:111.222.333.444:1666"
 	// - "tcp:111.222.333.444:1666"
+	"p4.port": null,
 
+	// REQUIRED:
 	// The user to be authenticated for p4 CLI (P4USER).
-	"p4.user": null,
 	// Other example values:
 	// - "admin"
+	"p4.user": null,
 
 	// The pattern used to generate the corresponding Sourcegraph repository name for a Perforce depot. In the pattern, the variable "{depot}" is replaced with the Perforce depot's path.
-	//
 	// For example, if your Perforce depot path is "//Sourcegraph/" and your Sourcegraph URL is https://src.example.com, then a repositoryPathPattern of "perforce/{depot}" would mean that the Perforce depot is available on Sourcegraph at https://src.example.com/perforce/Sourcegraph.
-	//
 	// It is important that the Sourcegraph repository name generated with this pattern be unique to this Perforce Server. If different Perforce Servers generate repository names that collide, Sourcegraph's behavior is undefined.
 	"repositoryPathPattern": "{depot}"
 }
 ```
-
+{/* SCHEMA_SYNC_END: admin/code_hosts/perforce.schema.json */}
 ## Known issues and limitations
 
 We are actively working to significantly improve Sourcegraph's Perforce support. Please [contact us](https://help.sourcegraph.com/hc/en-us/requests/new) to help us prioritize any specific improvements you'd like to see.

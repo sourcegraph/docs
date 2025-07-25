@@ -2,33 +2,33 @@
 
 # Sourcegraph Docs
 
-<!-- Working branch for Sourcegraph 6.4 Release -->
+<!-- Working branch for Sourcegraph 6.5 Release -->
 
-Welcome to the Sourcegraph documentation! We're excited to have you contribute to our docs. We've recently rearchitectured our docs tech stack — powered by Next.js, TailwindCSS and deployed on Vercel. This guide will walk you through the process of contributing to our documentation using the new tech stack.
+Welcome to the Sourcegraph documentation! We're excited to have you contribute to our docs. Our docs tech stack is powered by Next.js, TailwindCSS and deployed on Vercel. This guide will walk you through the process of contributing to our documentation.
 
 ## Get started
 
 To get started with this template, clone this repository to your local machine using the following command:
 
 ```sh
-git clone https://github.com/sourcegraph/docs.git sourcegraph-docs
+git clone https://github.com/sourcegraph/docs.git docs
 ```
 
 Navigate to the project directory by typing the following command in your terminal:
 
 ```sh
-cd sourcegraph-docs
+cd docs
 ```
 
-Before the dependencies are install make sure your local machine has the following versions of `node` and `pnpm` installed:
+Before the dependencies are installed make sure your local machine has the following versions of `node` and `pnpm` installed:
 
 * node: `v20.8.1`
 * pnpm: `8.13.1`
 
-**Note**: If you have `asdf` available you can install the above versions for only this repository by running the following command from your terminal in the root folder:
+**Note**: If you have `mise` available you can install the above versions for only this repository by running the following command from your terminal in the root folder:
 
 ```sh
-asdf install
+mise install
 ```
 
 Now that the base requirements of the project have been satisfied, we can install the required dependencies to run the development server!

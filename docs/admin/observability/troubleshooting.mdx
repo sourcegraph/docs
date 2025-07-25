@@ -40,8 +40,8 @@ environment.
 #### Scenario: no cloning, syncing, updating or deleting is happening
 
 Observed state: Sourcegraph instance does not react to any updates to code hosts and no cloning is happening.
-The cause of this state could be repo-updater queries that are too large for the limits of the running Postgres DB.
-One symptom is seeing a line like the one below in the repo-updater logs:
+The cause of this state could be worker queries that are too large for the limits of the running Postgres DB.
+One symptom is seeing a line like the one below in the worker logs:
 
 ```text
 t=2020-05-28T18:41:02+0000 lvl=eror msg=Syncer error="syncer.sync.store.upsert-repos: delete: driver: bad connection
@@ -50,10 +50,10 @@ t=2020-05-28T18:41:02+0000 lvl=eror msg=Syncer error="syncer.sync.store.upsert-r
 or seeing the same error in the "Code host status panel" (Clicking the cloud icon).
 
 The fix is to increase the memory on Postgres DB which will increase certain Postgres-internal limits and will allow
-the queries from repo-updater to go through.
+the queries from worker to go through.
 
-Another cause could be that the `repo-updater` is in a crash loop for some reason. If there are large numbers of repos
-to be updated it could be from `Out of memory` errors. A fix here is to increase the memory for `repo-updater` instead.
+Another cause could be that the `worker` is in a crash loop for some reason. If there are large numbers of repos
+to be updated it could be from `Out of memory` errors. A fix here is to increase the memory for `worker` instead.
 
 ## General scenarios
 

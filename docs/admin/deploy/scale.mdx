@@ -26,9 +26,7 @@ Here is a list of components you can find in a typical Sourcegraph deployment:
 | [`frontend`](/admin/deploy/scale#frontend)                     | Serves the web application, extensions, and graphQL services. Almost every service has a link back to the frontend, from which it gathers configuration updates.                         |
 | [`gitserver`](/admin/deploy/scale#gitserver)                   | Mirrors repositories from their code host. All other Sourcegraph services talk to gitserver when they need data from git.                                                                |
 | [`precise-code-intel`](/admin/deploy/scale#precise-code-intel) | Converts LSIF upload file into Postgres data. The entire index must be read into memory to be correlated.                                                                                |
-| [`repo-updater`](/admin/deploy/scale#repo-updater)             | Tracks the state of repositories. It is responsible for automatically scheduling updates using gitserver and for synchronizing metadata between code hosts and external services.        |
-| [`searcher`](/admin/deploy/scale#searcher)                     | Provides on-demand un-indexed search for repositories. It fetches archives from gitserver and searches them with regexp.                                                                 |
-| [`symbols`](/admin/deploy/scale#symbols)                       | Indexes symbols in repositories using Ctags.                                                                                                                                             |
+| [`searcher`](/admin/deploy/scale#searcher)                     | Provides on-demand un-indexed search for repositories. It fetches archives from gitserver and searches them with regexp. Indexes symbols in repositories using Ctags.                                                                 |
 | [`syntect-server`](/admin/deploy/scale#syntect-server)         | An HTTP server that exposes the Rust Syntect syntax highlighting library for use by other services.                                                                                      |
 | [`worker`](/admin/deploy/scale#worker)                         | Runs a collection of background jobs periodically in response to internal requests and external events. It is currently janitorial and commit based.                                     |
 | [`zoekt-indexserver`](/admin/deploy/scale#zoekt-indexserver)   | Indexes all enabled repositories on Sourcegraph and keeps the indexes up to date. Lives inside the indexed-search pod in a Kubernetes deployment.                                        |
@@ -480,48 +478,12 @@ A Redis instance for storing short-term information such as user sessions.
 
 ---
 
-### repo-updater
-
-```
-Repo-updater tracks the state of repositories.
-It is responsible for automatically scheduling updates using gitserver.
-It is also responsible for synchronizing metadata between code hosts and external services.
-Services that desire updates or fetch must communicate with repo-updater instead of gitserver.
-```
-
-| Replica     |                                                         |
-|:------------|:--------------------------------------------------------|
-| `Overview`  | Singleton                                               |
-| `Factors`   | -                                                       |
-| `Guideline` | A Singleton service should not have more than 1 replica |
-
-| CPU         |                                                                                          |
-|:------------|:-----------------------------------------------------------------------------------------|
-| `Overview`  | Most operations are not CPU bound                                                        |
-| `Factors`   | Most of the syncing jobs are related more to internal and code host-specific rate limits |
-| `Guideline` | -                                                                                        |
-
-| Memory      |                                                                                                                                                                                                                                   |
-|:------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Overview`  | The queue of repositories that need to be updated is stored in memory. It uses an in-memory queue and is mostly network intensive as it makes API calls and processes and writes those newly available data to the pgsql database |
-| `Factors`   | Number of repositories                                                                                                                                                                                                            |
-| `Guideline` | This service is safe to restart at any time. The existing in-memory update queue is reset upon restart                                                                                                                            |
-|             | Not memory intensive                                                                                                                                                                                                              |
-
-| Storage     |                                                                |
-|:------------|:---------------------------------------------------------------|
-| `Overview`  | A stateless service that directly writes to the pgsql database |
-| `Factors`   | -                                                              |
-| `Guideline` | -                                                              |
-| `Type`      | None                                                           |
-
----
-
 ### searcher
 
 ```
 Provides on-demand unindexed search for repositories.
-It relies on the OS file page cache to speed up future searches
+It relies on the OS file page cache to speed up future searches.
+Also the backend for symbols operations, indexing symbols in repositories using Ctags.
 ```
 
 | Replica     |                                                                     |
@@ -535,7 +497,7 @@ It relies on the OS file page cache to speed up future searches
 |:------------|:-----------------------------------------------------------------------------------------------|
 | `Overview`  | Searcher is IO and CPU bound. It fetches archives from gitserver and searches them with regexp |
 | `Factors`   | Number of active users                                                                         |
-| `Guideline` | More engaged users = more CPU                                                                  |
+| `Guideline` | More engaged users = more CPU. Scale with the size of repositories as well                     |
 
 | Memory      |                                                                       |
 |:------------|:----------------------------------------------------------------------|
@@ -553,49 +515,12 @@ It relies on the OS file page cache to speed up future searches
 |             | The most important thing is to ensure fast IO for storage                      |
 |             | Add more disks or replicas if you have lots of unindexed searches              |
 |             | More disk space will help speed up future caches                               |
+|             | At least 20% more than the size of your largest repository                     |
 | `Type`      | Ephemeral storage for Kubernetes deployments                                   |
 |             | The request size of the ephemeral storage is used as a limit for the zip cache |
 |             | Non-persistent SSD for Docker Compose                                          |
 
 <Callout type="note"> For example, if you search all branches on all repositories, that translates into lots of concurrent unindexed requests.</Callout>
-
----
-
-### symbols
-
-```
-The backend for symbols operations.
-Indexes symbols in repositories using Ctags.
-```
-
-| Replica     |                                                                             |
-|:------------|:----------------------------------------------------------------------------|
-| `Overview`  | Process unindexed search                                                    |
-| `Factors`   | Number of active users                                                      |
-| `Guideline` | More requests for distinct commits in different repositories = more replica |
-
-
-| CPU         |                                                                                        |
-|:------------|:---------------------------------------------------------------------------------------|
-| `Overview`  | Runs Ctags over code, stores symbol data in SQLite (or codeintel-db if using Rockskip) |
-| `Factors`   | Size of all repositories                                                               |
-| `Guideline` | Scale with the size of repositories                                                    |
-
-
-| Memory      |                                                                     |
-|:------------|:--------------------------------------------------------------------|
-| `Overview`  | Stores symbol data in SQLite and/or Postgres if Rockskip is enabled |
-| `Factors`   | Size of all repositories                                            |
-| `Guideline` | Scale with the size of repositories                                 |
-
-| Storage     |                                                                                                                      |
-|:------------|:---------------------------------------------------------------------------------------------------------------------|
-| `Overview`  | Saves SQLite DBs as files on disk in LRU fashion and copies an old one to a new file when a user visits a new commit |
-| `Factors`   | Size of the largest repository                                                                                       |
-| `Guideline` | At least 20% more than the size of your largest repository                                                           |
-|             | Using SSD is highly preferred                                                                                        |
-| `Type`      | Ephemeral storage for Kubernetes deployments                                                                         |
-|             | Non-persistent SSD for Docker Compose                                                                                |
 
 <Callout type="note"> If Rockskip is enabled, the symbols for repositories indexed by [Rockskip](/code-search/code-navigation/rockskip) are stored in codeintel-db instead.</Callout>
 

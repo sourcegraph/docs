@@ -1,29 +1,14 @@
-# Sourcegraph Cloud Analytics
+# Sourcegraph Analytics API
 
-The following instructions are for all Sourcegraph Cloud and self-hosted customers who have upgraded to a sufficient version of Sourcegraph (5.9+) and fully enabled usage telemetry.
-
-![Sourcegraph-cloud-analytics](https://storage.googleapis.com/sourcegraph-assets/cloud-analytics.png)
-
-## Enablement instructions
-
-To enable Sourcegraph Analytics:
-
-- Create an account on [Sourcegraph Accounts](https://accounts.sourcegraph.com/), or find the email address associated with your existing account.
-- Contact your Sourcegraph Technical Advisor or point of contact (or email us at support@sourcegraph.com if you don't know your contact), provide them with the email address you used to register above and ask for access to Sourcegraph Analytics.
-- They will validate your account and link it to your Sourcegraph Enterprise instance's usage metrics.
-- Sign in to [Sourcegraph Analytics](https://analytics.sourcegraph.com).
-
-## Data export
-
-Sourcegraph Analytics also includes a CSV export option with key metrics like the number of searches, chats, autocomplete suggestions, Completion Acceptance Rate (CAR%), and more. The data is split by user, day, client/editor, and programming language, perfect for automating retrieval and analyzing data in ways that make the most sense to your organization.
+The Sourcegraph Analytics API is an API that provides programmatic access to your Sourcegraph Analytics data, including usage metrics, user activity, and performance data.
 
 ## Access tokens
 
 For Sourcegraph Analytics, you can generate an access token for programmatic access. Tokens are long-lived with an optional expiry and have the same permissions to access instance data as the user who created them.
 
-### Token management APIs
+### Getting Started
 
-Token management is currently only available via the Sourcegraph Analytics API. Token management APIs are authenticated via the `cas` session cookie.
+Access tokens are created using the `cas` cookie for authentication to the token creation endpoint. Access tokens are longer lived than the `cas` cookie making them more suitable for programmatic access to the Sourcegraph Analytics API.
 
 - Sign in to [Sourcegraph Analytics](https://analytics.sourcegraph.com).
 - Retrieve your session cookie, `cas`, from your browser's developer tools.
@@ -120,7 +105,7 @@ curl -X DELETE https://analytics.sourcegraph.com/api/service-access-tokens/$TOKE
 
 ## API reference
 
-Sourcegraph Analytics API is a RESTful API that allows access to Sourcegraph Analytics data. To authenticate to the API, follow the instructions for [token creation](#token-creation).
+To authenticate to the API, follow the instructions for [token creation](#token-creation).
 
 Export your access token as an environment variable:
 
@@ -151,5 +136,18 @@ export INSTANCE_URL="<INSTANCE_URL>" # e.g. example.sourcegraphcloud.com
 export GRANULARITY="<GRANULARITY>"
 
 curl -X GET "https://analytics.sourcegraph.com/api/reports/by-user-client-date?instanceURL=$INSTANCE_URL&granularity=$GRANULARITY" \
+ -H "Authorization: Bearer $ACCESS_TOKEN"
+```
+
+Optional `startDate` and `endDate` values (formatted as `YYYY-MM-DD`) can be specified. Both parameters are optional. If neither is specified, the default is all time. If only one is specified, then only the start or end date filter will be applied.
+
+Example:
+
+```sh
+export INSTANCE_URL="<INSTANCE_URL>" # e.g. example.sourcegraphcloud.com
+export START_DATE="2025-01-01"
+export END_DATE="2025-12-31"
+
+curl -X GET "https://analytics.sourcegraph.com/api/reports/by-user-client-date?instanceURL=$INSTANCE_URL&startDate=$START_DATE&endDate=$END_DATE" \
  -H "Authorization: Bearer $ACCESS_TOKEN"
 ```

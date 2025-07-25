@@ -4,14 +4,91 @@
 
 Batch Changes are created by writing a [batch spec](/batch-changes/batch-spec-yaml-reference) and executing that batch spec with the [Sourcegraph CLI](https://github.com/sourcegraph/src-cli) `src`.
 
-Batch Changes can also be used on [multiple projects within a monorepo](/batch-changes/creating-changesets-per-project-in-monorepos) by using the `workspaces` key in your batch spec.
-
 There are two ways of creating a batch change:
 
-1. On your local machine, with the [Sourcegraph CLI](#create-a-batch-change-with-the-sourcegraph-cli)
-2. Remotely, with [server-side execution](/batch-changes/server-side)
+1. On your Sourcegraph instance, with [server-side execution](#on-your-sourcegraph-instance)
+2. On your local machine, with the [Sourcegraph CLI](#using-the-sourcegraph-cli)
 
-## Create a batch change with the Sourcegraph CLI
+## On your Sourcegraph instance
+
+Here, you'll learn how to create and run a batch change via server-side execution.
+
+To get started, click the **Batch Changes** icon in the top navigation or navigate to `/batch-changes`.
+
+### Create a batch change
+
+Click the **Create batch change** button on the Batch Changes page, or go to `/batch-changes/create`.
+
+![create_batch_change_button](https://sourcegraphstatic.com/docs/images/batch_changes/2025/create_batch_change_button.png)
+
+You will be redirected to a page showing you a list of curated templates.
+
+### Choosing a template
+
+<Callout type="info">Templates is a feature available in Sourcegraph 6.6 and later.</Callout>
+
+From the template selection page, you can either:
+
+- **Pick a template** from the list of curated templates that best matches your use case
+- **Click "Start from Scratch"** if you prefer to continue without a template
+
+![templates_list](https://sourcegraphstatic.com/docs/images/batch_changes/2025/templates_list.png)
+
+Your site admin can curate the list of available templates to match your organization's specific needs and use cases.
+
+### Filling out template fields
+
+If you selected a template, you will need to fill out the form fields specific to that template. These fields will customize the batch spec to your specific requirements.
+
+![templates_form](https://sourcegraphstatic.com/docs/images/batch_changes/2025/templates_form.png)
+
+The form fields are validated by regular expressions. If the validation fails, look at the description of that field to see what kind of value is required.
+
+### Choose a name for your batch change
+
+After you've filled out the template form fields, or after you've clicked "Start from Scratch", you will be prompted to choose a name for your namespace and optionally define a custom namespace to put your batch change in.
+
+![server-side-batch-change](https://sourcegraphstatic.com/docs/images/batch_changes/2024/create-a-batch-change.png)
+
+Once done, click **Create**.
+
+### Previewing batch spec and workspaces
+
+You can now see the batch spec and run a preview of the affected repositories and workspaces from the right-hand side panel. After resolution, it will show all the workspaces in repositories that match the given `on` statements. You can search through them and determine if your query is satisfying before starting execution. You can also exclude single workspaces from this list.
+
+Batch Changes can also be used on [multiple projects within a monorepo](/batch-changes/creating-changesets-per-project-in-monorepos) by using the `workspaces` key in your batch spec.
+
+The library contains examples that you can apply right into your batch spec if you need inspiration. Your site admin can manage the library of examples.
+
+![ssbc_workspace_preview](https://sourcegraphstatic.com/docs/images/batch_changes/2024/ssbc_workspace_preview.png)
+
+### Executing your batch spec
+
+When the spec is ready to run, ensure the [preview](/batch-changes/create-a-batch-change#previewing-workspaces) is up to date and then click **Run batch spec**. This takes you to the execution screen. On this page, you see:
+
+- Run statistics at the top
+- All the workspaces, including status and diff stat, in the left panel
+- Details on a particular workspace on the right-hand side panel where you can see steps with:
+  - Logs
+  - Results
+  - Command
+  - Per-step diffs
+  - Output variables
+  - Execution timelines for debugging
+
+Once finished, you can proceed to the batch spec preview, as you know it from before.
+
+![ssbc_execution_screen](https://sourcegraphstatic.com/docs/images/batch_changes/2024/ssbc_execution_screen.png)
+
+### Previewing and applying the batch spec
+
+On this page, you can review the proposed changes. Once satisfied, click **Apply**.
+
+Congratulations, you ran your first batch change server-side 🎊
+
+![ssbc_preview_screen](https://sourcegraphstatic.com/docs/images/batch_changes/2024/ssbc_preview_screen.png)
+
+## Using the Sourcegraph CLI
 
 This part of the guide will walk you through creating a batch change on your local machine with the Sourcegraph CLI.
 
@@ -83,7 +160,7 @@ src batch preview -f YOUR_BATCH_SPEC.yaml
 
 After you've applied a batch spec, you can [publish changesets](/batch-changes/publishing-changesets) to the code host when you're ready. This will turn the patches into commits, branches, and changesets (such as GitHub pull requests) for others to review and merge.
 
-You can share the link to your batch change with other users if you want their help. Any user on your Sourcegraph instance can [view it in the batch changes list](/batch-changes/create-a-batch-change#viewing-batch-changes).
+You can share the link to your batch change with other users if you want their help. Any user on your Sourcegraph instance can [view it in the batch changes list](/batch-changes/view-batch-changes).
 
 If a user viewing the batch change lacks read access to a repository in the batch change, they can only see [limited information about the changes to that repository](/batch-changes/permissions-in-batch-changes#repository-permissions-for-batch-changes) (and not the repository name, file paths, or diff).
 
@@ -114,88 +191,3 @@ src batch preview -f your_batch_spec.yaml -namespace <SOURCEGRAPH_USERNAME_OR_OR
 ```
 
 When creating a batch change server-side using the UI, you can select the namespace to which the batch change belongs when you create it.
-
-### Administration
-
-Once a batch change is open, any Sourcegraph user can view it. However, the namespace determines who can administer it, such as editing or deleting it. When a batch change is created in a user namespace, only that user (and site admins) can administer it. When a batch change is created in an organization namespace, all members of that organization (and site admins) can administer it.
-
-## Create a batch change with server-side execution
-
-Here, you'll learn how to create and run a batch change via server-side execution.
-
-Click the **Create batch change** button on the Batch Changes page, or go to `/batch-changes/create`.
-You will be prompted to choose a name for your namespace and optionally define a custom namespace to put your batch change in.
-
-![server-side-batch-change](https://sourcegraphstatic.com/docs/images/batch_changes/2024/create-a-batch-change.png)
-
-Once done, click **Create**.
-
-### Editing the spec file
-
-You should see the editor view now. This view consists of three main areas:
-
-- The library sidebar panel on the left
-- The editor in the middle
-- The workspaces preview panel on the right
-
-![ssbc_editor_panels](https://sourcegraphstatic.com/docs/images/batch_changes/2024/ssbc_editor_panels.png)
-
-You can pick from the examples in the library pane to get started quickly or begin working on your batch spec in the editor right away. Site admins can configure the examples. The editor will provide documentation as you hover over tokens in the YAML spec and supports auto-completion.
-
-### Previewing workspaces
-
-Once satisfied or to test your batch change's scope, you can run a new preview from the right-hand side panel at any time. After resolution, it will show all the workspaces in repositories that match the given `on` statements. You can search through them and determine if your query is satisfying before starting execution. You can also exclude single workspaces from this list.
-
-![ssbc_workspace_preview](https://sourcegraphstatic.com/docs/images/batch_changes/2024/ssbc_workspace_preview.png)
-
-### Executing your batch spec
-
-When the spec is ready to run, ensure the preview is up to date and then click **Run batch spec**. This takes you to the execution screen. On this page, you see:
-
-- Run statistics at the top
-- All the workspaces, including status and diff stat, in the left panel
-- Details on a particular workspace on the right-hand side panel where you can see steps with:
-  - Logs
-  - Results
-  - Command
-  - Per-step diffs
-  - Output variables
-  - Execution timelines for debugging
-
-Once finished, you can proceed to the batch spec preview, as you know it from before.
-
-![ssbc_execution_screen](https://sourcegraphstatic.com/docs/images/batch_changes/2024/ssbc_execution_screen.png)
-
-### Previewing and applying the batch spec
-
-On this page, you can review the proposed changes and the operations taken by Sourcegraph on each changeset. Once satisfied, click **Apply**.
-
-Congratulations, you ran your first batch change server-side 🎊
-
-![ssbc_preview_screen](https://sourcegraphstatic.com/docs/images/batch_changes/2024/ssbc_preview_screen.png)
-
-## Viewing batch changes
-
-You can view a list by clicking the **Batch Changes** icon in the top navigation bar:
-
-![batch-change-icon-to-view](https://sourcegraphstatic.com/docs/images/batch_changes/2024/batch_changes_icon_in_menu.png)
-
-### Title-based search
-
-You can search through your previously created batch changes by title. This search experience makes it much easier to find the batch change you’re looking for, especially when you have large volumes of batch changes to monitor.
-
-Start typing the keywords that match the batch change’s title, and you will see a list of relevant results.
-
-![title-based-search-batch-changes](https://storage.googleapis.com/sourcegraph-assets/Docs/title-based-search-bc.png)
-
-## Filtering Batch Changes
-
-You can also use the filters to switch between showing all open or closed Batch Changes.
-
-![use-filters-batch-changes](https://sourcegraphstatic.com/docs/images/batch_changes/2024/viewing_batch_changes_filtering.png)
-
-## Filtering changesets
-
-When looking at a batch change, you can search and filter the list of changesets with the controls at the top of the list:
-
-![filter-changesets](https://sourcegraphstatic.com/docs/images/batch_changes/2024/viewing_batch_changes_filtering_changesets.png)

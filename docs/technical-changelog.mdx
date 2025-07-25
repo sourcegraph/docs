@@ -4,6 +4,879 @@ This page documents all notable changes to Sourcegraph. For more detailed change
 
 {/* CHANGELOG_START */}
 
+# 6.6 Patch 0
+
+## v6.6.0
+
+- [sourcegraph](https://github.com/sourcegraph/sourcegraph/releases/tag/v6.6.0)
+
+- [docker-compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/releases/tag/v6.6.0)
+
+- [helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/releases/tag/v6.6.0)
+
+- [kustomize](https://github.com/sourcegraph/deploy-sourcegraph-k8s/releases/tag/v6.6.0)
+
+### Features
+
+#### Batch Changes
+
+- enable new templates experience by default `(PR #6608)`
+- enable forked repos flow for pushed-only changesets [gitlab only] `(PR #6342)`
+  - Enable forked repos flow for pushed-only changesets [gitlab only]
+- enable forked repos flow for pushed-only changesets [github only] `(PR #6312)`
+  - Enable forked repos flow for pushed-only changesets [github only]
+- new batch changes experience with templates `(PR #5966)`
+  - feat(batches): new batch changes experience with templates
+
+#### Deepsearch
+
+- Add separate diff search and compare revisions tools (SPLF-1114) `(PR #6332)`
+
+#### Ep
+
+- Improved left nav and consistent margins between internal pages `(PR #6165)`
+- server side filtering for subscriptions listing `(PR #6090)`
+
+#### Multitenant
+
+- Load code host scopes in parallel `(PR #6681)`
+- Layout improvements for the workspace setup `(PR #6624)`
+- Add BitBucket Cloud setup UI `(PR #6535)`
+
+#### Release
+
+- Schema sync PR Generation `(PR #6340)`
+  - release: sync docs repo config files during release process
+- Schema sync configuration system `(PR #6182)`
+  - feat(release): add schema syncing tool to keep docs repo schemas in sync with monorepo
+
+#### Search
+
+- Add grouping by repo or language to the inventory stats insight `(PR #6390)`
+- add archived badge to repos that are archived on code host `(PR #6366)`
+- (new web ui) Migrate saved searches to Svelte `(PR #5081)`
+
+#### Source
+
+- teams: bitbucket: enforce that username must be atlassian email address `(PR #6585)`
+- Check token scopes when connecting bitbucket workspace `(PR #6570)`
+- teams: gitlab: prevent setting PAT if token doesn't have sufficient scopes `(PR #6540)`
+- gitlab: create GetPat method that can be used to get information about a PAT (including scopes) `(PR #6539)`
+- Allow fetching Bitbucket Cloud connection username `(PR #6538)`
+- teams: bitbucket cloud: make it possible to search / filter repo names without knowing query syntax `(PR #6505)`
+- Implement Bitbucket Cloud workspace resolver `(PR #6476)`
+- bitbucket - create multitenant service for connection management `(PR #6435)`
+- add ListWorkspaceRepositories `(PR #6410)`
+- add support for api tokens to bitbucket cloud client `(PR #6393)`
+
+### Fix
+
+#### Batch Changes
+
+- introduce workaround for batch changes users on fine-grained pats for github repos `(PR #6704)`
+  -  Backport 9e232e27c2c1a19b69b01cea12ae0194fb7d4422 from #6656
+- only show examples in library pane `(PR #6577)`
+- dont pass empty renderTemplate `(PR #6362)`
+- restrict valid characters for batch spec template variable names `(PR #6265)`
+- update schema link to public artifacts repo `(PR #6193)`
+  - fix(batches): update schema link to public artifacts repo
+
+#### Code Intelligence
+
+- Fix and prevent cases where local and global occurrences share a range `(PR #6563)`
+- Don't mark global Go vars as locals in syntactic indexing `(PR #6537)`
+
+#### Cody
+
+- fix underline on hover for the Important Notice Banner `(PR #6246)`
+
+#### Deepsearch
+
+- Fix arrow up and down in follow ups `(PR #6616)`
+- Fix commit search query structure `(PR #6551)`
+- Reset scroll position when switching conversations `(PR #6482)`
+- Cache system prompt `(PR #6459)`
+- fix sidebar animation `(PR #6399)`
+- Reset activeAnswerIndex when switching conversations `(PR #6398)`
+- wrap content elements in container `(PR #6394)`
+- follow up questions not working after a fresh load `(PR #6392)`
+- fix external icon styling in sources `(PR #6379)`
+- More UI refinements `(PR #6378)`
+- Fix null byte parsing (SPLF-1216) `(PR #6348)`
+- Sanitize JSON bytes before writing to Postgres (SPLF-1216) `(PR #6275)`
+- ensure hidden sidebar buttons are not interactive `(PR #6262)`
+- move revision label down on file sources and preview to another line `(PR #6135)`
+
+#### Dev
+
+- Fix new web app dev build `(PR #6322)`
+- Fix react storybook `(PR #6321)`
+- Fix client/web-sveltekit storybook `(PR #6314)`
+- Add software-properties-common as prerequisit to sg setup `(PR #6191)`
+
+#### Ep
+
+- Improved tooltip readability for lightmode `(PR #6097)`
+
+#### Ep-Ui
+
+- fixed subscriptions list's width when loading `(PR #6474)`
+
+#### Insights
+
+- skip empty repos for inventory insights `(PR #6250)`
+  - fix(insights): skip empty repos for inventory insights
+
+#### Migrator
+
+- Remove links to sourcegraph/sourcegraph repo in drift summary `(PR #6463)`
+  - fix(migrator): remove private repo links in migrator drift output
+
+#### Msp/Otelcol
+
+- disable GCP resource detection override `(PR #6176)`
+
+#### Multitenant
+
+- Improve typography styles and colors on the create pages `(PR #6736)`
+- Multitenant setup paper cuts `(PR #6578)`
+- Do not show discount label if coupon isn't presented `(PR #6491)`
+
+#### Release
+
+- custom wolfi redis image `(PR #6548)`
+  - fix: package custom wolfi redis base image and package to include jemalloc
+
+#### Search
+
+- do not use workspace list API on unauth instance `(PR #6579)`
+- Skip search contexts from deleted namespaces `(PR #6013)`
+
+#### Serch
+
+- fix dotcom again `(PR #6581)`
+
+#### Source
+
+- teams: fix width of error banner (#6702) `(PR #6706)`
+- teams: github: have noConnectedAccountFoundError properly implement errcode.NotFounder (also fix gitlab token scopes) `(PR #6701)`
+- teams: githubapp: make scopes use proper pagination `(PR #6677)`
+  -  Backport a278c9287fd779ca9f26d10b2146e7c6cadfbcb3 from #6651
+- Specify bitbucket cloud pagelen `(PR #6671)`
+- Rename manage installation to just manage `(PR #6640)`
+- teams: github: drop suspended installations from list of scopes `(PR #6614)`
+- fix image/attachment click handling in bitbucket server native integration `(PR #6590)`
+- teams: bitbucket: return 0 scopes instead of error when credentials appear to be invalid `(PR #6588)`
+- Fix Bitbucket Cloud cloning with API Tokens `(PR #6541)`
+- Fix bug where workspace admins cannot manage GitLab repos `(PR #6520)`
+- Handle spaces in depot file paths for Perforce `(PR #6337)`
+
+#### Others
+
+- 'Public code search' entry style `(PR #6611)`
+- Update bazel file to include correct patch file `(PR #6603)`
+
+### Chore
+
+#### Batch Changes
+
+- add immediate sync after pushed-only changeset creation [gitlab only] `(PR #6525)`
+- add immediate sync after pushed-only changeset creation [github only] `(PR #6368)`
+- remove unnecessary comments `(PR #6333)`
+  - Remove unnecessary comments
+- refactor to use AbbreviateRef instead of TrimPrefix for pushed-only changesets `(PR #6222)`
+  - refactor to use AbbreviateRef instead of TrimPrefix for pushed-only changesets
+- add more backend telemetry for pushed-only changesets `(PR #6219)`
+  - Add more backend telemetry for pushed-only changesets
+
+#### Deepsearch
+
+- Add effect to resize text area `(PR #6699)`
+- Don't include full system prompt for rawLLM operations `(PR #6688)`
+- Don't include cache control for rawLLM calls `(PR #6687)`
+- Add telemetry for rawLLM calls `(PR #6618)`
+- Migrate diff_search tool to backend `(PR #6545)`
+- Migrate compare_revisions tool to backend `(PR #6523)`
+- Ensure valid tool call history for follow ups `(PR #6500)`
+
+#### Dev
+
+- Upgrade prettier and prettier svelte plugin `(PR #6473)`
+- Upgrade sass `(PR #6291)`
+- Upgrade to vite v6 `(PR #6273)`
+- Cleanup client/web peer dependency warnings `(PR #6261)`
+- Update @reach packages `(PR #6260)`
+- Cleanup client/web-sveltekit peer dependencies `(PR #6258)`
+- Upgrade fonts `(PR #6257)`
+- Upgrade prettier format imports plugin `(PR #6256)`
+- Standardize on @sourcegraph/ui `(PR #6070)`
+- Upgrade Svelte version `(PR #6040)`
+- Upgrade unplugin-icon and icon type definitions `(PR #6016)`
+
+#### Release
+
+- Update consts and stiched migration graph for 6.6 `(PR #6644)`
+  - NA - Internal change
+
+#### Release
+
+- cadvisor image default WARN log level `(PR #6516)`
+  - cadvisor image is now logging using WARN level by default
+
+#### Wolfi-Images/Cloud-Mi2
+
+- upgrade nodejs to v22.17.0 `(PR #6417)`
+
+#### Others
+
+- Upgrade uikit to latest version `(PR #6576)`
+- Fix some logspam `(PR #6470)`
+- Use more standard site-admin check `(PR #6349)`
+- CI removing upload to demo workflow `(PR #6225)`
+  - DINF-1196 has all details
+
+### Reverts
+
+  There were no reverts for this release
+
+### Uncategorized
+
+#### Others
+
+- [Backport 6.6.x] Merge Cody ignore and context filters for both dotcom and enterprise `(PR #6749)`
+  -  Backport c201fd4027ba118b2c8a0cd089003638f13db429 from #6593
+- [Backport 6.6.x] Update Cody Web to 0.33.0 `(PR #6737)`
+- [Backport 6.6.x] Use iterator methods for filtering `(PR #6672)`
+- Removes DeepSearch from pricing table on free tier `(PR #6641)`
+- UI fix on workspaces.sourcegraph.com for users with no workspace but able to join `(PR #6613)`
+- Update copy on confirmation modal to be code-host agnostic `(PR #6610)`
+- Adjust new dot com specific UI `(PR #6602)`
+- Feat(deep search): Implemented dotcom gating for deepsearch `(PR #6589)`
+  -
+- zoekt: try to reduce memory usage of zoektFileMatchToMultilineMatches `(PR #6561)`
+- msp: support custom OTEL config `(PR #6557)`
+- sg/msp: support single-env ops docs `(PR #6554)`
+- ep: warn when trying to add sourcegraph user `(PR #6531)`
+- chore(batches) add new test to ensure pushed-only changesets can transition to published state `(PR #6529)`
+- workspaces: ignore workspace-not-found on deletion `(PR #6528)`
+- feat(deepsearch) - CORE-1181: Added QuotaUsage information to HandleRetrieveDeepSearchs response `(PR #6527)`
+  - Added QuotaUsage information to HandleRetrieveDeepSearchs
+- Improves the UI and copy of the PlanPage for workspaces `(PR #6522)`
+- Add dot com UI for 6.6 `(PR #6521)`
+- Reduce output verbosity of SCIP groundtruth targets `(PR #6518)`
+- chore(deep search): migrated `commit_search` tool to server `(PR #6508)`
+- [CORE-1158] deepsearch: Added store for quota checks `(PR #6506)`
+  - Added store layer for tracking deep search queries
+- gitlab: Gracefully handle bad token when listing scopes `(PR #6495)`
+- gitab: Add all repos scope resolver `(PR #6494)`
+- bug(deep search): replaced compaction and turn limit with token limit `(PR #6485)`
+  - Replaced turn limits in deep search with a token limit
+- doc: Update architecture diagram svg `(PR #6458)`
+- ep: more copy fixups `(PR #6457)`
+- Re-add missing system prompt `(PR #6455)`
+- deepsearch: add stub gating.Provider for DS metering/enforcement `(PR #6443)`
+- web: Fix eslint not picking up changes to GQL `(PR #6439)`
+- idp: Advertise PKCE support in OIDC discovery `(PR #6434)`
+- ep: branding tweaks `(PR #6418)`
+- ep: add backend usage telemetry `(PR #6415)`
+- cody-gateway: add sg_actor_id, sg_actor_anonymous_uid for rate-limited events `(PR #6414)`
+- Add query logging to private metadata for search.submit events in sve… `(PR #6397)`
+- ep: fix analytics enablement instructions `(PR #6396)`
+- ep: slight copy fixups `(PR #6391)`
+- oidc: Fix empty displayName and improve claim precedence `(PR #6388)`
+- Adds new UI for template experience `(PR #6387)`
+- feature(release): improve schema syncer tool json output `(PR #6369)`
+  - feature(release): improve the schema marshalling in the release schema syncher tool
+- Update Cody Web to 0.32.9 in react web app `(PR #6360)`
+- web: Fix eslint autofixable errors `(PR #6357)`
+- ep: show button for Entitle link on internal pages to sourcegraph teammates `(PR #6345)`
+- dotcom, workspaces: shut down cody after codyprosunset.SunsetDate `(PR #6343)`
+- workspaces: remove price reference to Cody Pro `(PR #6335)`
+- dotcomgating: support siteconfig fallback for SAMS options `(PR #6311)`
+- completions: remove 'cody.completions:complete' event `(PR #6310)`
+- cody: remove token-usage manager `(PR #6309)`
+- Added license key lookup page `(PR #6307)`
+- source: Add workspace functions for Bitbucket Cloud client `(PR #6298)`
+- Update Cody Web to 0.32.9 `(PR #6296)`
+- gateway: Drop benchmarking endpoints `(PR #6287)`
+- dotcom: Implement dotcom gating provider `(PR #6286)`
+- workspaces: Set up for Teams name change `(PR #6284)`
+- completions: only record disabled reasons in trace `(PR #6282)`
+- gateway: support OpenAI models for autocomplete `(PR #6272)`
+- multitenant(fix): Fix workspaces and instance internal debug pages UI `(PR #6263)`
+- idp: Show UIs by default `(PR #6245)`
+- dotcom: update Enterprise Starter CTA to omit AI stuff `(PR #6240)`
+- Fede/ep UI fix left nav `(PR #6230)`
+- CI: remove scip-go upload to demo.sourcegraph.com `(PR #6220)`
+  - [https://sourcegraph.slack.com/archives/C04MYFW01NV/p1750800014304569](https://sourcegraph.slack.com/archives/C04MYFW01NV/p1750800014304569)
+  - Removed failing upload process that was causing CI errors
+- Polished EP UI `(PR #6207)`
+- completions/aws-sdk-compatibility `(PR #6198)`
+- feat(deep search): single URL for deepsearch [SPLF-1207] `(PR #6181)`
+  - Deep search URLs are now directly shareable
+- msp/otelcol: use googlecloud exporter for metrics `(PR #6171)`
+- idp: Add consent notification emails `(PR #6141)`
+- txemail: Add interface to make mocking nicer `(PR #6140)`
+- Removes dot from create workspace button `(PR #6139)`
+- Style Fixes homepage `(PR #6138)`
+- Add Cody Deprecation Notice `(PR #6103)`
+  - Cody will be deprecated on July 23rd 2025.
+- dotcom: remove Cody from footer link `(PR #6076)`
+- fix(dev infra): add dev proxy request cancellation propagation `(PR #6075)`
+- Update sensitive metadata allowlist `cody.autoedit` events to include `languageId` `(PR #6073)`
+- enterpriseportal/iam: document problems with schema `(PR #6069)`
+- fix(deep search): preserve conversation title on update `(PR #6029)`
+- Reduce local syntactic replicas, improve codeintel run configuration `(PR #5742)`
+
+{/* RSS={"version":"v6.6.0", "releasedAt": "2025-07-24"} */}
+
+
+# 6.5 Patch 2
+
+## v6.5.2654
+
+- [sourcegraph](https://github.com/sourcegraph/sourcegraph/releases/tag/v6.5.2654)
+
+- [docker-compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/releases/tag/v6.5.2654)
+
+- [helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/releases/tag/v6.5.2654)
+
+- [kustomize](https://github.com/sourcegraph/deploy-sourcegraph-k8s/releases/tag/v6.5.2654)
+
+### Fix
+
+#### Insights
+
+- skip empty repos for inventory insights `(PR #6271)`
+  - fix(insights): skip empty repos for inventory insights  Backport beee9d2241a4d3e854ac06ef8b5d8d000bd84a69 from #6250
+
+#### Migrator
+
+- Remove links to sourcegraph/sourcegraph repo in drift summary `(PR #6496)`
+  - fix(migrator): remove private repo links in migrator drift output Backport 4ae3c3a6b6d60bb99421293df830a9e63a53ae01 from #6463
+
+### Reverts
+
+  There were no reverts for this release
+
+### Uncategorized
+
+#### Others
+
+- Backport 6360 to 6.5.x `(PR #6492)`
+- [Backport 6.5.x] dotcom, workspaces: shut down cody after codyprosunset.SunsetDate `(PR #6344)`
+
+### Untracked
+
+The following PRs were merged onto the previous release branch but could not be automatically mapped to a corresponding commit in this release:
+
+- [Backport 6.5.x] tenant/reconciler: add notice reconciler for codyplgsunset `(PR #6218)`
+- add experimental icon + code host limits to pushed-only changesets UI `(PR #6215)`
+  - Add experimental icon + GitLab/GitHub only specification for pushed-only changesets in batch changes UIBackport 04be437 from #6180
+- [Backport 6.5.x] llmapitelemetry: fix traceparent metadata field `(PR #6209)`
+- add a new Code Insight for tracking inventory statistics over time `(PR #6202)`
+  - Combines features of the Language usage and Detect and track patterns insights to track code inventory metrics over time:
+    - lines of code
+    - size of code
+    - file counts
+  - Can group those metrics by repository, by language, or not at all
+  - Can collect the metrics for a list of repositories, or a repo search query
+- add graphql endpoints for inventory stats insight `(PR #6201)`
+  - New GraphQL endpoints
+    - query:
+      - inventoryStatsPreview
+    - mutation:
+      - createInventoryStatsInsight
+      - updateInventoryStatsInsight
+- [Backport 6.5.x] multitenant(fix): Fix Add repositories UI picker `(PR #6192)`
+
+{/* RSS={"version":"v6.5.2654", "releasedAt": "2025-07-09"} */}
+
+
+# 6.5 Patch 1
+
+## v6.5.1211
+
+- [sourcegraph](https://github.com/sourcegraph/sourcegraph/releases/tag/v6.5.1211)
+
+- [docker-compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/releases/tag/v6.5.1211)
+
+- [helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/releases/tag/v6.5.1211)
+
+- [kustomize](https://github.com/sourcegraph/deploy-sourcegraph-k8s/releases/tag/v6.5.1211)
+
+### Reverts
+
+  There were no reverts for this release
+
+### Uncategorized
+
+#### Others
+
+- [Backport 6.5.x] Remove sourcegraph repos from go to def tool description `(PR #6356)`
+
+{/* RSS={"version":"v6.5.1211", "releasedAt": "2025-07-01"} */}
+
+
+# 6.5 Patch 0
+
+## v6.5.0
+
+- [sourcegraph](https://github.com/sourcegraph/sourcegraph/releases/tag/v6.5.0)
+
+- [docker-compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/releases/tag/v6.5.0)
+
+- [helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/releases/tag/v6.5.0)
+
+- [kustomize](https://github.com/sourcegraph/deploy-sourcegraph-k8s/releases/tag/v6.5.0)
+
+### Features
+
+#### Batch Changes
+
+- Add experimental icon + code host limits to pushed-only changesets UI `(PR #6215)`
+  - Add experimental icon + GitLab/GitHub only specification for pushed-only changesets in batch changes UIBackport 04be437 from #6180
+- Add batchSpecLibraryRecord API `(PR #5982)`
+- Enable gitlab v0 functionality for pushed-only changesets `(PR #5974)`
+- Enable bulk ops for pushed-only-changesets (github only) `(PR #5796)`
+  - Add 'push only' bulk operation for Github
+
+#### Ci
+
+- Add TSV tracking for pushed Docker images `(PR #5733)`
+- Add the rights tags depending on where we push too + tests `(PR #5221)`
+
+#### Cloud
+
+- Cloud-relay process all handlers and slo parsing added `(PR #5438)`
+
+#### Completions
+
+- Always calculate and return credits, round up calculations `(PR #5817)`
+
+#### Deepsearch
+
+- Add tooltip when share button is disabled `(PR #6021)`
+- Introduce transitions `(PR #6007)`
+- Add Deep Search intro modal `(PR #6005)`
+- Initial UI for sharing threads `(PR #5954)`
+- Add API to rotate read token `(PR #5948)`
+- Add commit search card `(PR #5922)`
+- Add GetContributorReposTool card `(PR #5920)`
+- Hide follow-up suggestions with ESC `(PR #5906)`
+- Unify modal system for diagrams `(PR #5905)`
+- Add copy button to mermaid diagrams `(PR #5882)`
+- Force repo filter when using commit search `(PR #5760)`
+- Improve homepage `(PR #5756)`
+- Rebalance UI (Part 1) `(PR #5729)`
+- Introduce full file previews `(PR #5677)`
+- Make panes resizeable panels instead `(PR #5675)`
+- Conversation left, sources right layout `(PR #5621)`
+- Make file icons use language icon where applicable `(PR #5517)`
+- Report what tool we are executing before it finishes (SPLF-1017) `(PR #5465)`
+
+#### Dev
+
+- Add web-next-optin feature flag to control gradual rollout of Svelte pages `(PR #5780)`
+
+#### Enterprise-Portal
+
+- Update subscription fields `(PR #5736)`
+- Subscription details page with archive logic `(PR #5710)`
+- List subscriptions page UI `(PR #5700)`
+- ArchiveEnterpriseSubscription RPC handler `(PR #5636)`
+
+#### Ep
+
+- Create subscription UI `(PR #5734)`
+- Implement UpdateEnterpriseSubscription RPC handler `(PR #5678)`
+- Implement RevokeEnterpriseSubscriptionLicense RPC handler `(PR #5577)`
+- Implement CreateEnterpriseSubscriptionLicense RPC handler `(PR #5575)`
+- Implement CreateEnterpriseSubscription RPC handler `(PR #5554)`
+
+#### Msp
+
+- Sg msp (cloudrun|traces|metrics|rollouts|alerts) `(PR #5795)`
+- More health probe types `(PR #5691)`
+- Alert for datastream issues when publications are enabled `(PR #5546)`
+- Hint exact entitle links, update outdated links `(PR #5526)`
+- Custom entitle links `(PR #5503)`
+- Rollouts promotion strategy `(PR #5474)`
+- Otelcollector sidecar `(PR #5464)`
+
+#### Msp/Operationdocs
+
+- Account for automatic promotion rollouts `(PR #5537)`
+
+#### Release
+
+- Add granular telemetry for external databases `(PR #5739)`
+  - [telemetry] add granular database telemetry.
+- Create workflows to trigger and create graphQL pipelines `(PR #5299)`
+
+#### Release
+
+- Fix handler initialization and add testing `(PR #5975)`
+  - Correct handler init for gcp and aws clients in releaseplatform, add testing
+- ConnectRPC endpoints for VerifyExecutorsRelease `(PR #5972)`
+  - Releaseplatform: add rpc endpoint for VerifyExecutorsWorkflow
+- Add support for aws and gcp client initialization options `(PR #5916)`
+  - Releaseplatform: added secret injection to aws and gcp clients
+- Add aws verification to temporal executors check workflow `(PR #5529)`
+  - Add aws verification to VerifyExecutorsRelease temporal workflow
+
+#### Rerun-Changesets
+
+- Warn when rerunning a changeset triggers more changesets to be rerun `(PR #5426)`
+  - GIN index to efficiently search workspace by changesetSpec
+  - Resolver endpoint to get workspace from changesetSpec
+  - UI warning in preview step
+
+#### Search
+
+- Add a new Code Insight for tracking inventory statistics over time `(PR #6202)`
+  - Combines features of the Language usage and Detect and track patterns insights to track code inventory metrics over time:
+    - Lines of code
+    - Size of code
+    - File counts
+  - Can group those metrics by repository, by language, or not at all
+  - Can collect the metrics for a list of repositories, or a repo search query  Backport e5a5779e01a0e9cef1e29020c3ab173b44f19be2 from #5397
+- Add graphql endpoints for inventory stats insight `(PR #6201)`
+  - New GraphQL endpoints
+    - Query:
+      - InventoryStatsPreview
+    - Mutation:
+      - CreateInventoryStatsInsight
+      - UpdateInventoryStatsInsight
+ Backport 3c7681e462152cdc401148bd679b1d2924a6d639 from #5566
+- Expose Inventory settings in site config `(PR #5506)`
+  - The Inventory environment variables have been moved into site config settings (in the "inventory" section):
+    - USE_ENHANCED_LANGUAGE_DETECTION: "disableEnhancedLanguageDetection" (defaults to false)
+    - GET_INVENTORY_GIT_SERVER_CONCURRENCY: "gitServerConcurrency" (defaults to 4)
+    - GET_INVENTORY_REDIS_CONCURRENCY: "redisConcurrency" (defaults to 20)
+    - GET_INVENTORY_MAX_INV_IN_MEMORY: "maxInventoryInMemory" (defaults to 1000)
+    - GET_INVENTORY_TIMEOUT: "timeoutInMinutes" (defaults to 5)
+
+#### Sg
+
+- 'fleet' reports multi-stage pipelines and db publications `(PR #5528)`
+
+#### Sg/Msp
+
+- Add 'sg msp init env --clone-from=ENV' `(PR #6034)`
+- Add 'sg msp entitle' command `(PR #5583)`
+
+#### Source
+
+- Gate service accounts based on Explicit Permissions feature `(PR #6113)`
+- Allow filtering by account type `(PR #6098)`
+- Tweak service account pages to be a bit friendlier `(PR #6043)`
+- Add SERVICE_ACCOUNT rbac role `(PR #6009)`
+- Allow granting access to all to repositories in the UI `(PR #5812)`
+- Add unrestricted_repo_access option for users `(PR #5752)`
+- Allow site-admins to create service accounts `(PR #5628)`
+
+#### Telemetry
+
+- Improve updateCheck to check for canonical version `(PR #5789)`
+  - Feat(telemetry): add canonical PG version check for detecting external db usage
+
+#### Workspaces
+
+- Redirect users to homepage on 404, suspended `(PR #5533)`
+
+#### Others
+
+- Use TCP startup probe to otel-collector sidecar `(PR #5913)`
+- Add a tooltip on the retry button `(PR #5607)`
+  - Adds a tooltip to the retry button on the batch changes preview page.image
+
+### Fix
+
+#### Batch Changes
+
+- GitLab webhooks for merge requests not associated with batch changes now return HTTP 204 instead of HTTP 500 errors `(PR #6185)`
+  - Fix(batches): GitLab webhooks for merge requests not associated with batch changes now return HTTP 204 instead of HTTP 500 errors  Backport b5e926187d14784ea9a51fefca626379a25bda3e from #6052
+- Don't sync changesets from soft-deleted namespaces `(PR #6039)`
+  - Fix(batches): fixed an issue where Batch Changes would attempt to sync changesets from deleted namespaces resulting in delays and timeouts for active changesets
+- Update docs link `(PR #5955)`
+- Fix label unmarshalling for gitlab events `(PR #5782)`
+  - Fix(batches): fixed an issue where GitLab merge request events would fail to handle labels
+
+#### Client
+
+- Use forks vitest pool for branded `(PR #5626)`
+
+#### Cody
+
+- Update output limit for opus4 `(PR #5689)`
+
+#### Cody-Gateway
+
+- Update Claude 4 sonnet model tiers `(PR #5543)`
+  - Green ci
+
+#### Deepsearch
+
+- Conversation side bar bug fixes `(PR #6148)`
+- Adds delete confirmation modal `(PR #6118)`
+- Vertically center refresh button for upfront prompt suggestions `(PR #6115)`
+- Center intro modal, darken background and add dismiss animation `(PR #6058)`
+- Gives cancel icon margin top to align with question better `(PR #6054)`
+- Fixes ui bleeding offscreen `(PR #6053)`
+- Add color back to conversation pane `(PR #6046)`
+- Add Deep Search title back in and offset UI `(PR #6038)`
+- Add info text if new share link has not been generated yet `(PR #6023)`
+- Increase liklihood go-to-def and find-references uses syntactic or precise data `(PR #6018)`
+- Reduce search input width `(PR #6012)`
+- Add opacity to input placeholder `(PR #6008)`
+- Example query and search input visual tweaks `(PR #6006)`
+- Minimise query examples `(PR #6001)`
+- Improve Deep Search homepage `(PR #5980)`
+- Fix circular dependency in deep search tools `(PR #5953)`
+- Exclude first and last turn `(PR #5923)`
+- Make answer code highlighting styled differently `(PR #5919)`
+- Change placeholder inputs `(PR #5892)`
+- Fail mermaid tool call if result cannot be parsed `(PR #5881)`
+- Stop page jumping `(PR #5871)`
+- Update input placeholder `(PR #5868)`
+- Fixes funky layout issues `(PR #5867)`
+- Fix title truncation `(PR #5866)`
+- Handle non-utf8 data in get_contributor_data `(PR #5848)`
+- Show code host icon `(PR #5844)`
+- Tweaks to @-mentions menu `(PR #5839)`
+- Make conversation history list fancier `(PR #5757)`
+- Tweak source list height `(PR #5753)`
+- Fix code excerpts `(PR #5705)`
+- Consistently apply truncation to repo name `(PR #5704)`
+- Add code bg to code preview `(PR #5672)`
+- Suppress rendering diagrams with errors (SPLF-1060) `(PR #5610)`
+- Remove "Running" before tool display name `(PR #5561)`
+- Make footer more subtle and add finder link `(PR #5560)`
+- Improve submit button `(PR #5524)`
+- Make docs link more compact `(PR #5521)`
+- Improve date handling in commit search tool (SPLF-1043) `(PR #5501)`
+
+#### Dev
+
+- Hide logspam in gazelle about generation_mode `(PR #5630)`
+
+#### Msp
+
+- Include timeout in MaximumStartupLatencySeconds `(PR #5847)`
+
+#### Msp/Rollouts
+
+- Fix automation SA `(PR #5505)`
+
+#### Notebooks
+
+- Fix notebook page loading error `(PR #6152)`
+
+#### Pre-Commit
+
+- Don't flag service account configuration as a credential `(PR #5532)`
+  - Make google cred pre commit hook more precise
+
+#### Release
+
+- Verify glibc version in postgresql images `(PR #5670)`
+  - Release: add container test to verify `glibc` version does not get unintentionally upgraded in PostgreSQL container images`
+
+#### Release
+
+- Pin containerd version in executor build `(PR #5643)`
+
+#### Search
+
+- Allow users to see all public search contexts `(PR #5888)`
+- Do not suggest deprecated search filters `(PR #5551)`
+
+#### Source
+
+- Don't show warning while settings are loading `(PR #6037)`
+- Add store tests for AddUserToRepo and RemoveUserFromRepo `(PR #6010)`
+- Explicit permissions pagination `(PR #5965)`
+- Retry watching executor pods `(PR #5813)`
+- Handle 429 TooManyRequest responses from GitHub `(PR #5787)`
+  - Fixed an issue where Sourcegraph was not handling rate limit responses from GitHub correctly.
+- Bottom margin removed from service account tooltip `(PR #5746)`
+- Remove string as a default for boolean from schema `(PR #5717)`
+- Change auth provider URL type to NormalizedURL `(PR #5714)`
+
+#### Others
+
+- Leftover comment with dbperms `(PR #5976)`
+- Make menu separators uniform with React version `(PR #5901)`
+- Visually update fuzzy finder `(PR #5886)`
+- Correctly handle different kinds of paths for scip-syntax `(PR #5627)`
+- Minor tweaks to feedback modal `(PR #5594)`
+
+### Chore
+
+#### Batch Changes
+
+- Build out metadata enrichment process for gitlab pushed-only changesets, COPY `(PR #6032)`
+  - For some reason, PR 5995 got rebased in a weird way via git-spice, causing it to not get merged to [main](https://github.com/sourcegraph/sourcegraph/tree/main) when its base PR (5974) got merged. This is just us re-issuing PR [https://github.com/sourcegraph/sourcegraph/pull/5995](https://github.com/sourcegraph/sourcegraph/pull/5995).
+- Remove feature flag for pushed-only changesets `(PR #5816)`
+  - Remove feature flag for pushed-only changesets
+
+#### Deepsearch
+
+- Re-add pages if more than 4 charts on one answer `(PR #6143)`
+- Remove link to mermaid live editor `(PR #5880)`
+- Remove AI disclaimer `(PR #5762)`
+- Move markdown styling into separate file `(PR #5593)`
+- Add user friendly display names for tools `(PR #5540)`
+- Simplify question state management [SPLF-1023] `(PR #5472)`
+
+#### Dev
+
+- Run svelte-check on all files in CI `(PR #5737)`
+- Cleanup root package.json `(PR #5495)`
+- Cleanup non-client package dependencies `(PR #5488)`
+- Cleanup client/wildcard dependencies `(PR #5424)`
+
+#### Frontend
+
+- Update gitignore to include `*.d.ts` files in the `client/ui/` dir `(PR #5798)`
+  - Update gitignore to include `*.d.ts` files in the `client/ui/` dir
+
+#### Msp
+
+- Rename healthProbes.probeType to healthProbes.type `(PR #5720)`
+- Downgrade Sentry provider `(PR #5685)`
+- Upgrade CDKTF providers `(PR #5645)`
+- Move xdomainloginservice to subpackage of userauth `(PR #5612)`
+- Set DeletionProtectionEnabled on Cloud SQL `(PR #5611)`
+
+#### Release
+
+- Src-cli 6.3.0 update `(PR #5534)`
+  - Release: `src-cli` release docs
+
+#### Search
+
+- Fine-tune inventory stats insights `(PR #6204)`
+- Implement the create and edit pages + resolvers for the new Repo Stats insight `(PR #6203)`
+
+#### Source
+
+- Remove localhost in favour of 127.0.0.1 `(PR #5981)`
+- Remove !go pointer force from object fields `(PR #5699)`
+
+#### Others
+
+- Upd msp delivery for msp-testbed `(PR #5999)`
+- Cleanup leftover agents code `(PR #5978)`
+- Update datastream alert name and description for clarity `(PR #5693)`
+- Make externally unused public functions private `(PR #5613)`
+- Fix flaky test `(PR #5518)`
+
+### Refactor
+
+#### Authz
+
+- Remove logging from subrepo perms `(PR #5740)`
+
+#### Ep
+
+- Renamed EnterpriseSubscriptionLicenseType enum to follow Go conventions `(PR #5484)`
+
+### Reverts
+
+- Revert layout updates `(PR #-1)`
+- Revert "chore(batches): extract pushed-only changeset metadata into unique struct + simplify frontend hyperlinking" `(PR #5759)`
+
+### Uncategorized
+
+#### Others
+
+- [Backport 6.5.x] tenant/reconciler: add notice reconciler for codyplgsunset `(PR #6218)`
+- [Backport 6.5.x] llmapitelemetry: fix traceparent metadata field `(PR #6209)`
+- [Backport 6.5.x] multitenant(fix): Fix Add repositories UI picker `(PR #6192)`
+- [Backport 6.5.x] fix(deep search): Fix follow up bug `(PR #6179)`
+- [Backport 6.5.x] bug(deep search): fix route invalidation globally `(PR #6175)`
+- [Backport 6.5.x] feat(deep search): simplify state management via API [SPLF-1166] `(PR #6146)`
+- [Backport 6.5.x] deepsearch: fix tiny mermaid shards in tool results `(PR #6132)`
+- [Backport 6.5.x] search(fix): Fix Welcome Overlay UI position `(PR #6102)`
+- Modelconfig: mark smart-apply-qwen-default as "stable" correctly `(PR #6035)`
+- Fix(deep search): Use `$state.snapshot` when syncing local thread state [SPLF-1178] `(PR #6028)`
+- Web: remove Cody upsell in navbar `(PR #6027)`
+- Workspaces-switcher: use globe icon for public code search `(PR #6026)`
+- Feat(deep search): added error pages for deep search routes `(PR #6025)`
+- Bug(deep search): fixed sidebar resizing `(PR #6024)`
+- Bug(deep search): fixes missing repo foreign key errors [SPLF-1169] `(PR #6022)`
+- Trace: Improve lock contention on tracer `(PR #6019)`
+- Feat(deep search): Config for enabling/disabling thread sharing globally on the instance [SPLF-1115] `(PR #5997)`
+  - Deepsearch thread sharing can be enabled or disabled globally on an instance
+- Cody/chat: redirect to deepsearch or search in dotcom and workspaces `(PR #5994)`
+- Sg/live: add dotcom-dev alias, add aliases for MSP services `(PR #5993)`
+- Update Cody Web to 0.32.8 `(PR #5991)`
+- Feat(deep search): disabled repo permission checks by default [SPLF-1149] `(PR #5979)`
+  - Defaults repo permission checks for sharing deep searches off.
+- Feat(deep search): server based routing for deepsearch [SPLF-1110][SPLF-1109] `(PR #5977)`
+  - Adds server based routes for deep search
+- Dotcom: fix in-web-app redirect to workspaces `(PR #5971)`
+- Localdev: improve dotcom DX `(PR #5970)`
+- Dotcom: always enable workspaces switcher `(PR #5952)`
+- Codyplg: disable Cody Free for users created after sunset date `(PR #5951)`
+- Cody: apply post-sunset behaviour to all cody.IsCodyEnabled checks `(PR #5950)`
+- Workspaces: more tweaks for public code search row `(PR #5947)`
+- Jscontext: fixup injected time `(PR #5944)`
+- Workspaces: make public code search conditional `(PR #5940)`
+- Fx workspace storybook demos `(PR #5939)`
+- Workspaces: make public code search option off-by-default, remove border `(PR #5936)`
+- Cody Pro Sunset: schedule subscription changes `(PR #5933)`
+- Completions: add special cody_debug:::{} prompt syntax site admins can use to measure latency `(PR #5918)`
+  - Test: added special debug syntax usable by site admins to measure completions latency.
+- Bedrock: do not discard IAM machine-credential authentication cache; add support for latency optimized inference `(PR #5917)`
+  - Bedrock: added support for AWS Bedrock Latency Optimized Inference which can reduce autocomplete latency with e.g. Haiku 3.5 models by as much as 40%.
+  - Bedrock: fixed an issue where Cody's AWS Bedrock implementation would incorrectly discard the IAM machine-credential cache, making static access tokens potentially faster in older versions.
+- Workspaces: make public code search more prominent `(PR #5910)`
+- Executors: Report less metrics on GCP `(PR #5896)`
+- Feat(deep search): Repo permissioning in deepsearch [SPLF-1108] `(PR #5883)`
+  - Adds repo and sub-repo permissioning for deep search threads to enable sharing
+- Migrate sourcegraph workspaces web client to @sourcegraph/uikit `(PR #5800)`
+- Workspaces/internal: show last state change `(PR #5794)`
+- Rbac: Add missing repo permission enum value `(PR #5792)`
+- Feat(deep search): backend persistence for thread sharing `(PR #5778)`
+  - Deep search threads are persisted in the database allowing for thread sharing
+- Executor-vm: Ensure we always build for amd64 `(PR #5773)`
+- Sg/msp: suggest 'gcloud auth application-default login' on perm issue `(PR #5764)`
+- Sourcegraph: CORE-935 Unify bedrock anthropic request parameters with direct anthropic request parameters `(PR #5730)`
+- Deep search: return JSON error from completions/stream `(PR #5723)`
+  - With this change we return JSON errors from the `completions/stream` endpoint. Before we returned plain text errors.
+- Executors: Always use legacy iptables `(PR #5698)`
+- Release: Bump backcompat test target to 6.4 `(PR #5697)`
+- Executor: Upgrade base VM image again `(PR #5695)`
+- Executor: Upgrade various components `(PR #5694)`
+- Executor: Actually bump executor-vm image to new ubuntu version `(PR #5688)`
+- Bug(deepsearch): prefix all deepsearch prompts with a whitelisted prefix `(PR #5687)`
+- Chore(deep search): added tool id to analytics metadata and a source.clicked analytics event `(PR #5673)`
+- Feat(deep search): generate title from question [SPLF-1072] `(PR #5671)`
+- Amp-pruner: create MSP job for deleting attachments `(PR #5648)`
+- Executors: Bump base VM to ubuntu 24.04 `(PR #5637)`
+- Executors: Upgrade CNI plugins `(PR #5631)`
+- Removed RPC dependencies from database enum types `(PR #5598)`
+- Switch autoedit model with better context understanding `(PR #5582)`
+- Bug(deep search): retain button strip when side bar open `(PR #5567)`
+- Chore(deep search): split ExampleQueries and TurnLimit into separate components `(PR #5565)`
+- Feat(deep search): only show follow ups when input is focused [SPLF-1050] `(PR #5564)`
+- Bump buf dependency version to fix deprecations `(PR #5523)`
+- Implemented ListEnterpriseSubscriptionLicenses rpc `(PR #5513)`
+- Agent.md: hint to use go doc `(PR #5500)`
+- Add Deep Search tools UI `(PR #5441)`
+- Authz: Drop old legacy tables `(PR #5408)`
+- Remove cody from workspace and dotcom plans pages - For 6.5 release `(PR #5385)`
+- Remove BillingMetadata from telemetry in ValidateChangesetSpecs `(PR #5298)`
+- To focus ES on code search, skip the editor install step during onboarding - For 6.5 release `(PR #5103)`
+  - During onboarding, skip the "install Cody in your IDE" step
+- Authz: Add UI for explicit repo permissions `(PR #5082)`
+
+{/* RSS={"version":"v6.5.0", "releasedAt": "2025-06-25"} */}
+
+
 # 6.4 Patch 3
 
 ## v6.4.3889
@@ -20,8 +893,8 @@ This page documents all notable changes to Sourcegraph. For more detailed change
 
 #### Batch Changes
 
-- don't sync changesets from soft-deleted namespaces (#6039) `(PR #6061)`
-  - fix(batches): fixed an issue where Batch Changes would attempt to sync changesets from deleted namespaces resulting in delays and timeouts for active changesets
+- Don't sync changesets from soft-deleted namespaces (#6039) `(PR #6061)`
+  - Fix(batches): fixed an issue where Batch Changes would attempt to sync changesets from deleted namespaces resulting in delays and timeouts for active changesets
 
 ### Reverts
 
@@ -32,9 +905,9 @@ This page documents all notable changes to Sourcegraph. For more detailed change
 The following PRs were merged onto the previous release branch but could not be automatically mapped to a corresponding commit in this release:
 
 - [Backport 6.4.x] bitbucket: Fix panic with nil logger `(PR #5605)`
-- move grafana dashboards for retry to proper section `(PR #5603)`
+- Move grafana dashboards for retry to proper section `(PR #5603)`
   - N/A  Backport 413705d76b9e4b258f3718f884e3c3c2ddf4f6fd from #5602
-- gitserver: have gitserver try re-running commands before marking repositories as corrupt `(PR #5584)`
+- Gitserver: have gitserver try re-running commands before marking repositories as corrupt `(PR #5584)`
   - N/A
   Backport 4e0ca00f1e5fb1951a0f24bb7ccb3af918ce33ec from #5531
 - Fix repository package names `(PR #5581)`
@@ -10139,4 +11012,3 @@ The following PRs were merged onto the previous release branch but could not be 
 ## Older versions
 
 For older versions of Sourcegraph, see the [CHANGELOG](https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md) on GitHub.
-```
