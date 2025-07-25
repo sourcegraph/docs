@@ -114,7 +114,6 @@ A few helpful tips:
 
 ## Sending a test email
 
-(Added in Sourcegraph v3.38)
 
 To verify email sending is working correctly, visit the GraphQL API console at e.g. `https://sourcegraph.example.com/api/console` and then run the following query replacing `test@example.com` with your personal email address:
 
@@ -145,3 +144,42 @@ Otherwise, you should see an error with more information:
 ```
 
 If you need further assistance, please let us know at `mailto:support@sourcegraph.com`.
+
+## Email templates
+
+Customize email templates sent by Sourcegraph via the `email.templates` configuration option.
+
+Navigate to your site configuration (e.g. `https://sourcegraph.com/site-admin/configuration`) and add:
+
+```jsonc
+{
+  // [...]
+  "email.templates": {
+    "resetPassword": {
+      "subject": "Reset your password on {{.Host}}",
+      "html": "<p>To reset your password on {{.Host}}, please click the link below:</p><p><a href=\"{{.URL}}\">Reset Password</a></p><p>If you did not request a password reset, please ignore this email.</p>"
+    },
+    "setPassword": {
+      "subject": "Set your password on {{.Host}}",
+      "html": "<p>To set your password on {{.Host}} and complete your account registration, please click the link below:</p><p><a href=\"{{.URL}}\">Set Password</a></p><p>Your username is: {{.Username}}</p>"
+    }
+  }
+}
+```
+
+Available template types:
+
+* `resetPassword` - Email sent on password resets
+* `setPassword` - Email sent on account creation, if a password reset URL is created
+
+Template variables:
+
+* `{{.Host}}` - The hostname of your Sourcegraph instance
+* `{{.URL}}` - The action URL (password reset/set link)
+* `{{.Username}}` - The recipient's username
+
+Template fields:
+
+* `subject` - The email subject line (required)
+* `html` - The HTML email body content (required)
+* `text` - Optional plain-text email body. If not provided, a plain-text body will be automatically generated from the HTML template
