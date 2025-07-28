@@ -6881,6 +6881,48 @@ const redirectsData = [
     destination: 'https://sourcegraph.com/pricing',
     permanent: true
   },
+
+  // Code monitoring redirects - merged pages into consolidated index
+  {
+    source: '/code_monitoring/explanations/best_practices',
+    destination: '/code_monitoring',
+    permanent: true
+  },
+  {
+    source: '/code_monitoring/explanations/core_concepts',
+    destination: '/code_monitoring',
+    permanent: true
+  },
+  {
+    source: '/code_monitoring/explanations',
+    destination: '/code_monitoring',
+    permanent: true
+  },
+  {
+    source: '/code_monitoring/how-tos',
+    destination: '/code_monitoring',
+    permanent: true
+  },
+  {
+    source: '/code_monitoring/how-tos/slack',
+    destination: '/code_monitoring',
+    permanent: true
+  },
+  {
+    source: '/code_monitoring/how-tos/starting_points',
+    destination: '/code_monitoring',
+    permanent: true
+  },
+  {
+    source: '/code_monitoring/how-tos/webhook',
+    destination: '/code_monitoring',
+    permanent: true
+  },
+  {
+    source: '/code_monitoring/quickstart',
+    destination: '/code_monitoring',
+    permanent: true
+  },
 ];
 
 const updatedRedirectsData = redirectsData.map(redirect => {

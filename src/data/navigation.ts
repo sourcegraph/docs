@@ -406,14 +406,6 @@ export const navigation: NavigationItem[] = [
 			{
 				title: 'Code Monitoring',
 				href: '/code_monitoring',
-				sections: [
-					{ title: 'Quickstart', href: '/code_monitoring/quickstart' },
-					{
-						title: 'Explanations',
-						href: '/code_monitoring/explanations'
-					},
-					{ title: 'How-to Guides', href: '/code_monitoring/how-tos' }
-				]
 			},
 			{
 				title: 'Code Ownership',
