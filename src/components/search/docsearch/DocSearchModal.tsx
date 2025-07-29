@@ -460,7 +460,7 @@ export function DocSearchModal({
       className={[
         'DocSearch',
         'DocSearch-Container',
-        'z-50 bg-slate-300/50 p-4 backdrop-blur backdrop-filter dark:bg-dark-bg',
+        'z-50 bg-slate-300/50 p-4 backdrop-blur backdrop-filter dark:bg-slate-900/40',
         state.status === 'stalled' && 'DocSearch-Container--Stalled',
         state.status === 'error' && 'DocSearch-Container--Errored',
       ]
