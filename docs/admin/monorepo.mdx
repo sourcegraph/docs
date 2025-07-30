@@ -15,16 +15,6 @@ Sourcegraph uses the standard `git` binary to interact with repositories, but st
 
 Sourcegraph's code search index scales horizontally with the number of files being indexed for search. Multiple shards may be allocated for one repository, and the index is agnostic to whether the code exists in one massive repository or many smaller ones. Sourcegraph has been used to index both large monorepos and tens of thousands of smaller repositories.
 
-### Known Limitations
-
-- Sourcegraph will inspect the full tree for language detection. It incrementally caches and builds the language statistics to reuse information across commits. However, this has been shown to create too much load in monorepos. You can disable this feature by setting the environment variable `USE_ENHANCED_LANGUAGE_DETECTION=false` on `sourcegraph-frontend`.
-
-## Custom git binaries
-
-Sourcegraph clones code from your code host via the usual `git clone` or `git fetch` commands. Some organisations use custom `git` binaries or commands to speed up these operations. Sourcegraph supports using alternative git binaries to allow cloning. This can be done by inheriting from the `gitserver` docker image and installing the custom `git` onto the `$PATH`.
-
-Some monorepos use a custom command for `git fetch` to speed up fetch. Sourcegraph provides the `experimentalFeatures.customGitFetch` site setting to specify the custom command.
-
 ## Statistics
 
 You can help the Sourcegraph developers understand the scale of your monorepo by sharing some statistics with the team. The bash script [`git-stats`](https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/dev/git-stats) when run in your git repository will calculate these statistics.

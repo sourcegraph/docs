@@ -128,6 +128,21 @@ You can then access your dashboards directly through your Grafana instance URL.
 
 This error is expected if your instance was not [deployed with Kubernetes](/admin/deploy/kubernetes/). The Instrumentation page is currently only available for Kubernetes instances.
 
-## Troubleshooting
+## Sourcegraph is making unauthorized requests to the git server
 
-Please refer to our [dedicated troubleshooting page](/admin/troubleshooting).
+This is normal and happens whenever git is used over HTTP. To avoid unnecessarily sending a password over HTTP, git first
+makes a request without the password included. If a 401 Unauthorized is returned, git sends the request with the password.
+
+More information can be found [here](https://confluence.atlassian.com/bitbucketserverkb/two-401-responses-for-every-git-opperation-938854756.html).
+
+If this behaviour is undesired, the `gitURLType` in the [external service configuration](/admin/code_hosts/github#configuration)
+should be set to `ssh` instead of `http`. This will also require [ssh keys to be set up](/admin/repo/auth#repositories-that-need-http-s-or-ssh-authentication).
+
+## Sourcegraph is not returning results from a repository unless "repo:" is included
+
+If you can get repository results when you explicitly include `repo:{your repository}` in your search, but don't see any results from that repository when you don't, there are a few possible causes:
+
+- The repository is a fork repository (excluded from search results by default) and `fork:yes` is not specified in the search query.
+- The repository is an archived repository (excluded from search results by default) and `archived:yes` is not specified in the search query.
+- There is an issue indexing the repository: check the logs of worker and/or search-indexer.
+- The search index is unavailable for some reason: try the search query `repo:<the_repository> index:only`. If it returns no results, the repository has not been indexed.
