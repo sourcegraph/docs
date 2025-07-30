@@ -6923,6 +6923,11 @@ const redirectsData = [
     destination: '/code_monitoring',
     permanent: true
   },
+  {
+    source: '/admin/nginx',
+    destination: '/admin/http_https_configuration',
+    permanent: true
+  },
 ];
 
 const updatedRedirectsData = redirectsData.map(redirect => {

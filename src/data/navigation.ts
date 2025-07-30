@@ -467,7 +467,6 @@ export const navigation: NavigationItem[] = [
 					{ title: 'Analytics', href: '/admin/analytics' },
 					{ title: 'Executors', href: '/admin/executors' },
 					{ title: 'FAQs', href: '/admin/faq' },
-					{ title: 'Troubleshooting', href: '/admin/troubleshooting' },
 					{ title: 'How-to Guides', href: '/admin/how-to' },
 					{
 						title: 'Enterprise Getting Started',
