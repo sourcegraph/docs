@@ -7,19 +7,18 @@ The Sourcegraph Analytics API is an API that provides programmatic access to you
 For Sourcegraph Analytics, you can generate an access token for programmatic access. Tokens are long-lived with an optional expiry and have the same permissions to access instance data as the user who created them.
 
 ### Getting Started
-> **_NOTE:_** As of July 2025, the authentication cookie has changed from `cas` to `accounts_session_v2` (Sourcegraph Accounts session cookie). If you have existing scripts using the old cookie name, please update them accordingly.
 
-Access tokens are created using the Sourcegraph Accounts session cookie (`accounts_session_v2`) for authentication to the token creation endpoint. Access tokens are longer lived than the Sourcegraph Accounts session cookie making them more suitable for programmatic access to the Sourcegraph Analytics API.
+Access tokens are created using the `cas` cookie for authentication to the token creation endpoint. Access tokens are longer lived than the `cas` cookie making them more suitable for programmatic access to the Sourcegraph Analytics API.
 
 - Sign in to [Sourcegraph Analytics](https://analytics.sourcegraph.com).
-- Retrieve your Sourcegraph Accounts session cookie, `accounts_session_v2`, from your browser's developer tools.
+- Retrieve your session cookie, `cas`, from your browser's developer tools.
 
 ![Sourcegraph Analytics session cookie](https://storage.googleapis.com/sourcegraph-assets/Docs/analytics-cookie.png)
 
 - Export the cookie as an environment variable to use in the following commands:
 
 ```sh
-export ACCOUNTS_COOKIE="<ACCOUNTS_SESSION_V2_VALUE>"
+export CAS_COOKIE="<CAS_COOKIE_VALUE>"
 ```
 
 #### Token creation
@@ -29,7 +28,7 @@ Create the token by running the following command:
 ```sh
 curl -X POST https://analytics.sourcegraph.com/api/service-access-tokens \
  -H "Content-Type: application/json" \
- -H "Cookie: accounts_session_v2=$ACCOUNTS_COOKIE" \
+ -H "Cookie: cas=$CAS_COOKIE" \
  -d '{}'
 
 # Optionally include displayName, expiresAt, or both in the request body.
@@ -55,7 +54,7 @@ List the tokens by running the following command:
 
 ```sh
 curl -X GET https://analytics.sourcegraph.com/api/service-access-tokens \
- -H "Cookie: accounts_session_v2=$ACCOUNTS_COOKIE"
+ -H "Cookie: cas=$CAS_COOKIE"
 ```
 
 Each token in the response will include the token ID, creation date, a boolean indicating if the token has expired, and display name and expiration date if provided. For example:
@@ -99,7 +98,7 @@ Revoke a token by running the following commands:
 export TOKEN_ID="<TOKEN_ID>"
 
 curl -X DELETE https://analytics.sourcegraph.com/api/service-access-tokens/$TOKEN_ID \
- -H "Cookie: accounts_session_v2=$ACCOUNTS_COOKIE"
+ -H "Cookie: cas=$CAS_COOKIE"
 ```
 
 <Callout type="note">The revocation request does not produce output. To verify that a token has been revoked, list the tokens and verify that `isExpired` is `true`.</Callout>
