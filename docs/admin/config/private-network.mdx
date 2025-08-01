@@ -35,20 +35,22 @@ Add the proxy environment variables to your Sourcegraph Helm chart [override fil
 ```yaml
 executor|frontend|gitserver|migrator|worker:
   env:
-  - name: HTTP_PROXY
-    value: http://proxy.example.com:8080
-  - name: HTTPS_PROXY
-    value: http://proxy.example.com:8080
-  - name: NO_PROXY
-    value: "blobstore,codeinsights-db,codeintel-db,sourcegraph-frontend-internal,sourcegraph-frontend,github-proxy,gitserver,grafana,indexed-search-indexer,indexed-search,jaeger-query,pgsql,precise-code-intel-worker,prometheus,redis-cache,redis-store,searcher,syntect-server,worker-executors,worker,cloud-sql-proxy,localhost,127.0.0.1,.svc,.svc.cluster.local,kubernetes.default.svc"
+    HTTP_PROXY:
+      value: http://proxy.example.com:8080
+    HTTPS_PROXY:
+      value: http://proxy.example.com:8080
+    NO_PROXY:
+      value: "blobstore,codeinsights-db,codeintel-db,sourcegraph-frontend-internal,sourcegraph-frontend,gitserver,grafana,indexed-search-indexer,indexed-search,jaeger-query,pgsql,precise-code-intel-worker,prometheus,redis-cache,redis-store,searcher,syntect-server,worker-executors,worker,cloud-sql-proxy,localhost,127.0.0.1,.svc,.svc.cluster.local,kubernetes.default.svc"
 ```
 
 <Callout type="info">
-If the updated Sourcegraph pods fail to pass their readiness or health checks after configuring the HTTP proxy environment variables, you may also need to add your k8s cluster pod & service CIDR ranges to the `NO_PROXY` environment variable. Example:
+If the updated Sourcegraph pods fail to pass their readiness or health checks after configuring the HTTP proxy environment variables, you may also need to add your k8s cluster pod & service CIDR ranges to the `NO_PROXY` environment variable. For example, if the k8s cluster pod & service CIDR ranges are `10.10.0.0/16` and `10.20.0.0/16`, configure the `NO_PROXY` environment variable as:
 
 ```yaml
-- name: NO_PROXY
-    value: "blobstore,codeinsights-db,codeintel-db,sourcegraph-frontend-internal,sourcegraph-frontend,github-proxy,gitserver,grafana,indexed-search-indexer,indexed-search,jaeger-query,pgsql,precise-code-intel-worker,prometheus,redis-cache,redis-store,searcher,syntect-server,worker-executors,worker,cloud-sql-proxy,localhost,127.0.0.1,.svc,.svc.cluster.local,kubernetes.default.svc,10.10.0.0/16,10.20.0.0/16"
+executor|frontend|gitserver|migrator|worker:
+  env:
+   NO_PROXY:
+     value: "blobstore,codeinsights-db,codeintel-db,sourcegraph-frontend-internal,sourcegraph-frontend,gitserver,grafana,indexed-search-indexer,indexed-search,jaeger-query,pgsql,precise-code-intel-worker,prometheus,redis-cache,redis-store,searcher,syntect-server,worker-executors,worker,cloud-sql-proxy,localhost,127.0.0.1,.svc,.svc.cluster.local,kubernetes.default.svc,10.10.0.0/16,10.20.0.0/16"
 ```
 </Callout>
 
