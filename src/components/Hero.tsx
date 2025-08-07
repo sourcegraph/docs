@@ -35,36 +35,7 @@ export function Hero() {
 							>
 								Sourcegraph allows developers to rapidly search, write, and understand code by bringing insights from their entire codebase right into the editor.
 							</p>
-							<div className="mt-8 flex gap-1 md:justify-center lg:justify-start">
-								<Button
-									href="/cody"
-								// target="_blank"
-								>
-									Learn about Cody
-								</Button>
-								<Button
-									className="group flex items-center"
-									// target="_blank"
-									href="/code_search"
-									variant="ghost"
-								>
-									Learn about Code Search
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										fill="none"
-										viewBox="0 0 24 24"
-										strokeWidth="1.5"
-										stroke="currentColor"
-										className="ml-2 h-3 w-3 transform-gpu transition-transform group-hover:translate-x-1"
-									>
-										<path
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											d="M11.25 4.5l7.5 7.5-7.5 7.5m-6-15l7.5 7.5-7.5 7.5"
-										/>
-									</svg>
-								</Button>
-							</div>
+
 						</div>
 					</div>
 					<div className="relative -mb-32 -mt-16 hidden items-center justify-center sm:flex lg:static xl:pl-10">
