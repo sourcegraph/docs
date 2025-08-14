@@ -12,11 +12,11 @@ The Sourcegraph GraphQL API supports the following types of queries:
 
 ## Quickstart
 
-Generate an access token on your Sourcegraph instance at:
+There are two ways to authenticate with the Sourcegraph GraphQL API:
 
-```none
-https://sourcegraph.example.com/user/settings/tokens
-```
+### Access Tokens
+
+Generate an access token for your Sourcegraph instance under **Settings > Access tokens**.
 
 Then run this query to echo your username back:
 
@@ -26,11 +26,23 @@ curl -H 'Authorization: token YOUR_TOKEN'
 https://sourcegraph.example.com/.api/graphql
 ```
 
-You should see a response like this:
+### OAuth Tokens
+
+If you have an [OAuth app](/admin/oauth_apps) configured with the `user:all` scope, you can use OAuth Bearer tokens:
+
+```bash
+curl -H 'Authorization: Bearer YOUR_OAUTH_TOKEN'
+-d '{"query": "query { currentUser { username } }"}'
+https://sourcegraph.example.com/.api/graphql
+```
+
+Both authentication methods will return a response like this:
 
 ```json
 { "data": { "currentUser": { "username": "YOUR_USERNAME" } } }
 ```
+
+<Callout type="note">OAuth access tokens are always short-lived and must be refreshed using refresh tokens before expiration. Check the `expires_in` field and refresh proactively.</Callout>
 
 For automated scripts, CI/CD pipelines, and production integrations, use [service accounts](/admin/access_control/service_accounts) instead of personal access tokens. Service accounts are designed specifically for programmatic API access and provide better security and audit capabilities.
 
