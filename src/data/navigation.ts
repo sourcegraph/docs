@@ -253,12 +253,6 @@ export const navigation: NavigationItem[] = [
 			{
 				title: 'Deep Search',
 				href: '/deep-search',
-				sections: [
-					{
-						title: 'Deep Search',
-						href: '/deep-search'
-					}
-				]
 			}
 		]
 	},
@@ -451,11 +445,9 @@ export const navigation: NavigationItem[] = [
 				title: 'Sourcegraph Admin',
 				href: '/admin',
 				sections: [
-					{ title: 'Deploy', href: '/admin/deploy' },
-					{ title: 'Architecture', href: '/admin/architecture' },
-					{ title: 'Upgrade', href: '/admin/updates' },
 					{ title: 'Configuration', href: '/admin/config' },
 					{ title: 'Licensing', href: '/admin/licensing' },
+					{ title: 'Enterprise Portal', href: '/enterprise-portal' },
 					{ title: 'Codehosts', href: '/admin/code_hosts' },
 					{ title: 'User Authentication', href: '/admin/auth' },
 					{ title: 'Access Control', href: '/admin/access_control' },
@@ -463,7 +455,6 @@ export const navigation: NavigationItem[] = [
 						title: 'Repository Permissions',
 						href: '/admin/permissions'
 					},
-					{ title: 'Observability', href: '/admin/observability' },
 					{ title: 'Analytics', href: '/admin/analytics' },
 					{ title: 'Executors', href: '/admin/executors' },
 					{ title: 'FAQs', href: '/admin/faq' },
@@ -472,6 +463,16 @@ export const navigation: NavigationItem[] = [
 						title: 'Enterprise Getting Started',
 						href: '/admin/enterprise_getting_started_guide'
 					}
+				]
+			},
+			{
+				title: 'Enterprise self-hosted',
+				href: '/admin/self-hosted',
+				sections: [
+					{ title: 'Deploy', href: '/admin/deploy' },
+					{ title: 'Architecture', href: '/admin/architecture' },
+					{ title: 'Upgrade', href: '/admin/updates' },
+					{ title: 'Observability', href: '/admin/observability' }
 				]
 			},
 			{
@@ -485,10 +486,6 @@ export const navigation: NavigationItem[] = [
 						href: '/analytics/air-gapped'
 					}
 				]
-			},
-			{
-				title: 'Sourcegraph Enterprise Portal',
-				href: '/enterprise-portal'
 			},
 			{
 				title: 'Sourcegraph Cloud',
