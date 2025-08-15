@@ -455,6 +455,7 @@ export const navigation: NavigationItem[] = [
 						title: 'Repository Permissions',
 						href: '/admin/permissions'
 					},
+					{ title: 'OAuth Apps', href: '/admin/oauth_apps' },
 					{ title: 'Analytics', href: '/admin/analytics' },
 					{ title: 'Executors', href: '/admin/executors' },
 					{ title: 'FAQs', href: '/admin/faq' },

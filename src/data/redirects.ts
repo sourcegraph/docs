@@ -6928,6 +6928,11 @@ const redirectsData = [
     destination: '/admin/http_https_configuration',
     permanent: true
   },
+  {
+    source: '/admin/access_control/service_accounts',
+    destination: '/admin/service_accounts',
+    permanent: true
+  },
 ];
 
 const updatedRedirectsData = redirectsData.map(redirect => {
