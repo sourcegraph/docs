@@ -13,8 +13,22 @@ putting pressure on the backend.
 ## Request
 
 ```bash
+# Using access token
 curl --header "Accept: text/event-stream" \
      --header "Authorization: token <access token>" \
+     --get \
+     --url "<Sourcegraph URL>/.api/search/stream" \
+     --data-urlencode "q=<query>" \
+     --data-urlencode "v=<version>" \
+     --data-urlencode "t=<pattern type>" \
+     --data-urlencode "max-line-len=<maximum line length>" \
+     --data-urlencode "cm=<enable chunk matches>" \
+     --data-urlencode "display=<display limit>" \
+     --data-urlencode "cl=<context lines>"
+
+# Using OAuth token
+curl --header "Accept: text/event-stream" \
+     --header "Authorization: Bearer <oauth token>" \
      --get \
      --url "<Sourcegraph URL>/.api/search/stream" \
      --data-urlencode "q=<query>" \
@@ -28,7 +42,7 @@ curl --header "Accept: text/event-stream" \
 
 | Parameter                       | Description                                                                                                                                                                                                                                                                                                                                                                           |
 |---------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| access token                    | [Sourcegraph access token](/cli/how-tos/creating_an_access_token)                                                                                                                                                                                                                                                                                                                     |
+| access token / oauth token      | [Sourcegraph access token](/cli/how-tos/creating_an_access_token) or [OAuth token](/admin/oauth_apps) with `user:all` scope. See [GraphQL API authentication](/api/graphql#quickstart) for details on token refresh and expiration handling.                                                                                                                                      |
 | Sourcegraph URL                 | The URL of your Sourcegraph instance, or https://sourcegraph.com.                                                                                                                                                                                                                                                                                                                     |
 | query                           | A Sourcegraph query string, see our [search query syntax](/code-search/queries)                                                                                                                                                                                                                                                                                                       |
 | version (optional)              | The version of the search query syntax. We recommend to explicitly set the version. The latest version is "V3". (Default: "V3")                                                                                                                                                                                                                                                       |
