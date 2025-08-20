@@ -4,6 +4,266 @@ This page documents all notable changes to Sourcegraph. For more detailed change
 
 {/* CHANGELOG_START */}
 
+# 6.7 Patch 0
+
+## v6.7.0
+
+- [sourcegraph](https://github.com/sourcegraph/sourcegraph/releases/tag/v6.7.0)
+
+- [docker-compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/releases/tag/v6.7.0)
+
+- [helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/releases/tag/v6.7.0)
+
+- [kustomize](https://github.com/sourcegraph/deploy-sourcegraph-k8s/releases/tag/v6.7.0)
+
+### Features
+
+#### Cloud
+
+- cloudAPI client support SAMS token provider `(PR #6816)`
+- extend with additional configuration `(PR #6712)`
+
+#### Cloudapi
+
+- search by subscriptionId `(PR #6886)`
+- enforce scopes `(PR #6769)`
+
+#### Code Intelligence
+
+- GRAPH-920 Cross-repo syntactic code navigation `(PR #5622)`
+
+#### Deepsearch
+
+- Create worker pool for deepsearchHandler `(PR #6869)`
+
+#### Dev
+
+- Update route codegen to respect +page.ts `(PR #6685)`
+
+#### Gating
+
+- Added telemetry for gating on open failure `(PR #6965)`
+  - Added licensing.canConsumeDeepSearchQuota and licensing.consumeDeepSearchQuota telemetry events
+  - Captures error codes, license key status, and error details for debugging
+  - Uses testutil.IsTest pattern for test safety
+
+#### Release
+
+- changelog generation activity `(PR #6744)`
+  - feat: technical changelog generation temporal activity
+- schema sync library `(PR #6703)`
+  - chore(release): make library for easier calling of schema sync tool
+- docs activities in releaseplatform `(PR #6623)`
+  - release: add temporal activities and workflow for docs related release operations
+
+#### Search
+
+- CORE-1202 Added store layer to metering service of enterprise portal `(PR #6830)`
+- CORE-1183 Added metering stub API for deep search usage `(PR #6636)`
+
+#### Source
+
+- Allow finding users by roles and permissions `(PR #6815)`
+
+#### Others
+
+- Google Vertex: fix critical regression; add support for Gemin models and Workload Identity auth `(PR #7080)`
+  - Google Vertex: added Workload Identity authentication support, as an alternative to access token authentication.
+  - Google Vertex: fixed issues preventing Gemini models from being used.
+ Backport f80ec0d84a54336daf66fa6e9c8a43cea9ac1fc2 from #7075
+- Add fullscreen option to page layout `(PR #6733)`
+- Embed React repo batch changes page `(PR #6686)`
+
+### Fix
+
+#### Batch Changes
+
+- add constraint to remove duplicate template fields in batch spec library variables table `(PR #6741)`
+
+#### Deepsearch
+
+- Add nil check when setting UserAgent `(PR #6972)`
+- Fix table content overflow `(PR #6870)`
+- Fix token counting and split LLMStats interface `(PR #6856)`
+- Migration for SearchErrorKind `(PR #6745)`
+- Fix search error kind unmarshalling `(PR #6720)`
+
+#### Dev
+
+- Add parallel as prerequisite to sg setup for ubuntu `(PR #6226)`
+- Fix postgress install step in 'sg setup' `(PR #6190)`
+
+#### Prompts
+
+- Avoid throwing "user not found" errors when listing prompts `(PR #6975)`
+- gracefully handle deleted users for tags `(PR #6771)`
+  - fix(prompts): gracefully handle deleted users for tags
+
+#### Release
+
+- Fix changelog activity semver handle `(PR #6958)`
+
+#### Search
+
+- Default enterprise-portal set to dev `(PR #6864)`
+
+#### Source
+
+- reduce verbosity of gitserver logging `(PR #6939)`
+- Add a max height to modal and overflow scroll `(PR #6881)`
+- annotate redacted secrets in batch changes logs `(PR #6849)`
+- Refactor external account perms syncing to not fail on a single error `(PR #6847)`
+- improve contrast in dark theme for Combobox used in explicit permissions page `(PR #6818)`
+- teams: fix width of error banner `(PR #6702)`
+- Make MT repo search tooltip span over columns `(PR #6639)`
+- Fix some minor grammatical errors `(PR #6638)`
+
+#### Others
+
+- Match child symbols with their parent using full container path `(PR #6936)`
+- revet migration from d07540b `(PR #6922)`
+- QueryInput placeholder prop `(PR #6665)`
+- Improve workspaces mobile layout `(PR #6612)`
+
+### Chore
+
+#### Ci
+
+- Update aspect_rules_swc to 2.4.4 `(PR #6893)`
+- update rules_js 2.4.1 `(PR #6891)`
+
+#### Cleanup
+
+- remove dead mock functions `(PR #6829)`
+- remove dead graphql initializers `(PR #6826)`
+
+#### Deepsearch
+
+- Add default case to deep search telemetry (#6977) `(PR #7019)`
+- Move deep search agentic loop to server `(PR #6919)`
+- Remove external link symbol from sources (SPLF-1172) `(PR #6767)`
+
+#### Dev
+
+- Disable flaky web app tests in CI `(PR #6952)`
+- Upgrade to pnpm v10 `(PR #6660)`
+- Upgrade stylelint `(PR #6564)`
+
+#### Release
+
+- move schema syncher mapping file to schema folder out of tool `(PR #6854)`
+  - chore: move schema syncher mapping file to schema folder out of tool
+
+#### Source
+
+- Display effective permissions for user roles `(PR #6821)`
+
+#### Ui
+
+- Add SQL syntax highlighting `(PR #6648)`
+
+#### Others
+
+- Remove long deprecated and non-functional config `(PR #6855)`
+- Remove mentions of community forum `(PR #6853)`
+- Prepare React prompt components `(PR #6734)`
+- Support react router injection `(PR #6698)`
+- Refactor Svelte app error pages `(PR #6697)`
+- Remove unused/broken user area subscription route `(PR #6676)`
+
+### Reverts
+
+- Revert parts of "workspaces: Set up for Teams name change (#6284)" `(PR #6284)`
+- Revert "feat(workspaces): add v1 metering service proto" `(PR #6591)`
+- Revert "chore: skip bitbucket tests while server is reworked (#6791)" `(PR #6791)`
+- Revert "bug(release): Fix the executors changes" `(PR #6912)`
+
+### Uncategorized
+
+#### Others
+
+- fix(deep search): remove unused property from conversation test `(PR #7084)`
+- [Backport 6.7.x] feat(deep search): add share url to deepsearch `(PR #7079)`
+  - Added a shareable URL to DeepSearch conversations, making it easier to share conversations with others.  Backport 08602f581464e9f8c1c766cf7542649159bacfc8 from #7078
+- [Backport 6.7.x] chore(deep search): remove DeepsearchReference `(PR #7077)`
+  - Removed the `references` field from the DeepSearch conversation model and related functionality. This simplifies the codebase by removing the unused file permission tracking system for DeepSearch conversations.  Backport affb5349bedef24188a7e992f9581ee76fbe151d from #7021
+- [Backport 6.7.x] feat(deep search): allow sync processing via API (#7055) `(PR #7074)`
+- [Backport 6.7.x] cody: add GPT-5 models `(PR #7053)`
+- [Backport 6.7.x] webhooks: Fix 500 error if repo is unknown `(PR #7041)`
+- [backport 6.7.x] feat(deep search): add v1 to deepsearch APIs prefix `(PR #7018)`
+  - Adds `v1` prefix to deepsearch APIsBackport `bcd3192` from [https://github.com/sourcegraph/sourcegraph/pull/7002](https://github.com/sourcegraph/sourcegraph/pull/7002)
+- [Backport 6.7.x] Fix native integration bazel build `(PR #7008)`
+- Update Cody Web to 0.35.0 `(PR #6989)`
+- completions: propagate scope to Cody Gateway, use different client for deepsearch `(PR #6976)`
+- Properly set deep search telemetry action `(PR #6974)`
+- deepsearch: add V2 telemetry for measuring latency of quota enforcement API calls `(PR #6973)`
+- fix(deep search): CORE-1235 Quota message is refreshed after completion of deep search query `(PR #6971)`
+- ci: update cloud gql compat playbook `(PR #6970)`
+- cody-gateway: document attributions API `(PR #6969)`
+- bug(deep search): report sources from tool calls `(PR #6946)`
+  - Fixed a bug in DeepSearch where sources were not being recorded
+- enterprise-portal: fix bug in meteringservice with unlimited deepsearch -1 value `(PR #6945)`
+- bug(deep search): migrate questions to fix tool calls `(PR #6944)`
+  - Added migration to fix legacy tool call formats in DeepSearch questions
+- enterprise-portal: add escape hatch we can flip to enable unlimited deepsearch `(PR #6942)`
+- Disable cody web in Safari `(PR #6941)`
+- Update Cody Web to 0.34.0 `(PR #6938)`
+- msp/tfc: trigger on service modules `(PR #6933)`
+- bug(deep search): include thread history in follow-up questions `(PR #6932)`
+  - Enhanced DeepSearch to maintain conversation context in follow-up questions
+  - Added validation to prevent errors from unfinished tool calls in conversation history
+- dotcom: remove subscriptions UI, EP proxies, unused dotcom site config `(PR #6923)`
+- cody-gateway: fix rate limit Slack notification throttling `(PR #6916)`
+- chore(deep search): CORE-1220 Deep searcg displays error if getting quota usage fails and does not crash `(PR #6897)`
+- chore(deep search): convert the frontend to using question API `(PR #6868)`
+- Add sveltekit prod build command `(PR #6863)`
+- msp/lb: fixup security policy again `(PR #6857)`
+- msp/lb: fix Cloud Armor conditions `(PR #6852)`
+- msp: make Cloud Run pending requests alert a bit more lenient `(PR #6825)`
+- chore(deep search): move raw LLM calls to the server [SPLF-1302] `(PR #6812)`
+  - Added automatic title generation for Deepsearch conversations
+  - Added suggested followup questions after completing a Deepsearch query
+- chore(deep search): adds LLM turn handler for UpdateQuestion `(PR #6811)`
+- codyapi: Add deprecation alert and remove WIP wording `(PR #6807)`
+- dotcom: Remove post sign up page `(PR #6806)`
+- workspaces/invite: show email of already-a-member `(PR #6786)`
+- msp: support always provisioning a Cloud Armor policy that can be extended `(PR #6779)`
+- msp: support additional domains `(PR #6778)`
+- ep: port subscription timeline to new UI `(PR #6777)`
+- modelconfig: regenerate models.json, remove fallback `(PR #6773)`
+- Update UIKit to 1.4.2 version `(PR #6772)`
+- msp: add option to spin up private network connector, redis connection util `(PR #6761)`
+- workspaces: fix tests, we now have 500 seats `(PR #6757)`
+- dotcom: fixup go-to-workspace button `(PR #6756)`
+- workspaces: copy fixups `(PR #6755)`
+- mail-gatekeeper: return 10 on zero_credit match `(PR #6754)`
+- Rename cody ignore file name `(PR #6752)`
+- dotcom: remove special RBAC `(PR #6742)`
+- dotcom: remove all hubspot integrations `(PR #6740)`
+- dotcom/subscriptions: make deprecation alert way more aggro `(PR #6722)`
+- workspaces: remove Cody Pro checks `(PR #6721)`
+- workspaces/plan: remove code host support `(PR #6719)`
+- dotcom: remove all Cody Pro things `(PR #6708)`
+- workspaces: Fix missing template variable `(PR #6705)`
+- gateway: add gemini 2.5 flash and gemini 2.5 pro `(PR #6700)`
+- feat(deep search): migrate question data model to the server `(PR #6691)`
+  - Adds API endpoints for creating and updating questions within a deep search thread
+- refactor(cody-gateway) Deprecate gemini-2.5-flash-preview-04-17 and gemini-2.5-pro-preview-03-25 `(PR #6684)`
+- deepsearch: dotcom: make quota limit 5 searches per user per week `(PR #6659)`
+- dotcom: remove pings forwarder `(PR #6556)`
+- gitserver: Don't logspam errors for canceled requests `(PR #6436)`
+
+### Untracked
+
+The following PRs were merged onto the previous release branch but could not be automatically mapped to a corresponding commit in this release:
+
+- teams: fix width of error banner (#6702) `(PR #6706)`
+- Update consts and stiched migration graph for 6.6 `(PR #6644)`
+  - NA - Internal change
+
+{/* RSS={"version":"v6.7.0", "releasedAt": "2025-08-20"} */}
+
+
 # 6.6 Patch 2
 
 ## v6.6.2517
