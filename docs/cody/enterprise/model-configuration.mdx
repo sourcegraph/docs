@@ -515,3 +515,54 @@ The `reasoningEffort` field is only used by reasoning models (those having `reas
 * `openai` provider maps the `reasoningEffort` field value to the [OpenAI `reasoning_effort`](https://platform.openai.com/docs/api-reference/chat/create#chat-create-reasoning_effort) request body value.
 
 </Accordion>
+
+## Google Vertex AI Authentication Configuration
+
+Configure Google Vertex AI authentication using any of the following methods in your `providerOverrides`:
+
+```json
+"providerOverrides": [
+  {
+    "id": "google",
+    "displayName": "Anthropic via Vertex AI",
+    "serverSideConfig": {
+      "type": "google",
+      "endpoint": "https://us-east5-aiplatform.googleapis.com/v1/projects/your-project/locations/us-east5/publishers/anthropic/models"
+
+      // Option 1: Application Default Credentials (recommended - no additional config)
+
+      // Option 2: Explicit credentials file
+      // "googleWorkloadIdentityConfig": {
+      //   // Note: this file must be mounted in the Sourcegraph frontend container!
+      //   "credentialsFile": "/var/secrets/google/credentials.json"
+      // }
+
+      // Option 3: Inline credentials JSON
+      // "googleWorkloadIdentityConfig": {
+      //   "credentialsJSON": "<YOUR BASE64-ENCODED CREDENTIALS JSON>"
+      // }
+
+      // Option 4: Legacy access token
+      // "accessToken": "<YOUR BASE64-ENCODED SERVICE ACCOUNT JSON>"
+    }
+  }
+]
+```
+
+<Callout type="note">In Sourcegraph versions prior to 6.7, only `accessToken` authentication was supported.</Callout>
+
+By default (with no additional configuration), Google [Application Default Credentials (ADC)](https://cloud.google.com/docs/authentication/application-default-credentials) will be used to automatically discover credentials from:
+- `GOOGLE_APPLICATION_CREDENTIALS` environment variable  
+- `~/.config/gcloud/application_default_credentials.json`
+- GCE/GKE metadata service
+- [Workload Identity](https://cloud.google.com/iam/docs/workload-identity-federation) (when running in GKE)
+
+If `credentialsFile` is specified, it must specify a filepath which exists in the Sourcegraph frontend container. See [Creating service account keys](https://cloud.google.com/iam/docs/keys-create-delete) for how to generate JSON credentials files.
+
+If `credentialsJSON` is specified, it must be a base64-encoded string of the credentials.json file (also created via [service account keys](https://cloud.google.com/iam/docs/keys-create-delete)).
+
+If `accessToken` is specified, it must be a base64-encoded service account JSON. This option disables ADC.
+
+### OAuth Scopes
+
+Sourcegraph requests the `https://www.googleapis.com/auth/cloud-platform` OAuth scope, which is the recommended scope per Google's documentation for applications accessing Vertex AI services. See Google's [Vertex AI authentication documentation](https://cloud.google.com/vertex-ai/docs/authentication) and the complete [OAuth 2.0 scopes reference](https://developers.google.com/identity/protocols/oauth2/scopes) for more details.
