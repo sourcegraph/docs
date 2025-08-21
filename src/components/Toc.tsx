@@ -168,17 +168,6 @@ export function TableOfContents({ headings }: Props) {
 								Go to Sourcegraph.com
 							</a>
 						</div>
-						<div className="flex items-center mt-2 text-sm">
-							<a
-								href="https://community.sourcegraph.com"
-								target="_blank"
-								rel="noopener noreferrer"
-								className="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-							>
-								<BugIcon className="mr-1 h-4 w-4" />
-								Questions? Give us feedback
-							</a>
-						</div>
 					</>
 				)}
 			</nav>
