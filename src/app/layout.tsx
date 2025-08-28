@@ -111,7 +111,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
 					runllm-assistant-id="1119"
 					runllm-theme-color="#FF5543"
 					runllm-floating-button-text="Ask AI"
-					runllm-brand-logo="https://file.notion.so/f/f/e7ce844a-fe2e-4102-b77e-e852aee3841b/5c8731c4-920f-4550-a102-93eb8522e35e/pictogram-dark-mode.png?table=block&id=2e0f3abe-bdd5-4266-b429-cc7fe9451dae&spaceId=e7ce844a-fe2e-4102-b77e-e852aee3841b&expirationTimestamp=1756247966593&signature=t6N9NcU7K1q_zEreEm2W7Ri_NuK27iFVT_wvo0469i0&downloadName=pictogram-dark.png"
+					runllm-brand-logo="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/sourcegraph-pictogram-light.png"
 					async
 				/>
 			</body>
