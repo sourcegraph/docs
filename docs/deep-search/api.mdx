@@ -1,0 +1,207 @@
+# Deep Search API
+
+<p className="subtitle">Programmatic access to Sourcegraph's agentic code search capabilities.</p>
+
+<Callout type="note">
+	The Deep Search API is available in Sourcegraph version 6.7+. This API
+	allows you to programmatically create and manage Deep Search
+	conversations.
+</Callout>
+
+The Deep Search API provides programmatic access to Sourcegraph's agentic code search capabilities. Use this API to integrate Deep Search into your development workflows, build custom tools, or automate code analysis tasks.
+
+## Authentication
+
+All API requests require authentication using a Sourcegraph access token. You can generate an access token from your user settings.
+
+```bash
+# Set your access token
+export SRC_ACCESS_TOKEN="your-token-here"
+```
+
+## Base URL
+
+All Deep Search API endpoints are prefixed with `/.api/deepsearch/v1` and require the `X-Requested-With` header to identify the client:
+
+```bash
+curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1' \
+  -H 'Accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H "Authorization: token $SRC_ACCESS_TOKEN" \
+  -H 'X-Requested-With: my-client 1.0.0'
+```
+
+<Callout type="note">
+	The `X-Requested-With` header is required and should include your client
+	name and version number.
+</Callout>
+
+## Creating conversations
+
+Create a new Deep Search conversation by asking a question:
+
+```bash
+curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1' \
+  -H 'Accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H "Authorization: token $SRC_ACCESS_TOKEN" \
+  -H 'X-Requested-With: my-client 1.0.0' \
+  -d '{"question":"Does github.com/sourcegraph/sourcegraph have a README?"}'
+```
+
+The API returns a complete conversation object including the generated answer:
+
+```json
+{
+	"id": 332,
+	"questions": [
+		{
+			"id": 4978,
+			"conversation_id": 332,
+			"question": "Does github.com/sourcegraph/sourcegraph have a README?",
+			"status": "completed",
+			"title": "Check for README in sourcegraph/sourcegraph",
+			"answer": "Yes, [github.com/sourcegraph/sourcegraph](/github.com/sourcegraph/sourcegraph/) has a [README.md](/github.com/sourcegraph/sourcegraph/-/blob/README.md) file in the root directory.",
+			"sources": [
+				{
+					"type": "Repository",
+					"link": "/github.com/sourcegraph/sourcegraph",
+					"label": "github.com/sourcegraph/sourcegraph"
+				}
+			],
+			"suggested_followups": [
+				"What is the purpose of the README.md file in the sourcegraph repository?"
+			]
+		}
+	],
+	"created_at": "2025-08-18T21:16:49Z",
+	"updated_at": "2025-08-18T21:16:49Z",
+	"user_id": 1,
+	"read_token": "fb1f21bb-07e5-48ff-a4cf-77bd2502c8a8",
+	"share_url": "https://your-sourcegraph-instance.com/deepsearch/fb1f21bb-07e5-48ff-a4cf-77bd2502c8a8"
+}
+```
+
+## Asynchronous processing
+
+For complex questions that might take longer to process, you can request asynchronous processing by adding the `Prefer: respond-async` header:
+
+```bash
+curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1' \
+  -H 'Accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H "Authorization: token $SRC_ACCESS_TOKEN" \
+  -H 'X-Requested-With: my-client 1.0.0' \
+  -H 'Prefer: respond-async' \
+  -d '{"question":"Analyze the authentication patterns across all our microservices"}'
+```
+
+This returns a `202 Accepted` status with the conversation object showing a `processing` status. You can then poll the conversation endpoint to check for completion:
+
+```bash
+curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/333' \
+  -H 'Accept: application/json' \
+  -H "Authorization: token $SRC_ACCESS_TOKEN" \
+  -H 'X-Requested-With: my-client 1.0.0'
+```
+
+## Adding follow-up questions
+
+Continue a conversation by adding follow-up questions:
+
+```bash
+curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/332/questions' \
+  -H 'Accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H "Authorization: token $SRC_ACCESS_TOKEN" \
+  -H 'X-Requested-With: my-client 1.0.0' \
+  -d '{"question":"What does the README file contain?"}'
+```
+
+## Listing conversations
+
+Get all your conversations with optional filtering:
+
+```bash
+# List all conversations
+curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1' \
+  -H 'Accept: application/json' \
+  -H "Authorization: token $SRC_ACCESS_TOKEN" \
+  -H 'X-Requested-With: my-client 1.0.0'
+
+# List with pagination and filtering
+curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1?page_first=10&sort=created_at' \
+  -H 'Accept: application/json' \
+  -H "Authorization: token $SRC_ACCESS_TOKEN" \
+  -H 'X-Requested-With: my-client 1.0.0'
+```
+
+Available query parameters:
+
+- `filter_id` - Filter by conversation ID
+- `filter_user_id` - Filter by user ID
+- `page_first` - Number of results per page
+- `page_after` - Pagination cursor
+- `sort` - Sort order: `created_at`, `-created_at`, `updated_at`, `-updated_at`
+
+## Managing conversations
+
+**Get a specific conversation:**
+
+```bash
+curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/332' \
+  -H 'Accept: application/json' \
+  -H "Authorization: token $SRC_ACCESS_TOKEN" \
+  -H 'X-Requested-With: my-client 1.0.0'
+```
+
+**Delete a conversation:**
+
+```bash
+curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/332' \
+  -X DELETE \
+  -H "Authorization: token $SRC_ACCESS_TOKEN" \
+  -H 'X-Requested-With: my-client 1.0.0'
+```
+
+**Cancel a processing question:**
+
+```bash
+curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/332/questions/4978/cancel' \
+  -X POST \
+  -H 'Accept: application/json' \
+  -H "Authorization: token $SRC_ACCESS_TOKEN" \
+  -H 'X-Requested-With: my-client 1.0.0'
+```
+
+## Response structure
+
+**Conversation object:**
+
+- `id` - Unique conversation identifier
+- `questions` - Array of questions and answers
+- `created_at`/`updated_at` - Timestamps
+- `user_id` - Owner user ID
+- `read_token` - Token for sharing access
+- `share_url` - URL for sharing the conversation
+
+**Question object:**
+
+- `id` - Unique question identifier
+- `question` - The original question text
+- `status` - Processing status: `pending`, `processing`, `completed`, `failed`
+- `title` - Generated title for the question
+- `answer` - The AI-generated answer (when completed)
+- `sources` - Array of sources used to generate the answer
+- `suggested_followups` - Suggested follow-up questions
+
+## Error handling
+
+The API returns standard HTTP status codes with descriptive error messages:
+
+- `200` - Success
+- `202` - Accepted (for async requests)
+- `400` - Bad Request
+- `401` - Unauthorized
+- `404` - Not Found
+- `500` - Internal Server Error
