@@ -253,6 +253,7 @@ export const navigation: NavigationItem[] = [
 			{
 				title: 'Deep Search',
 				href: '/deep-search',
+								sections: [{title: 'Deep Search API', href: '/deep-search/api'}]
 			}
 		]
 	},
