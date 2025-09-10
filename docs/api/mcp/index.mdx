@@ -1,0 +1,246 @@
+# Sourcegraph MCP Server
+
+<p className="subtitle">Connect AI agents and applications to your Sourcegraph instance's code search and analysis capabilities.</p>
+
+<TierCallout>
+  Supported on [Enterprise](/pricing/enterprise) plans.
+</TierCallout>
+<Callout type="note">This feature is [experimental](admin/beta_and_experimental_features#experimental-features) and might change or be removed in the future.</Callout>
+
+The Sourcegraph Model Context Protocol (MCP) Server provides AI agents and applications with programmatic access to your Sourcegraph instance's code search, navigation, and analysis capabilities through a standardized interface.
+
+## Server Endpoint
+
+The MCP server is available at:
+
+```
+https://your-sourcegraph-instance.com/.api/mcp/v1
+```
+
+## Authentication
+
+The Sourcegraph MCP server supports two authentication methods:
+
+### OAuth 2.0
+
+For programmatic access without storing credentials, use OAuth 2.0 with device flow or authorization code flow with PKCE:
+
+#### Prerequisites
+
+Before using OAuth, you must create an OAuth application in your Sourcegraph instance. Follow the instructions [here](/admin/oauth_apps#creating-an-oauth-app). (Note: you will need the `user:all` scope) 
+
+### Authorization Header
+
+Include your token in the Authorization header:
+
+```
+Authorization: token YOUR_ACCESS_TOKEN
+```
+
+## Available Tools
+
+The MCP server provides these tools for code exploration and analysis:
+
+### File & Repository Operations
+
+#### `sg_read_file`
+
+Read file contents with line numbers and support for specific ranges and revisions.
+
+**Parameters:**
+
+- `repo` - Repository name (required)
+- `path` - File path within repository (required)
+- `startLine` - Starting line number (optional)
+- `endLine` - Ending line number (optional)
+- `revision` - Branch, tag, or commit hash (optional)
+
+**Use cases:** Reading specific files, examining code sections, reviewing different versions
+
+<Callout type="note">File size limit is 128KB. Use line ranges for larger files.</Callout>
+
+#### `sg_list_files`
+
+List files and directories in a repository path.
+
+**Parameters:**
+- `repo` - Repository name (required)
+- `path` - Directory path (optional, defaults to root)
+- `revision` - Branch, tag, or commit hash (optional)
+
+#### `sg_list_repos`
+
+Search and list repositories by name patterns with pagination support.
+
+**Parameters:**
+- `query` - Search pattern for repository names (required)
+- `limit` - Maximum results per page (optional, default 50)
+- `after`/`before` - Pagination cursors (optional)
+
+### Code Search
+
+#### `sg_keyword_search`
+
+Perform exact keyword searches with boolean operators and filters.
+
+**Parameters:**
+- `query` - Search query with optional filters (required)
+
+**Supported filters:**
+- `repo:` - limit to specific repositories
+- `file:` - search specific file patterns
+- `rev:` - search specific revisions
+
+**Features:** Boolean AND/OR operators, regex patterns
+
+#### `sg_nls_search`
+
+Semantic search with flexible linguistic matching.
+
+**Parameters:**
+- `query` - Natural language search query (required)
+
+**Supported filters:**
+- `repo:` - limit to specific repositories
+- `file:` - search specific file patterns
+- `rev:` - search specific revisions
+
+**Features:** Flexible linguistic matching, stemming, broader results than keyword search
+
+### Code Navigation
+
+#### `sg_go_to_definition`
+
+Find the definition of a symbol from a usage location.
+
+**Parameters:**
+- `repo` - Repository name (required)
+- `path` - File path containing symbol usage (required)
+- `symbol` - Symbol name to find definition for (required)
+- `revision` - Branch, tag, or commit hash (optional)
+
+**Features:** Cross-repository support, compiler-level accuracy
+
+#### `sg_find_references`
+
+Find all references to a symbol from its definition location.
+
+**Parameters:**
+- `repo` - Repository name (required)
+- `path` - File path containing symbol definition (required)
+- `symbol` - Symbol name to find references for (required)
+- `revision` - Branch, tag, or commit hash (optional)
+
+### Version Control & History
+
+#### `sg_commit_search`
+
+Search commits by message, author, content, files, and date ranges.
+
+**Parameters:**
+- `repos` - Array of repository names (required)
+- `messageTerms` - Terms to search in commit messages (optional)
+- `authors` - Filter by commit authors (optional)
+- `contentTerms` - Search in actual code changes (optional)
+- `files` - Filter by file paths (optional)
+- `after`/`before` - Date range filters (optional)
+
+#### `sg_diff_search`
+
+Search actual code changes for specific patterns across repositories.
+
+**Parameters:**
+- `pattern` - Search pattern for code changes (required)
+- `repos` - Array of repository names (required)
+- `added` - Search only added code (optional)
+- `removed` - Search only removed code (optional)
+- `author` - Filter by author (optional)
+- `after`/`before` - Date range filters (optional)
+
+#### `sg_compare_revisions`
+
+Compare changes between two specific revisions.
+
+**Parameters:**
+- `repo` - Repository name (required)
+- `base` - Base revision (older version) (required)
+- `head` - Head revision (newer version) (required)
+- `first` - Maximum file diffs to return (optional, default 50)
+- `after` - Pagination cursor (optional)
+
+#### `sg_get_contributor_repos`
+
+Find repositories where a contributor has made commits.
+
+**Parameters:**
+- `author` - Author name or email (required)
+- `limit` - Maximum repositories to return (optional, default 20)
+- `minCommits` - Minimum commits required (optional, default 1)
+
+### [Deep Search](/deep-search)
+
+#### `sg_deepsearch`
+
+Perform comprehensive analysis of complex questions about your codebase.
+
+**Parameters:**
+- `question` - Complex technical question (required)
+
+**Features:** Agentic LLM-powered research with automatic tool usage
+
+## Usage Examples
+
+### Finding Authentication Code
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "sg_nls_search",
+    "arguments": {
+      "query": "authentication login user"
+    }
+  }
+}
+```
+
+### Reading a Specific File
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "sg_read_file",
+    "arguments": {
+      "repo": "github.com/myorg/myrepo",
+      "path": "src/auth/login.go",
+      "startLine": 1,
+      "endLine": 50
+    }
+  }
+}
+```
+
+### Finding Recent Changes
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "sg_commit_search",
+    "arguments": {
+      "repos": ["github.com/myorg/myrepo"],
+      "messageTerms": ["bug fix"],
+      "after": "1 week ago"
+    }
+  }
+}
+```
+
+## Best Practices
+
+1. **Repository Scoping:** Use `sg_list_repos` first to find relevant repositories for better performance
+2. **Progressive Search:** Start with broad searches (`sg_nls_search`) then narrow with specific tools
+3. **File Verification:** Use `sg_list_files` before `sg_read_file` to verify file existence
+4. **Pagination:** Use `after`/`before` cursors for large result sets
+5. **Tool Combinations:** Chain tools together (e.g., `sg_list_repos` → `sg_commit_search`)

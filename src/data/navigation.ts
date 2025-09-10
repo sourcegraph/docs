@@ -531,6 +531,10 @@ export const navigation: NavigationItem[] = [
 			{
 				title: 'Sourcegraph Stream API',
 				href: '/api/stream_api'
+			},
+			{
+				title: 'Sourcegraph MCP Server',
+				href: '/api/mcp'
 			}
 		]
 	},
