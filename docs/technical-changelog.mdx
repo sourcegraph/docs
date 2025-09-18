@@ -4,6 +4,205 @@ This page documents all notable changes to Sourcegraph. For more detailed change
 
 {/* CHANGELOG_START */}
 
+# 6.8 Patch 0
+
+## v6.8.0
+
+- [sourcegraph](https://github.com/sourcegraph/sourcegraph/releases/tag/v6.8.0)
+
+- [docker-compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/releases/tag/v6.8.0)
+
+- [helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/releases/tag/v6.8.0)
+
+- [kustomize](https://github.com/sourcegraph/deploy-sourcegraph-k8s/releases/tag/v6.8.0)
+
+### Features
+
+#### Cody
+
+- add Claude Opus 4.1 `(PR #7218)`
+
+#### Ds
+
+- Deep Search rate limits dynamically scale for Enterprise Portal `(PR #6902)`
+
+#### Release
+
+- release prep codeowners file update `(PR #7251)`
+  - feat: update codeowners release prep activity
+- release prep deliverables activity `(PR #7240)`
+  - feat: minor release prep deliverables activity
+- stitched-graph gen activity with buildkite `(PR #7209)`
+  - feat(release): stitched-graph gen activity with buildkite
+- init minor release prep activities `(PR #7091)`
+  - temporal maxVersionConst update activity, minor release prep workflow set up
+- Stitched Migration Graph Gen Library `(PR #7024)`
+  - feat(release): introduce stitched graph lib for portability rather than just a bazel target
+
+#### Search
+
+- Consider existing file: filters for suggestions `(PR #7253)`
+
+#### Source
+
+- Gate Cody API access behind license feature `(PR #7230)`
+  - The Cody API endpoints (anything under `/.api/llm`) are no longer available.
+- Support Bitbucket Server's archived repositories `(PR #7158)`
+  - Sourcegraph now supports Bitbucket Server's [official way to archive a repository](https://confluence.atlassian.com/bitbucketserver/archive-a-repository-1128304317.html), and the workaround of applying an "archived" label is no longer supported.
+- Support .git-blame-ignore-revs for Blame commands `(PR #7035)`
+  - Sourcegraph now supports `.git-blame-ignore-revs` files in the root of repositories.
+
+#### Others
+
+- add predefined OAuth client for Visual Studio `(PR #7163)`
+  - VS predefined OAuth client added
+- sg msp: use operatorwrite db account `(PR #7132)`
+- add predefined OAuth client for Cody `(PR #7090)`
+  - Add "cody" predefined client with device flow support to enable OAuth authentication for Sourcegraph Cody across all IDEs.
+- Embed React prompts pages `(PR #6735)`
+- Embed repo own pages `(PR #6713)`
+
+### Fix
+
+#### Cody
+
+- max output tokens for claude-opus-4-1 `(PR #7260)`
+
+#### Deepsearch
+
+- Only show follow-up suggestions for most recent QA pair `(PR #6998)`
+
+#### Ds-Gating
+
+- added testing to telemetry for DS gating on fail open cases `(PR #7017)`
+  - Added testing to the telemetry events on fail open cases for DeepSearch gating
+
+#### Release
+
+- use `--auto-exclude-previous-releases` in changelog call `(PR #7224)`
+  - feat: improved changelog gen filtering, prevent duplicate entries on fast forwarded branches
+
+#### Source
+
+- Git blame check for fs.PathError instead of NotFound error `(PR #7215)`
+- Deduplicate repository permissions on Repo Permissions page `(PR #7202)`
+  - Fixed a bug where, on a user's Repo Permissions page, the number of repositories they have access to could be greatly exaggerated.
+- Fix repo permissions page pagination `(PR #7200)`
+  - Fixed an issue where pagination on a user's Repo Permissions page did not work.
+- show different errors for user and organisation name conflicts `(PR #7166)`
+
+#### Others
+
+- Fix various style issues with embedded React pages `(PR #7242)`
+- Make Deep Search responsive `(PR #7125)`
+- Add `billingMetadata` to `search:execute` event `(PR #7086)`
+- Add /search/notebook to /notebooks redirect in new web app `(PR #7066)`
+- sg setup check for pre-commit `(PR #7042)`
+  - N/A
+- update dev/nix README with Cachix setup documentation `(PR #7007)`
+  - N/A
+
+### Chore
+
+#### Ci
+
+- use sourcegraph/go-mockgen fork `(PR #7052)`
+
+#### Cody
+
+- Deprecated claude opus 4 `(PR #7258)`
+
+#### Deepsearch
+
+- Remove Deep Search tool from MCP registry `(PR #7314)`
+- Prevent input and follow up boxes from accepting pasted images `(PR #7309)`
+- Add composite index for user_id and updated_at `(PR #7129)`
+
+#### Release
+
+- consolidate sitiched const to one file `(PR #7122)`
+  - chore: consolidate stitched graph generation consts into one file
+
+#### Source
+
+- wrap FetchUserPerms errors more `(PR #7264)`
+- Simplify code and remove TODO `(PR #7192)`
+
+#### Others
+
+- Enable react embedded pages for customers `(PR #7243)`
+- deprecate claude sonnet 3.5 model since it's going to be EOL `(PR #7085)`
+  - closes: CODY-6235
+
+### Reverts
+
+- revert pgvector removal and auto-upgrade of versions `(PR #-1)`
+
+### Uncategorized
+
+#### Others
+
+- [Backport 6.8.x] Fix OAuth provider matching when multiple client IDs are present for the same URL `(PR #7282)`
+- Fix repository metadata documentation link `(PR #7244)`
+- bug(deep search): Report suggested follow-ups as raw LLM call in analytics `(PR #7226)`
+  - Fixed the analytics event type for follow-up suggestions to use `DeepSearchEventRawLLM` instead of `DeepSearchEventFollowUp` to ensure consistent event tracking.
+- feat(deep search): add deepsearch MCP tool `(PR #7197)`
+  - Added DeepSearch tool to the MCP API for codebase assistant integration
+- msp: pgaudit for operator users `(PR #7196)`
+- Move feature checks into the worker routine `(PR #7187)`
+- workspaces/internal: link to Stripe customer `(PR #7183)`
+- workspaces: write billing event in background `(PR #7182)`
+- feat(deep search): create MCP server endpoint `(PR #7173)`
+  - Added Model Context Protocol (MCP) support to Deepsearch API
+  - Refactored tool response handling to use strongly typed responses
+  - Moved error messages and notes to dedicated fields instead of embedding in content
+  - Removed X-Requested-With middleware requirement for MCP endpoints
+  - Improved tool schema handling with separate input and output schemas
+- cloud: add waf configuration to instance proto `(PR #7172)`
+- msp: filter service logs to only service container `(PR #7171)`
+- Fix SvelteKit theme state `(PR #7167)`
+- Embed insight dashboard edit pages `(PR #7159)`
+- msp: scale uptime check period based on livenessInterval `(PR #7154)`
+- msp/runtime: better documentation for RegisterDiagnosticsHandlers `(PR #7151)`
+- bug(deep search): add viewed analytics event `(PR #7145)`
+  - Added telemetry recording for the `DeepSearchEventViewed` event type in the deep search analytics recorder.
+- Embed code insights standalone and edit pages in SvelteKit shell `(PR #7137)`
+- feat(deep search): record analytics when a shared thread is viewed `(PR #7130)`
+  - Refactored DeepSearch telemetry into a dedicated `deepsearchAnalyticsRecorder` component
+  - Added tracking for when DeepSearch conversations are shared and viewed by others
+  - Moved telemetry-related code from `deepsearch_agent.go` to a new `analytics.go` file
+- Added redirect param to sign out for workspaces and EP `(PR #7128)`
+  - Added redirect parameter when pressing sign out button in Enterprise Portal and Workspaces
+- Fix repositories search alert UI `(PR #7126)`
+- feat(deep search): combine line ranges in identical files `(PR #7109)`
+  - Created new `file-source-utils.ts` with helper functions for processing file ranges
+  - Updated `FileSource.svelte` to display multiple ranges with separators
+  - Modified `FilePreview.svelte` to use the first range from the array
+  - Updated backend tools to use the new `lineRanges` array format
+  - Added database migration to convert existing `lineRange` to `lineRanges` array
+- omega: use internal image, deliver image to pipeline `(PR #7104)`
+- Embed insights creation pages to the sveltekit shell `(PR #7082)`
+- ep/administration: filter by license tags and revocation state `(PR #7073)`
+- tls: Deprecate experimental setting and code-host certificate settings `(PR #7037)`
+- msp/cloudsql: postgresql.additionalFlags `(PR #7023)`
+- Make index picker show the type of index available `(PR #7015)`
+- Add RBAC permission that allows uploading SCIP code index `(PR #7010)`
+  - A user can be allowed through RBAC system to upload SCIP indexes for repositories they do not have write access to on code forge. This also applies to service accounts.
+- Update telemetry billing metadata from 'insights' to 'insight' `(PR #7000)`
+- modelconfig: remove generated JSON `(PR #6981)`
+- Migrate Code Insights react pages to sveltekit shell UI `(PR #6929)`
+
+### Untracked
+
+The following PRs were merged onto the previous release branch but could not be automatically mapped to a corresponding commit in this release:
+
+- add reasoning to GPT-5 models `(PR #7223)`
+  - Fixed model configuration to include reasoning parameter.
+- fix(deep search): remove unused property from conversation test `(PR #7084)`
+
+{/* RSS={"version":"v6.8.0", "releasedAt": "2025-09-18"} */}
+
+
 # 6.7 Patch 5
 
 ## v6.7.2720
