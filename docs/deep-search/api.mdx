@@ -38,9 +38,7 @@ curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1' \
 
 ## Creating conversations
 
-<Callout type="note">
-	Synchronous API calls currently have a **1 minute timeout**. For complex questions that might take longer to process, request [asynchronous processing](#asynchronous-processing) instead.
-</Callout>
+All Deep Search conversations are processed asynchronously. When you create a conversation, the API will return immediately with a conversation object containing the question in `processing` status.
 
 Create a new Deep Search conversation by asking a question:
 
@@ -53,68 +51,117 @@ curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1' \
   -d '{"question":"Does github.com/sourcegraph/sourcegraph have a README?"}'
 ```
 
-The API returns a complete conversation object including the generated answer:
+The API returns a conversation object with the question initially in `processing` status:
 
 ```json
 {
-	"id": 332,
-	"questions": [
-		{
-			"id": 4978,
-			"conversation_id": 332,
-			"question": "Does github.com/sourcegraph/sourcegraph have a README?",
-			"status": "completed",
-			"title": "Check for README in sourcegraph/sourcegraph",
-			"answer": "Yes, [github.com/sourcegraph/sourcegraph](/github.com/sourcegraph/sourcegraph/) has a [README.md](/github.com/sourcegraph/sourcegraph/-/blob/README.md) file in the root directory.",
-			"sources": [
-				{
-					"type": "Repository",
-					"link": "/github.com/sourcegraph/sourcegraph",
-					"label": "github.com/sourcegraph/sourcegraph"
-				}
-			],
-			"suggested_followups": [
-				"What is the purpose of the README.md file in the sourcegraph repository?"
-			]
-		}
-	],
-	"created_at": "2025-08-18T21:16:49Z",
-	"updated_at": "2025-08-18T21:16:49Z",
-	"user_id": 1,
-	"read_token": "fb1f21bb-07e5-48ff-a4cf-77bd2502c8a8",
-	"share_url": "https://your-sourcegraph-instance.com/deepsearch/fb1f21bb-07e5-48ff-a4cf-77bd2502c8a8"
+  "id": 140,
+  "questions": [
+    {
+      "id": 163,
+      "conversation_id": 140,
+      "question": "Does github.com/sourcegraph/sourcegraph have a README?",
+      "created_at": "2025-09-24T08:14:06Z",
+      "updated_at": "2025-09-24T08:14:06Z",
+      "status": "processing",
+      "turns": [
+        {
+          "reasoning": "Does github.com/sourcegraph/sourcegraph have a README?",
+          "timestamp": 1758701646,
+          "role": "user"
+        }
+      ],
+      "stats": {
+        "time_millis": 0,
+        "tool_calls": 0,
+        "total_input_tokens": 0,
+        "cached_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0,
+        "credits": 0
+      },
+      "suggested_followups": null
+    }
+  ],
+  "created_at": "2025-09-24T08:14:06Z",
+  "updated_at": "2025-09-24T08:14:06Z",
+  "user_id": 1,
+  "read_token": "caebeb05-7755-4f89-834f-e3ee4a6acb25",
+  "share_url": "https://your-sourcegraph-instance.com/deepsearch/caebeb05-7755-4f89-834f-e3ee4a6acb25"
 }
 ```
 
-## Asynchronous processing
-
-For complex questions that might take longer to process, you can request asynchronous processing by adding the `Prefer: respond-async` header:
+To get the completed answer, poll the conversation endpoint:
 
 ```bash
-curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1' \
-  -H 'Accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -H "Authorization: token $SRC_ACCESS_TOKEN" \
-  -H 'X-Requested-With: my-client 1.0.0' \
-  -H 'Prefer: respond-async' \
-  -d '{"question":"Analyze the authentication patterns across all our microservices"}'
-```
-
-This returns a `202 Accepted` status with the conversation object showing a `processing` status. You can then poll the conversation endpoint to check for completion:
-
-```bash
-curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/333' \
+curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/140' \
   -H 'Accept: application/json' \
   -H "Authorization: token $SRC_ACCESS_TOKEN" \
   -H 'X-Requested-With: my-client 1.0.0'
 ```
+
+Once processing is complete, the response will include the answer:
+
+```json
+{
+  "id": 140,
+  "questions": [
+    {
+      "id": 163,
+      "conversation_id": 140,
+      "question": "Does github.com/sourcegraph/sourcegraph have a README?",
+      "created_at": "2025-09-24T08:14:06Z",
+      "updated_at": "2025-09-24T08:14:15Z",
+      "status": "completed",
+      "title": "GitHub README check",
+      "answer": "Yes, [github.com/sourcegraph/sourcegraph](https://sourcegraph.test:3443/github.com/sourcegraph/sourcegraph) has a [README.md](https://sourcegraph.test:3443/github.com/sourcegraph/sourcegraph/-/blob/README.md) file in the root directory.",
+      "sources": [
+        {
+          "type": "Repository",
+          "link": "/github.com/sourcegraph/sourcegraph",
+          "label": "github.com/sourcegraph/sourcegraph"
+        }
+      ],
+      "stats": {
+        "time_millis": 6369,
+        "tool_calls": 1,
+        "total_input_tokens": 13632,
+        "cached_tokens": 12359,
+        "cache_creation_input_tokens": 13625,
+        "prompt_tokens": 11,
+        "completion_tokens": 156,
+        "total_tokens": 13694,
+        "credits": 2
+      },
+      "suggested_followups": [
+        "What information does the README.md file contain?",
+        "Are there other important documentation files in the repository?"
+      ]
+    }
+  ],
+  "created_at": "2025-09-24T08:14:06Z",
+  "updated_at": "2025-09-24T08:14:15Z",
+  "user_id": 1,
+  "read_token": "caebeb05-7755-4f89-834f-e3ee4a6acb25",
+  "viewer": { "is_owner": true },
+  "quota_usage": {
+    "total_quota": 0,
+    "quota_limit": -1,
+    "reset_time": "2025-10-01T00:00:00Z"
+  },
+  "share_url": "https://sourcegraph.test:3443/deepsearch/caebeb05-7755-4f89-834f-e3ee4a6acb25"
+}
+```
+
 
 ## Adding follow-up questions
 
 Continue a conversation by adding follow-up questions:
 
 ```bash
-curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/332/questions' \
+curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/140/questions' \
   -H 'Accept: application/json' \
   -H 'Content-Type: application/json' \
   -H "Authorization: token $SRC_ACCESS_TOKEN" \
@@ -153,7 +200,7 @@ Available query parameters:
 **Get a specific conversation:**
 
 ```bash
-curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/332' \
+curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/140' \
   -H 'Accept: application/json' \
   -H "Authorization: token $SRC_ACCESS_TOKEN" \
   -H 'X-Requested-With: my-client 1.0.0'
@@ -162,7 +209,7 @@ curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/332' \
 **Delete a conversation:**
 
 ```bash
-curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/332' \
+curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/140' \
   -X DELETE \
   -H "Authorization: token $SRC_ACCESS_TOKEN" \
   -H 'X-Requested-With: my-client 1.0.0'
@@ -171,7 +218,7 @@ curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/332' \
 **Cancel a processing question:**
 
 ```bash
-curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/332/questions/4978/cancel' \
+curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/140/questions/163/cancel' \
   -X POST \
   -H 'Accept: application/json' \
   -H "Authorization: token $SRC_ACCESS_TOKEN" \
