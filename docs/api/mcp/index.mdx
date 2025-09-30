@@ -37,6 +37,100 @@ Include your token in the Authorization header:
 Authorization: token YOUR_ACCESS_TOKEN
 ```
 
+## Client Integration
+
+The Sourcegraph MCP server can be integrated with various AI tools and IDEs that support the Model Context Protocol.
+
+### Amp
+
+<Callout type="info">
+  To create an access token, visit [Creating an access token](/cli/how-tos/creating_an_access_token).
+</Callout>
+
+You can add the Sourcegraph MCP server to [Amp](https://ampcode.com) in two ways:
+
+#### Option 1: VSCode settings.json
+
+1. Open VSCode's `settings.json` file.
+2. Add the following configuration:
+
+   ```json
+   {
+     "amp.mcpServers": {
+       "sourcegraph": {
+         "url": "https://your-sourcegraph-instance.com/.api/mcp/v1",
+         "headers": {
+           "Authorization": "token YOUR_ACCESS_TOKEN"
+         }
+       }
+     }
+   }
+   ```
+
+   <Callout type="info">
+     Replace `your-sourcegraph-instance.com` with your Sourcegraph instance URL and `YOUR_ACCESS_TOKEN` with your access token.
+   </Callout>
+
+3. Save the configuration file.
+4. Restart VS Code to apply the new configuration.
+
+#### Option 2: Amp CLI
+
+Run the following command in your terminal:
+
+```bash
+amp mcp add sourcegraph --header "Authorization=token YOUR_ACCESS_TOKEN" https://sourcegraph.sourcegraph.com/.api/mcp/v1
+```
+
+<Callout type="info">
+  Replace `sourcegraph.sourcegraph.com` with your Sourcegraph instance URL and set `YOUR_ACCESS_TOKEN` environment variable to your access token.
+</Callout>
+
+### Claude Code
+
+You can add the Sourcegraph MCP server to [Claude Code](https://claude.ai/code) in two ways:
+
+#### Option 1: Project-scoped server (via .mcp.json file)
+
+1. Create a `.mcp.json` file in your project root if it doesn't exist.
+2. Add the following configuration:
+
+   ```json
+   {
+     "mcpServers": {
+       "sourcegraph": {
+         "url": "https://your-sourcegraph-instance.com/.api/mcp/v1",
+         "headers": {
+           "Authorization": "token YOUR_ACCESS_TOKEN"
+         }
+       }
+     }
+   }
+   ```
+
+   <Callout type="info">
+     Replace `your-sourcegraph-instance.com` with your Sourcegraph instance URL and `YOUR_ACCESS_TOKEN` with your access token.
+   </Callout>
+
+3. Save the configuration file.
+4. Restart Claude Code to apply the new configuration.
+
+#### Option 2: Locally-scoped server (via CLI command)
+
+You can also add the Sourcegraph MCP server as a locally-scoped server, which is only available to you in the current project:
+
+1. Run the following command in your terminal:
+
+   ```bash
+   claude mcp add sourcegraph -s local --url https://your-sourcegraph-instance.com/.api/mcp/v1 --header "Authorization: token YOUR_ACCESS_TOKEN"
+   ```
+
+   <Callout type="info">
+     Replace `your-sourcegraph-instance.com` with your Sourcegraph instance URL and `YOUR_ACCESS_TOKEN` with your access token.
+   </Callout>
+
+Locally-scoped servers take precedence over project-scoped servers with the same name and are stored in your project-specific user settings.
+
 ## Available Tools
 
 The MCP server provides these tools for code exploration and analysis:
