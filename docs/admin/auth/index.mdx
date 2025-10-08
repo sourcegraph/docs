@@ -184,6 +184,36 @@ When combined with `"allowSignup": false` or unset, an admin should first create
     }
   ```
 
+**requiredSsoOrgs**
+
+Requires that users have SAML SSO authorization for specific GitHub organizations when authenticating via OAuth. This is useful when your GitHub organizations enforce SAML SSO, and you want to ensure users properly authorize the OAuth application for those organizations during the authentication flow. Not doing so could cause permissions syncing issues.
+
+This setting accepts **GitHub organization IDs** (numeric strings), not organization names.
+
+**Finding your GitHub organization ID:**
+
+You can find your organization ID using the GitHub API:
+
+```bash
+curl -H "Authorization: token YOUR_GITHUB_TOKEN" \
+  https://api.github.com/orgs/YOUR_ORG_NAME
+```
+
+The response will include an `id` field with your organization's numeric ID.
+
+**Example configuration:**
+
+```json
+{
+  "type": "github",
+  "url": "https://github.com",
+  "displayName": "GitHub",
+  "clientID": "replace-with-the-oauth-client-id",
+  "clientSecret": "replace-with-the-oauth-client-secret",
+  "allowSignup": true,
+  "requiredSsoOrgs": ["123456789", "987654321"]
+}
+```
 
 ## GitLab
 
