@@ -27,6 +27,112 @@ export const navigation: NavigationItem[] = [
 		separator: 'Code Intelligence',
 		topics: [
 			{
+				title: 'Code Search',
+				href: '/code-search',
+				sections: [
+					{ title: 'Features', href: '/code-search/features' },
+					{
+						title: 'Search Query Syntax',
+						href: '/code-search/queries',
+						subsections: [
+							{
+								title: 'Search Filters Panel',
+								href: '/code-search/working/search_filters'
+							},
+							{
+								title: 'Search Examples',
+								href: '/code-search/queries/examples'
+							},
+							{
+								title: 'Symbol Search',
+								href: '/code-search/types/symbol'
+							},
+							{
+								title: 'Language Reference',
+								href: '/code-search/queries/language'
+							}
+						]
+					},
+					{
+						title: 'Code Navigation',
+						href: '/code-search/code-navigation',
+						subsections: [
+							{
+								title: 'Features',
+								href: '/code-search/code-navigation/features'
+							},
+							{
+								title: 'Search-based code navigation',
+								href: '/code-search/code-navigation/search_based_code_navigation'
+							},
+							{
+								title: 'Precise code navigation',
+								href: '/code-search/code-navigation/precise_code_navigation'
+							},
+							{
+								title: 'Syntactic code navigation',
+								href: '/code-search/code-navigation/syntactic_code_navigation'
+							},
+							{
+								title: 'Auto-indexing',
+								href: '/code-search/code-navigation/auto_indexing'
+							},
+							{
+								title: 'Environment Variables',
+								href: '/code-search/code-navigation/envvars'
+							},
+							{
+								title: 'Troubleshooting',
+								href: '/code-search/code-navigation/troubleshooting'
+							}
+						]
+					},
+					{
+						title: 'Advanced Features',
+						href: '/code-search/working/saved_searches',
+						subsections: [
+							{
+								title: 'Fuzzy Finder',
+								href: '/code-search/types/fuzzy'
+							},
+							{
+								title: 'Search Contexts',
+								href: '/code-search/working/search_contexts'
+							},
+							{
+								title: 'Search Jobs',
+								href: '/code-search/types/search-jobs'
+							},
+							{
+								title: 'Search Snippets',
+								href: '/code-search/working/snippets'
+							},
+							{
+								title: 'Search Subexpressions',
+								href: '/code-search/working/search_subexpressions'
+							},
+							{
+								title: 'Saved Searches',
+								href: '/code-search/working/saved_searches'
+							},
+							{
+								title: 'Structural Search',
+								href: '/code-search/types/structural'
+							}
+						]
+					},
+					{
+						title: 'FAQs',
+						href: '/code-search/faq'
+					}
+				]
+			},
+			{
+				title: 'Deep Search',
+				href: '/deep-search',
+				sections: [{title: 'Deep Search API', href: '/deep-search/api'}]
+			},
+			{
 				title: 'Cody',
 				href: '/cody',
 				sections: [
@@ -148,112 +254,6 @@ export const navigation: NavigationItem[] = [
 					{ title: 'Troubleshooting', href: '/cody/troubleshooting' },
 					{ title: 'FAQs', href: '/cody/faq' }
 				]
-			},
-			{
-				title: 'Code Search',
-				href: '/code-search',
-				sections: [
-					{ title: 'Features', href: '/code-search/features' },
-					{
-						title: 'Search Query Syntax',
-						href: '/code-search/queries',
-						subsections: [
-							{
-								title: 'Search Filters Panel',
-								href: '/code-search/working/search_filters'
-							},
-							{
-								title: 'Search Examples',
-								href: '/code-search/queries/examples'
-							},
-							{
-								title: 'Symbol Search',
-								href: '/code-search/types/symbol'
-							},
-							{
-								title: 'Language Reference',
-								href: '/code-search/queries/language'
-							}
-						]
-					},
-					{
-						title: 'Code Navigation',
-						href: '/code-search/code-navigation',
-						subsections: [
-							{
-								title: 'Features',
-								href: '/code-search/code-navigation/features'
-							},
-							{
-								title: 'Search-based code navigation',
-								href: '/code-search/code-navigation/search_based_code_navigation'
-							},
-							{
-								title: 'Precise code navigation',
-								href: '/code-search/code-navigation/precise_code_navigation'
-							},
-							{
-								title: 'Syntactic code navigation',
-								href: '/code-search/code-navigation/syntactic_code_navigation'
-							},
-							{
-								title: 'Auto-indexing',
-								href: '/code-search/code-navigation/auto_indexing'
-							},
-							{
-								title: 'Environment Variables',
-								href: '/code-search/code-navigation/envvars'
-							},
-							{
-								title: 'Troubleshooting',
-								href: '/code-search/code-navigation/troubleshooting'
-							}
-						]
-					},
-					{
-						title: 'Advanced Features',
-						href: '/code-search/working/saved_searches',
-						subsections: [
-							{
-								title: 'Fuzzy Finder',
-								href: '/code-search/types/fuzzy'
-							},
-							{
-								title: 'Search Contexts',
-								href: '/code-search/working/search_contexts'
-							},
-							{
-								title: 'Search Jobs',
-								href: '/code-search/types/search-jobs'
-							},
-							{
-								title: 'Search Snippets',
-								href: '/code-search/working/snippets'
-							},
-							{
-								title: 'Search Subexpressions',
-								href: '/code-search/working/search_subexpressions'
-							},
-							{
-								title: 'Saved Searches',
-								href: '/code-search/working/saved_searches'
-							},
-							{
-								title: 'Structural Search',
-								href: '/code-search/types/structural'
-							}
-						]
-					},
-					{
-						title: 'FAQs',
-						href: '/code-search/faq'
-					}
-				]
-			},
-			{
-				title: 'Deep Search',
-				href: '/deep-search',
-								sections: [{title: 'Deep Search API', href: '/deep-search/api'}]
 			}
 		]
 	},
