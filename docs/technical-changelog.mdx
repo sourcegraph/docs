@@ -4,6 +4,89 @@ This page documents all notable changes to Sourcegraph. For more detailed change
 
 {/* CHANGELOG_START */}
 
+# 6.10 Patch 0
+
+## v6.10.0
+
+- [sourcegraph](https://github.com/sourcegraph/sourcegraph/releases/tag/v6.10.0)
+
+- [docker-compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/releases/tag/v6.10.0)
+
+- [helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/releases/tag/v6.10.0)
+
+- [kustomize](https://github.com/sourcegraph/deploy-sourcegraph-k8s/releases/tag/v6.10.0)
+
+### Features
+
+#### Release
+
+- sg create helm automation `(PR #7622)`
+  - feat(release): extend the deploy repos automation to include the helm repo
+- sg create k8s automation `(PR #7601)`
+  - feat(release): extend the deploy repos automation to include the k8s repo
+- temporal workflow activites for deploy-sourcegraph-docker `sg release create` `(PR #7468)`
+  - feat(release): deploy-sourcegraph-docker temporal release automation
+
+#### Search
+
+- remove 'sourcegraph.loginWithCody' setting from VSCode Code Search plugin `(PR #7630)`
+  - The VSCode Code Search extension no longer shares authentication credentials with the Cody extension.
+  - Users must now authenticate directly with their own credentials or access token.
+
+#### Source
+
+- Add PKCE support for GitHub `(PR #7537)`
+  - GitHub account connections now use Proof Key for Code Exchange
+
+### Fix
+
+#### Release
+
+- improve error handling on rds first sync `(PR #7732)`
+  - fix(RDS connections): improve initial connection error message
+
+#### Source
+
+- Fix PermissionsSyncJobs pagination `(PR #7647)`
+  - Fixed an issue where permissions sync jobs couldn't be paginated if they referenced a deleted user or repository.
+
+#### Others
+
+- update peforce scheme parsing for go 1.25.3 change `(PR #7575)`
+  - update perforce URL parsing to handle new ipv6 parsing behavior in go 1.25.3
+- Allow minor upgrades of Postgres for the latest Sourcegraph releases `(PR #7533)`
+  - use constraints instead of exact match in database constraints
+
+### Chore
+
+#### Others
+
+- upgrade s3proxy to 2.8.0 `(PR #7536)`
+  - Upgraded [s3proxy](https://github.com/gaul/s3proxy) dependency to 2.8.0.
+
+### Reverts
+
+  There were no reverts for this release
+
+### Uncategorized
+
+#### Others
+
+- fix(search jobs): Search Jobs broken if soft-deleted users have search jobs `(PR #7782)`
+  - This fixes a bug where the Search Jobs management page wouldn't render for an admin if there were search jobs of soft-deleted users.
+- (feat) authz/github: add gzip compression to group cache to reduce Redis memory usage `(PR #7760)`
+  - N/A
+- deep search: support markdown routes `(PR #7757)`
+  - Users can append ".md" to a deep search url in which case we return a markdown version of the thread.
+- deep search: add stars `(PR #7590)`
+  - You can now star your favorite threads and a new tab in the sidebar shows all your favorite threads in one place.
+- Renamed canConsumeDeepSearchQuotaClientTiming event `(PR #7480)`
+  - Renamed `canConsumeDeepSearchQuotaClientTiming` to `checkCanConsumeDeepSearchQuota`
+  - Rermoved useless len(licenseKey) metadata
+
+{/* RSS={"version":"v6.10.0", "releasedAt": "2025-11-12"} */}
+
+
 # 6.9 Patch 4
 
 ## v6.9.2509
