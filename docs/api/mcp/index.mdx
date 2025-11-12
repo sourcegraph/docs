@@ -5,6 +5,7 @@
 <TierCallout>
   Supported on [Enterprise](/pricing/enterprise) plans.
 </TierCallout>
+<Callout type="note">Available in version 6.8 and above.</Callout>
 <Callout type="note">This feature is [experimental](admin/beta_and_experimental_features#experimental-features) and might change or be removed in the future.</Callout>
 
 The Sourcegraph Model Context Protocol (MCP) Server provides AI agents and applications with programmatic access to your Sourcegraph instance's code search, navigation, and analysis capabilities through a standardized interface.
@@ -99,6 +100,7 @@ You can add the Sourcegraph MCP server to [Claude Code](https://claude.ai/code) 
    {
      "mcpServers": {
        "sourcegraph": {
+         "type": "http",
          "url": "https://your-sourcegraph-instance.com/.api/mcp/v1",
          "headers": {
            "Authorization": "token YOUR_ACCESS_TOKEN"
@@ -122,7 +124,7 @@ You can also add the Sourcegraph MCP server as a locally-scoped server, which is
 1. Run the following command in your terminal:
 
    ```bash
-   claude mcp add sourcegraph -s local --url https://your-sourcegraph-instance.com/.api/mcp/v1 --header "Authorization: token YOUR_ACCESS_TOKEN"
+   claude mcp add sourcegraph -s local --transport http https://your-sourcegraph-instance.com/.api/mcp/v1 --header "Authorization: token YOUR_ACCESS_TOKEN"
    ```
 
    <Callout type="info">
@@ -131,7 +133,39 @@ You can also add the Sourcegraph MCP server as a locally-scoped server, which is
 
 Locally-scoped servers take precedence over project-scoped servers with the same name and are stored in your project-specific user settings.
 
+### Cursor
+
+You can add the Sourcegraph MCP server to Cursor by configuring it in your MCP settings file:
+
+1. Open or create the MCP configuration file at `~/.cursor/mcp.json` (or the equivalent path on your system).
+2. Add the following configuration:
+
+   ```json
+   {
+     "mcpServers": {
+       "sourcegraph": {
+         "type": "http",
+         "url": "https://your-sourcegraph-instance.com/.api/mcp/v1",
+         "headers": {
+           "Authorization": "token YOUR_ACCESS_TOKEN"
+         }
+       }
+     }
+   }
+   ```
+
+   <Callout type="info">
+     Replace `your-sourcegraph-instance.com` with your Sourcegraph instance URL and `YOUR_ACCESS_TOKEN` with your access token. Note that Cursor requires the `type: "http"` field to be explicitly specified.
+   </Callout>
+
+3. Save the configuration file.
+4. Restart Cursor to apply the new configuration.
+
 ## Available Tools
+
+<Callout type="info">
+All MCP tools implement result limits to ensure efficient operation and prevent context window overflow. These limits are designed to return the most relevant results while maintaining optimal performance. For large result sets, use pagination parameters (`after`/`before` cursors) where available, or refine your search with more specific filters.
+</Callout>
 
 The MCP server provides these tools for code exploration and analysis:
 
