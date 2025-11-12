@@ -1,0 +1,45 @@
+# Sourcegraph Model Provider
+
+<p className="subtitle">Learn how the default Sourcegraph LLM model provider enables AI features for Sourcegraph Enterprise customers.</p>
+
+The Sourcegraph model provider is the default and recommended way to configure AI features like [Deep Search](/deep-search) and [Cody](/cody). Through this service, we provide zero-configuration access to state-of-the-art models from various LLM providers, including [Anthropic](https://www.anthropic.com/) and [OpenAI](https://openai.com/), with enterprise-grade [privacy and security](#privacy-and-security).
+
+<Callout type="note">The Sourcegraph model provider is also referred to as "Cody Gateway", which is the LLM proxy service that provides this capability.</Callout>
+
+## Using the Sourcegraph model provider
+
+<Callout type="info">If you are a [Sourcegraph Cloud](/cloud/) customer, the Sourcegraph model provider is automatically configured by default. Other customers can verify their Enterprise subscription has access by confirming with their account manager.</Callout>
+
+To enable completions provided by the Sourcegraph model proivder on your Sourcegraph Enterprise instance, all you need to do is ensure your license key and your completions provider is set to `"sourcegraph"` is set in your [site configuration](/admin/config/site_config):
+
+```jsonc
+{
+  "licenseKey": "<...>",
+  // Optional: Once the license key is added, default configuration and
+  // authentication are automatically applied.
+  "modelConfiguration": {
+    "sourcegraph": {}
+  }
+}
+```
+
+This feature is backed by a service hosted at `cody-gateway.sourcegraph.com`. To use the Sourcegraph model provider, your Sourcegraph instance must be allowed to connect to the service at this domain.
+
+## Rate limits and quotas
+
+Rate limits and quotas are tied to your Sourcegraph Enterprise license for Sourcegraph Enterprise instances. All successful LLM requests will count toward your rate limits. Unsuccessful requests are not counted as usage.
+
+In addition to the above, we may throttle concurrent requests per Sourcegraph Enterprise instance or Cody App user to prevent excessive burst consumption.
+
+<Callout type="note">You can reach out for more details about Sourcegraph model provider access available to you and how you can gain access to higher rate limits, quotas, and/or model options.</Callout>
+
+## Privacy and security
+
+Sourcegraph's [Enterprise AI Terms of Use](https://sourcegraph.com/terms/ai-terms) apply to all usage of the Sourcegraph model provider and Cody Gateway:
+
+- Input and output ownership: You own all inputs (queries) and outputs (generated code/text) from AI features
+- Zero retention by LLM partners: Partner LLMs do not retain any input or output data beyond the time needed to generate responses. Your enterprise code is not used to train LLM models unless you explicitly enable finetuning features.
+- Data collection: Customer content (inputs, outputs, context) is collected solely to provide the service, not for product improvement. Only rate limit consumption and high-level diagnostic data (error codes, numeric parameters) are tracked
+- Security: All data is processed according to Sourcegraph's [Security Exhibit](https://sourcegraph.com/terms/security-exhibit)
+
+For more privacy details, refer to the [Cody usage and privacy notice](https://about.sourcegraph.com/terms/cody-notice).

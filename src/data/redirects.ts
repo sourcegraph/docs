@@ -6933,6 +6933,16 @@ const redirectsData = [
     destination: '/admin/service_accounts',
     permanent: true
   },
+  {
+    source: '/cody/core-concepts/cody-gateway',
+    destination: '/model-provider',
+    permanent: true
+  },
+  {
+    source: '/cody/core-concepts/enterprise-architecture',
+    destination: '/admin/architecture#cody',
+    permanent: true
+  },
 ];
 
 const updatedRedirectsData = redirectsData.map(redirect => {

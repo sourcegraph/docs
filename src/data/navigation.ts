@@ -177,7 +177,7 @@ export const navigation: NavigationItem[] = [
 								href: '/cody/enterprise/model-configuration'
 							},
 							{
-								title: 'modelConfiguration examples',
+								title: 'Model Configuration examples',
 								href: '/cody/enterprise/model-config-examples'
 							}
 						]
@@ -242,8 +242,8 @@ export const navigation: NavigationItem[] = [
 								href: '/cody/prompts-guide'
 							},
 							{
-								title: 'Cody Gateway',
-								href: '/cody/core-concepts/cody-gateway'
+								title: 'Sourcegraph Model Provider',
+								href: '/model-provider'
 							},
 							{
 								title: 'Enterprise Architecture',
@@ -468,7 +468,11 @@ export const navigation: NavigationItem[] = [
 				]
 			},
 			{
-				title: 'Enterprise self-hosted',
+				title: 'Sourcegraph Cloud',
+				href: '/cloud'
+			},
+			{
+				title: 'Enterprise Self-Hosted',
 				href: '/admin/self-hosted',
 				sections: [
 					{ title: 'Deploy', href: '/admin/deploy' },
@@ -490,8 +494,8 @@ export const navigation: NavigationItem[] = [
 				]
 			},
 			{
-				title: 'Sourcegraph Cloud',
-				href: '/cloud'
+				title: 'Sourcegraph Model Provider',
+				href: '/model-provider'
 			},
 			{
 				title: 'Integrations',
