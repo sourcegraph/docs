@@ -191,9 +191,11 @@ Available query parameters:
 
 - `filter_id` - Filter by conversation ID
 - `filter_user_id` - Filter by user ID
+- `filter_read_token` - Access conversations via read token (requires sharing to be enabled)
+- `filter_is_starred` - Filter by starred conversations (`true` or `false`)
 - `page_first` - Number of results per page
 - `page_after` - Pagination cursor
-- `sort` - Sort order: `created_at`, `-created_at`, `updated_at`, `-updated_at`
+- `sort` - Sort order: `id`, `-id`, `created_at`, `-created_at`, `updated_at`, `-updated_at` (default: `-updated_at`)
 
 ## Managing conversations
 
@@ -220,6 +222,21 @@ curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/140' \
 ```bash
 curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/140/questions/163/cancel' \
   -X POST \
+  -H 'Accept: application/json' \
+  -H "Authorization: token $SRC_ACCESS_TOKEN" \
+  -H 'X-Requested-With: my-client 1.0.0'
+```
+
+## Accessing conversations via read tokens
+
+You can retrieve a conversation using its read token with the `filter_read_token` query parameter.
+
+Each conversation includes a `read_token` field that allows accessing the conversation.
+The read token is also visible in the web client URL and in the `share_url` field.
+Note that you can only access other users' conversations via read tokens if sharing is enabled on your Sourcegraph instance.
+
+```bash
+curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1?filter_read_token=5d9aa113-c511-4687-8b71-dbc2dd733c03' \
   -H 'Accept: application/json' \
   -H "Authorization: token $SRC_ACCESS_TOKEN" \
   -H 'X-Requested-With: my-client 1.0.0'
