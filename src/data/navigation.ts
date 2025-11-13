@@ -242,10 +242,6 @@ export const navigation: NavigationItem[] = [
 								href: '/cody/prompts-guide'
 							},
 							{
-								title: 'Sourcegraph Model Provider',
-								href: '/model-provider'
-							},
-							{
 								title: 'Enterprise Architecture',
 								href: '/cody/core-concepts/enterprise-architecture'
 							}
