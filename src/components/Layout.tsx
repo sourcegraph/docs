@@ -44,35 +44,6 @@ function Header() {
 		<header
 			className="sticky top-0 z-50"
 		>
-			{/* Cody docs banner */}
-			{/*isCodyDocs && !isopenCtxDocs && <TopBanner
-				text="UPDATE: Starting July 23, 2025, we're making changes to Cody Free, Pro, and Enterprise Starter plans."
-				link="https://sourcegraph.com/blog/changes-to-cody-free-pro-and-enterprise-starter-plans"
-				linkText="Read here"
-				textColor="#ffffff"
-				backgroundColor="#F34E3F"
-				opacity='0.80'
-			/>*/}
-
-			{/* Pricing docs banner */}
-			{/*isPricingDocs && !isopenCtxDocs && <TopBanner
-				text="UPDATE: Starting July 23, 2025, we're making changes to Cody Free, Pro, and Enterprise Starter plans."
-				link="https://sourcegraph.com/blog/changes-to-cody-free-pro-and-enterprise-starter-plans"
-				linkText="Read here"
-				textColor="#ffffff"
-				backgroundColor="#F34E3F"
-				opacity='0.80'
-			/>*/}
-
-			{/* Openctx docs banner */}
-			{/* {isopenCtxDocs && <TopBanner
-				text="NEW: MCP is the recommended method for adding external context in Cody due to its broad community adoption and extensive tool support."
-				link="https://sourcegraph.com/docs/cody/capabilities/agentic-context-fetching#mcp-support"
-				linkText="Read docs to learn more about configuring MCP."
-				textColor="#ffffff"
-				backgroundColor="#F34E3F"
-				/>} */}
-
 			<div className={clsx(
 				'flex flex-none flex-wrap items-center justify-between bg-light-bg px-4 py-6 shadow-md shadow-slate-900/5 transition duration-500 dark:border-dark-border dark:shadow-none sm:px-6 lg:border-b lg:border-light-border lg:px-8',
 				isScrolled
@@ -129,7 +100,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 			<Header />
 
 			{isHomePage && <Hero />}
-			{/* {isHomePage && <DemoLayout />} */}
 
 			<div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-12">
 				<div className="hidden lg:relative lg:block lg:flex-none">
