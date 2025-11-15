@@ -1,5 +1,6 @@
 import {CopyButton} from '@/components/CopyButton';
-import React, {DetailedHTMLProps, HTMLAttributes, Children} from 'react';
+import React, {DetailedHTMLProps, HTMLAttributes} from 'react';
+import config from '../../docs.config';
 
 interface PreProps
 	extends DetailedHTMLProps<HTMLAttributes<HTMLPreElement>, HTMLPreElement> {
@@ -24,19 +25,23 @@ async function getLatestVersion() {
 		'https://releaseregistry.sourcegraph.com/v1/releases/sourcegraph/latest'
 	);
 
-	const response = await fetch(url.toString(), {
-		method: 'GET',
-		headers: {
-			Accept: 'application/json'
+	try {
+		const response = await fetch(url.toString(), {
+			method: 'GET',
+			headers: {
+				Accept: 'application/json'
+			}
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
 		}
-	});
 
-	if (!response.ok) {
-		throw new Error(`HTTP error! status: ${response.status}`);
+		const releaseInfo: ReleaseInfo = await response.json();
+		return releaseInfo.version;
+	} catch (error) {
+		return config.DOCS_LATEST_VERSION;
 	}
-
-	const releaseInfo: ReleaseInfo = await response.json();
-	return releaseInfo.version;
 }
 
 function trimPrefix(str: string, prefix: string) {
