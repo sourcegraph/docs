@@ -243,7 +243,7 @@ export const navigation: NavigationItem[] = [
 							},
 							{
 								title: 'Enterprise Architecture',
-								href: '/cody/core-concepts/enterprise-architecture'
+								href: '/admin/architecture#cody'
 							}
 						]
 					},
