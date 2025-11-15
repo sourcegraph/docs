@@ -1,5 +1,5 @@
-import type { NextRequest } from 'next/server';
-import { NextResponse } from 'next/server';
+import type {NextRequest} from 'next/server';
+import {NextResponse} from 'next/server';
 import docsConfig from '../docs.config.js';
 
 const {updatedRedirectsData} = require('./data/redirects.ts');

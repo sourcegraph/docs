@@ -1,17 +1,17 @@
 import type {
-    AutocompleteContext,
-    AutocompleteInsightsApi,
-    AutocompleteState,
-    BaseItem,
+	AutocompleteContext,
+	AutocompleteInsightsApi,
+	AutocompleteState,
+	BaseItem
 } from '@algolia/autocomplete-core';
 
 interface DocSearchContext extends AutocompleteContext {
-    algoliaInsightsPlugin?: {
-        insights: AutocompleteInsightsApi;
-    };
+	algoliaInsightsPlugin?: {
+		insights: AutocompleteInsightsApi;
+	};
 }
 
 export interface DocSearchState<TItem extends BaseItem>
-    extends AutocompleteState<TItem> {
-    context: DocSearchContext;
+	extends AutocompleteState<TItem> {
+	context: DocSearchContext;
 }
