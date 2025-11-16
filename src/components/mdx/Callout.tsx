@@ -5,7 +5,7 @@ import {
 	LightBulbIcon,
 	ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
-import { NotebookPen } from 'lucide-react';
+import {NotebookPen} from 'lucide-react';
 
 const styles = {
 	note: {

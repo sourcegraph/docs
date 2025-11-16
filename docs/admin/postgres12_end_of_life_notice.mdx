@@ -3,45 +3,57 @@
 Sourcegraph's required minimum version of Postgres will be updated to Postgres 16 with upcoming releases, Sourcegraph 5.10. This change in required minimum version is a result of Postgres 12, the previous required minimum version, reaching end of life. Please review the below information and reach out if you have any questions or would like to review the impact this change will have on you!
 
 ## What
+
 Currently, Sourcegraph's minimum required version of Postgres, the database management system used for all Sourcegraph instances, is Postgres 12. Postgres 12 is reaching end-of-life and will no longer be supported by Postgres. Because of this, Sourcegraph will be updating our minimum supported version to Postgres 16.
 
 ## Impact
+
 The impact to you depends on how you currently manage your Sourcegraph databases. Please first determine which of the following two buckets you fall into to determine what impact this change will have on your instance. If you are uncertain of which bucket you fall under, please check your deployment configuration or reach out to your account team.
 
-* **Bucket 1 (Built-in Databases)** - Your Sourcegraph databases are deployed using the built-in Postgres images standardly provided by Sourcegraph
-* **Bucket 2 (External Databases)** - Your Sourcegraph databases run in an externally managed database service separate from your Sourcegraph deployment, such as AWS RDS or Google CloudSQL (External Database)
+-   **Bucket 1 (Built-in Databases)** - Your Sourcegraph databases are deployed using the built-in Postgres images standardly provided by Sourcegraph
+-   **Bucket 2 (External Databases)** - Your Sourcegraph databases run in an externally managed database service separate from your Sourcegraph deployment, such as AWS RDS or Google CloudSQL (External Database)
 
 ### Built-in Databases
-If you are using Sourcegraph's released Postgres images, these images will be updated to Postgres 16 as part of the Sourcegraph 5.10 release (expected for November 25th, 2024) and all near term subsequent releases. With this update, Sourcegraph will experience a longer-than-average downtime at the time of the upgrade to version 5.10 or beyond. This downtime is proportional to the amount of code indexed in your instance, and can range from approximately 15 minutes to a couple of hours. The downtime will only occur at the first upgrade to version 5.10 or beyond, and not during any subsequent upgrades. 
+
+If you are using Sourcegraph's released Postgres images, these images will be updated to Postgres 16 as part of the Sourcegraph 5.10 release (expected for November 25th, 2024) and all near term subsequent releases. With this update, Sourcegraph will experience a longer-than-average downtime at the time of the upgrade to version 5.10 or beyond. This downtime is proportional to the amount of code indexed in your instance, and can range from approximately 15 minutes to a couple of hours. The downtime will only occur at the first upgrade to version 5.10 or beyond, and not during any subsequent upgrades.
 
 We strongly recommend that you consider this downtime prior to upgrading to ensure minimal disruption to your users. We also strongly recommend creating a backup of your database before the upgrade process, as an interruption to the upgrade process could lead to database corruption.
 
-<Callout type="info">When upgrading, it's important to note that even if there's a newer version of the migrator image you should only use the 5.10 image to get the databases to v5.10 first. After that you can use newer migrator images to target versions beyond 5.10.</Callout>
+<Callout type="info">
+	When upgrading, it's important to note that even if there's a newer version
+	of the migrator image you should only use the 5.10 image to get the
+	databases to v5.10 first. After that you can use newer migrator images to
+	target versions beyond 5.10.
+</Callout>
 
 ### External Databases
+
 If you are using externally managed databases for your Sourcegraph instance, you will need to manually upgrade the version of Postgres you are using to Postgres 16. For the Sourcegraph version that will be released on January 15, 2025 and subsequent versions, Sourcegraph will no longer run on any version of Postgres lower than Postgres 16, and you will not be able to upgrade your instance to any of those Sourcegraph versions unless that minimum required version of Postgres is met.
 
-The steps for upgrading your version of  Postgres will be dependent on your organizational practices and the database management service you are using.
+The steps for upgrading your version of Postgres will be dependent on your organizational practices and the database management service you are using.
 
 ## Call to Action
 
-* If you are using Sourcegraph's built-in database images, please work with your account team to plan for an extended downtime as part of your first upgrade to Sourcegraph 5.10 or beyond.
+-   If you are using Sourcegraph's built-in database images, please work with your account team to plan for an extended downtime as part of your first upgrade to Sourcegraph 5.10 or beyond.
 
-* If you are using external databases, please follow the appropriate processes to upgrade your Sourcegraph databases to Postgres 16. This will be required to upgrade to the versions of Sourcegraph released on and after January 15, 2025.
-
+-   If you are using external databases, please follow the appropriate processes to upgrade your Sourcegraph databases to Postgres 16. This will be required to upgrade to the versions of Sourcegraph released on and after January 15, 2025.
 
 ## Frequently Asked Questions
 
 ### Will I be required to upgrade to the latest version of Sourcegraph by November 25, 2024 or January 15, 2025?
+
 No, you will not be required to upgrade to the latest version of Sourcegraph. However, as always, we do recommend you are updating your instance regularly to continue getting the latest and greatest features and fixes.
 
 ### What happens if I do nothing?
+
 If you don't upgrade your instance, your Sourcegraph instance may be running a version of Postgres that has reached end-of-life. That means that, if any issues should arise with that version of Postgres, they will no longer be supported or fixed.
 
 ### If I'm using Sourcegraph's built-in Postgres images, how will I know the length of the downtime I can expect at the time of upgrade?
+
 We expect the downtime to last approximately 2.5 hours per TB of code indexed in your Sourcegraph instance. So, if you only have 100 GB of indexed code, the downtime should last only about 15 minutes.
 
 ### If I'm using external databases with Sourcegraph, how do I upgrade my version of Postgres? Can I upgrade Postgres independently of a Sourcegraph upgrade?
+
 Upgrading your Postgres version is highly dependent on your specific situation. If you have a separate team managing this database, reach out to them to understand their practices. And, as always, feel free to reach out to Sourcegraph to assist you.
 
 When using external databases, you can upgrade your Postgres version at any time, either alongside a Sourcegraph upgrade or independently of it. We encourage you to do so as soon as it's convenient for you.

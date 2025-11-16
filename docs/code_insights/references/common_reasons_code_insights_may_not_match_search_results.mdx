@@ -2,7 +2,7 @@
 
 There are a few reasons why chart data series' most recent datapoint may show you a different number of match counts than the same search query run in Sourcegraph manually.
 
-## If the chart data point shows *higher* counts than a manual search
+## If the chart data point shows _higher_ counts than a manual search
 
 ### [For versions pre-3.40] Not including `fork:no` and `archived:no` in your insight query
 
@@ -16,7 +16,7 @@ All repositories in a historical search are unindexed, but a manual Sourcegraph 
 
 To investigate this, one can compare the list of repositories in the manual search (use a `select:repository` filter) with the list of repositories in the insight `series_points` database table. To see why a repository may not be indexing, refer to [this guide](/admin/faq#sourcegraph-is-not-returning-results-from-a-repository-unless-repo-is-included).
 
-## If the chart data point shows *lower* counts than a manual search
+## If the chart data point shows _lower_ counts than a manual search
 
 ### New matches created since the insight datapoint ran
 
@@ -25,23 +25,24 @@ Currently, a data series' most recent datapoint defaults to the end of the prior
 ### Repository timeouts caused a datapoint to miss results
 
 If your code insight is very large, it is possible that a few (\<1% in 100+ manual tests over 26,000 repositories) repositories failed to return match counts due to timing out while searching. To check this, you can run the following GraphQL query in the Sourcegraph GraphQL API:
+
 ```graphql
 query debug {
-  insightViews(id: "INSIGHT_ID") {
-    nodes {
-      dataSeries {
-        label
-        status {
-          pendingJobs
-          completedJobs
-          failedJobs
-        }
-      }
-    }
-  }
-  insightViewDebug(id: "INSIGHT_ID") {
-    raw
-  }
+	insightViews(id: "INSIGHT_ID") {
+		nodes {
+			dataSeries {
+				label
+				status {
+					pendingJobs
+					completedJobs
+					failedJobs
+				}
+			}
+		}
+	}
+	insightViewDebug(id: "INSIGHT_ID") {
+		raw
+	}
 }
 ```
 

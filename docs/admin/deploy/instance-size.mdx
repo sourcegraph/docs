@@ -9,22 +9,21 @@ If you fall between two sizes, choose the larger of the two. For example:
 1. If you have 8,000 users with 80,000 repositories, your instance size would be **L**.
 2. If you have 1,000 users with 80,000 repositories, your instance size would still be **L**.
 
-|                  |    **XS**     |     **S**      |     **M**      |     **L**      |     **XL**     |
-|:-----------------|:-------------:|:--------------:|:--------------:|:--------------:|:--------------:|
-| **Users**        |   Up to 500   |  Up to 1,000   |  Up to 5,000   |  Up to 10,000  |  Up to 20,000  |
-| **Repositories** |  Up to 5,000  |  Up to 10,000  |  Up to 50,000  | Up to 100,000  | Up to 250,000  |
-| **vCPU**         |       8       |       16       |       32       |       48       |       96       |
-| **Memory (GB)**  |      32       |       64       |      128       |      192       |      384       |
-| **SSD Required** |      Yes      |      Yes       |      Yes       |      Yes       |      Yes       |
+|                  |   **XS**    |    **S**     |    **M**     |     **L**     |    **XL**     |
+| :--------------- | :---------: | :----------: | :----------: | :-----------: | :-----------: |
+| **Users**        |  Up to 500  | Up to 1,000  | Up to 5,000  | Up to 10,000  | Up to 20,000  |
+| **Repositories** | Up to 5,000 | Up to 10,000 | Up to 50,000 | Up to 100,000 | Up to 250,000 |
+| **vCPU**         |      8      |      16      |      32      |      48       |      96       |
+| **Memory (GB)**  |     32      |      64      |     128      |      192      |      384      |
+| **SSD Required** |     Yes     |     Yes      |     Yes      |      Yes      |      Yes      |
 
 We recommend the following instance type for the cloud providers listed below:
 
 |           |    **XS**     |     **S**      |     **M**      |     **L**      |     **XL**     |
-|:----------|:-------------:|:--------------:|:--------------:|:--------------:|:--------------:|
+| :-------- | :-----------: | :------------: | :------------: | :------------: | :------------: |
 | **AWS**   |  m6a.2xlarge  |  m6a.4xlarge   |  m6a.8xlarge   |  m6a.12large   |  m6a.24xlarge  |
 | **Azure** |     D8_v3     |     D16_v3     |     D32_v3     |     D48_v3     |     D64_v3     |
 | **GCP**   | n2-standard-8 | n2-standard-16 | n2-standard-32 | n2-standard-48 | n2-standard-96 |
-
 
 ### Kubernetes
 
@@ -33,18 +32,36 @@ infrastructure provider of your choice. Use the recommended node and list types 
 table.
 
 | **Provider**                                                                                 | **Node type**                   | **Boot/ephemeral disk size** |
-|----------------------------------------------------------------------------------------------|---------------------------------|------------------------------|
+| -------------------------------------------------------------------------------------------- | ------------------------------- | ---------------------------- |
 | [Amazon EKS (better than plain EC2)](/admin/deploy/kubernetes/eks)                           | m5.4xlarge                      | 100 GB (SSD preferred)       |
 | [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine/docs/quickstart) | n2-standard-16                  | 100 GB (default)             |
 | [Azure](/admin/deploy/kubernetes/azure)                                                      | D16 v3                          | 100 GB (SSD preferred)       |
 | [Other](https://kubernetes.io/docs/setup/production-environment/turnkey-solutions/)          | 16 vCPU, 60 GiB memory per node | 100 GB (SSD preferred)       |
 
+<Callout type="note">
+	Sourcegraph can run most standard Kubernetes clusters, so if your
+	infrastructure provider is not listed, see the "Other" row.
+</Callout>
 
-<Callout type="note">Sourcegraph can run most standard Kubernetes clusters, so if your infrastructure provider is not listed, see the "Other" row.</Callout>
+<Callout type="warning">
+	If you are deploying on Azure, you **must** ensure that your cluster is
+	created with support for CSI storage
+	driver(https://docs.microsoft.com/en-us/azure/aks/csi-storage-drivers). This
+	**can not** be enabled after the fact.
+</Callout>
 
-<Callout type="warning">If you are deploying on Azure, you **must** ensure that your cluster is created with support for CSI storage driver(https://docs.microsoft.com/en-us/azure/aks/csi-storage-drivers). This **can not** be enabled after the fact.</Callout>
-
-<Callout type="warning">If you intend to set this up as a production instance, we recommend you create the cluster in a VPC or other secure network that restricts unauthenticated access from the public Internet. You can later expose the necessary ports via an [Internet Gateway](https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html) or an equivalent mechanism. Note that Sourcegraph must expose port 443 for outbound traffic to code hosts and to enable [telemetry](/admin/pings) with Sourcegraph.com. Additionally, port 22 may be opened to enable git SSH cloning by Sourcegraph. Take care to secure your cluster in a manner that meets your organization's security requirements.</Callout>
+<Callout type="warning">
+	If you intend to set this up as a production instance, we recommend you
+	create the cluster in a VPC or other secure network that restricts
+	unauthenticated access from the public Internet. You can later expose the
+	necessary ports via an [Internet
+	Gateway](https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html)
+	or an equivalent mechanism. Note that Sourcegraph must expose port 443 for
+	outbound traffic to code hosts and to enable [telemetry](/admin/pings) with
+	Sourcegraph.com. Additionally, port 22 may be opened to enable git SSH
+	cloning by Sourcegraph. Take care to secure your cluster in a manner that
+	meets your organization's security requirements.
+</Callout>
 
 ## Resources
 

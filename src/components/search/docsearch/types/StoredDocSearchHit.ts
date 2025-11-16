@@ -1,6 +1,6 @@
-import type { DocSearchHit } from './DocSearchHit';
+import type {DocSearchHit} from './DocSearchHit';
 
 export type StoredDocSearchHit = Omit<
-    DocSearchHit,
-    '_highlightResult' | '_snippetResult'
+	DocSearchHit,
+	'_highlightResult' | '_snippetResult'
 >;

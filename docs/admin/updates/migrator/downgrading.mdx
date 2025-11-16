@@ -22,11 +22,14 @@ The migrator service can be run with the `downgrade` command. See the [command d
 
 Heres an example of `downgrade` being used on a Docker-compose deployment:
 
-*Altered `command:` value in the `docker-compose.yaml`*
+_Altered `command:` value in the `docker-compose.yaml`_
+
 ```yaml
 command: ['downgrade', '--from=v4.5.1', '--to=v4.0.0']
 ```
-*Command and output*
+
+_Command and output_
+
 ```bash
 $ ~/deploy-sourcegraph-docker/docker-compose/ v4.5.1* docker-compose up -d migrator
 codeinsights-db is up-to-date
@@ -46,8 +49,9 @@ $ ~/deploy-sourcegraph-docker/docker-compose/ v4.5.1* docker logs migrator
 ```
 
 Downgrade is run using a similar to procedure to a [multiversion upgrade](/admin/updates/#upgrades-index):
-- Services that connect to the databases must be disabled before running `downgrade`
-- Manifests must be reverted to the version you are downgrading to and reapplyed **after** the `downgrade` is complete.
+
+-   Services that connect to the databases must be disabled before running `downgrade`
+-   Manifests must be reverted to the version you are downgrading to and reapplyed **after** the `downgrade` is complete.
 
 ## Rolling back a standard upgrade
 
@@ -61,11 +65,11 @@ You can rollback by resetting your `release` branch to the old state before rede
 
 ### Rollback with Kustomize
 
-  ```bash
-  # Re-generate manifests
-  $ kubectl kustomize instances/$YOUR_INSTANCE -o cluster-rollback.yaml
-  # Review manifests
-  $ less cluster-rollback.yaml
-  # Re-deploy
-  $ kubectl apply --prune -l deploy=sourcegraph -f cluster-rollback.yaml
-  ```
+```bash
+# Re-generate manifests
+$ kubectl kustomize instances/$YOUR_INSTANCE -o cluster-rollback.yaml
+# Review manifests
+$ less cluster-rollback.yaml
+# Re-deploy
+$ kubectl apply --prune -l deploy=sourcegraph -f cluster-rollback.yaml
+```

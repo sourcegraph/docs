@@ -1,6 +1,8 @@
 # Creating Changesets per Project in Monorepos
 
-<p className="subtitle">Learn how to create changesets per project in monorepos.</p>
+<p className="subtitle">
+	Learn how to create changesets per project in monorepos.
+</p>
 
 Large repositories often contain multiple projects, hence named as **Monorepos**. It can make sense to run the batch spec [`steps`](/batch-changes/batch-spec-yaml-reference#steps) separately in each project and create one changeset per project.
 
@@ -38,16 +40,15 @@ name: update-typescript-monorepo
 description: This batch change updates the TypeScript dependency to the latest version
 
 on:
-  - repositoriesMatchingQuery: our-large-monorepo
+    - repositoriesMatchingQuery: our-large-monorepo
 
 workspaces:
-  - rootAtLocationOf: package.json
-    in: github.com/our-org/our-large-monorepo
+    - rootAtLocationOf: package.json
+      in: github.com/our-org/our-large-monorepo
 
 steps:
-  - run: npm update typescript
-    container: node:14
-
+    - run: npm update typescript
+      container: node:14
 # [...]
 ```
 
@@ -64,23 +65,23 @@ To do that, we make use of [templating](/batch-changes/batch-spec-templating) in
 ```yaml
 # [...]
 changesetTemplate:
-  title: Update TypeScript
-  body: This updates TypeScript to the latest version
-  published: false
-  commit:
-    message: Update TypeScript
-  # Templating and helper functions allow us to get the `path` in which
-  # the `steps` executed and turn that into a branch name:
-  branch: batch-changes/update-typescript-${{ replace steps.path "/" "-" }}
+    title: Update TypeScript
+    body: This updates TypeScript to the latest version
+    published: false
+    commit:
+        message: Update TypeScript
+    # Templating and helper functions allow us to get the `path` in which
+    # the `steps` executed and turn that into a branch name:
+    branch: batch-changes/update-typescript-${{ replace steps.path "/" "-" }}
 ```
 
 The `steps.path` [templating variable](/batch-changes/batch-spec-templating) contains the path in which the `steps` were executed relative to the root of the repository.
 
 With the file and directory structure above, that means you'd end up with the following branch names:
 
-- `batch-changes/update-typescript-project1`
-- `batch-changes/update-typescript-project2`
-- `batch-changes/update-typescript-examples-project3`
+-   `batch-changes/update-typescript-project1`
+-   `batch-changes/update-typescript-project2`
+-   `batch-changes/update-typescript-examples-project3`
 
 And with that, you're done and ready to produce multiple changesets in a single repository, with the full batch spec looking like this:
 
@@ -89,23 +90,23 @@ name: update-typescript-monorepo
 description: This batch change updates the TypeScript dependency to the latest version
 
 on:
-  - repository: github.com/sourcegraph/automation-testing
+    - repository: github.com/sourcegraph/automation-testing
 
 workspaces:
-  - rootAtLocationOf: package.json
-    in: github.com/sourcegraph/automation-testing
+    - rootAtLocationOf: package.json
+      in: github.com/sourcegraph/automation-testing
 
 steps:
-  - run: npm update typescript
-    container: node:14
+    - run: npm update typescript
+      container: node:14
 
 changesetTemplate:
-  title: Update TypeScript
-  body: This updates TypeScript to the latest version
-  branch: batch-changes/update-typescript-${{ replace steps.path "/" "-" }}
-  commit:
-    message: Update TypeScript
-  published: false
+    title: Update TypeScript
+    body: This updates TypeScript to the latest version
+    branch: batch-changes/update-typescript-${{ replace steps.path "/" "-" }}
+    commit:
+        message: Update TypeScript
+    published: false
 ```
 
 You only need to run `src batch [apply|preview]` to execute your batch spec.
@@ -120,4 +121,7 @@ That has the advantage that it's dynamic: whenever `src batch [apply|preview]` i
 
 If the repository containing the workspaces is really large and it's not feasible to download to make it available for the `steps` execution, the [`workspaces.onlyFetchWorkspaces`](/batch-changes/batch-spec-yaml-reference#workspacesonlyfetchworkspace) field can be set to `true` to only download the workspaces, without the rest of the repository.
 
-<Callout type="info">To learn more about `workspaces`, read in the [batch spec YAML reference](/batch-changes/batch-spec-yaml-reference#workspaces).</Callout>
+<Callout type="info">
+	To learn more about `workspaces`, read in the [batch spec YAML
+	reference](/batch-changes/batch-spec-yaml-reference#workspaces).
+</Callout>

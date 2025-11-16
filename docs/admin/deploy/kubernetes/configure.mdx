@@ -27,7 +27,7 @@ The base resources in Sourcegraph include the services that make up the main Sou
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  resources:
+resources:
     # Deploy Sourcegraph main stack
     - ../../base/sourcegraph
     # Deploy Sourcegraph monitoring stack
@@ -50,10 +50,10 @@ To deploy a High Availability (HA) configured Sourcegraph instance to an RBAC-en
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  resources:
+resources:
     - ../../base/sourcegraph # Deploy Sourcegraph main stack
     - ../../base/monitoring # Deploy Sourcegraph monitoring stack
-  components:
+components:
     # Add resources for cadvisor
     # NOTE: cadvisor includes RBAC resources and must be run with privileges
     - ../../components/monitoring/cadvisor
@@ -74,7 +74,7 @@ RBAC must be enabled in your cluster for the frontend to communicate with other 
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/...
     # IMPORTANT: Include this as the last component
     - ../../components/enable/service-discovery
@@ -94,7 +94,7 @@ To deploy the monitoring stack, add the monitoring resources to the resources-li
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  resources:
+resources:
     # Deploy Sourcegraph main stack
     - ../../base/sourcegraph
     # Deploy Sourcegraph monitoring stack
@@ -109,17 +109,17 @@ cAdvisor requires a service account and certain permissions to access and gather
 
 To deploy cAdvisor with privileged access, include the following:
 
-- [monitoring base resources](#monitoring-stack)
-- [monitoring/privileged component](#monitoring-stack)
-- [privileged component](#privileged)
-- [cadvisor component](#deploy-cadvisor)
+-   [monitoring base resources](#monitoring-stack)
+-   [monitoring/privileged component](#monitoring-stack)
+-   [privileged component](#privileged)
+-   [cadvisor component](#deploy-cadvisor)
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  resources:
+resources:
     - ../../base/sourcegraph # Deploy Sourcegraph main stack
     - ../../base/monitoring # Deploy Sourcegraph monitoring stack
-  components:
+components:
     # Add resources for cadvisor
     # NOTE: cadvisor includes RBAC resources and must be run with privileges
     - ../../components/monitoring/cadvisor
@@ -166,7 +166,7 @@ envsubst < base/monitoring/prometheus/prometheus.ConfigMap.yaml > instances/$INS
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  patches:
+patches:
     - patch: patches/prometheus.ConfigMap.yaml
 ```
 
@@ -191,12 +191,12 @@ The quickest way to get started with HTTP tracing is by deploying our bundled OT
 
 Include the `tracing` component to deploy both OpenTelemetry and Jaeger together. This component also configures the following services:
 
-- `otel-collector` to export to this Jaeger instance
-- `grafana` to get metrics from this Jaeger instance
+-   `otel-collector` to export to this Jaeger instance
+-   `grafana` to get metrics from this Jaeger instance
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     # Deploy OpenTelemetry Collector and Jaeger
     - ../../components/monitoring/tracing
 ```
@@ -209,7 +209,7 @@ Include the `otel` component to deploy OpenTelemetry Collector:
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     # Deploy OpenTelemetry Collector
     - ../../components/monitoring/otel
 ```
@@ -225,9 +225,9 @@ Follow these steps to configure the otel-collector to export traces to an extern
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/otel-collector/backend
-  patches:
+patches:
     - patch: patches/otel-collector.ConfigMap.yaml
 ```
 
@@ -249,7 +249,7 @@ To set a namespace for all your Sourcegraph resources, update the `namespace` fi
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  namespace: ns-sourcegraph
+namespace: ns-sourcegraph
 ```
 
 This will set namespace to the `namespace` value (`ns-sourcegraph` in this example) for all your Sourcegraph resources.
@@ -262,12 +262,12 @@ To create a new namespace, include the [utils/namespace](https://sourcegraph.com
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  namespace: ns-sourcegraph
-  components:
+namespace: ns-sourcegraph
+components:
     - ../../components/resources/namespace
 ```
 
-This component will create a new namespace using the  `namespace` value (`ns-sourcegraph` in this example).
+This component will create a new namespace using the `namespace` value (`ns-sourcegraph` in this example).
 
 ---
 
@@ -281,7 +281,7 @@ To allocate resources based on your [instance size](/admin/deploy/instance-size)
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     # Include ONE of the sizes component based on your instance size
     - ../../components/sizes/xs
     - ../../components/sizes/s
@@ -292,40 +292,40 @@ To allocate resources based on your [instance size](/admin/deploy/instance-size)
 
 ### Adjust storage sizes
 
-You can adjust storage size for different services in the *STORAGE SIZES* section with [patches](https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/patches/).
+You can adjust storage size for different services in the _STORAGE SIZES_ section with [patches](https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/patches/).
 
 Here is an example on how to adjust the storage sizes for different services:
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/sizes/l
-  # [STORAGE SIZES]
-  patches:
+# [STORAGE SIZES]
+patches:
     # `pgsql` to 500Gi
     - target:
-        kind: PersistentVolumeClaim
-        name: pgsql
+          kind: PersistentVolumeClaim
+          name: pgsql
       patch: |-
-        - op: replace
-          path: /spec/resources/requests/storage
-          value: 500Gi
+          - op: replace
+            path: /spec/resources/requests/storage
+            value: 500Gi
     # `redis-store` & `redis-cache` to 200Gi
     - target:
-        kind: PersistentVolumeClaim
-        name: redis-store|redis-cache
+          kind: PersistentVolumeClaim
+          name: redis-store|redis-cache
       patch: |-
-        - op: replace
-          path: /spec/resources/requests/storage
-          value: 200Gi
+          - op: replace
+            path: /spec/resources/requests/storage
+            value: 200Gi
     # `gitserver` & `indexed-search` to 1000Gi
     - target:
-        kind: StatefulSet
-        name: gitserver|indexed-search
+          kind: StatefulSet
+          name: gitserver|indexed-search
       patch: |-
-        - op: replace
-          path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
-          value: 1000Gi
+          - op: replace
+            path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+            value: 1000Gi
 ```
 
 ### Custom resources allocation
@@ -352,55 +352,55 @@ $ cp -R components/custom/resources instances/$INSTANCE_NAME/custom-resources
 
 For example, the following patches update the resources for:
 
-- gitserver
-  - increase replica count to 2
-  - adjust resources limits and requests
-- pgsql
-  - increase storage size to 500Gi
+-   gitserver
+    -   increase replica count to 2
+    -   adjust resources limits and requests
+-   pgsql
+    -   increase storage size to 500Gi
 
 ```yaml
 # instances/$INSTANCE_NAME/custom-resources/kustomization.yaml
-  patches:
+patches:
     - patch: |-
-        apiVersion: apps/v1
-        kind: StatefulSet
-        metadata:
-          name: gitserver
-        spec:
-          replicas: 2
-          template:
-            spec:
-              containers:
-                - name: gitserver
-                  resources:
-                    limits:
-                      cpu: "8"
-                      memory: 32G
-                    requests:
-                      cpu: "1"
-                      memory: 2G
+          apiVersion: apps/v1
+          kind: StatefulSet
+          metadata:
+            name: gitserver
+          spec:
+            replicas: 2
+            template:
+              spec:
+                containers:
+                  - name: gitserver
+                    resources:
+                      limits:
+                        cpu: "8"
+                        memory: 32G
+                      requests:
+                        cpu: "1"
+                        memory: 2G
     - patch: |-
-        apiVersion: v1
-        kind: PersistentVolumeClaim
-        metadata:
-          name: pgsql
-        spec:
-          resources:
-            requests:
-              storage: 500Gi
+          apiVersion: v1
+          kind: PersistentVolumeClaim
+          metadata:
+            name: pgsql
+          spec:
+            resources:
+              requests:
+                storage: 500Gi
 ```
 
 > WARNING: Please make sure the patches for services you are not adjusting resources for are left uncommented. **Do not remove** `patches/update-endpoints.yaml`.
 
-**Step 3**: In the `instances/$INSTANCE_NAME/kustomization.yaml` file, add the `custom-resources` directory created in step 1 to your components-list under the *Resource Allocation* section:
+**Step 3**: In the `instances/$INSTANCE_NAME/kustomization.yaml` file, add the `custom-resources` directory created in step 1 to your components-list under the _Resource Allocation_ section:
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - custom-resources
 ```
 
-> WARNING: If *service-discovery* is not enabled for the sourcegraph-frontend service, the `instances/$INSTANCE_NAME/custom-resources/endpoint-update.yaml` file within the patches subdirectory is responsible for updating the relevant variables for the frontend to generate the endpoint addresses for each service replica. It should not be removed at any point.
+> WARNING: If _service-discovery_ is not enabled for the sourcegraph-frontend service, the `instances/$INSTANCE_NAME/custom-resources/endpoint-update.yaml` file within the patches subdirectory is responsible for updating the relevant variables for the frontend to generate the endpoint addresses for each service replica. It should not be removed at any point.
 
 ### Remove securityContext
 
@@ -408,7 +408,7 @@ The `remove/security-context` component removes all the `securityContext` config
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/remove/security-context
 ```
 
@@ -418,12 +418,12 @@ If you do not have permission to deploy DaemonSets, you can include the `remove/
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  resources:
+resources:
     # Deploy Sourcegraph main stack
     - ../../base/sourcegraph
     # Deploy Sourcegraph monitoring stack
     - ../../base/monitoring
-  components:
+components:
     # Make sure the cAdvisor and otel are excluded from the components list
     # As they both include daemonset
     # - ../../components/monitoring/cadvisor
@@ -442,21 +442,20 @@ A storage class is required for all persistent volume claims by default. It must
 
 ### Google Cloud Platform
 
-
 **Step 1**: Read and follow the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/gce-pd-csi-driver) for enabling the persistent disk CSI driver on a [new](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/gce-pd-csi-driver#enabling_the_on_a_new_cluster) or [existing](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/gce-pd-csi-driver#enabling_the_on_an_existing_cluster) cluster.
 
 **Step 2**: Include the GCP storage class component to the `kustomization.yaml` file for your Kustomize overlay:
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/storage-class/gcp
 ```
 
 The component takes care of creating a new storage class named `sourcegraph` with the following configurations:
 
-- Provisioner: pd.csi.storage.gke.io
-- SSD: types: pd-ssd
+-   Provisioner: pd.csi.storage.gke.io
+-   SSD: types: pd-ssd
 
 It also updates the storage class name for all resources to `sourcegraph`.
 
@@ -468,13 +467,12 @@ It also updates the storage class name for all resources to `sourcegraph`.
 
 **Step 2**: Include one of the AWS storage class components in your overlay: [storage-class/aws/eks](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/tree/components/storage-class/aws/eks) or [storage-class/aws/ebs](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/tree/components/storage-class/aws/ebs)
 
-   * The [storage-class/aws/ebs-csi](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/tree/components/storage-class/aws/eks) component is configured with the `ebs.csi.aws.com` storage class provisioner for clusters with self-managed Amazon EBS Container Storage Interface driver installed
-   * The [storage-class/aws/aws-ebs](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/tree/components/storage-class/aws/ebs) component is configured with the `kubernetes.io/aws-ebs` storage class provisioner for clusters with the [AWS EBS CSI driver installed as Amazon EKS add-on](https://docs.aws.amazon.com/eks/latest/userguide/managing-ebs-csi.html)
-
+-   The [storage-class/aws/ebs-csi](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/tree/components/storage-class/aws/eks) component is configured with the `ebs.csi.aws.com` storage class provisioner for clusters with self-managed Amazon EBS Container Storage Interface driver installed
+-   The [storage-class/aws/aws-ebs](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/tree/components/storage-class/aws/ebs) component is configured with the `kubernetes.io/aws-ebs` storage class provisioner for clusters with the [AWS EBS CSI driver installed as Amazon EKS add-on](https://docs.aws.amazon.com/eks/latest/userguide/managing-ebs-csi.html)
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     # Set provisioner to `kubernetes.io/aws-ebs`
     - ../../components/storage-class/aws/aws-ebs
     # Set provisioner to `ebs.csi.aws.com`
@@ -493,16 +491,16 @@ It also updates the storage class name for all resources to `sourcegraph`.
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/storage-class/azure
 ```
 
 This component creates a new storage class named `sourcegraph` in your cluster with the following configurations:
 
-- provisioner: disk.csi.azure.com
-- parameters.storageaccounttype: Premium_LRS
-  - This configures SSDs and is highly recommended.
-  - **A Premium VM is required.**
+-   provisioner: disk.csi.azure.com
+-   parameters.storageaccounttype: Premium_LRS
+    -   This configures SSDs and is highly recommended.
+    -   **A Premium VM is required.**
 
 [Additional documentation](https://docs.microsoft.com/en-us/azure/aks/csi-storage-drivers) for more information.
 
@@ -512,7 +510,7 @@ Configure to use the default storage class `local-path` in a k3s cluster:
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/storage-class/k3s
 ```
 
@@ -524,7 +522,7 @@ Add one of the available `storage-class/trident/$FSTYPE` components to the `kust
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     # -- fsType: ext3
     - ../../components/storage-class/trident/ext3
     # -- fsType: ext4
@@ -539,26 +537,26 @@ To use an **existing** storage class provided by other cloud providers:
 
 **Step 1**: Include the `storage-class/name-update` component to your overlay:
 
-  ```yaml
-  # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+```yaml
+# instances/$INSTANCE_NAME/kustomization.yaml
+components:
     - ../../components/storage-class/name-update
-  ```
+```
 
 **Step 2**: Enter the value of your existing storage class name in your [buildConfig.yaml file](/admin/deploy/kubernetes/kustomize#buildconfig-yaml) using the `STORAGECLASS_NAME` config key
 
 Example, add `STORAGECLASS_NAME=sourcegraph` if `sourcegraph` is the name for the existing storage class:
 
-  ```yaml
-  # instances/$INSTANCE_NAME/buildConfig.yaml
-  kind: SourcegraphBuildConfig
-  metadata:
+```yaml
+# instances/$INSTANCE_NAME/buildConfig.yaml
+kind: SourcegraphBuildConfig
+metadata:
     name: sourcegraph-kustomize-config
-  data:
+data:
     STORAGECLASS_NAME: sourcegraph # [ACTION] Set storage class name here
-  ```
+```
 
-  The `storage-class/name-update` component updates the `storageClassName` field for all associated resources to the `STORAGECLASS_NAME` value set in step 2.
+The `storage-class/name-update` component updates the `storageClassName` field for all associated resources to the `STORAGECLASS_NAME` value set in step 2.
 
 ### Update storageClassName
 
@@ -566,23 +564,23 @@ To updates the `storageClassName` field for all associated resources:
 
 **Step 1**: Include the `storage-class/name-update` component to your overlay:
 
-  ```yaml
-  # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+```yaml
+# instances/$INSTANCE_NAME/kustomization.yaml
+components:
     - ../../components/storage-class/name-update
-  ```
+```
 
 **Step 2**: Enter the value of your existing storage class name in your [buildConfig.yaml](/admin/deploy/kubernetes/kustomize/#buildconfig-yaml) file using the `STORAGECLASS_NAME` config key
 
 Example, set `STORAGECLASS_NAME=sourcegraph` if `sourcegraph` is the name for the existing storage class:
 
-  ```yaml
-  # instances/$INSTANCE_NAME/buildConfig.yaml
-  data:
+```yaml
+# instances/$INSTANCE_NAME/buildConfig.yaml
+data:
     STORAGECLASS_NAME: sourcegraph # [ACTION] Set storage class name here
-  ```
+```
 
-  The `storage-class/name-update` component updates the `storageClassName` field for all associated resources to the `STORAGECLASS_NAME` value set in step 2.
+The `storage-class/name-update` component updates the `storageClassName` field for all associated resources to the `STORAGECLASS_NAME` value set in step 2.
 
 ### Create a custom storage class
 
@@ -592,7 +590,7 @@ To create a custom storage class:
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/storage-class/cloud
 ```
 
@@ -600,7 +598,7 @@ Update the following variables in your [buildConfig.yaml](/admin/deploy/kubernet
 
 ```yaml
 # instances/$INSTANCE_NAME/buildConfig.yaml
-  data:
+data:
     # [ACTION] Set values below
     STORAGECLASS_NAME: STORAGECLASS_NAME
     STORAGECLASS_PROVISIONER: STORAGECLASS_PROVISIONER
@@ -661,43 +659,44 @@ To manually configure a certificate via [TLS Secrets](https://kubernetes.io/docs
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml > [SECRETS GENERATOR]
-  secretGenerator:
-  - name: sourcegraph-frontend-tls
-    behavior: create
-    files:
-    - tls.crt
-    - tls.key
+secretGenerator:
+    - name: sourcegraph-frontend-tls
+      behavior: create
+      files:
+          - tls.crt
+          - tls.key
 ```
 
 This will create a new Secret resource named sourcegraph-frontend-tls that contains the encoded cert and key:
 
 ```yaml
 # cluster.yaml - output file after running build
-  apiVersion: v1
-  kind: Secret
-  type: kubernetes.io/tls
-  metadata:
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/tls
+metadata:
     name: sourcegraph-frontend-tls-99dh8g92m5
     namespace: $YOUR_NAMESPACE
-  data:
+data:
     tls.crt: |
-      LS...FUlRJRklDQVRFLS0tLS0=
+        LS...FUlRJRklDQVRFLS0tLS0=
     tls.key: |
-      LS...SSVZBVEUgS0VZLS0tLS0=
+        LS...SSVZBVEUgS0VZLS0tLS0=
+
 # the data is abbreviated in this example
 ```
 
 **Step 3**: Configure the TLS settings of your Ingress by adding the following variables to your [buildConfig.yaml](/admin/deploy/kubernetes/kustomize/#buildconfig-yaml) file:
 
-- **TLS_HOST**: your domain name
-- **TLS_INGRESS_CLASS_NAME**: ingress class name required by your cluster-issuer
-- **TLS_CLUSTER_ISSUER**: name of the cluster-issuer
+-   **TLS_HOST**: your domain name
+-   **TLS_INGRESS_CLASS_NAME**: ingress class name required by your cluster-issuer
+-   **TLS_CLUSTER_ISSUER**: name of the cluster-issuer
 
 Example:
 
 ```yaml
 # instances/$INSTANCE_NAME/buildConfig.yaml
-  data:
+data:
     # [ACTION] Set values below
     TLS_HOST: sourcegraph.company.com
     TLS_INGRESS_CLASS_NAME: example-ingress-class-name
@@ -708,7 +707,7 @@ Step 4: Include the `tls` component:
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/network/tls
 ```
 
@@ -722,7 +721,7 @@ If the name of your secret for TLS is not `sourcegraph-frontend-tls`, you can re
 
 ```yaml
 # instances/$INSTANCE_NAME/buildConfig.yaml
-  data:
+data:
     # [ACTION] Set values below
     TLS_SECRET_NAME: sourcegraph-tls
 ```
@@ -731,7 +730,7 @@ Then, include the `tls-secretname` component:
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/network/tls-secretname
 ```
 
@@ -747,7 +746,7 @@ Component to configure Ingress to use [AWS Load Balancer Controller](https://doc
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/ingress/alb
 ```
 
@@ -759,7 +758,7 @@ It also adds a [BackendConfig CRD](https://cloud.google.com/kubernetes-engine/do
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/ingress/gke
 ```
 
@@ -769,7 +768,7 @@ Component to configure Ingress to use the default HTTP reverse proxy and load ba
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/ingress/k3s
 ```
 
@@ -781,7 +780,7 @@ To configure the hostname for your Sourcegraph ingress, follow these steps:
 
 ```yaml
 # instances/$INSTANCE_NAME/buildConfig.yaml
-  data:
+data:
     # [ACTION] Set values below
     HOST_DOMAIN: sourcegraph.company.com
 ```
@@ -790,7 +789,7 @@ To configure the hostname for your Sourcegraph ingress, follow these steps:
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/ingress/hostname
 ```
 
@@ -806,7 +805,7 @@ The `network/nodeport` component creates a frontend service of [type NodePort](h
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/network/nodeport/30080
 ```
 
@@ -816,8 +815,8 @@ The `network/loadbalancer` component sets the type of the frontend service as [L
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
-  - ../../components/network/loadbalancer
+components:
+    - ../../components/network/loadbalancer
 ```
 
 ### Annotations
@@ -840,14 +839,14 @@ $ cp components/patches/frontend-ingress-annotations.yaml instances/$INSTANCE_NA
 
 **Step 4**: Include the patch file in your overlay under `patches`:
 
-  ```yaml
-  # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+```yaml
+# instances/$INSTANCE_NAME/kustomization.yaml
+components:
     - ../../components/...
-  # ...
-  patches:
+# ...
+patches:
     - patch: patches/frontend-ingress.annotations.yaml
-  ```
+```
 
 This will add the annotations specified in your copy of the [frontend-ingress-annotations.yaml](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/master/base/sourcegraph/frontend/sourcegraph-frontend.Ingress.yaml) file to the sourcegraph-frontend ingress resource. For more information on [ingress-nginx annotations](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/), refer to the [NGINX Configuration documentation](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/).
 
@@ -861,7 +860,7 @@ To configure network policy for your Sourcegraph installation, you will need to 
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/network-policy
 ```
 
@@ -879,33 +878,33 @@ Add a network rule that allows incoming traffic on port 30080 (HTTP) to at least
 
 ### Google Cloud Platform Firewall
 
-- Expose the necessary ports.
+-   Expose the necessary ports.
 
 ```bash
 $ gcloud compute --project=$PROJECT firewall-rules create sourcegraph-frontend-http --direction=INGRESS --priority=1000 --network=default --action=ALLOW --rules=tcp:30080
 ```
 
-- Include the nodeport component to change the type of the `sourcegraph-frontend` service from `ClusterIP` to `NodePort` with the `nodeport` component:
+-   Include the nodeport component to change the type of the `sourcegraph-frontend` service from `ClusterIP` to `NodePort` with the `nodeport` component:
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/network/nodeport/30080
 ```
 
-- Directly applying this change to a running service [will fail](https://github.com/kubernetes/kubernetes/issues/42282). You must first delete the old service before redeploying a new one (with a few seconds of downtime):
+-   Directly applying this change to a running service [will fail](https://github.com/kubernetes/kubernetes/issues/42282). You must first delete the old service before redeploying a new one (with a few seconds of downtime):
 
 ```bash
 $ kubectl delete svc sourcegraph-frontend
 ```
 
-- Find a node name.
+-   Find a node name.
 
 ```bash
 $ kubectl get pods -l app=sourcegraph-frontend -o=custom-columns=NODE:.spec.nodeName
 ```
 
-- Get the EXTERNAL-IP address (will be ephemeral unless you [make it static](https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address#promote_ephemeral_ip)).
+-   Get the EXTERNAL-IP address (will be ephemeral unless you [make it static](https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address#promote_ephemeral_ip)).
 
 ```bash
 $ kubectl get node $NODE -o wide
@@ -926,7 +925,7 @@ If your [Rancher Kubernetes Engine (RKE)](https://rancher.com/docs/rke/latest/en
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
 components:
-  - ../../components/network/nodeport/30080
+    - ../../components/network/nodeport/30080
 ```
 
 > NOTE: Check with your upstream admin for the correct nodePort value.
@@ -939,7 +938,7 @@ There are a few [known issues](/admin/deploy/kubernetes/troubleshoot#service-mes
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/network/envoy
 ```
 
@@ -949,18 +948,18 @@ There are a few [known issues](/admin/deploy/kubernetes/troubleshoot#service-mes
 
 ### Frontend
 
-To update the environment variables for the **sourcegraph-frontend** service, add the new environment variables to the end of the *FRONTEND ENV VARS* section at the bottom of your [kustomization file](/admin/deploy/kubernetes/kustomize/#kustomizationyaml). For example:
+To update the environment variables for the **sourcegraph-frontend** service, add the new environment variables to the end of the _FRONTEND ENV VARS_ section at the bottom of your [kustomization file](/admin/deploy/kubernetes/kustomize/#kustomizationyaml). For example:
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
 components:
-  - ../../components/...
+    - ../../components/...
 configMapGenerator:
-  - name: sourcegraph-frontend-env
-    behavior: merge
-    literals:
-      - DEPLOY_TYPE=kustomize
-      - NEW_ENV_VAR=NEW_VALUE
+    - name: sourcegraph-frontend-env
+      behavior: merge
+      literals:
+          - DEPLOY_TYPE=kustomize
+          - NEW_ENV_VAR=NEW_VALUE
 ```
 
 These values will be automatically merged with the environment variables currently listed in the ConfigMap for frontend.
@@ -976,20 +975,20 @@ For example, to add new environment variables `SRC_ENABLE_GC_AUTO` and `SRC_ENAB
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
 patches:
-  - target:
-      name: gitserver
-      kind: StatefulSet
-    patch: |-
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: SRC_ENABLE_GC_AUTO
-          value: "true"
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: SRC_ENABLE_SG_MAINTENANCE
-          value: "false"
+    - target:
+          name: gitserver
+          kind: StatefulSet
+      patch: |-
+          - op: add
+            path: /spec/template/spec/containers/0/env/-
+            value:
+              name: SRC_ENABLE_GC_AUTO
+              value: "true"
+          - op: add
+            path: /spec/template/spec/containers/0/env/-
+            value:
+              name: SRC_ENABLE_SG_MAINTENANCE
+              value: "false"
 ```
 
 ### Searcher
@@ -1000,21 +999,21 @@ For example, to update the value for `SEARCHER_CACHE_SIZE_MB` and `SYMBOLS_CACHE
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  patches:
+patches:
     - target:
-        name: searcher
-        kind: StatefulSet|Deployment
+          name: searcher
+          kind: StatefulSet|Deployment
       patch: |-
-        - op: replace
-          path: /spec/template/spec/containers/0/env/0
-          value:
-            name: SEARCHER_CACHE_SIZE_MB
-            value: "50000"
-        - op: add
-          path: /spec/template/spec/containers/0/env/0
-          value:
-            name: SYMBOLS_CACHE_SIZE_MB
-            value: "50000"
+          - op: replace
+            path: /spec/template/spec/containers/0/env/0
+            value:
+              name: SEARCHER_CACHE_SIZE_MB
+              value: "50000"
+          - op: add
+            path: /spec/template/spec/containers/0/env/0
+            value:
+              name: SYMBOLS_CACHE_SIZE_MB
+              value: "50000"
 ```
 
 ---
@@ -1039,16 +1038,16 @@ Below is the example Helm deployment files modified to reference this secret.
 ```yaml
 # sourcegraph-frontend.Deployment.yaml
 spec:
-  template:
-    spec:
-      containers:
-        - name: frontend
-          env:
-            - name: PGPASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: pgsql-secret
-                  key: password
+    template:
+        spec:
+            containers:
+                - name: frontend
+                  env:
+                      - name: PGPASSWORD
+                        valueFrom:
+                            secretKeyRef:
+                                name: pgsql-secret
+                                key: password
 ```
 
 You can then drop the environment variable `PGPASSWORD` from the default deployment.
@@ -1059,19 +1058,19 @@ Similar changes will be required for other pods and services, depending on the s
 
 For optimal performance and resilience, it is recommended to use an external database when deploying Sourcegraph. For more information on database requirements, please refer to the [Postgres guide](/admin/postgres).
 
-To connect Sourcegraph to an existing PostgreSQL instance, add the relevant environment variables ([such as PGHOST, PGPORT, PGUSER, etc.](http://www.postgresql.org/docs/current/static/libpq-envars.html)) to the frontend ConfigMap by adding the new environment variables to the end of the *FRONTEND ENV VARS* section at the bottom of your [kustomization file](/admin/deploy/kubernetes/kustomize/#kustomizationyaml). For example:
+To connect Sourcegraph to an existing PostgreSQL instance, add the relevant environment variables ([such as PGHOST, PGPORT, PGUSER, etc.](http://www.postgresql.org/docs/current/static/libpq-envars.html)) to the frontend ConfigMap by adding the new environment variables to the end of the _FRONTEND ENV VARS_ section at the bottom of your [kustomization file](/admin/deploy/kubernetes/kustomize/#kustomizationyaml). For example:
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/...
-  configMapGenerator:
+configMapGenerator:
     - name: sourcegraph-frontend-env
       behavior: merge
       literals:
-        - DEPLOY_TYPE=kustomize
-        - PGHOST=NEW_PGHOST
-        - PGPORT=NEW_PGPORT
+          - DEPLOY_TYPE=kustomize
+          - PGHOST=NEW_PGHOST
+          - PGPORT=NEW_PGPORT
 ```
 
 > WARNING: You must restart frontend for the updated values to be activated
@@ -1080,15 +1079,15 @@ To connect Sourcegraph to an existing PostgreSQL instance, add the relevant envi
 
 Sourcegraph supports specifying an external Redis server with these environment variables:
 
-- **REDIS_CACHE_ENDPOINT**=[redis-cache:6379](https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24++REDIS_CACHE_ENDPOINT+AND+REDIS_STORE_ENDPOINT+-file:doc+file:internal&patternType=literal) for caching information.
-- **REDIS_STORE_ENDPOINT**=[redis-store:6379](https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24++REDIS_CACHE_ENDPOINT+AND+REDIS_STORE_ENDPOINT+-file:doc+file:internal&patternType=literal) for storing information (session data and job queues).
+-   **REDIS_CACHE_ENDPOINT**=[redis-cache:6379](https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24++REDIS_CACHE_ENDPOINT+AND+REDIS_STORE_ENDPOINT+-file:doc+file:internal&patternType=literal) for caching information.
+-   **REDIS_STORE_ENDPOINT**=[redis-store:6379](https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24++REDIS_CACHE_ENDPOINT+AND+REDIS_STORE_ENDPOINT+-file:doc+file:internal&patternType=literal) for storing information (session data and job queues).
 
 When using an external Redis server, the corresponding environment variable must also be added to the following services:
 
-- `sourcegraph-frontend`
-- `gitserver`
-- `searcher`
-- `worker`
+-   `sourcegraph-frontend`
+-   `gitserver`
+-   `searcher`
+-   `worker`
 
 **Step 1**: Include the `services/redis` component in your components:
 
@@ -1096,7 +1095,7 @@ This adds the new environment variables for redis to the services listed above.
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/services/redis
 ```
 
@@ -1104,13 +1103,14 @@ This adds the new environment variables for redis to the services listed above.
 
 ```yaml
 # instances/$INSTANCE_NAME/buildConfig.yaml
-  data:
+data:
     # [ACTION] Set values below
     REDIS_CACHE_ENDPOINT: REDIS_CACHE_DSN
     REDIS_STORE_ENDPOINT: REDIS_STORE_DSN
 ```
 
 > WARNING: You must restart frontend for the updated values to be activated
+
 ---
 
 ## SSH for cloning
@@ -1125,25 +1125,25 @@ To mount the files through Kustomize:
 
 **Step 2:** Include the following in your overlay to [generate secrets](https://kubernetes.io/docs/tasks/configmap-secret/managing-secret-using-kustomize/) that base64 encoded the values in those files
 
-  ```yaml
-  # instances/$INSTANCE_NAME/kustomization.yaml > [SECRETS GENERATOR]
-  secretGenerator:
-  - name: gitserver-ssh
-    files:
-    - configs/id_rsa
-    - configs/known_hosts
-  ```
+```yaml
+# instances/$INSTANCE_NAME/kustomization.yaml > [SECRETS GENERATOR]
+secretGenerator:
+    - name: gitserver-ssh
+      files:
+          - configs/id_rsa
+          - configs/known_hosts
+```
 
 **Step 3:** Include the following component to mount the [secret as a volume](https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-files-from-a-pod) in [gitserver.StatefulSet.yaml](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/master/base/sourcegraph/gitserver/gitserver.StatefulSet.yaml).
 
-  ```yaml
-  # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+```yaml
+# instances/$INSTANCE_NAME/kustomization.yaml
+components:
     # Enable SSH to clone repositories as non-root user (default)
     - ../../components/enable/ssh/non-root
     # Enable SSH to clone repositories as root user
     - ../../components/enable/ssh/root
-  ```
+```
 
 > NOTE: If you are running Sourcegraph with privileges using our [privileged component](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/tree/components/privileged), you are most likely running Sourcegraph with `root` access and should use the [ssh/root component](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/tree/components/enable/ssh/root) to enable SSH cloning.
 
@@ -1162,7 +1162,7 @@ Our Postgres databases can only be run with the UIDs defined by the upstream ima
 The `utils/uid` component bind-mount `/etc/passwd` as read-only through hostpath so that you can run the containers with valid users on your host.
 
 ```yaml
-  components:
+components:
     - ../../components/utils/uid
 ```
 
@@ -1197,8 +1197,8 @@ mv base/monitoring/prometheus/rbacs/prometheus.ConfigMap.yaml instances/$INSTANC
 
 ```yaml
 # instances/$INSTANCE_NAME/patches/prometheus.ConfigMap.yaml
-  - job_name: 'kubernetes-pods'
-    metric_relabel_configs:
+- job_name: 'kubernetes-pods'
+  metric_relabel_configs:
       - source_labels: [container_label_io_kubernetes_pod_namespace]
         regex: ^$|ns-sourcegraph # ACTION: replace ns-sourcegraph with your namespace
         action: keep
@@ -1210,11 +1210,11 @@ Replace `ns-sourcegraph` with your namespace, e.g. `regex: ^$|your_namespace`.
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  patches:
+patches:
     - patch: patches/prometheus.ConfigMap.yaml
 ```
 
-This will cause Prometheus to drop all metrics *from cAdvisor* that are not services running in the specified namespace.
+This will cause Prometheus to drop all metrics _from cAdvisor_ that are not services running in the specified namespace.
 
 ---
 
@@ -1224,7 +1224,7 @@ This will cause Prometheus to drop all metrics *from cAdvisor* that are not serv
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/enable/private-registry
 ```
 
@@ -1232,7 +1232,7 @@ This will cause Prometheus to drop all metrics *from cAdvisor* that are not serv
 
 ```yaml
 # instances/$INSTANCE_NAME/buildConfig.yaml
-  data:
+data:
     PRIVATE_REGISTRY: your.private.registry.com # -- Replace 'your.private.registry.com'
 ```
 
@@ -1244,7 +1244,7 @@ To add `imagePullSecrets` to all resources:
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/resources/imagepullsecrets
 ```
 
@@ -1254,7 +1254,7 @@ For example:
 
 ```yaml
 # instances/$INSTANCE_NAME/buildConfig.yaml
-  data:
+data:
     IMAGE_PULL_SECRET_NAME: YOUR_SECRET_NAME
 ```
 
@@ -1263,15 +1263,15 @@ For example:
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
 patches:
-  - patch: |-
-      - op: add
-        path: /spec/template/spec/imagePullSecrets
-        value:
-          name: YOUR_SECRET_NAME
-    target:
-      group: apps
-      kind: StatefulSet|Deployment|DaemonSet
-      version: v1
+    - patch: |-
+          - op: add
+            path: /spec/template/spec/imagePullSecrets
+            value:
+              name: YOUR_SECRET_NAME
+      target:
+          group: apps
+          kind: StatefulSet|Deployment|DaemonSet
+          version: v1
 ```
 
 ---
@@ -1282,7 +1282,7 @@ In order to perform a [multi-version upgrade](/admin/updates/#multi-version-upgr
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/utils/multi-version-upgrade
 ```
 
@@ -1298,7 +1298,7 @@ After transferring ownerships, you can redeploy the instance with non-privileged
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
-  components:
+components:
     - ../../components/utils/migrate-to-nonprivileged
 ```
 

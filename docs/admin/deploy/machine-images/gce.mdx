@@ -1,4 +1,7 @@
-import { CURRENT_VERSION_STRING_NO_V, CURRENT_VERSION_STRING } from 'src/components/PreCodeBlock'
+import {
+	CURRENT_VERSION_STRING_NO_V,
+	CURRENT_VERSION_STRING
+} from 'src/components/PreCodeBlock';
 
 # Sourcegraph Google Compute Instances
 
@@ -6,11 +9,14 @@ Sourcegraph [Google Compute Engine (GCE) Images](https://cloud.google.com/comput
 
 Following these docs will provision the following resources:
 
-- A pre-configured Sourcegraph instance running on the latest version
-- A root EBS volume with 50GB of storage
-- An additional EBS volume for storing code and search indices
+-   A pre-configured Sourcegraph instance running on the latest version
+-   A root EBS volume with 50GB of storage
+-   An additional EBS volume for storing code and search indices
 
-<Callout type="warning">Connection to the internet is required to pull Docker images at first launch.</Callout>
+<Callout type="warning">
+	Connection to the internet is required to pull Docker images at first
+	launch.
+</Callout>
 
 ## Instance size chart
 
@@ -19,7 +25,7 @@ Select a deployment image and machine type according to the number of users and 
 If you fall between two sizes, choose the larger of the two. For example, if you have 8,000 users with 80,000 repositories, your instance size would be **L**. If you have 1,000 users with 80,000 repositories, you should still go with size **M**.
 
 |                          | **XS**                                                                                     | **S**                                                                                     | **M**                                                                                     | **L**                                                                                     | **XL**                                                                                     |
-|--------------------------|--------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| ------------------------ | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | **Users**                | greater than or equal to 500                                                               | greater than or equal to 1,000                                                            | greater than or equal to 5,000                                                            | greater than or equal to 10,000                                                           | greater than or equal to 20,000                                                            |
 | **Repositories**         | greater than or equal to 5,000                                                             | greater than or equal to 10,000                                                           | greater than or equal to 50,000                                                           | greater than or equal to 100,000                                                          | greater than or equal to 250,000                                                           |
 | **Series**               | N2                                                                                         | N2                                                                                        | N2                                                                                        | N2                                                                                        | N2                                                                                         |
@@ -27,7 +33,15 @@ If you fall between two sizes, choose the larger of the two. For example, if you
 | **Minimum**              | standard-8                                                                                 | standard-8                                                                                | standard-16                                                                               | standard-32                                                                               | standard-64                                                                                |
 | **Latest Version Links** | [download](https://storage.googleapis.com/sourcegraph-images/latest/Sourcegraph-XS.tar.gz) | [download](https://storage.googleapis.com/sourcegraph-images/latest/Sourcegraph-S.tar.gz) | [download](https://storage.googleapis.com/sourcegraph-images/latest/Sourcegraph-M.tar.gz) | [download](https://storage.googleapis.com/sourcegraph-images/latest/Sourcegraph-L.tar.gz) | [download](https://storage.googleapis.com/sourcegraph-images/latest/Sourcegraph-XL.tar.gz) |
 
-<Callout type="note">Sourcegraph GCE images are optimized for the specific set of resources provided by the machine type, please ensure you use the correct GCE image for the associated GCE machine type. You can [resize your machine type anytime](https://cloud.google.com/compute/docs/instances/changing-machine-type-of-stopped-instance), but your Sourcegraph GCE image must match accordingly. If needed, follow the [upgrade steps](#upgrade) to switch to the correct GCE image that is optimized for your machine type.</Callout>
+<Callout type="note">
+	Sourcegraph GCE images are optimized for the specific set of resources
+	provided by the machine type, please ensure you use the correct GCE image
+	for the associated GCE machine type. You can [resize your machine type
+	anytime](https://cloud.google.com/compute/docs/instances/changing-machine-type-of-stopped-instance),
+	but your Sourcegraph GCE image must match accordingly. If needed, follow the
+	[upgrade steps](#upgrade) to switch to the correct GCE image that is
+	optimized for your machine type.
+</Callout>
 
 ---
 
@@ -47,11 +61,11 @@ If you fall between two sizes, choose the larger of the two. For example, if you
 ![](https://storage.googleapis.com/sourcegraph-assets/Docs/gcp-custom-image.png)
 
 1. Click **CREATE IMAGE** on top of the [GCE Images Console](https://console.cloud.google.com/compute/images)
-   - Name: [Any]
-   - Source: Cloud Storage file
-   - Cloud Storage file: Click **Browse** and look for the image you uploaded in step 1
-   - Select location: select one that works best for you
-   - Family: sourcegraph
+    - Name: [Any]
+    - Source: Cloud Storage file
+    - Cloud Storage file: Click **Browse** and look for the image you uploaded in step 1
+    - Select location: select one that works best for you
+    - Family: sourcegraph
 2. Click **CREATE** to create your custom image of Sourcegraph
 
 #### Step 3: Launch a new instance
@@ -62,20 +76,29 @@ If you fall between two sizes, choose the larger of the two. For example, if you
 2. Name the instance
 3. Select a **machine type** (see [instance size chart](#instance-size-chart))
 4. Under the **Boot disk** section, click **CHANGE** and navigate to the **CUSTOM IMAGES** tab
-   - Image: Select the Sourcegraph image created in the previous step
-   - Boot disk type: SSD persistent disk
+    - Image: Select the Sourcegraph image created in the previous step
+    - Boot disk type: SSD persistent disk
 5. Under the **Firewall** section
-  - Allow both `HTTP` and `HTTPS` traffic if needed
+
+-   Allow both `HTTP` and `HTTPS` traffic if needed
+
 6. Under the **Advanced options > Disk** section
-   - Select **+ ADD NEW DISK**
-   - Disk source type: Blank disk
-   - Disk type: SSD persistent disk (REQUIRED)
-   - Size: 500GB or more --_this should be at least 25-50% *more* than the size of all your repositories on disk. Please refer to the disk usage of your code host instances (e.g. GitHub/BitBucket/GitLab) in order to adjust disk size accordingly._
-   - Deletion rule: Keep disk
+    - Select **+ ADD NEW DISK**
+    - Disk source type: Blank disk
+    - Disk type: SSD persistent disk (REQUIRED)
+    - Size: 500GB or more --_this should be at least 25-50% *more* than the size of all your repositories on disk. Please refer to the disk usage of your code host instances (e.g. GitHub/BitBucket/GitLab) in order to adjust disk size accordingly._
+    - Deletion rule: Keep disk
 
-<Callout type="note">RECOMMENDED: Configure your network setting under the **Advanced options > Network** section</Callout>
+<Callout type="note">
+	RECOMMENDED: Configure your network setting under the **Advanced options >
+	Network** section
+</Callout>
 
-<Callout type="note">Please allow ~5 minutes for Sourcegraph to initialize. During this time you may observe a `404 page not found` response. If you cannot access the Sourcegraph homepage after 10 minutes, please try reboot your instance.</Callout>
+<Callout type="note">
+	Please allow ~5 minutes for Sourcegraph to initialize. During this time you
+	may observe a `404 page not found` response. If you cannot access the
+	Sourcegraph homepage after 10 minutes, please try reboot your instance.
+</Callout>
 
 ### Connect via SSH
 
@@ -87,6 +110,7 @@ To SSH into the instance as user `sourcegraph`, add the username in front of you
 # sourcegraph is the username
 $ gcloud compute ssh sourcegraph@YOUR-INSTANCE-NAME --zone=us-central1-a
 ```
+
 Your can also switch users in the terminal with the command below:
 
 ```bash
@@ -94,24 +118,30 @@ $ sudo su sourcegraph
 ```
 
 ### Executors
+
 Executors are supported using [native kubernetes executors](/admin/executors/deploy_executors_kubernetes).
 
 Executors support [auto-indexing](/code-search/code-navigation/auto_indexing) and [server-side batch changes](/batch-changes/server-side).
 
 To enable executors you must do the following:
+
 1. Connect to the instance using `ssh` as described above.
 2. Run `cd /home/sourcegraph/deploy/install/`.
 3. Replace the placeholder `executor.frontendPassword` in `override.yaml`.
 4. Run the following command to update the executor:
+
 ```
 helm upgrade -i -f ./override.yaml --version "$(cat /home/sourcegraph/.sourcegraph-version)" executor sourcegraph/sourcegraph-executor-k8s
 ```
+
 1. Add the following to the site-admin config using the password you chose previously:
+
 ```
 "executors.accessToken": "<exector.frontendPassword>",
 "executors.frontendURL": "http://sourcegraph-frontend:30080",
 "codeIntelAutoIndexing.enabled": true
 ```
+
 1. Check `Site-Admin > Executors > Instances` to verify the executor connected successfully. If it does not appear try reboot the instance.
 
 To use server-side batch changes you will need to enable the `native-ssbc-execution` [feature flag](/admin/executors/native_execution#enable).
@@ -126,16 +156,23 @@ As a result, setting up a static IP for your Sourcegraph instance is strongly re
 
 ## Upgrade
 
-<Callout type="warning">This upgrade process works with **Sourcegraph instances set up with GCE Images only**. Do not follow this upgrade procedure if you deployed Sourcegraph through other means.</Callout>
+<Callout type="warning">
+	This upgrade process works with **Sourcegraph instances set up with GCE
+	Images only**. Do not follow this upgrade procedure if you deployed
+	Sourcegraph through other means.
+</Callout>
 
-<Callout type="warning">Please be aware that our machine image deployment types do not support multi-version upgrades at this time.</Callout>
+<Callout type="warning">
+	Please be aware that our machine image deployment types do not support
+	multi-version upgrades at this time.
+</Callout>
 
 Please take time to review the following before proceeding with the upgrades:
 
-- [Technical changelog](/technical-changelog)
-- [Update policy](/admin/updates#update-policy)
-- [Update notes](/admin/updates/kubernetes)
-- [Multi-version upgrade procedure](/admin/updates/kubernetes#multi-version-upgrade-procedure)
+-   [Technical changelog](/technical-changelog)
+-   [Update policy](/admin/updates#update-policy)
+-   [Update notes](/admin/updates/kubernetes)
+-   [Multi-version upgrade procedure](/admin/updates/kubernetes#multi-version-upgrade-procedure)
 
 IMPORTANT: **Back up your volumes before each upgrade**
 
@@ -155,13 +192,12 @@ helm upgrade -i -f /home/sourcegraph/deploy/install/override.yaml --version {CUR
 
 ![](https://storage.googleapis.com/sourcegraph-assets/Docs/gcp-edit.png)
 
-
-1. *Stop* your current Sourcegraph GCP Image instance from the [GCE Console](https://console.cloud.google.com/compute).
+1. _Stop_ your current Sourcegraph GCP Image instance from the [GCE Console](https://console.cloud.google.com/compute).
 2. Navigate to your instance console after your instance is stopped.
 3. Detach the local disk:
-   - Click the **EDIT** button located on top of the page in your instance console.
-   - Remove the **Existing disk** under **Additional disks**.
-   - **SAVE** the changes.
+    - Click the **EDIT** button located on top of the page in your instance console.
+    - Remove the **Existing disk** under **Additional disks**.
+    - **SAVE** the changes.
 
 ##### Step 2: Launch a new instance
 
@@ -169,23 +205,32 @@ helm upgrade -i -f /home/sourcegraph/deploy/install/override.yaml --version {CUR
 2. Name the instance.
 3. Select the appropriate **machine type**.
 4. Under the **Firewall** section:
-  - Allow both `HTTP` and `HTTPS` traffic if needed.
-5. Under the **Advanced options > Disk** section:
-  - Select **+ ATTACH EXISTING DISK**.
-  - Select the volume you've detached in step 1.
-  - Deletion rule: **Keep disk**
-6. Under the **Advanced options > Management > Automation** section:
-  - Copy and paste the following script into the `Startup script` box to upgrade to a specified version.
 
-  ```bash
-  # Replace version number to the version you are trying to upgrade to
-  VERSION='4.0.0'
-  echo $VERSION | sudo tee home/sourcegraph/.sourcegraph-version
-  ```
+-   Allow both `HTTP` and `HTTPS` traffic if needed.
+
+5. Under the **Advanced options > Disk** section:
+
+-   Select **+ ATTACH EXISTING DISK**.
+-   Select the volume you've detached in step 1.
+-   Deletion rule: **Keep disk**
+
+6. Under the **Advanced options > Management > Automation** section:
+
+-   Copy and paste the following script into the `Startup script` box to upgrade to a specified version.
+
+```bash
+# Replace version number to the version you are trying to upgrade to
+VERSION='4.0.0'
+echo $VERSION | sudo tee home/sourcegraph/.sourcegraph-version
+```
 
 You can terminate the stopped Sourcegraph Google Image instance once you have confirmed the new instance is up and running.
 
-<Callout type="warning">You must follow the [multi-version upgrade procedure](/admin/updates/kubernetes#multi-version-upgrade-procedure) if you are attempting a multi-version upgrade.</Callout>
+<Callout type="warning">
+	You must follow the [multi-version upgrade
+	procedure](/admin/updates/kubernetes#multi-version-upgrade-procedure) if you
+	are attempting a multi-version upgrade.
+</Callout>
 
 ## Downgrade
 
@@ -211,5 +256,5 @@ Click [here](../docker-compose/google_cloud) to view install instructions for de
 
 ## Additional resources
 
-- [GCP Docs: Resize a persistent disk](https://cloud.google.com/compute/docs/disks/resize-persistent-disk)
-- [GCP Docs: Changing the machine type](https://cloud.google.com/compute/docs/instances/changing-machine-type-of-stopped-instance)
+-   [GCP Docs: Resize a persistent disk](https://cloud.google.com/compute/docs/disks/resize-persistent-disk)
+-   [GCP Docs: Changing the machine type](https://cloud.google.com/compute/docs/instances/changing-machine-type-of-stopped-instance)

@@ -1,8 +1,13 @@
 # Running Batch Changes Server Side
 
-<p className="subtitle">Learn how to run Batch Changes server-side using executors and file mounts.</p>
+<p className="subtitle">
+	Learn how to run Batch Changes server-side using executors and file mounts.
+</p>
 
-<Callout type="info">Running Batch Changes server-side is in Experimental stage and comes with certains [limitations](#limitations).</Callout>
+<Callout type="info">
+	Running Batch Changes server-side is in Experimental stage and comes with
+	certains [limitations](#limitations).
+</Callout>
 
 By default, Batch Changes uses a command line interface in your local environment to [compute diffs](/batch-changes/how-src-executes-a-batch-spec) and create changesets. This can be impractical for creating batch changes affecting hundreds or thousands of repositories, with large numbers of workspaces, or if the batch change steps require CPU, memory, or disk resources that are unavailable locally.
 
@@ -10,9 +15,9 @@ Instead of computing Batch Changes locally using `src-cli`, you can offload this
 
 This allows to:
 
-- Run large-scale batch changes that would be impractical to compute locally
-- Speed up batch change creation time by distributing batch change computing over several executors
-- Reduce the setup time required to onboard new users to Batch Changes
+-   Run large-scale batch changes that would be impractical to compute locally
+-   Speed up batch change creation time by distributing batch change computing over several executors
+-   Reduce the setup time required to onboard new users to Batch Changes
 
 ## Setup
 
@@ -20,14 +25,17 @@ This is a one-time process. Once a site-admin of the Sourcegraph instance sets u
 
 Make sure that [executors are deployed and are online](/admin/executors/deploy_executors).
 
-<Callout type="tip">It's recommended to read [Getting started with running batch changes server-side](/batch-changes/server-side) for better understanding.</Callout>
+<Callout type="tip">
+	It's recommended to read [Getting started with running batch changes
+	server-side](/batch-changes/server-side) for better understanding.
+</Callout>
 
 ## Limitations
 
-- Running batch changes server-side requires setting up executors. Executors are configured ready-to-use on Sourcegraph Cloud
-- Running batch changes server-side is limited to user namespaces
-- The newly introduced APIs for server-side are still experimental and will likely change
-- Executors can only be deployed using Terraform (AWS or GCP) or using pre-built binaries (see [deploying executors](/admin/executors/deploy_executors)).
+-   Running batch changes server-side requires setting up executors. Executors are configured ready-to-use on Sourcegraph Cloud
+-   Running batch changes server-side is limited to user namespaces
+-   The newly introduced APIs for server-side are still experimental and will likely change
+-   Executors can only be deployed using Terraform (AWS or GCP) or using pre-built binaries (see [deploying executors](/admin/executors/deploy_executors)).
 
 Running batch changes server-side has been tested to run a simple **45K changeset batch change**. Actual performance and setup requirements depend on the complexity of the batch change.
 
@@ -37,7 +45,10 @@ By default, docker on mac will build docker images for `linux/arm64`, which will
 
 ## Using file mounts with server-side execution
 
-<Callout type="note">Running a batch spec server-side with file mounts is currently only supported with [Sourcegraph CLI](https://github.com/sourcegraph/src-cli).</Callout>
+<Callout type="note">
+	Running a batch spec server-side with file mounts is currently only
+	supported with [Sourcegraph CLI](https://github.com/sourcegraph/src-cli).
+</Callout>
 
 File [`mounts`](/batch-changes/batch-spec-yaml-reference#stepsmount) are a powerful way to run custom files without directly embedding the files in your batch spec.
 
@@ -69,24 +80,24 @@ description: Add Hello World to READMEs
 
 # Find all repositories that contain a README file.
 on:
-  - repositoriesMatchingQuery: file:README
+    - repositoriesMatchingQuery: file:README
 
 # In each repository, run this command. Each repository's resulting diff is captured.
 steps:
-  - run: python /tmp/hello_appender.py
-    container: python:latest
-    mount:
-      - path: ./hello_appender.py
-        mountpoint: /tmp/hello_appender.py
+    - run: python /tmp/hello_appender.py
+      container: python:latest
+      mount:
+          - path: ./hello_appender.py
+            mountpoint: /tmp/hello_appender.py
 
 # Describe the changeset (e.g., GitHub pull request) you want for each repository.
 changesetTemplate:
-  title: Hello World
-  body: My first batch change!
-  branch: hello-world # Push the commit to this branch.
-  commit:
-    message: Append Hello World to all README files
-  published: false # Do not publish any changes to the code hosts yet
+    title: Hello World
+    body: My first batch change!
+    branch: hello-world # Push the commit to this branch.
+    commit:
+        message: Append Hello World to all README files
+    published: false # Do not publish any changes to the code hosts yet
 ```
 
 In this example, the Python script should live beside the batch spec file, as indicated by the `path`:
@@ -110,6 +121,16 @@ src batch remote -f batch-spec.yml
 Once successful, `src` provides a URL to the execution of the batch change.
 
 <QuickLinks>
-<QuickLink title="Debug Batch Changes Server Side" icon='lightbulb' href="/batch-changes/troubleshooting#debug-running-batch-changes-server-side" description="Learn how to debug running batch changes server side." />
-<QuickLink title="Server Side FAQs" icon='presets' href="/batch-changes/faq#running-batch-change-server-side" description="Some frequently asked questions about running batch changes server side." />
+	<QuickLink
+		title="Debug Batch Changes Server Side"
+		icon="lightbulb"
+		href="/batch-changes/troubleshooting#debug-running-batch-changes-server-side"
+		description="Learn how to debug running batch changes server side."
+	/>
+	<QuickLink
+		title="Server Side FAQs"
+		icon="presets"
+		href="/batch-changes/faq#running-batch-change-server-side"
+		description="Some frequently asked questions about running batch changes server side."
+	/>
 </QuickLinks>

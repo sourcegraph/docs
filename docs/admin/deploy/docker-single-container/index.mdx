@@ -1,4 +1,7 @@
-import { CURRENT_VERSION_STRING_NO_V, CURRENT_VERSION_STRING } from 'src/components/PreCodeBlock'
+import {
+	CURRENT_VERSION_STRING_NO_V,
+	CURRENT_VERSION_STRING
+} from 'src/components/PreCodeBlock';
 
 # Docker Single Container Deployment
 
@@ -18,7 +21,7 @@ docker run
 sourcegraph/server:{CURRENT_VERSION_NO_V}
 ```
 
-Once the server is ready (logo is displayed in the terminal), navigate to the hostname or IP address on port `7080`.  Create the admin account, then you'll be guided through setting up Sourcegraph for code searching and navigation.
+Once the server is ready (logo is displayed in the terminal), navigate to the hostname or IP address on port `7080`. Create the admin account, then you'll be guided through setting up Sourcegraph for code searching and navigation.
 
 For next steps and further configuration options, review the high-level configuration items below, or visit the [detailed configuration documentation](/admin/config/).
 
@@ -139,6 +142,7 @@ SELECT * FROM users;
 ## Upgrade
 
 ### Postgresql 16
+
 > Warning: The 5.11 release updates the database container images from Postgres 12 to Postgres 16. Customers are advised to have a database backup before upgrading! See our [postgres 12 end of life](https://sourcegraph.com/docs/admin/postgres12_end_of_life_notice#postgres-12-end-of-life) notice!
 
 From sourcegraph version 5.11 onwards, the Sourcegraph single container Docker image uses Postgresql 16. Upgrading from Postgresql 12 to Postgresql 16 is a manual process, that is similar to the one outlined below for multi-version upgrades, but migrator has been merged into the container, allowing for a simpler upgrade.
@@ -151,11 +155,11 @@ From sourcegraph version 5.11 onwards, the Sourcegraph single container Docker i
 
 **Before performing a multi-version upgrade**:
 
-- Read our [update policy](/admin/updates/#update-policy) to learn about Sourcegraph updates.
-- Find the entries that apply to the version range you're passing through in the [update notes for Sourcegraph with Docker Single Container](/admin/updates/server#multi-version-upgrade-procedure).
+-   Read our [update policy](/admin/updates/#update-policy) to learn about Sourcegraph updates.
+-   Find the entries that apply to the version range you're passing through in the [update notes for Sourcegraph with Docker Single Container](/admin/updates/server#multi-version-upgrade-procedure).
 
 0. You must first shutdown the container instance via `docker stop [CONTAINER]`.
-1. Start a temporary Postgres container on top of the Postgres data directory used by the old `sourcegraph/server` image. You must use the *new* postgresql-16-codeinsights image, which is based on the new Postgresql 16 image, and provides an automatic upgrade script to move from Postgresql 12 to Postgresql 16.
+1. Start a temporary Postgres container on top of the Postgres data directory used by the old `sourcegraph/server` image. You must use the _new_ postgresql-16-codeinsights image, which is based on the new Postgresql 16 image, and provides an automatic upgrade script to move from Postgresql 12 to Postgresql 16.
 
 `docker run --rm -it -v ~/.sourcegraph/data/postgresql:/data/pgdata-12 -e POSTGRES_USER=postgres  -p 5432:5432 sourcegraph/postgresql-16-codeinsights:{CURRENT_VERSION_NO_V}`
 
@@ -166,15 +170,14 @@ From sourcegraph version 5.11 onwards, the Sourcegraph single container Docker i
 
 You now have a single server Sourcegraph container image running on Postgresql 16.
 
-
 ### Standard upgrades
 
 A [standard upgrade](/admin/updates/#standard-upgrades) occurs between two minor versions of Sourcegraph. If you are looking to jump forward several versions, you must perform a [multi-version upgrade](#multi-version-upgrades) instead.
 
 **Before upgrading:**
 
-- Read our [update policy](/admin/updates/#update-policy) to learn about Sourcegraph updates.
-- Find the relevant entry for your update in the [update notes for single-container Sourcegraph with Docker](/admin/updates/server).
+-   Read our [update policy](/admin/updates/#update-policy) to learn about Sourcegraph updates.
+-   Find the relevant entry for your update in the [update notes for single-container Sourcegraph with Docker](/admin/updates/server).
 
 To update, just use the newer `sourcegraph/server:N.N.N` Docker image (where `N.N.N` is a patch or single minor release away your current version) in place of the older one, using the same Docker volumes. Your server's data will be migrated automatically if needed. You can always find the version number details of the latest release via the [technical changelog](/technical-changelog).
 
@@ -200,14 +203,14 @@ A [multi-version upgrade](/admin/updates/#multi-version-upgrades) is a downtime-
 
 **Before performing a multi-version upgrade**:
 
-- Read our [update policy](/admin/updates/#update-policy) to learn about Sourcegraph updates.
-- Find the entries that apply to the version range you're passing through in the [update notes for Sourcegraph with Docker Single Container](/admin/updates/server#multi-version-upgrade-procedure).
+-   Read our [update policy](/admin/updates/#update-policy) to learn about Sourcegraph updates.
+-   Find the entries that apply to the version range you're passing through in the [update notes for Sourcegraph with Docker Single Container](/admin/updates/server#multi-version-upgrade-procedure).
 
 To perform a multi-version upgrade on a Sourcegraph instance running on Docker Single Container:
 
 1. Stop the running Sourcegraph container via `docker stop [CONTAINER]`.
 1. Start a temporary Postgres container on top of the Postgres data directory used by the old `sourcegraph/server` image. This Postgres instance will be used by the following upgrade migration. If using an [external database](/admin/external_services/postgres), the database is already accessible from the `migrator` so no action is needed. Otherwise, start the new Postgres container by following the steps [described below](#running-temporary-postgres-containers).
-2. Follow the instructions on [how to run the migrator job in Docker](/admin/updates/migrator/migrator-operations#docker-compose) to perform the upgrade migratiohn. For specific documentation on the `upgrade` command, see the [command documentation](/admin/updates/migrator/migrator-operations#upgrade). The following specific steps are an easy way to run the upgrade command:
+1. Follow the instructions on [how to run the migrator job in Docker](/admin/updates/migrator/migrator-operations#docker-compose) to perform the upgrade migratiohn. For specific documentation on the `upgrade` command, see the [command documentation](/admin/updates/migrator/migrator-operations#upgrade). The following specific steps are an easy way to run the upgrade command:
 
 <p />
 
@@ -262,12 +265,12 @@ $ docker run --rm -it \
 
 The version of this Postgres container is dependent on the version of the instance prior to upgrade.
 
-| `${SG_VERSION}`     | `${PG_VERSION_TAG}`   |
-| ------------------- | -------------------   |
-| `3.20.X` - `3.29.X` | `postgres-12.6`       |
-| `3.30.X` - `3.37.X` | `postgres-12.6-alpine`|
-| `3.38.X` - `5.9.X`  | `postgres-12-alpine`  |
-| `5.10.X` -          | `postgresql-16`       |
+| `${SG_VERSION}`     | `${PG_VERSION_TAG}`    |
+| ------------------- | ---------------------- |
+| `3.20.X` - `3.29.X` | `postgres-12.6`        |
+| `3.30.X` - `3.37.X` | `postgres-12.6-alpine` |
+| `3.38.X` - `5.9.X`  | `postgres-12-alpine`   |
+| `5.10.X` -          | `postgresql-16`        |
 
 ## Troubleshooting
 
@@ -283,11 +286,11 @@ There is a [known issue](https://github.com/docker/for-mac/issues/77) in Docker 
 
 To achieve better performance, you can do any of the following:
 
-- For better clone performance, clone the repository on your host machine and then [add it to Sourcegraph Server](/admin/repo/add#add-repositories-already-cloned-to-disk).
-- Try adding the `:delegated` suffix the data volume mount. [Learn more](https://github.com/docker/for-mac/issues/1592).
-  ```sh
-  --volume ~/.sourcegraph/data:/var/opt/sourcegraph:delegated
-  ```
+-   For better clone performance, clone the repository on your host machine and then [add it to Sourcegraph Server](/admin/repo/add#add-repositories-already-cloned-to-disk).
+-   Try adding the `:delegated` suffix the data volume mount. [Learn more](https://github.com/docker/for-mac/issues/1592).
+    ```sh
+    --volume ~/.sourcegraph/data:/var/opt/sourcegraph:delegated
+    ```
 
 ### Testing Sourcegraph on Windows
 
@@ -296,7 +299,13 @@ Sourcegraph can be **tested** on Windows 10 using roughly the same steps provide
 1. [Install Docker for Windows](https://docs.docker.com/docker-for-windows/install/)
 2. Using a command prompt, follow the same [installation steps provided above](#install-sourcegraph-with-docker) but remove the `--volume` arguments. For example by pasting this:
 
-<pre class="pre-wrap"><code>docker run<span class="virtual-br"></span> --publish 7080:7080 --publish 127.0.0.1:3370:3370 --rm<span class="virtual-br"></span> sourcegraph/server:{CURRENT_VERSION_STRING_NO_V()}</code></pre>
+<pre class="pre-wrap">
+	<code>
+		docker run<span class="virtual-br"></span> --publish 7080:7080 --publish
+		127.0.0.1:3370:3370 --rm<span class="virtual-br"></span>{' '}
+		sourcegraph/server:{CURRENT_VERSION_STRING_NO_V()}
+	</code>
+</pre>
 
 ### Low resource environments
 
@@ -329,9 +338,9 @@ To fix this, run:
 
 Cloud specific Sourcegraph installation guides for AWS, Google Cloud and Digital Ocean.
 
-- [Install Sourcegraph with Docker on AWS](/admin/deploy/docker-single-container/aws)
-- [Install Sourcegraph with Docker on Google Cloud](/admin/deploy/docker-single-container/google_cloud)
-- [Install Sourcegraph with Docker on DigitalOcean](/admin/deploy/docker-single-container/digitalocean)
+-   [Install Sourcegraph with Docker on AWS](/admin/deploy/docker-single-container/aws)
+-   [Install Sourcegraph with Docker on Google Cloud](/admin/deploy/docker-single-container/google_cloud)
+-   [Install Sourcegraph with Docker on DigitalOcean](/admin/deploy/docker-single-container/digitalocean)
 
 ### Insiders build
 

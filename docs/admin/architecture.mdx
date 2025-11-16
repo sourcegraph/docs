@@ -1,6 +1,9 @@
 # Sourcegraph Architecture
 
-<p className="subtitle">This document provides a high-level overview of Sourcegraph's architecture so you can understand how our systems fit together.</p>
+<p className="subtitle">
+	This document provides a high-level overview of Sourcegraph's architecture
+	so you can understand how our systems fit together.
+</p>
 
 ## Diagram
 
@@ -10,14 +13,16 @@
 
 At its core, Sourcegraph maintains a persistent cache of all repositories that are connected to it. It is persistent because this data is critical for Sourcegraph to function. Still, it is ultimately a cache because the code host is the source of truth, and our cache is eventually consistent.
 
-- `gitserver` is the sharded service that stores repositories and makes them accessible to other Sourcegraph services
-- `worker` is responsible for ensuring all repositories in gitserver are as up-to-date as possible while respecting code host rate limits. It is also responsible for syncing repository metadata from the code host that is stored in the repo table of our Postgres database
+-   `gitserver` is the sharded service that stores repositories and makes them accessible to other Sourcegraph services
+-   `worker` is responsible for ensuring all repositories in gitserver are as up-to-date as possible while respecting code host rate limits. It is also responsible for syncing repository metadata from the code host that is stored in the repo table of our Postgres database
 
 ## Permission syncing
 
 Repository permissions are mirrored from code hosts to Sourcegraph by default. This builds the foundation of Sourcegraph authorization for repositories to ensure users see consistent content on code hosts. Currently, the background permissions syncer resides in the `worker`.
 
-<Callout type="note">Learn more in the [Permission Syncing docs](/admin/permissions/syncing)</Callout>
+<Callout type="note">
+	Learn more in the [Permission Syncing docs](/admin/permissions/syncing)
+</Callout>
 
 ## Settings cascade
 
@@ -29,15 +34,17 @@ Developers can search for the entire codebase that is connected to their Sourceg
 
 By default, Sourcegraph uses `zoekt` to create a trigram index of the default branch of every repository, which makes searches fast. This trigram index is why Sourcegraph search is more powerful and faster than what is usually provided by code hosts.
 
-- [zoekt-indexserver](https://sourcegraph.com/github.com/sourcegraph/zoekt/-/tree/cmd/zoekt-sourcegraph-indexserver)
-- [zoekt-webserver](https://sourcegraph.com/github.com/sourcegraph/zoekt/-/tree/cmd/zoekt-webserver)
+-   [zoekt-indexserver](https://sourcegraph.com/github.com/sourcegraph/zoekt/-/tree/cmd/zoekt-sourcegraph-indexserver)
+-   [zoekt-webserver](https://sourcegraph.com/github.com/sourcegraph/zoekt/-/tree/cmd/zoekt-webserver)
 
 Sourcegraph also has a fast search path for code that isn't indexed yet or will never be indexed (for example, code that is not on a default branch). Indexing every branch of every repository isn't a pragmatic use of resources for most customers, so this decision balances optimizing the common case (searching all default branches) with space savings (not indexing everything).
 
-- `searcher` implements the non-indexed search
-- Syntax highlighting for any code view, including search results, is provided by `Syntect` server
+-   `searcher` implements the non-indexed search
+-   Syntax highlighting for any code view, including search results, is provided by `Syntect` server
 
-<Callout type="note">Learn more in the [Code Search docs](/code-search)</Callout>
+<Callout type="note">
+	Learn more in the [Code Search docs](/code-search)
+</Callout>
 
 ## Code Navigation
 
@@ -49,13 +56,15 @@ This is the default because it works with no extra configuration and is good for
 
 With some setup, customers can enable [precise code navigation](/code-search/code-navigation/precise_code_navigation). Repositories add a step to their build pipeline that computes the index for that code revision and uploads it to Sourcegraph. We must write language-specific indexers, so adding precise code navigation support for new languages is a non-trivial task.
 
-<Callout type="note">Learn more in the [Code Navigation docs](/code-search/code-navigation)</Callout>
+<Callout type="note">
+	Learn more in the [Code Navigation docs](/code-search/code-navigation)
+</Callout>
 
 ### Dependencies
 
-- Search: Symbol search is used for basic code navigation
-- Sourcegraph extension API: Hover and definition providers
-- Native integrations (for code hosts): UI of hover tooltips on code hosts
+-   Search: Symbol search is used for basic code navigation
+-   Sourcegraph extension API: Hover and definition providers
+-   Native integrations (for code hosts): UI of hover tooltips on code hosts
 
 ## Batch Changes
 
@@ -69,8 +78,8 @@ Read the [Batch Changes](/batch-changes) docs to learn more.
 
 ### Dependencies
 
-- src-cli: Batch changes are currently executed client-side through the `src` CLI
-- Search: Repositories in which batch specs need to be executed are resolved through the search API
+-   src-cli: Batch changes are currently executed client-side through the `src` CLI
+-   Search: Repositories in which batch specs need to be executed are resolved through the search API
 
 ## Code Insights
 
@@ -88,17 +97,17 @@ You can learn more in the [Code Insights](/code_insights) docs.
 
 ### Dependencies
 
-- Search:
-  - GraphQL API for text search, in particular `search()`, `matchCount`, `stats.languages`
-  - Query syntax: Code insights "construct" search queries programmatically
-  - Exhaustive search (with `count:all/count:999999` operator)
-  - Historical search (= unindexed search, currently)
-  - Commit search to find historical commits to search over
-- Repository Syncing: The code insights backend has a direct dependency on `gitserver`
-- Permission syncing: The code insights backend depends on synced repository permissions for access control
-- Settings cascade:
-  - Insights and dashboard configuration are stored in user, organization, and global settings. This will change in the future and is planned to be moved to the database
-  - Insights contributed by extensions are configured through settings (this will stay the same)
+-   Search:
+    -   GraphQL API for text search, in particular `search()`, `matchCount`, `stats.languages`
+    -   Query syntax: Code insights "construct" search queries programmatically
+    -   Exhaustive search (with `count:all/count:999999` operator)
+    -   Historical search (= unindexed search, currently)
+    -   Commit search to find historical commits to search over
+-   Repository Syncing: The code insights backend has a direct dependency on `gitserver`
+-   Permission syncing: The code insights backend depends on synced repository permissions for access control
+-   Settings cascade:
+    -   Insights and dashboard configuration are stored in user, organization, and global settings. This will change in the future and is planned to be moved to the database
+    -   Insights contributed by extensions are configured through settings (this will stay the same)
 
 ## Code Monitoring
 
@@ -110,11 +119,13 @@ The **trigger** watches for new data; if there is new data, we call this an even
 
 The actions are run in response to a trigger event. For now, the only supported action is an email notification to the primary email address of the code monitor's owner. To work, `email.address` and `email.smtp` must be configured in the site configuration. Code monitoring actions will be extended in the future to support webhooks.
 
-<Callout type="note">Learn more in the [Code Monitoring docs](/code_monitoring)</Callout>
+<Callout type="note">
+	Learn more in the [Code Monitoring docs](/code_monitoring)
+</Callout>
 
 ### Dependencies
 
-- Search: Diff and commit search triggers
+-   Search: Diff and commit search triggers
 
 ## Browser extensions
 
@@ -130,13 +141,15 @@ Native integrations bring Sourcegraph features directly into the UI of code host
 
 Instead of requiring a browser extension, native integrations inject a script by extending the code host directly (for example, using the code host's plugin architecture). The advantage is that Sourcegraph can be enabled for all users of a code host instance without any action required from each user.
 
-<Callout type="note">Learn more in the [Code host integrations docs](/admin/code_hosts)</Callout>
+<Callout type="note">
+	Learn more in the [Code host integrations docs](/admin/code_hosts)
+</Callout>
 
 #### Dependencies
 
-- Repository Syncing: Uses the GraphQL API to resolve repositories and revisions on code hosts
-- Search: Query transformer API hooks into search in the web app
-- Settings cascade: Which extensions are enabled, and which configurations for extensions are stored in the settings. Extensions may also change settings
+-   Repository Syncing: Uses the GraphQL API to resolve repositories and revisions on code hosts
+-   Search: Query transformer API hooks into search in the web app
+-   Settings cascade: Which extensions are enabled, and which configurations for extensions are stored in the settings. Extensions may also change settings
 
 ## src-cli
 
@@ -144,15 +157,21 @@ Instead of requiring a browser extension, native integrations inject a script by
 
 `src-cli` is written in Go and distributed as a standalone binary for Windows, macOS, and Linux. Its features include running searches, managing Sourcegraph, and executing batch changes. `src-cli` is integral to the batch changes product.
 
-<Callout type="note">`src-cli` is a standalone client, maintained and released separately from Sourcegraph</Callout>
+<Callout type="note">
+	`src-cli` is a standalone client, maintained and released separately from
+	Sourcegraph
+</Callout>
 
-<Callout type="note">Learn more in the [src-cli docs](/admin/code_hosts) and [GitHub repo](https://github.com/sourcegraph/src-cli)</Callout>
+<Callout type="note">
+	Learn more in the [src-cli docs](/admin/code_hosts) and [GitHub
+	repo](https://github.com/sourcegraph/src-cli)
+</Callout>
 
 ### Dependencies
 
-- Search: GraphQL API
-- Batch Changes: GraphQL API
-- Code Intelligence: GraphQL API
+-   Search: GraphQL API
+-   Batch Changes: GraphQL API
+-   Code Intelligence: GraphQL API
 
 ## Deployment
 
@@ -166,7 +185,9 @@ Sourcegraph's recommended deployment methods are:
 
 The [resource estimator](/admin/deploy/resource_estimator#sourcegraph-resource-estimator) can guide you on the requirements for each deployment type.
 
-<Callout type="note">Learn more in the [deployment docs](/admin/deploy)</Callout>
+<Callout type="note">
+	Learn more in the [deployment docs](/admin/deploy)
+</Callout>
 
 ## Observability
 
@@ -174,17 +195,19 @@ Observability encapsulates the monitoring and debugging of Sourcegraph deploymen
 
 Monitoring includes [metrics and dashboards](/admin/observability/metrics), [alerting](/admin/observability/alerting), and [health checking](/admin/observability/health_checks) capabilities.
 
-- `grafana` is the frontend for service metrics and ships with customized dashboards for Sourcegraph services
-- prometheus handles the scraping of service metrics and ships with recording rules, alert rules, and alerting capabilities
-- `cadvisor` provides per-container performance metrics (scraped by Prometheus) in most Sourcegraph environments
-- Each Sourcegraph service provides health checks
+-   `grafana` is the frontend for service metrics and ships with customized dashboards for Sourcegraph services
+-   prometheus handles the scraping of service metrics and ships with recording rules, alert rules, and alerting capabilities
+-   `cadvisor` provides per-container performance metrics (scraped by Prometheus) in most Sourcegraph environments
+-   Each Sourcegraph service provides health checks
 
 Debugging includes [tracing](/admin/observability/tracing) and [logging](/admin/observability/logs).
 
-- jaeger is the distributed tracing service used by Sourcegraph
-- Each Sourcegraph service provides logs
+-   jaeger is the distributed tracing service used by Sourcegraph
+-   Each Sourcegraph service provides logs
 
-<Callout type="note">Learn more in the [Observability docs](/admin/observability).</Callout>
+<Callout type="note">
+	Learn more in the [Observability docs](/admin/observability).
+</Callout>
 
 ## Cody
 

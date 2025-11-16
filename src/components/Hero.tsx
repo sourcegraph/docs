@@ -1,7 +1,7 @@
-import { Button } from '@/components/Button';
+import {Button} from '@/components/Button';
 import clsx from 'clsx';
-import { HeroBackground } from './HeroBackground';
-import { HeroGradient } from './HeroGradient';
+import {HeroBackground} from './HeroBackground';
+import {HeroGradient} from './HeroGradient';
 
 function TrafficLightsIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -22,7 +22,7 @@ export function Hero() {
 						<div className="relative">
 							<h1
 								className={clsx(
-									'inline dark:text-white bg-clip-text font-display text-4xl tracking-tight text-black dark:text-transparent sm:text-5xl'
+									'inline bg-clip-text font-display text-4xl tracking-tight text-black sm:text-5xl dark:text-transparent dark:text-white'
 								)}
 							>
 								Documentation
@@ -30,12 +30,14 @@ export function Hero() {
 
 							<p
 								className={clsx(
-									'mt-3 text-xl tracking-tight text-slate-700 dark:text-[#A9A9A9] sm:text-2xl'
+									'mt-3 text-xl tracking-tight text-slate-700 sm:text-2xl dark:text-[#A9A9A9]'
 								)}
 							>
-								Sourcegraph allows developers to rapidly search, write, and understand code by bringing insights from their entire codebase right into the editor.
+								Sourcegraph allows developers to rapidly search,
+								write, and understand code by bringing insights
+								from their entire codebase right into the
+								editor.
 							</p>
-
 						</div>
 					</div>
 					<div className="relative -mb-32 -mt-16 hidden items-center justify-center sm:flex lg:static xl:pl-10">

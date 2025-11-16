@@ -7,7 +7,7 @@
 
 <Callout type="note">
 	`modelConfiguration` is the recommended way to configure chat and
-	autocomplete models in Sourcegraph `v5.6.0` and later.
+	autocomplete models.
 </Callout>
 
 The `modelConfiguration` field in the **Site config** section allows you to configure Cody to use different LLM models for chat and autocomplete, enabling greater flexibility in selecting the best model for your needs.
@@ -42,7 +42,15 @@ For most administrators, relying on these models alone ensures access to high-qu
 
 The use of these models is controlled through the `"modelConfiguration.sourcegraph"` field in the site config.
 
-<Callout type="note">Sourcegraph-provided models through Cody Gateway have context window limitations. To access models with extended context windows (such as Claude Sonnet 4's [1M token context](https://www.anthropic.com/news/1m-context)), configure BYOK (Bring Your Own Key) models using `providerOverrides` and suitable `contextWindow` configuration. See the [examples page](/cody/enterprise/model-config-examples) for BYOK configuration details.</Callout>
+<Callout type="note">
+	Sourcegraph-provided models through Cody Gateway have context window
+	limitations. To access models with extended context windows (such as Claude
+	Sonnet 4's [1M token context](https://www.anthropic.com/news/1m-context)),
+	configure BYOK (Bring Your Own Key) models using `providerOverrides` and
+	suitable `contextWindow` configuration. See the [examples
+	page](/cody/enterprise/model-config-examples) for BYOK configuration
+	details.
+</Callout>
 
 ### Configure Sourcegraph-provided models
 
@@ -188,17 +196,17 @@ The most important part of a provider's configuration is the `"serverSideConfig"
 
 Sourcegraph natively supports several types of LLM API providers. The current set of supported providers includes:
 
-| **Provider type**    | **Description**                                                                                            |
-| -------------------- | ---------------------------------------------------------------------------------------------------------- |
+| **Provider type**    | **Description**                                                                                                        |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `"sourcegraph"`      | [Sourcegraph Model Provider (Cody Gateway)](/model-provider), offering access to various models from multiple services |
-| `"openaicompatible"` | Any OpenAI-compatible API implementation                                                                   |
-| `"awsBedrock"`       | [Amazon Bedrock](https://docs.aws.amazon.com/bedrock/)                                                     |
-| `"azureOpenAI"`      | [Microsoft Azure OpenAI](https://azure.microsoft.com/en-us/products/ai-services/openai-service/)           |
-| `"anthropic"`        | [Anthropic](https://www.anthropic.com)                                                                     |
-| `"fireworks"`        | [Fireworks AI](https://fireworks.ai)                                                                       |
-| `"google"`           | [Google Gemini](http://cloud.google.com/gemini) and [Vertex](https://cloud.google.com/vertex-ai/)          |
-| `"openai"`           | [OpenAI](http://platform.openai.com)                                                                       |
-| `"huggingface-tgi"`  | [Hugging Face Text Generation Interface](https://huggingface.co/docs/text-generation-inference/en/index)   |
+| `"openaicompatible"` | Any OpenAI-compatible API implementation                                                                               |
+| `"awsBedrock"`       | [Amazon Bedrock](https://docs.aws.amazon.com/bedrock/)                                                                 |
+| `"azureOpenAI"`      | [Microsoft Azure OpenAI](https://azure.microsoft.com/en-us/products/ai-services/openai-service/)                       |
+| `"anthropic"`        | [Anthropic](https://www.anthropic.com)                                                                                 |
+| `"fireworks"`        | [Fireworks AI](https://fireworks.ai)                                                                                   |
+| `"google"`           | [Google Gemini](http://cloud.google.com/gemini) and [Vertex](https://cloud.google.com/vertex-ai/)                      |
+| `"openai"`           | [OpenAI](http://platform.openai.com)                                                                                   |
+| `"huggingface-tgi"`  | [Hugging Face Text Generation Interface](https://huggingface.co/docs/text-generation-inference/en/index)               |
 
 The configuration for `serverSideConfig` varies by provider type.
 
@@ -228,8 +236,8 @@ This field is an array of items, each with the following fields:
     -   `maxInputTokens`: Specifies the maximum number of tokens for the contextual data in the prompt (e.g., question, relevant snippets)
     -   `maxOutputTokens`: Specifies the maximum number of tokens allowed in the response
 -   `reasoningEffort`: Specifies the effort on reasoning for reasoning models (having `reasoning` capability). Supported values: `high`, `medium`, `low`. How this value is treated depends on the specific provider.
-For example, for Anthropic models supporting thinking, `low` effort means that the minimum [`thinking.budget_tokens`](https://docs.anthropic.com/en/api/messages#body-thinking) value (1024) will be used. For other `reasoningEffort` values, the `contextWindow.maxOutputTokens / 2` value will be used.
-For OpenAI reasoning models, the `reasoningEffort` field value corresponds to the [`reasoning_effort`](https://platform.openai.com/docs/api-reference/chat/create#chat-create-reasoning_effort) request body value.
+    For example, for Anthropic models supporting thinking, `low` effort means that the minimum [`thinking.budget_tokens`](https://docs.anthropic.com/en/api/messages#body-thinking) value (1024) will be used. For other `reasoningEffort` values, the `contextWindow.maxOutputTokens / 2` value will be used.
+    For OpenAI reasoning models, the `reasoningEffort` field value corresponds to the [`reasoning_effort`](https://platform.openai.com/docs/api-reference/chat/create#chat-create-reasoning_effort) request body value.
 -   `serverSideConfig`: Additional configuration for the model. It can be one of the following:
 
     -   `awsBedrockProvisionedThroughput`: Specifies provisioned throughput settings for AWS Bedrock models with the following fields:
@@ -336,11 +344,11 @@ In the example above:
 
 In this modelOverrides config example:
 
-- The model is configured to use Claude 3.7 Sonnet with Cody Gateway
-- The model is configured to use the `"chat"` and `"reasoning"` capabilities
-- The `reasoningEffort` can be set to 3 different options in the Model Config. These options are `high`, `medium` and `low`
-- The default `reasoningEffort` is set to `low`
-- For Anthropic models supporting thinking, when the reasoning effort is `low`, 1024 tokens is used as the thinking budget. With `medium` and `high` the thinking budget is set to half of the maxOutputTokens value
+-   The model is configured to use Claude 3.7 Sonnet with Cody Gateway
+-   The model is configured to use the `"chat"` and `"reasoning"` capabilities
+-   The `reasoningEffort` can be set to 3 different options in the Model Config. These options are `high`, `medium` and `low`
+-   The default `reasoningEffort` is set to `low`
+-   For Anthropic models supporting thinking, when the reasoning effort is `low`, 1024 tokens is used as the thinking budget. With `medium` and `high` the thinking budget is set to half of the maxOutputTokens value
 
 Refer to the [examples page](/cody/enterprise/model-config-examples) for additional examples.
 
@@ -483,7 +491,11 @@ The response includes:
 
 ## Reasoning models
 
-<Callout type="note">Claude 3.7 and 4 support is available with Sourcegraph versions 6.4+ and 6.3.4167 when using Cody Gateway. This section is primarily relevant to Sourcegraph Enterprise customers using AWS Bedrock or Google Vertex.</Callout>
+<Callout type="note">
+	Claude 3.7 and 4 support is available with Sourcegraph versions 6.4+ and
+	6.3.4167 when using Cody Gateway. This section is primarily relevant to
+	Sourcegraph Enterprise customers using AWS Bedrock or Google Vertex.
+</Callout>
 
 Reasoning models can be added via `modelOverrides` in the site configuration by adding the `reasoning` capability to the `capabilities` list, and setting the `reasoningEffort` field on the model. Both must be set for the models' reasoning functionality to be used (otherwise the base model without reasoning / exteded thinking will be used.)
 
@@ -491,21 +503,18 @@ For example, this `modelOverride` would create a `Claude Sonnet 4 with Thinking`
 
 ```json
 {
-    "modelRef": "bedrock::2024-10-22::claude-sonnet-4-thinking-latest",
-    "displayName": "Claude Sonnet 4 with Thinking",
-    "modelName": "claude-sonnet-4-20250514",
-    "contextWindow": {
-      "maxInputTokens": 93000,
-      "maxOutputTokens": 64000,
-      "maxUserInputTokens": 18000
-    },
-    "capabilities": [
-      "chat",
-      "reasoning"
-    ],
-    "reasoningEffort": "low",
-    "category": "accuracy",
-    "status": "stable"
+	"modelRef": "bedrock::2024-10-22::claude-sonnet-4-thinking-latest",
+	"displayName": "Claude Sonnet 4 with Thinking",
+	"modelName": "claude-sonnet-4-20250514",
+	"contextWindow": {
+		"maxInputTokens": 93000,
+		"maxOutputTokens": 64000,
+		"maxUserInputTokens": 18000
+	},
+	"capabilities": ["chat", "reasoning"],
+	"reasoningEffort": "low",
+	"category": "accuracy",
+	"status": "stable"
 }
 ```
 
@@ -513,8 +522,8 @@ For example, this `modelOverride` would create a `Claude Sonnet 4 with Thinking`
 
 The `reasoningEffort` field is only used by reasoning models (those having `reasoning` in their `capabilities` section). Supported values are `high`, `medium`, `low`. How this value is treated depends on the specific provider:
 
-* `anthropic` provider treats e.g. `low` effort to mean that the minimum [`thinking.budget_tokens`](https://docs.anthropic.com/en/api/messages#body-thinking) value (1024) will be used. For other `reasoningEffort` values, the `contextWindow.maxOutputTokens / 2` value will be used.
-* `openai` provider maps the `reasoningEffort` field value to the [OpenAI `reasoning_effort`](https://platform.openai.com/docs/api-reference/chat/create#chat-create-reasoning_effort) request body value.
+-   `anthropic` provider treats e.g. `low` effort to mean that the minimum [`thinking.budget_tokens`](https://docs.anthropic.com/en/api/messages#body-thinking) value (1024) will be used. For other `reasoningEffort` values, the `contextWindow.maxOutputTokens / 2` value will be used.
+-   `openai` provider maps the `reasoningEffort` field value to the [OpenAI `reasoning_effort`](https://platform.openai.com/docs/api-reference/chat/create#chat-create-reasoning_effort) request body value.
 
 </Accordion>
 
@@ -551,13 +560,17 @@ Configure Google Vertex AI authentication using any of the following methods in 
 ]
 ```
 
-<Callout type="note">In Sourcegraph versions prior to 6.7, only `accessToken` authentication was supported.</Callout>
+<Callout type="note">
+	In Sourcegraph versions prior to 6.7, only `accessToken` authentication was
+	supported.
+</Callout>
 
 By default (with no additional configuration), Google [Application Default Credentials (ADC)](https://cloud.google.com/docs/authentication/application-default-credentials) will be used to automatically discover credentials from:
-- `GOOGLE_APPLICATION_CREDENTIALS` environment variable  
-- `~/.config/gcloud/application_default_credentials.json`
-- GCE/GKE metadata service
-- [Workload Identity](https://cloud.google.com/iam/docs/workload-identity-federation) (when running in GKE)
+
+-   `GOOGLE_APPLICATION_CREDENTIALS` environment variable
+-   `~/.config/gcloud/application_default_credentials.json`
+-   GCE/GKE metadata service
+-   [Workload Identity](https://cloud.google.com/iam/docs/workload-identity-federation) (when running in GKE)
 
 If `credentialsFile` is specified, it must specify a filepath which exists in the Sourcegraph frontend container. See [Creating service account keys](https://cloud.google.com/iam/docs/keys-create-delete) for how to generate JSON credentials files.
 

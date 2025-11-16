@@ -20,7 +20,7 @@ By default, users cannot set a search timeout larger than 1 minute. Sourcegraph 
 
 ### Forks and Archives
 
-Sourcegraph search defaults to using `fork:no archived:no` as implied search values, excluding [forked](/code-search/queries/language#fork) and [archived](/code-search/queries/language#archived) repositories from search results. If you wish to include forked or achived repositories in your search results you must include the params `fork:yes` or `archived:yes`, respectively. 
+Sourcegraph search defaults to using `fork:no archived:no` as implied search values, excluding [forked](/code-search/queries/language#fork) and [archived](/code-search/queries/language#archived) repositories from search results. If you wish to include forked or achived repositories in your search results you must include the params `fork:yes` or `archived:yes`, respectively.
 
 ## Exclude files and directories
 
@@ -75,24 +75,30 @@ The resource requirements for indexed search vary considerably based on the text
 
 ### Multi-branch indexing
 
-<Callout type="note">This feature is experimental and might change or be removed in the future.</Callout>
+<Callout type="note">
+	This feature is experimental and might change or be removed in the future.
+</Callout>
 
 Sourcegraph always maintains an index of the source code on your default branch. Some organizations have other branches that are regularly searched. To speed up search for those branches, Sourcegraph can be configured to index up to 64 branches per repository.
 
 You can configure indexed branches in site configuration under the `experimentalFeatures.search.index.branches` setting. For example:
 
- ``` json
- "experimentalFeatures": {
-   "search.index.branches": {
-    "github.com/sourcegraph/sourcegraph": ["3.15", "develop"],
-    "github.com/sourcegraph/src-cli": ["next"]
-   }
- }
- ```
+```json
+"experimentalFeatures": {
+  "search.index.branches": {
+   "github.com/sourcegraph/sourcegraph": ["3.15", "develop"],
+   "github.com/sourcegraph/src-cli": ["next"]
+  }
+}
+```
 
 Indexing multiple branches will add additional resource requirements to Sourcegraph (particularly memory). The indexer will deduplicate documents between branches. So the size of your index will grow in relation to the number of unique documents. Refer to our [resource estimator](/admin/deploy/resource_estimator) to estimate whether additional resources are required.
 
-<Callout type="note"> The default branch (HEAD) and all revisions specified in version contexts are always indexed.</Callout>
+<Callout type="note">
+	{' '}
+	The default branch (HEAD) and all revisions specified in version contexts are
+	always indexed.
+</Callout>
 
 ### Scaling considerations
 
@@ -100,23 +106,23 @@ Zoekt is Sourcegraph's indexing engine. When processing a repository, Zoekt spli
 
 Zoekt uses [memory maps](https://en.wikipedia.org/wiki/Memory-mapped_file) to load all shards into memory to evaluate search queries. In most deployments, the total size of the search index (all the shards on disk) is much larger than the total amount of RAM available to Zoekt. Amongst other benefits, using [memory maps](https://en.wikipedia.org/wiki/Memory-mapped_file) allows Zoekt to:
 
-- Leverage [demand paging](https://en.wikipedia.org/wiki/Demand_paging): only read the shard file from the disk if Zoekt tries to read that portion of the file (and it isn't already in RAM)
-- Leverage the kernel's [page cache](https://en.wikipedia.org/wiki/Page_cache): keep the most frequently accessed pages in RAM and evict them when the system is under memory pressure
+-   Leverage [demand paging](https://en.wikipedia.org/wiki/Demand_paging): only read the shard file from the disk if Zoekt tries to read that portion of the file (and it isn't already in RAM)
+-   Leverage the kernel's [page cache](https://en.wikipedia.org/wiki/Page_cache): keep the most frequently accessed pages in RAM and evict them when the system is under memory pressure
 
 #### Consideration: RAM versus Disk
 
 As stated above, Zoekt uses RAM as a cache for accessing shards while
 evaluating a search query.
 
-- The more RAM you give Zoekt, the more shards it can hold in RAM *before* it has to access the disk.
+-   The more RAM you give Zoekt, the more shards it can hold in RAM _before_ it has to access the disk.
 
-- The less RAM you give Zoekt, the more often it will have to access the disk to read the data it needs from its shards. If Zoekt has to access the disk more often, this negatively impacts search performance, increases disk utilization, etc.
+-   The less RAM you give Zoekt, the more often it will have to access the disk to read the data it needs from its shards. If Zoekt has to access the disk more often, this negatively impacts search performance, increases disk utilization, etc.
 
 Tuning Zoekt's resource requirements is a balance between:
 
-- The amount of RAM you are willing to allocate
-- The amount of disk i/o resources that you have available in your environment
-- The impact on search performance that you find acceptable
+-   The amount of RAM you are willing to allocate
+-   The amount of disk i/o resources that you have available in your environment
+-   The impact on search performance that you find acceptable
 
 #### Consideration: Available memory maps
 
@@ -149,13 +155,13 @@ Shard merging is on by default. It can be disabled by setting the ENV `SRC_DISAB
 
 Shard merging can be fine-tuned by setting ENV variables for Zoekt indexserver:
 
-|     **Env Variable**      |                                          **Description**                                           | **Default**  |
-| ---------------------- | ---------------------------------------------------------------------------------------------- | -------- |
-| SRC_VACUUM_INTERVAL    | Run vacuum this often, specified as a duration                                                 | 24 hours |
-| SRC_MERGE_INTERVAL     | Run merge this often, specified as a duration                                                  | 8 hours  |
-| SRC_MERGE_TARGET_SIZE  | The target size of compound shards in MiB                                                      | 1000     |
-| SRC_MERGE_MIN_SIZE     | The minimum size of a compound shard in MiB                                                    | 800      |
-| SRC_MERGE_MIN_AGE      | The time since the last commit in days. Shards with newer commits are excluded from merging.   | 7        |
+| **Env Variable**      | **Description**                                                                              | **Default** |
+| --------------------- | -------------------------------------------------------------------------------------------- | ----------- |
+| SRC_VACUUM_INTERVAL   | Run vacuum this often, specified as a duration                                               | 24 hours    |
+| SRC_MERGE_INTERVAL    | Run merge this often, specified as a duration                                                | 8 hours     |
+| SRC_MERGE_TARGET_SIZE | The target size of compound shards in MiB                                                    | 1000        |
+| SRC_MERGE_MIN_SIZE    | The minimum size of a compound shard in MiB                                                  | 800         |
+| SRC_MERGE_MIN_AGE     | The time since the last commit in days. Shards with newer commits are excluded from merging. | 7           |
 
 When repostiories receive udpates, Zoekt reindexes them and tombstones their old index data. As a result, compound shards can shrink and be dismantled into individual shards once they reach a critical minimum size. These individual
 shards are then considered for future merge operations. Shard merging can be monitored via the "Compound shards" panel in Zoekt's Grafana dashboard.

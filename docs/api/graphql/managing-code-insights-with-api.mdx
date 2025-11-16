@@ -30,11 +30,11 @@ Important: Specify the list of repositories that the insight should run over in 
 
 ```gql
 mutation CreateLineChartSearchInsight($input: LineChartSearchInsightInput!) {
-  createLineChartSearchInsight(input: $input) {
-    view {
-      id
-    }
-  }
+	createLineChartSearchInsight(input: $input) {
+		view {
+			id
+		}
+	}
 }
 ```
 
@@ -42,43 +42,45 @@ Example variables:
 
 ```json
 {
-  "input": {
-    "options": {
-      "title": "Javascript to Typescript migration"
-    },
-    "dataSeries": [{
-      "query": "lang:javascript",
-      "options": {
-        "label": "javascript",
-        "lineColor": "#6495ED"
-      },
-      "repositoryScope": {
-        "repositories": []
-      },
-      "timeScope": {
-        "stepInterval": {
-          "unit": "MONTH",
-          "value": 1
-        }
-      }
-    },
-    {
-      "query": "lang:typescript",
-      "options": {
-        "label": "typescript",
-        "lineColor": "#DE3163"
-      },
-      "repositoryScope": {
-        "repositories": []
-      },
-      "timeScope": {
-        "stepInterval": {
-          "unit": "MONTH",
-          "value": 1
-        }
-      }
-    }]
-  }
+	"input": {
+		"options": {
+			"title": "Javascript to Typescript migration"
+		},
+		"dataSeries": [
+			{
+				"query": "lang:javascript",
+				"options": {
+					"label": "javascript",
+					"lineColor": "#6495ED"
+				},
+				"repositoryScope": {
+					"repositories": []
+				},
+				"timeScope": {
+					"stepInterval": {
+						"unit": "MONTH",
+						"value": 1
+					}
+				}
+			},
+			{
+				"query": "lang:typescript",
+				"options": {
+					"label": "typescript",
+					"lineColor": "#DE3163"
+				},
+				"repositoryScope": {
+					"repositories": []
+				},
+				"timeScope": {
+					"stepInterval": {
+						"unit": "MONTH",
+						"value": 1
+					}
+				}
+			}
+		]
+	}
 }
 ```
 
@@ -88,11 +90,11 @@ Pie chart insights show language usage across a specified repository. Because th
 
 ```gql
 mutation CreatePieChartSearchInsight($input: PieChartSearchInsightInput!) {
-  createPieChartSearchInsight(input: $input) {
-    view {
-      id
-    }
-  }
+	createPieChartSearchInsight(input: $input) {
+		view {
+			id
+		}
+	}
 }
 ```
 
@@ -100,16 +102,16 @@ Example variables:
 
 ```json
 {
-  "input": {
-    "query": "",
-    "repositoryScope": {
-      "repositories": ["sourcegraph/sourcegraph"]
-    },
-    "presentationOptions": {
-      "title": "Language usage for Sourcegraph",
-      "otherThreshold": 0.3
-    }
-  }
+	"input": {
+		"query": "",
+		"repositoryScope": {
+			"repositories": ["sourcegraph/sourcegraph"]
+		},
+		"presentationOptions": {
+			"title": "Language usage for Sourcegraph",
+			"otherThreshold": 0.3
+		}
+	}
 }
 ```
 
@@ -121,61 +123,61 @@ You can find an insight's `id` if you visit the edit page for the insight. The e
 
 Notes on the return object:
 
-- `dataSeries.status` is useful to guage the progress of the series point generation. More information can be found in the [API Console Documentation](/api/graphql/#api-console)
-- The `dataSeries`, `dataSeriesDefinitions` and `seriesPresentation` arrays each store different information about the same series. The `seriesId` field on each can be used to match them up.
-  - `dataSeries` contains the calculated time series data
-  - `dataSeriesDefinitions` contains the definition for the series, such as the query and time interval
-  - `seriesPresentation` contains presentation options such as the title and line color
+-   `dataSeries.status` is useful to guage the progress of the series point generation. More information can be found in the [API Console Documentation](/api/graphql/#api-console)
+-   The `dataSeries`, `dataSeriesDefinitions` and `seriesPresentation` arrays each store different information about the same series. The `seriesId` field on each can be used to match them up.
+    -   `dataSeries` contains the calculated time series data
+    -   `dataSeriesDefinitions` contains the definition for the series, such as the query and time interval
+    -   `seriesPresentation` contains presentation options such as the title and line color
 
 ```gql
 query InsightViews($id: ID, $filters: InsightViewFiltersInput) {
-  insightViews(id: $id, filters: $filters) {
-    nodes {
-      id,
-      dataSeries {
-        label,
-        points {
-          dateTime,
-          value
-        },
-        status {
-          pendingJobs,
-          completedJobs,
-          failedJobs,
-          backfillQueuedAt
-        }
-      }
-      dataSeriesDefinitions {
-        ... on SearchInsightDataSeriesDefinition {
-          seriesId,
-          query,
-          repositoryScope {
-            repositories
-          }
-          timeScope {
-            ... on InsightIntervalTimeScope {
-              unit,
-              value
-            }
-          }
-        }
-      }
-      presentation {
-        ... on LineChartInsightViewPresentation {
-          title,
-          seriesPresentation {
-            seriesId,
-            label,
-            color
-          }
-        },
-        ... on PieChartInsightViewPresentation {
-          title,
-          otherThreshold
-        }
-      }
-    }
-  }
+	insightViews(id: $id, filters: $filters) {
+		nodes {
+			id
+			dataSeries {
+				label
+				points {
+					dateTime
+					value
+				}
+				status {
+					pendingJobs
+					completedJobs
+					failedJobs
+					backfillQueuedAt
+				}
+			}
+			dataSeriesDefinitions {
+				... on SearchInsightDataSeriesDefinition {
+					seriesId
+					query
+					repositoryScope {
+						repositories
+					}
+					timeScope {
+						... on InsightIntervalTimeScope {
+							unit
+							value
+						}
+					}
+				}
+			}
+			presentation {
+				... on LineChartInsightViewPresentation {
+					title
+					seriesPresentation {
+						seriesId
+						label
+						color
+					}
+				}
+				... on PieChartInsightViewPresentation {
+					title
+					otherThreshold
+				}
+			}
+		}
+	}
 }
 ```
 
@@ -183,11 +185,11 @@ Example variables:
 
 ```json
 {
-  "id": "aW5zaWdodF92aWV3OiIyMkVIR2pXOTFkSzNOanpmM2hyWnU3WDJwMlgi",
-  "filters": {
-    "includeRepoRegex": "sourcegraph/sourcegraph",
-    "excludeRepoRegex": "sourcegraph/handbook"
-  }
+	"id": "aW5zaWdodF92aWV3OiIyMkVIR2pXOTFkSzNOanpmM2hyWnU3WDJwMlgi",
+	"filters": {
+		"includeRepoRegex": "sourcegraph/sourcegraph",
+		"excludeRepoRegex": "sourcegraph/handbook"
+	}
 }
 ```
 
@@ -196,16 +198,20 @@ Example variables:
 The query below will list all of the Code Insights that you can see based on [permissions](#permissions-and-visibility). The query and return object is the same as for reading a single Code Insight. All input parameters are optional, and can be used for cursor-based pagination and repository filtering.
 
 ```gql
-query InsightViews($first: Int, $after: String, $filters: InsightViewFiltersInput) {
-  insightViews(first: $first, after: $after, filters: $filters) {
-    nodes {
-      id
-    },
-    pageInfo {
-      endCursor,
-      hasNextPage
-    }
-  }
+query InsightViews(
+	$first: Int
+	$after: String
+	$filters: InsightViewFiltersInput
+) {
+	insightViews(first: $first, after: $after, filters: $filters) {
+		nodes {
+			id
+		}
+		pageInfo {
+			endCursor
+			hasNextPage
+		}
+	}
 }
 ```
 
@@ -213,8 +219,8 @@ Example variables:
 
 ```json
 {
-  "first": 10,
-  "after": "aW5zaWdodF92aWV3OiIyM1l3WHpmSkVhY2Juc0RvWVE5N0FtRU9Wbkki"
+	"first": 10,
+	"after": "aW5zaWdodF92aWV3OiIyM1l3WHpmSkVhY2Juc0RvWVE5N0FtRU9Wbkki"
 }
 ```
 
@@ -224,17 +230,20 @@ Below is a GraphQL mutation that updates an existing Code Insight. The format is
 
 Important: series are added, updated, and deleted from the insight as follows:
 
-- A `dataSeries` without a `seriesId` or with an unknown `seriesId` will be treated as a new series and be added to the insight.
-- A `dataSeries` with a `seriesId` that already exists for this insight will be updated in place.
-- Any `dataSeries` that previously existed on the insight but are NOT included in the update **will be deleted.**
+-   A `dataSeries` without a `seriesId` or with an unknown `seriesId` will be treated as a new series and be added to the insight.
+-   A `dataSeries` with a `seriesId` that already exists for this insight will be updated in place.
+-   Any `dataSeries` that previously existed on the insight but are NOT included in the update **will be deleted.**
 
 ```gql
-mutation UpdateLineChartSearchInsight($id: ID!, $input: UpdateLineChartSearchInsightInput!) {
-  updateLineChartSearchInsight(id: $id, input: $input) {
-    view {
-      id
-    }
-  }
+mutation UpdateLineChartSearchInsight(
+	$id: ID!
+	$input: UpdateLineChartSearchInsightInput!
+) {
+	updateLineChartSearchInsight(id: $id, input: $input) {
+		view {
+			id
+		}
+	}
 }
 ```
 
@@ -244,35 +253,35 @@ This is an example of updating the Code Insight from the creation mutation examp
 
 ```json
 {
-  "id": "[INSIGHT_ID]",
-  "input": {
-    "presentationOptions": {
-      "title": "Javascript weekly"
-    },
-    "viewControls": {
-      "seriesDisplayOptions": {},
-      "filters": {}
-    },
-    "dataSeries": [
-      {
-        "seriesId": "[SERIES_ID]",
-        "query": "lang:javascript",
-        "options": {
-          "label": "javascript",
-          "lineColor": "#6495ED"
-        },
-        "repositoryScope": {
-          "repositories": []
-        },
-        "timeScope": {
-          "stepInterval": {
-            "unit": "WEEK",
-            "value": 1
-          }
-        }
-      }
-    ]
-  }
+	"id": "[INSIGHT_ID]",
+	"input": {
+		"presentationOptions": {
+			"title": "Javascript weekly"
+		},
+		"viewControls": {
+			"seriesDisplayOptions": {},
+			"filters": {}
+		},
+		"dataSeries": [
+			{
+				"seriesId": "[SERIES_ID]",
+				"query": "lang:javascript",
+				"options": {
+					"label": "javascript",
+					"lineColor": "#6495ED"
+				},
+				"repositoryScope": {
+					"repositories": []
+				},
+				"timeScope": {
+					"stepInterval": {
+						"unit": "WEEK",
+						"value": 1
+					}
+				}
+			}
+		]
+	}
 }
 ```
 
@@ -282,9 +291,9 @@ Below is a GraphQL mutation that deletes a Code Insight by ID.
 
 ```gql
 mutation DeleteInsightView($id: ID!) {
-  deleteInsightView(id: $id) {
-    alwaysNil
-  }
+	deleteInsightView(id: $id) {
+		alwaysNil
+	}
 }
 ```
 
@@ -292,7 +301,7 @@ Example variables:
 
 ```json
 {
-  "id": "aW5zaWdodF92aWV3OiIyMkVIR2pXOTFkSzNOanpmM2hyWnU3WDJwMlgi"
+	"id": "aW5zaWdodF92aWV3OiIyMkVIR2pXOTFkSzNOanpmM2hyWnU3WDJwMlgi"
 }
 ```
 
@@ -304,11 +313,11 @@ Below is a GraphQL mutation that creates a dashboard with global permissions, me
 
 ```gql
 mutation CreateInsightsDashboard($input: CreateInsightsDashboardInput!) {
-  createInsightsDashboard(input: $input) {
-    dashboard {
-      id
-    }
-  }
+	createInsightsDashboard(input: $input) {
+		dashboard {
+			id
+		}
+	}
 }
 ```
 
@@ -316,14 +325,14 @@ Example variables:
 
 ```json
 {
-  "input": {
-    "title": "Global insights dashboard",
-    "grants": {
-      "users": [],
-      "organizations": [],
-      "global": true
-    }
-  }
+	"input": {
+		"title": "Global insights dashboard",
+		"grants": {
+			"users": [],
+			"organizations": [],
+			"global": true
+		}
+	}
 }
 ```
 
@@ -333,21 +342,23 @@ Use the following mutations to add and remove insights from dashboards:
 
 ```gql
 mutation AddInsightViewToDashboard($input: AddInsightViewToDashboardInput!) {
-  addInsightViewToDashboard(input: $input) {
-    dashboard {
-      id
-    }
-  }
+	addInsightViewToDashboard(input: $input) {
+		dashboard {
+			id
+		}
+	}
 }
 ```
 
 ```gql
-mutation RemoveInsightViewFromDashboard($input: RemoveInsightViewFromDashboardInput!) {
-  removeInsightViewFromDashboard(input: $input) {
-    dashboard {
-      id
-    }
-  }
+mutation RemoveInsightViewFromDashboard(
+	$input: RemoveInsightViewFromDashboardInput!
+) {
+	removeInsightViewFromDashboard(input: $input) {
+		dashboard {
+			id
+		}
+	}
 }
 ```
 
@@ -355,9 +366,9 @@ Example variables:
 
 ```json
 {
-  "input": {
-    "insightViewId": "aW5zaWdodF92aWV3OiIyMkVIR2pXOTFkSzNOanpmM2hyWnU3WDJwMlgi",
-    "dashboardId": "ZGFzaGJvYXJkOnsiSWRUeXBlIjoiY3VzdG9tIiwiQXJnIjoxNDV9"
-  }
+	"input": {
+		"insightViewId": "aW5zaWdodF92aWV3OiIyMkVIR2pXOTFkSzNOanpmM2hyWnU3WDJwMlgi",
+		"dashboardId": "ZGFzaGJvYXJkOnsiSWRUeXBlIjoiY3VzdG9tIiwiQXJnIjoxNDV9"
+	}
 }
 ```

@@ -1,16 +1,14 @@
 # Executors
 
 <TierCallout>
-  Supported on [Enterprise](/pricing/enterprise) plans.
-  <user>
-    Available via the Web app.
-  </user>
+	Supported on [Enterprise](/pricing/enterprise) plans.
+	<user>Available via the Web app.</user>
 </TierCallout>
 
 Executors are Sourcegraph's solution for running untrusted code in a secure and controllable way. Executors provide a sandbox that can run resource-intensive or untrusted tasks on behalf of the Sourcegraph instance, such as:
 
-- [Automatically indexing a repository for precise code navigation](/code-search/code-navigation/auto_indexing)
-- [Running batch changes](/batch-changes/server-side)
+-   [Automatically indexing a repository for precise code navigation](/code-search/code-navigation/auto_indexing)
+-   [Running batch changes](/batch-changes/server-side)
 
 ## Installation
 
@@ -35,7 +33,10 @@ Optionally, executors can be run without using KVM-based isolation, which is les
 
 Deciding how to deploy the executor depends on your use case. For users that wish to process their untrusted compute in the most secure manner, we recommend leveraging the [Firecracker](./executors/firecracker) isolation method. For users that have constraints around running nested virtualization, the following flowchart can help you decide which deployment option is best for your environment:
 
-<img src='https://storage.googleapis.com/sourcegraph-assets/executor_deployment_tree.png' alt='Executor Deployment Flowchart' />
+<img
+	src="https://storage.googleapis.com/sourcegraph-assets/executor_deployment_tree.png"
+	alt="Executor Deployment Flowchart"
+/>
 
 ## How it works
 
@@ -43,8 +44,10 @@ Executor instances are capable of being deployed in a variety of ways. Each runt
 
 ### Locally with src-cli
 
-<img src="https://storage.googleapis.com/sourcegraph-assets/executor_src_local_arch.png" alt="Executors architecture - local with src-cli" />
-
+<img
+	src="https://storage.googleapis.com/sourcegraph-assets/executor_src_local_arch.png"
+	alt="Executors architecture - local with src-cli"
+/>
 
 1.  User runs the `src` (e.g. `src batch`) command from the command line.
 2.  `src` calls the Sourcegraph API to clone a repository.
@@ -59,9 +62,10 @@ Executor instances are capable of being deployed in a variety of ways. Each runt
 
 ### Binary
 
-
-<img src="https://storage.googleapis.com/sourcegraph-assets/executor_binary_arch.png" alt="Executors architecture - binary" />
-
+<img
+	src="https://storage.googleapis.com/sourcegraph-assets/executor_binary_arch.png"
+	alt="Executors architecture - binary"
+/>
 
 1.  The executor binary is installed to a machine.
     1.  Additional executables (e.g. Docker, `src`) are installed as well
@@ -78,15 +82,16 @@ Executor instances are capable of being deployed in a variety of ways. Each runt
 7.  The container run a defined command against the repository.
 8.  Logs from the container are sent back to the executor.
 9.  Logs are streamed from the executor to a Sourcegraph API
-10.  The executor calls a Sourcegraph API to that "complete" the Job.
+10. The executor calls a Sourcegraph API to that "complete" the Job.
 
 ### Firecracker
 
 > NOTE: [What the heck is firecracker, anyway](/admin/executors/firecracker)??
 
-
-<img src="https://storage.googleapis.com/sourcegraph-assets/executor_firecracker_arch.png" alt="Executors architecture - firecracker" />
-
+<img
+	src="https://storage.googleapis.com/sourcegraph-assets/executor_firecracker_arch.png"
+	alt="Executors architecture - firecracker"
+/>
 
 1.  The executor binary is installed to a machine.
     1.  Additional executables (e.g. Docker, `src`) are installed as well
@@ -95,23 +100,24 @@ Executor instances are capable of being deployed in a variety of ways. Each runt
 4.  The executor instance "dequeues" a Job.
 5.  Executor calls the Sourcegraph API to clone a repository.
     1.  The repositories are written to a directory.
-6. `ignite` starts up a Docker container that spawns a single Firecracker VM within the Docker container.
+6.  `ignite` starts up a Docker container that spawns a single Firecracker VM within the Docker container.
     1. The directory containing the repository is mounted to the VM.
-7. Docker Container is created in the Firecracker VM for each "step."
+7.  Docker Container is created in the Firecracker VM for each "step."
     1.  If the Job is `batches` (non-native execution), `src` is invoked
     2.  Docker is invoked directly for other Jobs (`codeintel` and native execution `batches`)
     3.  "Steps" are ran in sequential order.
 8.  Within each Firecracker VM a single Docker container is created
 9.  The container run a defined command against the repository.
-10.  Logs from the container are sent back to the executor.
-11.  Logs are streamed from the executor to a Sourcegraph API
-12.  The executor calls a Sourcegraph API to that "complete" the Job.
+10. Logs from the container are sent back to the executor.
+11. Logs are streamed from the executor to a Sourcegraph API
+12. The executor calls a Sourcegraph API to that "complete" the Job.
 
 ### Docker
 
-
-<img src="https://storage.googleapis.com/sourcegraph-assets/executor_docker_arch.png" alt="Executors architecture - docker" />
-
+<img
+	src="https://storage.googleapis.com/sourcegraph-assets/executor_docker_arch.png"
+	alt="Executors architecture - docker"
+/>
 
 1.  The executor image is started as a Docker container on a machine
 2.  The executor pulls for available Jobs from a Sourcegraph API
@@ -127,13 +133,16 @@ Executor instances are capable of being deployed in a variety of ways. Each runt
 7.  The container run a defined command against the repository.
 8.  Logs from the container are sent back to the executor.
 9.  Logs are streamed from the executor to a Sourcegraph API
-10.  The executor calls a Sourcegraph API to that "complete" the Job.
+10. The executor calls a Sourcegraph API to that "complete" the Job.
 
 ### Native Kubernetes
 
 > NOTE: This is an experimental feature.
 
-<img src="https://storage.googleapis.com/sourcegraph-assets/executor_kubernetes_native_arch.png" alt="Executors architecture - native kubernetes" />
+<img
+	src="https://storage.googleapis.com/sourcegraph-assets/executor_kubernetes_native_arch.png"
+	alt="Executors architecture - native kubernetes"
+/>
 
 1.  The executor image is started as a pod in a Kubernetes node
 2.  The executor pulls for available Jobs from a Sourcegraph API
@@ -147,13 +156,16 @@ Executor instances are capable of being deployed in a variety of ways. Each runt
 7.  The container run a defined command against the repository.
 8.  Logs from the container are sent back to the executor.
 9.  Logs are streamed from the executor to a Sourcegraph API
-10.  The executor calls a Sourcegraph API to that "complete" the Job.
+10. The executor calls a Sourcegraph API to that "complete" the Job.
 
 ### Docker-in-Docker Kubernetes
 
 > NOTE: This is an experimental feature.
 
-<img src="https://storage.googleapis.com/sourcegraph-assets/executor_kubernetes_dind_arch.png" alt="Executors architecture - docker in docker kubernetes" />
+<img
+	src="https://storage.googleapis.com/sourcegraph-assets/executor_kubernetes_dind_arch.png"
+	alt="Executors architecture - docker in docker kubernetes"
+/>
 
 1.  The executor image is started as a container in Kubernetes Pod
     1. The dind image is started as a sidecar container in the same Kubernetes Pod
@@ -170,7 +182,7 @@ Executor instances are capable of being deployed in a variety of ways. Each runt
 7.  The container run a defined command against the repository.
 8.  Logs from the container are sent back to the executor.
 9.  Logs are streamed from the executor to a Sourcegraph API
-10.  The executor calls a Sourcegraph API to that "complete" the Job.
+10. The executor calls a Sourcegraph API to that "complete" the Job.
 
 ## Troubleshooting
 

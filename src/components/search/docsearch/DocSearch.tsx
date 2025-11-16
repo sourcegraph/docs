@@ -1,104 +1,105 @@
 import type {
-    AutocompleteOptions,
-    AutocompleteState,
+	AutocompleteOptions,
+	AutocompleteState
 } from '@algolia/autocomplete-core';
-import type { SearchOptions } from '@algolia/client-search';
-import type { SearchClient } from 'algoliasearch/lite';
+import type {SearchOptions} from '@algolia/client-search';
+import type {SearchClient} from 'algoliasearch/lite';
 import React from 'react';
-import { createPortal } from 'react-dom';
+import {createPortal} from 'react-dom';
 
-import { DocSearchButton } from './DocSearchButton';
-import { DocSearchModal } from './DocSearchModal';
+import {DocSearchButton} from './DocSearchButton';
+import {DocSearchModal} from './DocSearchModal';
 import type {
-    DocSearchHit,
-    InternalDocSearchHit,
-    StoredDocSearchHit,
+	DocSearchHit,
+	InternalDocSearchHit,
+	StoredDocSearchHit
 } from './types';
-import { useDocSearchKeyboardEvents } from './useDocSearchKeyboardEvents';
+import {useDocSearchKeyboardEvents} from './useDocSearchKeyboardEvents';
 
-import type { ButtonTranslations } from './DocSearchButton';
-import type { ModalTranslations } from './DocSearchModal';
+import type {ButtonTranslations} from './DocSearchButton';
+import type {ModalTranslations} from './DocSearchModal';
 import Modal from './Modal';
 
 export type DocSearchTranslations = Partial<{
-    button: ButtonTranslations;
-    modal: ModalTranslations;
+	button: ButtonTranslations;
+	modal: ModalTranslations;
 }>;
 
 export interface DocSearchProps {
-    appId: string;
-    apiKey: string;
-    indexName: string;
-    placeholder?: string;
-    searchParameters?: SearchOptions;
-    maxResultsPerGroup?: number;
-    transformItems?: (items: DocSearchHit[]) => DocSearchHit[];
-    hitComponent?: (props: {
-        hit: InternalDocSearchHit | StoredDocSearchHit;
-        children: React.ReactNode;
-    }) => JSX.Element;
-    resultsFooterComponent?: (props: {
-        state: AutocompleteState<InternalDocSearchHit>;
-    }) => JSX.Element | null;
-    transformSearchClient?: (searchClient: SearchClient) => SearchClient;
-    disableUserPersonalization?: boolean;
-    initialQuery?: string;
-    navigator?: AutocompleteOptions<InternalDocSearchHit>['navigator'];
-    translations?: DocSearchTranslations;
-    getMissingResultsUrl?: ({ query }: { query: string }) => string;
-    insights?: AutocompleteOptions<InternalDocSearchHit>['insights'];
+	appId: string;
+	apiKey: string;
+	indexName: string;
+	placeholder?: string;
+	searchParameters?: SearchOptions;
+	maxResultsPerGroup?: number;
+	transformItems?: (items: DocSearchHit[]) => DocSearchHit[];
+	hitComponent?: (props: {
+		hit: InternalDocSearchHit | StoredDocSearchHit;
+		children: React.ReactNode;
+	}) => JSX.Element;
+	resultsFooterComponent?: (props: {
+		state: AutocompleteState<InternalDocSearchHit>;
+	}) => JSX.Element | null;
+	transformSearchClient?: (searchClient: SearchClient) => SearchClient;
+	disableUserPersonalization?: boolean;
+	initialQuery?: string;
+	navigator?: AutocompleteOptions<InternalDocSearchHit>['navigator'];
+	translations?: DocSearchTranslations;
+	getMissingResultsUrl?: ({query}: {query: string}) => string;
+	insights?: AutocompleteOptions<InternalDocSearchHit>['insights'];
 }
 
 export function DocSearch(props: DocSearchProps) {
-    const searchButtonRef = React.useRef<HTMLButtonElement>(null);
-    const [initialQuery, setInitialQuery] = React.useState<string | undefined>(
-        props?.initialQuery || undefined
-    );
-    const [isOpen, setIsOpen] = React.useState(!!initialQuery);
+	const searchButtonRef = React.useRef<HTMLButtonElement>(null);
+	const [initialQuery, setInitialQuery] = React.useState<string | undefined>(
+		props?.initialQuery || undefined
+	);
+	const [isOpen, setIsOpen] = React.useState(!!initialQuery);
 
-    const onOpen = React.useCallback(() => {
-        setIsOpen(true);
-    }, [setIsOpen]);
+	const onOpen = React.useCallback(() => {
+		setIsOpen(true);
+	}, [setIsOpen]);
 
-    const onClose = React.useCallback(() => {
-        setIsOpen(false);
-        setInitialQuery(undefined);
-    }, [setIsOpen]);
+	const onClose = React.useCallback(() => {
+		setIsOpen(false);
+		setInitialQuery(undefined);
+	}, [setIsOpen]);
 
-    const onInput = React.useCallback(
-        (event: KeyboardEvent) => {
-            setIsOpen(true);
-            setInitialQuery(event.key);
-        },
-        [setIsOpen, setInitialQuery]
-    );
+	const onInput = React.useCallback(
+		(event: KeyboardEvent) => {
+			setIsOpen(true);
+			setInitialQuery(event.key);
+		},
+		[setIsOpen, setInitialQuery]
+	);
 
-    useDocSearchKeyboardEvents({
-        isOpen,
-        onOpen,
-        onClose,
-        onInput,
-        searchButtonRef,
-    });
+	useDocSearchKeyboardEvents({
+		isOpen,
+		onOpen,
+		onClose,
+		onInput,
+		searchButtonRef
+	});
 
-    return (
-        <>
-            <DocSearchButton
-                ref={searchButtonRef}
-                translations={props?.translations?.button}
-                onClick={onOpen}
-            />
+	return (
+		<>
+			<DocSearchButton
+				ref={searchButtonRef}
+				translations={props?.translations?.button}
+				onClick={onOpen}
+			/>
 
-
-            {isOpen && <Modal wrapperId='doc-search-modal'>
-                <DocSearchModal
-                    {...props}
-                    initialScrollY={window.scrollY}
-                    initialQuery={initialQuery}
-                    translations={props?.translations?.modal}
-                    onClose={onClose}
-                />
-            </Modal>}
-        </>
-    );
+			{isOpen && (
+				<Modal wrapperId="doc-search-modal">
+					<DocSearchModal
+						{...props}
+						initialScrollY={window.scrollY}
+						initialQuery={initialQuery}
+						translations={props?.translations?.modal}
+						onClose={onClose}
+					/>
+				</Modal>
+			)}
+		</>
+	);
 }

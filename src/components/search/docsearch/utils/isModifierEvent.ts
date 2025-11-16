@@ -3,15 +3,15 @@
  * trigger its default behavior.
  */
 export function isModifierEvent<TEvent extends KeyboardEvent | MouseEvent>(
-  event: TEvent
+	event: TEvent
 ): boolean {
-  const isMiddleClick = (event as MouseEvent).button === 1;
+	const isMiddleClick = (event as MouseEvent).button === 1;
 
-  return (
-    isMiddleClick ||
-    event.altKey ||
-    event.ctrlKey ||
-    event.metaKey ||
-    event.shiftKey
-  );
+	return (
+		isMiddleClick ||
+		event.altKey ||
+		event.ctrlKey ||
+		event.metaKey ||
+		event.shiftKey
+	);
 }

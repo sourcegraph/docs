@@ -1,6 +1,8 @@
 # Auto-indexing configuration reference
 
-<Callout type="note">This feature is in beta for self-hosted customers.</Callout>
+<Callout type="note">
+	This feature is in beta for self-hosted customers.
+</Callout>
 
 This document details the expected contents of [explicit index job configuration](/code-search/code-navigation/auto_indexing#explicit-index-job-configuration) for a particular repository. Depending on how this configuration is supplied, it may be encoded as JSON.
 
@@ -67,37 +69,28 @@ The following example uses the Docker image `sourcegraph/scip-go` pinned at the 
 
 ```json
 {
-  "indexer": "sourcegraph/scip-go:v0.1@sha256::39c1495...55391cc",
-  "indexer_args": [
-    "scip-go",
-    "-q",
-  ],
-  "root": "dev/sg"
+	"indexer": "sourcegraph/scip-go:v0.1@sha256::39c1495...55391cc",
+	"indexer_args": ["scip-go", "-q"],
+	"root": "dev/sg"
 }
 ```
 
 The following example uses the Docker image `sourcegraph/scip-typescript` pinned at the tag `autoindex`. This index configuration will run `npm install` followed by the TypeScript indexer `scip-typescript` in the `editors/code` directory. In this job, both commands run in the same workspace, but are invoked in different Docker containers. Both containers happen to be based on the same image, but that's not necessary.
 
-
 Note: `sourcegraph/scip-typescript` does not define a Docker entrypoint, so we need to indicate which binary to invoke (along with any additional arguments).
 
 ```json
 {
-  "steps": [
-    {
-      "image": "sourcegraph/scip-typescript:autoindex",
-      "commands": [
-        "npm install"
-      ],
-      "root": "editors/code"
-    }
-  ],
-  "indexer": "sourcegraph/scip-typescript:autoiondex",
-  "indexer_args": [
-    "scip-typescript",
-    "index"
-  ],
-  "root": "editors/code"
+	"steps": [
+		{
+			"image": "sourcegraph/scip-typescript:autoindex",
+			"commands": ["npm install"],
+			"root": "editors/code"
+		}
+	],
+	"indexer": "sourcegraph/scip-typescript:autoiondex",
+	"indexer_args": ["scip-typescript", "index"],
+	"root": "editors/code"
 }
 ```
 
@@ -127,10 +120,8 @@ The following example runs `go generate` over all packages in the root of the re
 
 ```json
 {
-  "indexer": "golang:1.17.3-buster@sha256:c1bae5f...3e4f07b",
-  "commands": [
-    "go generate ./..."
-  ]
+	"indexer": "golang:1.17.3-buster@sha256:c1bae5f...3e4f07b",
+	"commands": ["go generate ./..."]
 }
 ```
 
@@ -138,11 +129,8 @@ The following example runs a series of commands to install dependencies in the `
 
 ```json
 {
-  "indexer": "node:alpine3.12@sha256:4435145...fd06fd3",
-  "commands": [
-    "yarn config set ignore-engines true",
-    "yarn install"
-  ],
-  "root": "lib/proj"
+	"indexer": "node:alpine3.12@sha256:4435145...fd06fd3",
+	"commands": ["yarn config set ignore-engines true", "yarn install"],
+	"root": "lib/proj"
 }
 ```

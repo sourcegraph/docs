@@ -30,7 +30,7 @@ In a complex authentication set up, there is a chain of authentication. For exam
 
 In such a setup, the Sourcegraph instance only talks to the GitHub instance, and is not aware of the existence of the central SSO. The central SSO, in turn, does not know that the Sourcegraph is syncing users from the central SSO (through GitHub).
 
-Therefore, it makes no sense to have the central SSO redirect users directly back to Sourcegraph, which effectively bypasses the GitHub instance. The authentication provider should always redirect the user to its direct consumer. Thus, *the central SSO should only redirect users back to the GitHub instance, and the GitHub instance should redirect the user back to Sourcegraph with any information needed for the consumer.*
+Therefore, it makes no sense to have the central SSO redirect users directly back to Sourcegraph, which effectively bypasses the GitHub instance. The authentication provider should always redirect the user to its direct consumer. Thus, _the central SSO should only redirect users back to the GitHub instance, and the GitHub instance should redirect the user back to Sourcegraph with any information needed for the consumer._
 
 ## Debugging playbook
 
@@ -38,8 +38,8 @@ Therefore, it makes no sense to have the central SSO redirect users directly bac
 
 Set the env var `INSECURE_OAUTH2_LOG_TRACES=1` to log all OAuth2 requests and responses on:
 
-* [Docker Compose](/admin/deploy/docker-compose/) and [Kubernetes](/admin/deploy/kubernetes/): the `sourcegraph-frontend` deployment
-* [Single-container](/admin/deploy/docker-single-container/): the `sourcegraph/server` container
+-   [Docker Compose](/admin/deploy/docker-compose/) and [Kubernetes](/admin/deploy/kubernetes/): the `sourcegraph-frontend` deployment
+-   [Single-container](/admin/deploy/docker-single-container/): the `sourcegraph/server` container
 
 ### Make sure the client ID and client secret are actually correct
 
@@ -58,9 +58,9 @@ This could be related to the scopes granted on your `clientID` and `clientSecret
 
 For example, for the GitLab oAuth integratio, check the [GitLab scopes](https://gitlab.com/-/profile/applications) granted to ensure that you have the following configured:
 
-* `api`
-* `read_user`
-* `read_api`
+-   `api`
+-   `read_user`
+-   `read_api`
 
 ### Test in incognito mode
 
@@ -103,22 +103,23 @@ If the cookie is not found in the **Request Headers**, then there is a problem. 
 
 ### Things to collect for async analysis
 
-- `"auth.providers"` portion of the Sourcegraph site configuration. Example:
+-   `"auth.providers"` portion of the Sourcegraph site configuration. Example:
 
     !["auth.providers" site config](https://storage.googleapis.com/sourcegraph-assets/docs/images/auth/troubleshooting_sourcegraph_auth_providers.png)
 
-- A screenshot of the Sourcegraph OAuth application on the GitHub instance. Example:
+-   A screenshot of the Sourcegraph OAuth application on the GitHub instance. Example:
 
     ![OAuth application settings](https://storage.googleapis.com/sourcegraph-assets/docs/images/auth/troubleshooting_oauth_application_settings.png)
 
-- A screenshot of the GitHub authentication settings.
-  - For GitHub Enterprise Server, it is in the management console's **Settings > Authentication**. Example:
+-   A screenshot of the GitHub authentication settings.
 
-        ![GitHub Enterprise Server SAML settings](https://storage.googleapis.com/sourcegraph-assets/docs/images/auth/troubleshooting_ghe_saml_settings.png)
+    -   For GitHub Enterprise Server, it is in the management console's **Settings > Authentication**. Example:
 
-  - For GitHub Enterprise Cloud, it is in the organization's **Settings > Organization security > SAML single sign-on**. Example:
+            ![GitHub Enterprise Server SAML settings](https://storage.googleapis.com/sourcegraph-assets/docs/images/auth/troubleshooting_ghe_saml_settings.png)
 
-        ![GitHub Enterprise Cloud SAML settings](https://storage.googleapis.com/sourcegraph-assets/docs/images/auth/troubleshooting_github_enterprise_cloud_saml_settings.png)
+    -   For GitHub Enterprise Cloud, it is in the organization's **Settings > Organization security > SAML single sign-on**. Example:
 
-- Screenshots of the Okta application settings on both General and Sign On tabs, with all options from top to bottom.
-- Full browser logs (https://toolbox.googleapps.com/apps/har_analyzer/)
+            ![GitHub Enterprise Cloud SAML settings](https://storage.googleapis.com/sourcegraph-assets/docs/images/auth/troubleshooting_github_enterprise_cloud_saml_settings.png)
+
+-   Screenshots of the Okta application settings on both General and Sign On tabs, with all options from top to bottom.
+-   Full browser logs (https://toolbox.googleapps.com/apps/har_analyzer/)

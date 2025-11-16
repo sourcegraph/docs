@@ -4,10 +4,10 @@ OAuth Apps let you build rich third-party experiences that interact with Sourceg
 
 This makes OAuth the preferred choice for any multi-user integration like browser extensions, IDE plugins, chatbots, internal tools, or SaaS platforms where you need to:
 
-- Authenticate users with familiar Sourcegraph credentials
-- Operate without ever handling or storing users' passwords
-- Rely on short-lived, scoped tokens that can be revoked at any time
-- Guarantee that repository visibility and other access controls are enforced automatically
+-   Authenticate users with familiar Sourcegraph credentials
+-   Operate without ever handling or storing users' passwords
+-   Rely on short-lived, scoped tokens that can be revoked at any time
+-   Guarantee that repository visibility and other access controls are enforced automatically
 
 OAuth Apps are in compliance with standards including [RFC 6749](https://tools.ietf.org/html/rfc6749), [RFC 7636 (PKCE)](https://tools.ietf.org/html/rfc7636), and [RFC 8628 (Device Authorization Grant)](https://tools.ietf.org/html/rfc8628).
 
@@ -20,20 +20,24 @@ Site admins can create OAuth Apps in the site admin area:
 1. Navigate to **Site admin > OAuth clients**
 2. Click **Create OAuth client**
 3. Provide the following information:
-   - **Name**: A descriptive name for your application
-   - **Description**: (Optional) Additional details about the app's purpose
-   - **Redirect URI**: The URL where users will be redirected after authorization
-   - **Client type**: Choose between **Public** or **Private**
-   - **Scopes**: Select the permissions your app needs
+
+    - **Name**: A descriptive name for your application
+    - **Description**: (Optional) Additional details about the app's purpose
+    - **Redirect URI**: The URL where users will be redirected after authorization
+    - **Client type**: Choose between **Public** or **Private**
+    - **Scopes**: Select the permissions your app needs
 
 4. Click **Create** to generate the OAuth client
 
 After creation, you'll receive:
 
-- **Client ID**: Public identifier for your application
-- **Client Secret**: (Private clients only) Secret key for authentication
+-   **Client ID**: Public identifier for your application
+-   **Client Secret**: (Private clients only) Secret key for authentication
 
-<Callout type="warning">Store the client secret securely. It won't be displayed again after initial creation.</Callout>
+<Callout type="warning">
+	Store the client secret securely. It won't be displayed again after initial
+	creation.
+</Callout>
 
 ## Client Types
 
@@ -41,55 +45,57 @@ After creation, you'll receive:
 
 Public clients are designed for applications that cannot securely store client secrets:
 
-- **Browser-based applications** (SPAs)
-- **Mobile applications**
-- **Desktop applications**
+-   **Browser-based applications** (SPAs)
+-   **Mobile applications**
+-   **Desktop applications**
 
 Public clients:
 
-- Do not receive a client secret
-- Must use PKCE (Proof Key for Code Exchange) for security
-- Support RFC 8628 Device Authorization Grant flow
-- Are suitable for environments where the client code is publicly accessible
+-   Do not receive a client secret
+-   Must use PKCE (Proof Key for Code Exchange) for security
+-   Support RFC 8628 Device Authorization Grant flow
+-   Are suitable for environments where the client code is publicly accessible
 
 ### Private Clients
 
 Private clients can securely store client secrets:
 
-- **Server-side web applications**
-- **Backend services**
-- **Secure server environments**
+-   **Server-side web applications**
+-   **Backend services**
+-   **Secure server environments**
 
 Private clients:
 
-- Receive both client ID and client secret
-- Can use the standard authorization code flow (PKCE strongly recommended)
-- Allow client authentication with a secret and server-side code exchange
+-   Receive both client ID and client secret
+-   Can use the standard authorization code flow (PKCE strongly recommended)
+-   Allow client authentication with a secret and server-side code exchange
 
 ## Available Scopes
 
 When creating an OAuth app, select the minimum scopes necessary for your application:
 
-| Scope | Description |
-|-------|-------------|
-| `openid` | Required for OpenID Connect authentication |
-| `profile` | Access to user profile information (name, picture, etc.) |
-| `email` | Access to user's email address |
-| `offline_access` | Request refresh tokens for offline access |
-| `user:all` | Full access to Sourcegraph API on behalf of the user |
+| Scope            | Description                                              |
+| ---------------- | -------------------------------------------------------- |
+| `openid`         | Required for OpenID Connect authentication               |
+| `profile`        | Access to user profile information (name, picture, etc.) |
+| `email`          | Access to user's email address                           |
+| `offline_access` | Request refresh tokens for offline access                |
+| `user:all`       | Full access to Sourcegraph API on behalf of the user     |
 
-<Callout type="note">The `user:all` scope is required for GraphQL API access with OAuth tokens.</Callout>
+<Callout type="note">
+	The `user:all` scope is required for GraphQL API access with OAuth tokens.
+</Callout>
 
 ## OAuth endpoints reference
 
-| Endpoint | URL |
-|----------|-----|
-| Authorization | `https://sourcegraph.example.com/.auth/idp/oauth/authorize` |
-| Token | `https://sourcegraph.example.com/.auth/idp/oauth/token` |
+| Endpoint             | URL                                                           |
+| -------------------- | ------------------------------------------------------------- |
+| Authorization        | `https://sourcegraph.example.com/.auth/idp/oauth/authorize`   |
+| Token                | `https://sourcegraph.example.com/.auth/idp/oauth/token`       |
 | Device Authorization | `https://sourcegraph.example.com/.auth/idp/oauth/device/code` |
-| Token Revocation | `https://sourcegraph.example.com/.auth/idp/oauth/revoke` |
-| Token Introspection | `https://sourcegraph.example.com/.auth/idp/oauth/introspect` |
-| User Info | `https://sourcegraph.example.com/.auth/idp/oauth/userinfo` |
+| Token Revocation     | `https://sourcegraph.example.com/.auth/idp/oauth/revoke`      |
+| Token Introspection  | `https://sourcegraph.example.com/.auth/idp/oauth/introspect`  |
+| User Info            | `https://sourcegraph.example.com/.auth/idp/oauth/userinfo`    |
 
 ## OAuth Flow Examples
 
@@ -131,11 +137,11 @@ curl -X POST https://sourcegraph.example.com/.auth/idp/oauth/token \
 
 ```json
 {
-  "access_token": "ACCESS_TOKEN",
-  "token_type": "Bearer",
-  "expires_in": 3600,
-  "refresh_token": "REFRESH_TOKEN",
-  "scope": "user:all"
+	"access_token": "ACCESS_TOKEN",
+	"token_type": "Bearer",
+	"expires_in": 3600,
+	"refresh_token": "REFRESH_TOKEN",
+	"scope": "user:all"
 }
 ```
 
@@ -182,10 +188,10 @@ curl -X POST https://sourcegraph.example.com/.auth/idp/oauth/token \
 
 ```json
 {
-  "access_token": "ACCESS_TOKEN",
-  "token_type": "Bearer",
-  "expires_in": 3600,
-  "scope": "user:all"
+	"access_token": "ACCESS_TOKEN",
+	"token_type": "Bearer",
+	"expires_in": 3600,
+	"scope": "user:all"
 }
 ```
 
@@ -208,12 +214,12 @@ curl -X POST https://sourcegraph.example.com/.auth/idp/oauth/device/code \
 
 ```json
 {
-  "device_code": "DEVICE_CODE",
-  "user_code": "USER-CODE",
-  "verification_uri": "https://sourcegraph.example.com/device",
-  "verification_uri_complete": "https://sourcegraph.example.com/device?user_code=USER-CODE",
-  "expires_in": 1800,
-  "interval": 5
+	"device_code": "DEVICE_CODE",
+	"user_code": "USER-CODE",
+	"verification_uri": "https://sourcegraph.example.com/device",
+	"verification_uri_complete": "https://sourcegraph.example.com/device?user_code=USER-CODE",
+	"expires_in": 1800,
+	"interval": 5
 }
 ```
 
@@ -231,10 +237,10 @@ curl -X POST https://sourcegraph.example.com/.auth/idp/oauth/token \
 
 ```json
 {
-  "access_token": "ACCESS_TOKEN",
-  "token_type": "Bearer",
-  "expires_in": 3600,
-  "scope": "user:all"
+	"access_token": "ACCESS_TOKEN",
+	"token_type": "Bearer",
+	"expires_in": 3600,
+	"scope": "user:all"
 }
 ```
 
@@ -242,7 +248,7 @@ curl -X POST https://sourcegraph.example.com/.auth/idp/oauth/token \
 
 ```json
 {
-  "error": "authorization_pending"
+	"error": "authorization_pending"
 }
 ```
 
@@ -267,10 +273,10 @@ curl -X POST https://sourcegraph.example.com/.auth/idp/oauth/token \
 
 ```json
 {
-  "access_token": "ACCESS_TOKEN",
-  "token_type": "Bearer",
-  "expires_in": 3600,
-  "scope": "user:all"
+	"access_token": "ACCESS_TOKEN",
+	"token_type": "Bearer",
+	"expires_in": 3600,
+	"scope": "user:all"
 }
 ```
 

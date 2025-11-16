@@ -1,16 +1,39 @@
 # SCIM
 
-<Callout type="info">This feature is in beta while we're testing it with more IdPs. Our implementation complies with the SCIM 2.0 specification, and passes the validator for Okta and Microsoft Entra ID. But implementations might differ on the side of IdPs and validators don't give a 100% coverage, so we can't guarantee that our solution works with all IdPs in every case.</Callout>
+<Callout type="info">
+	This feature is in beta while we're testing it with more IdPs. Our
+	implementation complies with the SCIM 2.0 specification, and passes the
+	validator for Okta and Microsoft Entra ID. But implementations might differ
+	on the side of IdPs and validators don't give a 100% coverage, so we can't
+	guarantee that our solution works with all IdPs in every case.
+</Callout>
 
 SCIM (System for Cross-domain Identity Management) is a standard for provisioning and deprovisioning users and groups in an organization. IdPs (identity providers) like Okta, OneLogin, and Microsoft Entra ID support provisioning users through SCIM.
 
 Sourcegraph supports SCIM 2.0 for provisioning and de-provisioning _users_.
 
-> <Callout type="note">SCIM integration requires your SCIM provider to have network connectivity to your Sourcegraph instance. For example, using Okta's SCIM service with a private Sourcegraph instance, you will need to implement an [Okta privisioning agent](https://help.okta.com/en-us/content/topics/provisioning/opp/opp-main.htm) within a network that can connect to both your Sourcegraph instance and Okta's cloud services before continuing this setup.</Callout>
+<Callout type="note">
+	SCIM integration requires your SCIM provider to have network connectivity to
+	your Sourcegraph instance. For example, using Okta's SCIM service with a
+	private Sourcegraph instance, you will need to implement an [Okta
+	privisioning
+	agent](https://help.okta.com/en-us/content/topics/provisioning/opp/opp-main.htm)
+	within a network that can connect to both your Sourcegraph instance and
+	Okta's cloud services before continuing this setup.
+</Callout>
 
-> <Callout type="note">While our implementation of SCIM 2.0 is compliant with the specification, we’ve only tested it against two IdPs: Okta and Microsoft Entra ID. We can't guarantee it works with every IdP if the provider doesn't fully comply with the specification.</Callout> 
+<Callout type="note">
+	While our implementation of SCIM 2.0 is compliant with the specification,
+	we’ve only tested it against two IdPs: Okta and Microsoft Entra ID. We can't
+	guarantee it works with every IdP if the provider doesn't fully comply with
+	the specification.
+</Callout>
 
-> <Callout type="note">Currently, there is a known issue where Microsoft Entra ID [validator](https://scimvalidator.microsoft.com/) will fail; however, this does not impact the ability to provision users.</Callout>
+<Callout type="note">
+	Currently, there is a known issue where Microsoft Entra ID
+	[validator](https://scimvalidator.microsoft.com/) will fail; however, this
+	does not impact the ability to provision users.
+</Callout>
 
 ## How to use
 
@@ -21,27 +44,29 @@ To configure:
 1. Generate a random alphanumeric bearer token of maximum 255 characters.
    To do this in a terminal, run:
 
-   ```
-   openssl rand -base64 342 | tr -dc 'a-zA-Z0-9' | cut -c -255
-   ```
+    ```
+    openssl rand -base64 342 | tr -dc 'a-zA-Z0-9' | cut -c -255
+    ```
 
-   (This command generates a random base64 string with more characters than required (342 characters) and then filters out non-alphanumeric characters. Finally, it trims the output to 255 characters. The reason we generate a longer string is to account for the fact that the base64 encoding has non-alphanumeric characters, which are removed by the tr command.)
+    (This command generates a random base64 string with more characters than required (342 characters) and then filters out non-alphanumeric characters. Finally, it trims the output to 255 characters. The reason we generate a longer string is to account for the fact that the base64 encoding has non-alphanumeric characters, which are removed by the tr command.)
 
 2. Add the following line to your [site configuration](/admin/config/site_config):
 
-   ```
-   "scim.authToken": "{your token}"
-   ```
+    ```
+    "scim.authToken": "{your token}"
+    ```
+
 3. If you use Microsoft Entra ID, add the following setting to your site config:
 
-   ```
-   "scim.identityProvider": "Azure AD"
-   ```
+    ```
+    "scim.identityProvider": "Azure AD"
+    ```
+
 4. Set up your IdP to use our SCIM API. The API is at
 
-   ```
-   https://sourcegraph.company.com/.api/scim/v2/
-   ```
+    ```
+    https://sourcegraph.company.com/.api/scim/v2/
+    ```
 
 ## Configuring SCIM for Okta
 
@@ -70,33 +95,33 @@ The User endpoint only synchronizes attributes needed to create a Sourcegraph ac
 
 We sync the following attributes:
 
-- preferred username
-- name
-- email addresses
+-   preferred username
+-   name
+-   email addresses
 
 ### REST methods
 
 We support REST API calls for:
 
-- Creating users (POST)
-- Updating users (PATCH)
-- Replacing users (PUT)
-- Deleting users (DELETE)
-- Listing users (GET)
-- Getting users (GET)
+-   Creating users (POST)
+-   Updating users (PATCH)
+-   Replacing users (PUT)
+-   Deleting users (DELETE)
+-   Listing users (GET)
+-   Getting users (GET)
 
 ### Feature support
 
 We support the following SCIM 2.0 features:
 
-- ✅ Updating users (PATCH)
-- ✅ Pagination for listing users
-- ✅ Filtering for listing users
+-   ✅ Updating users (PATCH)
+-   ✅ Pagination for listing users
+-   ✅ Filtering for listing users
 
 ### Limitations
 
-- ❌ Bulk operations – need to add users one by one
-- ❌ Sorting – when listing users
-- ❌ Entity tags (ETags)
-- ❌ Multi-tenancy – you can only have 1 SCIM client configured at a time.
-- ❌ Tests with many IdPs – we’ve only validated the endpoint with Okta and Microsoft Entra ID.
+-   ❌ Bulk operations – need to add users one by one
+-   ❌ Sorting – when listing users
+-   ❌ Entity tags (ETags)
+-   ❌ Multi-tenancy – you can only have 1 SCIM client configured at a time.
+-   ❌ Tests with many IdPs – we’ve only validated the endpoint with Okta and Microsoft Entra ID.

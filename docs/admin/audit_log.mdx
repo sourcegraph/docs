@@ -48,56 +48,60 @@ Here's a sample audit log entry:
 
 Here's a word-by-word breakout to demonstrate how the captured entry aligns with the design mantra:
 
-- **Actor** - `Attributes.audit.actor` field carries essential information about the actor who performed the action.
-- **Action** - `Body` field carries the action description. This action is suffixed with a "sampling immunity token," which carries the unique audit log entry ID. The audit entry ID must be present in the `Body` so that the message is always unique and never gets dropped by the sampling mechanism (hence the sampling immunity token string).
-- **Entity** - `Attributes.audit.entity` describes the audited entity.
-- **Context** - Additional fields within the `audit` object provide context for the action.
+-   **Actor** - `Attributes.audit.actor` field carries essential information about the actor who performed the action.
+-   **Action** - `Body` field carries the action description. This action is suffixed with a "sampling immunity token," which carries the unique audit log entry ID. The audit entry ID must be present in the `Body` so that the message is always unique and never gets dropped by the sampling mechanism (hence the sampling immunity token string).
+-   **Entity** - `Attributes.audit.entity` describes the audited entity.
+-   **Context** - Additional fields within the `audit` object provide context for the action.
 
 ### What is audited?
 
 The audit log captures a wide range of security-relevant events including:
 
-- **Authentication Events** - Login attempts, access token usage, password changes, and sign-out events
-- **Authorization Events** - Permission changes, role modifications, and access control updates  
-- **User Management** - User creation, modification, deletion, and email verification
-- **Configuration Changes** - Site configuration updates, external service modifications
-- **Repository Access** - Repository access events and gitserver requests
-- **API Usage** - GraphQL requests and outbound API calls
-- **Code Host Integration** - External service configuration and webhook events
-- **Tenant Operations** - Multi-tenant workspace management events
+-   **Authentication Events** - Login attempts, access token usage, password changes, and sign-out events
+-   **Authorization Events** - Permission changes, role modifications, and access control updates
+-   **User Management** - User creation, modification, deletion, and email verification
+-   **Configuration Changes** - Site configuration updates, external service modifications
+-   **Repository Access** - Repository access events and gitserver requests
+-   **API Usage** - GraphQL requests and outbound API calls
+-   **Code Host Integration** - External service configuration and webhook events
+-   **Tenant Operations** - Multi-tenant workspace management events
 
 ### Entities and Actions
 
 Below is a comprehensive list of currently audited entities and their associated actions:
 
 #### Authentication
-- **auth.accessToken**: failed, invalid, impersonated
-- **auth.password**: attempted, failed, succeeded  
-- **auth.oauth** (various providers): failed, sign-in
-- **auth.operator**: access
 
-#### User Management  
-- **user**: created, modified, deleted, hardDeleted
-- **user.email**: added, deleted, changed, verified, unverified
-- **user.password**: changed, reset
-- **user.accessToken**: created, deleted, hardDeleted
-- **user.completions.quota**: changed
-- **user.codecompletions.quota**: changed
+-   **auth.accessToken**: failed, invalid, impersonated
+-   **auth.password**: attempted, failed, succeeded
+-   **auth.oauth** (various providers): failed, sign-in
+-   **auth.operator**: access
+
+#### User Management
+
+-   **user**: created, modified, deleted, hardDeleted
+-   **user.email**: added, deleted, changed, verified, unverified
+-   **user.password**: changed, reset
+-   **user.accessToken**: created, deleted, hardDeleted
+-   **user.completions.quota**: changed
+-   **user.codecompletions.quota**: changed
 
 #### Configuration & Infrastructure
-- **site.config**: viewed, changed
-- **site.config.redacted**: viewed
-- **codehosts**: created, changed, deleted
-- **repository**: accessed
-- **gitserver**: access
-- **requests.outbound**: viewed
-- **webhooks.outbound**: created, deleted
+
+-   **site.config**: viewed, changed
+-   **site.config.redacted**: viewed
+-   **codehosts**: created, changed, deleted
+-   **repository**: accessed
+-   **gitserver**: access
+-   **requests.outbound**: viewed
+-   **webhooks.outbound**: created, deleted
 
 #### Organizations & Access Control
-- **organizations**: viewed, created
-- **entitlements**: viewed, created, updated, deleted
-- **rbac.permission**: changed
-- **rbac.role**: created, changed, deleted
+
+-   **organizations**: viewed, created
+-   **entitlements**: viewed, created, updated, deleted
+-   **rbac.permission**: changed
+-   **rbac.role**: created, changed, deleted
 
 ### Target audience
 
@@ -119,10 +123,11 @@ The audit log is currently configured using the site config. Here's the correspo
 ```
 
 Configuration options:
-- `internalTraffic`: When false (default), suppresses audit logs from internal system actors to reduce noise
-- `graphQL`: Controls auditing of GraphQL API requests
-- `gitserverAccess`: Controls auditing of gitserver access events  
-- `severityLevel`: DEPRECATED - audit log level now follows the global `SRC_LOG_LEVEL` environment variable
+
+-   `internalTraffic`: When false (default), suppresses audit logs from internal system actors to reduce noise
+-   `graphQL`: Controls auditing of GraphQL API requests
+-   `gitserverAccess`: Controls auditing of gitserver access events
+-   `severityLevel`: DEPRECATED - audit log level now follows the global `SRC_LOG_LEVEL` environment variable
 
 ## Using
 
@@ -132,39 +137,41 @@ Audit logs are structured logs delivered as JSON to STDERR. As long as one can i
 
 All audit logs are delivered to **STDERR** for each individual [component](./deploy/scale.mdx#core-components).
 
-
 ### Filtering Audit Logs
 
 There are two approaches to filtering the audit logs:
 
-- **JSON-based**: Look for the presence of the `Attributes.audit` node. Do not depend on the log level, as it can change based on `SRC_LOG_LEVEL`.
-- **Message-based**: Filter based on the following string: `auditID` (note: this is the current field name, not `auditId`).
+-   **JSON-based**: Look for the presence of the `Attributes.audit` node. Do not depend on the log level, as it can change based on `SRC_LOG_LEVEL`.
+-   **Message-based**: Filter based on the following string: `auditID` (note: this is the current field name, not `auditId`).
 
 ### Important Fields for Filtering
 
 Customers can filter audit logs using these key fields:
 
 #### Core Audit Fields
-- `Attributes.audit.auditID`: Unique identifier for each audit event
-- `Attributes.audit.entity`: The entity being acted upon (e.g., "user", "site.config")
-- `Attributes.audit.action`: The action performed (e.g., "created", "modified", "deleted")
-- `Attributes.audit.tenant`: Tenant ID for multi-tenant environments
+
+-   `Attributes.audit.auditID`: Unique identifier for each audit event
+-   `Attributes.audit.entity`: The entity being acted upon (e.g., "user", "site.config")
+-   `Attributes.audit.action`: The action performed (e.g., "created", "modified", "deleted")
+-   `Attributes.audit.tenant`: Tenant ID for multi-tenant environments
 
 #### Actor Information
-- `Attributes.audit.actor.actorUID`: User ID of the actor performing the action
-- `Attributes.audit.actor.ip`: IP address of the request
-- `Attributes.audit.actor.fromAccessTokenID`: Access token ID if action performed via API
-- `Attributes.audit.actor.sourcegraphOperator`: Boolean indicating if actor is a Sourcegraph operator
-- `Attributes.audit.actor.userAgent`: User agent string from the request
-- `Attributes.audit.actor.X-Forwarded-For`: Forwarded IP addresses
-- `Attributes.audit.actor.X-Sourcegraph-API-Client-Name`: API client name
-- `Attributes.audit.actor.X-Sourcegraph-API-Client-Version`: API client version
+
+-   `Attributes.audit.actor.actorUID`: User ID of the actor performing the action
+-   `Attributes.audit.actor.ip`: IP address of the request
+-   `Attributes.audit.actor.fromAccessTokenID`: Access token ID if action performed via API
+-   `Attributes.audit.actor.sourcegraphOperator`: Boolean indicating if actor is a Sourcegraph operator
+-   `Attributes.audit.actor.userAgent`: User agent string from the request
+-   `Attributes.audit.actor.X-Forwarded-For`: Forwarded IP addresses
+-   `Attributes.audit.actor.X-Sourcegraph-API-Client-Name`: API client name
+-   `Attributes.audit.actor.X-Sourcegraph-API-Client-Version`: API client version
 
 #### Timestamp and Service Information
-- `Timestamp`: Event timestamp (nanoseconds since Unix epoch)
-- `Resource.service.name`: Service that generated the audit log
-- `Resource.service.version`: Version of the service
-- `Body`: Human-readable action description with sampling immunity token
+
+-   `Timestamp`: Event timestamp (nanoseconds since Unix epoch)
+-   `Resource.service.name`: Service that generated the audit log
+-   `Resource.service.version`: Version of the service
+-   `Body`: Human-readable action description with sampling immunity token
 
 ### Cloud
 
@@ -175,6 +182,7 @@ For Sourcegraph Cloud customers, please refer to Cloud [documentations](/cloud/#
 The single entry point to the audit logging API is made via the `audit.Log` function. This internal function can be used from any place in the app, and nothing else needs to be done for the logged entry to appear in the audit log.
 
 Example call:
+
 ```go
 audit.Log(ctx, logger, audit.Record{
   Entity: "user",
@@ -187,19 +195,21 @@ audit.Log(ctx, logger, audit.Record{
 ```
 
 **Parameters:**
-- `ctx`: Context parameter required for acquiring `actor.Actor` and `requestclient.Client`
-- `logger`: Logger instance used for performing the actual log call
-- `audit.Record`: Structure carrying all the information required for constructing a valid audit log entry
-  - `Entity`: Name of the audited entity
-  - `Action`: Description of the state change
-  - `Fields`: Additional context fields specific to the action
-  - `MustRecord`: Optional flag to bypass internal traffic filtering
+
+-   `ctx`: Context parameter required for acquiring `actor.Actor` and `requestclient.Client`
+-   `logger`: Logger instance used for performing the actual log call
+-   `audit.Record`: Structure carrying all the information required for constructing a valid audit log entry
+    -   `Entity`: Name of the audited entity
+    -   `Action`: Description of the state change
+    -   `Fields`: Additional context fields specific to the action
+    -   `MustRecord`: Optional flag to bypass internal traffic filtering
 
 The audit log system automatically:
-- Checks current settings via cached `schema.SiteConfiguration`
-- Extracts actor information from context
-- Generates unique audit ID with sampling immunity
-- Formats the log entry according to the structured format
+
+-   Checks current settings via cached `schema.SiteConfiguration`
+-   Extracts actor information from context
+-   Generates unique audit ID with sampling immunity
+-   Formats the log entry according to the structured format
 
 ## FAQ
 
@@ -213,20 +223,22 @@ The `audit.actor` node carries ID of the user who performed the action (`actorUI
 1. Find the corresponding user by searching the query results for the encoded ID from above
 
 GraphQL query:
+
 ```graphql
 {
-  users {
-    nodes {
-      id
-      username
-    }
-  }
+	users {
+		nodes {
+			id
+			username
+		}
+	}
 }
 ```
 
 **How do I reduce audit log volume?**
 
 To reduce audit log volume:
+
 1. Set `log.auditLog.internalTraffic` to `false` (default) to suppress logs from internal system actors
 2. Configure specific audit types (`graphQL`, `gitserverAccess`) based on your monitoring needs
 3. Use log filtering at the ingestion level to focus on specific entities or actions

@@ -4,8 +4,7 @@ import Link from 'next/link';
 const variantStyles = {
 	primary:
 		'block min-w-fit transition-colors font-semibold px-4 py-2 rounded-[4px] bg-vermilion-07 text-vermilion-11 shadow-md hover:bg-vermilion-08',
-	ghost: 
-		'min-w-fit block py-2 px-4 text-center text-vermilion-07 hover:text-vermilion-08 transition',
+	ghost: 'min-w-fit block py-2 px-4 text-center text-vermilion-07 hover:text-vermilion-08 transition',
 	secondary:
 		'rounded-full bg-violet-07 py-2 px-4 text-sm font-medium text-violet-11 hover:bg-violet-08 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-11/50 active:text-teal-07'
 };

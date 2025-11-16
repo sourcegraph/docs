@@ -2,7 +2,6 @@
 
 This guide will take you through how to deploy Sourcegraph with [Docker Compose](https://docs.docker.com/compose/) to a single EC2 instance on Amazon Web Services (AWS).
 
-
 ## Configure
 
 Click **Launch Instance** from the [EC2 dashboard](https://console.aws.amazon.com/ec2/v2/home), then fill in the following values for each section:
@@ -13,9 +12,9 @@ Click **Launch Instance** from the [EC2 dashboard](https://console.aws.amazon.co
 
 #### Application and OS Images
 
-1. Select **Amazon Linux** in the *Quick Start* tab
+1. Select **Amazon Linux** in the _Quick Start_ tab
 
-2. Select **Amazon Linux 2 AMI (HVM), SSD Volume Type** under *Amazon Machine Image (AMI)*
+2. Select **Amazon Linux 2 AMI (HVM), SSD Volume Type** under _Amazon Machine Image (AMI)_
 
 #### Instance type
 
@@ -31,28 +30,29 @@ Click **Launch Instance** from the [EC2 dashboard](https://console.aws.amazon.co
 
 2. Under **Firewall (security group)** , create or select existing security group with the following settings:
 
-  * Allow SSH traffic from Anywhere
-  * Allow HTTPs traffic from the internet
-  * Allow HTTP traffic from the internet
+-   Allow SSH traffic from Anywhere
+-   Allow HTTPs traffic from the internet
+-   Allow HTTP traffic from the internet
 
 > NOTE: If possible, replace the IP address ranges specified with the IPs from which you actually want to allow access.
 
 #### Configure storage
 
-1. Click **Add New Volume** to add an *additional* EBS volume for storing data
+1. Click **Add New Volume** to add an _additional_ EBS volume for storing data
 
 2. Click **Advanced** in the header to update the following settings for the new Custom Volume:
-  * `Storage Type`: EBS
-  * `Device name`: `/dev/sdb`
-  * `Volume Type`: `gp3` (General Purpose SSD)
-  * `Size (GiB)`: `250GB minimum`
-      * Sourcegraph needs at least as much space as all your repositories combined take up
-      * Allocating as much disk space as you can upfront minimize the need for [resizing your volume](https://aws.amazon.com/premiumsupport/knowledge-center/expand-root-ebs-linux/) in the future
-  * `Delete on Termination`: `No`
+
+-   `Storage Type`: EBS
+-   `Device name`: `/dev/sdb`
+-   `Volume Type`: `gp3` (General Purpose SSD)
+-   `Size (GiB)`: `250GB minimum`
+    -   Sourcegraph needs at least as much space as all your repositories combined take up
+    -   Allocating as much disk space as you can upfront minimize the need for [resizing your volume](https://aws.amazon.com/premiumsupport/knowledge-center/expand-root-ebs-linux/) in the future
+-   `Delete on Termination`: `No`
 
 #### Advanced details > User Data
 
-Copy and paste the *startup script* below into the **User Data** textbox:
+Copy and paste the _startup script_ below into the **User Data** textbox:
 
 ```bash
 #!/usr/bin/env bash
@@ -121,18 +121,18 @@ cd "${DEPLOY_SOURCEGRAPH_DOCKER_CHECKOUT}"/docker-compose
 docker-compose up -d --remove-orphans
 ```
 
-> NOTE: If you're deploying a production instance, we recommend [forking the deployment configuration repository](/admin/deploy/docker-compose/#step-1-fork-the-deployment-repository) to track any customizations you make to the deployment config. If you do so, you'll want to update the *startup script* you pasted from above to refer to the clone URL and revision of your fork:
+> NOTE: If you're deploying a production instance, we recommend [forking the deployment configuration repository](/admin/deploy/docker-compose/#step-1-fork-the-deployment-repository) to track any customizations you make to the deployment config. If you do so, you'll want to update the _startup script_ you pasted from above to refer to the clone URL and revision of your fork:
 >
-> - `DEPLOY_SOURCEGRAPH_DOCKER_FORK_CLONE_URL`: The Git clone URL of your deployment repository. If it is a private repository, please check with your code host on how to generate a URL for cloning private repository
-> - `DEPLOY_SOURCEGRAPH_DOCKER_FORK_REVISION`: The revision (branch) in your fork containing the customizations, typically "release"
+> -   `DEPLOY_SOURCEGRAPH_DOCKER_FORK_CLONE_URL`: The Git clone URL of your deployment repository. If it is a private repository, please check with your code host on how to generate a URL for cloning private repository
+> -   `DEPLOY_SOURCEGRAPH_DOCKER_FORK_REVISION`: The revision (branch) in your fork containing the customizations, typically "release"
 
 ---
 
 ## Deploy
 
-1. Click **Launch Instance** in the *Summary Section* on the right to launch the EC2 node running Sourcegraph.
+1. Click **Launch Instance** in the _Summary Section_ on the right to launch the EC2 node running Sourcegraph.
 
-2. In your web browser, navigate to the public IP address assigned to the EC2 node. (Look for the **IPv4 Public IP** value in your EC2 instance page under the *Description* panel.) It may take a few minutes for the instance to finish initializing before Sourcegraph becomes accessible.
+2. In your web browser, navigate to the public IP address assigned to the EC2 node. (Look for the **IPv4 Public IP** value in your EC2 instance page under the _Description_ panel.) It may take a few minutes for the instance to finish initializing before Sourcegraph becomes accessible.
 
 You can monitor the setup process by SSHing into the instance to run the following diagnostic commands:
 
@@ -159,7 +159,7 @@ Data is persisted within a [Docker volume](https://docs.docker.com/storage/volum
 
 There are two, non-mutually-exclusive ways to back up data:
 
-* [Snapshot the entire `/mnt/docker-data` EBS volume](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-creating-snapshot.html) on an [automatic, scheduled basis](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/snapshot-lifecycle.html).
+-   [Snapshot the entire `/mnt/docker-data` EBS volume](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-creating-snapshot.html) on an [automatic, scheduled basis](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/snapshot-lifecycle.html).
 
 Use [AWS RDS for PostgreSQL](https://aws.amazon.com/rds/) instead of the Dockerized PostgreSQL instance included by default. All data from Sourcegraph is derivable from the data stored in this database. Note, however, that it may take awhile to reclone repositories and rebuild indices afresh. If you require a faster restoration process, we recommend also snapshotting the EBS volume. (Recommended)
 

@@ -1,13 +1,13 @@
 'use client';
 
 import clsx from 'clsx';
-import { allPosts } from 'contentlayer/generated';
+import {allPosts} from 'contentlayer/generated';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
-import { BugIcon } from './icons/BugIcon';
-import { Globe } from './icons/Globe';
-import { PencilIcon } from './icons/PencilIcon';
+import {useParams} from 'next/navigation';
+import {useCallback, useEffect, useState} from 'react';
+import {BugIcon} from './icons/BugIcon';
+import {Globe} from './icons/Globe';
+import {PencilIcon} from './icons/PencilIcon';
 
 interface Heading {
 	level: number;
@@ -22,12 +22,12 @@ interface Props {
 type ParamsType = {
 	version?: string;
 	slug: string[];
-}
+};
 
-export function TableOfContents({ headings }: Props) {
+export function TableOfContents({headings}: Props) {
 	let [currentSection, setCurrentSection] = useState(headings[0]?.id);
-	const [path, setPath] = useState('')
-	const params: ParamsType = useParams()
+	const [path, setPath] = useState('');
+	const params: ParamsType = useParams();
 
 	let getHeadings = useCallback((headings: Heading[]) => {
 		return headings
@@ -43,24 +43,27 @@ export function TableOfContents({ headings }: Props) {
 						window.scrollY +
 						el.getBoundingClientRect().top -
 						scrollMt;
-					return { id: heading.id, top };
+					return {id: heading.id, top};
 				}
 			})
-			.filter((x): x is { id: string; top: number } => x !== null);
+			.filter((x): x is {id: string; top: number} => x !== null);
 	}, []);
 
 	useEffect(() => {
 		const path = params.slug.join('/');
 
 		if (allPosts) {
-			const post = allPosts.find(post => post._raw.flattenedPath === path);
+			const post = allPosts.find(
+				post => post._raw.flattenedPath === path
+			);
 			if (post) {
 				let currentPath = post._id;
-				if (params?.version) currentPath = `versioned/${params.version}/${currentPath}`;
+				if (params?.version)
+					currentPath = `versioned/${params.version}/${currentPath}`;
 				setPath(currentPath);
 			}
 		}
-	}, [params])
+	}, [params]);
 
 	useEffect(() => {
 		if (headings.length === 0) return;
@@ -82,7 +85,7 @@ export function TableOfContents({ headings }: Props) {
 			setCurrentSection(current);
 		}
 
-		window.addEventListener('scroll', onScroll, { passive: true });
+		window.addEventListener('scroll', onScroll, {passive: true});
 		onScroll();
 
 		return () => {
@@ -145,8 +148,8 @@ export function TableOfContents({ headings }: Props) {
 							))}
 						</ol>
 						{/* Edit doc with GitHub button */}
-						<hr className='mt-4' />
-						<div className="flex items-center mt-4 text-sm">
+						<hr className="mt-4" />
+						<div className="mt-4 flex items-center text-sm">
 							<a
 								href={`https://github.com/sourcegraph/docs/edit/main/docs/${path}`}
 								target="_blank"
@@ -157,7 +160,7 @@ export function TableOfContents({ headings }: Props) {
 								Edit this page on GitHub
 							</a>
 						</div>
-						<div className="flex items-center mt-2 text-sm">
+						<div className="mt-2 flex items-center text-sm">
 							<a
 								href={`https://sourcegraph.com/`}
 								target="_blank"

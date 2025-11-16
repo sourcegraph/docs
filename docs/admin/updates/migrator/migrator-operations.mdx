@@ -10,12 +10,12 @@ This document provides a list of the `migrator` commands available to admins for
 
 To run a `migrator` command, follow the guide for your Sourcegraph distribution type:
 
-- Kubernetes
-  - [Kustomize](#kubernetes-kustomize)
-  - [Helm](#kubernetes-helm)
-- [Docker-compose](#docker-compose)
-- [Docker Single-node](#single-node)
-- [Local development](#local-development)
+-   Kubernetes
+    -   [Kustomize](#kubernetes-kustomize)
+    -   [Helm](#kubernetes-helm)
+-   [Docker-compose](#docker-compose)
+-   [Docker Single-node](#single-node)
+-   [Local development](#local-development)
 
 ## Overview
 
@@ -23,42 +23,45 @@ The `migrator` is a Sourcegraph service whose purpose is to managed the state of
 
 Whenever a `docker-compose` or `kubernetes` based deployment is started `migrator` is run with the default `up` command. In kubernetes as an [`initContainer`](https://github.com/sourcegraph/deploy-sourcegraph/blob/master/base/frontend/sourcegraph-frontend.Deployment.yaml#L30-L40), and in [docker-compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/master/docker-compose/docker-compose.yaml#L14-L53) as a `depends_on` of the `frontend`. `up` runs all necessary schema migrations in the case of a [standard upgrade](/admin/updates/#upgrade-types), and then exits. The `frontend` service will not start until `migrator` exits successfully.
 
-`migrator` can also be used like a command line tool, accepting *command* arguments with *flags*. The most common usage of `migrator` this way is to perform [multiversion upgrades](/admin/updates/#upgrade-types) with the [`upgrade`](#upgrade) command. Many other commands are also available.
+`migrator` can also be used like a command line tool, accepting _command_ arguments with _flags_. The most common usage of `migrator` this way is to perform [multiversion upgrades](/admin/updates/#upgrade-types) with the [`upgrade`](#upgrade) command. Many other commands are also available.
 
 Some notes on `migrator`:
-- The `migrator` service was introduced in `v3.37.0`.
-- `migrator`'s `upgrade` command was introduced in `v4.0.0` and is intended to be used to upgrade versions as old as `3.20.x`. **Always check your deployment types [upgrade notes](/admin/updates/#upgrades-index) before a multiversion upgrade.**
-- Commands such as `downgrade`, `drift`, `run-out-of-band-migrations`, and `upgrade`, all work against Sourcegraph versions as old as `v3.20.x`.
+
+-   The `migrator` service was introduced in `v3.37.0`.
+-   `migrator`'s `upgrade` command was introduced in `v4.0.0` and is intended to be used to upgrade versions as old as `3.20.x`. **Always check your deployment types [upgrade notes](/admin/updates/#upgrades-index) before a multiversion upgrade.**
+-   Commands such as `downgrade`, `drift`, `run-out-of-band-migrations`, and `upgrade`, all work against Sourcegraph versions as old as `v3.20.x`.
 
 ## Migrator environment variables
 
 Migrator uses environemt variables to target the correct database instances. By default these values are configured to target Sourcegraphs locally deployed databases. These values may be adjusted to connect migrator to externally managed databases.
 
 Manifest locations:
-- [Docker-compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/master/docker-compose/docker-compose.yaml#L20C4-L43)
-- [Kustomize](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/components/utils/migrator/resources/sourcegraph-frontend.ConfigMap.yaml#L10-L28)
-- [Helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/blob/main/charts/sourcegraph-migrator/values.yaml#L39-L79)
+
+-   [Docker-compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/master/docker-compose/docker-compose.yaml#L20C4-L43)
+-   [Kustomize](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/components/utils/migrator/resources/sourcegraph-frontend.ConfigMap.yaml#L10-L28)
+-   [Helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/blob/main/charts/sourcegraph-migrator/values.yaml#L39-L79)
 
 Example default environment variables:
+
 ```yaml
-PGHOST: "pgsql"
-PGPORT: "5432"
-PGUSER: "sg"
-PGPASSWORD: "sg"
-PGDATABASE: "sg"
-PGSSLMODE: "disable"
-CODEINTEL_PGHOST: "codeintel-db"
-CODEINTEL_PGPORT: "5432"
-CODEINTEL_PGUSER: "sg"
-CODEINTEL_PGPASSWORD: "sg"
-CODEINTEL_PGDATABASE: "sg"
-CODEINTEL_PGSSLMODE: "disable"
-CODEINSIGHTS_PGHOST: "codeinsights-db"
-CODEINSIGHTS_PGPORT: "5432"
-CODEINSIGHTS_PGUSER: "postgres"
-CODEINSIGHTS_PGPASSWORD: "password"
-CODEINSIGHTS_PGDATABASE: "postgres"
-CODEINSIGHTS_PGSSLMODE: "disable"
+PGHOST: 'pgsql'
+PGPORT: '5432'
+PGUSER: 'sg'
+PGPASSWORD: 'sg'
+PGDATABASE: 'sg'
+PGSSLMODE: 'disable'
+CODEINTEL_PGHOST: 'codeintel-db'
+CODEINTEL_PGPORT: '5432'
+CODEINTEL_PGUSER: 'sg'
+CODEINTEL_PGPASSWORD: 'sg'
+CODEINTEL_PGDATABASE: 'sg'
+CODEINTEL_PGSSLMODE: 'disable'
+CODEINSIGHTS_PGHOST: 'codeinsights-db'
+CODEINSIGHTS_PGPORT: '5432'
+CODEINSIGHTS_PGUSER: 'postgres'
+CODEINSIGHTS_PGPASSWORD: 'password'
+CODEINSIGHTS_PGDATABASE: 'postgres'
+CODEINSIGHTS_PGSSLMODE: 'disable'
 ```
 
 ## Commands
@@ -81,23 +84,23 @@ upgrade \
 
 **Required arguments**:
 
-- `--from`: The current Sourcegraph release version (*without the patch*; e.g., `v3.36`)
-- `--to`: The target Sorucegraph release version (*without the patch*; e.g., `v4.0`)
+-   `--from`: The current Sourcegraph release version (_without the patch_; e.g., `v3.36`)
+-   `--to`: The target Sorucegraph release version (_without the patch_; e.g., `v4.0`)
 
 **Optional arguments**:
 
-- `--dry-run`: Print the steps of the upgrade but do not execute them.
-- `--disable-animation`: Print plain log messages instead of an animated progress bar.
-- `--skip-version-check`: Skip comparing the current instance version against `--from`.
-- `--skip-drift-check`: Skip comparing the database schema shape against the schema defined by `--from`.
-- `--unprivileged-only` and `--noop-privileged`: Controls behavior of schema migrations the presence of [privileged definitions](/admin/how-to/privileged_migrations).
-- `--ignore-migrator-update`: Controls whether to hard- or soft-fail if a newer migrator version is available. It is recommended to use the latest migrator version.
+-   `--dry-run`: Print the steps of the upgrade but do not execute them.
+-   `--disable-animation`: Print plain log messages instead of an animated progress bar.
+-   `--skip-version-check`: Skip comparing the current instance version against `--from`.
+-   `--skip-drift-check`: Skip comparing the database schema shape against the schema defined by `--from`.
+-   `--unprivileged-only` and `--noop-privileged`: Controls behavior of schema migrations the presence of [privileged definitions](/admin/how-to/privileged_migrations).
+-   `--ignore-migrator-update`: Controls whether to hard- or soft-fail if a newer migrator version is available. It is recommended to use the latest migrator version.
 
 **Notes**:
 
-- Successive invocations of this command will re-attempt the last failed or attempted (but incomplete) migration. This command run as if the `--ignore-single-{dirty,pending}-log` flags supplied by the commands `up`, `upto`, and `downto` were enabled.
-- This command checks that the schema of the database is in the correct state for the current version, if schema drift is detected it must be resolved before completing the upgrade. [Learn more here.](/admin/updates/migrator/schema-drift).
-- Successive invocations of this command may *cause* database drift when partial progress is made. When making a subsequent upgrade attempt, invoke this command with `--skip-drift-check` ignore the failing startup check.
+-   Successive invocations of this command will re-attempt the last failed or attempted (but incomplete) migration. This command run as if the `--ignore-single-{dirty,pending}-log` flags supplied by the commands `up`, `upto`, and `downto` were enabled.
+-   This command checks that the schema of the database is in the correct state for the current version, if schema drift is detected it must be resolved before completing the upgrade. [Learn more here.](/admin/updates/migrator/schema-drift).
+-   Successive invocations of this command may _cause_ database drift when partial progress is made. When making a subsequent upgrade attempt, invoke this command with `--skip-drift-check` ignore the failing startup check.
 
 ### drift
 
@@ -113,15 +116,15 @@ drift \
 
 **Required arguments**:
 
-- `--db`: The target schema to inspect. *Ex: frontend, codeintel, codeinsights*
+-   `--db`: The target schema to inspect. _Ex: frontend, codeintel, codeinsights_
 
 **Mutually exclusive arguments**:
 
 Exactly one of `--version` and `--file` must be supplied.
 
-- `--version`: The instance's current Sourcegraph release version *including a patch* (e.g., `v3.42.1`).
-- `--file`: The filepath to a local schema description file. This is useful for airgapped instances that do not have access to the public Sourcegraph GitHub repository or the public GCS bucket where old revisions have been backfilled.
-- `--ignore-migrator-update`: Controls whether to hard- or soft-fail if a newer migrator version is available. It is recommended to use the latest migrator version.
+-   `--version`: The instance's current Sourcegraph release version _including a patch_ (e.g., `v3.42.1`).
+-   `--file`: The filepath to a local schema description file. This is useful for airgapped instances that do not have access to the public Sourcegraph GitHub repository or the public GCS bucket where old revisions have been backfilled.
+-   `--ignore-migrator-update`: Controls whether to hard- or soft-fail if a newer migrator version is available. It is recommended to use the latest migrator version.
 
 ### downgrade
 
@@ -139,22 +142,22 @@ downgrade \
 
 **Required arguments**:
 
-- `--from`: The current Sourcegraph release version (*without the patch*; e.g., `v3.36`)
-- `--to`: The target Sorucegraph release version (*without the patch*; e.g., `v4.0`)
+-   `--from`: The current Sourcegraph release version (_without the patch_; e.g., `v3.36`)
+-   `--to`: The target Sorucegraph release version (_without the patch_; e.g., `v4.0`)
 
 **Optional arguments**:
 
-- `--dry-run`: Print the steps of the upgrade but do not execute them.
-- `--disable-animation`: Print plain log messages instead of an animated progress bar.
-- `--skip-version-check`: Skip comparing the current instance version against `--from`.
-- `--skip-drift-check`: Skip comparing the database schema shape against the schema defined by `--from`.
-- `--unprivileged-only`: Controls behavior of schema migrations the presence of [privileged definitions](/admin/how-to/privileged_migrations).
-- `--ignore-migrator-update`: Controls whether to hard- or soft-fail if a newer migrator version is available. It is recommended to use the latest migrator version.
+-   `--dry-run`: Print the steps of the upgrade but do not execute them.
+-   `--disable-animation`: Print plain log messages instead of an animated progress bar.
+-   `--skip-version-check`: Skip comparing the current instance version against `--from`.
+-   `--skip-drift-check`: Skip comparing the database schema shape against the schema defined by `--from`.
+-   `--unprivileged-only`: Controls behavior of schema migrations the presence of [privileged definitions](/admin/how-to/privileged_migrations).
+-   `--ignore-migrator-update`: Controls whether to hard- or soft-fail if a newer migrator version is available. It is recommended to use the latest migrator version.
 
 **Notes**:
 
-- Successive invocations of this command will re-attempt the last failed or attempted (but incomplete) migration. This command run as if the `--ignore-single-{dirty,pending}-log` flags supplied by the commands `up`, `upto`, and `downto` were enabled.
-- Successive invocations of this command may *cause* database drift when partial progress is made. When making a subsequent downgrade attempt, invoke this command with `--skip-drift-check` ignore the failing startup check.
+-   Successive invocations of this command will re-attempt the last failed or attempted (but incomplete) migration. This command run as if the `--ignore-single-{dirty,pending}-log` flags supplied by the commands `up`, `upto`, and `downto` were enabled.
+-   Successive invocations of this command may _cause_ database drift when partial progress is made. When making a subsequent downgrade attempt, invoke this command with `--skip-drift-check` ignore the failing startup check.
 
 ### add-log
 
@@ -169,12 +172,12 @@ add-log \
 
 **Required arguments**:
 
-- `--db`: The target schema to modify.
-- `--version`: The migration identifier noted on the log entry.
+-   `--db`: The target schema to modify.
+-   `--version`: The migration identifier noted on the log entry.
 
 **Optional arguments**:
 
-- `--up`: The migration direction noted on the log entry.
+-   `--up`: The migration direction noted on the log entry.
 
 ### validate
 
@@ -188,12 +191,12 @@ validate \
 
 **Optional arguments**:
 
-- `--db`: The target schema(s) to validate. Comma-separated values are allowed.
-- `--skip-out-of-band-migrations`: Skip validation of out-of-band migrations. Validate the schema only.
+-   `--db`: The target schema(s) to validate. Comma-separated values are allowed.
+-   `--skip-out-of-band-migrations`: Skip validation of out-of-band migrations. Validate the schema only.
 
 **Notes**:
 
-- If `DISABLE_CODE_INSIGHTS` is not set and the `codeinsights-db` is not available, then this command will fail with the default value for the `--db` flag. To resolve, supply `--db=frontend,codeintel` instead.
+-   If `DISABLE_CODE_INSIGHTS` is not set and the `codeinsights-db` is not available, then this command will fail with the default value for the `--db` flag. To resolve, supply `--db=frontend,codeintel` instead.
 
 ### up
 
@@ -214,15 +217,15 @@ up \
 
 **Optional arguments**:
 
-- `--db`: The target schema(s) to modify. Comma-separated values are allowed.
-- `--skip-upgrade-validation`: Skip asserting that the [standard upgrade policy](/admin/updates/#upgrade-types) is being followed.
-- `--skip-oobmigration-validation`: Skip reading the progress of out-of-band migrations to assert completion of newly deprecated migrations.
-- `--ignore-single-dirty-log` and `--ignore-single-pending-log`: Re-attempt to apply the **next** migration that was marked as errored or as incomplete (respectively). See [how to troubleshoot a dirty database](/admin/how-to/dirty_database#0-attempt-re-application).
-- `--unprivileged-only`: Controls behavior of schema migrations the presence of [privileged definitions](/admin/how-to/privileged_migrations).
+-   `--db`: The target schema(s) to modify. Comma-separated values are allowed.
+-   `--skip-upgrade-validation`: Skip asserting that the [standard upgrade policy](/admin/updates/#upgrade-types) is being followed.
+-   `--skip-oobmigration-validation`: Skip reading the progress of out-of-band migrations to assert completion of newly deprecated migrations.
+-   `--ignore-single-dirty-log` and `--ignore-single-pending-log`: Re-attempt to apply the **next** migration that was marked as errored or as incomplete (respectively). See [how to troubleshoot a dirty database](/admin/how-to/dirty_database#0-attempt-re-application).
+-   `--unprivileged-only`: Controls behavior of schema migrations the presence of [privileged definitions](/admin/how-to/privileged_migrations).
 
 **Notes**:
 
-- If `DISABLE_CODE_INSIGHTS` is not set and the `codeinsights-db` is not available, then this command will fail with the default value for the `--db` flag. To resolve, supply `--db=frontend,codeintel` instead.
+-   If `DISABLE_CODE_INSIGHTS` is not set and the `codeinsights-db` is not available, then this command will fail with the default value for the `--db` flag. To resolve, supply `--db=frontend,codeintel` instead.
 
 ### run-out-of-band-migrations
 
@@ -237,12 +240,12 @@ run-out-of-band-migrations \
 
 **Required arguments**:
 
-- `--id`: The identifier(s) of the migrations to apply. Multiple flags can be supplied. If no flag is supplied, all migrations are applied.
-- `--apply-reverse`: Run migrations in the reverse direction.
+-   `--id`: The identifier(s) of the migrations to apply. Multiple flags can be supplied. If no flag is supplied, all migrations are applied.
+-   `--apply-reverse`: Run migrations in the reverse direction.
 
 **Optional arguments**:
 
-- `--disable-animation`: Print plain log messages instead of an animated progress bar.
+-   `--disable-animation`: Print plain log messages instead of an animated progress bar.
 
 ### describe
 
@@ -259,43 +262,45 @@ describe \
 
 **Required arguments**:
 
-- `--db`: The target schema to describe.
-- `--format`: The format in which the description is output.
+-   `--db`: The target schema to describe.
+-   `--format`: The format in which the description is output.
 
 **Optional arguments**:
 
-- `--out`: The target output file. If not supplied, the output is printed to stdout.
-- `--force`: Overwrite the file.
-- `--no-color`: Do not print ANSI color sequences.
+-   `--out`: The target output file. If not supplied, the output is printed to stdout.
+-   `--force`: Overwrite the file.
+-   `--no-color`: Do not print ANSI color sequences.
 
 ## Environments
 
-- Kubernetes
-  - [Helm](#kubernetes-helm)
-  - [Kustomize](#kubernetes-kustomize)
-- [Docker-compose](#docker-compose)
-- [Docker Single-node](#single-node)
-- [Local development](#local-development)
+-   Kubernetes
+    -   [Helm](#kubernetes-helm)
+    -   [Kustomize](#kubernetes-kustomize)
+-   [Docker-compose](#docker-compose)
+-   [Docker Single-node](#single-node)
+-   [Local development](#local-development)
 
 Generally in production environments `migrator` is run by updating the startup **command** and **image** of `migrator` in the manifest defining migrator. Below you can find general instructions on how to manipulate `migrator`'s manifest to invoke a **command**.
 
 ### Kubernetes Kustomize
 
 In kubernetes `migrator` is initialized as a [kubernetes job](https://kubernetes.io/docs/concepts/workloads/controllers/job/). The `job` is initialized with arguments passed to the `args:` key. Below are links to the job manifests:
-- [migrator.Job.yaml](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/components/utils/migrator/resources/migrator.Job.yaml)
-- [configMap](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/components/utils/migrator/resources/sourcegraph-frontend.ConfigMap.yaml)
 
-To run `migrator` with a specific *command*:
+-   [migrator.Job.yaml](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/components/utils/migrator/resources/migrator.Job.yaml)
+-   [configMap](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/components/utils/migrator/resources/sourcegraph-frontend.ConfigMap.yaml)
 
-1. Edit the `migrator.Job.yaml` files `args:` value to the intended command with flags, and alter the `image:` value to the latest released image of migrator (*in the case of the `up` command use your current deployment version*).
+To run `migrator` with a specific _command_:
+
+1. Edit the `migrator.Job.yaml` files `args:` value to the intended command with flags, and alter the `image:` value to the latest released image of migrator (_in the case of the `up` command use your current deployment version_).
 
 For example here the `upgrade` command:
+
 ```yaml
 containers:
-  - name: migrator
-    image: "index.docker.io/sourcegraph/migrator:5.0.3"
-    args: ["upgrade", "--from=v3.41.0", "--to=v4.5.1"]
-    envFrom:
+    - name: migrator
+      image: 'index.docker.io/sourcegraph/migrator:5.0.3'
+      args: ['upgrade', '--from=v3.41.0', '--to=v4.5.1']
+      envFrom:
 ```
 
 2. Apply the job and wait for it to complete.
@@ -340,19 +345,20 @@ $ helm upgrade --install -n <your namespace> --set "migrator.args={<arg1>,<arg2>
 
 In Docker-compose `migrator` is initialized as a [container](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/master/docker-compose/docker-compose.yaml#L14-L53) in the `docker-compose.yaml` file.
 
-To run `migrator` with a specific *command*:
+To run `migrator` with a specific _command_:
 
-1. Edit the `docker-compose.yaml` file `command:` value to the intended command with flags, and alter the `image:` value to the latest released image of migrator (*in the case of the `up` command use your current deployment version*).
+1. Edit the `docker-compose.yaml` file `command:` value to the intended command with flags, and alter the `image:` value to the latest released image of migrator (_in the case of the `up` command use your current deployment version_).
 
 For example here the `upgrade` command:
+
 ```yaml
 migrator:
-  container_name: migrator
-  image: 'index.docker.io/sourcegraph/migrator:5.0.3'
-  cpus: 0.5
-  mem_limit: '500m'
-  command: ['upgrade', '--from=v3.41.0', '--to=v4.5.1']
-  environment:
+    container_name: migrator
+    image: 'index.docker.io/sourcegraph/migrator:5.0.3'
+    cpus: 0.5
+    mem_limit: '500m'
+    command: ['upgrade', '--from=v3.41.0', '--to=v4.5.1']
+    environment:
 ```
 
 2. Apply the job and wait for it to complete.
@@ -362,6 +368,7 @@ $ docker-compose up -d migrator
 ```
 
 3. The log output of `migrator` can be checked with the command
+
 ```sh
 $ docker logs migrator
 ```

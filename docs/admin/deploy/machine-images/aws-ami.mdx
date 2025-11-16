@@ -4,17 +4,16 @@ Sourcegraph [Amazon Machine Images (AMIs)](https://docs.aws.amazon.com/AWSEC2/la
 
 Following these docs will provision the following resources:
 
-- An EC2 node running Sourcegraph
-- A root EBS volume with 50GB of storage
-- An additional EBS volume with 500GB of storage for storing code and search indices
+-   An EC2 node running Sourcegraph
+-   A root EBS volume with 50GB of storage
+-   An additional EBS volume with 500GB of storage for storing code and search indices
 
 ### Sourcegraph AMI account ID
 
 All Sourcegraph AMIs are published from one of the following AWS accounts:
 
-- Account ID: `840044800169`
-- Account ID: `870751268155`
-
+-   Account ID: `840044800169`
+-   Account ID: `870751268155`
 
 ### Instance sizing
 
@@ -28,7 +27,11 @@ Click [here](https://github.com/sourcegraph/deploy#amazon-ec2-amis) to see the c
 
 ## Deploy Sourcegraph
 
-<img width="1256" alt="Screenshot 2025-05-06 at 3 52 51 PM" src="https://github.com/user-attachments/assets/8e98792b-16d9-4c0c-a3a1-981246a811b8" />
+<img
+	width="1256"
+	alt="Screenshot 2025-05-06 at 3 52 51 PM"
+	src="https://github.com/user-attachments/assets/8e98792b-16d9-4c0c-a3a1-981246a811b8"
+/>
 
 1. Search for Sourcegraph in the AWS Marketplace or AMI catalog (see screenshot in the introduction).
 2. Choose **Launch instance from AMI**.
@@ -36,15 +39,15 @@ Click [here](https://github.com/sourcegraph/deploy#amazon-ec2-amis) to see the c
 4. Select an **instance type** according to [our sizing guide](/how-to/aws-instance-sizing) or your specific requirements.
 5. **Key pair (login)**: Select or create a new Key Pair for connecting to your instance securely (this may be required in the event you need support).
 6. **Network settings**:
-   - Under "Auto-assign public IP" select "Enable".
-   - Select a **Security Group** for the instance, or create one with the following rules:
-     - Allow SSH from Anywhere: `port range 22, source 0.0.0.0/0, ::/0`
-     - Allow HTTPS from the internet: `port range 443, source 0.0.0.0/0, ::/0`
-     - Allow HTTP traffic from the internet: `port range 80, source 0.0.0.0/0, ::/0`
-   - **NOTE**: If you do not wish to have HTTP/HTTPS exposed to the public internet, you may later choose to remove these rules so that all traffic routes through your AWS load balancer.
+    - Under "Auto-assign public IP" select "Enable".
+    - Select a **Security Group** for the instance, or create one with the following rules:
+        - Allow SSH from Anywhere: `port range 22, source 0.0.0.0/0, ::/0`
+        - Allow HTTPS from the internet: `port range 443, source 0.0.0.0/0, ::/0`
+        - Allow HTTP traffic from the internet: `port range 80, source 0.0.0.0/0, ::/0`
+    - **NOTE**: If you do not wish to have HTTP/HTTPS exposed to the public internet, you may later choose to remove these rules so that all traffic routes through your AWS load balancer.
 7. **Configure storage**:
-   - **Root Volume:** `50GB`
-   - **EBS Volume:** `500GB` - this should be at least 25-50% *more* than the size of all your repositories on disk (you may check your GitHub/BitBucket/GitLab instance's disk usage.)
+    - **Root Volume:** `50GB`
+    - **EBS Volume:** `500GB` - this should be at least 25-50% _more_ than the size of all your repositories on disk (you may check your GitHub/BitBucket/GitLab instance's disk usage.)
 8. Click **Launch instance**, and navigate to the public IP address in your browser. (Look for the IPv4 Public IP value in your EC2
    instance page under the Description panel.)
 
@@ -52,7 +55,10 @@ Once the instance has started, please allow ~5 minutes for Sourcegraph to initia
 
 To configure SSL, and lock down the instance from the public internet, see the [networking](#networking) section.
 
-<Callout type="note">If you cannot access the Sourcegraph homepage after 10 minutes, please try reboot your instance.</Callout>
+<Callout type="note">
+	If you cannot access the Sourcegraph homepage after 10 minutes, please try
+	reboot your instance.
+</Callout>
 
 ### Executors
 
@@ -91,7 +97,9 @@ We suggest using an AWS Application Load Balancer (ALB) to manage HTTPS connecti
 
 ### Creating an AWS Load Balancer
 
-<Callout type="warning">You must own a domain name before you can proceed with the following steps.</Callout>
+<Callout type="warning">
+	You must own a domain name before you can proceed with the following steps.
+</Callout>
 
 1. Request a certificate for the domain name in [AWS Certificate Manager](https://aws.amazon.com/certificate-manager/).
 2. Create a [target group](https://console.aws.amazon.com/ec2#TargetGroups) for `HTTPS Port 443` that links to the instance's `Port 443`.
@@ -104,8 +112,8 @@ We suggest using an AWS Application Load Balancer (ALB) to manage HTTPS connecti
 
 Open the [AWS Certificate Manager console](https://console.aws.amazon.com/acm) to **Request a certificate**:
 
-- **Domain names**: Fully qualified domain name: your domain
-- **Select validation method**: DNS validation—recommended
+-   **Domain names**: Fully qualified domain name: your domain
+-   **Select validation method**: DNS validation—recommended
 
 After the certificate has been created, you will need to attach the `CNAME name` and `CNAME values` to your DNS.
 
@@ -119,42 +127,42 @@ Follow the steps below to attach the CNAME to your DNS if your DNS is hosted in 
 #### Step 2: Create a target group
 
 1. Click **Create a target group** on your [EC2 Target groups dashboard](https://console.aws.amazon.com/ec2#TargetGroups)
-   - Choose a target type: `Instance`
-   - Target group name: `YOUR-TARGETGROUP-NAME`
-   - Protocol: `HTTPS`
-   - Port: `443`
-   - VPC: Select the VPC where your instance is located.
-   - Protocol version: `HTTP2`
-   - Health checks: `Use Default`
+    - Choose a target type: `Instance`
+    - Target group name: `YOUR-TARGETGROUP-NAME`
+    - Protocol: `HTTPS`
+    - Port: `443`
+    - VPC: Select the VPC where your instance is located.
+    - Protocol version: `HTTP2`
+    - Health checks: `Use Default`
 2. Click **Include as pending below**
 
 #### Step 3: Create subnets
 
 Click **Create subnet** in your VPC subnets dashboard:
 
-- **VPC ID**: Selected the VPC that the instance is in.
-- **Subnet name**: name the subnet.
-- **Availability Zone**: select an availability zone that is different from the current zone.
-- Click **Create subnet**
+-   **VPC ID**: Selected the VPC that the instance is in.
+-   **Subnet name**: name the subnet.
+-   **Availability Zone**: select an availability zone that is different from the current zone.
+-   Click **Create subnet**
 
 #### Step 4: Create an Application Load Balancer
 
 1. Open your [EC2 Load Balancers dashboard](https://console.aws.amazon.com/ec2#LoadBalancers) to **Create Load Balancer**.
 2. Choose **Application Load Balancer** as the Load balancer types using the following configurations:
 
-- **Basic configuration**
-  - Load balancer name: `YOUR-LOAD-BALANCER-NAME`
-  - Scheme: `Internet-facing`
-  - IP address type: `IPv4`
-- **Network mapping**
-  - VPC: Selected the VPC that the instance is in.
-  - Mapping: Select two subnets associated with the selected VPC.
-- **Security groups**
-  - Security groups: Make sure only the security group associated with the instance is selected.
-- **Listeners and routing**
-  - Protocol: `HTTPS`
-  - Port: `443`
-  - Default action: Select the HTTPS target group created for the instance.
+-   **Basic configuration**
+    -   Load balancer name: `YOUR-LOAD-BALANCER-NAME`
+    -   Scheme: `Internet-facing`
+    -   IP address type: `IPv4`
+-   **Network mapping**
+    -   VPC: Selected the VPC that the instance is in.
+    -   Mapping: Select two subnets associated with the selected VPC.
+-   **Security groups**
+    -   Security groups: Make sure only the security group associated with the instance is selected.
+-   **Listeners and routing**
+    -   Protocol: `HTTPS`
+    -   Port: `443`
+    -   Default action: Select the HTTPS target group created for the instance.
 
 ### Securing your instance
 
@@ -166,28 +174,36 @@ Now that your instance is confirmed to be working, and you have HTTPS working th
 
 ## Upgrade
 
-<Callout type="warning">This upgrade process works with **Sourcegraph AWS AMI instances only**. Do not use these if you deployed Sourcegraph through other means.</Callout>
+<Callout type="warning">
+	This upgrade process works with **Sourcegraph AWS AMI instances only**. Do
+	not use these if you deployed Sourcegraph through other means.
+</Callout>
 
-<Callout type="warning">Please be aware that our AMI deployment types do not support multi-version upgrades at this time, nor do they support Automatic Upgrade State. The Automatic Upgrade State toggle can be found on your Sourcegraph instance's `site-admin/updates` screen.</Callout>
+<Callout type="warning">
+	Please be aware that our AMI deployment types do not support multi-version
+	upgrades at this time, nor do they support Automatic Upgrade State. The
+	Automatic Upgrade State toggle can be found on your Sourcegraph instance's
+	`site-admin/updates` screen.
+</Callout>
 
 Please take time to review the following before proceeding with the upgrades:
 
-- [Technical changelog](/technical-changelog)
-- [Update policy](/admin/updates#update-policy)
-- [Update notes](/admin/updates/kubernetes)
+-   [Technical changelog](/technical-changelog)
+-   [Update policy](/admin/updates#update-policy)
+-   [Update notes](/admin/updates/kubernetes)
 
 <Callout type="warning">Back up your volumes before each upgrade!</Callout>
 
 #### Step 1: Stop the current instance
 
 1. Stop your current Sourcegraph AMI instance
-   - Go to the ECS console for your instance
-   - Click Instance State to Stop Instance
+    - Go to the ECS console for your instance
+    - Click Instance State to Stop Instance
 2. Detach the non-root data volume (Device name: /dev/sdb/)
-   - Go to the Storage section in your instance console
-   - Find the volume with the device name **/dev/sdb**
-   - Select the volume, then click Actions to **Detach Volume**
-   - Give the volume a name for identification purposes
+    - Go to the Storage section in your instance console
+    - Find the volume with the device name **/dev/sdb**
+    - Select the volume, then click Actions to **Detach Volume**
+    - Give the volume a name for identification purposes
 3. Make a note of the VPC name
 
 #### Step 2: Launch a new instance
@@ -196,19 +212,25 @@ Please take time to review the following before proceeding with the upgrades:
 2. Name the instance
 3. Select the appropriate **instance type**
 4. Under **Key Pair**
-  - Select the **Key Pair** used by the old instance
+
+-   Select the **Key Pair** used by the old instance
+
 5. Under **Network settings**
-   - Select the **Security Group** used by the old instance
+    - Select the **Security Group** used by the old instance
 6. Under **Configure storage**
- - Remove the **second** EBS volume
+
+-   Remove the **second** EBS volume
+
 7. After reviewing the settings, click **Launch Instance**
 8. Attach the detached volume to the new instance
-   - Go to the Volumes section in your ECS Console
-   - Select the volume you've detached earlier
-   - Click **Actions > Attach Volume**
+    - Go to the Volumes section in your ECS Console
+    - Select the volume you've detached earlier
+    - Click **Actions > Attach Volume**
 9. On the `Attach volume` page:
-  - **Instance**: select the new Sourcegraph AMI instance
-  - **Device name**: /dev/sdb
+
+-   **Instance**: select the new Sourcegraph AMI instance
+-   **Device name**: /dev/sdb
+
 10. **Reboot** the new instance
 
 You can terminate the stopped Sourcegraph AMI instance once you have confirmed the new instance is up and running.
@@ -225,5 +247,5 @@ We strongly recommend you taking [snapshots of the entire EBS volume](https://do
 
 ## Additional resources
 
-- [Increase the size of an Amazon EBS volume on an EC2 instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/modify-ebs-volume-on-instance.html)
-- [Change the instance type](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-resize.html)
+-   [Increase the size of an Amazon EBS volume on an EC2 instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/modify-ebs-volume-on-instance.html)
+-   [Change the instance type](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-resize.html)

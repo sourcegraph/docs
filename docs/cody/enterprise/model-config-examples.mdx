@@ -527,7 +527,6 @@ By default, Cody will send Autocomplete requests to the legacy OpenAI /completio
 
 ## Sending custom HTTP headers
 
-
 <Callout type="info">Available in Sourcegraph v6.4+ and v6.3.2692</Callout>
 
 By default, Cody will only send an `Authorization: Bearer <accessToken>` header to OpenAI-compatible endpoints. You may configure custom HTTP headers if you like under the URL of endpoints:
@@ -545,7 +544,10 @@ By default, Cody will only send an `Authorization: Bearer <accessToken>` header 
 }
 ```
 
-<Callout type="note">When using custom headers, both `accessToken` and `accessTokenQuery` configuration settings are ignored.</Callout>
+<Callout type="note">
+	When using custom headers, both `accessToken` and `accessTokenQuery`
+	configuration settings are ignored.
+</Callout>
 
 </Accordion>
 
@@ -726,19 +728,28 @@ Provider override `serverSideConfig` fields:
 | `type`        | Must be `"awsBedrock"`.                                                                                                                                                                                                                                                                                         |
 | `accessToken` | Leave empty to rely on instance role bindings or other AWS configurations in the frontend service. Use `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>` for direct credential configuration, or `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>:<SESSION_TOKEN>` if a session token is also required.                                 |
 | `endpoint`    | For pay-as-you-go, set it to an AWS region code (e.g., `us-west-2`) when using a public Amazon Bedrock endpoint. For provisioned throughput, set it to the provisioned VPC endpoint for the bedrock-runtime API (e.g., `https://vpce-0a10b2345cd67e89f-abc0defg.bedrock-runtime.us-west-2.vpce.amazonaws.com`). |
-| `region`      | The region to use when configuring API clients. The `AWS_REGION` Environment variable must also be configured in the `sourcegraph-frontend` container to match.                                                                                                                                                |
+| `region`      | The region to use when configuring API clients. The `AWS_REGION` Environment variable must also be configured in the `sourcegraph-frontend` container to match.                                                                                                                                                 |
 
 Provisioned throughput for Amazon Bedrock models can be configured using the `"awsBedrockProvisionedThroughput"` server-side configuration type. Refer to the [Model Overrides](/cody/enterprise/model-configuration#model-overrides) section for more details.
 
 <Callout type="note">
-	If using [IAM roles for EC2 / instance role binding](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html),
-  you may need to increase the [HttpPutResponseHopLimit
-](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_InstanceMetadataOptionsRequest.html#:~:text=HttpPutResponseHopLimit) instance metadata option to a higher value (e.g., 2) to ensure that the metadata service can be accessed from the frontend container running in the EC2 instance. See [here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-IMDS-existing-instances.html) for instructions.
+	If using [IAM roles for EC2 / instance role
+	binding](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html),
+	you may need to increase the [HttpPutResponseHopLimit
+	](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_InstanceMetadataOptionsRequest.html#:~:text=HttpPutResponseHopLimit)
+	instance metadata option to a higher value (e.g., 2) to ensure that the
+	metadata service can be accessed from the frontend container running in the
+	EC2 instance. See
+	[here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-IMDS-existing-instances.html)
+	for instructions.
 </Callout>
 
 ## AWS Bedrock: Latency optimization
 
-<Callout type="note">Optimization for latency with AWS Bedrock is available in Sourcegraph v6.5 and more.</Callout>
+<Callout type="note">
+	Optimization for latency with AWS Bedrock is available in Sourcegraph v6.5
+	and more.
+</Callout>
 
 AWS Bedrock supports [Latency Optimized Inference](https://docs.aws.amazon.com/bedrock/latest/userguide/latency-optimized-inference.html) which can reduce autocomplete latency with models like Claude 3.5 Haiku by up to ~40%.
 
@@ -791,7 +802,10 @@ See also [Debugging: running a latency test](#debugging-running-a-latency-test).
 
 ### Debugging: Running a latency test
 
-<Callout type="note">Debugging latency optimizated inference is supported in Sourcegraph v6.5 and more.</Callout>
+<Callout type="note">
+	Debugging latency optimizated inference is supported in Sourcegraph v6.5 and
+	more.
+</Callout>
 
 Site administrators can test completions latency by sending a special debug command in any Cody chat window (in the web, in the editor, etc.):
 
@@ -820,7 +834,7 @@ This can be helpful to get a feel for the latency of particular models, or model
 
 Few important considerations:
 
-- Debug commands are only available to site administrators and have no effect when used by regular users.
-- Sourcegraph's built-in Grafana monitoring also has a full `Completions` dashboard for monitoring LLM requests, performance, etc.
+-   Debug commands are only available to site administrators and have no effect when used by regular users.
+-   Sourcegraph's built-in Grafana monitoring also has a full `Completions` dashboard for monitoring LLM requests, performance, etc.
 
 </Accordion>

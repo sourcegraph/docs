@@ -14,14 +14,15 @@ export function Navigation({
 	onLinkClick?: React.MouseEventHandler<HTMLAnchorElement>;
 }) {
 	let pathname = usePathname();
-	const params = useParams()
+	const params = useParams();
 
 	const [version, setVersion] = useState<string | null>(null);
 	const [expandedTopics, setExpandedTopics] = useState<string[]>([]);
 	const [expandedSections, setExpandedSections] = useState<string[]>([]);
 	const [expandUsingPath, setExpandUsingPath] = useState<boolean>(true);
 
-	const navigation = versionNavigations[params.version as string || 'navigation']
+	const navigation =
+		versionNavigations[(params.version as string) || 'navigation'];
 
 	const handleTopicClick = (topicTitle: string, maximize?: boolean) => {
 		setExpandedTopics(prevExpandedTopics => {
@@ -121,7 +122,7 @@ export function Navigation({
 			<ul role="list" className="space-y-9">
 				{navigation.map(separator => (
 					<li key={separator.separator}>
-						<h2 className="mb-8 font-semibold tracking-wide text-slate-900 dark:text-dark-text-primary lg:mb-3">
+						<h2 className="mb-8 font-semibold tracking-wide text-slate-900 lg:mb-3 dark:text-dark-text-primary">
 							{separator.separator}
 						</h2>
 						<ul
@@ -174,7 +175,7 @@ export function Navigation({
 										expandedTopics.includes(
 											topic.title
 										) && (
-											<ul className="my-4 space-y-2 border-l-2 border-slate-100 dark:border-slate-800  lg:border-slate-200">
+											<ul className="my-4 space-y-2 border-l-2 border-slate-100 lg:border-slate-200  dark:border-slate-800">
 												{topic.sections.map(section => (
 													<>
 														<li
@@ -233,7 +234,7 @@ export function Navigation({
 															expandedSections.includes(
 																section.title
 															) && (
-																<ul className="my-4 ml-4 space-y-2 border-l-2 border-slate-100 dark:border-slate-800  lg:border-slate-200">
+																<ul className="my-4 ml-4 space-y-2 border-l-2 border-slate-100 lg:border-slate-200  dark:border-slate-800">
 																	{section.subsections.map(
 																		subsection => (
 																			<li

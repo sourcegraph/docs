@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { searchMetadata } from '../../data/search';
-import { DocSearch } from './docsearch/DocSearch';
+import {useEffect, useState} from 'react';
+import {searchMetadata} from '../../data/search';
+import {DocSearch} from './docsearch/DocSearch';
 import './docsearch/docsearch.css';
 
 // import '@docsearch/css';
@@ -13,7 +13,7 @@ const getInitialQuery = () => {
 		const query = params.get('q');
 		return query ?? undefined;
 	}
-}
+};
 
 export const Search = () => {
 	let [modifierKey, setModifierKey] = useState<string>();
@@ -24,7 +24,7 @@ export const Search = () => {
 	}, []);
 
 	const initialQuery = getInitialQuery();
-	const { algoliaConfig } = searchMetadata;
+	const {algoliaConfig} = searchMetadata;
 	return (
 		<DocSearch
 			appId={algoliaConfig.appId}

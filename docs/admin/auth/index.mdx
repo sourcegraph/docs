@@ -1,31 +1,38 @@
 # User authentication
 
 <TierCallout>
-  Supported on [Enterprise](/pricing/enterprise) plans.
-  <user>
-    Available via the Web app.
-  </user>
+	Supported on [Enterprise](/pricing/enterprise) plans.
+	<user>Available via the Web app.</user>
 </TierCallout>
 
 In order to use a Sourcegraph instance, users need an account on the instance. Accounts are used to store settings and preferences, but also to identify a person to make decisions about repository visibility.
 
 For that, various authentication providers can be configured. Multiple options can be provided.
 
-<Callout type="note">If you want to make use of repository permissions, auth providers are also used to prove the identity of the user on the code hosts. For example: To be able to see private repositories from a GitHub instance, users need to tell Sourcegraph who they are on the code host. Thus, it might make sense to configure multiple auth providers, depending on your needs. For example, you might want to use your SSO provider as the main signup/signin source, but you will also want to configure a GitHub OAuth connection so that users can prove their GitHub identity to Sourcegraph.</Callout>
+<Callout type="note">
+	If you want to make use of repository permissions, auth providers are also
+	used to prove the identity of the user on the code hosts. For example: To be
+	able to see private repositories from a GitHub instance, users need to tell
+	Sourcegraph who they are on the code host. Thus, it might make sense to
+	configure multiple auth providers, depending on your needs. For example, you
+	might want to use your SSO provider as the main signup/signin source, but
+	you will also want to configure a GitHub OAuth connection so that users can
+	prove their GitHub identity to Sourcegraph.
+</Callout>
 
 The following methods are supported for sign up and sign in:
 
-- [Builtin password authentication](/admin/auth/builtin)
-- [GitHub OAuth](#github)
-- [GitLab OAuth](#gitlab)
-- [Bitbucket Cloud OAuth](#bitbucket-cloud)
-- [Bitbucket Server OAuth](#bitbucket-server)
-- [Gerrit](#gerrit) (Beta)
-- [SAML](/admin/auth/saml)
-- [OpenID Connect](#openid-connect)
-  - [Google Workspace (Google accounts)](#google-workspace-google-accounts)
-- [HTTP authentication proxies](#http-authentication-proxies)
-  - [Username header prefixes](#username-header-prefixes)
+-   [Builtin password authentication](/admin/auth/builtin)
+-   [GitHub OAuth](#github)
+-   [GitLab OAuth](#gitlab)
+-   [Bitbucket Cloud OAuth](#bitbucket-cloud)
+-   [Bitbucket Server OAuth](#bitbucket-server)
+-   [Gerrit](#gerrit) (Beta)
+-   [SAML](/admin/auth/saml)
+-   [OpenID Connect](#openid-connect)
+    -   [Google Workspace (Google accounts)](#google-workspace-google-accounts)
+-   [HTTP authentication proxies](#http-authentication-proxies)
+    -   [Username header prefixes](#username-header-prefixes)
 
 The authentication providers are configured in the [`auth.providers`](/admin/config/site_config#authentication-providers) site configuration option.
 
@@ -42,25 +49,25 @@ To configure the presentation of the login form, see the [login form configurati
 If you are unsure which auth provider is right for you, we recommend applying the following rules in
 order:
 
-- If you have no external identity providers (i.e., not SSO) or are just trying to spin Sourcegraph
-  up as quickly as possible to try, use [`builtin`](#builtin-password-authentication) authentication. You can
-  always change the auth configuration later, and user identities from external providers will be
-  linked automatically to existing Sourcegraph accounts using verified email addresses.
-- If you are deploying Sourcegraph behind a HTTP authentication proxy service, use the
-  [`http-header`](#http-authentication-proxies) provider type. The proxy service should handle
-  authentication and session management and, in turn, set a HTTP header that indicates the user
-  identity to Sourcegraph.
-- If you are configuring Sourcegraph to index a GitHub or GitLab instance, we recommend using the
-  OAuth provider for that code host. This applies even if the code host itself uses an external
-  identity provider (e.g., SAML, OpenID Connect, LDAP, etc.). Sourcegraph will redirect to your code
-  host on sign-in and the code host will perform the required sign-in flow before redirecting to
-  Sourcegraph on success.
-- If you are using an identity provider that supports SAML, use the [SAML auth provider](/admin/auth/saml).
-- If you are using an identity provider that supports OpenID Connect (including Google accounts),
-  use the [OpenID Connect provider](#openid-connect).
-- If you wish to use LDAP and cannot use the GitHub/GitLab OAuth provider as described above, or if
-  you wish to use another authentication mechanism that is not yet supported, please [contact
-  us](https://sourcegraph.com/contact)
+-   If you have no external identity providers (i.e., not SSO) or are just trying to spin Sourcegraph
+    up as quickly as possible to try, use [`builtin`](#builtin-password-authentication) authentication. You can
+    always change the auth configuration later, and user identities from external providers will be
+    linked automatically to existing Sourcegraph accounts using verified email addresses.
+-   If you are deploying Sourcegraph behind a HTTP authentication proxy service, use the
+    [`http-header`](#http-authentication-proxies) provider type. The proxy service should handle
+    authentication and session management and, in turn, set a HTTP header that indicates the user
+    identity to Sourcegraph.
+-   If you are configuring Sourcegraph to index a GitHub or GitLab instance, we recommend using the
+    OAuth provider for that code host. This applies even if the code host itself uses an external
+    identity provider (e.g., SAML, OpenID Connect, LDAP, etc.). Sourcegraph will redirect to your code
+    host on sign-in and the code host will perform the required sign-in flow before redirecting to
+    Sourcegraph on success.
+-   If you are using an identity provider that supports SAML, use the [SAML auth provider](/admin/auth/saml).
+-   If you are using an identity provider that supports OpenID Connect (including Google accounts),
+    use the [OpenID Connect provider](#openid-connect).
+-   If you wish to use LDAP and cannot use the GitHub/GitLab OAuth provider as described above, or if
+    you wish to use another authentication mechanism that is not yet supported, please [contact
+    us](https://sourcegraph.com/contact)
 
 Most users will use only one auth provider, but you can use multiple auth providers if desired to
 enable sign-in via multiple services. Identities from different providers will be mapped to a
@@ -69,7 +76,6 @@ external identity provider.
 
 > NOTE: If OAuth is the only sign-in method available on sign-out, a new OAuth sign-in will be attempted immediately upon a redirect to the sign-in page. If it is necessary to sign-out and have persistent access to the sign-in page, enable `builtin` sign-in in addition to your OAuth sign-in.
 
-
 ## GitHub
 
 [Create a GitHub OAuth
@@ -77,8 +83,8 @@ application](https://developer.github.com/apps/building-oauth-apps/creating-an-o
 GitHub Enterprise, create one on your instance, not GitHub.com). Set the following values, replacing
 `sourcegraph.example.com` with the IP or hostname of your Sourcegraph instance:
 
-- Homepage URL: `https://sourcegraph.example.com`
-- Authorization callback URL: `https://sourcegraph.example.com/.auth/github/callback`
+-   Homepage URL: `https://sourcegraph.example.com`
+-   Authorization callback URL: `https://sourcegraph.example.com/.auth/github/callback`
 
 > NOTE: If you want to enable repository permissions, you should grant your OAuth app permission to
 > your GitHub organization(s). You can do that either by creating the OAuth app under your GitHub
@@ -89,19 +95,19 @@ Then add the following lines to your site configuration:
 
 ```json
 {
-  // ...
-  "auth.providers": [
-    {
-      "type": "github",
-      "url": "https://github.example.com",  // URL of your GitHub instance; can leave empty for github.com
-      "displayName": "GitHub",
-      "clientID": "replace-with-the-oauth-client-id",
-      "clientSecret": "replace-with-the-oauth-client-secret",
-      "allowSignup": false,  // CAUTION: Set to true to enable signup. If nothing is specified in `allowOrgs` or `allowOrgsMap`, any GitHub user can sign up.
-      "allowOrgs": ["your-org-name"], // Restrict logins and sign-ups if enabled to members of these orgs.
-      "allowOrgsMap": { "orgName": ["Your Team Name"]} // Restrict logins and sign-ups if enabled to members of teams that belong to a given org.
-    }
-  ]
+	// ...
+	"auth.providers": [
+		{
+			"type": "github",
+			"url": "https://github.example.com", // URL of your GitHub instance; can leave empty for github.com
+			"displayName": "GitHub",
+			"clientID": "replace-with-the-oauth-client-id",
+			"clientSecret": "replace-with-the-oauth-client-secret",
+			"allowSignup": false, // CAUTION: Set to true to enable signup. If nothing is specified in `allowOrgs` or `allowOrgsMap`, any GitHub user can sign up.
+			"allowOrgs": ["your-org-name"], // Restrict logins and sign-ups if enabled to members of these orgs.
+			"allowOrgsMap": {"orgName": ["Your Team Name"]} // Restrict logins and sign-ups if enabled to members of teams that belong to a given org.
+		}
+	]
 }
 ```
 
@@ -111,7 +117,6 @@ configuration.
 Leave the `url` field empty for GitHub.com.
 
 Once you've configured GitHub as a sign-on provider, you may also want to [add GitHub repositories to Sourcegraph](/admin/code_hosts/github#repository-syncing).
-
 
 ### How to control user sign-up and sign-in with GitHub auth provider
 
@@ -125,7 +130,6 @@ If set to `false` or not set, sign-up will be blocked. In this case, new users w
 The new user email, during their account creation, should match one of their GitHub verified emails.
 
 > WARNING: If `allowSignup` is set to `true`, anyone with internet access to both your Sourcegraph instance and your GitHub url are able to sign up and login to your instance. In particular, if url is set to `https://github.com`, this means that anyone with a Github account could log in to your Sourcegraph instance and search your indexed code. Make sure to also configure the `allowOrgs` field described below to limit sign-ups to your org, or limit public access to your Sourcegraph instance via IP restrictions / VPN. For assistance, contact support.
-
 
 ```json
   {
@@ -143,54 +147,49 @@ If combined with `"allowSignup": true`, only members of the allowed orgs can cre
 
 When combined with `"allowSignup": false` or unset, an admin should first create the user account so that the user can sign in with GitHub if they belong to the allowed orgs.
 
-  ```json
-    {
-      "type": "github",
-      // ...
-      "allowSignup": true,
-      "allowOrgs": ["org1", "org2"]
-    },
-  ```
+```json
+  {
+    "type": "github",
+    // ...
+    "allowSignup": true,
+    "allowOrgs": ["org1", "org2"]
+  },
+```
 
 **allowOrgsMap**
 
-  Restricts sign-ups and new logins to members of the listed teams or subteams mapped to the organizations they belong to. If empty or unset, no restrictions will be applied.
+Restricts sign-ups and new logins to members of the listed teams or subteams mapped to the organizations they belong to. If empty or unset, no restrictions will be applied.
 
-  When combined with `"allowSignup": true`, only members of the allowed teams can create their accounts in Sourcegraph via GitHub authentication.
+When combined with `"allowSignup": true`, only members of the allowed teams can create their accounts in Sourcegraph via GitHub authentication.
 
-  If set with `"allowSignup": false` or if `allowSignup` is unset, an admin should first create the new users accounts so that they can login with GitHub.
+If set with `"allowSignup": false` or if `allowSignup` is unset, an admin should first create the new users accounts so that they can login with GitHub.
 
-  In case both `allowOrgs` and `allowOrgsMap` filters are configured, org membership (`allowOrgs`) will be checked first. Only if the user doesn't belong to any of the listed organizations then team membership (`allowOrgsMap`) will be checked.
+In case both `allowOrgs` and `allowOrgsMap` filters are configured, org membership (`allowOrgs`) will be checked first. Only if the user doesn't belong to any of the listed organizations then team membership (`allowOrgsMap`) will be checked.
 
-  Note that subteams inheritance is not supported — the name of child teams (subteams) should be informed so their members can be granted access to Sourcegraph.
+Note that subteams inheritance is not supported — the name of child teams (subteams) should be informed so their members can be granted access to Sourcegraph.
 
-  When configuring teams in allowOrgsMap, use the team's display name. If the team names do not match exactly, users will be unable to create an account.
+When configuring teams in allowOrgsMap, use the team's display name. If the team names do not match exactly, users will be unable to create an account.
 
-  ```json
-    {
-       "type": "github",
-      // ...
-      "allowOrgsMap": {
-        "org1": [
-          "Your Team Name"
-        ],
-        "org2": [
-          "team1", "subteam1"
-        ],
-        "org3": [
-          "subteam2"
-        ]
-      }
-    }
-  ```
+```json
+{
+	"type": "github",
+	// ...
+	"allowOrgsMap": {
+		"org1": ["Your Team Name"],
+		"org2": ["team1", "subteam1"],
+		"org3": ["subteam2"]
+	}
+}
+```
 
 **requiredSsoOrgs**
 
 Requires that users have SAML SSO authorization for specific GitHub organizations when authenticating via OAuth. This is useful when your GitHub organizations enforce SAML SSO, and you want to ensure users properly authorize the OAuth application for those organizations during the authentication flow. Not doing so could cause permissions syncing issues.
 
 This setting accepts one of two values:
-- A list of **GitHub organization IDs** (numeric strings), not organization names.
-- A list with a single entry: ["all"], which means **all** organizations need to be authorized.
+
+-   A list of **GitHub organization IDs** (numeric strings), not organization names.
+-   A list with a single entry: ["all"], which means **all** organizations need to be authorized.
 
 **Finding your GitHub organization ID:**
 
@@ -207,13 +206,13 @@ The response will include an `id` field with your organization's numeric ID.
 
 ```json
 {
-  "type": "github",
-  "url": "https://github.com",
-  "displayName": "GitHub",
-  "clientID": "replace-with-the-oauth-client-id",
-  "clientSecret": "replace-with-the-oauth-client-secret",
-  "allowSignup": true,
-  "requiredSsoOrgs": ["123456789", "987654321"]
+	"type": "github",
+	"url": "https://github.com",
+	"displayName": "GitHub",
+	"clientID": "replace-with-the-oauth-client-id",
+	"clientSecret": "replace-with-the-oauth-client-secret",
+	"allowSignup": true,
+	"requiredSsoOrgs": ["123456789", "987654321"]
 }
 ```
 
@@ -222,8 +221,8 @@ The response will include an `id` field with your organization's numeric ID.
 [Create a GitLab OAuth application](https://docs.gitlab.com/ee/integration/oauth_provider.html). Set the following values, replacing `sourcegraph.example.com` with the IP or hostname of your
 Sourcegraph instance:
 
-- Authorization callback URL: `https://sourcegraph.example.com/.auth/gitlab/callback`
-- Scopes: `read_user`, `read_api` (be sure to set `"apiScope": "read_api"` in the `auth.providers` config, as indicated below)
+-   Authorization callback URL: `https://sourcegraph.example.com/.auth/gitlab/callback`
+-   Scopes: `read_user`, `read_api` (be sure to set `"apiScope": "read_api"` in the `auth.providers` config, as indicated below)
 
 Then add the following lines to your site configuration:
 
@@ -257,60 +256,57 @@ You can use the following filters to control how users can create accounts and s
 
 **allowSignup**
 
-  Allows anyone with a GitLab account to create their accounts.
+Allows anyone with a GitLab account to create their accounts.
 
-  When `false`, sign-up with GitLab will be blocked. In this case, new users can only sign in after an admin creates their account on Sourcegraph. The user account email should match their primary emails on GitLab (which are always verified).
+When `false`, sign-up with GitLab will be blocked. In this case, new users can only sign in after an admin creates their account on Sourcegraph. The user account email should match their primary emails on GitLab (which are always verified).
 
-  *If not set, unlike with GitHub, it defaults to `true`, allowing any GitLab user with access to your instance to sign up*.
+_If not set, unlike with GitHub, it defaults to `true`, allowing any GitLab user with access to your instance to sign up_.
 
-
-  ```json
-    {
-      "type": "gitlab",
-      // ...
-      "allowSignup": false
-    }
-  ```
+```json
+{
+	"type": "gitlab",
+	// ...
+	"allowSignup": false
+}
+```
 
 **allowGroups**
 
-  Restricts new sign-ins to members of the listed groups or subgroups.
+Restricts new sign-ins to members of the listed groups or subgroups.
 
-  Instead of informing the groups or subgroups names, use their full path that can be copied from the URL.
+Instead of informing the groups or subgroups names, use their full path that can be copied from the URL.
 
-  Example: for a parent group, the full path can be simple as `group`. For nested groups it can look like `group/subgroup/subsubgroup`.
+Example: for a parent group, the full path can be simple as `group`. For nested groups it can look like `group/subgroup/subsubgroup`.
 
-  When empty or unset, no restrictions will be applied.
+When empty or unset, no restrictions will be applied.
 
-  If combined with `"allowSignup": false`, an admin should first create the user account so that the user can sign in with GitLab.
+If combined with `"allowSignup": false`, an admin should first create the user account so that the user can sign in with GitLab.
 
-  If combined with `"allowSignup": true` or with `allowSignup` unset, only members of  the allowed groups or subgroups can create their accounts in Sourcegraph via GitLab authentitcation.
+If combined with `"allowSignup": true` or with `allowSignup` unset, only members of the allowed groups or subgroups can create their accounts in Sourcegraph via GitLab authentitcation.
 
 > WARNING: Users will require a minimum access level of `Guest` in at least one of the specified groups in order to gain access to Sourcegraph. GitLab offers a lower user permission level, [Minimal Access](https://docs.gitlab.com/ee/user/permissions.html#users-with-minimal-access), for Premium and Ultimate tier customers, which is often used to configure SAML SSO on GitLab. Sourcegraph does not currently support the `Minimal Access` access level, and users with this access level will not be allowed to sign in. In these cases it is recommended to create a subgroup and add all users that require access to Sourcegraph to that subgroup with a minimum access level of `Guest`, and then add that subgroup to the `allowGroups` list.
 
-  ```json
-    {
-      "type": "gitlab",
-      // ...
-      "allowSignup": true,
-      "allowGroups": [
-        "group/subgroup/subsubgroup"
-      ]
-    }
-  ```
+```json
+{
+	"type": "gitlab",
+	// ...
+	"allowSignup": true,
+	"allowGroups": ["group/subgroup/subsubgroup"]
+}
+```
 
 ### How to set up GitLab auth provider for use with GitLab group SAML/SSO
 
 GitLab groups can require SAML/SSO sign-in to have access to the group. The regular OAuth sign-in won't work in this case, as users will be redirected to the normal GitLab sign-in page, requesting a username/password. In this scenario, add a `ssoURL` to your GitLab auth provider configuration:
 
-  ```json
-    {
-      "type": "gitlab",
-      // ...
-      "ssoURL": "https://gitlab.com/groups/your-group/-/saml/sso?token=xxxxxxxx"
-      ]
-    }
-  ```
+```json
+  {
+    "type": "gitlab",
+    // ...
+    "ssoURL": "https://gitlab.com/groups/your-group/-/saml/sso?token=xxxxxxxx"
+    ]
+  }
+```
 
 The `token` parameter can be found on the **Settings > SAML SSO** page on GitLab.
 
@@ -318,23 +314,23 @@ The `token` parameter can be found on the **Settings > SAML SSO** page on GitLab
 
 If your organization has a lot of internal repositories that should be accessible to everyone on GitLab, you may want to [mark internal repositories as public](/admin/code_hosts/gitlab#internal-repositories), and then configure your auth provider to not sync user permissions for internal repositories:
 
-  ```json
-    {
-      "type": "gitlab",
-      // ...
-      "syncInternalRepoPermissions": false
-    }
-  ```
+```json
+{
+	"type": "gitlab",
+	// ...
+	"syncInternalRepoPermissions": false
+}
+```
 
 ## Bitbucket Cloud
 
 [Create a Bitbucket Cloud OAuth consumer](https://support.atlassian.com/bitbucket-cloud/docs/use-oauth-on-bitbucket-cloud/). Set the following values, replacing `sourcegraph.example.com` with the IP or hostname of your
 Sourcegraph instance:
 
-- Callback URL: `https://sourcegraph.example.com/.auth/bitbucketcloud/callback`
-- Permissions:
-  - `Account`: `Read`
-  - `Repositories`: `Read` (more information in [repository permissions section](/admin/permissions))
+-   Callback URL: `https://sourcegraph.example.com/.auth/bitbucketcloud/callback`
+-   Permissions:
+    -   `Account`: `Read`
+    -   `Repositories`: `Read` (more information in [repository permissions section](/admin/permissions))
 
 After the consumer is created, you will need the `Key` and the `Secret`, which can be found by expanding OAuth consumer in the list.
 Then add the following lines to your [site configuration](/admin/config/site_config):
@@ -352,6 +348,7 @@ Then add the following lines to your [site configuration](/admin/config/site_con
       }
     ]
 ```
+
 Replace the `clientKey` and `clientSecret` values with the values from your Bitbucket Cloud OAuth consumer.
 
 ## Bitbucket Server
@@ -359,9 +356,9 @@ Replace the `clientKey` and `clientSecret` values with the values from your Bitb
 [Configure a Bitbucket Server incoming link](https://confluence.atlassian.com/bitbucketserver0720/configure-an-incoming-link-1116282013.html). Set the following values, replacing `sourcegraph.example.com` with the IP or hostname of your
 Sourcegraph instance:
 
-- Redirect URL: `https://sourcegraph.example.com/.auth/bitbucketserver/callback`
-- Permissions:
-  - `Repositories`: `Read` (more information in [repository permissions section](/admin/permissions))
+-   Redirect URL: `https://sourcegraph.example.com/.auth/bitbucketserver/callback`
+-   Permissions:
+    -   `Repositories`: `Read` (more information in [repository permissions section](/admin/permissions))
 
 After the link is created, you will need to copy the `Client ID` and the `Client Secret`.
 Then add the following lines to your [site configuration](/admin/config/site_config):
@@ -380,9 +377,11 @@ Then add the following lines to your [site configuration](/admin/config/site_con
       }
     ]
 ```
+
 Replace the `clientID` and `clientSecret` values with the values from your Bitbucket Server link.
 
 ## Gerrit
+
 <span class="badge badge-beta">Beta</span>
 
 To enable users to add Gerrit credentials and verify their access to repositories on Sourcegraph,
@@ -406,20 +405,20 @@ Users can then add Gerrit credentials by visiting their **Settings** > **Account
 
 The [`openidconnect` auth provider](/admin/config/site_config#openid-connect-including-google-workspace) authenticates users via OpenID Connect, which is supported by many external services, including:
 
-- [Google Workspace (Google accounts)](#google-workspace-google-accounts)
-- [Okta](https://developer.okta.com/docs/api/resources/oidc.html)
-- [Ping Identity](https://www.pingidentity.com/en/resources/client-library/articles/openid-connect.html)
-- [Auth0](https://auth0.com/docs/protocols/oidc)
-- [Salesforce Identity](https://developer.salesforce.com/page/Inside_OpenID_Connect_on_Force.com)
-- [Microsoft Entra ID (Azure Active Directory)](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-protocols-openid-connect-code)
-- [Google Identity Platform](https://developers.google.com/identity/)
-- Known issue: [OneLogin](https://www.onelogin.com/openid-connect) OpenID Connect is not supported (use SAML for OneLogin instead)
+-   [Google Workspace (Google accounts)](#google-workspace-google-accounts)
+-   [Okta](https://developer.okta.com/docs/api/resources/oidc.html)
+-   [Ping Identity](https://www.pingidentity.com/en/resources/client-library/articles/openid-connect.html)
+-   [Auth0](https://auth0.com/docs/protocols/oidc)
+-   [Salesforce Identity](https://developer.salesforce.com/page/Inside_OpenID_Connect_on_Force.com)
+-   [Microsoft Entra ID (Azure Active Directory)](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-protocols-openid-connect-code)
+-   [Google Identity Platform](https://developers.google.com/identity/)
+-   Known issue: [OneLogin](https://www.onelogin.com/openid-connect) OpenID Connect is not supported (use SAML for OneLogin instead)
 
 If the OpenID Connect provider requires specifying scopes, the following scopes are required:
 
-- `openid`
-- `email`
-- `profile`
+-   `openid`
+-   `email`
+-   `profile`
 
 To configure Sourcegraph to authenticate users via OpenID Connect:
 
@@ -432,19 +431,19 @@ Example [`openidconnect` auth provider](/admin/config/site_config#openid-connect
 
 ```json
 {
-  // ...
-  "externalURL": "https://sourcegraph.example.com",
-  "auth.providers": [
-    {
-      "type": "openidconnect",
-      "issuer": "https://oidc.example.com",
-      "displayName": "Your Custom Provider Name", //This is optional
-      "clientID": "my-client-id",
-      "configID":"my-config-id", //An arbitrary value that will be used to reference to this auth provider within the site config
-      "clientSecret": "my-client-secret",
-      "requireEmailDomain": "example.com"
-    }
-  ]
+	// ...
+	"externalURL": "https://sourcegraph.example.com",
+	"auth.providers": [
+		{
+			"type": "openidconnect",
+			"issuer": "https://oidc.example.com",
+			"displayName": "Your Custom Provider Name", //This is optional
+			"clientID": "my-client-id",
+			"configID": "my-config-id", //An arbitrary value that will be used to reference to this auth provider within the site config
+			"clientSecret": "my-client-secret",
+			"requireEmailDomain": "example.com"
+		}
+	]
 }
 ```
 
@@ -456,16 +455,16 @@ See the [`openid` auth provider documentation](/admin/config/site_config#openid-
 
 **allowSignup**
 
-  If true or not set, it allows new users to creating their Sourcegraph accounts via OpenID.
-  When `false`, sign-up won't be available and a site admin should create new users accounts.
+If true or not set, it allows new users to creating their Sourcegraph accounts via OpenID.
+When `false`, sign-up won't be available and a site admin should create new users accounts.
 
-  ```json
-    {
-      "type": "openidconnect",
-      // ...
-      "allowSignup": false
-    }
-  ```
+```json
+{
+	"type": "openidconnect",
+	// ...
+	"allowSignup": false
+}
+```
 
 ### Google Workspace (Google accounts)
 
@@ -483,17 +482,17 @@ Example [`openidconnect` auth provider](/admin/config/site_config#openid-connect
 
 ```json
 {
-  // ...
-  "externalURL": "https://sourcegraph.example.com",
-  "auth.providers": [
-    {
-      "type": "openidconnect",
-      "issuer": "https://accounts.google.com", // All Google Workspace domains use this issuer URI.
-      "clientID": "my-client-id",
-      "clientSecret": "my-client-secret",
-      "requireEmailDomain": "example.com"
-    }
-  ]
+	// ...
+	"externalURL": "https://sourcegraph.example.com",
+	"auth.providers": [
+		{
+			"type": "openidconnect",
+			"issuer": "https://accounts.google.com", // All Google Workspace domains use this issuer URI.
+			"clientID": "my-client-id",
+			"clientSecret": "my-client-secret",
+			"requireEmailDomain": "example.com"
+		}
+	]
 }
 ```
 
@@ -505,14 +504,14 @@ To use an authentication proxy to authenticate users to Sourcegraph, add the fol
 
 ```json
 {
-  // ...
-  "auth.providers": [
-    {
-      "type": "http-header",
-      "usernameHeader": "X-Forwarded-User",
-      "emailHeader": "X-Forwarded-Email"
-    }
-  ]
+	// ...
+	"auth.providers": [
+		{
+			"type": "http-header",
+			"usernameHeader": "X-Forwarded-User",
+			"emailHeader": "X-Forwarded-Email"
+		}
+	]
 }
 ```
 
@@ -528,14 +527,14 @@ Some proxies add a prefix to the username header value. For example, Google IAP 
 
 ```json
 {
-  // ...
-  "auth.providers": [
-    {
-      "type": "http-header",
-      "usernameHeader": "x-goog-authenticated-user-email",
-      "stripUsernameHeaderPrefix": "accounts.google.com:"
-    }
-  ]
+	// ...
+	"auth.providers": [
+		{
+			"type": "http-header",
+			"usernameHeader": "x-goog-authenticated-user-email",
+			"stripUsernameHeaderPrefix": "accounts.google.com:"
+		}
+	]
 }
 ```
 
@@ -563,12 +562,12 @@ At the time of signing in with the new account, any of the email addresses confi
 
 Usernames provided from external authentication providers are normalized in Sourcegraph according to the following rules:
 
-- Any characters not in `[a-zA-Z0-9-._]` are replaced with `-`
-- Usernames with exactly one `@` character are interpreted as an email address, so the username will be extracted by truncating at the `@` character.
-- Usernames with two or more `@` characters are not considered an email address, so the `@` will be treated as a non-standard character and be replaced with `-`
-- Usernames with consecutive `-` or `.` characters are not allowed, so they are replaced with a single `-` or `.`
-- Usernames that start with `.` or `-` are not allowed, starting periods and dashes are removed
-- Usernames that end with `.` are not allowed, ending periods are removed
+-   Any characters not in `[a-zA-Z0-9-._]` are replaced with `-`
+-   Usernames with exactly one `@` character are interpreted as an email address, so the username will be extracted by truncating at the `@` character.
+-   Usernames with two or more `@` characters are not considered an email address, so the `@` will be treated as a non-standard character and be replaced with `-`
+-   Usernames with consecutive `-` or `.` characters are not allowed, so they are replaced with a single `-` or `.`
+-   Usernames that start with `.` or `-` are not allowed, starting periods and dashes are removed
+-   Usernames that end with `.` are not allowed, ending periods are removed
 
 Usernames from authentication providers are normalized before being used in Sourcegraph. Usernames chosen by users are rejected if they do not meet these criteria.
 

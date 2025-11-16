@@ -45,11 +45,14 @@ batch_spec_id SET NOT NULL;
 
 To correct these errors in the database run the suggested SQL queries via `psql` in internal databases, or via the tools provided by your cloud database provider.
 
-*docker example*
+_docker example_
+
 ```
 docker exec -it pgsql psql -U sg -c 'ALTER TABLE external_service_repos ADD CONSTRAINT external_service_repos_repo_id_external_service_id_unique UNIQUE (repo_id, external_service_id);'
 ```
-*kubernetes example*
+
+_kubernetes example_
+
 ```
 kubectl -n ns-sourcegraph exec -it pgsql -- psql -U sg -c 'ALTER TABLE external_service_repos ADD CONSTRAINT external_service_repos_repo_id_external_service_id_unique UNIQUE (repo_id, external_service_id);'
 ```
@@ -57,6 +60,7 @@ kubectl -n ns-sourcegraph exec -it pgsql -- psql -U sg -c 'ALTER TABLE external_
 Then check the database again with the `drift` command and proceed with your multiversion upgrade.
 
 > Note: It is possible for the drift command to detect diffs which will not prevent upgrades. For example the following drift output picked up formating differences `\n` vs `""`:
+
 ```
 ❌ Unexpected definition of function "lsif_data_docs_search_private_delete"
 strings.Join({

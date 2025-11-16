@@ -1,4 +1,4 @@
-import type { BaseAIConfig } from 'baseai';
+import type {BaseAIConfig} from 'baseai';
 
 export const config: BaseAIConfig = {
 	log: {

@@ -1,14 +1,24 @@
 # Creating Multiple Changesets in Large Repositories
 
-<p className="subtitle">Learn how to create multiple changesets in large-sized repos.</p>
+<p className="subtitle">
+	Learn how to create multiple changesets in large-sized repos.
+</p>
 
-<Callout type="note">Creating multiple changesets in large repos functionality is in the Beta stage.</Callout>
+<Callout type="note">
+	Creating multiple changesets in large repos functionality is in the Beta
+	stage.
+</Callout>
 
 Batch changes can produce a lot of changes in a single repository. Splitting the changes into multiple changesets makes reviewing and merging the changes easier.
 
 This can be done by using [`transformChanges`](/batch-changes/batch-spec-yaml-reference#transformchanges) in the batch spec to group the changes produced in one single repository by directory and create a changeset for each group.
 
-<Callout type="note">In some monorepos, it makes more sense to run the batch spec `steps` per project. Read [Creating changesets per project in monorepos](/batch-changes/creating-changesets-per-project-in-monorepos)to find out how to use the `workspaces` property for it.</Callout>
+<Callout type="note">
+	In some monorepos, it makes more sense to run the batch spec `steps` per
+	project. Read [Creating changesets per project in
+	monorepos](/batch-changes/creating-changesets-per-project-in-monorepos)to
+	find out how to use the `workspaces` property for it.
+</Callout>
 
 ## Using `transformChanges`
 
@@ -20,37 +30,38 @@ description: Add Hello World to READMEs
 
 # Find all repositories that contain a README file.
 on:
-  - repositoriesMatchingQuery: file:README
+    - repositoriesMatchingQuery: file:README
 
 # In each repository, run this command. Each repository's resulting diff is captured.
 steps:
-  - run: IFS=$'\n'; echo Hello World | tee -a $(find -name README)
-    container: alpine:3
+    - run: IFS=$'\n'; echo Hello World | tee -a $(find -name README)
+      container: alpine:3
 
 # Transform the changes produced in each repository.
 transformChanges:
-  # Group the file diffs by directory and produce one additional changeset per group.
-  # Changes that haven't been grouped will be be in the standard changeset.
-  group:
-    - directory: client
-      branch: hello-world-client # will replace the `branch` in the `changesetTemplate`
-    - directory: docker-images
-      # Optional: only apply the rule in this repository
-      repository: github.com/sourcegraph/sourcegraph
-      branch: hello-world-infra
-    - directory: monitoring
-      repository: github.com/sourcegraph/sourcegraph
-      branch: hello-world-monitoring
+    # Group the file diffs by directory and produce one additional changeset per group.
+    # Changes that haven't been grouped will be be in the standard changeset.
+    group:
+        - directory: client
+          branch: hello-world-client # will replace the `branch` in the `changesetTemplate`
+        - directory: docker-images
+          # Optional: only apply the rule in this repository
+          repository: github.com/sourcegraph/sourcegraph
+          branch: hello-world-infra
+        - directory: monitoring
+          repository: github.com/sourcegraph/sourcegraph
+          branch: hello-world-monitoring
 
 # Describe the changeset (e.g., GitHub pull request) you want for each repository.
 changesetTemplate:
-  title: Hello World
-  body: My first batch change!
-  branch: hello-world # This branch is the default branch and will be
-                      # overwritten for each additional changeset.
-  commit:
-    message: Append Hello World to all README files
-  published: false # Do not publish any changes to the code hosts yet
+    title: Hello World
+    body: My first batch change!
+    branch:
+        hello-world # This branch is the default branch and will be
+        # overwritten for each additional changeset.
+    commit:
+        message: Append Hello World to all README files
+    published: false # Do not publish any changes to the code hosts yet
 ```
 
 This batch spec will produce up to 4 changesets in the `github.com/sourcegraph/sourcegraph` repository:
@@ -64,4 +75,7 @@ Since code hosts and Git don't allow creating multiple, different changesets on 
 
 If no changes have been made in a `directory` specified in a `group`, no additional changeset will be produced. If the optional `repository` property is specified, only the changes in that repository will be grouped.
 
-<Callout type="info">Read more in [batch spec YAML reference about `transformChanges`](/batch-changes/batch-spec-yaml-reference#transformchanges).</Callout>
+<Callout type="info">
+	Read more in [batch spec YAML reference about
+	`transformChanges`](/batch-changes/batch-spec-yaml-reference#transformchanges).
+</Callout>

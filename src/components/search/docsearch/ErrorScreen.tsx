@@ -1,27 +1,26 @@
-
-import { ErrorIcon } from './icons/ErrorIcon';
+import {ErrorIcon} from './icons/ErrorIcon';
 
 export type ErrorScreenTranslations = Partial<{
-  titleText: string;
-  helpText: string;
+	titleText: string;
+	helpText: string;
 }>;
 
 type ErrorScreenProps = {
-  translations?: ErrorScreenTranslations;
+	translations?: ErrorScreenTranslations;
 };
 
-export function ErrorScreen({ translations = {} }: ErrorScreenProps) {
-  const {
-    titleText = 'Unable to fetch results',
-    helpText = 'You might want to check your network connection.',
-  } = translations;
-  return (
-    <div className="DocSearch-ErrorScreen">
-      <div className="DocSearch-Screen-Icon">
-        <ErrorIcon />
-      </div>
-      <p className="DocSearch-Title">{titleText}</p>
-      <p className="DocSearch-Help">{helpText}</p>
-    </div>
-  );
+export function ErrorScreen({translations = {}}: ErrorScreenProps) {
+	const {
+		titleText = 'Unable to fetch results',
+		helpText = 'You might want to check your network connection.'
+	} = translations;
+	return (
+		<div className="DocSearch-ErrorScreen">
+			<div className="DocSearch-Screen-Icon">
+				<ErrorIcon />
+			</div>
+			<p className="DocSearch-Title">{titleText}</p>
+			<p className="DocSearch-Help">{helpText}</p>
+		</div>
+	);
 }

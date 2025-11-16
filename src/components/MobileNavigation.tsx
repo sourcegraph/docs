@@ -82,7 +82,7 @@ export function MobileNavigation() {
 				className="fixed inset-0 z-50 flex items-start overflow-y-auto bg-slate-900/50 pr-10 backdrop-blur lg:hidden"
 				aria-label="Navigation"
 			>
-				<Dialog.Panel className="min-h-full w-full max-w-xs bg-light-bg px-4 pb-12 pt-5 dark:bg-dark-bg sm:px-6">
+				<Dialog.Panel className="min-h-full w-full max-w-xs bg-light-bg px-4 pb-12 pt-5 sm:px-6 dark:bg-dark-bg">
 					<div className="flex items-center">
 						<button
 							type="button"

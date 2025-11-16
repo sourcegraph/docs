@@ -24,12 +24,12 @@ For Docker Compose:
 
 ```yaml
 services:
-  searcher-0:
-    environment:
-      # Enables Rockskip
-      - USE_ROCKSKIP=true
-      # Uses Rockskip for all repositories over 1GB
-      - ROCKSKIP_MIN_REPO_SIZE_MB=1000
+    searcher-0:
+        environment:
+            # Enables Rockskip
+            - USE_ROCKSKIP=true
+            # Uses Rockskip for all repositories over 1GB
+            - ROCKSKIP_MIN_REPO_SIZE_MB=1000
 ```
 
 For Helm:
@@ -37,13 +37,13 @@ For Helm:
 ```yaml
 # overrides.yaml
 searcher:
-  env:
-    # Enables Rockskip
-    USE_ROCKSKIP:
-      value: "true"
-    # Uses Rockskip for all repositories over 1GB
-    ROCKSKIP_MIN_REPO_SIZE_MB:
-      value: "1000"
+    env:
+        # Enables Rockskip
+        USE_ROCKSKIP:
+            value: 'true'
+        # Uses Rockskip for all repositories over 1GB
+        ROCKSKIP_MIN_REPO_SIZE_MB:
+            value: '1000'
 ```
 
 For Kubernetes:
@@ -51,24 +51,24 @@ For Kubernetes:
 ```yaml
 # base/searcher/searcher.Deployment.yaml
 spec:
-  template:
-    spec:
-      containers:
-      - name: searcher
-        env:
-        # Enables Rockskip
-        - name: USE_ROCKSKIP
-          value: "true"
-        # Uses Rockskip for all repositories over 1GB
-        - name: ROCKSKIP_MIN_REPO_SIZE_MB
-          value: "1000"
+    template:
+        spec:
+            containers:
+                - name: searcher
+                  env:
+                      # Enables Rockskip
+                      - name: USE_ROCKSKIP
+                        value: 'true'
+                      # Uses Rockskip for all repositories over 1GB
+                      - name: ROCKSKIP_MIN_REPO_SIZE_MB
+                        value: '1000'
 ```
 
 For all deployments, make sure that:
 
-- The `searcher` service has access to the codeintel DB
-- The `searcher` service has the environment variables set
-- The `codeintel-db` has a few extra GB of RAM
+-   The `searcher` service has access to the codeintel DB
+-   The `searcher` service has the environment variables set
+-   The `codeintel-db` has a few extra GB of RAM
 
 **Step 2:** Kick off indexing
 
@@ -100,14 +100,14 @@ The easiest way to check the status of a single repository is to open the symbol
 
 For more info, the searcher container responds to GET requests on the `localhost:3184/status` endpoint with the following info:
 
-- Repository count
-- Size of the symbols table in Postgres
-- Most recently searched repositories
-- List of in-flight indexing and search requests
+-   Repository count
+-   Size of the symbols table in Postgres
+-   Most recently searched repositories
+-   List of in-flight indexing and search requests
 
 For Kubernetes, find the searcher pod and `exec` a `curl` command in it:
 
-``` yaml
+```yaml
 $ kubectl get pods | grep searcher
 searcher-5ff7c67b57-mr5h4
 
@@ -141,4 +141,4 @@ For a deeper dive into the index and query structures, check out the [explanator
 
 ## Limitations
 
-- Rockskip does not support file paths that are not encoded in UTF-8. Consequently, any symbols in files with non-UTF-8 encoded paths will not be indexed.
+-   Rockskip does not support file paths that are not encoded in UTF-8. Consequently, any symbols in files with non-UTF-8 encoded paths will not be indexed.

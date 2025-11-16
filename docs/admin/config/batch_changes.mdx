@@ -26,7 +26,7 @@ To restore the default behavior, you can either delete the `batchChanges.rollout
 
 Or, to put it another way:
 
-| `batchChanges.rolloutWindows` configuration |                                                                                                                                           Behavior                                                                                                                                           |
+| `batchChanges.rolloutWindows` configuration | Behavior                                                                                                                                                                                                                                                                                     |
 | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Omitted, or set to `null`                   | Changesets will be reconciled as fast as the code host allows; essentially the same as setting a single `{"rate": "unlimited"}` window.                                                                                                                                                      |
 | Set to an array (even if empty)             | Changesets will be reconciled using the rate limit in the current window using [the leaky bucket behavior described below](#leaky-bucket-rate-limiting). If no window covers the current period, then no changesets will be reconciled until a window with a non-zero [`rate`](#rate) opens. |
@@ -42,9 +42,9 @@ Practically speaking, this means that the given rate can be thought of more as a
 
 Keep in mind that if you configure a rollout window that is too aggressive, you risk exceeding your code hosts' API rate limits. We recommend maintaining a rate that is no faster than `5/minute`; however, you can refer to your code host's API docs if you wish to increase it beyond this recommendation:
 
-* [GitHub](https://docs.github.com/en/graphql/overview/resource-limitations#rate-limit)
-* [GitLab](https://docs.gitlab.com/ee/user/gitlab_com/.html#gitlabcom-specific-rate-limits)
-* [Bitbucket Cloud](https://support.atlassian.com/bitbucket-cloud/docs/api-request-limits/)
+-   [GitHub](https://docs.github.com/en/graphql/overview/resource-limitations#rate-limit)
+-   [GitLab](https://docs.gitlab.com/ee/user/gitlab_com/.html#gitlabcom-specific-rate-limits)
+-   [Bitbucket Cloud](https://support.atlassian.com/bitbucket-cloud/docs/api-request-limits/)
 
 When using a [global service account token](/batch-changes/configuring-credentials#global-service-account-tokens) with Batch Changes, keep in mind that this token will also be used for other Batch Changes with code host interactions, too.
 
@@ -64,10 +64,10 @@ A rollout window is a JSON object that looks as follows:
 
 ```json
 {
-  "rate": "10/hour",
-  "days": ["saturday", "sunday"],
-  "start": "06:00",
-  "end": "20:00"
+	"rate": "10/hour",
+	"days": ["saturday", "sunday"],
+	"start": "06:00",
+	"end": "20:00"
 }
 ```
 
@@ -79,16 +79,16 @@ In the event multiple windows overlap, the last defined window will be used.
 
 `rate` describes the rate at which changesets will be reconciled. This may be expressed in one of the following ways:
 
-* The string `unlimited`, in which case no limit will be applied for this window, or
-* A string in the format `N/UNIT`, where `N` is a number and `UNIT` is one of `second`, `minute`, or `hour`; for example, `10/hour` would allow 10 changesets to be reconciled per hour, or
-* The number `0`, which will prevent any changesets from being reconciled when this window is active.
+-   The string `unlimited`, in which case no limit will be applied for this window, or
+-   A string in the format `N/UNIT`, where `N` is a number and `UNIT` is one of `second`, `minute`, or `hour`; for example, `10/hour` would allow 10 changesets to be reconciled per hour, or
+-   The number `0`, which will prevent any changesets from being reconciled when this window is active.
 
 #### `days`
 
 `days` is an array of strings that defines the days of the week that the window applies to. English day names are accepted in a case insensitive manner:
 
-* `["saturday", "sunday"]` constrains the window to Saturday and Sunday.
-* `["tuesday"]` constrains the window to only Tuesday.
+-   `["saturday", "sunday"]` constrains the window to Saturday and Sunday.
+-   `["tuesday"]` constrains the window to only Tuesday.
 
 If omitted or an empty array, all days of the week will be matched.
 
@@ -104,15 +104,15 @@ To rate limit changeset publication to 3 per minute between 08:00 and 16:00 UTC 
 
 ```json
 [
-  {
-    "rate": "unlimited"
-  },
-  {
-    "rate": "3/minute",
-    "days": ["monday", "tuesday", "wednesday", "thursday", "friday"],
-    "start": "08:00",
-    "end": "16:00"
-  }
+	{
+		"rate": "unlimited"
+	},
+	{
+		"rate": "3/minute",
+		"days": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+		"start": "08:00",
+		"end": "16:00"
+	}
 ]
 ```
 
@@ -120,10 +120,10 @@ To only allow changesets to be reconciled at 1 changeset per minute on (UTC) wee
 
 ```json
 [
-  {
-    "rate": "1/minute",
-    "days": ["saturday", "sunday"]
-  }
+	{
+		"rate": "1/minute",
+		"days": ["saturday", "sunday"]
+	}
 ]
 ```
 
@@ -143,7 +143,7 @@ To enable forks, update the site configuration to include:
 
 ```json
 {
-  "batchChanges.enforceForks": true
+	"batchChanges.enforceForks": true
 }
 ```
 
@@ -161,14 +161,14 @@ For those that require a separate API call, Batch Changes will only be able to d
 
 Refer to the table below to see the levels with which each code host is supported:
 
-   Code Host     | Changeset property or separate API call? | Support on merge | Support on close |                                                                            Note
----------------- | ---------------------------------------- | :--------------: | :--------------: | -----------------------------------------------------------------------------------------------------------------------------------------------------------
-Azure DevOps     | Changeset property                       |        ✓         |        ✗         |
-Bitbucket Cloud  | Changeset property                       |        ✓         |        ✓         |
-Bitbucket Server | API call                                 |        ✓         |        ✓         |
-GitHub           | API call                                 |        ✓         |        ✓         |
-GitLab           | Changeset property                       |        ✓         |        ✓         |
-Gerrit           | API call                                 |        ✗         |        ✓         | Requires ["delete own changes" permission](https://gerrit-review.googlesource.com/Documentation/access-control.html#category_delete_own_changes) at minimum
+| Code Host        | Changeset property or separate API call? | Support on merge | Support on close | Note                                                                                                                                                        |
+| ---------------- | ---------------------------------------- | :--------------: | :--------------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Azure DevOps     | Changeset property                       |        ✓         |        ✗         |
+| Bitbucket Cloud  | Changeset property                       |        ✓         |        ✓         |
+| Bitbucket Server | API call                                 |        ✓         |        ✓         |
+| GitHub           | API call                                 |        ✓         |        ✓         |
+| GitLab           | Changeset property                       |        ✓         |        ✓         |
+| Gerrit           | API call                                 |        ✗         |        ✓         | Requires ["delete own changes" permission](https://gerrit-review.googlesource.com/Documentation/access-control.html#category_delete_own_changes) at minimum |
 
 ## Commit signing
 
@@ -176,7 +176,10 @@ Batch Changes supports commit signing with both GitHub apps and with SSH keys.
 
 ### Commit signing with SSH keys (GitLab and GitHub)
 
-<Callout type="note">Commit signing with SSH keys is currently Experimental and is supported only with Sourcegraph v6.2 or more.</Callout>
+<Callout type="note">
+	Commit signing with SSH keys is currently Experimental and is supported only
+	with Sourcegraph v6.2 or more.
+</Callout>
 
 Commit signing with SSH keys can only be combined with a personal or fine-grained access token.
 
@@ -207,13 +210,20 @@ To enable **commit signing as a site admin**, navigate to **Site Admin > Section
 
 ### Commit signing with GitHub apps
 
-<Callout type="note">Commit signing with GitHub apps is currently in Beta and is supported with Sourcegraph v5.1 or more.</Callout>
+<Callout type="note">
+	Commit signing with GitHub apps is currently in Beta and is supported with
+	Sourcegraph v5.1 or more.
+</Callout>
 
 Sourcegraph can be configured to [sign commits pushed to GitHub](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification) using a GitHub App. Commit signing prevents tampering by unauthorized parties and provides a way to ensure that commits pushed to branches created by Batch Changes actually do come from Sourcegraph. Enabling commit signing for Batch Changes can also help pass checks in build systems or CI/CD pipelines that require that all commits are signed and verified before they can be merged.
 
 At present, only GitHub code hosts (both Cloud and Enterprise) are supported, and only GitHub App signing is supported. Support for other code hosts and signing methods may be added in the future.
 
-<Callout type="note"> Commit signing on GitHub Enterprise requires [web commit signing](https://docs.github.com/en/enterprise-server@3.14/admin/configuring-settings/configuring-user-applications-for-your-enterprise/configuring-web-commit-signing#enabling-web-commit-signing) to be enabled. Otherwise commits from GitHub apps will be unverified.</Callout>
+<Callout type="note">
+	{' '}
+	Commit signing on GitHub Enterprise requires [web commit signing](https://docs.github.com/en/enterprise-server@3.14/admin/configuring-settings/configuring-user-applications-for-your-enterprise/configuring-web-commit-signing#enabling-web-commit-signing)
+	to be enabled. Otherwise commits from GitHub apps will be unverified.
+</Callout>
 
 GitHub Apps are also the recommended way to [sync repositories on GitHub](/admin/code_hosts/github#using-a-github-app). However, **they are not a replacement for [PATs](/batch-changes/configuring-credentials#personal-access-tokens) in Batch Changes**. It is **also** necessary to create a separate GitHub App for Batch Changes commit signing even if you already have an App connected for the same code host for repository syncing because the Apps require different permissions. The process for creating each type of GitHub App is almost identical.
 
@@ -221,7 +231,10 @@ To create a GitHub App for commit signing and connect it to Sourcegraph:
 
 1. Go to **Site admin > Batch Changes > Settings** on Sourcegraph.
 
-<img alt="The Batch Changes settings page on Sourcegraph, scrolled to show commit signing integrations" src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-apps-batches-list-dark.png" />
+<img
+	alt="The Batch Changes settings page on Sourcegraph, scrolled to show commit signing integrations"
+	src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-apps-batches-list-dark.png"
+/>
 
 1. Click **Create GitHub App** for the GitHub instance on which you want to enable commit signing.
 2. Enter a name for your app (it must be unique across your GitHub instance).
@@ -230,19 +243,31 @@ To create a GitHub App for commit signing and connect it to Sourcegraph:
 
     You may also optionally set the App visibility to public. A GitHub App must be made public if you wish to install it on multiple organizations or user accounts. The default is private.
 
-<img alt="The GitHub App creation page on Sourcegraph, with the default values filled out" src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-apps-create-batches-dark.png" />
+<img
+	alt="The GitHub App creation page on Sourcegraph, with the default values filled out"
+	src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-apps-create-batches-dark.png"
+/>
 
 1. When you click **Create GitHub App**, you will be redirected to GitHub to confirm the details of the App to be created.
 
-<img alt="The GitHub App creation page on GitHub" src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-create-on-gh-batches-dark.png"  />
+<img
+	alt="The GitHub App creation page on GitHub"
+	src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-create-on-gh-batches-dark.png"
+/>
 
 1. To complete the setup on GitHub, you will be asked to review the App permissions and select which repositories the App can access before installing it in a namespace. The default is **All repositories**. Any repositories that you choose to omit will not be able to have changesets published to them from Sourcegraph. You can change this later.
 
-<img alt="The GitHub App installation page on GitHub" src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-install-gh-batches-dark.png"  />
+<img
+	alt="The GitHub App installation page on GitHub"
+	src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-install-gh-batches-dark.png"
+/>
 
 1. Click **Install**. Once complete, you will be redirected back to Sourcegraph, where the updated commit signing integration should be listed.
 
-<img alt="The Batch Changes settings page on Sourcegraph, scrolled to show the newly added commit signing integration" src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-post-create-batches-dark.png"  />
+<img
+	alt="The Batch Changes settings page on Sourcegraph, scrolled to show the newly added commit signing integration"
+	src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-post-create-batches-dark.png"
+/>
 
 1. (Optional) If you want to sign commits for changesets in repositories from other organization or user namespaces and your GitHub App is set to public visibility, you can create additional installations by clicking **Edit** on the App and then from the detail page clicking **Add installation**.
 
@@ -258,13 +283,19 @@ Once public, App can be installed in additional namespaces either from Sourcegra
 
 1. Go to **Site admin > Batch Changes > Settings** and click **Edit** on the App you want to install in another namespace. You'll be taken to the App details page.
 
-<img alt="The GitHub App details page on Sourcegraph" src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-details-batches-dark.png"  />
+<img
+	alt="The GitHub App details page on Sourcegraph"
+	src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-details-batches-dark.png"
+/>
 
 1. Click **Add installation**. You will be redirected to GitHub to pick which other organization to install the App on and finish the installation process.
 
     > NOTE: Only [organization owners](https://docs.github.com/en/organizations/managing-peoples-access-to-your-organization-with-roles/roles-in-an-organization#organization-owners) can install GitHub Apps on an organization. If you are not an owner, you will need to ask an owner to install the App for you.
 
-<img alt="The GitHub App installation page, with a list of namespaces to select from" src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-multi-install-gh-batches-dark.png"  />
+<img
+	alt="The GitHub App installation page, with a list of namespaces to select from"
+	src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-multi-install-gh-batches-dark.png"
+/>
 
 1. As before, you will be asked to review the App permissions and select which repositories the App can access before installing it in a namespace. Once you click **Install** and the setup completes, you will be redirected back to Sourcegraph. You will now be able to push signed commits for repositories in this namespace.
 
@@ -275,7 +306,10 @@ Once public, App can be installed in additional namespaces either from Sourcegra
 3. As before, you will be asked to review the App permissions and select which repositories the App can access before installing it in a namespace. Once you click **Install** and the setup completes, you will be redirected back to Sourcegraph.
 4. GitHub App installations will be automatically synced in the background. Return to **Site admin > Batch Changes > Settings** and click **Edit** on the App you added the new installation for. You'll be taken to the App details page. Once synced, you will see the new installation listed, and you will be able to push signed commits for repositories in this namespace.
 
-<img alt="The GitHub App details page on Sourcegraph, scrolled to show a second new installation" src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-post-multi-install-batches-dark.png"  />
+<img
+	alt="The GitHub App details page on Sourcegraph, scrolled to show a second new installation"
+	src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-post-multi-install-batches-dark.png"
+/>
 
 ### Uninstalling an App
 
@@ -310,11 +344,9 @@ If you are using a self-signed certificate for your GitHub Enterprise instance, 
 
 ```json
 {
-  "tls.external": {
-    "certificates": [
-      "-----BEGIN CERTIFICATE-----\n..."
-    ]
-  }
+	"tls.external": {
+		"certificates": ["-----BEGIN CERTIFICATE-----\n..."]
+	}
 }
 ```
 
@@ -343,7 +375,9 @@ Examples are visible in the library pane when you are in the batch spec editor. 
 
 ### Templates
 
-<Callout type="note">Templates are supported in Sourcegraph v6.6 and more.</Callout>
+<Callout type="note">
+	Templates are supported in Sourcegraph v6.6 and more.
+</Callout>
 
 Templates are like examples, but with variables for easy reuse across multiple batch changes. Templates provide the simplest path for users to create batch changes without needing to learn Batch Spec YAML syntax. Users select from a curated list of templates and complete a form with the required parameters, making batch change creation accessible to all team members regardless of their technical background.
 
@@ -353,10 +387,11 @@ Variables can be used to replace any text in the batch spec except the batch cha
 
 ### Managing the Batch Spec Library
 
-<Callout type="note">Site admins can manage the Batch Spec library in Sourcegraph v6.4 and more.</Callout>
+<Callout type="note">
+	Site admins can manage the Batch Spec library in Sourcegraph v6.4 and more.
+</Callout>
 
 Site admins can manage the library through the GraphQL mutations `createBatchSpecLibraryRecord`, `updateBatchSpecLibraryRecord`, and `deleteBatchSpecLibraryRecord`. Use the query `batchSpecLibrary` to list all available Batch Spec examples.
-
 
 ```graphql
 createBatchSpecLibraryRecord(name: "example", spec: "version: 2\nname: example") {
@@ -415,20 +450,24 @@ batchSpecLibrary(first: 100, labels: ["featured"]) {
 
 ### Variables
 
-<Callout type="note">Variables are supported in Sourcegraph v6.6 and more.</Callout>
+<Callout type="note">
+	Variables are supported in Sourcegraph v6.6 and more.
+</Callout>
 
 When creating a template, you can define placeholders for values that will vary between different uses of the template. Users filling out the template see these variables as form fields where they can enter specific values like repository names, file paths, or commit messages.
 
-<Callout type="note">You cannot use a variable for the batch change name.</Callout>
+<Callout type="note">
+	You cannot use a variable for the batch change name.
+</Callout>
 
 The `libraryVariables` field accepts an array of variable objects, each with the following configuration options:
 
-- **Name**: The variable identifier used in the template
-- **Display name**: Optional human-readable name shown in the form interface
-- **Pattern**: Regular expression for input validation
-- **Description**: Help text shown to users explaining what the variable is for
-- **Mandatory**: Boolean field indicating whether the variable is required
-- **Level**: Validation message severity level (`INFO`, `WARNING`, or `ERROR`)
+-   **Name**: The variable identifier used in the template
+-   **Display name**: Optional human-readable name shown in the form interface
+-   **Pattern**: Regular expression for input validation
+-   **Description**: Help text shown to users explaining what the variable is for
+-   **Mandatory**: Boolean field indicating whether the variable is required
+-   **Level**: Validation message severity level (`INFO`, `WARNING`, or `ERROR`)
 
 You can create templates by adding the `libraryVariables` field to the `createBatchSpecLibraryRecord` mutation. Here's an example that creates a simple template:
 
