@@ -5,8 +5,6 @@ import clsx from 'clsx';
 import {ChevronRightIcon} from '@heroicons/react/20/solid';
 import {useEffect, useState} from 'react';
 import {usePathname} from 'next/navigation';
-import {navigation} from '@/data/navigation';
-import {allPosts} from 'contentlayer/generated';
 
 export function Breadcrumbs({path}: {path: string[]}) {
 	let pathname = usePathname();
@@ -23,36 +21,6 @@ export function Breadcrumbs({path}: {path: string[]}) {
 	// Prepends version (if any) to the link path
 	const prependVersion = (path: string) => {
 		return version ? `/v/${version}${path}` : path;
-	};
-
-	const getTitleForSlug = (currentPath: string[]): string => {
-		const href = `/${currentPath.join('/')}`;
-
-		for (const navItem of navigation) {
-			for (const topic of navItem.topics) {
-				if (topic.href === href) return topic.title;
-
-				if (topic.sections) {
-					for (const section of topic.sections) {
-						if (section.href === href) return section.title;
-
-						if (section.subsections) {
-							for (const subsection of section.subsections) {
-								if (subsection.href === href) return subsection.title;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		const pagePath = currentPath.join('/');
-		const post = allPosts.find(post => post._raw.flattenedPath === pagePath);
-		if (post && post.headings && post.headings.length > 0) {
-			return post.headings[0].title;
-		}
-
-		throw new Error(`No title found in navigation.ts or page headings for path: ${href}`);
 	};
 
 	// Handle versions
@@ -99,7 +67,7 @@ export function Breadcrumbs({path}: {path: string[]}) {
 										: 'text-gray-500 hover:text-link-light dark:hover:text-link'
 								)}
 							>
-								{getTitleForSlug(path.slice(0, index + 1))}
+								{slug}
 							</Link>
 						</div>
 					</li>
