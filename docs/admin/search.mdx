@@ -67,7 +67,16 @@ will not return any result.
 
 ## Indexed search
 
-Sourcegraph indexes the code on the default branch of each repository. This speeds up searches that hit many repositories at once. Not all files in a repository branch are indexed, we skip files that are [larger than 1 MB](#maximum-file-size) and binary files. To view which files are skipped during indexing, visit the repository settings page and click on indexing.
+Sourcegraph indexes the code on the default branch of each repository. This speeds up searches that hit many repositories at once. Not all files in a repository branch are indexed. We skip:
+
+- Files that are [larger than 1 MB](#maximum-file-size).
+- Binary files.
+- Files exceeding 20,000 unique trigrams (sequences of three characters).
+- Files that are not valid UTF-8.
+
+To view which files are skipped during indexing, visit the repository settings page and click on **Indexing**.
+
+To force the indexer to include specific files (like `yarn.lock` or other large text files) that are otherwise skipped, add their file path or a glob pattern to the [`search.largeFiles`](/admin/config/site_config#search-largeFiles) setting in your site configuration and reindex the repository. Note that files must still be valid UTF-8 to be indexed, even if added to `search.largeFiles`.
 
 For large deployments we recommend horizontally scaling indexed search. You can do this by [adjusting the number of replicas](https://github.com/sourcegraph/deploy-sourcegraph/blob/master/docs/configure#configure-indexed-search-replica-count). Sourcegraph shards repository indexes across replicas. When the replica count changes Sourcegraph will slowly rebalance indexes to ensure availability of existing indexes.
 
