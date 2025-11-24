@@ -8,18 +8,18 @@ The installation guide below will walk you through deploying Sourcegraph on Goog
 
 The GKE overlay will:
 
-- Deploy a Sourcegraph instance without RBAC resources
-- Create [BackendConfig](https://cloud.google.com/kubernetes-engine/docs/how-to/ingress-configuration#create_backendconfig) CRD. This is necessary to instruct the GCP load balancer on how to perform health checks on our deployment.
-- Configure ingress to use [Container-native load balancing](https://cloud.google.com/kubernetes-engine/docs/how-to/container-native-load-balancing) to expose Sourcegraph publicly on a domain of your choosing and
-- Create Storage Class to use [Compute Engine persistent disk](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/gce-pd-csi-driver).
+-   Deploy a Sourcegraph instance without RBAC resources
+-   Create [BackendConfig](https://cloud.google.com/kubernetes-engine/docs/how-to/ingress-configuration#create_backendconfig) CRD. This is necessary to instruct the GCP load balancer on how to perform health checks on our deployment.
+-   Configure ingress to use [Container-native load balancing](https://cloud.google.com/kubernetes-engine/docs/how-to/container-native-load-balancing) to expose Sourcegraph publicly on a domain of your choosing and
+-   Create Storage Class to use [Compute Engine persistent disk](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/gce-pd-csi-driver).
 
 ## Prerequisites
 
-- A running GKE cluster with the following configurations:
-  - **Enable HTTP load balancing** in Networking
-  - **SSD persistent disk** as book disk type
-- Minimum Kubernetes version: [v1.19](https://kubernetes.io/blog/2020/08/26/kubernetes-release-1.19-accentuate-the-paw-sitive/) with [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) v1.19 or later
-- [Kustomize](https://kustomize.io/) (built into `kubectl` in version >= 1.14)
+-   A running GKE cluster with the following configurations:
+    -   **Enable HTTP load balancing** in Networking
+    -   **SSD persistent disk** as book disk type
+-   Minimum Kubernetes version: [v1.19](https://kubernetes.io/blog/2020/08/26/kubernetes-release-1.19-accentuate-the-paw-sitive/) with [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) v1.19 or later
+-   [Kustomize](https://kustomize.io/) (built into `kubectl` in version >= 1.14)
 
 ## Quick Start
 
@@ -68,7 +68,7 @@ Forward the remote port so that you can access Sourcegraph without network confi
 kubectl port-forward svc/sourcegraph-frontend 3080:30080 -n ns-sourcegraph
 ```
 
-You should now be able to access your new Sourcegraph instance at http://localhost:3080  🎉
+You should now be able to access your new Sourcegraph instance at http://localhost:3080 🎉
 
 ### Further configuration
 
@@ -82,24 +82,25 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: ns-sourcegraph
 resources:
-  # Deploy Sourcegraph main stack
-  - ../../base/sourcegraph
-  # Deploy Sourcegraph monitoring stack
-  - ../../base/monitoring
+    # Deploy Sourcegraph main stack
+    - ../../base/sourcegraph
+    # Deploy Sourcegraph monitoring stack
+    - ../../base/monitoring
 components:
-  # Create a namespace for ns-sourcegraph
-  - ../../components/resources/namespace
-  # Use resources for a size-XS instance
-  - ../../components/sizes/xs
-  # Apply configurations for GKE
-  - ../../components/clusters/gke/configure
+    # Create a namespace for ns-sourcegraph
+    - ../../components/resources/namespace
+    # Use resources for a size-XS instance
+    - ../../components/sizes/xs
+    # Apply configurations for GKE
+    - ../../components/clusters/gke/configure
 ```
 
 #### Enable TLS
 
 Once you have created a new overlay using the kustomization file from our examples overlay for gke, we strongly recommend you to:
-- create a DNS A record for your Sourcegraph instance domain
-- enable TLS is highly recommended.
+
+-   create a DNS A record for your Sourcegraph instance domain
+-   enable TLS is highly recommended.
 
 If you would like to enable TLS with your own certificate, please read the [TLS configuration guide](/admin/deploy/kubernetes/configure#tls) for detailed instructions.
 
@@ -115,13 +116,13 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: ns-sourcegraph
 resources:
-  - ../../base/sourcegraph
-  - ../../base/monitoring
+    - ../../base/sourcegraph
+    - ../../base/monitoring
 components:
-  - ../../components/resources/namespace
-  - ../../components/sizes/xs
-  - ../../components/clusters/gke/configure
-  - ../../components/clusters/gke/managed-cert
+    - ../../components/resources/namespace
+    - ../../components/sizes/xs
+    - ../../components/clusters/gke/configure
+    - ../../components/clusters/gke/managed-cert
 ```
 
 Step 2: Set the `GKE_MANAGED_CERT_NAME` variable with your Google-managed certificate name under the [BUILD CONFIGURATIONS](/admin/deploy/kubernetes/kustomize#buildconfig-yaml) section:
@@ -130,9 +131,9 @@ Step 2: Set the `GKE_MANAGED_CERT_NAME` variable with your Google-managed certif
 # instances/$INSTANCE_NAME/buildConfig.yaml
 kind: SourcegraphBuildConfig
 metadata:
-  name: sourcegraph-kustomize-config
+    name: sourcegraph-kustomize-config
 data:
-  GKE_MANAGED_CERT_NAME: your-managed-cert-name
+    GKE_MANAGED_CERT_NAME: your-managed-cert-name
 ```
 
 ### Remote Build
@@ -150,10 +151,9 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: ns-sourcegraph
 resources:
-  - https://github.com/sourcegraph/deploy-sourcegraph-k8s/examples/gke
+    - https://github.com/sourcegraph/deploy-sourcegraph-k8s/examples/gke
 components:
-  # Add components here
-  - https://github.com/sourcegraph/deploy-sourcegraph-k8s/components/monitoring/cadvisor
-  - https://github.com/sourcegraph/deploy-sourcegraph-k8s/components/monitoring/tracing
-
+    # Add components here
+    - https://github.com/sourcegraph/deploy-sourcegraph-k8s/components/monitoring/cadvisor
+    - https://github.com/sourcegraph/deploy-sourcegraph-k8s/components/monitoring/tracing
 ```

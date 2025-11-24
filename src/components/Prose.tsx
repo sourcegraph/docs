@@ -21,7 +21,7 @@ export function Prose<T extends React.ElementType = 'div'>({
 				// lead
 				'prose-lead:text-slate-500 dark:prose-lead:text-dark-paragraph-text',
 				// links
-				'prose-a:font-semibold prose-a:text-vermilion-00 hover:prose-a-text:[#606060] visited:text-[#4A4A4A] hover:visited:text-[#606060] dark:prose-a:text-vermilion-11 dark:hover:prose-a:text-dark-text-secondary dark:visited:text-[#606060] dark:hover:visited:text-[#A9A9A9]',
+				'hover:prose-a-text:[#606060] visited:text-[#4A4A4A] hover:visited:text-[#606060] prose-a:font-semibold prose-a:text-vermilion-00 dark:visited:text-[#606060] dark:hover:visited:text-[#A9A9A9] dark:prose-a:text-vermilion-11 dark:hover:prose-a:text-dark-text-secondary',
 				// link underline
 				'prose-a:underline hover:prose-a:text-[#606060] hover:prose-a:underline dark:prose-a:underline dark:hover:prose-a:underline',
 				// pre
@@ -38,16 +38,16 @@ export function Prose<T extends React.ElementType = 'div'>({
 				'prose-video:rounded-xl',
 
 				// Specific styles for the API docs navigation
-        // Remove bullets from all nav items
-        '[&_#nav_ul]:list-none [&_#nav_ul]:pl-0 [&_#nav_ul]:ml-0',
-        
-        // Style all nav links
-        '[&_#nav_a]:font-normal [&_#nav_a]:text-slate-500 hover:[&_#nav_a]:text-slate-700 dark:[&_#nav_a]:text-dark-text-secondary dark:hover:[&_#nav_a]:text-slate-300',
-        '[&_#nav_a]:no-underline hover:[&_#nav_a]:underline dark:hover:[&_#nav_a]:underline',
-        
-        // Specific style for h5.nav-group-section-title links (to match TOC h3)
-        '[&_#nav_h5.nav-group-section-title_a]:font-normal [&_#nav_h5.nav-group-section-title_a]:text-slate-500 hover:[&_#nav_h5.nav-group-section-title_a]:text-slate-700 dark:[&_#nav_h5.nav-group-section-title_a]:text-dark-text-secondary dark:hover:[&_#nav_h5.nav-group-section-title_a]:text-slate-300',
-        '[&_#nav_h5.nav-group-section-title_a]:no-underline hover:[&_#nav_h5.nav-group-section-title_a]:underline dark:hover:[&_#nav_h5.nav-group-section-title_a]:underline',
+				// Remove bullets from all nav items
+				'[&_#nav_ul]:ml-0 [&_#nav_ul]:list-none [&_#nav_ul]:pl-0',
+
+				// Style all nav links
+				'[&_#nav_a]:font-normal [&_#nav_a]:text-slate-500 hover:[&_#nav_a]:text-slate-700 dark:[&_#nav_a]:text-dark-text-secondary dark:hover:[&_#nav_a]:text-slate-300',
+				'[&_#nav_a]:no-underline hover:[&_#nav_a]:underline dark:hover:[&_#nav_a]:underline',
+
+				// Specific style for h5.nav-group-section-title links (to match TOC h3)
+				'[&_#nav_h5.nav-group-section-title_a]:font-normal [&_#nav_h5.nav-group-section-title_a]:text-slate-500 hover:[&_#nav_h5.nav-group-section-title_a]:text-slate-700 dark:[&_#nav_h5.nav-group-section-title_a]:text-dark-text-secondary dark:hover:[&_#nav_h5.nav-group-section-title_a]:text-slate-300',
+				'[&_#nav_h5.nav-group-section-title_a]:no-underline hover:[&_#nav_h5.nav-group-section-title_a]:underline dark:hover:[&_#nav_h5.nav-group-section-title_a]:underline'
 			)}
 			{...props}
 		/>

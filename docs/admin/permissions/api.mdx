@@ -4,11 +4,7 @@ Sourcegraph's GraphQL API allows users to explicitly set repository permissions.
 
 ## Permissions mechanisms in parallel
 
-> Feature is in Experimental stage and is supported up to Sourcegraph 5.0
-
-> NOTE: Up to version 5.0, if the Explicit permissions API is enabled, all the other repository permissions mechanisms are disabled. If you're using Sourcegraph with multiple code hosts, it's not possible to use the explicit permissions API for one code host and use other mechanisms for getting permissions for others.
-
-If you want to use explicit permissions API alongside synced permissions, read section [permission mechanisms in parallel here](/admin/permissions/#permissions-mechanisms-in-parallel).
+If you want to use explicit permissions managmeent alongside permissions synchronised from code hosts, read section [permission mechanisms in parallel here](/admin/permissions/#permissions-mechanisms-in-parallel).
 
 ## Recommendations
 
@@ -43,10 +39,10 @@ To enable the permissions API, add the following to the [site configuration](/ad
 
 The `bindID` value specifies how to uniquely identify users when setting permissions:
 
-- `username`: You can [set permissions](#setting-repository-permissions-for-users) for users by specifying their Sourcegraph usernames. Using usernames is **preferred**, as usernames are required to be unique for each user.
-- `email`: You can [set permissions](#setting-repository-permissions-for-users) for users by specifying their email addresses (which must be verified primary emails associated with their Sourcegraph user account). This method can lead to unexpected results if there are multiple Sourcegraph user accounts with the same verified email address. Also, the email address is case-sensitive, so it should be exactly the same as set on the sourcegraph UI.
+-   `username`: You can [set permissions](#setting-repository-permissions-for-users) for users by specifying their Sourcegraph usernames. Using usernames is **preferred**, as usernames are required to be unique for each user.
+-   `email`: You can [set permissions](#setting-repository-permissions-for-users) for users by specifying their email addresses (which must be verified primary emails associated with their Sourcegraph user account). This method can lead to unexpected results if there are multiple Sourcegraph user accounts with the same verified email address. Also, the email address is case-sensitive, so it should be exactly the same as set on the sourcegraph UI.
 
-After you enable the permissions API, you must [set permissions](#setting-repository-permissions-for-users) to allow users to view repositories (site admins bypass all permissions checks and can always view all repositories). 
+After you enable the permissions API, you must [set permissions](#setting-repository-permissions-for-users) to allow users to view repositories (site admins bypass all permissions checks and can always view all repositories).
 
 > NOTE: If you were previously using [permissions syncing](/admin/permissions/syncing), e.g. syncing permissions from Github, then those permissions are used as the initial state after enabling explicit permissions. Otherwise, the initial state is for all repositories to have an empty set of authorized users, so users will not be able to view any repositories.
 
@@ -60,7 +56,10 @@ For example:
 
 ```graphql
 mutation {
-  setRepositoryPermissionsUnrestricted(repositories: ["<repo ID>", "<repo ID>", "<repo ID>"], unrestricted: true)
+	setRepositoryPermissionsUnrestricted(
+		repositories: ["<repo ID>", "<repo ID>", "<repo ID>"]
+		unrestricted: true
+	)
 }
 ```
 
@@ -72,9 +71,9 @@ First, obtain the ID of the repository from its name:
 
 ```graphql
 query {
-  repository(name: "github.com/owner/repo") {
-    id
-  }
+	repository(name: "github.com/owner/repo") {
+		id
+	}
 }
 ```
 
@@ -82,14 +81,12 @@ Next, set the list of users allowed to view the repository:
 
 ```graphql
 mutation {
-  setRepositoryPermissionsForUsers(
-    repository: "<repo ID>",
-    userPermissions: [
-      { bindID: "alice" },
-      { bindID: "bob" },
-    ]) {
-    alwaysNil
-  }
+	setRepositoryPermissionsForUsers(
+		repository: "<repo ID>"
+		userPermissions: [{bindID: "alice"}, {bindID: "bob"}]
+	) {
+		alwaysNil
+	}
 }
 ```
 
@@ -101,7 +98,7 @@ You can call `setRepositoryPermissionsForUsers` repeatedly to set permissions fo
 
 > NOTE: If a user has no sub-repo permissions set for a specific repository (assuming that they have general access to the repository), they will have access to the entire repository contents.
 
-Sourcegraph supports permissions on a per-file/directory basis. 
+Sourcegraph supports permissions on a per-file/directory basis.
 
 To enable the sub-repo permissions API, add the following to the [site configuration](/admin/config/site_config):
 
@@ -115,37 +112,27 @@ Sub-repo permissions can be set for a repository via the following GraphQL API:
 
 ```graphql
 mutation {
-  setSubRepositoryPermissionsForUsers(
-    repository: "<repo ID>",
-    userPermissions:  [
-      {
-        bindID: "alice",
-        paths: ["-/**", "/README.md"]
-      }
-    ]
-  ) {
-    alwaysNil
-  }
+	setSubRepositoryPermissionsForUsers(
+		repository: "<repo ID>"
+		userPermissions: [{bindID: "alice", paths: ["-/**", "/README.md"]}]
+	) {
+		alwaysNil
+	}
 }
 ```
 
 This query denies the user `alice` access to all files in the repository, except for the file `README.md`.
-The paths are specified in the [glob syntax](https://en.wikipedia.org/wiki/Glob_(programming)), and a `-` prefix indicates that the path should be denied.
+The paths are specified in the [glob syntax](<https://en.wikipedia.org/wiki/Glob_(programming)>), and a `-` prefix indicates that the path should be denied.
 Permissions are applied in the order they are specified. If we were to want to provide `alice` access to all files except for the `README.md` file, we could specify the following:
 
 ```graphql
 mutation {
-  setSubRepositoryPermissionsForUsers(
-    repository: "<repo ID>",
-    userPermissions:  [
-      {
-        bindID: "alice",
-        paths: ["/**", "-/README.md"]
-      }
-    ]
-  ) {
-    alwaysNil
-  }
+	setSubRepositoryPermissionsForUsers(
+		repository: "<repo ID>"
+		userPermissions: [{bindID: "alice", paths: ["/**", "-/README.md"]}]
+	) {
+		alwaysNil
+	}
 }
 ```
 
@@ -157,11 +144,11 @@ You may query the set of repositories visible to a particular user with the `aut
 
 ```graphql
 query {
-  authorizedUserRepositories(username: "alice", first: 100) {
-    nodes {
-      name
-    }
-    totalCount
-  }
+	authorizedUserRepositories(username: "alice", first: 100) {
+		nodes {
+			name
+		}
+		totalCount
+	}
 }
 ```

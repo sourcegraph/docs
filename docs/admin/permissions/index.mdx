@@ -1,13 +1,11 @@
 # Permissions
 
 <TierCallout>
-  Supported on [Enterprise](/pricing/enterprise) plans.
-  <user>
-    Available via the Web app.
-  </user>
+	Supported on [Enterprise](/pricing/enterprise) plans.
+	<user>Available via the Web app.</user>
 </TierCallout>
 
-> NOTE: This page refers to repository access permissions synced between Sourcegraph and your code host, which has also historically been referred to as "authorization", "repository permissions", and "code host permissions". This is *not* the same as [in-product permissions](/admin/access_control/), which determine who can, for example, create a batch change or who is a site admin.
+> NOTE: This page refers to repository access permissions synced between Sourcegraph and your code host, which has also historically been referred to as "authorization", "repository permissions", and "code host permissions". This is _not_ the same as [in-product permissions](/admin/access_control/), which determine who can, for example, create a batch change or who is a site admin.
 
 Sourcegraph can be configured to enforce the same access to repositories and underlying
 source files as your code host. If configured, Sourcegraph will allow the user to only
@@ -17,10 +15,10 @@ including the existence of such repository on the code host.
 
 Imagine a scenario, with 2 users, `alice` and `bob`:
 
-- `alice` can access repositories `my-organisation/global` and `my-organisation/alice` on the code host
-- `bob` has access to repositories `my-organisation/global` and `my-organisation/docs` on the code host
-- There is a public repository `my-organisation/public`
-- All of the mentioned repositories are synced to Sourcegraph
+-   `alice` can access repositories `my-organisation/global` and `my-organisation/alice` on the code host
+-   `bob` has access to repositories `my-organisation/global` and `my-organisation/docs` on the code host
+-   There is a public repository `my-organisation/public`
+-   All of the mentioned repositories are synced to Sourcegraph
 
 With permissions set up, when `alice` tries to run a search on Sourcegraph, the results will only contain data from the public `my-organisation/public` repository and the ones she has access to (`my-organisation/global` and `my-organisation/alice`). `alice` will not be able to see results from the `my-organisation/docs`. If `alice` creates a code insight, she will only see results from the repositories she has access to.
 
@@ -64,7 +62,7 @@ To know more about each method that we support, please follow the link above.
 
 Support for repository permissions accross different code hosts is different. The following table captures current state of support (ordered alphabetically):
 
-|       Code host        | [Permission Syncing](/admin/permissions/syncing) | [Webhooks for Permissions](/admin/permissions/webhooks) | [Explicit API](/admin/permissions/api) | [Scale supported](#supported-scale) |
+| Code host              | [Permission Syncing](/admin/permissions/syncing) | [Webhooks for Permissions](/admin/permissions/webhooks) | [Explicit API](/admin/permissions/api) | [Scale supported](#supported-scale) |
 | ---------------------- | ------------------------------------------------ | ------------------------------------------------------- | -------------------------------------- | ----------------------------------- |
 | Bitbucket Cloud (Beta) | ✓                                                | ✗                                                       | ✓                                      | 10k users, 100k repositories        |
 | Bitbucket Server       | ✓                                                | ✗                                                       | ✓                                      | 10k users, 100k repositories        |
@@ -74,7 +72,7 @@ Support for repository permissions accross different code hosts is different. Th
 | GitLab                 | ✓                                                | ✗                                                       | ✓                                      | 40k users, 200k repositories        |
 | GitLab Self-Managed    | ✓                                                | ✗                                                       | ✓                                      | 40k users, 200k repositories        |
 | Perforce (Beta)        | Yes (with file-level permissions)                | ✓                                                       | ✓                                      | 10k users, 250k repositories        |
-| Azure Devops        | ✓                | ✓                                                       | ✓                                      |    10k users, 100k repositories     |
+| Azure Devops           | ✓                                                | ✓                                                       | ✓                                      | 10k users, 100k repositories        |
 
 All the other code hosts only support [Explicit permissions API](/admin/permissions/api).
 
@@ -93,9 +91,9 @@ Please contact support if you want to discuss bigger scale than specified.
 Each method of getting permissions to Sourcegraph has different SLA on how long it takes for permissions to appear
 in Sourcegraph.
 
-- [Permission syncing SLA](/admin/permissions/syncing#sla)
-- [Webhooks SLA](/admin/permissions/webhooks#sla)
-- [Explicit Permissions API SLA](/admin/permissions/api#sla)
+-   [Permission syncing SLA](/admin/permissions/syncing#sla)
+-   [Webhooks SLA](/admin/permissions/webhooks#sla)
+-   [Explicit Permissions API SLA](/admin/permissions/api#sla)
 
 ## License requirements
 
@@ -118,11 +116,11 @@ might become an impossible task if the site admin cannot access that repository.
 ## Permissions mechanisms in parallel
 
 (Experimental)
+
 <span class="badge badge-note">Sourcegraph 5.0+</span>
 
-Up to version 5.0 it was not possible to use explicit permissions API alongside permission syncing.
-Meaning, if explicit permissions API was turned ON, synced permissions were turned OFF. Which also meant it was
-impossible to use explicit permissions for one code host and synced permissions for another one on the same Sourcegraph instance.
+You can use the [explicit permissions API](/admin/permissions/api) alongside code host permission syncing.
+This allows you to configure explicit permissions for one code host while using synced permissions for another on the same Sourcegraph instance.
 
 **Example**:
 
@@ -133,19 +131,22 @@ of `alice` are the following union set: [`horsegraph/global`, `horsegraph/hay-v1
 ### Configuration
 
 **Prerequisites:**
+
 1. Sourcegraph version 5.0+
 1. Go to **Site Admin > Migrations** page. There is a migration called `Migrate data from user_permissions table to unified user_repo_permissions.`.
-Make sure that it finished migrating all the data (it reports as 100%). Contact support if the migration does not seem to complete for a long time (multiple days).
+   Make sure that it finished migrating all the data (it reports as 100%). Contact support if the migration does not seem to complete for a long time (multiple days).
 
 1. (Not required for Sourcegraph 5.1+) Enable the experimental feature in the [site configuration](/admin/config/site_config):
+
 ```json
 {
-  "experimentalFeatures": {
-    "unifiedPermissions": "enabled"
-  }
-  // ...
+	"experimentalFeatures": {
+		"unifiedPermissions": "enabled"
+	}
+	// ...
 }
 ```
+
 1. Continue [configuring the explicit permissions API](/admin/permissions/api#configuration) as you would before.
 
 ### Permission updates

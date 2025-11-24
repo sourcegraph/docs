@@ -1,6 +1,10 @@
 # Troubleshooting
 
-<p className="subtitle">This docs helps you to troubleshoot and eliminate problems when trying to execute a batch spec with `src batch [apply|preview]` or managing an already created batch change and its changesets.</p>
+<p className="subtitle">
+	This docs helps you to troubleshoot and eliminate problems when trying to
+	execute a batch spec with `src batch [apply|preview]` or managing an already
+	created batch change and its changesets.
+</p>
 
 ## Executing batch change steps
 
@@ -54,21 +58,21 @@ description: Add Hello World to READMEs
 
 # Find one repository with a README
 on:
-  - repositoriesMatchingQuery: repohasfile:README count:1
+    - repositoriesMatchingQuery: repohasfile:README count:1
 
 # In each repository, run this command. Each repository's resulting diff is captured.
 steps:
-  - run: IFS=$'\n'; echo Hello World | tee -a $(find -name README)
-    container: alpine:3
+    - run: IFS=$'\n'; echo Hello World | tee -a $(find -name README)
+      container: alpine:3
 
 # Describe the changeset (e.g., GitHub pull request) you want for each repository.
 changesetTemplate:
-  title: Hello World
-  body: My first batch change!
-  branch: hello-world # Push the commit to this branch.
-  commit:
-    message: Append Hello World to all README files
-  published: false
+    title: Hello World
+    body: My first batch change!
+    branch: hello-world # Push the commit to this branch.
+    commit:
+        message: Append Hello World to all README files
+    published: false
 ```
 
 If that doesn't work, you can exclude the possibility that only something with your batch spec is wrong.
@@ -84,7 +88,7 @@ For the former, you can use Sourcegraph's [search filters](/code-search/queries#
 ```yaml
 # [...]
 on:
-  - repositoriesMatchingQuery: repo:^github.com/my-org
+    - repositoriesMatchingQuery: repo:^github.com/my-org
 ```
 
 This one will only return a single repository matching that exact name:
@@ -92,7 +96,7 @@ This one will only return a single repository matching that exact name:
 ```yaml
 # [...]
 on:
-  - repositoriesMatchingQuery: repo:^github.com/my-org/my-repo$
+    - repositoriesMatchingQuery: repo:^github.com/my-org/my-repo$
 ```
 
 That can also be achieved with the mentioned `on.repository` attribute:
@@ -100,15 +104,19 @@ That can also be achieved with the mentioned `on.repository` attribute:
 ```yaml
 # [...]
 on:
-  - repository: github.com/my-org/my-repo1
-  - repository: github.com/my-org/my-repo2
+    - repository: github.com/my-org/my-repo1
+    - repository: github.com/my-org/my-repo2
 ```
 
 Once you know that executing the batch spec works with one or more repositories, you can expand the scope back to its original form and identify which repository execution breaks.
 
 ### Can you download a repository archive?
 
-<Callout type="note">Using Batch Changes with Windows Subsystem For Linux (WSL) will add [network latency](https://github.com/microsoft/WSL/issues/4901) that can cause timeouts.</Callout>
+<Callout type="note">
+	Using Batch Changes with Windows Subsystem For Linux (WSL) will add [network
+	latency](https://github.com/microsoft/WSL/issues/4901) that can cause
+	timeouts.
+</Callout>
 
 If `src` is stuck in the **Initializing workspace** phase for a repository or fails to initialize the workspace, try to see whether you can download an archive of the repository manually on your command line with `curl`:
 
@@ -201,8 +209,8 @@ permitted to be public, there are a couple of possible solutions.
 
 You can choose either to:
 
-- Permit your email address to be public.
-- Disable the feature **Block command line pushes that expose my email**.
+-   Permit your email address to be public.
+-   Disable the feature **Block command line pushes that expose my email**.
 
 Instructions for both of these potential solutions can be found in
 the [GitHub Email Settings](https://github.com/settings/emails).

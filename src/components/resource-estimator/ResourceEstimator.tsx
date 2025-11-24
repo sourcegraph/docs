@@ -1,18 +1,19 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import {useEffect, useRef} from 'react';
 
 declare const Go: any;
 const version = 'f62b75b';
-export const inDevEnvironment = !!process && process.env.NODE_ENV === 'development';
+export const inDevEnvironment =
+	!!process && process.env.NODE_ENV === 'development';
 
 const fileLocal = `https://corsproxy.io/?${encodeURIComponent(
 	`https://storage.googleapis.com/sourcegraph-resource-estimator/main_${version}.wasm`
-)}`
+)}`;
 
-const fileProd = `https://storage.googleapis.com/sourcegraph-resource-estimator/main_${version}.wasm`
+const fileProd = `https://storage.googleapis.com/sourcegraph-resource-estimator/main_${version}.wasm`;
 
-const API_URL = inDevEnvironment ? fileLocal : fileProd
+const API_URL = inDevEnvironment ? fileLocal : fileProd;
 export async function loadResourceEstimator() {
 	const resp = await fetch(API_URL);
 	if (!resp.ok) {
@@ -27,7 +28,6 @@ export async function loadResourceEstimator() {
 	go.run(result.instance);
 }
 
-
 const useScripts = (containerRef: any) => {
 	useEffect(() => {
 		if (containerRef === null) return;
@@ -39,7 +39,7 @@ const useScripts = (containerRef: any) => {
 		document.body.appendChild(script);
 		loadResourceEstimator();
 
-		return () => { };
+		return () => {};
 	}, [containerRef]);
 };
 
