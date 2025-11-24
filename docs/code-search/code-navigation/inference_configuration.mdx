@@ -1,21 +1,27 @@
 # Auto-indexing inference configuration reference
 
-<Callout type="note">This feature is in beta for self-hosted customers.</Callout>
+<Callout type="note">
+	This feature is in beta for self-hosted customers.
+</Callout>
 
 This document details how a site administrator can supply a Lua script to customize the way [Sourcegraph detects precise code intelligence indexing jobs from repository contents](/code-search/code-navigation/explanations/auto_indexing_inference).
 
 By default, Sourcegraph will attempt to infer index jobs for the following languages:
 
-- [`Go`](/code-search/code-navigation/explanations/auto_indexing_inference#go)
-- [`Java`/`Scala`/`Kotlin`](/code-search/code-navigation/explanations/auto_indexing_inference#java)
-- `Python`
-- `Ruby`
-- [`Rust`](/code-search/code-navigation/explanations/auto_indexing_inference#rust)
-- [`TypeScript`/`JavaScript`](/code-search/code-navigation/explanations/auto_indexing_inference#typescript)
+-   [`Go`](/code-search/code-navigation/explanations/auto_indexing_inference#go)
+-   [`Java`/`Scala`/`Kotlin`](/code-search/code-navigation/explanations/auto_indexing_inference#java)
+-   `Python`
+-   `Ruby`
+-   [`Rust`](/code-search/code-navigation/explanations/auto_indexing_inference#rust)
+-   [`TypeScript`/`JavaScript`](/code-search/code-navigation/explanations/auto_indexing_inference#typescript)
 
 Inference logic can be disabled or altered in the case when the target repositories do not conform to a pattern that the Sourcegraph default inference logic recognizes. Inference logic is controlled by a **Lua override script** that can be supplied in the UI under `Admin > Code graph > Inference`.
 
-<Callout type="note">While the change is self-service, Sourcegraph support is more than happy to help write custom behaviors with you. Do not hesitate to contact us to get the inference logic behaving how you would expect for your repositories.</Callout>
+<Callout type="note">
+	While the change is self-service, Sourcegraph support is more than happy to
+	help write custom behaviors with you. Do not hesitate to contact us to get
+	the inference logic behaving how you would expect for your repositories.
+</Callout>
 
 ## Example
 
@@ -90,127 +96,129 @@ There are a number of specific and general-purpose Lua libraries made accessible
 
 The type signatures for the functions below use the following syntax:
 
-- `(A1, ..., An) -> R`: Function type with arguments of type `A1, ..., An` and return type `R`.
-- `array[A]`: Table with indexes 1 to N of elements of type `A`.
-- `table[K, V]`: Table with keys of type `K` and values of type `V`.
-- `A | B`: Union type (includes values of type `A` and type `B`).
-- `A...`: Variadic (0 or more values of A, without being wrapped in a table).
-- `"mystring"`: Literal string type with only `"mystring"` as the allowed value.
-- `{K1: V1, K2: V2, ...}`: Heterogenous table (object) with a key of type `K1` mapping to a value of type `V1` etc.
-- `void`: no value returned from function
+-   `(A1, ..., An) -> R`: Function type with arguments of type `A1, ..., An` and return type `R`.
+-   `array[A]`: Table with indexes 1 to N of elements of type `A`.
+-   `table[K, V]`: Table with keys of type `K` and values of type `V`.
+-   `A | B`: Union type (includes values of type `A` and type `B`).
+-   `A...`: Variadic (0 or more values of A, without being wrapped in a table).
+-   `"mystring"`: Literal string type with only `"mystring"` as the allowed value.
+-   `{K1: V1, K2: V2, ...}`: Heterogenous table (object) with a key of type `K1` mapping to a value of type `V1` etc.
+-   `void`: no value returned from function
 
 ### `sg.autoindex.recognizer`
 
 This auto-indexing-specific library defines the following two functions.
 
-- `new_path_recognizer` creates a `Recognizer` from a config object containing `patterns` and `generate` fields. See the [example](#example) above for basic usage.
-  - Type:
-    ```
-    ({
-      -- List of patterns to match against paths in the repository
-      "patterns": array[pattern],
-      -- List of patterns to match against paths in the repository
-      -- for getting contents (see contents_by_path below)
-      "patterns_for_content": array[pattern],
-      -- Callback function invoked with paths requested by patterns above
-      -- for creating index jobs
-      "generate": (
-          registration_api,
-          -- List of paths obtained from 'patterns' and
-          -- 'patterns_for_content' combined.
-          paths: array[string],
-          -- Table mapping paths to contents for paths matched by
-          -- 'patterns_for_content'
-          contents_by_path: table[string, string]
-      ) -> array[index_job],
-    }) -> recognizer
-    ```
-    where `index_job` is an object with the following shape:
-    ```
-    index_job = {
-      -- Docker image for the indexer
-      "indexer": string,
-      -- Working directory for invoking the indexer
-      "root": string,
-      -- Preparatory steps to run before invoking the indexer
-      -- such as installing dependencies
-      "steps": array[{
-        -- Working directory for this step
-        "root": string,
-        -- Docker image to use for this step
-        "image": string,
-        -- List of commands to run inside the Docker image
-        "commands": array[string]
-      }],
-      -- List of commands to run inside the indexer image at "root"
-      -- before invoking the indexer, such as installing dependencies.
-      "local_steps": array[string],
-      -- Command-line invocation for the indexer
-      "indexer_args": array[string],
-      -- Path to the index generated by the indexer
-      "outfile": string,
-      -- Names of necessary environment variables. These are
-      -- made accessible to steps, local_steps, and the
-      -- indexer_args command.
-      --
-      -- These are generally used for passing secrets.
-      "requested_envvars": array[string],
-    }
-    ```
-    For installing dependencies, if the indexer image contains the relevant package manager(s),
-    then it is simpler to install dependencies using `local_steps`. Otherwise,
-    the `steps` field allows more customizability.
+-   `new_path_recognizer` creates a `Recognizer` from a config object containing `patterns` and `generate` fields. See the [example](#example) above for basic usage.
 
-- `new_fallback_recognizer` creates a `recognizer` from an ordered list of `recognizer`s. Each `recognizer` is called sequentially, until one of them emits non-empty results.
-  - Type: `(array[recognizer]) -> recognizer`
+    -   Type:
+        ```
+        ({
+          -- List of patterns to match against paths in the repository
+          "patterns": array[pattern],
+          -- List of patterns to match against paths in the repository
+          -- for getting contents (see contents_by_path below)
+          "patterns_for_content": array[pattern],
+          -- Callback function invoked with paths requested by patterns above
+          -- for creating index jobs
+          "generate": (
+              registration_api,
+              -- List of paths obtained from 'patterns' and
+              -- 'patterns_for_content' combined.
+              paths: array[string],
+              -- Table mapping paths to contents for paths matched by
+              -- 'patterns_for_content'
+              contents_by_path: table[string, string]
+          ) -> array[index_job],
+        }) -> recognizer
+        ```
+        where `index_job` is an object with the following shape:
+        ```
+        index_job = {
+          -- Docker image for the indexer
+          "indexer": string,
+          -- Working directory for invoking the indexer
+          "root": string,
+          -- Preparatory steps to run before invoking the indexer
+          -- such as installing dependencies
+          "steps": array[{
+            -- Working directory for this step
+            "root": string,
+            -- Docker image to use for this step
+            "image": string,
+            -- List of commands to run inside the Docker image
+            "commands": array[string]
+          }],
+          -- List of commands to run inside the indexer image at "root"
+          -- before invoking the indexer, such as installing dependencies.
+          "local_steps": array[string],
+          -- Command-line invocation for the indexer
+          "indexer_args": array[string],
+          -- Path to the index generated by the indexer
+          "outfile": string,
+          -- Names of necessary environment variables. These are
+          -- made accessible to steps, local_steps, and the
+          -- indexer_args command.
+          --
+          -- These are generally used for passing secrets.
+          "requested_envvars": array[string],
+        }
+        ```
+        For installing dependencies, if the indexer image contains the relevant package manager(s),
+        then it is simpler to install dependencies using `local_steps`. Otherwise,
+        the `steps` field allows more customizability.
+
+-   `new_fallback_recognizer` creates a `recognizer` from an ordered list of `recognizer`s. Each `recognizer` is called sequentially, until one of them emits non-empty results.
+    -   Type: `(array[recognizer]) -> recognizer`
 
 The `registration_api` object has the following API:
-- `register` which queues a `recognizer` to be run at a later stage.
-  This makes it possible to add more recognizers dynamically,
-  such as based on whether specific configuration files were found or not.
-  - Type: `(recognizer) -> void`
+
+-   `register` which queues a `recognizer` to be run at a later stage.
+    This makes it possible to add more recognizers dynamically,
+    such as based on whether specific configuration files were found or not.
+    -   Type: `(recognizer) -> void`
 
 ### `sg.autoindex.patterns`
 
 This auto-indexing-specific library defines the following four path pattern constructors.
 
-- `new_path_literal(fullpath)` creates a `pattern` that matches an exact filepath.
-  - Type: `(string) -> pattern`
-- `new_path_segment(segment)` creates a `pattern` that matches a directory name.
-  - Type: `(string) -> pattern`
-- `new_path_basename(basename)` creates a `pattern` that matches a basename exactly.
-  - Type: `(string) -> pattern`
-- `new_path_extension(ext_no_leading_dot)` creates a `pattern` that matches files with a given extension.
-  - Type: `(string) -> pattern`
+-   `new_path_literal(fullpath)` creates a `pattern` that matches an exact filepath.
+    -   Type: `(string) -> pattern`
+-   `new_path_segment(segment)` creates a `pattern` that matches a directory name.
+    -   Type: `(string) -> pattern`
+-   `new_path_basename(basename)` creates a `pattern` that matches a basename exactly.
+    -   Type: `(string) -> pattern`
+-   `new_path_extension(ext_no_leading_dot)` creates a `pattern` that matches files with a given extension.
+    -   Type: `(string) -> pattern`
 
 This library also defines the following two pattern collection constructors.
 
-- `new_path_combine(patterns)` creates a pattern collection object (to be used with [recognizers](#sg-autoindex-recognizers)) from the given set of path `pattern`s.
-  - Type: `((pattern | array[pattern])...) -> pattern`
-- `new_path_exclude(patterns)` creates a new _inverted_ pattern collection object. Paths matching these `pattern`s are filtered out from the set of matching filepaths given to a recognizer's `generate` function.
-  - Type: `((pattern | array[pattern])...) -> pattern`
+-   `new_path_combine(patterns)` creates a pattern collection object (to be used with [recognizers](#sg-autoindex-recognizers)) from the given set of path `pattern`s.
+    -   Type: `((pattern | array[pattern])...) -> pattern`
+-   `new_path_exclude(patterns)` creates a new _inverted_ pattern collection object. Paths matching these `pattern`s are filtered out from the set of matching filepaths given to a recognizer's `generate` function.
+    -   Type: `((pattern | array[pattern])...) -> pattern`
 
 ### `path`
 
 This library defines the following utility functions:
 
-- `ancestors(path)` returns a list `{dirname(path), dirname(dirname(path)), ...}`. The last element in the list will be an empty string.
-  - Type: `(string) -> array[string]`
-- `basename(path)` returns the basename of the given path as defined by Go's [filepath.Base](https://pkg.go.dev/path/filepath#Base).
-  - Type: `(string) -> string`
-- `dirname(path)` returns the dirname of the given path as defined by Go's [filepath.Dir](https://pkg.go.dev/path/filepath#Dir), except that it (1) returns an empty path instead of `"."` if the path is empty and (2) removes a leading `/` if present.
-  - Type: `string -> string`
-- `join(path1, path2)` returns a filepath created by joining the given path segments via filepath separator.
-  - Type: `(string, string) -> string`
-- `split(path)` is a convenience function that returns `dirname(path), basename(path)`.
-  - Type: `(string) -> string, string`
+-   `ancestors(path)` returns a list `{dirname(path), dirname(dirname(path)), ...}`. The last element in the list will be an empty string.
+    -   Type: `(string) -> array[string]`
+-   `basename(path)` returns the basename of the given path as defined by Go's [filepath.Base](https://pkg.go.dev/path/filepath#Base).
+    -   Type: `(string) -> string`
+-   `dirname(path)` returns the dirname of the given path as defined by Go's [filepath.Dir](https://pkg.go.dev/path/filepath#Dir), except that it (1) returns an empty path instead of `"."` if the path is empty and (2) removes a leading `/` if present.
+    -   Type: `string -> string`
+-   `join(path1, path2)` returns a filepath created by joining the given path segments via filepath separator.
+    -   Type: `(string, string) -> string`
+-   `split(path)` is a convenience function that returns `dirname(path), basename(path)`.
+    -   Type: `(string) -> string, string`
 
 ### `json`
 
 This library defines the following two JSON utility functions:
 
-- `encode(val)` returns a JSON-ified version of the given Lua object.
-- `decode(json)` returns a Lua table representation of the given JSON text.
+-   `encode(val)` returns a JSON-ified version of the given Lua object.
+-   `decode(json)` returns a Lua table representation of the given JSON text.
 
 ### `fun`
 
@@ -220,26 +228,29 @@ This library defines the following two JSON utility functions:
 
 Sourcegraph enforces several limits to avoid inference timeouts and ever-growing auto-indexing queues. These limits apply for a single round of inference for a single repository, combined across all recognizers, including any implicitly included Sourcegraph recognizers.
 
-Limit | Default value
-:-----|-------------:
-The number of auto-indexing jobs inferred | 100
-The number of total paths passed to the inference script's `generate` functions as the second argument `paths` | 500
-The number of total paths with contents passed to the inference script's `generate` functions as the third argument `contents_by_paths` | 100
-Maximum size limit for file contents, in bytes | 1 MiB
+| Limit                                                                                                                                   | Default value |
+| :-------------------------------------------------------------------------------------------------------------------------------------- | ------------: |
+| The number of auto-indexing jobs inferred                                                                                               |           100 |
+| The number of total paths passed to the inference script's `generate` functions as the second argument `paths`                          |           500 |
+| The number of total paths with contents passed to the inference script's `generate` functions as the third argument `contents_by_paths` |           100 |
+| Maximum size limit for file contents, in bytes                                                                                          |         1 MiB |
 
-<Callout type="note">Please reach out to Sourcegraph support if you'd like to change these limits.</Callout>
+<Callout type="note">
+	Please reach out to Sourcegraph support if you'd like to change these
+	limits.
+</Callout>
 
 Auto-indexing jobs and paths are first ranked based on the criteria described below. If the number of jobs and/or paths exceeds the limits above, lower ranked items are discarded.
 
-- For auto-indexing jobs, ranking is done based on the following:
+-   For auto-indexing jobs, ranking is done based on the following:
 
-  - Descending order of indexer frequency (total number of inferred jobs with the same `indexer` field).
-  - Ascending lexicographic ordering of `indexer`.
-  - Descending order of number of path components for `root`. Shallower roots are preferrred over deeper ones as they are more likely to cover more code.
-  - Ascending lexicographic ordering of `root` paths.
+    -   Descending order of indexer frequency (total number of inferred jobs with the same `indexer` field).
+    -   Ascending lexicographic ordering of `indexer`.
+    -   Descending order of number of path components for `root`. Shallower roots are preferrred over deeper ones as they are more likely to cover more code.
+    -   Ascending lexicographic ordering of `root` paths.
 
-- For paths, ranking happens in the following order:
+-   For paths, ranking happens in the following order:
 
-  - Paths for which the contents are requested are ranked higher.
-  - Paths with fewer components are ranked higher.
-  - Otherwise, lexicographic ordering of paths is used.
+    -   Paths for which the contents are requested are ranked higher.
+    -   Paths with fewer components are ranked higher.
+    -   Otherwise, lexicographic ordering of paths is used.

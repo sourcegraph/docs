@@ -4,11 +4,7 @@
 
 Sourcegraph stores bare Git repositories (without a working tree), which is a complete mirror of the repository on your code host.
 
-If you are keen for more details on what bare Git repositories are, [check out this discussion on StackOverflow](https://stackoverflow.com/q/5540883).
-
-The directories should contain just a few files and directories, namely: HEAD, config, description, hooks, info, objects, packed-refs, refs
-
-## Does Sourcegraph support svn?
+## Does Sourcegraph support SVN?
 
 For Subversion and other non-Git code hosts, the recommended way to make these accessible in
 Sourcegraph is through [`src-expose`](/admin/code_hosts/other#experimental-src-expose).
@@ -110,9 +106,10 @@ While it is technically possible to consume all of Sourcegraph's metrics in an e
 Other monitoring systems that support Prometheus scraping (for example, Datadog and New Relic) or [Prometheus federation](https://prometheus.io/docs/prometheus/latest/federation/) can be configured to federate Sourcegraph's [high-level alerting metrics](/admin/observability/metrics#high-level-alerting-metrics). For information on how to configure those systems, please check your provider's documentation.
 
 The `/-/debug/grafana` endpoint is specifically designed for the built-in Grafana instance that comes with Sourcegraph. When using an external Grafana instance, this endpoint won't automatically redirect to your custom Grafana URL.
- 
+
 To properly integrate your external Grafana and Prometheus instances with Sourcegraph, you'll want to:
 Ensure your configuration in values.yaml is correct:
+
 ```
 frontend:
   env:
@@ -120,7 +117,7 @@ frontend:
       value: https://grafana.mycompany.com
     PROMETHEUS_URL:
       value: http://prometheus.mycompany.com
- ```
+```
 
 You can then access your dashboards directly through your Grafana instance URL.
 
@@ -142,7 +139,7 @@ should be set to `ssh` instead of `http`. This will also require [ssh keys to be
 
 If you can get repository results when you explicitly include `repo:{your repository}` in your search, but don't see any results from that repository when you don't, there are a few possible causes:
 
-- The repository is a fork repository (excluded from search results by default) and `fork:yes` is not specified in the search query.
-- The repository is an archived repository (excluded from search results by default) and `archived:yes` is not specified in the search query.
-- There is an issue indexing the repository: check the logs of worker and/or search-indexer.
-- The search index is unavailable for some reason: try the search query `repo:<the_repository> index:only`. If it returns no results, the repository has not been indexed.
+-   The repository is a fork repository (excluded from search results by default) and `fork:yes` is not specified in the search query.
+-   The repository is an archived repository (excluded from search results by default) and `archived:yes` is not specified in the search query.
+-   There is an issue indexing the repository: check the logs of worker and/or search-indexer.
+-   The search index is unavailable for some reason: try the search query `repo:<the_repository> index:only`. If it returns no results, the repository has not been indexed.

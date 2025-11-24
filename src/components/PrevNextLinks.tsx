@@ -52,9 +52,10 @@ function PageLink({
 
 export function PrevNextLinks() {
 	let pathname = usePathname();
-	const params = useParams()
-	
-	const navigation = versionNavigations[params.version as string || 'navigation']
+	const params = useParams();
+
+	const navigation =
+		versionNavigations[(params.version as string) || 'navigation'];
 
 	const allLinks = navigation.flatMap(item =>
 		item.topics.flatMap(topic => [
@@ -63,7 +64,7 @@ export function PrevNextLinks() {
 				? topic.sections.flatMap(section => [
 						{title: section.title, href: section.href},
 						...(section.subsections ? section.subsections : [])
-				  ])
+					])
 				: [])
 		])
 	);

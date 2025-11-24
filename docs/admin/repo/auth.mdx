@@ -6,8 +6,8 @@ First, ensure your **Site admin > Manage code hosts** code host configuration is
 
 Then, you need to supply the SSH keys and passphrase to Sourcegraph if applicable. You have two options:
 
-- **Option 1**: Configure the SSH credentials in code host configuration in the Web UI. (Recommended)
-- **Option 2**: Mount the SSH keys into the container.
+-   **Option 1**: Configure the SSH credentials in code host configuration in the Web UI. (Recommended)
+-   **Option 2**: Mount the SSH keys into the container.
 
 ## Configuring SSH credentials in the Web UI (Recommended)
 
@@ -15,15 +15,15 @@ In supported code hosts configuration, you can provide the credentials in the JS
 
 ```json
 {
-  "url": "https://github.com",
-  "token": "<personal access token>",
-  "gitURLType": "ssh",
-  "gitSSHCredential": {
-    // make sure the key is base64 encoded
-    // $ cat ~/.ssh/id_rsa | base64
-    "privateKey": "<base64 encoded of the SSH private key>",
-    "passphrase": "<passphrase if applicable, omit if none is needed>"
-  }
+	"url": "https://github.com",
+	"token": "<personal access token>",
+	"gitURLType": "ssh",
+	"gitSSHCredential": {
+		// make sure the key is base64 encoded
+		// $ cat ~/.ssh/id_rsa | base64
+		"privateKey": "<base64 encoded of the SSH private key>",
+		"passphrase": "<passphrase if applicable, omit if none is needed>"
+	}
 }
 ```
 
@@ -31,9 +31,9 @@ Some providers may require additional configuration, consult the [code host spec
 
 ## Mounting SSH keys into the container
 
-- [Sourcegraph with Docker Compose](/admin/deploy/docker-compose/): See [the Docker Compose git configuration guide](/admin/deploy/docker-compose/#git-configuration).
-- [Sourcegraph with Kubernetes](/admin/deploy/kubernetes/): See [Configure repository cloning via SSH](/admin/deploy/kubernetes/configure#ssh-for-cloning).
-- [Single-container Sourcegraph](/admin/deploy/docker-single-container/): See [the single-container git configuration guide](/admin/deploy/docker-single-container/#git-configuration-and-authentication).
+-   [Sourcegraph with Docker Compose](/admin/deploy/docker-compose/): See [the Docker Compose git configuration guide](/admin/deploy/docker-compose/#git-configuration).
+-   [Sourcegraph with Kubernetes](/admin/deploy/kubernetes/): See [Configure repository cloning via SSH](/admin/deploy/kubernetes/configure#ssh-for-cloning).
+-   [Single-container Sourcegraph](/admin/deploy/docker-single-container/): See [the single-container git configuration guide](/admin/deploy/docker-single-container/#git-configuration-and-authentication).
 
 ## Troubleshooting
 
@@ -51,8 +51,8 @@ We recommend adding the `StrictHostKeyChecking no` and `AddKeysToAgent yes` flag
 
 ```yaml
 Host *
-  StrictHostKeyChecking no
-  AddKeysToAgent yes
+StrictHostKeyChecking no
+AddKeysToAgent yes
 ```
 
 See [git configuration](/admin/repo/git_config) for more details.
@@ -79,6 +79,7 @@ git clone <SSH-URL>
 
 This indicates the container is having trouble reading the configuration files due to permission / owner issues.
 The permission and ownership settings inside your `.ssh/` directory should look similar to:
+
 ```bash
 $ ls -al #command to display list of file with detailed information
 total 20
@@ -92,15 +93,14 @@ drwxr-sr-x    1 sourcegr sourcegr      4096 May 12 19:43 ..
 
 ##### Solution
 
-- Inside the `.ssh` directory on the Host Machine:
-  - Permission on all files must be set to `600`, and `700` for the directory itself.
-  - Files must be owned by a user who has access to the docker container. This can be done via `sudo chown -v -R $USER:$GROUP` (the user may need to set these values).
-- (**OR**) Inside the `/home/sourcegraph/` directory on Docker Compose:
-  - Permission on all files must be set to `600`, and `700` for the directory itself.
-  - Files must be owned by the root user, which is `sourcegraph` by default. This can be done via `sudo chown -v -R $USER:$GROUP` (the user may need to set these values).
+-   Inside the `.ssh` directory on the Host Machine:
+    -   Permission on all files must be set to `600`, and `700` for the directory itself.
+    -   Files must be owned by a user who has access to the docker container. This can be done via `sudo chown -v -R $USER:$GROUP` (the user may need to set these values).
+-   (**OR**) Inside the `/home/sourcegraph/` directory on Docker Compose:
+    -   Permission on all files must be set to `600`, and `700` for the directory itself.
+    -   Files must be owned by the root user, which is `sourcegraph` by default. This can be done via `sudo chown -v -R $USER:$GROUP` (the user may need to set these values).
 
-
->NOTE: Once the volume for the configuration files has been mounted, both the `/ssh` directory on the host machine and docker will be synced and changes within one directory will be reflected by the other one. Consquently, you will only need to make the changes within one directory.
+> NOTE: Once the volume for the configuration files has been mounted, both the `/ssh` directory on the host machine and docker will be synced and changes within one directory will be reflected by the other one. Consquently, you will only need to make the changes within one directory.
 
 #### Error: `Permissions 0644 for '/home/sourcegraph/.ssh/<YOUR-PRIVATE-KEY-FILE>' are too open`
 

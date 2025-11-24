@@ -5,8 +5,8 @@
 From **Sourcegraph 5.1 and later**, multi-version upgrades can be performed **automatically** as if they were a standard upgrade for the same deployment type. Automatic multi-version upgrades take the following general form:
 
 1. Determine if your instance is ready to Upgrade:
-   1. Check your Sourcegraph instances `Site admin > Updates` page. ([more info](/admin/updates/#upgrade-readiness))
-   2. Consult upgrade notes for your deployment type accross the range of your upgrade. ([Kubernetes](/admin/updates/kubernetes), [Docker-compose](/admin/updates/docker_compose), [Server](/admin/updates/server))
+    1. Check your Sourcegraph instances `Site admin > Updates` page. ([more info](/admin/updates/#upgrade-readiness))
+    2. Consult upgrade notes for your deployment type accross the range of your upgrade. ([Kubernetes](/admin/updates/kubernetes), [Docker-compose](/admin/updates/docker_compose), [Server](/admin/updates/server))
 2. Merge the latest Sourcegraph release into your deployment manifests.
 3. With upstream changes to your manifests merged, start the new instance.
 
@@ -33,22 +33,23 @@ In the case that there's a migration failure, or an unfinished out-of-band migra
 
 Whether or not a Sourcegraph instance will perform an automatic upgrade is determined by the state of the `versions` table in the `pgsql` (also called `frontend`) database. After `v5.0.0` a column exists on `versions` called `auto_upgrade` set either true of false, this controls whether or not automatic upgrades will be attempted by a Sourcegraph instance.
 
-For versions prior to v5.0.0, the `SRC_AUTOUPGRADE` environment variable may be set on the `sourcegraph-frontend`, and `migrator` service manifests. To enable automatic upgrades in docker-compose deployments the env var must also be set on `sourcegraph-frontend-internal`.  For example,
+For versions prior to v5.0.0, the `SRC_AUTOUPGRADE` environment variable may be set on the `sourcegraph-frontend`, and `migrator` service manifests. To enable automatic upgrades in docker-compose deployments the env var must also be set on `sourcegraph-frontend-internal`. For example,
+
 ```yaml
-  sourcegraph-frontend-0:
+sourcegraph-frontend-0:
     container_name: sourcegraph-frontend-0
     image: 'index.docker.io/sourcegraph/frontend:4.5.1@sha256:22bb1203a6d8ac9bab442dcfef867efc216181026c3d6fc62415ef1a3f063139'
     cpus: 4
     mem_limit: '8g'
     environment:
-      - SRC_AUTOUPGRADE=true
-      - DEPLOY_TYPE=docker-compose
-      - 'OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317'
-      - PGHOST=pgsql
-      - CODEINTEL_PGHOST=codeintel-db
-      - CODEINSIGHTS_PGDATASOURCE=postgres://postgres:password@codeinsights-db:5432/postgres
-      - 'SRC_GIT_SERVERS=gitserver-0:3178'
-      - 'SRC_SYNTECT_SERVER=http://syntect-server:9238'
+        - SRC_AUTOUPGRADE=true
+        - DEPLOY_TYPE=docker-compose
+        - 'OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317'
+        - PGHOST=pgsql
+        - CODEINTEL_PGHOST=codeintel-db
+        - CODEINSIGHTS_PGDATASOURCE=postgres://postgres:password@codeinsights-db:5432/postgres
+        - 'SRC_GIT_SERVERS=gitserver-0:3178'
+        - 'SRC_SYNTECT_SERVER=http://syntect-server:9238'
 ```
 
 ## Drift and Automatic Upgrades

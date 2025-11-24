@@ -1,6 +1,9 @@
 # Updating Go Import Statements using Comby
 
-<p className="subtitle">This guide explains how to use Comby to update Go import statements in a batch change.</p>
+<p className="subtitle">
+	This guide explains how to use Comby to update Go import statements in a
+	batch change.
+</p>
 
 This batch change example rewrites Go import paths for the `log15` package from `gopkg.in/inconshreveable/log15.v2` to `github.com/inconshreveable/log15` using [Comby](https://comby.dev/).
 
@@ -29,12 +32,15 @@ import (
 
 ## Prerequisites
 
-<Callout type="tip">It's recommended to use the latest version of Sourcegraph when working with Batch Changes.</Callout>
+<Callout type="tip">
+	It's recommended to use the latest version of Sourcegraph when working with
+	Batch Changes.
+</Callout>
 
 Before you start, it's better to read the following docs:
 
-- [Batch Changes Quickstart](/batch-changes/quickstart)
-- [How to create and run a Batch Spec?](/batch-changes/create-a-batch-change)
+-   [Batch Changes Quickstart](/batch-changes/quickstart)
+-   [How to create and run a Batch Spec?](/batch-changes/create-a-batch-change)
 
 ## Create the batch spec
 
@@ -46,37 +52,37 @@ description: This batch change updates Go import paths for the `log15` package f
 
 # Find all repositories that contain the import we want to change.
 on:
-  - repositoriesMatchingQuery: lang:go gopkg.in/inconshreveable/log15.v2
+    - repositoriesMatchingQuery: lang:go gopkg.in/inconshreveable/log15.v2
 
 # In each repository
 steps:
-  # we first replace the import when it's part of a multi-package import statement
-  - run: comby -in-place 'import (:[before]"gopkg.in/inconshreveable/log15.v2":[after])' 'import (:[before]"github.com/inconshreveable/log15":[after])' .go -matcher .go -exclude-dir .,vendor
-    container: comby/comby
-  # ... and when it's a single import line.
-  - run: comby -in-place 'import:[alias]"gopkg.in/inconshreveable/log15.v2"' 'import:[alias]"github.com/inconshreveable/log15"' .go -matcher .go -exclude-dir .,vendor
-    container: comby/comby
+    # we first replace the import when it's part of a multi-package import statement
+    - run: comby -in-place 'import (:[before]"gopkg.in/inconshreveable/log15.v2":[after])' 'import (:[before]"github.com/inconshreveable/log15":[after])' .go -matcher .go -exclude-dir .,vendor
+      container: comby/comby
+    # ... and when it's a single import line.
+    - run: comby -in-place 'import:[alias]"gopkg.in/inconshreveable/log15.v2"' 'import:[alias]"github.com/inconshreveable/log15"' .go -matcher .go -exclude-dir .,vendor
+      container: comby/comby
 
 # Describe the changeset (e.g., GitHub pull request) you want for each repository.
 changesetTemplate:
-  title: Update import path for log15 package to use GitHub
-  body: Updates Go import paths for the `log15` package from `gopkg.in/inconshreveable/log15.v2` to `github.com/inconshreveable/log15` using [Comby](https://comby.dev/)
-  branch: batch-changes/update-log15-import # Push the commit to this branch.
-  commit:
-    message: Fix import path for log15 package
-  published: false
+    title: Update import path for log15 package to use GitHub
+    body: Updates Go import paths for the `log15` package from `gopkg.in/inconshreveable/log15.v2` to `github.com/inconshreveable/log15` using [Comby](https://comby.dev/)
+    branch: batch-changes/update-log15-import # Push the commit to this branch.
+    commit:
+        message: Fix import path for log15 package
+    published: false
 ```
 
 ## Create the batch change
 
-- In your terminal, run the following command:
+-   In your terminal, run the following command:
 
 ```shell
 src batch preview -f update-log15-import.batch.yaml
 ```
 
-- Wait for it to run and compute the changes for each repository
-- Open the preview URL that the command printed out
-- Examine the preview. Confirm that the changesets are the ones you intended to track. If not, edit the batch spec and then re-run the command above
-- Click the **Apply** button to create the batch change
-- Feel free to then publish the changesets (i.e., create pull requests and merge requests) by [modifying the `published` attribute in the batch spec](/batch-changes/batch-spec-yaml-reference#changesettemplatepublished) and re-running the `src batch preview` command
+-   Wait for it to run and compute the changes for each repository
+-   Open the preview URL that the command printed out
+-   Examine the preview. Confirm that the changesets are the ones you intended to track. If not, edit the batch spec and then re-run the command above
+-   Click the **Apply** button to create the batch change
+-   Feel free to then publish the changesets (i.e., create pull requests and merge requests) by [modifying the `published` attribute in the batch spec](/batch-changes/batch-spec-yaml-reference#changesettemplatepublished) and re-running the `src batch preview` command

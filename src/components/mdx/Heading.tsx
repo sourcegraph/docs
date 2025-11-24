@@ -1,12 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import React, {Children, isValidElement, cloneElement, ReactNode, ComponentPropsWithoutRef} from 'react';
+import React, {
+	Children,
+	isValidElement,
+	cloneElement,
+	ReactNode,
+	ComponentPropsWithoutRef
+} from 'react';
 
 interface childProps {
 	props: {
-		children: any
-	}
+		children: any;
+	};
 }
 
 function AnchorIcon(props: ComponentPropsWithoutRef<'svg'>) {
@@ -25,8 +31,7 @@ function AnchorIcon(props: ComponentPropsWithoutRef<'svg'>) {
 
 function sanitizeAnchors(children: any): any {
 	return Children.map(children, (child: childProps) => {
-		if (typeof child === 'string')
-			return child;
+		if (typeof child === 'string') return child;
 
 		if (isValidElement(child)) {
 			if (child.type === 'a')
@@ -34,16 +39,16 @@ function sanitizeAnchors(children: any): any {
 
 			return cloneElement(child, {
 				...child.props,
-				children: sanitizeAnchors(child.props.children),
-			})
+				children: sanitizeAnchors(child.props.children)
+			});
 		}
 
 		return child;
-	})
+	});
 }
 
 function Anchor({id, children}: {id: string; children: ReactNode}) {
-	const sanitizedChildren = sanitizeAnchors(children)
+	const sanitizedChildren = sanitizeAnchors(children);
 	return (
 		<Link
 			href={`#${id}`}

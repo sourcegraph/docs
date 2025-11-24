@@ -10,8 +10,8 @@ The comparison page supports three different query parameters to specify which f
 
 You can specify individual files using either of these parameters:
 
-- `filePath=path/to/file.js` - Primary parameter for specifying files
-- `f=path/to/file.js` - Shorthand alternative
+-   `filePath=path/to/file.js` - Primary parameter for specifying files
+-   `f=path/to/file.js` - Shorthand alternative
 
 Multiple files can be included by repeating the parameter:
 
@@ -23,15 +23,17 @@ Multiple files can be included by repeating the parameter:
 
 For comparisons with a large number of files, the system supports compressed file lists (newline-separated):
 
-- `compressedFileList=base64EncodedCompressedData` - Efficiently packs many file paths
+-   `compressedFileList=base64EncodedCompressedData` - Efficiently packs many file paths
 
 This parameter efficiently transmits large file paths using base64-encoded, gzip-compressed data. The compression allows hundreds or thousands of files to be included in a URL without exceeding length limits, which vary depending on the browser, HTTP server, and other services involved, like Cloudflare.
 
 ```typescript
 // Behind the scenes, the code decompresses file lists using:
-const decodedData = atoburl(compressedFileList)
-const compressedData = Uint8Array.from([...decodedData].map(char => char.charCodeAt(0)))
-const decompressedData = pako.inflate(compressedData, { to: 'string' })
+const decodedData = atoburl(compressedFileList);
+const compressedData = Uint8Array.from(
+	[...decodedData].map(char => char.charCodeAt(0))
+);
+const decompressedData = pako.inflate(compressedData, {to: 'string'});
 ```
 
 One way to create a list of files for the `compressedFileList` parameter is to use Python's built-in libraries to compress and encode using url-safe base64 encoding (smaller than base64-encoding, then url-encoding).
@@ -44,7 +46,7 @@ python3 -c "import sys, zlib, base64; sys.stdout.write(base64.urlsafe_b64encode(
 
 You can focus on a single file using:
 
-- `focus=true&filePath=path/to/specific/file.js` - Show only this file in detail view
+-   `focus=true&filePath=path/to/specific/file.js` - Show only this file in detail view
 
 ## File filtering UI components
 
@@ -54,10 +56,10 @@ The comparison view provides several UI components to help you filter and naviga
 
 The FileDiffPicker component allows you to:
 
-- Search for files by name or path
-- Filter files by type/extension
-- Toggle between showing all files or only modified files
-- Sort files by different criteria (path, size of change, etc.)
+-   Search for files by name or path
+-   Filter files by type/extension
+-   Toggle between showing all files or only modified files
+-   Sort files by different criteria (path, size of change, etc.)
 
 This component uses a dedicated file metadata query optimized for quick filtering. Results are displayed as you type. Through client-side filtering, the component can efficiently handle repositories with thousands of files.
 
@@ -65,10 +67,10 @@ This component uses a dedicated file metadata query optimized for quick filterin
 
 When viewing diffs, you can:
 
-- Click on any file in the sidebar to switch to that file
-- Use keyboard shortcuts to navigate between files
-- Toggle between expanded and collapsed views of files
-- Show or hide specific changes (additions, deletions, etc.)
+-   Click on any file in the sidebar to switch to that file
+-   Use keyboard shortcuts to navigate between files
+-   Toggle between expanded and collapsed views of files
+-   Show or hide specific changes (additions, deletions, etc.)
 
 ### URL-based filtering
 
@@ -107,7 +109,7 @@ The file filtering system uses a specialized file metadata query that is faster 
 
 ```bash
  ?focus=true&filePath=src/components/Button.tsx
- ```
+```
 
 3. Use a compressed file list for many files:
 

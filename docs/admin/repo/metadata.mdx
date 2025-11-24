@@ -4,9 +4,10 @@ Repositories tracked by Sourcegraph can be associated with user-provided key-val
 
 Metadata can be added either as key-value pairs or as tags. Key-value pairs can be searched with the filter `repo:has.meta(mykey:myvalue)`. `repo:has.meta(mykey)` can be used to search over repositories with a given key irrespective of its value. Tags are just key-value pairs with a `null` value and can be searched with the filter `repo:has.meta(mytag:)`.
 
-Additionally, metadata can be searched with regex using slash-delimited regex literals like `repo:has.meta(owner:/eng.(search|infra)/)`. This capability is particularly useful for searching against semi-structured metadata. 
+Additionally, metadata can be searched with regex using slash-delimited regex literals like `repo:has.meta(owner:/eng.(search|infra)/)`. This capability is particularly useful for searching against semi-structured metadata.
 
 ## Examples
+
 ### Repository owners
 
 One way this feature might be used is to add the owning team of each repository as a key-value pair. For example, the repository `github.com/sourcegraph/security-onboarding` repository is owned by the security team, so we could add `owning-team:security` as a key-value pair on that repository.
@@ -25,11 +26,12 @@ There are three ways to add metadata to a repository: via web UI, Sourcegraph's 
 
 ### Limitations
 
-- There are no scale limits in terms of number of pairs per repo, or number of pairs globally.
-- The size of a field is unbounded, but practically it's better to keep it small for performance reasons.
-- There are no limits on special characters in the key-value pairs, but in practice we recommend not using special characters because the search query language doesn’t have full support for escaping arbitrary sequences, in particular `:`, `(` and`)`.
+-   There are no scale limits in terms of number of pairs per repo, or number of pairs globally.
+-   The size of a field is unbounded, but practically it's better to keep it small for performance reasons.
+-   There are no limits on special characters in the key-value pairs, but in practice we recommend not using special characters because the search query language doesn’t have full support for escaping arbitrary sequences, in particular `:`, `(` and`)`.
 
 ### Web UI
+
 Go to repository root page, hover over "Metadata" section and click on a gear icon, it will open a repository metadata editing page.
 
 ### GraphQL
@@ -38,21 +40,21 @@ Metadata can be added with the `addRepoMetadata` mutation, updated with the `upd
 
 ```graphql
 mutation AddSecurityOwner($repoID: ID!) {
-  addRepoMetadata(repo: $repoID, key: "owning-team", value: "security") {
-    alwaysNil
-  }
+	addRepoMetadata(repo: $repoID, key: "owning-team", value: "security") {
+		alwaysNil
+	}
 }
 
 mutation UpdateSecurityOwner($repoID: ID!) {
-  updateRepoMetadata(repo: $repoID, key: "owning-team", value: "security++") {
-    alwaysNil
-  }
+	updateRepoMetadata(repo: $repoID, key: "owning-team", value: "security++") {
+		alwaysNil
+	}
 }
 
 mutation DeleteSecurityOwner($repoID: ID!) {
-  deleteRepoMetadata(repo: $repoID, key: "owning-team") {
-    alwaysNil
-  }
+	deleteRepoMetadata(repo: $repoID, key: "owning-team") {
+		alwaysNil
+	}
 }
 ```
 
