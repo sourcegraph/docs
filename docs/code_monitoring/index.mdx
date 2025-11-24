@@ -1,13 +1,14 @@
 # Code monitoring
 
 <TierCallout>
-  Supported on [Enterprise](/pricing/enterprise) plans.
-  <user>
-    Currently available via the Web app.
-  </user>
+	Supported on [Enterprise](/pricing/enterprise) plans.
+	<user>Currently available via the Web app.</user>
 </TierCallout>
 
-<p className="subtitle">Keep on top of events in your codebase. Watch your code with code monitors and trigger actions to run automatically in response to events.</p>
+<p className="subtitle">
+	Keep on top of events in your codebase. Watch your code with code monitors
+	and trigger actions to run automatically in response to events.
+</p>
 
 Code monitors allow you to keep track of and get notified about changes in your code. Some use cases for code monitors include getting notifications for potential secrets, anti-patterns, or common typos committed to your codebase.
 
@@ -35,7 +36,7 @@ You may want to get notified when a given file is changed, regardless of the dif
 repo:^github\.com/sourcegraph/sourcegraph$ type:diff select:commit.diff.added Sprintf
 ```
 
-You may want to monitor new additions of a specific function call, for example a deprecated function or a function that introduces a security concern.  This query will notify you whenever a new addition of `Sprintf` is added to the `sourcegraph/sourcegraph` repository.  This query selects all diff additions marked as "+".  If a call of `Sprintf` is both added and removed from a file, this query will still notify due to the addition.
+You may want to monitor new additions of a specific function call, for example a deprecated function or a function that introduces a security concern. This query will notify you whenever a new addition of `Sprintf` is added to the `sourcegraph/sourcegraph` repository. This query selects all diff additions marked as "+". If a call of `Sprintf` is both added and removed from a file, this query will still notify due to the addition.
 
 Code monitors are made up of two main elements: **Triggers** and **Actions**.
 
@@ -60,13 +61,13 @@ Prerequisite: Ensure [email notifications](/admin/observability/alerting#email) 
 3. Fill out the _Name_ input with: "TODOs".
 4. Under the _Trigger_ section, click _When there are new search results_.
 5. In the _Search query_ input, enter the following search query:
-`TODO type:diff patternType:keyword`.
-(Note that `type:` and `patternType:` are required as part of the search query for code monitoring.)
-1. You can click _Preview results_ to see all previous additions or removals of TODO to your codebase.
-2. Back in the code monitor form, click _Continue_.
-3. Click _Send email notifications_ under the _Actions_ section. You can use "Send test email" to verify you can properly receive notifications and to lean more about the format.
-4. Click _Done_.
-5. Click _Create code monitor_.
+   `TODO type:diff patternType:keyword`.
+   (Note that `type:` and `patternType:` are required as part of the search query for code monitoring.)
+6. You can click _Preview results_ to see all previous additions or removals of TODO to your codebase.
+7. Back in the code monitor form, click _Continue_.
+8. Click _Send email notifications_ under the _Actions_ section. You can use "Send test email" to verify you can properly receive notifications and to lean more about the format.
+9. Click _Done_.
+10. Click _Create code monitor_.
 
 You should now see the TODO code monitor on the page, and you will receive email notifications whenever the trigger fires.
 
@@ -89,13 +90,19 @@ You can set up code monitors to send notifications about new matching search res
 1. Click on the "Create an app" button.
 1. Create your app "From scratch".
 1. Give your app a name and select the workplace you want notifications sent to.
- <video src="https://storage.googleapis.com/sourcegraph-assets/search/code-monitoring/slack-tutorial/1-create-app.mp4" controls />
+    <video
+    	src="https://storage.googleapis.com/sourcegraph-assets/search/code-monitoring/slack-tutorial/1-create-app.mp4"
+    	controls
+    />
 1. Once your app is created, click on the "Incoming Webhooks" in the sidebar, under "Features".
 1. Click the toggle button to activate incoming webhooks.
 1. Scroll to the bottom of the page and click on "Add New Webhook to Workspace".
 1. Select the channel you want notifications sent to, then click on the "Allow" button.
 1. Your webhook URL is now created! Click the copy button to copy it to your clipboard.
- <video src="https://storage.googleapis.com/sourcegraph-assets/search/code-monitoring/slack-tutorial/2-create-webhook.mp4" controls />
+    <video
+    	src="https://storage.googleapis.com/sourcegraph-assets/search/code-monitoring/slack-tutorial/2-create-webhook.mp4"
+    	controls
+    />
 
 ### Sending a webhook event to an endpoint of your choosing
 
@@ -105,7 +112,7 @@ by Sourcegraph, and contains all the information available about the cause of th
 
 #### Prerequisites
 
-- You must have a service running that can accept the POST request triggered by the webhook notification
+-   You must have a service running that can accept the POST request triggered by the webhook notification
 
 #### Creating a webhook receiver
 
@@ -114,43 +121,41 @@ The receiver must be reachable from the Sourcegraph cluster using the URL that i
 
 The HTTP POST request sent to the receiver will have a JSON-encoded body with the following fields:
 
-- `monitorDescription`: The description of the monitor as configured in the UI
-- `monitorURL`: A link to the monitor configuration page
-- `query`: The query that generated `results`
-- `results`: The list of results that triggered this notification. Contains the following sub-fields
-  - `repository`: The name of the repository the commit belongs to
-  - `commit`: The commit hash for the matched commit.
-  - `diff`: The matching diff in unified diff format. Only set if the result is a diff match.
-  - `matchedDiffRanges`: The character ranges of `diff` that matched `query`. Only set if the result is a diff match.
-  - `message`: The matching commit message. Only set if the result is a commit match.
-  - `matchedMessageRanges`: The character ranges of `message` that matched `query`. Only set if the result is a commit match.
+-   `monitorDescription`: The description of the monitor as configured in the UI
+-   `monitorURL`: A link to the monitor configuration page
+-   `query`: The query that generated `results`
+-   `results`: The list of results that triggered this notification. Contains the following sub-fields
+    -   `repository`: The name of the repository the commit belongs to
+    -   `commit`: The commit hash for the matched commit.
+    -   `diff`: The matching diff in unified diff format. Only set if the result is a diff match.
+    -   `matchedDiffRanges`: The character ranges of `diff` that matched `query`. Only set if the result is a diff match.
+    -   `message`: The matching commit message. Only set if the result is a commit match.
+    -   `matchedMessageRanges`: The character ranges of `message` that matched `query`. Only set if the result is a commit match.
 
 <Accordion title="Example payload">
 
 ```json
 {
-  "monitorDescription": "My test monitor",
-  "monitorURL": "https://sourcegraph.com/code-monitoring/Q29kZU1vbml0b3I6NDI=?utm_source=",
-  "query": "repo:camdentest -file:id_rsa.pub BEGIN",
-  "results": [
-    {
-      "repository": "github.com/test/test",
-      "commit": "7815187511872asbasdfgasd",
-      "diff": "file1.go file2.go\n@ -97,5 +97,5 @ func Test() {\n leading context\n+matched added\n-matched removed\n trailing context\n",
-      "matchedDiffRanges": [
-        [ 66, 73 ],
-        [ 91, 98 ]
-      ]
-    },
-    {
-      "repository": "github.com/test/test",
-      "commit": "7815187511872asbasdfgasd",
-      "message": "summary line\n\nsample\ncommit\nmessage\n",
-      "matchedMessageRanges": [
-        [ 15, 19 ]
-      ]
-    }
-  ]
+	"monitorDescription": "My test monitor",
+	"monitorURL": "https://sourcegraph.com/code-monitoring/Q29kZU1vbml0b3I6NDI=?utm_source=",
+	"query": "repo:camdentest -file:id_rsa.pub BEGIN",
+	"results": [
+		{
+			"repository": "github.com/test/test",
+			"commit": "7815187511872asbasdfgasd",
+			"diff": "file1.go file2.go\n@ -97,5 +97,5 @ func Test() {\n leading context\n+matched added\n-matched removed\n trailing context\n",
+			"matchedDiffRanges": [
+				[66, 73],
+				[91, 98]
+			]
+		},
+		{
+			"repository": "github.com/test/test",
+			"commit": "7815187511872asbasdfgasd",
+			"message": "summary line\n\nsample\ncommit\nmessage\n",
+			"matchedMessageRanges": [[15, 19]]
+		}
+	]
 }
 ```
 
@@ -162,9 +167,9 @@ To put it all together, a code monitor has a flow similar to the following:
 
 A user creates a code monitor, which consists of:
 
-- a name for the monitor
-- a trigger, which consists of a search query to run periodically,
-- and an action, which is sending an email, sending a Slack message, or sending a webhook event
+-   a name for the monitor
+-   a trigger, which consists of a search query to run periodically,
+-   and an action, which is sending an email, sending a Slack message, or sending a webhook event
 
 Sourcegraph runs the query periodically over new commits. When new results are detected, a notification will be sent with the configured action. It will either contain a link to the search that provided new results, or if the "Include results" setting is enabled, it will include the result contents.
 

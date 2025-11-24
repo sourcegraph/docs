@@ -1,6 +1,8 @@
 # Inference of auto-indexing jobs
 
-<Callout type="note">This feature is in beta for self-hosted customers.</Callout>
+<Callout type="note">
+	This feature is in beta for self-hosted customers.
+</Callout>
 
 When a commit of a repository is selected as a candidate for [auto-indexing](/code-search/code-navigation/auto_indexing) but does not have an explicitly supplied index job configuration, index jobs are inferred from the content of the repository at that commit.
 
@@ -16,25 +18,20 @@ For each directory containing a `go.mod` file, the following index job is schedu
 
 ```json
 {
-  "index_jobs": [
-    {
-      "steps": [
-        {
-          "root": "<dir>",
-          "image": "sourcegraph/scip-go",
-          "commands": [
-            "go mod download"
-          ]
-        }
-      ],
-      "root": "<dir>",
-      "indexer": "sourcegraph/scip-go",
-      "indexer_args": [
-        "scip-go",
-        "--verbose"
-      ]
-    }
-  ]
+	"index_jobs": [
+		{
+			"steps": [
+				{
+					"root": "<dir>",
+					"image": "sourcegraph/scip-go",
+					"commands": ["go mod download"]
+				}
+			],
+			"root": "<dir>",
+			"indexer": "sourcegraph/scip-go",
+			"indexer_args": ["scip-go", "--verbose"]
+		}
+	]
 }
 ```
 
@@ -42,13 +39,9 @@ For every _other_ directory excluding `vendor/` directories and their children c
 
 ```json
 {
-  "root": "<dir>",
-  "indexer": "sourcegraph/scip-go",
-  "indexer_args": [
-    "GO111MODULE=off",
-    "scip-go",
-    "--verbose"
-  ]
+	"root": "<dir>",
+	"indexer": "sourcegraph/scip-go",
+	"indexer_args": ["GO111MODULE=off", "scip-go", "--verbose"]
 }
 ```
 
@@ -58,32 +51,25 @@ For each directory excluding `node_modules/` directories and their children cont
 
 ```json
 {
-  "steps": [
-    {
-      "root": "<ancestor(dir)>",
-      "image": "sourcegraph/scip-typescript:autoindex",
-      "commands": [
-        "yarn"
-      ]
-    },
-    {
-      "root": "<ancestor(dir)>",
-      "image": "sourcegraph/scip-typescript:autoindex",
-      "commands": [
-        "npm install"
-      ]
-    },
-    "..."
-  ],
-  "local_steps": [
-    "N_NODE_MIRROR=https://unofficial-builds.nodejs.org/download/release n --arch x64-musl autol"
-  ],
-  "root": "<dir>",
-  "indexer": "sourcegraph/scip-typescript:autoindex",
-  "indexer_args": [
-    "scip-typescript",
-    "index"
-  ]
+	"steps": [
+		{
+			"root": "<ancestor(dir)>",
+			"image": "sourcegraph/scip-typescript:autoindex",
+			"commands": ["yarn"]
+		},
+		{
+			"root": "<ancestor(dir)>",
+			"image": "sourcegraph/scip-typescript:autoindex",
+			"commands": ["npm install"]
+		},
+		"..."
+	],
+	"local_steps": [
+		"N_NODE_MIRROR=https://unofficial-builds.nodejs.org/download/release n --arch x64-musl autol"
+	],
+	"root": "<dir>",
+	"indexer": "sourcegraph/scip-typescript:autoindex",
+	"indexer_args": ["scip-typescript", "index"]
 }
 ```
 
@@ -93,31 +79,28 @@ If the repository contains a `Cargo.toml` file, the following index job is sched
 
 ```json
 {
-  "root": "",
-  "indexer": "sourcegraph/lsif-rust",
-  "indexer_args": [
-    "lsif-rust",
-    "index"
-  ],
-  "outfile": "dump.lsif"
+	"root": "",
+	"indexer": "sourcegraph/lsif-rust",
+	"indexer_args": ["lsif-rust", "index"],
+	"outfile": "dump.lsif"
 }
 ```
 
 ## Java
 
-<Callout type="note">Inference for languages supported by [scip-java](https://github.com/sourcegraph/scip-java) is currently restricted to Sourcegraph.com.</Callout>
+<Callout type="note">
+	Inference for languages supported by
+	[scip-java](https://github.com/sourcegraph/scip-java) is currently
+	restricted to Sourcegraph.com.
+</Callout>
 
 If the repository contains both a `lsif-java.json` file as well as `*.java`, `*.scala`, or `*.kt` files, the following index job is scheduled.
 
 ```json
 {
-  "root": "",
-  "indexer": "sourcegraph/scip-java",
-  "indexer_args": [
-    "scip-java",
-    "index",
-    "--build-tool=lsif"
-  ],
-  "outfile": "index.scip"
+	"root": "",
+	"indexer": "sourcegraph/scip-java",
+	"indexer_args": ["scip-java", "index", "--build-tool=lsif"],
+	"outfile": "index.scip"
 }
 ```

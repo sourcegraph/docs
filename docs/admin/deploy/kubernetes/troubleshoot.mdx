@@ -28,20 +28,17 @@ $ kubectl get storageclass sourcegraph -o=yaml \
 
 > NOTE: Google Cloud Platform users may need to [request an increase in storage quota](https://cloud.google.com/compute/quotas).
 
-
 #### Error: error retrieving RESTMappings to prune: invalid resource networking.k8s.io/v1, Kind=Ingress, Namespaced=true: no matches for kind "Ingress" in version "networking.k8s.io/v1".
 
-Run `kubectl version` to verify the __Client Version__ matches the __Server Version__.
+Run `kubectl version` to verify the **Client Version** matches the **Server Version**.
 
 Run `kubectl get ingresses -A` to check if there is more than one ingress for `sourcegraph-frontend`. You can delete the duplicate with `kubectl delete ingress sourcegraph-frontend --namespace $YOUR_NAMESPACE`
 
 > NOTE: See our ["configuration guide"](/admin/deploy/kubernetes/configure#security-configure-network-access) for more information on network access.
 
-
 #### Error: error when creating "base/cadvisor/cadvisor.ClusterRoleBinding.yaml": subjects[0].namespace: Required value
 
 This error occurs when using legacy deployment manifests. For modern deployments using deploy-sourcegraph-k8s, cadvisor is configured as a DaemonSet with a ServiceAccount and doesn't require a ClusterRoleBinding. If you encounter this error, ensure you're using the latest [deploy-sourcegraph-k8s](https://github.com/sourcegraph/deploy-sourcegraph-k8s) repository.
-
 
 #### Multiple pods are stuck in Pending.
 
@@ -67,7 +64,6 @@ Alternatively, you can wait until the rate limits are reset.
 
 [**OPTIONAL**] You can also upgrade your account to a Docker Pro or Team subscription with higher rate-limits. ([See Docker Hub for more information](https://www.docker.com/increase-rate-limits)).
 
-
 #### Irrelevant cAdvisor metrics are causing strange alerts and performance issues.
 
 This is most likely due to cAdvisor picking up other metrics from the cluster.
@@ -76,7 +72,6 @@ A workaround is available: [Filtering cAdvisor metrics](/admin/deploy/kubernetes
 #### I don't see any metrics on my Grafana Dashboard.
 
 Missing metrics indicate Sourcegraph is having issues connecting to the Kubernetes API. For instance, running a Sourcegraph instance as non-privileged prevents services from picking up metrics through the Kubernetes API. One of the potential solutions is to grant Prometheus and cAdvisor root access.
-
 
 #### Which metrics are using the most resources?
 
@@ -90,7 +85,6 @@ Missing metrics indicate Sourcegraph is having issues connecting to the Kubernet
     ```
 3. Run `topk(10, count by (__name__)({__name__=~".+"}))` to check the values
 
-
 #### You can't access Sourcegraph.
 
 Make sure the namespace of the ingress-controller is `ingress-nginx`. See the [Troubleshooting ingress-nginx docs](https://kubernetes.github.io/ingress-nginx/troubleshooting/) for more information.
@@ -101,13 +95,13 @@ This can occur when the Readiness or Liveness probe is referring to a port that 
 
 ```yaml
 ports:
-  - containerPort: 3188
-    name: minio
-...
+    - containerPort: 3188
+      name: minio
+---
 livenessProbe:
-  httpGet:
-    path: /minio/health/live
-    port: minio   #this port name MUST exist in the same spec
+    httpGet:
+        path: /minio/health/live
+        port: minio #this port name MUST exist in the same spec
 ```
 
 ## Service mesh
@@ -116,13 +110,19 @@ Known issues when using a service mesh (e.g. Istio, Linkerd, etc.)
 
 #### Error message: `Git command [git rev-parse HEAD] failed (stderr: ""): strconv.Atoi: parsing "": invalid syntax`
 
-<img class="screenshot w-100" src="https://user-images.githubusercontent.com/68532117/178506378-3d047bc5-d672-487a-920f-8f228ae5cb27.png"/>
+<img
+	class="screenshot w-100"
+	src="https://user-images.githubusercontent.com/68532117/178506378-3d047bc5-d672-487a-920f-8f228ae5cb27.png"
+/>
 
 This error occurs because Envoy, the proxy used by Istio, [drops proxied trailers for the requests made over HTTP/1.1 protocol by default](https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/core/v3/protocol.proto#config-core-v3-http1protocoloptions). To resolve this issue, enable trailers in your instance following the examples provided for [Kubernetes](https://github.com/sourcegraph/deploy-sourcegraph/tree/master/overlays) and [Kubernetes with Helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/tree/main/charts/sourcegraph/examples).
 
 #### Symbols sidebar and hovers are not working
 
-<img class="screenshot w-100" src="https://user-images.githubusercontent.com/68532117/212372086-4c53e817-be3d-46b6-9cc1-fc34e695d30c.png"/>
+<img
+	class="screenshot w-100"
+	src="https://user-images.githubusercontent.com/68532117/212372086-4c53e817-be3d-46b6-9cc1-fc34e695d30c.png"
+/>
 
 In a service mesh like Istio, communication between services is secured using a feature called mutual Transport Layer Security (mTLS). mTLS relies on services communicating with each other using DNS names, rather than IP addresses, to identify the specific services or pods that the communication is intended for.
 
@@ -157,12 +157,20 @@ SEARCHER_URL=http:searcher:3184
 
 #### Squirrel.LocalCodeIntel http status 502
 
-<img class="screenshot w-100" src="https://user-images.githubusercontent.com/68532117/212374098-dc2dfe69-4d26-4f5e-a78b-37a53c19ef22.png"/>
-The issue described is related to the Code Intel hover feature, where it may get stuck in a loading state or return a 502 error with the message `Squirrel.LocalCodeIntel http status 502`. This is caused by the same issue described in [Symbols sidebar and hovers are not working](#symbols-sidebar-and-hovers-are-not-working"). See that section for solution.
+<img
+	class="screenshot w-100"
+	src="https://user-images.githubusercontent.com/68532117/212374098-dc2dfe69-4d26-4f5e-a78b-37a53c19ef22.png"
+/>
+The issue described is related to the Code Intel hover feature, where it may get
+stuck in a loading state or return a 502 error with the message `Squirrel.LocalCodeIntel
+http status 502`. This is caused by the same issue described in [Symbols sidebar
+and hovers are not working](#symbols-sidebar-and-hovers-are-not-working"). See that
+section for solution.
 
 ## Help request
 
 Still need additional help? Please contact us using one of the methods listed below:
-- Twitter [@sourcegraph](https://twitter.com/sourcegraph)
-- Email us at [support@sourcegraph.com](mailto:support@sourcegraph.com)
-- File issues with our [public issue tracker](https://github.com/sourcegraph/issues/issues)
+
+-   Twitter [@sourcegraph](https://twitter.com/sourcegraph)
+-   Email us at [support@sourcegraph.com](mailto:support@sourcegraph.com)
+-   File issues with our [public issue tracker](https://github.com/sourcegraph/issues/issues)

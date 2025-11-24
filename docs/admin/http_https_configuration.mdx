@@ -1,13 +1,16 @@
-import { CURRENT_VERSION_STRING_NO_V, CURRENT_VERSION_STRING } from 'src/components/PreCodeBlock'
+import {
+	CURRENT_VERSION_STRING_NO_V,
+	CURRENT_VERSION_STRING
+} from 'src/components/PreCodeBlock';
 
 # Sourcegraph HTTP and HTTPS/SSL configuration
 
 Overview:
 
-- [Single Docker image (`sourcegraph/server`): NGINX](#sourcegraph-single-instance-docker)
-- [Sourcegraph Cluster (Kubernetes): NGINX](#sourcegraph-cluster-kubernetes)
-- [Docker Compose: Caddy 2](#sourcegraph-via-docker-compose-caddy-2)
-- [Other Sourcegraph clusters (e.g. pure-docker)](#other-sourcegraph-clusters-e-g-pure-docker)
+-   [Single Docker image (`sourcegraph/server`): NGINX](#sourcegraph-single-instance-docker)
+-   [Sourcegraph Cluster (Kubernetes): NGINX](#sourcegraph-cluster-kubernetes)
+-   [Docker Compose: Caddy 2](#sourcegraph-via-docker-compose-caddy-2)
+-   [Other Sourcegraph clusters (e.g. pure-docker)](#other-sourcegraph-clusters-e-g-pure-docker)
 
 ## Sourcegraph single Docker image and Sourcegraph Cluster (Kubernetes): NGINX
 
@@ -21,14 +24,14 @@ Sourcegraph's single Docker image and Kubernetes deployments use [NGINX](https:/
 
 The first time Sourcegraph is run, it will create an [`nginx.conf`](https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/cmd/server/shared/assets/nginx.conf) file at:
 
-- `~/.sourcegraph/config/nginx.conf` on the Docker/Sourcegraph host (presuming you're using the [quickstart `docker run` command](/#quick-install))
-- `/etc/sourcegraph/nginx.conf` inside the container
+-   `~/.sourcegraph/config/nginx.conf` on the Docker/Sourcegraph host (presuming you're using the [quickstart `docker run` command](/#quick-install))
+-   `/etc/sourcegraph/nginx.conf` inside the container
 
 SSL support requires two things:
 
 1. [Manual editing](#nginx-ssl-https-configuration) of the NGINX configuration file if using the [quickstart docker run command](/#quick-install) as it presumes local or internal usage.
 1. (Now that NGINX is listening on port 7443), we need to configure the Sourcegraph container to forward
-443 to 7443 by adding `--publish 443:7443` to the `docker run` command:
+   443 to 7443 by adding `--publish 443:7443` to the `docker run` command:
 
 ```bash
 docker container run \
@@ -88,26 +91,28 @@ There are a few options:
 
 1. On the Certbot homepage, select "Nginx" and the operating system of the machine hosting Sourcegraph.
 1. Follow the instructions to install and run Certbot.
-  1. If there is currently a process (e.g., Sourcegraph) listening on port 80, you'll
-     need to stop it before running Certbot:
+1. If there is currently a process (e.g., Sourcegraph) listening on port 80, you'll
+   need to stop it before running Certbot:
 
-     ```
-     docker stop $(docker ps | grep sourcegraph/server | awk '{ print $1 }')
-     ```
-  1. When you get to the step describing how to run Certbot, use the "certonly" command: `sudo certbot certonly --nginx`.
-  1. When Certbot runs successfully, it will emit the key file `privkey.pem` and cert file
-     `fullchain.pem`. These should be renamed to `sourcegraph.key` and `sourcegraph.crt`,
-     respectively, if you are using the `nginx.conf` template mentioned in this doc.
-  1. Kill the NGINX server that Certbot started: `killall nginx`. Restart Sourcegraph:
+    ```
+    docker stop $(docker ps | grep sourcegraph/server | awk '{ print $1 }')
+    ```
 
-     ```
-     docker start $(docker ps -a | grep sourcegraph/server | awk '{ print $1 }')
-     ```
-  1. Now visit your Sourcegraph instance at `https://${YOUR_URL}`. If there are issues, debug by examining the Docker logs:
+1. When you get to the step describing how to run Certbot, use the "certonly" command: `sudo certbot certonly --nginx`.
+1. When Certbot runs successfully, it will emit the key file `privkey.pem` and cert file
+   `fullchain.pem`. These should be renamed to `sourcegraph.key` and `sourcegraph.crt`,
+   respectively, if you are using the `nginx.conf` template mentioned in this doc.
+1. Kill the NGINX server that Certbot started: `killall nginx`. Restart Sourcegraph:
 
-     ```
-     docker logs $(docker ps | grep sourcegraph/server | awk '{ print $1 }')
-     ```
+    ```
+    docker start $(docker ps -a | grep sourcegraph/server | awk '{ print $1 }')
+    ```
+
+1. Now visit your Sourcegraph instance at `https://${YOUR_URL}`. If there are issues, debug by examining the Docker logs:
+
+    ```
+    docker logs $(docker ps | grep sourcegraph/server | awk '{ print $1 }')
+    ```
 
 **[2. Generate a self-signed certificate](/admin/ssl_https_self_signed_cert_nginx)**<br />
 
@@ -125,7 +130,7 @@ more details.
 
 The URL that clients should use to access Sourcegraph is defined in the `externalURL` property in [site configuration](/admin/config/site_config). To enforce that clients access Sourcegraph via this URL (and not some other URL, such as an IP address or other non-`https` URL), add the following to `nginx.conf` (replacing `https://sourcegraph.example.com` with your external URL):
 
-``` nginx
+```nginx
 # Redirect non-HTTPS traffic to HTTPS.
 server {
     listen 80;
@@ -141,7 +146,7 @@ server {
 
 [HTTP Strict Transport Security](https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) instructs web clients to only communicate with the server over HTTPS. To configure it, add the following to `nginx.conf` (in the `server` block):
 
-``` nginx
+```nginx
 add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 ```
 
@@ -159,9 +164,9 @@ You should configure Sourcegraph's `externalURL` in the [site configuration](/ad
 
 Sourcegraph's [Docker Compose deployment](/admin/deploy/docker-compose/) uses [Caddy 2](https://caddyserver.com/) as its reverse proxy. The Docker Compose deployment ships with a few builtin templates that cover common scenarios for exposing Sourcegraph:
 
-- plain HTTP
-- HTTPS with automatically provisioned Let's Encrypt certificates
-- HTTPS with custom certificates that you provide
+-   plain HTTP
+-   HTTPS with automatically provisioned Let's Encrypt certificates
+-   HTTPS with custom certificates that you provide
 
 Usage instructions are provided via [the `caddy` service's inline comments inside the `docker-compose.yaml` definition](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/3.14/docker-compose/docker-compose.yaml#L3:L58). Detailed steps are found below.
 
@@ -169,36 +174,41 @@ Usage instructions are provided via [the `caddy` service's inline comments insid
 
 ### HTTPS with Custom Certificates in Docker Compose
 
-**Important:**  [https.custom-cert.Caddyfile](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/master/caddy/builtins/https.custom-cert.Caddyfile) should not require any updates and should remain untouched. Updates should be made in the [docker-compose.yaml](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/master/docker-compose/docker-compose.yaml) file only and as described below.
+**Important:** [https.custom-cert.Caddyfile](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/master/caddy/builtins/https.custom-cert.Caddyfile) should not require any updates and should remain untouched. Updates should be made in the [docker-compose.yaml](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/master/docker-compose/docker-compose.yaml) file only and as described below.
 
 In your [docker-compose.yaml](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/master/docker-compose/docker-compose.yaml) within the caddy section:
 
 1. In the Environment section of the compose file uncomment & update this line with your Sourcegraph Site Address:
 
-   ```
-   - 'SRC_SITE_ADDRESS=sourcegraph.example.com'
-   ```
+    ```
+    - 'SRC_SITE_ADDRESS=sourcegraph.example.com'
+    ```
+
 1. In Volumes section of the compose file comment out the following line
 
-   ```
-   - '//builtins/http.Caddyfile:/etc/caddy/Caddyfile'
-   ```
+    ```
+    - '//builtins/http.Caddyfile:/etc/caddy/Caddyfile'
+    ```
+
 1. In Volumes section of the compose file uncomment the following line:
 
-   ```
-   - '//builtins/https.custom-cert.Caddyfile:/etc/caddy/Caddyfile'
-   ```
+    ```
+    - '//builtins/https.custom-cert.Caddyfile:/etc/caddy/Caddyfile'
+    ```
+
 1. In Volumes section of the compose file uncomment and update the following line with your custom cert path:
 
-   ```
-   - '/LOCAL/CERT/PATH.pem:/sourcegraph.pem'
-   ```
+    ```
+    - '/LOCAL/CERT/PATH.pem:/sourcegraph.pem'
+    ```
+
 1. In Volumes section of the compose file uncomment and update the following line with your custom cert path:
 
-   ```
-   - '/LOCAL/KEY/PATH.key:/sourcegraph.key'
-   ```
-**NOTE**: When adding your certs to your instance, make sure they are in the `deploy-sourcegraph-docker` folder, not outside of it. They will not be recognized otherwise.
+    ```
+    - '/LOCAL/KEY/PATH.key:/sourcegraph.key'
+    ```
+
+    **NOTE**: When adding your certs to your instance, make sure they are in the `deploy-sourcegraph-docker` folder, not outside of it. They will not be recognized otherwise.
 
 ## Other Sourcegraph clusters (e.g. pure-Docker)
 

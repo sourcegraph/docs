@@ -1,39 +1,42 @@
 # Manage Cody Context
 
-<p className="subtitle">You can control and manage what context from your codebase is used by Cody. You can do this by using Cody Context Filters. It is supported on all Cody [clients](/cody/clients).</p>
+<p className="subtitle">
+	You can control and manage what context from your codebase is used by Cody.
+	You can do this by using Cody Context Filters. It is supported on all Cody
+	[clients](/cody/clients).
+</p>
 
 ## Context Filters
 
 Admins on the Sourcegraph Enterprise instance can use the Cody Context Filters to determine which repositories Cody can use as the context in its requests to third-party LLMs. You can use Context Filters if you have:
 
-- A valid Cody Enterprise license running on Sourcegraph instance version `>=5.4.0`
-- Running the supported Cody client versions: VS Code `>=1.20.0` and JetBrains `>=6.0.0`
-- Setting the `cody-context-filters-enabled` feature flag to `true`
+-   A valid Cody Enterprise license running on Sourcegraph instance version `>=5.4.0`
+-   Running the supported Cody client versions: VS Code `>=1.20.0` and JetBrains `>=6.0.0`
+-   Setting the `cody-context-filters-enabled` feature flag to `true`
 
 Site admins can customize the `cody.contextFilters` field in the site configuration to specify which repositories Cody should `include` or `exclude`, using the following structure:
 
 ```json
 {
-  // Optional. If defined, it must have at least one
-  // field set (either `include` or `exclude`).
-  "cody.contextFilters": {
-    // Optional. If defined, it must have at least one item.
-    "include": [
-      {
-        // Required. Should follow the RE2 syntax.
-        "repoNamePattern": "^github\\.com\\/sourcegraph\\/.*"
-      }
-    ],
-    // Optional. If defined, it must have at least one item.
-    "exclude": [
-      {
-        // Required. Should follow the RE2 syntax.
-        "repoNamePattern": ".*analytics.*"
-      }
-    ]
-  }
+	// Optional. If defined, it must have at least one
+	// field set (either `include` or `exclude`).
+	"cody.contextFilters": {
+		// Optional. If defined, it must have at least one item.
+		"include": [
+			{
+				// Required. Should follow the RE2 syntax.
+				"repoNamePattern": "^github\\.com\\/sourcegraph\\/.*"
+			}
+		],
+		// Optional. If defined, it must have at least one item.
+		"exclude": [
+			{
+				// Required. Should follow the RE2 syntax.
+				"repoNamePattern": ".*analytics.*"
+			}
+		]
+	}
 }
-
 ```
 
 ## How `include` and `exclude` rules work
@@ -52,16 +55,15 @@ The `include` field can also contain a catch-all pattern (e.g., a `regexp` that 
 
 ```json
 {
-  "cody.contextFilters": {
-    // Only repositories whose names either start with "github.com/sourcegraph/"
-    // or contain "cody" are allowed.
-    "include": [
-      { "repoNamePattern": "^github\\.com\\/sourcegraph\\/.+" },
-      { "repoNamePattern": ".*cody.*" }
-    ]
-  }
+	"cody.contextFilters": {
+		// Only repositories whose names either start with "github.com/sourcegraph/"
+		// or contain "cody" are allowed.
+		"include": [
+			{"repoNamePattern": "^github\\.com\\/sourcegraph\\/.+"},
+			{"repoNamePattern": ".*cody.*"}
+		]
+	}
 }
-
 ```
 
 These `include` rules allow Cody only to utilize the repository matching the `regexp` with full access to fetch context.
@@ -74,16 +76,17 @@ The `exclude` field can also include a catch-all condition, such as a `regexp` t
 
 ```json
 {
-  "cody.contextFilters": {
-    // All repositories are allowed except for "github.com/sourcegraph/cody-analytics"
-    // or the ones containing "secret" in their name.
-    "exclude": [
-      { "repoNamePattern": "^github\\.com\\/sourcegraph\\/cody-analytics$" },
-      { "repoNamePattern": ".*secret.*" }
-    ]
-  }
+	"cody.contextFilters": {
+		// All repositories are allowed except for "github.com/sourcegraph/cody-analytics"
+		// or the ones containing "secret" in their name.
+		"exclude": [
+			{
+				"repoNamePattern": "^github\\.com\\/sourcegraph\\/cody-analytics$"
+			},
+			{"repoNamePattern": ".*secret.*"}
+		]
+	}
 }
-
 ```
 
 #### Chat behavior when exclude rules are defined
@@ -96,31 +99,34 @@ When requesting third-party LLMs, Cody can use content from a repository if its 
 
 ```json
 {
-  "cody.contextFilters": {
-    // All repositories starting with "github.com/sourcegraph/" are allowed
-    "include": [
-      { repoNamePattern: "^github\\.com\\/sourcegraph\\/.+" }
-    ],
-    // except for "github.com/sourcegraph/cody-analytics"
-    // and the ones containing "cody" in their name.
-    "exclude": [
-      { "repoNamePattern": "^github\\.com\\/sourcegraph\\/cody-analytics$" },
-      { "repoNamePattern": ".*cody.*" }
-    ]
-  }
+	"cody.contextFilters": {
+		// All repositories starting with "github.com/sourcegraph/" are allowed
+		"include": [{"repoNamePattern": "^github\\.com\\/sourcegraph\\/.+"}],
+		// except for "github.com/sourcegraph/cody-analytics"
+		// and the ones containing "cody" in their name.
+		"exclude": [
+			{
+				"repoNamePattern": "^github\\.com\\/sourcegraph\\/cody-analytics$"
+			},
+			{"repoNamePattern": ".*cody.*"}
+		]
+	}
 }
-
 ```
 
 In this case, Cody can access content from repositories whose names start with `github.com/sourcegraph/`. However, it excludes files from repositories with `cody` in their name.
 
 ## Cody Context Filters Compatibility Matrix
 
-<Callout type="info"> Cody Context Filters work only on Sourcegraph versions `>=5.4.0`, VS Code `>=1.20.0` and JetBrains `>=6.0.0` for Enterprise users.</Callout>
+<Callout type="info">
+	{' '}
+	Cody Context Filters work only on Sourcegraph versions `>=5.4.0`, VS Code `>=1.20.0`
+	and JetBrains `>=6.0.0` for Enterprise users.
+</Callout>
 
 Depending on the client type, here's a breakdown of versions supported and the behavior for unsupported versions:
 
-|  **Client**   |      Client version       | Sourcegraph `v<5.4.0` | Sourcegraph `v=5.4.0` |    Sourcegraph `v=5.4.12303`    | Sourcegraph `v>=5.4.0` |
+| **Client**    | Client version            | Sourcegraph `v<5.4.0` | Sourcegraph `v=5.4.0` | Sourcegraph `v=5.4.12303`       | Sourcegraph `v>=5.4.0` |
 | ------------- | ------------------------- | --------------------- | --------------------- | ------------------------------- | ---------------------- |
 | **VS Code**   | `< 1.16.X`                | N/A                   | Cody not compatible   | Respects policy, ask to upgrade | Not affected           |
 |               | `1.18.0 <` and `< 1.20.0` | N/A                   | Cody not compatible   | Respects policy, ask to upgrade | Not affected           |

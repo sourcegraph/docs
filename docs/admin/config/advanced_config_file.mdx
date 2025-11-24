@@ -29,9 +29,9 @@ Loading configuration in this manner has two significant drawbacks:
 
 Set `SITE_CONFIG_FILE=site.json` and mount the config on:
 
-- [Docker Compose](/admin/deploy/docker-compose/) and [Kubernetes](/admin/deploy/kubernetes/): all `frontend`
-  containers
-- [Single-container](/admin/deploy/docker-single-container/): the `sourcegraph/server` container
+-   [Docker Compose](/admin/deploy/docker-compose/) and [Kubernetes](/admin/deploy/kubernetes/): all `frontend`
+    containers
+-   [Single-container](/admin/deploy/docker-single-container/): the `sourcegraph/server` container
 
 Where `site.json` is a file that contains the [site configuration](/admin/config/site_config), which you would otherwise edit
 through the in-app site configuration editor.
@@ -52,9 +52,9 @@ This will merge both files. Sourcegraph will need access both files.
 
 Set `EXTSVC_CONFIG_FILE=extsvc.json` and mount the config on:
 
-- [Docker Compose](/admin/deploy/docker-compose/) and [Kubernetes](/admin/deploy/kubernetes/): all `frontend`
-  containers
-- [Single-container](/admin/deploy/docker-single-container/): the `sourcegraph/server` container
+-   [Docker Compose](/admin/deploy/docker-compose/) and [Kubernetes](/admin/deploy/kubernetes/): all `frontend`
+    containers
+-   [Single-container](/admin/deploy/docker-single-container/): the `sourcegraph/server` container
 
 Where `extsvc.json` contains a JSON object that specifies _all_ of your code hosts in a single JSONC file:
 
@@ -96,8 +96,8 @@ If you want to _allow_ edits to be made through the web UI (which will be overwr
 
 Set `GLOBAL_SETTINGS_FILE=global-settings.json` and mount the config on:
 
-- [Docker Compose](/admin/deploy/docker-compose/) and [Kubernetes](/admin/deploy/kubernetes/): all `frontend` containers
-- [Single-container](/admin/deploy/docker-single-container/): the `sourcegraph/server` container
+-   [Docker Compose](/admin/deploy/docker-compose/) and [Kubernetes](/admin/deploy/kubernetes/): all `frontend` containers
+-   [Single-container](/admin/deploy/docker-single-container/): the `sourcegraph/server` container
 
 Where `global-settings.json` contains the global settings, which you would otherwise edit through the in-app global settings editor.
 
@@ -127,59 +127,59 @@ You can load these configuration files via a Kubernetes ConfigMap resource. To d
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  annotations:
-    description: Sourcegraph configuration files
-  labels:
-    deploy: sourcegraph
-  name: frontend-config-files
+    annotations:
+        description: Sourcegraph configuration files
+    labels:
+        deploy: sourcegraph
+    name: frontend-config-files
 data:
-  # IMPORTANT: see https://sourcegraph.com/docs/admin/config/advanced_config_file for details on how this works.
+    # IMPORTANT: see https://sourcegraph.com/docs/admin/config/advanced_config_file for details on how this works.
 
-  # Global user settings, see: https://sourcegraph.com/docs/admin/config/advanced_config_file#global-settings
-  global-settings.json: |
-    {
-        "search.scopes": [
-            {
-              "name": "Test code",
-              "value": "file:(test|spec)"
-            },
-            {
-              "name": "Non-test files",
-              "value": "-file:(test|spec)"
+    # Global user settings, see: https://sourcegraph.com/docs/admin/config/advanced_config_file#global-settings
+    global-settings.json: |
+        {
+            "search.scopes": [
+                {
+                  "name": "Test code",
+                  "value": "file:(test|spec)"
+                },
+                {
+                  "name": "Non-test files",
+                  "value": "-file:(test|spec)"
+                }
+            ],
+            "extensions": {
+              "sourcegraph/git-extras": true,
             }
-        ],
-        "extensions": {
-          "sourcegraph/git-extras": true,
-        }
-      }
+          }
 
-  # Site configuration, see: https://sourcegraph.com/docs/admin/config/advanced_config_file#site-configuration
-  site.json: |
-    {
-      "auth.providers": [
+    # Site configuration, see: https://sourcegraph.com/docs/admin/config/advanced_config_file#site-configuration
+    site.json: |
         {
-          "allowSignup": true,
-          "type": "builtin"
-        }
-      ],
-      "externalURL": "https://sourcegraph.example.com",
-      "licenseKey": "..."
-      }
-    }
-
-  # Code host configuration, see: https://sourcegraph.com/docs/admin/config/advanced_config_file#code-host-configuration
-  extsvc.json: |
-    {
-      "GITHUB": [
-        {
-          "url": "https://github.com",
-          "token": "...",
-          "repositoryQuery": [
-            "none"
+          "auth.providers": [
+            {
+              "allowSignup": true,
+              "type": "builtin"
+            }
           ],
+          "externalURL": "https://sourcegraph.example.com",
+          "licenseKey": "..."
+          }
         }
-      ]
-    }
+
+    # Code host configuration, see: https://sourcegraph.com/docs/admin/config/advanced_config_file#code-host-configuration
+    extsvc.json: |
+        {
+          "GITHUB": [
+            {
+              "url": "https://github.com",
+              "token": "...",
+              "repositoryQuery": [
+                "none"
+              ],
+            }
+          ]
+        }
 ```
 
 To have Sourcegraph use this new ConfigMap, add the following environment variables to `base/frontend/sourcegraph-frontend.Deployment.yaml`:
@@ -230,43 +230,41 @@ Sourcegraph reads from the new `extsvc.json` file and creates a new entry in the
 As Sourcegraph reads from an `extsvc.json` file it reads from the top level schema and creates a new config with display name `<codehost type> #<position in json>` For example in the `extsvc.config` below GITHUB #1, GITHUB #2, GITHUB #3, and GITLAB #1 external service configs will be generated.
 
 ```json
-    {
-      "GITHUB": [
-        {
-          "url": "https://github.com",
-          "token": "secret",
-          "repos": [
-            "latveria/doombot",
-            "latveria/darkhold",
-            "latveria/timemachine"
-          ]
-        },
-        {
-          "url": "https://github.com",
-          "token": "secret",
-          "orgs": ["sourcegraph"]
-        },
-        {
-          "url": "https://github.com",
-          "token": "secret",
-          "orgs": [],
-          "repos": [
-            "grafana/grafana",
-            "sourcegraph/deploy-sourcegraph-twit-test",
-            "kubernetes/kubernetes",
-          ]
-        }
-      ],
-      "GITLAB": [
-        {
-          "url": "https://gitlab.com",
-          "token": "secret",
-          "projectQuery": [
-            "projects?membership=true&archived=no"
-          ]
-        }
-      ]
-    }
+{
+	"GITHUB": [
+		{
+			"url": "https://github.com",
+			"token": "secret",
+			"repos": [
+				"latveria/doombot",
+				"latveria/darkhold",
+				"latveria/timemachine"
+			]
+		},
+		{
+			"url": "https://github.com",
+			"token": "secret",
+			"orgs": ["sourcegraph"]
+		},
+		{
+			"url": "https://github.com",
+			"token": "secret",
+			"orgs": [],
+			"repos": [
+				"grafana/grafana",
+				"sourcegraph/deploy-sourcegraph-twit-test",
+				"kubernetes/kubernetes"
+			]
+		}
+	],
+	"GITLAB": [
+		{
+			"url": "https://gitlab.com",
+			"token": "secret",
+			"projectQuery": ["projects?membership=true&archived=no"]
+		}
+	]
+}
 ```
 
 You can avoid generation of a new config by changing the display name of your UI based config to match the relative display name which will be generated by the new `extsvc.json` file. For Sourcegraph to view a codehost config as already present its `display_name`, `kind`, and `config` **must not** change. You can take a look at these values in the database by running the following SQL query:

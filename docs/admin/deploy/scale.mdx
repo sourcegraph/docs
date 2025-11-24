@@ -11,7 +11,11 @@ Scaling is unnecessary if your resource usage is kept below 80%.
 
 For example, if you plan to add 100% more engaged users, and the resource usage for all services is currently at around 70%, we’d recommend using this documentation as a reference to adjust the resources that list “Number of active users” as one of their scaling factors. You can also use the output from the Resource Estimator as references alternatively.
 
-<Callout type="note"> For assistance when scaling and tuning Sourcegraph, [contact us](https://sourcegraph.com/contact/). We're happy to help!</Callout>
+<Callout type="note">
+	{' '}
+	For assistance when scaling and tuning Sourcegraph, [contact us](https://sourcegraph.com/contact/).
+	We're happy to help!
+</Callout>
 
 ---
 
@@ -22,11 +26,11 @@ Here is a list of components you can find in a typical Sourcegraph deployment:
 ### Core Components
 
 |                                                                |                                                                                                                                                                                          |
-|:---------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| :------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`frontend`](/admin/deploy/scale#frontend)                     | Serves the web application, extensions, and graphQL services. Almost every service has a link back to the frontend, from which it gathers configuration updates.                         |
 | [`gitserver`](/admin/deploy/scale#gitserver)                   | Mirrors repositories from their code host. All other Sourcegraph services talk to gitserver when they need data from git.                                                                |
 | [`precise-code-intel`](/admin/deploy/scale#precise-code-intel) | Converts LSIF upload file into Postgres data. The entire index must be read into memory to be correlated.                                                                                |
-| [`searcher`](/admin/deploy/scale#searcher)                     | Provides on-demand un-indexed search for repositories. It fetches archives from gitserver and searches them with regexp. Indexes symbols in repositories using Ctags.                                                                 |
+| [`searcher`](/admin/deploy/scale#searcher)                     | Provides on-demand un-indexed search for repositories. It fetches archives from gitserver and searches them with regexp. Indexes symbols in repositories using Ctags.                    |
 | [`syntect-server`](/admin/deploy/scale#syntect-server)         | An HTTP server that exposes the Rust Syntect syntax highlighting library for use by other services.                                                                                      |
 | [`worker`](/admin/deploy/scale#worker)                         | Runs a collection of background jobs periodically in response to internal requests and external events. It is currently janitorial and commit based.                                     |
 | [`zoekt-indexserver`](/admin/deploy/scale#zoekt-indexserver)   | Indexes all enabled repositories on Sourcegraph and keeps the indexes up to date. Lives inside the indexed-search pod in a Kubernetes deployment.                                        |
@@ -37,7 +41,7 @@ Here is a list of components you can find in a typical Sourcegraph deployment:
 A list of services that can be externalized. See our docs on [Using external services with Sourcegraph](/admin/code_hosts/) for detailed instruction.
 
 |                                                          |                                                                                                                                                                         |
-|:---------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| :------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`codeinsights-db`](/admin/deploy/scale#codeinsights-db) | A PostgreSQL instance for storing code insights data.                                                                                                                   |
 | [`codeintel-db`](/admin/deploy/scale#codeintel-db)       | A PostgreSQL instance for storing large-volume code graph data.                                                                                                         |
 | [`jaeger`](/admin/deploy/scale#jeager)                   | A Jaeger instance for end-to-end distributed tracing.                                                                                                                   |
@@ -52,7 +56,7 @@ Sourcegraph provides a number of tools to monitor the health and usage of your d
 You can also learn more about the architecture of Sourcegraph’s monitoring stack in [Sourcegraph monitoring architecture](https://handbook.sourcegraph.com/departments/engineering/dev/tools/observability/monitoring_architecture)
 
 |                                                |                                                                                                                                      |
-|:-----------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
+| :--------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | [`cadvisor`](/admin/deploy/scale#cadvisor)     | A custom cAdvisor instance that exports container monitoring metrics scraped by Prometheus and visualized in Grafana.                |
 | [`grafana`](/admin/deploy/scale#grafana)       | A Grafana instance that displays data from Prometheus and Jaeger. It is shipped with customized dashboards for Sourcegraph services. |
 | [`prometheus`](/admin/deploy/scale#prometheus) | A customized Prometheus instance for collecting high-level and low-cardinality, metrics across services.                             |
@@ -70,10 +74,10 @@ A cAdvisor instance.
 It exports container monitoring metrics scraped by Prometheus and visualized in Grafana.
 ```
 
-| Resources   |                                                                                                                                                 |
-|:------------|:------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Overview`  | Scaling is not necessary as it is designed to be a small footprint service                                                                      |
-| `Factors`   | Its primary traffic are the requests coming from Prometheus                                                                                     |
+| Resources   |                                                                                                                                                                                    |
+| :---------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Overview`  | Scaling is not necessary as it is designed to be a small footprint service                                                                                                         |
+| `Factors`   | Its primary traffic are the requests coming from Prometheus                                                                                                                        |
 | `Guideline` | Read [the list of known issues](https://docs-legacy.sourcegraph.com/dev/background-information/observability/cadvisor#known-issues) that can cause performance issues for cAdvisor |
 
 ---
@@ -85,24 +89,23 @@ A PostgreSQL instance for storing code insights data.
 ```
 
 | Replica     |                                                         |
-|:------------|:--------------------------------------------------------|
+| :---------- | :------------------------------------------------------ |
 | `Overview`  | Singleton                                               |
 | `Factors`   | -                                                       |
 | `Guideline` | A Singleton service should not have more than 1 replica |
 
-
-| CPU           |                                                     |
-|:--------------|:----------------------------------------------------|
-| `Overview`    | Executes queries                                    |
-| ``Factors``   | Number of active users                              |
-|               | Number of repositories                              |
-|               | Number of insight series defined                    |
-|               | Number of matches per insight series                |
-|               | Compression ratio of insight data                   |
-| ``Guideline`` | Keep the total memory larger than the largest index |
+| CPU         |                                                     |
+| :---------- | :-------------------------------------------------- |
+| `Overview`  | Executes queries                                    |
+| `Factors`   | Number of active users                              |
+|             | Number of repositories                              |
+|             | Number of insight series defined                    |
+|             | Number of matches per insight series                |
+|             | Compression ratio of insight data                   |
+| `Guideline` | Keep the total memory larger than the largest index |
 
 | Memory      |                                                     |
-|:------------|:----------------------------------------------------|
+| :---------- | :-------------------------------------------------- |
 | `Overview`  | Process Indexes                                     |
 | `Factors`   | Number of active users                              |
 |             | Size of all repositories                            |
@@ -113,7 +116,7 @@ A PostgreSQL instance for storing code insights data.
 | `Guideline` | Keep the total memory larger than the largest index |
 
 | Storage     |                                                                            |
-|:------------|:---------------------------------------------------------------------------|
+| :---------- | :------------------------------------------------------------------------- |
 | `Overview`  | Stores code insights data                                                  |
 | `Factors`   | Number of insight series defined                                           |
 |             | Number of matches per insight series                                       |
@@ -122,7 +125,15 @@ A PostgreSQL instance for storing code insights data.
 | `Type`      | Persistent Volumes for Kubernetes                                          |
 |             | Persistent SSD for Docker Compose                                          |
 
-<Callout type="warning">The database must be configured properly to consume resources effectively and efficiently for better performance and to avoid regular usage from overwhelming built-in utilities (like autovacuum for example). For example, a Postgres database running out of memory indicates that it is currently misconfigured, and the amount of memory each worker can utilize should be reduced. See our [Postgres database configuration guide](/admin/config/postgres-conf) for more information.</Callout>
+<Callout type="warning">
+	The database must be configured properly to consume resources effectively
+	and efficiently for better performance and to avoid regular usage from
+	overwhelming built-in utilities (like autovacuum for example). For example,
+	a Postgres database running out of memory indicates that it is currently
+	misconfigured, and the amount of memory each worker can utilize should be
+	reduced. See our [Postgres database configuration
+	guide](/admin/config/postgres-conf) for more information.
+</Callout>
 
 ---
 
@@ -133,20 +144,20 @@ A PostgreSQL instance for storing large-volume code graph data.
 ```
 
 | Replica     |                                                         |
-|:------------|:--------------------------------------------------------|
+| :---------- | :------------------------------------------------------ |
 | `Overview`  | Singleton                                               |
 | `Factors`   | -                                                       |
 | `Guideline` | A Singleton service should not have more than 1 replica |
 
 | CPU         |                                                                                                   |
-|:------------|:--------------------------------------------------------------------------------------------------|
+| :---------- | :------------------------------------------------------------------------------------------------ |
 | `Overview`  | Executes queries                                                                                  |
 | `Factors`   | Number of active users                                                                            |
 |             | Frequency with which the instance runs precise code navigation queries                            |
 | `Guideline` | The default value should work for all deployments. Please refer to the note below for more detail |
 
 | Memory      |                                                                                                                           |
-|:------------|:--------------------------------------------------------------------------------------------------------------------------|
+| :---------- | :------------------------------------------------------------------------------------------------------------------------ |
 | `Overview`  | Process LSIF indexes                                                                                                      |
 | `Factors`   | Number of active users                                                                                                    |
 |             | Frequency with which the instance runs precise code navigation queries                                                    |
@@ -156,7 +167,7 @@ A PostgreSQL instance for storing large-volume code graph data.
 |             | Increase the memory assigned to each worker proportionally when database queries are slow                                 |
 
 | Storage     |                                                                              |
-|:------------|:-----------------------------------------------------------------------------|
+| :---------- | :--------------------------------------------------------------------------- |
 | `Overview`  | Stores processed upload data                                                 |
 | `Factors`   | Number and size of precise code graph data uploads                           |
 |             | Indexer used                                                                 |
@@ -166,7 +177,15 @@ A PostgreSQL instance for storing large-volume code graph data.
 | `Type`      | Persistent Volumes for Kubernetes                                            |
 |             | Persistent SSD for Docker Compose                                            |
 
-<Callout type="warning"> The database must be configured properly to consume resources effectively and efficiently for better performance and to avoid regular usage from overwhelming built-in utilities (like autovacuum for example). For example, a Postgres database running out of memory indicates that it is currently misconfigured, and the amount of memory each worker can utilize should be reduced. See our [Postgres database configuration guide](/admin/config/postgres-conf) for more information.</Callout>
+<Callout type="warning">
+	{' '}
+	The database must be configured properly to consume resources effectively and
+	efficiently for better performance and to avoid regular usage from overwhelming
+	built-in utilities (like autovacuum for example). For example, a Postgres database
+	running out of memory indicates that it is currently misconfigured, and the amount
+	of memory each worker can utilize should be reduced. See our [Postgres database
+	configuration guide](/admin/config/postgres-conf) for more information.
+</Callout>
 
 ---
 
@@ -177,14 +196,14 @@ Serves the Sourcegraph web application, extensions, and graphQL API services.
 ```
 
 | Replica     |                                                                                                   |
-|:------------|:--------------------------------------------------------------------------------------------------|
+| :---------- | :------------------------------------------------------------------------------------------------ |
 | `Overview`  | Almost every service has a link back to the frontend, from which it gathers configuration updates |
 | `Factors`   | Number of active users                                                                            |
 |             | Number of services connected                                                                      |
 | `Guideline` | More engaged users = more replicas                                                                |
 
 | CPU         |                                                                                                     |
-|:------------|:----------------------------------------------------------------------------------------------------|
+| :---------- | :-------------------------------------------------------------------------------------------------- |
 | `Overview`  | At least one goroutine is dispatched per HTTP request. It is also used to serve Code Insight series |
 | `Factors`   | Number of active users                                                                              |
 |             | Number of user actions performed                                                                    |
@@ -192,14 +211,14 @@ Serves the Sourcegraph web application, extensions, and graphQL API services.
 | `Guideline` | More engaged users = more replicas                                                                  |
 
 | Memory      |                                                   |
-|:------------|:--------------------------------------------------|
+| :---------- | :------------------------------------------------ |
 | `Overview`  | Aggregates results before serving them to clients |
 | `Factors`   | Number of active users                            |
 |             | Number of repositories                            |
 | `Guideline` | More engaged users = more Memory                  |
 
 | Storage     |      |
-|:------------|:-----|
+| :---------- | :--- |
 | `Overview`  | -    |
 | `Factors`   | -    |
 | `Guideline` | -    |
@@ -215,13 +234,13 @@ Other Sourcegraph services communicate with gitserver when they need data from g
 ```
 
 | Replica     |                                                                        |
-|:------------|:-----------------------------------------------------------------------|
+| :---------- | :--------------------------------------------------------------------- |
 | `Overview`  | Handles requests from other Sourcegraph services for git information   |
 | `Factors`   | Size of all repositories                                               |
 | `Guideline` | When the total size of repositories is too large to fit in one replica |
 
 | CPU         |                                                                                      |
-|:------------|:-------------------------------------------------------------------------------------|
+| :---------- | :----------------------------------------------------------------------------------- |
 | `Overview`  | Runs git commands concurrently                                                       |
 | `Factors`   | Number of active users                                                               |
 |             | Size of all repositories                                                             |
@@ -229,14 +248,14 @@ Other Sourcegraph services communicate with gitserver when they need data from g
 | `Guideline` | Depends on the amount of git commands need to perform --more git commands = more CPU |
 
 | Memory      |                                                                                                |
-|:------------|:-----------------------------------------------------------------------------------------------|
+| :---------- | :--------------------------------------------------------------------------------------------- |
 | `Overview`  | Data associate with the running git commands                                                   |
 | `Factors`   | Size of all repositories                                                                       |
 |             | Size of the largest repository                                                                 |
 | `Guideline` | Depends on the git commands to be executed --the more or larger the git commands = more memory |
 
 | Storage     |                                                                                                                      |
-|:------------|:---------------------------------------------------------------------------------------------------------------------|
+| :---------- | :------------------------------------------------------------------------------------------------------------------- |
 | `Overview`  | Repositories are cloned to disk                                                                                      |
 | `Factors`   | Size of all repositories                                                                                             |
 | `Guideline` | Greater than 20% free space accounting for the size of all repositories on disk, including soft-deleted repositories |
@@ -255,7 +274,7 @@ It is shipped with customized dashboards for Sourcegraph services.
 ```
 
 | Resources   |                                                             |
-|:------------|:------------------------------------------------------------|
+| :---------- | :---------------------------------------------------------- |
 | `Overview`  | Not designed to be a high-traffic service                   |
 | `Factors`   | Number of Site Admins                                       |
 | `Guideline` | The default setup should be sufficient for most deployments |
@@ -269,12 +288,16 @@ A Jaeger instance for end-to-end distributed tracing
 ```
 
 | Resources   |                                                                                                        |
-|:------------|:-------------------------------------------------------------------------------------------------------|
+| :---------- | :----------------------------------------------------------------------------------------------------- |
 | `Overview`  | A debugging tool that is not designed to be a high-traffic service                                     |
 | `Factors`   | Number of Site Admins                                                                                  |
 | `Guideline` | Memory depends on the size of buffers, like the number of traces and the size of the queue for example |
 
-<Callout type="note"> The Jaeger service is not mandatory for basic Sourcegraph functionality, however, the ability to troubleshoot issues is vastly improved with it.</Callout>
+<Callout type="note">
+	{' '}
+	The Jaeger service is not mandatory for basic Sourcegraph functionality, however,
+	the ability to troubleshoot issues is vastly improved with it.
+</Callout>
 
 ---
 
@@ -288,25 +311,25 @@ navigation.
 ```
 
 | Replica     |                                                         |
-|:------------|:--------------------------------------------------------|
+| :---------- | :------------------------------------------------------ |
 | `Overview`  | Singleton                                               |
 | `Factors`   | -                                                       |
 | `Guideline` | A Singleton service should not have more than 1 replica |
 
 | CPU         |                                                             |
-|:------------|:------------------------------------------------------------|
+| :---------- | :---------------------------------------------------------- |
 | `Overview`  | The default setup should be sufficient for most deployments |
 | `Factors`   | -                                                           |
 | `Guideline` | -                                                           |
 
 | Memory      |                                                             |
-|:------------|:------------------------------------------------------------|
+| :---------- | :---------------------------------------------------------- |
 | `Overview`  | The default setup should be sufficient for most deployments |
 | `Factors`   | -                                                           |
 | `Guideline` | -                                                           |
 
 | Storage     |                                                   |
-|:------------|:--------------------------------------------------|
+| :---------- | :------------------------------------------------ |
 | `Overview`  | A temporary storage location for the LSIF uploads |
 | `Factors`   | Size of the largest LSIF index                    |
 | `Guideline` | Equal to the size of the largest LSIF index file  |
@@ -325,25 +348,25 @@ Basically anything not related to code-intel.
 ```
 
 | Replica     |                                                         |
-|:------------|:--------------------------------------------------------|
+| :---------- | :------------------------------------------------------ |
 | `Overview`  | Singleton                                               |
 | `Factors`   | -                                                       |
 | `Guideline` | A Singleton service should not have more than 1 replica |
 
 | CPU         |                                                                                                                                                              |
-|:------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| :---------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Overview`  | Executes queries                                                                                                                                             |
 | `Factors`   | The default setup should be sufficient for most deployments                                                                                                  |
 | `Guideline` | The database must be configured properly following our [Postgres configuration guide](/admin/config/postgres-conf) to use the assigned resources efficiently |
 
 | Memory      |                                                                                                                                                              |
-|:------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| :---------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Overview`  | Linear to the concurrent number of API requests proxies                                                                                                      |
 | `Factors`   | The default setup should be sufficient for most deployments                                                                                                  |
 | `Guideline` | The database must be configured properly following our [Postgres configuration guide](/admin/config/postgres-conf) to use the assigned resources efficiently |
 
 | Storage     |                                                                                                                                                              |
-|:------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| :---------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Overview`  | The Postgres instance will use memory by bringing OS pages into resident memory where it will control its own allocations                                    |
 | `Factors`   | Size of all repositories                                                                                                                                     |
 |             | Number of insight queries                                                                                                                                    |
@@ -352,11 +375,19 @@ Basically anything not related to code-intel.
 | `Type`      | Persistent Volumes for Kubernetes                                                                                                                            |
 |             | Persistent SSD for Docker Compose                                                                                                                            |
 
-<Callout type="warning"> The database must be configured properly to consume resources effectively and efficiently for better performance and to avoid regular usage from overwhelming built-in utilities (like autovacuum for example). For example, a Postgres database running out of memory indicates that it is currently misconfigured and the amount of memory each worker can utilize should be reduced. See our [Postgres database configuration guide](/admin/config/postgres-conf) for more information.</Callout>
+<Callout type="warning">
+	{' '}
+	The database must be configured properly to consume resources effectively and
+	efficiently for better performance and to avoid regular usage from overwhelming
+	built-in utilities (like autovacuum for example). For example, a Postgres database
+	running out of memory indicates that it is currently misconfigured and the amount
+	of memory each worker can utilize should be reduced. See our [Postgres database
+	configuration guide](/admin/config/postgres-conf) for more information.
+</Callout>
 
 ---
 
-###  precise-code-intel
+### precise-code-intel
 
 ```
 Handles conversion of uploaded code graph data bundles.
@@ -364,19 +395,19 @@ It converts LSIF upload file into Postgres data.
 ```
 
 | Replica     |                                                                                               |
-|:------------|:----------------------------------------------------------------------------------------------|
+| :---------- | :-------------------------------------------------------------------------------------------- |
 | `Overview`  | Process uploads queue                                                                         |
 | `Factors`   | Number of jobs in the upload queue                                                            |
 | `Guideline` | When there is a large queue backlog to increase the throughput at which uploads are processed |
 
 | CPU         |                                                                                                                                   |
-|:------------|:----------------------------------------------------------------------------------------------------------------------------------|
+| :---------- | :-------------------------------------------------------------------------------------------------------------------------------- |
 | `Overview`  | This service is I/O bound: reading from blobstore/GCS/S3 and writing to pgsql/codeintel-db. Correlation has been fairly optimized |
 | `Factors`   | Number of jobs in the upload queue                                                                                                |
 | `Guideline` | Upload jobs may finish faster if the CPU is increased, but having it at a reasonable minimum should be the ideal target here      |
 
 | MEM         |                                                                                                                     |
-|:------------|:--------------------------------------------------------------------------------------------------------------------|
+| :---------- | :------------------------------------------------------------------------------------------------------------------ |
 | `Overview`  | The entire LSIF index file must be read into memory to be correlated, and causes uploads to fail when out of memory |
 | `Factors`   | Size of the largest LSIF index                                                                                      |
 | `Guideline` | The entire index must be read into memory to be correlated                                                          |
@@ -384,7 +415,7 @@ It converts LSIF upload file into Postgres data.
 |             | Requires two times of the size of the largest LSIF index times upload_concurrency in memory                         |
 
 | Storage     |      |
-|:------------|:-----|
+| :---------- | :--- |
 | `Overview`  | -    |
 | `Factors`   | -    |
 | `Guideline` | -    |
@@ -400,7 +431,7 @@ It currently bundles Alertmanager as well as integrations to the Sourcegraph web
 ```
 
 | Resources   |                                                                                                                                                                                                                   |
-|:------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| :---------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Overview`  | The default setup should be sufficient for most deployments                                                                                                                                                       |
 | `Factors`   | Number of active users                                                                                                                                                                                            |
 | `Guideline` | For Kubernetes deployments, please follow the [instruction here](/admin/deploy/kubernetes/configure#filtering-cadvisor-metrics) to prevent Prometheus from scraping metrics outside of your Sourcegraph namespace |
@@ -414,25 +445,25 @@ A Redis instance for storing cache data for frontend.
 ```
 
 | Replica     |                                                         |
-|:------------|:--------------------------------------------------------|
+| :---------- | :------------------------------------------------------ |
 | `Overview`  | Singleton                                               |
 | `Factors`   | -                                                       |
 | `Guideline` | A Singleton service should not have more than 1 replica |
 
 | CPU         |                                                             |
-|:------------|:------------------------------------------------------------|
+| :---------- | :---------------------------------------------------------- |
 | `Overview`  | The default setup should be sufficient for most deployments |
 | `Factors`   | -                                                           |
 | `Guideline` | -                                                           |
 
 | Memory      |                                                             |
-|:------------|:------------------------------------------------------------|
+| :---------- | :---------------------------------------------------------- |
 | `Overview`  | The default setup should be sufficient for most deployments |
 | `Factors`   | -                                                           |
 | `Guideline` | -                                                           |
 
 | Storage     |                                                 |
-|:------------|:------------------------------------------------|
+| :---------- | :---------------------------------------------- |
 | `Overview`  | A temporary storage location for cache data     |
 | `Factors`   | Size of all repositories                        |
 | `Guideline` | Adjust based on the size of cloned repositories |
@@ -449,26 +480,26 @@ A Redis instance for storing short-term information such as user sessions.
 ```
 
 | Replica     |                                                         |
-|:------------|:--------------------------------------------------------|
+| :---------- | :------------------------------------------------------ |
 | `Overview`  | Singleton                                               |
 | `Factors`   | -                                                       |
 | `Guideline` | A Singleton service should not have more than 1 replica |
 
 | CPU         |                                                             |
-|:------------|:------------------------------------------------------------|
+| :---------- | :---------------------------------------------------------- |
 | `Overview`  | The default setup should be sufficient for most deployments |
 | `Factors`   | -                                                           |
 | `Guideline` | -                                                           |
 
 | Memory      |                                                                                                                  |
-|:------------|:-----------------------------------------------------------------------------------------------------------------|
+| :---------- | :--------------------------------------------------------------------------------------------------------------- |
 | `Overview`  | The default setup should be sufficient for most deployments                                                      |
 | `Factors`   | Number of active users                                                                                           |
 | `Guideline` | Increase memory based on the number of active user sessions (including both anonymous users and signed-in users) |
 |             | Each anonymous session is counted independently                                                                  |
 
 | Storage     |                                                                                                           |
-|:------------|:----------------------------------------------------------------------------------------------------------|
+| :---------- | :-------------------------------------------------------------------------------------------------------- |
 | `Overview`  | Stores user sessions                                                                                      |
 | `Factors`   | Size of all repositories                                                                                  |
 | `Guideline` | TIncrease based on the number of active user sessions (including both anonymous users and signed-in users |
@@ -487,20 +518,19 @@ Also the backend for symbols operations, indexing symbols in repositories using 
 ```
 
 | Replica     |                                                                     |
-|:------------|:--------------------------------------------------------------------|
+| :---------- | :------------------------------------------------------------------ |
 | `Overview`  | Depending on the number of concurrent requests for unindexed search |
 | `Factors`   | Number of active users                                              |
 | `Guideline` | More engaged users = more replicas                                  |
 
-
 | CPU         |                                                                                                |
-|:------------|:-----------------------------------------------------------------------------------------------|
+| :---------- | :--------------------------------------------------------------------------------------------- |
 | `Overview`  | Searcher is IO and CPU bound. It fetches archives from gitserver and searches them with regexp |
 | `Factors`   | Number of active users                                                                         |
 | `Guideline` | More engaged users = more CPU. Scale with the size of repositories as well                     |
 
 | Memory      |                                                                       |
-|:------------|:----------------------------------------------------------------------|
+| :---------- | :-------------------------------------------------------------------- |
 | `Overview`  | Searcher fetches archives from gitserver and stores them on disk      |
 | `Factors`   | Number of active users                                                |
 | `Guideline` | Not a memory-intensive service as the search results are streamed out |
@@ -508,7 +538,7 @@ Also the backend for symbols operations, indexing symbols in repositories using 
 |             | More memory will be useful around page cache                          |
 
 | Storage     |                                                                                |
-|:------------|:-------------------------------------------------------------------------------|
+| :---------- | :----------------------------------------------------------------------------- |
 | `Overview`  | Searcher primarily uses disk space to cache archives for unindexed search      |
 | `Factors`   | Size of the largest repository                                                 |
 | `Guideline` | Requires enough disk space to store the largest repository                     |
@@ -520,9 +550,17 @@ Also the backend for symbols operations, indexing symbols in repositories using 
 |             | The request size of the ephemeral storage is used as a limit for the zip cache |
 |             | Non-persistent SSD for Docker Compose                                          |
 
-<Callout type="note"> For example, if you search all branches on all repositories, that translates into lots of concurrent unindexed requests.</Callout>
+<Callout type="note">
+	{' '}
+	For example, if you search all branches on all repositories, that translates
+	into lots of concurrent unindexed requests.
+</Callout>
 
-<Callout type="note"> If Rockskip is enabled, the symbols for repositories indexed by [Rockskip](/code-search/code-navigation/rockskip) are stored in codeintel-db instead.</Callout>
+<Callout type="note">
+	{' '}
+	If Rockskip is enabled, the symbols for repositories indexed by [Rockskip](/code-search/code-navigation/rockskip)
+	are stored in codeintel-db instead.
+</Callout>
 
 ---
 
@@ -533,26 +571,26 @@ An HTTP server that exposes the Rust Syntect syntax highlighting library to othe
 ```
 
 | Replica     |                                                                                                                                                                                      |
-|:------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| :---------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Overview`  | The constant overhead applies per worker process. Having a large number of processes is not necessarily useful (consumes more memory while idling) if there aren't many active users |
 | `Factors`   | Number of active users                                                                                                                                                               |
 | `Guideline` | More users = more CPU and replicas                                                                                                                                                   |
 |             | Add replica when syntax highlighting queries take a long duration because of existing traffic                                                                                        |
 
 | CPU         |                                                                                                                                                                                                                                                                  |
-|:------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| :---------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Overview`  | There are a number of worker processes, each with some number of threads. When a syntax highlighting request comes in, it is dispatched to a process, which further sends it to the worker thread. When there are no requests, CPU consumption should be minimal |
 | `Factors`   | Number of active users                                                                                                                                                                                                                                           |
 | `Guideline` | More users = more CPU and replicas                                                                                                                                                                                                                               |
 
 | Memory      |                                                                                                                                                     |
-|:------------|:----------------------------------------------------------------------------------------------------------------------------------------------------|
+| :---------- | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Overview`  | A lot of the highlighting themes and compiled grammars are loaded into memory at start up                                                           |
 | `Factors`   | Number of active users                                                                                                                              |
 | `Guideline` | There is additional memory consumption on receiving requests (< 25 MB), although, that's generally much smaller than the constant overhead (1-2 GB) |
 
 | Storage     |      |
-|:------------|:-----|
+| :---------- | :--- |
 | `Overview`  | -    |
 | `Factors`   | -    |
 | `Guideline` | -    |
@@ -566,16 +604,20 @@ An HTTP server that exposes the Rust Syntect syntax highlighting library to othe
 Runs a collection of background jobs periodically in response to internal requests and external events.
 ```
 
-<Callout type="note"> See the docs on [Worker services](/admin/workers#worker-jobs) for a list of worker jobs.</Callout>
+<Callout type="note">
+	{' '}
+	See the docs on [Worker services](/admin/workers#worker-jobs) for a list of worker
+	jobs.
+</Callout>
 
 | Replica     |                                                         |
-|:------------|:--------------------------------------------------------|
+| :---------- | :------------------------------------------------------ |
 | `Overview`  | Singleton                                               |
 | `Factors`   | -                                                       |
 | `Guideline` | A Singleton service should not have more than 1 replica |
 
 | CPU         |                                                |
-|:------------|:-----------------------------------------------|
+| :---------- | :--------------------------------------------- |
 | `Overview`  | One goroutine per worker                       |
 | `Factors`   | Number of repositories                         |
 |             | Size of all repositories                       |
@@ -584,14 +626,14 @@ Runs a collection of background jobs periodically in response to internal reques
 | `Guideline` | Rate limited / concurrency limited worker pool |
 
 | Memory      |                                                                |
-|:------------|:---------------------------------------------------------------|
+| :---------- | :------------------------------------------------------------- |
 | `Overview`  | Abulating search results to generate Code Insights time series |
 | `Factors`   | Number of repositories                                         |
 |             | Number of insight series defined                               |
 | `Guideline` | Grow with the number of repositories and code-insight users    |
 
 | Storage     |      |
-|:------------|:-----|
+| :---------- | :--- |
 | `Overview`  | -    |
 | `Factors`   | -    |
 | `Guideline` | -    |
@@ -608,29 +650,33 @@ Lives inside the indexed-search pod in a Kubernetes deployment.
 The main guideline for scaling a zoekt-indexserver is the size of your largest repository.
 ```
 
-<Callout type="note"> As indexserver currently only indexes one repository at a time, having more CPU and memory are not as important here than in webserver.</Callout>
+<Callout type="note">
+	{' '}
+	As indexserver currently only indexes one repository at a time, having more CPU
+	and memory are not as important here than in webserver.
+</Callout>
 
 | Replica     |                                                       |
-|:------------|:------------------------------------------------------|
+| :---------- | :---------------------------------------------------- |
 | `Overview`  | Parallel with zoekt-webserver                         |
 | `Factors`   | Size of the largest repository                        |
 | `Guideline` | Scales with zoekt-webserver                           |
 |             | Replicas number must be parallel with zoekt-webserver |
 
 | CPU         |                                                                                              |
-|:------------|:---------------------------------------------------------------------------------------------|
+| :---------- | :------------------------------------------------------------------------------------------- |
 | `Overview`  | Indexes one repository at a time                                                             |
 | `Factors`   | Size of the largest repository                                                               |
 | `Guideline` | More CPU results in lower lag between a new commit and the time it takes to index for search |
 
 | Memory      |                                                                                                                   |
-|:------------|:------------------------------------------------------------------------------------------------------------------|
+| :---------- | :---------------------------------------------------------------------------------------------------------------- |
 | `Overview`  | Scans for symbols                                                                                                 |
 | `Factors`   | Size of the largest repository                                                                                    |
-| `Guideline` | In general the amount of RAM used will max out at 100MB * number of CPUS * constant factor (around 5 in practice) |
+| `Guideline` | In general the amount of RAM used will max out at 100MB _ number of CPUS _ constant factor (around 5 in practice) |
 
 | Storage     |                                                                       |
-|:------------|:----------------------------------------------------------------------|
+| :---------- | :-------------------------------------------------------------------- |
 | `Overview`  | Stores index. Storage is shared with zoekt-webserver                  |
 | `Factors`   | Size of all repositories                                              |
 | `Guideline` | 50% of the gitserver disk size                                        |
@@ -639,7 +685,12 @@ The main guideline for scaling a zoekt-indexserver is the size of your largest r
 | `Type`      | Persistent Volumes for Kubernetes                                     |
 |             | Persistent SSD for Docker Compose                                     |
 
-<Callout type="warning"> We recommend providing zoekt-indexserver with more resources when trying to add a lot of new repositories that requires indexing from a new external service, and then scale down once indexing is completed.</Callout>
+<Callout type="warning">
+	{' '}
+	We recommend providing zoekt-indexserver with more resources when trying to add
+	a lot of new repositories that requires indexing from a new external service,
+	and then scale down once indexing is completed.
+</Callout>
 
 ---
 
@@ -652,10 +703,13 @@ The indexes are persisted to disk to avoid re-indexing on startup.
 Lives inside the indexed-search pod in a Kubernetes deployment.
 ```
 
-<Callout type="note"> Adding more CPU and memory helps speed up searches.</Callout>
+<Callout type="note">
+	{' '}
+	Adding more CPU and memory helps speed up searches.
+</Callout>
 
 | Replica     |                                                         |
-|:------------|:--------------------------------------------------------|
+| :---------- | :------------------------------------------------------ |
 | `Overview`  | Parallel with zoekt-indexserver                         |
 | `Factors`   | Number of repositories                                  |
 |             | Size of all repositories                                |
@@ -663,7 +717,7 @@ Lives inside the indexed-search pod in a Kubernetes deployment.
 |             | Replicas number must be parallel with zoekt-indexserver |
 
 | CPU         |                                              |
-|:------------|:---------------------------------------------|
+| :---------- | :------------------------------------------- |
 | `Overview`  | Goroutines are dispatched per search query   |
 | `Factors`   | Number of repositories                       |
 |             | Number of active users                       |
@@ -671,7 +725,7 @@ Lives inside the indexed-search pod in a Kubernetes deployment.
 |             | More search requests = more CPU and replicas |
 
 | Memory      |                                         |
-|:------------|:----------------------------------------|
+| :---------- | :-------------------------------------- |
 | `Overview`  | Parts of the index are stored in memory |
 | `Factors`   | Number of repositories                  |
 |             | Size of all repositories                |
@@ -679,7 +733,7 @@ Lives inside the indexed-search pod in a Kubernetes deployment.
 |             | More repositories = more memory         |
 
 | Storage     |                                                                       |
-|:------------|:----------------------------------------------------------------------|
+| :---------- | :-------------------------------------------------------------------- |
 | `Overview`  | Stores index. Storage is shared with zoekt-indexserver.               |
 | `Factors`   | Size of all repositories                                              |
 | `Guideline` | 50% of the gitserver disk size                                        |
@@ -688,6 +742,10 @@ Lives inside the indexed-search pod in a Kubernetes deployment.
 | `Type`      | Persistent Volumes for Kubernetes                                     |
 |             | Persistent SSD for Docker Compose                                     |
 
-<Callout type="warning"> Check the peak bursts rather than the average over time when monitoring CPU usage for zoekt as it depends on when the searches happen.</Callout>
+<Callout type="warning">
+	{' '}
+	Check the peak bursts rather than the average over time when monitoring CPU usage
+	for zoekt as it depends on when the searches happen.
+</Callout>
 
 ---

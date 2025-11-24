@@ -1,16 +1,16 @@
 'use client';
 
-import { Hero } from '@/components/Hero';
-import { Logo } from '@/components/Logo';
-import { MobileNavigation } from '@/components/MobileNavigation';
-import { Navigation } from '@/components/Navigation';
-import { ThemeSelector } from '@/components/ThemeSelector';
+import {Hero} from '@/components/Hero';
+import {Logo} from '@/components/Logo';
+import {MobileNavigation} from '@/components/MobileNavigation';
+import {Navigation} from '@/components/Navigation';
+import {ThemeSelector} from '@/components/ThemeSelector';
 import clsx from 'clsx';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { LogoMark } from './LogoMark';
-import { Search } from './search/Search';
+import {usePathname} from 'next/navigation';
+import {useEffect, useState} from 'react';
+import {LogoMark} from './LogoMark';
+import {Search} from './search/Search';
 import VersionSelector from './VersionSelector';
 
 function GitHubIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
@@ -34,22 +34,22 @@ function Header() {
 			setIsScrolled(window.scrollY > 0);
 		}
 		onScroll();
-		window.addEventListener('scroll', onScroll, { passive: true });
+		window.addEventListener('scroll', onScroll, {passive: true});
 		return () => {
 			window.removeEventListener('scroll', onScroll);
 		};
 	}, []);
 
 	return (
-		<header
-			className="sticky top-0 z-50"
-		>
-			<div className={clsx(
-				'flex flex-none flex-wrap items-center justify-between bg-light-bg px-4 py-6 shadow-md shadow-slate-900/5 transition duration-500 dark:border-dark-border dark:shadow-none sm:px-6 lg:border-b lg:border-light-border lg:px-8',
-				isScrolled
-					? 'dark:bg-dark-bg-1 dark:backdrop-blur dark:[@supports(backdrop-filter:blur(0))]:bg-dark-bg-1/80'
-					: 'dark:bg-transparent'
-			)}>
+		<header className="sticky top-0 z-50">
+			<div
+				className={clsx(
+					'flex flex-none flex-wrap items-center justify-between bg-light-bg px-4 py-6 shadow-md shadow-slate-900/5 transition duration-500 sm:px-6 lg:border-b lg:border-light-border lg:px-8 dark:border-dark-border dark:shadow-none',
+					isScrolled
+						? 'dark:bg-dark-bg-1 dark:backdrop-blur dark:[@supports(backdrop-filter:blur(0))]:bg-dark-bg-1/80'
+						: 'dark:bg-transparent'
+				)}
+			>
 				<div className="mx-auto flex w-full max-w-8xl items-center justify-between sm:px-2 lg:px-8">
 					<div className="mr-6 flex lg:hidden">
 						<MobileNavigation />
@@ -92,7 +92,7 @@ function Header() {
 	);
 }
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export function Layout({children}: {children: React.ReactNode}) {
 	let pathname = usePathname();
 	let isHomePage = pathname === '/';
 	return (

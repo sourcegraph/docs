@@ -1,8 +1,16 @@
 # Completions Configuration
 
-<p className="subtitle">Learn how to configure Cody via `completions` on a Sourcegraph Enterprise instance.</p>
+<p className="subtitle">
+	Learn how to configure Cody via `completions` on a Sourcegraph Enterprise
+	instance.
+</p>
 
-<Callout type="info">Configuring Cody via `completions` is legacy but it's still supported. We recommend using the new [`modelConfiguration`](/cody/enterprise/model-configuration) for flexible LLM model selection.</Callout>
+<Callout type="info">
+	Configuring Cody via `completions` is legacy but it's still supported. We
+	recommend using the new
+	[`modelConfiguration`](/cody/enterprise/model-configuration) for flexible
+	LLM model selection.
+</Callout>
 
 [Cody Enterprise](https://sourcegraph.com/enterprise) supports many models and model providers. You can configure Cody Enterprise to access models via Sourcegraph Cody Gateway or directly using your own model provider account or infrastructure. Let's look at these options in more detail.
 
@@ -18,15 +26,15 @@ First, [create your own key with Anthropic](https://console.anthropic.com/accoun
 
 ```json
 {
-  // [...]
-  "cody.enabled": true,
-  "completions": {
-    "provider": "anthropic",
-    "chatModel": "claude-2.0", // Or any other model you would like to use
-    "fastChatModel": "claude-instant-1.2", // Or any other model you would like to use
-    "completionModel": "claude-instant-1.2", // Or any other model you would like to use
-    "accessToken": "<key>"
-  }
+	// [...]
+	"cody.enabled": true,
+	"completions": {
+		"provider": "anthropic",
+		"chatModel": "claude-2.0", // Or any other model you would like to use
+		"fastChatModel": "claude-instant-1.2", // Or any other model you would like to use
+		"completionModel": "claude-instant-1.2", // Or any other model you would like to use
+		"accessToken": "<key>"
+	}
 }
 ```
 
@@ -36,15 +44,15 @@ First, [create your own key with OpenAI](https://beta.openai.com/account/api-key
 
 ```json
 {
-  // [...]
-  "cody.enabled": true,
-  "completions": {
-    "provider": "openai",
-    "chatModel": "gpt-4", // Or any other model you would like to use
-    "fastChatModel": "gpt-3.5-turbo", // Or any other model you would like to use
-    "completionModel": "gpt-3.5-turbo-instruct", // Or any other model that supports the legacy completions endpoint
-    "accessToken": "<key>"
-  }
+	// [...]
+	"cody.enabled": true,
+	"completions": {
+		"provider": "openai",
+		"chatModel": "gpt-4", // Or any other model you would like to use
+		"fastChatModel": "gpt-3.5-turbo", // Or any other model you would like to use
+		"completionModel": "gpt-3.5-turbo-instruct", // Or any other model that supports the legacy completions endpoint
+		"accessToken": "<key>"
+	}
 }
 ```
 
@@ -66,15 +74,15 @@ Once ready, go to **Site admin > Site configuration** (`/site-admin/configuratio
 
 ```json
 {
-  // [...]
-  "cody.enabled": true,
-  "completions": {
-    "provider": "aws-bedrock",
-    "chatModel": "anthropic.claude-3-opus-20240229-v1:0",
-    "completionModel": "anthropic.claude-instant-v1",
-    "endpoint": "<See below>",
-    "accessToken": "<See below>"
-  }
+	// [...]
+	"cody.enabled": true,
+	"completions": {
+		"provider": "aws-bedrock",
+		"chatModel": "anthropic.claude-3-opus-20240229-v1:0",
+		"completionModel": "anthropic.claude-instant-v1",
+		"endpoint": "<See below>",
+		"accessToken": "<See below>"
+	}
 }
 ```
 
@@ -82,27 +90,31 @@ For the `chatModel` and `completionModel` fields, see [Amazon's Bedrock docs](ht
 
 For `endpoint`, you can either:
 
-- For **pay-as-you-go**, set it to an AWS region code (e.g., `us-west-2`) when using a public Amazon Bedrock endpoint
-- For **provisioned throughput**, set it to the provisioned VPC endpoint for the `bedrock-runtime` API (e.g., `"https://vpce-0a10b2345cd67e89f-abc0defg.bedrock-runtime.us-west-2.vpce.amazonaws.com"`)
+-   For **pay-as-you-go**, set it to an AWS region code (e.g., `us-west-2`) when using a public Amazon Bedrock endpoint
+-   For **provisioned throughput**, set it to the provisioned VPC endpoint for the `bedrock-runtime` API (e.g., `"https://vpce-0a10b2345cd67e89f-abc0defg.bedrock-runtime.us-west-2.vpce.amazonaws.com"`)
 
 For `accessToken`, you can either:
 
-- Leave it empty and rely on instance role bindings or other AWS configurations in the `frontend` service
-- Set it to `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>` if directly configuring the credentials
-- Set it to `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>:<SESSION_TOKEN>` if a session token is also required
+-   Leave it empty and rely on instance role bindings or other AWS configurations in the `frontend` service
+-   Set it to `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>` if directly configuring the credentials
+-   Set it to `<ACCESS_KEY_ID>:<SECRET_ACCESS_KEY>:<SESSION_TOKEN>` if a session token is also required
 
 ### Example: Using GCP Vertex AI
 
 On [GCP Vertex](https://cloud.google.com/vertex-ai/generative-ai/docs/partner-models/use-claude), we only support Anthropic Claude models.
 
-- Enable the [Vertex AI API](https://console.cloud.google.com/marketplace/product/google/aiplatform.googleapis.com) in the GCP console. Once Vertex has been enabled in your project, navigate to the [Vertex Model Garden](https://console.cloud.google.com/vertex-ai/model-garden) to select and enable the Anthropic Claude model(s) that you wish to use with Cody. See [Supported LLM Models](/cody/capabilities/supported-models) for an up-to-date list of Anthropic Claude models supported by Cody.
+-   Enable the [Vertex AI API](https://console.cloud.google.com/marketplace/product/google/aiplatform.googleapis.com) in the GCP console. Once Vertex has been enabled in your project, navigate to the [Vertex Model Garden](https://console.cloud.google.com/vertex-ai/model-garden) to select and enable the Anthropic Claude model(s) that you wish to use with Cody. See [Supported LLM Models](/cody/capabilities/supported-models) for an up-to-date list of Anthropic Claude models supported by Cody.
 
-<Callout type="note">It may take some time to enable Vertex and provision access to the models you plan to use</Callout>
+<Callout type="note">
+	It may take some time to enable Vertex and provision access to the models
+	you plan to use
+</Callout>
 
 1. **Create a Service Account**:
-   - Create a [service account](https://cloud.google.com/iam/docs/service-account-overview)
-   - Assign the `Vertex AI User` role to the service account
-   - Generate a JSON key for the service account and download it
+
+    - Create a [service account](https://cloud.google.com/iam/docs/service-account-overview)
+    - Assign the `Vertex AI User` role to the service account
+    - Generate a JSON key for the service account and download it
 
 2. **Convert JSON Key to Base64** by doing:
 
@@ -114,27 +126,26 @@ Once ready, go to **Site admin > Site configuration** (`/site-admin/configuratio
 
 ```json
 {
-  // [...]
-  "cody.enabled": true,
-  "completions": {
-    "chatModel": "claude-3-opus@20240229",
-    "completionModel": "claude-3-haiku@20240307",
-    "provider": "google",
-    "endpoint": "<See below>",
-    "accessToken": "<Base64 string from step 3>"
-  }
+	// [...]
+	"cody.enabled": true,
+	"completions": {
+		"chatModel": "claude-3-opus@20240229",
+		"completionModel": "claude-3-haiku@20240307",
+		"provider": "google",
+		"endpoint": "<See below>",
+		"accessToken": "<Base64 string from step 3>"
+	}
 }
-
 ```
 
 For the `endpoint`, you can:
 
-- Go to the Claude 3 Haiku docs on the GCP Console Model garden
-- Scroll through the page to find the example that shows how to use the `cURL` command with the Claude 3 Haiku model. The example will include a sample request JSON body and the necessary endpoint URL. Copy the URL in the site-admin config
-- The endpoint URL will look something like this:
-   `https://LOCATION-aiplatform.googleapis.com/v1/projects/PROJECT_ID/locations/LOCATION/publishers/anthropic/models/`
-- Example URL:
-`https://us-east5-aiplatform.googleapis.com/v1/projects/sourcegraph-vertex-staging/locations/us-east5/publishers/anthropic/models`
+-   Go to the Claude 3 Haiku docs on the GCP Console Model garden
+-   Scroll through the page to find the example that shows how to use the `cURL` command with the Claude 3 Haiku model. The example will include a sample request JSON body and the necessary endpoint URL. Copy the URL in the site-admin config
+-   The endpoint URL will look something like this:
+    `https://LOCATION-aiplatform.googleapis.com/v1/projects/PROJECT_ID/locations/LOCATION/publishers/anthropic/models/`
+-   Example URL:
+    `https://us-east5-aiplatform.googleapis.com/v1/projects/sourcegraph-vertex-staging/locations/us-east5/publishers/anthropic/models`
 
 ### Example: Use Azure OpenAI service
 
@@ -146,23 +157,23 @@ Once done, go to **Site admin > Site configuration** (`/site-admin/configuration
 
 ```json
 {
-  // [...]
-  "cody.enabled": true,
-  "completions": {
-    "provider": "azure-openai",
-    "chatModel": "<deployment name of the model>",
-    "fastChatModel": "<deployment name of the model>",
-    "completionModel": "<deployment name of the model>", // the model must support the legacy completions endpoint such as gpt-3.5-turbo-instruct
-    "endpoint": "<endpoint>",
-    "accessToken": "<See below>"
-  }
+	// [...]
+	"cody.enabled": true,
+	"completions": {
+		"provider": "azure-openai",
+		"chatModel": "<deployment name of the model>",
+		"fastChatModel": "<deployment name of the model>",
+		"completionModel": "<deployment name of the model>", // the model must support the legacy completions endpoint such as gpt-3.5-turbo-instruct
+		"endpoint": "<endpoint>",
+		"accessToken": "<See below>"
+	}
 }
 ```
 
 For the access token,
 
-- For Sourcegraph `v5.2.4` or more, the access token can be left empty, and it will rely on Environmental, Workload Identity, or Managed Identity credentials configured for the `frontend` and `worker` services
-- Set it to `<API_KEY>` if directly configuring the credentials using the API key specified in the Azure portal
+-   For Sourcegraph `v5.2.4` or more, the access token can be left empty, and it will rely on Environmental, Workload Identity, or Managed Identity credentials configured for the `frontend` and `worker` services
+-   Set it to `<API_KEY>` if directly configuring the credentials using the API key specified in the Azure portal
 
 ### Use StarCoder for autocomplete
 
@@ -174,12 +185,12 @@ To enable StarCoder, go to **Site admin > Site configuration** (`/site-admin/con
 
 ```json
 {
-  // [...]
-  "cody.enabled": true,
-  "completions": {
-    "provider": "sourcegraph",
-    "completionModel": "fireworks/starcoder"
-  }
+	// [...]
+	"cody.enabled": true,
+	"completions": {
+		"provider": "sourcegraph",
+		"completionModel": "fireworks/starcoder"
+	}
 }
 ```
 

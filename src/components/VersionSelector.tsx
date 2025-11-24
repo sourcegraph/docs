@@ -1,12 +1,12 @@
 'use client';
 
-import { VersionI, versions } from '@/data/versions';
-import { Menu, Transition } from '@headlessui/react';
-import { ArrowUpRightIcon, ChevronDownIcon } from '@heroicons/react/20/solid';
+import {VersionI, versions} from '@/data/versions';
+import {Menu, Transition} from '@headlessui/react';
+import {ArrowUpRightIcon, ChevronDownIcon} from '@heroicons/react/20/solid';
 import clsx from 'clsx';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Fragment, useEffect, useState } from 'react';
+import {usePathname} from 'next/navigation';
+import {Fragment, useEffect, useState} from 'react';
 
 export default function VersionSelector() {
 	const path = usePathname();
@@ -58,12 +58,12 @@ export default function VersionSelector() {
 				leaveFrom="transform opacity-100 scale-100"
 				leaveTo="transform opacity-0 scale-95"
 			>
-				<Menu.Items className="divide- absolute right-0 z-10 mt-2 flex w-32 origin-top-right flex-col divide-light-border rounded-md bg-light-bg-1 text-xs text-slate-500 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:divide-dark-border dark:bg-dark-bg-2 dark:text-dark-paragraph-text sm:w-48 sm:text-sm">
+				<Menu.Items className="divide- absolute right-0 z-10 mt-2 flex w-32 origin-top-right flex-col divide-light-border rounded-md bg-light-bg-1 text-xs text-slate-500 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:w-48 sm:text-sm dark:divide-dark-border dark:bg-dark-bg-2 dark:text-dark-paragraph-text">
 					{/* Versions */}
 					{versions.length > 0 &&
 						versions.map((version, count) => (
 							<Menu.Item key={version.name}>
-								{({ active }) => (
+								{({active}) => (
 									<a
 										href={version.url}
 										target="_blank"
@@ -73,7 +73,7 @@ export default function VersionSelector() {
 										className={clsx(
 											'hover:bg-vermilion-08 hover:text-vermilion-11',
 											active &&
-											'bg-vermilion-08 text-vermilion-11',
+												'bg-vermilion-08 text-vermilion-11',
 											count === 0 && 'rounded-t-md',
 											'flex w-full items-center justify-between px-3 py-2'
 										)}
@@ -90,12 +90,12 @@ export default function VersionSelector() {
 						))}
 					{/* Legacy versions */}
 					<Menu.Item>
-						{({ active }) => (
+						{({active}) => (
 							<Link
 								href="/legacy"
 								className={clsx(
 									active &&
-									'bg-vermilion-08 text-vermilion-11',
+										'bg-vermilion-08 text-vermilion-11',
 									'flex items-center justify-between rounded-b-md px-3 py-2'
 								)}
 							>
