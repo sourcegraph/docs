@@ -5,7 +5,7 @@
 <!-- Working branch for Sourcegraph 6.5 Release -->
 
 > [!IMPORTANT]
-> For support, please reach out to your account team or contact <mailto:support@sourcegraph.com>
+> For support, please reach out to your account team or contact [support@sourcegraph.com](mailto:support@sourcegraph.com)
 
 Welcome to the Sourcegraph documentation! We're excited to have you contribute to our docs. Our docs tech stack is powered by Next.js, TailwindCSS and deployed on Vercel. This guide will walk you through the process of contributing to our documentation.
 
