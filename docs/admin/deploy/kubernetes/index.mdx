@@ -1021,16 +1021,18 @@ When all pods have restarted and show as Running, you can browse to your Sourceg
 
 **Step 2:**
 
-> <Callout type="warning">
-> 	The Kubernetes Helm deployment type does not support MVU from Sourcegraph
-> 	`v5.9.45` versions and earlier to ANY version `v6.0.x` or later. Admins
-> 	seeking to upgrade to any Sourcegraph version `v6.0.x` or later (including
-> 	`v6.1.x`, `v6.2.x`, etc.) must first upgrade to `v5.10.3940` or
-> 	`v5.11.6271` and then use the standard upgrade procedure to get to their
-> 	target version. This is because migrator in all versions from `v6.0.0`
-> 	onwards will no longer connect to Postgres 12 databases. For more info see
-> 	our [PostgreSQL upgrade docs](/admin/postgres#requirements).
-> </Callout>
+<Callout type="warning">
+
+    The Kubernetes Helm deployment type does not support MVU from Sourcegraph
+    `v5.9.45` versions and earlier to ANY version `v6.0.x` or later. Admins
+    seeking to upgrade to any Sourcegraph version `v6.0.x` or later (including
+    `v6.1.x`, `v6.2.x`, etc.) must first upgrade to `v5.10.3940` or
+    `v5.11.6271` and then use the standard upgrade procedure to get to their
+    target version. This is because migrator in all versions from `v6.0.0`
+    onwards will no longer connect to Postgres 12 databases. For more info see
+    our [PostgreSQL upgrade docs](/admin/postgres#requirements).
+
+</Callout>
 
 Scale down `deployments` and `statefulSets` that access the database, _this step prevents services from accessing the database while schema migrations are in process._
 The following services must have their replicas scaled to 0:
@@ -1049,13 +1051,15 @@ The following convenience commands provide an example of scaling down the necess
 
 Deployments:
 
-````sh
+```sh
 $ kubectl get -n sourcegraph deploy --no-headers | awk '{print $1}' | xargs -n 1 -P 8 -I % kubectl -n sourcegraph scale deployment % --replicas=0
-   ```
+```
+
 StatefulSets:
+
 ```sh
 $ kubectl -n sourcegraph get sts --selector 'app.kubernetes.io/component!=codeinsights-db,app.kubernetes.io/component!=codeintel-db,app.kubernetes.io/component!=pgsql' --no-headers | awk '{print $1}' | xargs -n 1 -P 8 -I % kubectl -n sourcegraph scale sts % --replicas=0
-````
+```
 
 <Callout type="note">
 	The commands above use the `sourcegraph` namespace and are specific to the
@@ -1078,7 +1082,7 @@ $ helm upgrade --install -n <your namespace> --set "migrator.args={upgrade,--fro
 
 **Example:**
 
-````sh
+```sh
 $ helm upgrade --install -n sourcegraph --set "migrator.args={upgrade,--from=3.41.0,--to=4.5.1}" sourcegraph-migrator sourcegraph/sourcegraph-migrator --version {CURRENT_VERSION_NO_V}
 Release "sourcegraph-migrator" has been upgraded. Happy Helming!
 NAME: sourcegraph-migrator
@@ -1091,7 +1095,7 @@ TEST SUITE: None
 👉 Migrating to v4.5 (step 3 of 3)
 👉 Running schema migrations
 ✅ Schema migrations complete
-    ```
+```
 
 You can learn more about running migrator operations in helm in the [migrator operations doc](/admin/updates/migrator/migrator-operations#kubernetes-helm).
 
@@ -1101,7 +1105,7 @@ Now that the databases have been migrated to the latest versions, services can b
 
 ```sh
 $ helm upgrade -n <your namespace> --install -f override.yaml --version <sourcegraph version> sourcegraph sourcegraph/sourcegraph
-    ```
+```
 
 ### Rollback
 
@@ -1109,7 +1113,7 @@ You can revert to a previous version with the following command:
 
 ```sh
 $ helm rollback sourcegraph
-````
+```
 
 If you are rolling back more than a single version, then you must also [roll back your database](/admin/how-to/rollback_database), as database migrations (which may have run at some point during the upgrade) are guaranteed to be compatible with one previous minor version.
 
@@ -1120,6 +1124,30 @@ By default, database migrations will be performed during application startup by 
 In some situations, administrators may wish to migrate their databases before upgrading the rest of the system to reduce downtime. Sourcegraph guarantees database backward compatibility to the most recent minor point release so the database can safely be upgraded before the application code.
 
 To execute the database migrations independently, you can use the [Sourcegraph Migrator] helm chart.
+
+## Using Helm in restricted environment
+
+Some customers may not be allowed to directly install applications from a remote Helm Registry. In these cases, you may choose to download the chart to inspect the content, then install it locally.
+
+It's recommended to commit your charts in a VCS repo and namespace by versions:
+
+```
+charts/
+  sourcegraph-6.1.0/
+  sourcegraph-6.2.0/
+```
+
+Download and untar to a specific directory at `charts/sourcegraph-$VERSION`:
+
+```sh
+$ helm pull sourcegraph/sourcegraph --version $VERSION --untar -d charts/sourcegraph-$VERSION
+```
+
+Then, you can install the chart from the local directory:
+
+```sh
+$ helm upgrade --install sourcegraph charts/sourcegraph-$VERSION
+```
 
 ## Reviewing Changes
 
