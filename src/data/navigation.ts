@@ -571,14 +571,6 @@ export const navigation: NavigationItem[] = [
 				href: '/sla'
 			},
 			{
-				title: 'How to videos',
-				href: '/how-to-videos',
-				sections: [
-					{title: 'Code Search', href: '/how-to-videos/code-search'},
-					{title: 'Cody', href: '/how-to-videos/cody'}
-				]
-			},
-			{
 				title: 'Tutorials',
 				href: '/tutorials'
 			},
