@@ -62,7 +62,7 @@ export function SupportedReleasesTable() {
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		fetch('https://releaseregistry.sourcegraph.com/v1/releases/sourcegraph')
+		fetch('/api/releases')
 			.then(res => {
 				if (!res.ok) throw new Error('Failed to fetch releases');
 				return res.json();
