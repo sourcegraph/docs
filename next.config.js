@@ -11,7 +11,11 @@ const nextConfig = {
 	// VERCEL_ENV is a system env var set by Vercel
 	// https://vercel.com/docs/projects/environment-variables/system-environment-variables
 	// basePath: process.env.VERCEL_ENV === 'production' ? '/docs' : '',
-	basePath: process.env.VERCEL_ENV === 'production' ? '/docs' : ''
+	basePath: process.env.VERCEL_ENV === 'production' ? '/docs' : '',
+	env: {
+		NEXT_PUBLIC_DOCS_BASE_PATH:
+			process.env.VERCEL_ENV === 'production' ? '/docs' : ''
+	}
 };
 
 module.exports = async () => {

@@ -1,5 +1,5 @@
 export function Logo(props: React.ComponentPropsWithoutRef<'svg'>) {
-	const basePath = process.env.VERCEL_ENV === 'production' ? '/docs' : '';
+	const basePath = process.env.NEXT_PUBLIC_DOCS_BASE_PATH || '';
 
 	return (
 		<>
