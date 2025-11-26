@@ -1,46 +1,50 @@
 # Gerrit
 
 <TierCallout>
-  Supported on [Enterprise](/pricing/enterprise) plans.
-  <user>
-    Available via the Web app.
-  </user>
+	Supported on [Enterprise](/pricing/enterprise) plans.
+	<user>Available via the Web app.</user>
 </TierCallout>
 
-<Callout type="note">This feature is in beta and might change in the future.</Callout>
+<Callout type="note">
+	This feature is in beta and might change in the future.
+</Callout>
 
 A Gerrit instance can be connected to Sourcegraph as follows:
 
-- [Gerrit](#gerrit)
-	- [Configure Gerrit as a code host connection](#configure-gerrit-as-a-code-host-connection)
-		- [Clone using SSH](#clone-using-ssh)
-	- [Add Gerrit as an authentication provider](#add-gerrit-as-an-authentication-provider)
-	- [Have users authenticate their Sourcegraph accounts using their Gerrit HTTP credentials](#have-users-authenticate-their-sourcegraph-accounts-using-their-gerrit-http-credentials)
-	- [Configuration](#configuration)
-		- [admin/code\_hosts/gerrit.schema.json](#admincode_hostsgerritschemajson)
+-   [Gerrit](#gerrit)
+    -   [Configure Gerrit as a code host connection](#configure-gerrit-as-a-code-host-connection)
+        -   [Clone using SSH](#clone-using-ssh)
+    -   [Add Gerrit as an authentication provider](#add-gerrit-as-an-authentication-provider)
+    -   [Have users authenticate their Sourcegraph accounts using their Gerrit HTTP credentials](#have-users-authenticate-their-sourcegraph-accounts-using-their-gerrit-http-credentials)
+    -   [Configuration](#configuration)
+        -   [admin/code_hosts/gerrit.schema.json](#admincode_hostsgerritschemajson)
 
 ## Configure Gerrit as a code host connection
 
 1. In the **Site Admin** settings area, select **Manage code hosts** from the options on the left and select the **Add code host** option.
-![The Manage code hosts section in the Site Admin settings area.](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/gerrit/gerrit-manage-code-hosts.png)
+   ![The Manage code hosts section in the Site Admin settings area.](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/gerrit/gerrit-manage-code-hosts.png)
 2. On the following screen, select **Gerrit** as the code host of choice.
-![Gerrit as a code host option in the list](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/gerrit/gerrit-select.png)
+   ![Gerrit as a code host option in the list](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/gerrit/gerrit-select.png)
 3. Next you will have to provide a [configuration](#configuration) for the Gerrit code host connection. Here is an example configuration:
+
 ```json
 {
-  "url": "https://gerrit.example.com/", // Be sure to add a trailing slash
-  "username": "<username>",
-  "password": "<password>",
-  "projects": [ // If not set, all projects on the Gerrit instance will be mirrored
-    "docs",
-    "kubernetes/kubernetes"
-  ],
-  "exclude": [ // If not set, no repositories will be excluded. Takes precedence over the `projects` option
-    { "name": "docs" } // Despite "docs" being specified in "projects", this setting will override it and exclude the "docs" project
-  ],
-  "authorization": {} // Marks all repositories as private. Users will be required to present valid Gerrit HTTP credentials in order to view repositories
+	"url": "https://gerrit.example.com/", // Be sure to add a trailing slash
+	"username": "<username>",
+	"password": "<password>",
+	"projects": [
+		// If not set, all projects on the Gerrit instance will be mirrored
+		"docs",
+		"kubernetes/kubernetes"
+	],
+	"exclude": [
+		// If not set, no repositories will be excluded. Takes precedence over the `projects` option
+		{"name": "docs"} // Despite "docs" being specified in "projects", this setting will override it and exclude the "docs" project
+	],
+	"authorization": {} // Marks all repositories as private. Users will be required to present valid Gerrit HTTP credentials in order to view repositories
 }
 ```
+
 4. The provided `username` and `password` must be the HTTP credentials of an account on Gerrit that has access to all the repositories that need to be cloned. See [the Gerrit HTTP documentation](https://gerrit-documentation.storage.googleapis.com/Documentation/2.14.2/user-upload.html#http) for details on how to generate HTTP credentials.
 5. Select **Add Repositories** to create the connection. Sourcegraph will start mirroring the specified projects.
 
@@ -55,17 +59,14 @@ To clone using SSH, provide `"gitSSHCredential"` in the configuration:
 
 ```json
 {
-  "url": "https://gerrit.example.com/",
-  "username": "<username>",
-  "password": "<password>",
-  "projects": [
-    "docs",
-    "kubernetes/kubernetes"
-  ],
-  "gitSSHCredential": {
-    "privateKey": "..." // base64 encoded private key that will be used for cloning
-  },
-  "authorization": {}
+	"url": "https://gerrit.example.com/",
+	"username": "<username>",
+	"password": "<password>",
+	"projects": ["docs", "kubernetes/kubernetes"],
+	"gitSSHCredential": {
+		"privateKey": "..." // base64 encoded private key that will be used for cloning
+	},
+	"authorization": {}
 }
 ```
 
@@ -75,14 +76,16 @@ If the `"authorization": {}` option has been set on a Gerrit code host connectio
 
 1. In the **Site Admin** settings area, select [**Site configuration**](/admin/config/site_config) from the options on the left.
 2. Add a Gerrit configuration to the list of `"auth.providers"`.
-![Add a Gerrit configuration to the list of configured authentication providers](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/gerrit/gerrit-auth.png)
+   ![Add a Gerrit configuration to the list of configured authentication providers](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/gerrit/gerrit-auth.png)
 3. Here is an example configuration:
+
 ```json
 {
-  "type": "gerrit",
-  "url": "https://gerrit.example.com/" // This must match the URL of the code host connection. Be sure to add a trailing slash
+	"type": "gerrit",
+	"url": "https://gerrit.example.com/" // This must match the URL of the code host connection. Be sure to add a trailing slash
 }
 ```
+
 4. Save the configuration. If there was a warning at the top of the page, it should now disappear.
 
 Users should now be able to authenticate their Sourcegraph accounts using their Gerrit HTTP credentials.
@@ -94,7 +97,7 @@ After [configuring Gerrit as a code host connection](#configure-gerrit-as-code-h
 As a user:
 
 1. Visit your user settings page and select **Account security** from the options on the left.
-![A user's Account security page](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/gerrit/gerrit-account-security.png)
+   ![A user's Account security page](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/gerrit/gerrit-account-security.png)
 1. Gerrit should appear in the list of accounts you are able to connect. If it does not appear, try refreshing the page.
 1. Select the **Add** option next to Gerrit.
 1. Provide your Gerrit username and HTTP password. If you are unsure of how to generate an HTTP password, see [the Gerrit HTTP documentation](https://gerrit-documentation.storage.googleapis.com/Documentation/2.14.2/user-upload.html#http).
@@ -110,7 +113,7 @@ Gerrit connections support the following configuration options, which are specif
 
 {/* SCHEMA_SYNC_START: admin/code_hosts/gerrit.schema.json */}
 {/* WARNING: This section is auto-generated during releases. Do not edit manually. */}
-{/* Last updated: 2025-11-12T22:19:41Z via sourcegraph/sourcegraph@v6.10.0 */}
+{/* Last updated: 2025-11-25T00:35:32Z via sourcegraph/sourcegraph@v6.10.3349 */}
 ```json
 {
 	// If non-null, enforces Gerrit repository permissions. This requires that there is an item in the [site configuration json](https://sourcegraph.com/docs/admin/config/site_config#auth-providers) `auth.providers` field, of type "gerrit" with the same `url` field as specified in this `GerritConnection`.

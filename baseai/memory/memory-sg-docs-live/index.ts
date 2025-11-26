@@ -1,4 +1,4 @@
-import { MemoryI } from '@baseai/core';
+import {MemoryI} from '@baseai/core';
 
 const memoryDocs = (): MemoryI => ({
 	name: 'memory-sg-docs-live',
@@ -15,10 +15,10 @@ const memoryDocs = (): MemoryI => ({
 			const url = `https://sourcegraph.com/docs/${doc.path}`;
 			return {
 				url,
-				name: doc.name,
+				name: doc.name
 			};
-		},
-	},
+		}
+	}
 });
 
 export default memoryDocs;

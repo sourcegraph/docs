@@ -1,10 +1,13 @@
-import { CURRENT_VERSION_STRING } from 'src/components/PreCodeBlock'
+import {CURRENT_VERSION_STRING} from 'src/components/PreCodeBlock';
 
 # Upgrade Sourcegraph on Docker Compose
 
 This document describes the process to update a Docker Compose Sourcegraph instance. If you are unfamiliar with sourcegraph versioning or releases see our [general concepts documentation](/admin/updates/).
 
-> <Callout type="note">Always consult the [release notes](/admin/updates/docker_compose) for the versions your upgrade will pass over and end on.</Callout>
+> <Callout type="note">
+> 	Always consult the [release notes](/admin/updates/docker_compose) for the
+> 	versions your upgrade will pass over and end on.
+> </Callout>
 
 ### Standard upgrades
 
@@ -59,42 +62,49 @@ $ docker-compose up -d --remove-orphans
 
 ### Multi-version upgrades
 
-> <Callout type="warning">Multiversion upgrades **require downtime**, please see our [cautionary note](/admin/updates/#best-practices) on upgrades, if you have any concerns about running a multiversion upgrade, please reach out to us at [support@sourcegraph.com](mailto:support@sourcegraph.com) for advisement. </Callout>
+> <Callout type="warning">
+> 	Multiversion upgrades **require downtime**, please see our [cautionary
+> 	note](/admin/updates/#best-practices) on upgrades, if you have any
+> 	concerns about running a multiversion upgrade, please reach out to us at
+> 	[support@sourcegraph.com](mailto:support@sourcegraph.com) for
+> 	advisement.{' '}
+> </Callout>
 
 To perform a multi-version upgrade via migrators [upgrade](/admin/updates/migrator/migrator-operations#upgrade) command on a Sourcegraph instance running on Docker compose follow the procedure below:
 
 1. **Check Upgrade Readiness**:
-   - Check the [upgrade notes](/admin/updates/docker_compose#docker-compose-upgrade-notes) for the version range you're passing through.
-   - Check the `Site Admin > Updates` page to determine [upgrade readiness](/admin/updates/#upgrade-readiness).
+
+    - Check the [upgrade notes](/admin/updates/docker_compose#docker-compose-upgrade-notes) for the version range you're passing through.
+    - Check the `Site Admin > Updates` page to determine [upgrade readiness](/admin/updates/#upgrade-readiness).
 
 2. **Pull and merge upstream changes**:
-   - Follow the [standard upgrade procedure](#standard-upgrades) to pull and merge upstream changes from the version you are upgrading to your `release` branch.
+
+    - Follow the [standard upgrade procedure](#standard-upgrades) to pull and merge upstream changes from the version you are upgrading to your `release` branch.
 
 3. **Disable Connections to the Database**:
-   - Stop running containers connected to the databases and the databases:
-   ```
-   $ docker-compose down --remove-orphans
-   ```
+
+    - Stop running containers connected to the databases and the databases:
+
+    ```
+    $ docker-compose down --remove-orphans
+    ```
 
 4. **Run Migrator with the `upgrade` command**:
-   - *For more detailed instructions and available command flags see our [migrator docs](/admin/updates/migrator/migrator-operations#upgrade).*
+    - _For more detailed instructions and available command flags see our [migrator docs](/admin/updates/migrator/migrator-operations#upgrade)._
     1. If the migrator `image:` in your `docker-compose.yaml` wasn't updated to in the **latest** release of `migrator` in step 2 set migrator's image to the latest release.
-    **Example:**
+       **Example:**
     ```yaml
     migrator:
-      container_name: migrator
-      image: 'index.docker.io/sourcegraph/migrator:6.0.0'
+        container_name: migrator
+        image: 'index.docker.io/sourcegraph/migrator:6.0.0'
     ```
-    2. Set the migrator `command:` to `upgrade` you'll need to supply a `--to=` argument to the version you're upgrading to. 
-    **Example:**
+    2. Set the migrator `command:` to `upgrade` you'll need to supply a `--to=` argument to the version you're upgrading to.
+       **Example:**
     ```yaml
     command: ['upgrade', '--from=v5.9.0', '--to=v6.0.0']
     ```
-    > *Note: you may add the `--dry-run` flag to the `command:` to test things out before altering the dbs*
-    3. Run migrator with `docker-compose up migrator` 
-    
+    > _Note: you may add the `--dry-run` flag to the `command:` to test things out before altering the dbs_ 3. Run migrator with `docker-compose up migrator`
     - Migrator `depends_on:` will ensure the databases are ready before attempting to run the migrator. Ensuring that database entry point scripts are run before the migrator attempts to connect to the databases. For users upgrading from a version earlier than `5.10.0`, a PostgreSQL version is required and will be performed automatically here. For more details, see [Upgrading PostgreSQL](/admin/postgresql#upgrading-postgresql).
-    
     **Example:**
     ```sh
     $ ~/deploy-sourcegraph-docker/docker-compose/ docker-compose up migrator
@@ -124,20 +134,22 @@ To perform a multi-version upgrade via migrators [upgrade](/admin/updates/migrat
     migrator exited with code 0
     ```
 5. **Run Migrator with the `up` command**
-   - Set your migrator `command:` to `up`
-   > *Note: If you aren't upgrading to the latest release remember to set the migrator image back to the version you are upgrading to.*
-   **Example:**
-   ```yaml
-   migrator:
-     container_name: migrator
-     image: 'index.docker.io/sourcegraph/migrator:6.0.0@sha256:ec295eb0b743da6bf56777ca6524972267a5c442b0288095e2fe12fce38ebacc'
-     cpus: 0.5
-     mem_limit: '500m'
-     command: ['up']
-   ```
+
+    - Set your migrator `command:` to `up`
+        > _Note: If you aren't upgrading to the latest release remember to set the migrator image back to the version you are upgrading to._
+        > **Example:**
+
+    ```yaml
+    migrator:
+        container_name: migrator
+        image: 'index.docker.io/sourcegraph/migrator:6.0.0@sha256:ec295eb0b743da6bf56777ca6524972267a5c442b0288095e2fe12fce38ebacc'
+        cpus: 0.5
+        mem_limit: '500m'
+        command: ['up']
+    ```
 
 6. **Start your containers again**:
-   - run `docker-compose up -d` in the folder containing your `docker-compose.yaml` file.
-   ```sh
-   $ docker-compose up -d
-   ```
+    - run `docker-compose up -d` in the folder containing your `docker-compose.yaml` file.
+    ```sh
+    $ docker-compose up -d
+    ```

@@ -18,24 +18,26 @@ To enable Perforce code host connections, a site admin must:
 
     - [`depots`](/admin/repo/perforce#depots)
 
-      A list of depot paths that can be either a depot root or an arbitrary subdirectory. **Note**: Only `"local"` type depots are supported.
+        A list of depot paths that can be either a depot root or an arbitrary subdirectory. **Note**: Only `"local"` type depots are supported.
 
     - [`p4.user`](/admin/repo/perforce#p4-user)
 
-      The user to be authenticated for `p4` CLI, and should be capable of performing:
-      - `p4 login`
-      - `p4 trust`
-      - and any p4 commands involved with `git p4 clone` and `git p4 sync` for listed `depots`.
+        The user to be authenticated for `p4` CLI, and should be capable of performing:
 
-      If repository permissions are mirrored, the user needs additional ability (aka. "super" access level) to perform the commands:
-      - `p4 protects`
-      - `p4 groups`
-      - `p4 group`
-      - `p4 users`
+        - `p4 login`
+        - `p4 trust`
+        - and any p4 commands involved with `git p4 clone` and `git p4 sync` for listed `depots`.
+
+        If repository permissions are mirrored, the user needs additional ability (aka. "super" access level) to perform the commands:
+
+        - `p4 protects`
+        - `p4 groups`
+        - `p4 group`
+        - `p4 users`
 
     - [`p4.passwd`](/admin/repo/perforce#p4-passwd)
 
-      The ticket to be used for authenticating the `p4.user`. It is recommended to create tickets of users in a group that never expire. Use the command `p4 -u <p4.user> login -p -a` to obtain a ticket value.
+        The ticket to be used for authenticating the `p4.user`. It is recommended to create tickets of users in a group that never expire. Use the command `p4 -u <p4.user> login -p -a` to obtain a ticket value.
 
     - See the [configuration documentation below](#configuration) for other fields you can configure.
 
@@ -43,31 +45,31 @@ To enable Perforce code host connections, a site admin must:
 
     ```json
     {
-      "fusionClient": {
-        "enabled": true,
-        "lookAhead": 2000
-      }
+    	"fusionClient": {
+    		"enabled": true,
+    		"lookAhead": 2000
+    	}
     }
     ```
 
     > NOTE: While the `fusionClient` configuration is optional, without it the code host connection uses `git p4`, which has performance issues so we strongly recommend `p4-fusion`.
 
-2. Click **Add repositories**.
+1. Click **Add repositories**.
 
 Sourcegraph will now talk to the Perforce host and sync the configured `depots` to the Sourcegraph instance.
 
 It's worthwhile to note some limitations of this process:
 
-- When syncing depots [p4-fusion](https://github.com/salesforce/p4-fusion) is used to convert Perforce depots into git repositories so that Sourcegraph can index them.
-- Rename of a Perforce depot, including changing the depot on the Perforce server or the `repositoryPathPattern` config option, will cause a re-import of the depot.
-- Unless [permissions syncing](#repository-permissions) is enabled, Sourcegraph is not aware of the depot permissions, so it can't enforce access restrictions.
+-   When syncing depots [p4-fusion](https://github.com/salesforce/p4-fusion) is used to convert Perforce depots into git repositories so that Sourcegraph can index them.
+-   Rename of a Perforce depot, including changing the depot on the Perforce server or the `repositoryPathPattern` config option, will cause a re-import of the depot.
+-   Unless [permissions syncing](#repository-permissions) is enabled, Sourcegraph is not aware of the depot permissions, so it can't enforce access restrictions.
 
 ## Perforce labels
 
 Perforce labels are converted to Git tags, but only under the following conditions:
 
-- The depot is fully contained within one of the label's views. (i.e. the depot is contained at `//path/to/depot/...` and the label's view is `//path/to/depot/...`).
-- The label has a Revision field that matches a single revision. (i.e. `@4521`)
+-   The depot is fully contained within one of the label's views. (i.e. the depot is contained at `//path/to/depot/...` and the label's view is `//path/to/depot/...`).
+-   The label has a Revision field that matches a single revision. (i.e. `@4521`)
 
 Perforce label names are also more flexible than git tag names, so incompatible characters are replaced with underscores. (i.e. `v1:2:3` will become `v1_2_3`)
 
@@ -79,7 +81,7 @@ To enforce file-level permissions for Perforce depots using the [Perforce protec
 
 ```json
 {
-  "authorization": {}
+	"authorization": {}
 }
 ```
 
@@ -95,11 +97,11 @@ For example, if your Perforce depot `//depot/Talkhouse` has different permission
 
 ```json
 {
-  "depots": [
-    "//depot/Talkhouse/main-dev/",
-    "//depot/Talkhouse/rel1.0/front/",
-    "//depot/Talkhouse/rel1.0/back/"
-  ]
+	"depots": [
+		"//depot/Talkhouse/main-dev/",
+		"//depot/Talkhouse/rel1.0/front/",
+		"//depot/Talkhouse/rel1.0/back/"
+	]
 }
 ```
 
@@ -107,11 +109,11 @@ By configuring each subdirectory that has unique permissions, Sourcegraph is abl
 
 ```json
 {
-  "depots": [
-    "//depot/Talkhouse/main-dev/",
-    "//depot/Talkhouse/rel1.0/",
-    "//depot/Talkhouse/rel1.0/back/"
-  ]
+	"depots": [
+		"//depot/Talkhouse/main-dev/",
+		"//depot/Talkhouse/rel1.0/",
+		"//depot/Talkhouse/rel1.0/back/"
+	]
 }
 ```
 
@@ -132,9 +134,9 @@ To enable file-level permissions:
 
     ```json
     {
-      "experimentalFeatures": {
-        "subRepoPermissions": { "enabled": true }
-      }
+    	"experimentalFeatures": {
+    		"subRepoPermissions": {"enabled": true}
+    	}
     }
     ```
 
@@ -142,9 +144,9 @@ To enable file-level permissions:
 
     ```json
     {
-      "authorization": {
-        "subRepoPermissions": true
-      }
+    	"authorization": {
+    		"subRepoPermissions": true
+    	}
     }
     ```
 
@@ -162,8 +164,8 @@ If your Perforce environment relies heavily on host-based permissions, it's cruc
 
 By default, Sourcegraph:
 
-- **Applies all rules** in the Perforce `protects` table.
-- **Ignores host-specific restrictions**, treating all host fields as `*`.
+-   **Applies all rules** in the Perforce `protects` table.
+-   **Ignores host-specific restrictions**, treating all host fields as `*`.
 
 **Implication**: Users may gain access to resources that should be restricted based on their IP addresses.
 
@@ -180,16 +182,21 @@ If you want Sourcegraph to enforce host-specific permissions, you need to enable
 
 ```json
 {
-  "experimentalFeatures": {
-    "subRepoPermissions": {
-      "enabled": true,
-      "enforceIPRestrictions": true
-    }
-  }
+	"experimentalFeatures": {
+		"subRepoPermissions": {
+			"enabled": true,
+			"enforceIPRestrictions": true
+		}
+	}
 }
 ```
+
 <Callout type="warning">
-When `enforceIPRestrictions` is set to `true`, Sourcegraph will use the user's IP address to apply Perforce permissions at the user level. It uses the final `X-Forwarded-For` header in the request to identify the user's IP. Note that this header can be easily spoofed, so ensure your load balancer or proxy handles `X-Forwarded-For` headers securely.
+	When `enforceIPRestrictions` is set to `true`, Sourcegraph will use the
+	user's IP address to apply Perforce permissions at the user level. It uses
+	the final `X-Forwarded-For` header in the request to identify the user's IP.
+	Note that this header can be easily spoofed, so ensure your load balancer or
+	proxy handles `X-Forwarded-For` headers securely.
 </Callout>
 
 ##### Ignore rules with host
@@ -198,10 +205,10 @@ To ignore rules that have a host value other than `*`, set `ignoreRulesWithHost`
 
 ```json
 {
-  "authorization": {
-    "subRepoPermissions": true,
-    "ignoreRulesWithHost": true
-  }
+	"authorization": {
+		"subRepoPermissions": true,
+		"ignoreRulesWithHost": true
+	}
 }
 ```
 
@@ -209,11 +216,11 @@ With this setting, Sourcegraph will ignore any rules with a host other than `*`,
 
 ### Notes about permissions
 
-- Sourcegraph users are mapped to Perforce users based on their verified email addresses.
-- As long as a user has been granted at least `Read` permissions in Perforce they will be able to view content in Sourcegraph.
-- As a special case, commits in which a user does not have permissions to read any files are hidden. If a user can read a subset of files in a commit, only those files are shown.
-- [file-level permissions must be disabled for Batch Changes to work](#known-issues-and-limitations).
-- Setting `authz.enforceForSiteAdmins` to `true` in the site configuration will enforce permissions for admin users. They may not be able to see repositories and their contents if their Sourcegraph user account email does not match with their email on the Perforce server.
+-   Sourcegraph users are mapped to Perforce users based on their verified email addresses.
+-   As long as a user has been granted at least `Read` permissions in Perforce they will be able to view content in Sourcegraph.
+-   As a special case, commits in which a user does not have permissions to read any files are hidden. If a user can read a subset of files in a commit, only those files are shown.
+-   [file-level permissions must be disabled for Batch Changes to work](#known-issues-and-limitations).
+-   Setting `authz.enforceForSiteAdmins` to `true` in the site configuration will enforce permissions for admin users. They may not be able to see repositories and their contents if their Sourcegraph user account email does not match with their email on the Perforce server.
 
 ## Configuration
 
@@ -221,7 +228,7 @@ With this setting, Sourcegraph will ignore any rules with a host other than `*`,
 
 {/* SCHEMA_SYNC_START: admin/code_hosts/perforce.schema.json */}
 {/* WARNING: This section is auto-generated during releases. Do not edit manually. */}
-{/* Last updated: 2025-11-12T22:19:45Z via sourcegraph/sourcegraph@v6.10.0 */}
+{/* Last updated: 2025-11-25T00:35:35Z via sourcegraph/sourcegraph@v6.10.3349 */}
 ```json
 {
 	// If non-null, enforces Perforce depot permissions.
@@ -281,14 +288,15 @@ With this setting, Sourcegraph will ignore any rules with a host other than `*`,
 }
 ```
 {/* SCHEMA_SYNC_END: admin/code_hosts/perforce.schema.json */}
+
 ## Known issues and limitations
 
 We are actively working to significantly improve Sourcegraph's Perforce support. Please [contact us](https://help.sourcegraph.com/hc/en-us/requests/new) to help us prioritize any specific improvements you'd like to see.
 
-- Sourcegraph was initially built for Git repositories only, so it stores Perforce depots as Git repositories when syncing. Perforce concepts and languages are expressed in the UI, but under the hood, Git tools are used.
-- Batch Changes does not support [file-level permissions](#file-level-permissions) (also known as sub-repo permissions)
-- Batch Changes does not handle the shelved changelist other than to query the Perforce server for its status.
-- Permalinks with Changelist Id do not work yet
+-   Sourcegraph was initially built for Git repositories only, so it stores Perforce depots as Git repositories when syncing. Perforce concepts and languages are expressed in the UI, but under the hood, Git tools are used.
+-   Batch Changes does not support [file-level permissions](#file-level-permissions) (also known as sub-repo permissions)
+-   Batch Changes does not handle the shelved changelist other than to query the Perforce server for its status.
+-   Permalinks with Changelist Id do not work yet
 
 ## Configure experimental features
 
@@ -302,35 +310,37 @@ Add `"perforceChangelistMapping": "enabled",` to `experimentalFeatures` in the [
 
 ```json
 {
-  "experimentalFeatures": {
-    "perforceChangelistMapping": "enabled"
-  }
+	"experimentalFeatures": {
+		"perforceChangelistMapping": "enabled"
+	}
 }
 ```
 
 When enabled, URLs for Perforce code hosts will use the Changelist (CL) ID instead of commit SHAs. Areas that benefit from this at the moment are:
 
-- Viewing a specific CL
-- Viewing the files of a depot at a specific CL
-- Viewing a specific file added / removed / modified in a specific CL
-- Viewing the list of CLs
-
+-   Viewing a specific CL
+-   Viewing the files of a depot at a specific CL
+-   Viewing a specific file added / removed / modified in a specific CL
+-   Viewing the list of CLs
 
 ### Searching within a specific changelist
+
 As of Sourcegraph 5.5, you can search within a specific changelist by referring the the changelist as a reference path like `changelist/123` where 123 is the changelist id. For example, given a repo path of `Talkhouse/main` and a changelist id of `123`, you can search within that changelist by using the following query:
+
 ```
 repo:^Talkhouse/main$@changelist/123 text to find
 ```
 
 or
+
 ```
 repo:^Talkhouse/main$ rev:changelist/123 text to find
 ```
 
 #### Limitations
 
-- After a depot is cloned or fetched, Sourcegraph computes and stores mappings of CL IDs to commit SHAs. This mapping can take several minutes for large clones/fetches. When a background mapping job is running, the depot won't be serviceable as URLs referring to CL IDs may not resolve and users may see an error while interacting with the depot.
-- This experimental configuration can not be selectively enabled for a specific perforce depot.
+-   After a depot is cloned or fetched, Sourcegraph computes and stores mappings of CL IDs to commit SHAs. This mapping can take several minutes for large clones/fetches. When a background mapping job is running, the depot won't be serviceable as URLs referring to CL IDs may not resolve and users may see an error while interacting with the depot.
+-   This experimental configuration can not be selectively enabled for a specific perforce depot.
 
 #### Mechanism
 
@@ -344,9 +354,9 @@ Add `"batchChanges.enablePerforce": true` to `experimentalFeatures` in the [site
 
 ```json
 {
-  "experimentalFeatures": {
-   "batchChanges.enablePerforce": true,
-  }
+	"experimentalFeatures": {
+		"batchChanges.enablePerforce": true
+	}
 }
 ```
 

@@ -1,10 +1,8 @@
 # Auto-indexing
 
 <TierCallout>
-  Supported on [Enterprise](/pricing/enterprise) plans.
-  <user>
-    Currently in Beta and available via Web app.
-  </user>
+	Supported on [Enterprise](/pricing/enterprise) plans.
+	<user>Currently in Beta and available via Web app.</user>
 </TierCallout>
 
 <p className="subtitle">Learn and understand how auto-indexing works.</p>
@@ -19,7 +17,9 @@ The following docs explains how to turn on [auto-indexing](/code-search/code-nav
 
 ### Deploy executors
 
-<Callout type="note">This step is only required if you are on self-hosted Sourcegraph.</Callout>
+<Callout type="note">
+	This step is only required if you are on self-hosted Sourcegraph.
+</Callout>
 
 First, [deploy the executor service](/admin/executors/deploy_executors) targeting your Sourcegraph instance. This will provide the necessary compute resources that clone the target Git repository, securely analyze the code to produce a code graph data index, then upload that index to your Sourcegraph instance for processing.
 
@@ -28,9 +28,7 @@ First, [deploy the executor service](/admin/executors/deploy_executors) targetin
 Next, enable the following feature flag in your Sourcegraph instance's site configuration.
 
 ```yaml
-{
-  "codeIntelAutoIndexing.enabled": true
-}
+{'codeIntelAutoIndexing.enabled': true}
 ```
 
 This step will control the scheduling of indexing jobs which are made available to the executors deployed in the previous step.
@@ -39,14 +37,16 @@ This step will control the scheduling of indexing jobs which are made available 
 
 The frequency of index job scheduling can be tuned via the following environment variables read by `worker` service containers running the [`codeintel-auto-indexing`](/admin/workers#codeintel-auto-indexing) task.
 
-- **`PRECISE_CODE_INTEL_AUTO_INDEXING_TASK_INTERVAL`**: The time to run periodic codeintel auto-indexing tasks. The default is every 2 minutes
-- **`PRECISE_CODE_INTEL_AUTO_INDEXING_REPOSITORY_PROCESS_DELAY`**: The minimum time that the same repository can be considered for auto-index scheduling. The default is every 24 hours
-- **`PRECISE_CODE_INTEL_AUTO_INDEXING_REPOSITORY_BATCH_SIZE`**: The number of repositories to consider for auto-indexing scheduling at a time. Default is 2500
-- **`PRECISE_CODE_INTEL_AUTO_INDEX_MAXIMUM_REPOSITORIES_INSPECTED_PER_SECOND`**: The maximum number of repositories inspected for auto-indexing per second. Set to zero to disable the limit. Default is 0
+-   **`PRECISE_CODE_INTEL_AUTO_INDEXING_TASK_INTERVAL`**: The time to run periodic codeintel auto-indexing tasks. The default is every 2 minutes
+-   **`PRECISE_CODE_INTEL_AUTO_INDEXING_REPOSITORY_PROCESS_DELAY`**: The minimum time that the same repository can be considered for auto-index scheduling. The default is every 24 hours
+-   **`PRECISE_CODE_INTEL_AUTO_INDEXING_REPOSITORY_BATCH_SIZE`**: The number of repositories to consider for auto-indexing scheduling at a time. Default is 2500
+-   **`PRECISE_CODE_INTEL_AUTO_INDEX_MAXIMUM_REPOSITORIES_INSPECTED_PER_SECOND`**: The maximum number of repositories inspected for auto-indexing per second. Set to zero to disable the limit. Default is 0
 
 ## Configure auto-indexing
 
-<Callout type="info">This feature is in beta for self-hosted customers.</Callout>
+<Callout type="info">
+	This feature is in beta for self-hosted customers.
+</Callout>
 
 Precise code navigation [auto-indexing](/code-search/code-navigation/auto_indexing) jobs are scheduled based on two fronts of configuration.
 
@@ -60,13 +60,17 @@ Alternatively, index job configuration [can be supplied explicitly](#explicit-in
 
 Let's learn how to configure policies to control the scheduling of precise code navigation indexing jobs. An indexing jobs [produces a code graph data index](/code-search/code-navigation/precise_code_navigation) and uploads it to your Sourcegraph instance for use with code navigation.
 
-<Callout type="note">See the [best practices guide](/code-search/code-navigation/how-to/policies_resource_usage_best_practices) for additional details on how policies affect resource usage.</Callout>
+<Callout type="note">
+	See the [best practices
+	guide](/code-search/code-navigation/how-to/policies_resource_usage_best_practices)
+	for additional details on how policies affect resource usage.
+</Callout>
 
 Each policy has a number of configurable options, including:
 
-- The set of Git branches or tags to which the policy applies
-- The maximum age of commits that should be indexed (e.g., skip indexing commits made last year)
-- For branches, whether to only consider the _tip_ of the branch, or all commits on that branch
+-   The set of Git branches or tags to which the policy applies
+-   The maximum age of commits that should be indexed (e.g., skip indexing commits made last year)
+-   For branches, whether to only consider the _tip_ of the branch, or all commits on that branch
 
 When auto-indexing is enabled, uploading a code graph data index will trigger creation of index jobs for dependencies if they are available on the Sourcegraph instance, in order to provide greater coverage for precise code navigation actions such as Go to definition and Find references.
 
@@ -178,7 +182,9 @@ Once the index job completes, a code graph data file has been uploaded to the So
 
 ## Inference of auto-indexing jobs
 
-<Callout type="note">This feature is in beta for self-hosted customers.</Callout>
+<Callout type="note">
+	This feature is in beta for self-hosted customers.
+</Callout>
 
 When a commit of a repository is selected as a candidate for [auto-indexing](/code-search/code-navigation/auto_indexing) but does not have an explicitly supplied index job configuration, index jobs are inferred from the content of the repository at that commit.
 
@@ -194,25 +200,20 @@ For each directory containing a `go.mod` file, the following index job is schedu
 
 ```json
 {
-  "indexing_jobs": [
-    {
-      "steps": [
-        {
-          "root": "<dir>",
-          "image": "sourcegraph/lsif-go",
-          "commands": [
-            "go mod download"
-          ]
-        }
-      ],
-      "root": "<dir>",
-      "indexer": "sourcegraph/lsif-go",
-      "indexer_args": [
-        "lsif-go",
-        "--no-animation"
-      ]
-    }
-  ]
+	"indexing_jobs": [
+		{
+			"steps": [
+				{
+					"root": "<dir>",
+					"image": "sourcegraph/lsif-go",
+					"commands": ["go mod download"]
+				}
+			],
+			"root": "<dir>",
+			"indexer": "sourcegraph/lsif-go",
+			"indexer_args": ["lsif-go", "--no-animation"]
+		}
+	]
 }
 ```
 
@@ -220,13 +221,9 @@ For every other directory excluding `vendor/` directories and their children con
 
 ```json
 {
-  "root": "<dir>",
-  "indexer": "sourcegraph/lsif-go",
-  "indexer_args": [
-    "GO111MODULE=off",
-    "lsif-go",
-    "--no-animation"
-  ]
+	"root": "<dir>",
+	"indexer": "sourcegraph/lsif-go",
+	"indexer_args": ["GO111MODULE=off", "lsif-go", "--no-animation"]
 }
 ```
 
@@ -236,32 +233,25 @@ For each directory excluding `node_modules/` directories and their children cont
 
 ```json
 {
-  "steps": [
-    {
-      "root": "<ancestor(dir)>",
-      "image": "sourcegraph/scip-typescript:autoindex",
-      "commands": [
-        "yarn"
-      ]
-    },
-    {
-      "root": "<ancestor(dir)>",
-      "image": "sourcegraph/scip-typescript:autoindex",
-      "commands": [
-        "npm install"
-      ]
-    },
-    "..."
-  ],
-  "local_steps": [
-    "N_NODE_MIRROR=https://unofficial-builds.nodejs.org/download/release n --arch x64-musl autol"
-  ],
-  "root": "<dir>",
-  "indexer": "sourcegraph/scip-typescript:autoindex",
-  "indexer_args": [
-    "scip-typescript",
-    "index"
-  ]
+	"steps": [
+		{
+			"root": "<ancestor(dir)>",
+			"image": "sourcegraph/scip-typescript:autoindex",
+			"commands": ["yarn"]
+		},
+		{
+			"root": "<ancestor(dir)>",
+			"image": "sourcegraph/scip-typescript:autoindex",
+			"commands": ["npm install"]
+		},
+		"..."
+	],
+	"local_steps": [
+		"N_NODE_MIRROR=https://unofficial-builds.nodejs.org/download/release n --arch x64-musl autol"
+	],
+	"root": "<dir>",
+	"indexer": "sourcegraph/scip-typescript:autoindex",
+	"indexer_args": ["scip-typescript", "index"]
 }
 ```
 
@@ -271,41 +261,68 @@ If the repository contains a `Cargo.toml` file, the following index job is sched
 
 ```json
 {
-  "root": "",
-  "indexer": "sourcegraph/lsif-rust",
-  "indexer_args": [
-    "lsif-rust",
-    "index"
-  ],
-  "outfile": "dump.lsif"
+	"root": "",
+	"indexer": "sourcegraph/lsif-rust",
+	"indexer_args": ["lsif-rust", "index"],
+	"outfile": "dump.lsif"
 }
 ```
 
 ### Java
 
-<Callout type="note">Inference for languages supported by [scip-java](https://github.com/sourcegraph/scip-java) is currently restricted to Sourcegraph.com.</Callout>
+<Callout type="note">
+	Inference for languages supported by
+	[scip-java](https://github.com/sourcegraph/scip-java) is currently
+	restricted to Sourcegraph.com.
+</Callout>
 
 If the repository contains both a `lsif-java.json` file as well as `*.java`, `*.scala`, or `*.kt` files, the following index job is scheduled.
 
 ```json
 {
-  "root": "",
-  "indexer": "sourcegraph/scip-java",
-  "indexer_args": [
-    "scip-java",
-    "index",
-    "--build-tool=lsif"
-  ],
-  "outfile": "index.scip"
+	"root": "",
+	"indexer": "sourcegraph/scip-java",
+	"indexer_args": ["scip-java", "index", "--build-tool=lsif"],
+	"outfile": "index.scip"
 }
 ```
 
 ## More resources
 
 <QuickLinks>
-	<QuickLink href="/code-search/code-navigation/auto_indexing_configuration" icon="installation" imgAlt="Code Navigation" title="Auto-indexing configuration reference" description="Outlines the anticipated elements of an explicit index job configuration, which might be represented in JSON based on the method of supply." />
-  <QuickLink href="/code-search/code-navigation/explanations/auto_indexing_inference" icon="lightbulb" imgAlt="Code Navigation" title="Auto-indexing inference" description="What happens when a commit is chosen for auto-indexing without a specific index job configuration." />
-	<QuickLink href="/code-search/code-navigation/inference_configuration" icon="theming" imgAlt="Code Navigation" title="Auto-indexing inference configuration reference" description="Guide for site administrators on customizing code intelligence indexing jobs detection in Sourcegraph." />
-  <QuickLink href="/code-search/code-navigation/how-to/combining_scip_uploads_from_ci_cd_and_auto_indexing" icon="presets" imgAlt="Code Navigation" title="Combine SCIP uploads from CI/CD & auto-indexing" description="Learn about methods to precise SCIP index data for your team's repositories." />
-  <QuickLink href="/code-search/code-navigation/how-to/policies_resource_usage_best_practices" icon="installation" imgAlt="Code Navigation" title="Code intelligence policies resource usage best practices" description="An overview of best practices when defining auto-index scheduling and data retention policies." />
+	<QuickLink
+		href="/code-search/code-navigation/auto_indexing_configuration"
+		icon="installation"
+		imgAlt="Code Navigation"
+		title="Auto-indexing configuration reference"
+		description="Outlines the anticipated elements of an explicit index job configuration, which might be represented in JSON based on the method of supply."
+	/>
+	<QuickLink
+		href="/code-search/code-navigation/explanations/auto_indexing_inference"
+		icon="lightbulb"
+		imgAlt="Code Navigation"
+		title="Auto-indexing inference"
+		description="What happens when a commit is chosen for auto-indexing without a specific index job configuration."
+	/>
+	<QuickLink
+		href="/code-search/code-navigation/inference_configuration"
+		icon="theming"
+		imgAlt="Code Navigation"
+		title="Auto-indexing inference configuration reference"
+		description="Guide for site administrators on customizing code intelligence indexing jobs detection in Sourcegraph."
+	/>
+	<QuickLink
+		href="/code-search/code-navigation/how-to/combining_scip_uploads_from_ci_cd_and_auto_indexing"
+		icon="presets"
+		imgAlt="Code Navigation"
+		title="Combine SCIP uploads from CI/CD & auto-indexing"
+		description="Learn about methods to precise SCIP index data for your team's repositories."
+	/>
+	<QuickLink
+		href="/code-search/code-navigation/how-to/policies_resource_usage_best_practices"
+		icon="installation"
+		imgAlt="Code Navigation"
+		title="Code intelligence policies resource usage best practices"
+		description="An overview of best practices when defining auto-index scheduling and data retention policies."
+	/>
 </QuickLinks>

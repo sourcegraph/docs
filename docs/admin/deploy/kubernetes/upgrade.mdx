@@ -4,13 +4,11 @@ This document describes the process to update a **Kubernetes Kustomize** or **Ku
 
 This guide is **not for use with Helm**. Please refer to the [Upgrading Sourcegraph with Helm docs](/admin/deploy/kubernetes#upgrading-sourcegraph) for Helm deployments.
 
-
-> ***⚠️ Attention:***
->   - ***Always consult the [release notes](/admin/updates/kubernetes) for the versions your upgrade will pass over and end on.***
+> **_⚠️ Attention:_**
 >
->   - *This guide assumes you have created a `release` branch following the [reference repositories docs](/admin/deploy/repositories)*
->
->   - ***please see our [cautionary note](/admin/updates/#best-practices) on upgrades**, if you have any concerns about running a multiversion upgrade, please reach out to us at [support@sourcegraph.com](mailto:support@sourcegraph.com) for advisement.*
+> -   **_Always consult the [release notes](/admin/updates/kubernetes) for the versions your upgrade will pass over and end on._**
+> -   _This guide assumes you have created a `release` branch following the [reference repositories docs](/admin/deploy/repositories)_
+> -   **\*please see our [cautionary note](/admin/updates/#best-practices) on upgrades**, if you have any concerns about running a multiversion upgrade, please reach out to us at [support@sourcegraph.com](mailto:support@sourcegraph.com) for advisement.\*
 
 ## Standard upgrades
 
@@ -30,15 +28,15 @@ If the Sourcegraph upgrade fails, you can redeploy using the current `cluster.ya
 
 **Step 2**: Merge the new version of Sourcegraph into your release branch.
 
-  ```sh
-  cd $DEPLOY_SOURCEGRAPH_FORK
-  # get updates
-  git fetch upstream
-  # to merge the upstream release tag into your release branch.
-  git checkout release
-  # Choose which version you want to deploy from https://github.com/sourcegraph/deploy-sourcegraph-k8s/tags
-  git merge $NEW_VERSION
-  ```
+```sh
+cd $DEPLOY_SOURCEGRAPH_FORK
+# get updates
+git fetch upstream
+# to merge the upstream release tag into your release branch.
+git checkout release
+# Choose which version you want to deploy from https://github.com/sourcegraph/deploy-sourcegraph-k8s/tags
+git merge $NEW_VERSION
+```
 
 ---
 
@@ -46,37 +44,35 @@ If the Sourcegraph upgrade fails, you can redeploy using the current `cluster.ya
 
 Generate a new set of manifests locally using your current overlay `instances/$INSTANCE_NAME` (e.g. INSTANCE_NAME=my-sourcegraph) without applying to the cluster.
 
-  ```sh
-  $ kubectl kustomize instances/my-sourcegraph -o cluster.yaml
-  ```
+```sh
+$ kubectl kustomize instances/my-sourcegraph -o cluster.yaml
+```
 
 Review the generated manifests to ensure they match your intended configuration and have the images for the `$NEW_VERSION` version.
 
-  ```sh
-  $ less cluster.yaml
-  ```
+```sh
+$ less cluster.yaml
+```
 
 ---
 
-**Step 4**:  Deploy the generated manifests
+**Step 4**: Deploy the generated manifests
 
 Apply the new manifests from the ouput file `cluster.yaml` to your cluster:
 
-  ```sh
-  $ kubectl apply --prune -l deploy=sourcegraph -f cluster.yaml
-  ```
+```sh
+$ kubectl apply --prune -l deploy=sourcegraph -f cluster.yaml
+```
 
 ---
 
 **Step 5**: Monitor the status of the deployment to determine its success.
 
-  ```sh
-  $ kubectl get pods -o wide --watch
-  ```
+```sh
+$ kubectl get pods -o wide --watch
+```
 
 ---
-
-
 
 ## Multi-version upgrades
 
@@ -85,98 +81,114 @@ Apply the new manifests from the ouput file `cluster.yaml` to your cluster:
 To perform a multi-version upgrade via migrators [upgrade](/admin/updates/migrator/migrator-operations#upgrade) command on a Sourcegraph instance deployed with our [kustomize repo](https://github.com/sourcegraph/deploy-sourcegraph-k8s) follow the procedure below:
 
 1. **Check Upgrade Readiness**:
-   - Check the [upgrade notes](/admin/updates/kubernetes#kubernetes-upgrade-notes) for the version range you're passing through.
-   - Check the `Site Admin > Updates` page to determine [upgrade readiness](/admin/updates/#upgrade-readiness).
+
+    - Check the [upgrade notes](/admin/updates/kubernetes#kubernetes-upgrade-notes) for the version range you're passing through.
+    - Check the `Site Admin > Updates` page to determine [upgrade readiness](/admin/updates/#upgrade-readiness).
 
 2. **Pull and merge upstream changes**:
-     - Follow the [standard upgrade procedure](#upgrade-with-kubernetes-kustomize) to pull and merge upstream changes from the version you are upgrading to to your `release` branch.
+
+    - Follow the [standard upgrade procedure](#upgrade-with-kubernetes-kustomize) to pull and merge upstream changes from the version you are upgrading to to your `release` branch.
 
 3. **Update cluster.yaml and scale down non-database deployments and replicas**:
-   - In your cluster kustomization file (`instances/my-sourcegraph/kustomize.yaml`), uncomment the [multi-version-upgrade util](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/instances/template/kustomization.template.yaml#L155). This will scale down all non-database deployments and statefulSets replicas to 0.
-   ```yaml
-     # - ../../components/utils/uid # -- Run all Postgres database with valid users on host
-     - ../../components/utils/multi-version-upgrade # -- Scale down non-database pods to 0 for multi-version upgrade
-     # - ../../components/utils/migrate-to-nonprivileged # -- Component for migrating from privileged to non-privileged
-     #
-   ```
-   - Generate and apply a new cluster.yaml file.
-   ```sh
-   kubectl kustomize instances/my-sourcegraph -o cluster.yaml
-   kubectl apply --prune -l deploy=sourcegraph -f cluster.yaml
-   ```
-   > Note: This step will ensure that any PostgreSQL upgrade performed as an entrypoint script will have a chance to execute before the migrator is run. For more information see [Upgradeing PostgreSQL](/admin/postgres#upgrading-postgresql).
+
+    - In your cluster kustomization file (`instances/my-sourcegraph/kustomize.yaml`), uncomment the [multi-version-upgrade util](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/instances/template/kustomization.template.yaml#L155). This will scale down all non-database deployments and statefulSets replicas to 0.
+
+    ```yaml
+    # - ../../components/utils/uid # -- Run all Postgres database with valid users on host
+    - ../../components/utils/multi-version-upgrade # -- Scale down non-database pods to 0 for multi-version upgrade
+    # - ../../components/utils/migrate-to-nonprivileged # -- Component for migrating from privileged to non-privileged
+    #
+    ```
+
+    - Generate and apply a new cluster.yaml file.
+
+    ```sh
+    kubectl kustomize instances/my-sourcegraph -o cluster.yaml
+    kubectl apply --prune -l deploy=sourcegraph -f cluster.yaml
+    ```
+
+    > Note: This step will ensure that any PostgreSQL upgrade performed as an entrypoint script will have a chance to execute before the migrator is run. For more information see [Upgradeing PostgreSQL](/admin/postgres#upgrading-postgresql).
 
 4. **Run Migrator with the `upgrade` command**:
-   - *For more detailed instructions and available command flags see our [migrator docs](/admin/updates/migrator/migrator-operations#upgrade).*
-     1. In the `configure/migrator/migrator.Job.yaml` [manifest](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/components/utils/migrator/resources/migrator.Job.yaml):
-        - set the `image:` to the **latest** release of `migrator`
-        - set the `args:` value to `upgrade`. **Example:**
-     ```yaml
-      - name: migrator
-        image: "index.docker.io/sourcegraph/migrator:6.0.0" // here we use a later version of migrator than the version we're upgrading too.
-        args: ["upgrade", "--from=v5.9.0", "--to=5.11.0"]
-        env:
-     ```
-      > *Note:*
-      >  - *Always use the latest image version of migrator for migrator commands, except the startup command `up`*
-      >  - *You may add the `--dry-run` flag to the `command:` to test things out before altering the dbs*
-     2. Run the following commands to schedule the migrator job with the upgrade command and monitor its progress:
-     ```sh
-     # To ensure no previous job invocations will conflict with our current invocation
-     kubectl delete job migrator
-     # Start the migrator job
-     kubectl apply -f components/utils/migrator/resources/migrator.Job.yaml
-     # Stream the migrator's stdout logs for progress
-     kubectl logs job/migrator -f
-     ```
-     **Example:**
-     ```sh
-     $ kubectl -n sourcegraph apply -f ./migrator.Job.yaml
-     job.batch/migrator created
-     $ kubectl -n sourcegraph get jobs
-     NAME       COMPLETIONS   DURATION   AGE
-     migrator   0/1           9s         9s
-     $ kubectl -n sourcegraph logs job/migrator
-     ❗️ An error was returned when detecting the terminal size and capabilities:
 
-        GetWinsize: inappropriate ioctl for device
+    - _For more detailed instructions and available command flags see our [migrator docs](/admin/updates/migrator/migrator-operations#upgrade)._
 
-        Execution will continue, but please report this, along with your operating
-        system, terminal, and any other details, to:
-          https://sourcegraph.com/contact
+        1. In the `configure/migrator/migrator.Job.yaml` [manifest](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/components/utils/migrator/resources/migrator.Job.yaml):
+            - set the `image:` to the **latest** release of `migrator`
+            - set the `args:` value to `upgrade`. **Example:**
 
-     ✱ Sourcegraph migrator 4.5.1
-     👉 Migrating to v3.43 (step 1 of 3)
-     👉 Running schema migrations
-     ✅ Schema migrations complete
-     👉 Running out of band migrations [1 2 4 5 7 13 14 15 16]
-     ✅ Out of band migrations complete
-     👉 Migrating to v4.3 (step 2 of 3)
-     👉 Running schema migrations
-     ✅ Schema migrations complete
-     👉 Running out of band migrations [17 18]
-     ✅ Out of band migrations complete
-     👉 Migrating to v4.5 (step 3 of 3)
-     👉 Running schema migrations
-     ✅ Schema migrations complete
-     $ kubectl -n sourcegraph get jobs
-     NAME       COMPLETIONS   DURATION   AGE
-     migrator   1/1           9s         35s
-     ```
+        ```yaml
+         - name: migrator
+           image: "index.docker.io/sourcegraph/migrator:6.0.0" // here we use a later version of migrator than the version we're upgrading too.
+           args: ["upgrade", "--from=v5.9.0", "--to=5.11.0"]
+           env:
+        ```
+
+        > _Note:_
+        >
+        > - _Always use the latest image version of migrator for migrator commands, except the startup command `up`_
+        > - _You may add the `--dry-run` flag to the `command:` to test things out before altering the dbs_
+        >
+        > 2. Run the following commands to schedule the migrator job with the upgrade command and monitor its progress:
+
+        ```sh
+        # To ensure no previous job invocations will conflict with our current invocation
+        kubectl delete job migrator
+        # Start the migrator job
+        kubectl apply -f components/utils/migrator/resources/migrator.Job.yaml
+        # Stream the migrator's stdout logs for progress
+        kubectl logs job/migrator -f
+        ```
+
+        **Example:**
+
+        ```sh
+        $ kubectl -n sourcegraph apply -f ./migrator.Job.yaml
+        job.batch/migrator created
+        $ kubectl -n sourcegraph get jobs
+        NAME       COMPLETIONS   DURATION   AGE
+        migrator   0/1           9s         9s
+        $ kubectl -n sourcegraph logs job/migrator
+        ❗️ An error was returned when detecting the terminal size and capabilities:
+
+           GetWinsize: inappropriate ioctl for device
+
+           Execution will continue, but please report this, along with your operating
+           system, terminal, and any other details, to:
+             https://sourcegraph.com/contact
+
+        ✱ Sourcegraph migrator 4.5.1
+        👉 Migrating to v3.43 (step 1 of 3)
+        👉 Running schema migrations
+        ✅ Schema migrations complete
+        👉 Running out of band migrations [1 2 4 5 7 13 14 15 16]
+        ✅ Out of band migrations complete
+        👉 Migrating to v4.3 (step 2 of 3)
+        👉 Running schema migrations
+        ✅ Schema migrations complete
+        👉 Running out of band migrations [17 18]
+        ✅ Out of band migrations complete
+        👉 Migrating to v4.5 (step 3 of 3)
+        👉 Running schema migrations
+        ✅ Schema migrations complete
+        $ kubectl -n sourcegraph get jobs
+        NAME       COMPLETIONS   DURATION   AGE
+        migrator   1/1           9s         35s
+        ```
 
 5. **Generate and apply a new cluster.yaml file**:
-     1. Comment out the [multi-version-upgrade util](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/instances/template/kustomization.template.yaml#L155) in your cluster kustomization file (`instances/my-sourcegraph/kustomize.yaml`).
-     ```yaml
-     # - ../../components/utils/uid # -- Run all Postgres database with valid users on host
-     # - ../../components/utils/multi-version-upgrade # -- Scale down non-database pods to 0 for multi-version upgrade
-     # - ../../components/utils/migrate-to-nonprivileged # -- Component for migrating from privileged to non-privileged
-     ```
-     2. Generate and apply a new cluster.yaml with the new images from Step 2.
-     ```sh
-     kubectl kustomize instances/my-sourcegraph -o cluster.yaml
-     kubectl apply --prune -l deploy=sourcegraph -f cluster.yaml
-     ```
-     Your instance should now be up and running in the new version!
+    1. Comment out the [multi-version-upgrade util](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/instances/template/kustomization.template.yaml#L155) in your cluster kustomization file (`instances/my-sourcegraph/kustomize.yaml`).
+    ```yaml
+    # - ../../components/utils/uid # -- Run all Postgres database with valid users on host
+    # - ../../components/utils/multi-version-upgrade # -- Scale down non-database pods to 0 for multi-version upgrade
+    # - ../../components/utils/migrate-to-nonprivileged # -- Component for migrating from privileged to non-privileged
+    ```
+    2. Generate and apply a new cluster.yaml with the new images from Step 2.
+    ```sh
+    kubectl kustomize instances/my-sourcegraph -o cluster.yaml
+    kubectl apply --prune -l deploy=sourcegraph -f cluster.yaml
+    ```
+    Your instance should now be up and running in the new version!
 
 ---
 
@@ -196,14 +208,14 @@ If you are rolling back more than a single version, then you must also [rollback
 
 ### Rollback with Kustomize
 
-  ```sh
-  # Re-generate manifests
-  kubectl kustomize instances/$YOUR_INSTANCE -o cluster-rollback.yaml
-  # Review manifests
-  less cluster-rollback.yaml
-  # Re-deploy
-  kubectl apply --prune -l deploy=sourcegraph -f cluster-rollback.yaml
-  ```
+```sh
+# Re-generate manifests
+kubectl kustomize instances/$YOUR_INSTANCE -o cluster-rollback.yaml
+# Review manifests
+less cluster-rollback.yaml
+# Re-deploy
+kubectl apply --prune -l deploy=sourcegraph -f cluster-rollback.yaml
+```
 
 ### Rollback with `migrator downgrade`
 
@@ -215,7 +227,7 @@ For rolling back a multiversion upgrade use the `migrator` [downgrade](/admin/up
 
 In some situations, administrators may wish to migrate their databases before upgrading the rest of the system to reduce downtime. Sourcegraph guarantees database backward compatibility to the most recent minor point release so the database can safely be upgraded before the application code.
 
-To execute the database migrations independently, follow the [Kubernetes instructions on how to manually run database migrations](/admin/updates/migrator/migrator-operations). Running the `up` (default) command on the `migrator` of the *version you are upgrading to* will apply all migrations required by the next version of Sourcegraph.
+To execute the database migrations independently, follow the [Kubernetes instructions on how to manually run database migrations](/admin/updates/migrator/migrator-operations). Running the `up` (default) command on the `migrator` of the _version you are upgrading to_ will apply all migrations required by the next version of Sourcegraph.
 
 ## Improving update reliability and latency with node selectors
 
@@ -228,10 +240,10 @@ CPU/memory).
 
 If this happens, do the following:
 
-- Use `kubectl drain $NODE` to drain a node of existing pods, so it has enough allocation for the larger
-  service.
-- Run `watch kubectl get pods -o wide` and wait until the node has been drained. Run `kubectl get pods` to check that all pods except for the resource-hungry one(s) have been assigned to a node.
-- Run `kubectl uncordon $NODE` to enable the larger pod(s) to be scheduled on the drained node.
+-   Use `kubectl drain $NODE` to drain a node of existing pods, so it has enough allocation for the larger
+    service.
+-   Run `watch kubectl get pods -o wide` and wait until the node has been drained. Run `kubectl get pods` to check that all pods except for the resource-hungry one(s) have been assigned to a node.
+-   Run `kubectl uncordon $NODE` to enable the larger pod(s) to be scheduled on the drained node.
 
 Note that the need to run the above steps can be prevented altogether with [node
 selectors](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector), which
@@ -246,16 +258,16 @@ window. If you need zero-downtime upgrades, please contact us. Services employ h
 of newly updated components before switching live traffic over to them by default. HA-enabling features include
 the following:
 
-- Replication: nearly all of the critical services within Sourcegraph are replicated. If a single instance of a
-  service fails, that instance is restarted and removed from operation until it comes online again.
-- Updates are applied in a rolling fashion to each service such that a subset of instances are updated first while
-  traffic continues to flow to the old instances. Once the health check determines the set of new instances is
-  healthy, traffic is directed to the new set and the old set is terminated. By default, some database operations
-  may fail during this time as migrations occur so a scheduled 10m downtime window is required.
-- Each service includes a health check that detects whether the service is in a healthy state. This check is specific to
-  the service. These are used to check the health of new instances after an update and during regular operation to
-  determine if an instance goes down.
-- Database migrations are handled automatically on update when they are necessary.
+-   Replication: nearly all of the critical services within Sourcegraph are replicated. If a single instance of a
+    service fails, that instance is restarted and removed from operation until it comes online again.
+-   Updates are applied in a rolling fashion to each service such that a subset of instances are updated first while
+    traffic continues to flow to the old instances. Once the health check determines the set of new instances is
+    healthy, traffic is directed to the new set and the old set is terminated. By default, some database operations
+    may fail during this time as migrations occur so a scheduled 10m downtime window is required.
+-   Each service includes a health check that detects whether the service is in a healthy state. This check is specific to
+    the service. These are used to check the health of new instances after an update and during regular operation to
+    determine if an instance goes down.
+-   Database migrations are handled automatically on update when they are necessary.
 
 ---
 

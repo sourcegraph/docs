@@ -1,19 +1,21 @@
 # GitHub
 
 <TierCallout>
-  Supported on all Sourcegraph [pricing](https://sourcegraph.com/pricing) plans.
+	Supported on all Sourcegraph [pricing](https://sourcegraph.com/pricing)
+	plans.
 </TierCallout>
 
 Site admins can sync Git repositories hosted on [GitHub.com](https://github.com) and [GitHub Enterprise](https://enterprise.github.com) with Sourcegraph so that users can search and navigate the repositories.
 
 There are 2 ways to connect with GitHub:
+
 1. [Using a GitHub App (recommended)](#using-a-github-app)
 2. [Using an access token](#using-an-access-token)
 
 ## Supported versions
 
-- GitHub.com
-- GitHub Enterprise v2.10 and newer
+-   GitHub.com
+-   GitHub Enterprise v2.10 and newer
 
 ## Using a GitHub App
 
@@ -22,6 +24,7 @@ There are 2 ways to connect with GitHub:
 {/* <!-- NOTE: The instructions in the following sections closely mirror those in doc/admin/config/batch_changes under "Commit signing for GitHub". When making changes here, be sure to consider if those changes should also be made over there! --> */}
 
 There are two ways to connect a GitHub App:
+
 1. **[Create a new GitHub App](#creating-a-new-github-app)** via Sourcegraph, which will set up all of the required permissions and automatically retrieve the credentials
 2. **[Add an existing GitHub App](#adding-an-existing-github-app)** by providing the details of an existing GitHub App (required when using GitHub Enterprise Apps)
 
@@ -31,7 +34,10 @@ To create a GitHub App and connect it to Sourcegraph:
 
 1. Go to **Site admin > Repositories > Github Apps** on Sourcegraph.
 
-<img alt="The GitHub Apps page on Sourcegraph" src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-apps-list-dark.png" />
+<img
+	alt="The GitHub Apps page on Sourcegraph"
+	src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-apps-list-dark.png"
+/>
 
 2. Click **Create GitHub App**.
 3. Enter a name for your app (it must be unique across your GitHub instance) and the URL of your GitHub instance.
@@ -40,31 +46,41 @@ To create a GitHub App and connect it to Sourcegraph:
 
     You may also optionally set the App visibility to public. A GitHub App must be made public if you wish to install it on multiple organizations or user accounts. The default is private.
 
-	The GitHub App will require the following permissions:
+    The GitHub App will require the following permissions:
 
-	```
-	Contents (Repository contents, commits, branches, downloads, releases, and merges): read
+    ```
+    Contents (Repository contents, commits, branches, downloads, releases, and merges): read
     Emails (Manage a user's email addresses): read
     Members (Organization members and teams): read
     Metadata (Search repositories, list collaborators, and access repository metadata): read
     Administration (Repository creation, deletion, settings, teams, and collaborators): read (only required for groups caching)
-	```
+    ```
 
-<img alt="The GitHub App creation page on Sourcegraph, with the default values filled out" src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-apps-create-dark.png" />
+<img
+	alt="The GitHub App creation page on Sourcegraph, with the default values filled out"
+	src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-apps-create-dark.png"
+/>
 
 4. When you click **Create GitHub App**, you will be redirected to GitHub to confirm the details of the App to be created.
 
-<img alt="The GitHub App creation page on GitHub" src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-create-on-gh-dark.png" />
+<img
+	alt="The GitHub App creation page on GitHub"
+	src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-create-on-gh-dark.png"
+/>
 
 5. To complete the setup on GitHub, you will be asked to review the App permissions and select which repositories the App can access before installing it in a namespace. The default is **All repositories**. Any repositories that you choose to omit will not be able to be synced by Sourcegraph. You can change this later.
 
-<img alt="The GitHub App installation page on GitHub" src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-install-gh-dark.png" />
+<img
+	alt="The GitHub App installation page on GitHub"
+	src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-install-gh-dark.png"
+/>
 
 6. Click **Install**. Once complete, you will be redirected back to Sourcegraph, where you will now be able to view and manage the details of your new GitHub App from within Sourcegraph.
 
-
-<img alt="The GitHub App details page on Sourcegraph" src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-post-create-dark.png" />
-
+<img
+	alt="The GitHub App details page on Sourcegraph"
+	src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-post-create-dark.png"
+/>
 
 7. Sourcegraph needs to map Sourcegraph users to GitHub users. Click **Reveal secret** to get the JSON configuration for the auth provider and copy/paste it into the `"auth.providers"` section of your site configuration.
 8. Click **Add connection** under your new installation to create a code host connection to GitHub with this App installation. By default, it will sync all repositories the App can access within the namespace where it was installed. Repository permission enforcement will also be turned on by default.
@@ -79,7 +95,7 @@ When creating a code host connection for a GitHub App with multiple installation
 
 2. **Sync from all installations**: Create a connection that syncs repositories from all installations of the GitHub App by omitting the `installationID` field in the connection configuration. This is useful when you want a single connection to handle repositories across multiple organizations or user accounts.
 
-9. (Optional) If you want to sync repositories from other organization or user namespaces and your GitHub App is set to public visibility, you can create additional installations with **Add installation**.
+3. (Optional) If you want to sync repositories from other organization or user namespaces and your GitHub App is set to public visibility, you can create additional installations with **Add installation**.
 
 > NOTE: When you create a GitHub App, Sourcegraph automatically sets up an [incoming webhook](/admin/config/webhooks/incoming) for the app. This webhook subscribes to events for any repository or organization the app has access to, allowing Sourcegraph to keep repository and permission data in sync with GitHub.
 
@@ -97,20 +113,26 @@ Once public, App can be installed in additional namespaces either from Sourcegra
 
 1. Go to **Site admin > Repositories > Github Apps** and click **Edit** on the App you want to install in another namespace. You'll be taken to the App details page.
 
-
-<img alt="The GitHub App details page on Sourcegraph" src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-post-create-dark.png" />
+<img
+	alt="The GitHub App details page on Sourcegraph"
+	src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-post-create-dark.png"
+/>
 
 2. Click **Add installation**. You will be redirected to GitHub to pick which other organization to install the App on and finish the installation process.
 
     > NOTE: Only [organization owners](https://docs.github.com/en/organizations/managing-peoples-access-to-your-organization-with-roles/roles-in-an-organization#organization-owners) can install GitHub Apps on an organization. If you are not an owner, you will need to ask an owner to install the App for you.
 
-
-<img alt="The GitHub App installation page, with a list of namespaces to select from" src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-multi-install-gh-dark.png" />
+<img
+	alt="The GitHub App installation page, with a list of namespaces to select from"
+	src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-multi-install-gh-dark.png"
+/>
 
 3. As before, you will be asked to review the App permissions and select which repositories the App can access before installing it in a namespace. Once you click **Install** and the setup completes, you will be redirected back to Sourcegraph, where you will now see your additional installation listed.
 
-
-<img alt="The GitHub App details page on Sourcegraph, scrolled to show a second new installation" src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-post-multi-install-dark.png" />
+<img
+	alt="The GitHub App details page on Sourcegraph, scrolled to show a second new installation"
+	src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-post-multi-install-dark.png"
+/>
 
 4. To sync repositories from this installation, click **Add connection** under your new installation.
 
@@ -121,8 +143,10 @@ Once public, App can be installed in additional namespaces either from Sourcegra
 3. As before, you will be asked to review the App permissions and select which repositories the App can access before installing it in a namespace. Once you click **Install** and the setup completes, you will be redirected back to Sourcegraph.
 4. GitHub App installations will be automatically synced in the background. Return to **Site admin > Repositories > Github Apps** and click **Edit** on the App you added the new installation for. You'll be taken to the App details page. Once synced, you will see the new installation listed.
 
-
-<img alt="The GitHub App details page on Sourcegraph, scrolled to show a second new installation" src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-post-multi-install-dark.png" />
+<img
+	alt="The GitHub App details page on Sourcegraph, scrolled to show a second new installation"
+	src="https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-post-multi-install-dark.png"
+/>
 
 5. To sync repositories from this installation, click **Add connection** under your new installation.
 
@@ -130,17 +154,17 @@ Once public, App can be installed in additional namespaces either from Sourcegra
 
 If you have an existing GitHub App (such as a GitHub Enterprise App), you can connect it to Sourcegraph by providing its details manually. This is particularly useful for:
 
-- **GitHub Enterprise Apps**: Apps that can be installed across multiple organizations within an enterprise account while maintaining private visibility
-- **Existing GitHub Apps**: Apps that were created outside of Sourcegraph that you want to use for repository syncing
+-   **GitHub Enterprise Apps**: Apps that can be installed across multiple organizations within an enterprise account while maintaining private visibility
+-   **Existing GitHub Apps**: Apps that were created outside of Sourcegraph that you want to use for repository syncing
 
 To add an existing GitHub App:
 
 1. Go to **Site admin > Repositories > Github Apps** on Sourcegraph.
 2. Click **Add an existing GitHub App**.
 3. Enter the following details of your existing GitHub App:
-   - **GitHub URL**: The URL of your GitHub instance (e.g., `https://github.com` or `https://github-enterprise.example.com`)
-   - **Client ID**: The unique identifier for your GitHub App
-   - **Private Key**: The private key generated for your GitHub App (in PEM format)
+    - **GitHub URL**: The URL of your GitHub instance (e.g., `https://github.com` or `https://github-enterprise.example.com`)
+    - **Client ID**: The unique identifier for your GitHub App
+    - **Private Key**: The private key generated for your GitHub App (in PEM format)
 4. Click **Add GitHub App** to save the configuration.
 5. Once added, you can manage installations and create code host connections just like with apps created through Sourcegraph.
 
@@ -153,11 +177,13 @@ When creating code host connections for your existing GitHub App, you can choose
 > NOTE: Make sure your existing GitHub App has the required permissions listed in the [Creating a new GitHub App](#creating-a-new-github-app) section.
 
 ### Configuring Multiple Private GitHub Apps for Sourcegraph
+
 If you prefer not to make your GitHub App public and instead create separate private GitHub Apps for each organizations, users will need to authorize each GitHub App individually to ensure proper repository access and permissions syncing. This is because GitHub Apps have narrowly scoped permissions and do not share authentication across multiple installations. To streamline this process, users can go to `User Settings` > `Account Security` in Sourcegraph and connect all necessary GitHub Apps from there. Once authorized, Sourcegraph will use the user's GitHub identity to determine access across all configured GitHub Apps.
 
 **GitHub Enterprise Apps**: For customers using GitHub Enterprise Cloud, we recommend creating a GitHub Enterprise App, which can be installed across multiple organizations within an enterprise account while maintaining private visibility. This eliminates the need to create separate apps for each organization or make your app public.
 
 To use a GitHub Enterprise App with Sourcegraph:
+
 1. Create the Enterprise App in your GitHub Enterprise settings (see [GitHub's documentation](https://docs.github.com/en/enterprise-cloud@latest/admin/managing-your-enterprise-account/creating-github-apps-for-your-enterprise))
 2. Use the [**Add an existing GitHub App**](#adding-an-existing-github-app) option in Sourcegraph to connect it
 
@@ -168,8 +194,7 @@ If you get an error message similar to following error while adding a GitHub App
 
 ```
 
- It means that the IP allowlist is enabled at the organisation level and you will need to add sourcegraph's IP addresseses to this allowlist in order for the app connection to work (see [GitHub's documentation](https://docs.github.com/en/enterprise-cloud@latest/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/managing-allowed-ip-addresses-for-your-organization#adding-an-allowed-ip-address))
-
+It means that the IP allowlist is enabled at the organisation level and you will need to add sourcegraph's IP addresseses to this allowlist in order for the app connection to work (see [GitHub's documentation](https://docs.github.com/en/enterprise-cloud@latest/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/managing-allowed-ip-addresses-for-your-organization#adding-an-allowed-ip-address))
 
 ### Uninstalling an App
 
@@ -198,11 +223,9 @@ in the **Site configuration** with your certificate(s).
 
 ```json
 {
-    "tls.external": {
-      "certificates": [
-        "-----BEGIN CERTIFICATE-----\n..."
-      ]
-    }
+	"tls.external": {
+		"certificates": ["-----BEGIN CERTIFICATE-----\n..."]
+	}
 }
 ```
 
@@ -232,32 +255,31 @@ In this example, the kubernetes public repository on GitHub is added by selectin
 
 GitHub requires a `token` in order to access their API. There are different types of tokens that can be supplied. When using GitHub apps, this is handled automatically by Sourcegraph.
 
-- **[GitHub app installation access token](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app)**:An installation access token is created automatically when you install a GitHub app. Do not set this token in the code host connection configuration. This token gives Sourcegraph the same level of access to repositories as the GitHub app installation.
-- **[Personal access token](https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line)**:This gives Sourcegraph the same level of access to repositories as the account that created the token. If you don't want to mix your personal repositories with your organizations repositories, you could add an entry to the `exclude` array, or you can use a machine user token or a fine-grained access token.
-- **[Fine-grained access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-fine-grained-personal-access-token)**:Allows scoping access tokens to specific repositories with specific permissions. Consult the [table below](#fine-grained-access-token-permissions) for the required permissions.
-- **[Machine user token](https://developer.github.com/v3/guides/managing-deploy-keys/#machine-users)**:Generates a token for a machine user that is affiliated with an organization instead of a user account.
+-   **[GitHub app installation access token](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app)**:An installation access token is created automatically when you install a GitHub app. Do not set this token in the code host connection configuration. This token gives Sourcegraph the same level of access to repositories as the GitHub app installation.
+-   **[Personal access token](https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line)**:This gives Sourcegraph the same level of access to repositories as the account that created the token. If you don't want to mix your personal repositories with your organizations repositories, you could add an entry to the `exclude` array, or you can use a machine user token or a fine-grained access token.
+-   **[Fine-grained access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-fine-grained-personal-access-token)**:Allows scoping access tokens to specific repositories with specific permissions. Consult the [table below](#fine-grained-access-token-permissions) for the required permissions.
+-   **[Machine user token](https://developer.github.com/v3/guides/managing-deploy-keys/#machine-users)**:Generates a token for a machine user that is affiliated with an organization instead of a user account.
 
 ### Personal access token scopes
 
 No [token scopes](https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps#available-scopes) are required if you only want to sync public repositories and don't want to use any of the following features. Otherwise, the following token scopes are required for specific features:
 
-| Feature                                               | Required token scopes                                                                                          |
-| ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| [Sync private repositories](#private-repositories)    | `repo`                                                                                                         |
-| [Sync repository permissions][permissions]            | `repo`                                                                                                         |
-| [Batch changes][batch-changes]                        | `repo`, `read:org`, `user:email`, `read:discussion`, and `workflow` ([learn more][batch-changes-interactions]) |
+| Feature                                            | Required token scopes                                                                                          |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| [Sync private repositories](#private-repositories) | `repo`                                                                                                         |
+| [Sync repository permissions][permissions]         | `repo`                                                                                                         |
+| [Batch changes][batch-changes]                     | `repo`, `read:org`, `user:email`, `read:discussion`, and `workflow` ([learn more][batch-changes-interactions]) |
 
 [permissions]: #repository-permissions
 [permissions-caching]: #teams-and-organizations-permissions-caching
 [batch-changes]: /batch-changes/
 [batch-changes-interactions]: /batch-changes/permissions-in-batch-changes#code-host-interactions-in-batch-changes
 
-
 > WARNING: In addition to the prerequisite token scopes, the account attached to the token must actually have the same level of access to the relevant resources that you are trying to grant. For example:
 >
-> - If read access to repositories is required, the token must have `repo` scope *and* the token's account must have read access to the relevant repositories. This can happen by being directly granted read access to repositories, being on a team with read access to the repository, and so on.
-> - If write access to repositories is required, the token must have `repo` scope *and* the token's account must have write access to all repositories. This can happen by being added as a direct contributor, being on a team with write access to the repository, being an admin for the repository's organization, and so on.
-> - If write access to organizations is required, the token must have `write:org` scope *and* the token's account must have write access for all organizations. This can happen by being an admin in all relevant organizations.
+> -   If read access to repositories is required, the token must have `repo` scope _and_ the token's account must have read access to the relevant repositories. This can happen by being directly granted read access to repositories, being on a team with read access to the repository, and so on.
+> -   If write access to repositories is required, the token must have `repo` scope _and_ the token's account must have write access to all repositories. This can happen by being added as a direct contributor, being on a team with write access to the repository, being an admin for the repository's organization, and so on.
+> -   If write access to organizations is required, the token must have `write:org` scope _and_ the token's account must have write access for all organizations. This can happen by being an admin in all relevant organizations.
 >
 > Learn more about how the GitHub API is used and what level of access is required in the corresponding feature documentation.
 
@@ -267,17 +289,23 @@ Fine-grained tokens can access public repositories, but can only access the priv
 
 When creating your fine-grained access token, select the following permissions depending on the purpose of the token:
 
-| Feature                                               | Required token permissions                             |
-| ----------------------------------------------------- | ------------------------------------------------------ |
-| [Sync private repositories](#private-repositories)    | `Repository permissions: Contents - Access: Read-only` |
-| [Sync repository permissions][permissions]            | `Repository permissions: Contents - Access: Read-only` |
-| [Batch changes][batch-changes]                        | `Repository permissions: Contents: Read and write, Metadata: Read-only, Pull requests: Read and write, Workflows: Read and write` |
+| Feature                                            | Required token permissions                                                                                                        |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| [Sync private repositories](#private-repositories) | `Repository permissions: Contents - Access: Read-only`                                                                            |
+| [Sync repository permissions][permissions]         | `Repository permissions: Contents - Access: Read-only`                                                                            |
+| [Batch changes][batch-changes]                     | `Repository permissions: Contents: Read and write, Metadata: Read-only, Pull requests: Read and write, Workflows: Read and write` |
 
 ### Private repositories
 
 To clone and search private repositories, we need [a GitHub access token](#github-api-access) with the required scopes and at least read access to the relevant private repositories.
 
-<Callout type="note">Due to GitHub limitations, non-admins of an outside organization must use a [Classic personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#types-of-personal-access-tokens) to provision the appropriate permissions for Sourcegraph to index that organization's private repositories.</Callout>
+<Callout type="note">
+	Due to GitHub limitations, non-admins of an outside organization must use a
+	[Classic personal access
+	token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#types-of-personal-access-tokens)
+	to provision the appropriate permissions for Sourcegraph to index that
+	organization's private repositories.
+</Callout>
 
 For more details, see [GitHub API access](#github-api-access).
 
@@ -285,10 +313,10 @@ For more details, see [GitHub API access](#github-api-access).
 
 There are four fields for configuring which repositories are mirrored/synchronized:
 
-- [`repos`](/admin/code_hosts/github#repos)A list of repositories in `owner/name` format. The order determines the order in which we sync repository metadata and is safe to change.
-- [`orgs`](/admin/code_hosts/github#orgs)A list of organizations (every repository belonging to the organization will be cloned).
-- [`repositoryQuery`](/admin/code_hosts/github#repositoryQuery)A list of strings with three pre-defined options (`public`, `affiliated`, `none`, none of which are subject to result limitations), and/or a [GitHub advanced search query](https://github.com/search/advanced). Note: There is an existing limitation that requires the latter, GitHub advanced search queries, to return [less than 1000 results](#repositoryquery-returns-first-1000-results-only).
-- [`exclude`](/admin/code_hosts/github#exclude)A list of repositories to exclude which takes precedence over the `repos`, `orgs`, and `repositoryQuery` fields.
+-   [`repos`](/admin/code_hosts/github#repos)A list of repositories in `owner/name` format. The order determines the order in which we sync repository metadata and is safe to change.
+-   [`orgs`](/admin/code_hosts/github#orgs)A list of organizations (every repository belonging to the organization will be cloned).
+-   [`repositoryQuery`](/admin/code_hosts/github#repositoryQuery)A list of strings with three pre-defined options (`public`, `affiliated`, `none`, none of which are subject to result limitations), and/or a [GitHub advanced search query](https://github.com/search/advanced). Note: There is an existing limitation that requires the latter, GitHub advanced search queries, to return [less than 1000 results](#repositoryquery-returns-first-1000-results-only).
+-   [`exclude`](/admin/code_hosts/github#exclude)A list of repositories to exclude which takes precedence over the `repos`, `orgs`, and `repositoryQuery` fields.
 
 ## Rate limits
 
@@ -322,8 +350,8 @@ Then, add or edit the GitHub connection as described above and include the `auth
 
 ```json
 {
-  // ...
-  "authorization": {}
+	// ...
+	"authorization": {}
 }
 ```
 
@@ -332,8 +360,6 @@ This needs to be done for every github code host connection if there is more tha
 Repo-centric permission syncing is done by calling the [list repository collaborators GitHub API endpoint](https://docs.github.com/en/rest/collaborators/collaborators#list-repository-collaborators). To call this API endpoint correctly, we need a [GitHub access token](#github-api-access) with the required scopes and read and write access to all relevant repositories.
 
 > IMPORTANT: We strongly recommend configuring both read and write access to associated repositories for permission syncing due to GitHub's token scope requirements. Without write access, there will be a conflict between [user-centric sync](/admin/permissions/syncing#troubleshooting) and repo-centric sync. In that case, [disable repo-centric permission sync](/admin/permissions/syncing#disable-repo-centric-permission-sync) (supported in Sourcegraph 5.0.4+).
-
-
 
 > IMPORTANT: Optional, but strongly recommended - [continue with configuring webhooks for permissions](/admin/config/webhooks/incoming#user-permissions).
 
@@ -347,10 +373,10 @@ GitHub Enterprise has internal repositories in addition to the usual public and 
 
 ```json
 {
-  // ...
-  "authorization": {
-    "markInternalReposAsPublic": true
-  }
+	// ...
+	"authorization": {
+		"markInternalReposAsPublic": true
+	}
 }
 ```
 
@@ -358,12 +384,13 @@ If you would like internal repositories to remain private, but you're experienci
 
 ```json
 {
-  // ...
-  "authorization": {
-    "syncInternalRepoPermissions": true
-  }
+	// ...
+	"authorization": {
+		"syncInternalRepoPermissions": true
+	}
 }
 ```
+
 > NOTE: An explanation on repository visibility options in GitHub Enterprise. `public`- Only index public GitHub Enterprise repositories visible to all users. This excludes private and internal repos. `private` - Index both public and private GitHub Enterprise repositories. This allows accessing private repos the token has access to. `internal` - Include GitHub Enterprise internal repositories in addition to public/private repos. Internal repos are only visible to org members.
 
 ### Trigger permissions sync from GitHub webhooks
@@ -381,17 +408,17 @@ Github code host can leverage caching mechanisms to reduce the number of API cal
 Sourcegraph can leverage caching of GitHub [team](https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/managing-team-access-to-an-organization-repository) and [organization](https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/repository-permission-levels-for-an-organization) permissions.
 
 > NOTE: You should only try this if your GitHub setup makes extensive use of GitHub teams and organizations to distribute access to repositories and your number of `users * avg_repositories` is greater than 250,000 (which roughly corresponds to the scale at which [GitHub rate limits might become an issue](/admin/permissions/syncing#sync-duration)).
-{/* <!-- 5,000 requests an hour * 100 items per page / 2-way sync = approx. 250,000 items before hitting a limit --> */}
+> {/* <!-- 5,000 requests an hour * 100 items per page / 2-way sync = approx. 250,000 items before hitting a limit --> */}
 
 This caching behaviour can be enabled via the `authorization.groupsCacheTTL` field:
 
 ```json
 {
-   "url": "https://github.example.com",
-   "token": "$PERSONAL_ACCESS_TOKEN",
-   "authorization": {
-     "groupsCacheTTL": 72, // hours
-   }
+	"url": "https://github.example.com",
+	"token": "$PERSONAL_ACCESS_TOKEN",
+	"authorization": {
+		"groupsCacheTTL": 72 // hours
+	}
 }
 ```
 
@@ -399,19 +426,19 @@ In the corresponding [authorization provider](/admin/auth/#github) in [site conf
 
 ```json
 {
-  // ...
-  "auth.providers": [
-    {
-      "type": "github",
-      "url": "https://github.example.com",
-      "allowGroupsPermissionsSync": true,
-    }
-  ]
+	// ...
+	"auth.providers": [
+		{
+			"type": "github",
+			"url": "https://github.example.com",
+			"allowGroupsPermissionsSync": true
+		}
+	]
 }
 ```
 
 A [token that has the required scopes](#github-api-access) and both read and write access to all relevant repositories and organizations is needed to fetch repository permissions and team memberships.
-Read-only access will *not* work with cached permissions sync, but will work with careful configuration for [regular GitHub permissions sync](#repository-permissions).
+Read-only access will _not_ work with cached permissions sync, but will work with careful configuration for [regular GitHub permissions sync](#repository-permissions).
 
 When enabling this feature, we currently recommend a default `groupsCacheTTL` of `72` (hours, or 3 days). A lower value can be set if your teams and organizations change frequently, though the chosen value must be at least several hours for the cache to be leveraged in the event of being rate-limited (which takes [an hour to recover from](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting)).
 
@@ -424,9 +451,12 @@ To force a bypass of caches during a sync, you can manually queue users or repos
 
 ```gql
 mutation {
-  scheduleUserPermissionsSync(user: "userid", options: {invalidateCaches: true}) {
-    alwaysNil
-  }
+	scheduleUserPermissionsSync(
+		user: "userid"
+		options: {invalidateCaches: true}
+	) {
+		alwaysNil
+	}
 }
 ```
 
@@ -451,7 +481,7 @@ GitHub connections support the following configuration options, which are specif
 
 {/* SCHEMA_SYNC_START: admin/code_hosts/github.schema.json */}
 {/* WARNING: This section is auto-generated during releases. Do not edit manually. */}
-{/* Last updated: 2025-11-12T22:19:35Z via sourcegraph/sourcegraph@v6.10.0 */}
+{/* Last updated: 2025-11-25T00:35:26Z via sourcegraph/sourcegraph@v6.10.3349 */}
 ```json
 	// Authentication alternatives: token OR gitHubAppDetails OR externalAccount OR useRandomExternalAccount
 

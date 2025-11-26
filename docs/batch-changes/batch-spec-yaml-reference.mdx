@@ -1,6 +1,11 @@
 # Batch Spec YAML Reference
 
-<p className="subtitle">Sourcegraph Batch Changes use [batch specs](/batch-changes/create-a-batch-change#writing-a-batch-spec) to define batch changes. This page is a reference guide to the batch spec YAML format in which batch specs are defined.</p>
+<p className="subtitle">
+	Sourcegraph Batch Changes use [batch
+	specs](/batch-changes/create-a-batch-change#writing-a-batch-spec) to define
+	batch changes. This page is a reference guide to the batch spec YAML format
+	in which batch specs are defined.
+</p>
 
 ## `version`
 
@@ -52,13 +57,13 @@ description: This batch change changes all `fmt.Sprintf` calls to `strconv.Iota`
 
 ```yaml
 description: |
-  This batch change changes all imports from
+    This batch change changes all imports from
 
-  `gopkg.in/sourcegraph/sourcegraph-in-x86-asm`
+    `gopkg.in/sourcegraph/sourcegraph-in-x86-asm`
 
-  to
+    to
 
-  `github.com/sourcegraph/sourcegraph-in-x86-asm`
+    `github.com/sourcegraph/sourcegraph-in-x86-asm`
 ```
 
 ## `on`
@@ -69,8 +74,8 @@ The set of repositories (and branches) on which the batch change would run. It's
 
 ```yaml
 on:
-  - repositoriesMatchingQuery: lang:go fmt.Sprintf\("%d", \w+\) patterntype:regexp
-  - repository: github.com/sourcegraph/sourcegraph
+    - repositoriesMatchingQuery: lang:go fmt.Sprintf\("%d", \w+\) patterntype:regexp
+    - repository: github.com/sourcegraph/sourcegraph
 ```
 
 ## `on.repositoriesMatchingQuery`
@@ -81,62 +86,73 @@ Your search query should answer the question, "Where do I want to run this batch
 
 It's good practice to explicitly specify the pattern type. If you don't specify a pattern type, the default is determined by the [batch spec version](#version).
 
-<Callout type="tip">See [Code Search Queries](/code-search/queries/) docs for more information.</Callout>
+<Callout type="tip">
+	See [Code Search Queries](/code-search/queries/) docs for more information.
+</Callout>
 
 ### Examples
 
 ```yaml
 on:
-  - repositoriesMatchingQuery: file:README -repo:github.com/sourcegraph/src-cli
+    - repositoriesMatchingQuery: file:README -repo:github.com/sourcegraph/src-cli
 ```
 
 ```yaml
 on:
-  - repositoriesMatchingQuery: lang:typescript file:web \"const changesetStatsFragment\" patterntype:keyword
+    - repositoriesMatchingQuery: lang:typescript file:web \"const changesetStatsFragment\" patterntype:keyword
 ```
 
 ## `on.repository`
 
 A specific repository (and, optionally, one or more branches) that's added to the list of repositories on which the batch change will run.
 
-<Callout type= "note">For Sourcegraph version 3.35 or less, if multiple branches are specified, then only the last-named branch will be used, and only a single `branch` could be provided. For Sourcegraph version 3.35 or more, all branches are used.</Callout>
+<Callout type="note">
+	For Sourcegraph version 3.35 or less, if multiple branches are specified,
+	then only the last-named branch will be used, and only a single `branch`
+	could be provided. For Sourcegraph version 3.35 or more, all branches are
+	used.
+</Callout>
 
 To match a branch other than the default, `branch` or `branches` can be used to specify one or multiple branches, respectively. Only one of `branch` or `branches` can be set.
 
-<Callout type= "warning">If multiple branches are matched for the same repository, then [`changesetTemplate.branch`](#changesettemplate-branch) will need to have a different value for each branch.</Callout>
+<Callout type="warning">
+	If multiple branches are matched for the same repository, then
+	[`changesetTemplate.branch`](#changesettemplate-branch) will need to have a
+	different value for each branch.
+</Callout>
 
 ### Examples
 
 ```yaml
 on:
-  - repository: github.com/sourcegraph/src-cli
+    - repository: github.com/sourcegraph/src-cli
 ```
 
 ```yaml
 on:
-  - repository: github.com/sourcegraph/sourcegraph
-    branch: 3.19-beta
-  - repository: github.com/sourcegraph/src-cli
+    - repository: github.com/sourcegraph/sourcegraph
+      branch: 3.19-beta
+    - repository: github.com/sourcegraph/src-cli
 ```
 
 In the following example, the `repositoriesMatchingQuery` returns both repositories with their default branch, but the `3.23` branch is used for `github.com/sourcegraph/sourcegraph`, since it is more specific:
 
 ```yaml
 on:
-  - repositoriesMatchingQuery: repo:sourcegraph\/(sourcegraph|src-cli)$
-  - repository: github.com/sourcegraph/sourcegraph
-    branch: 3.23
+    - repositoriesMatchingQuery: repo:sourcegraph\/(sourcegraph|src-cli)$
+    - repository: github.com/sourcegraph/sourcegraph
+      branch: 3.23
 ```
 
 In this example, both the `3.19-beta` and `3.23` branches are used:
 
 ```yaml
 on:
-  - repositoriesMatchingQuery: repo:sourcegraph\/(sourcegraph|src-cli)$
-  - repository: github.com/sourcegraph/sourcegraph
-    branches:
-      - 3.19-beta
-      - 3.23
+    - repositoriesMatchingQuery: repo:sourcegraph\/(sourcegraph|src-cli)$
+    - repository: github.com/sourcegraph/sourcegraph
+      branches:
+          - 3.19-beta
+          - 3.23
 ```
 
 ## `steps`
@@ -147,32 +163,35 @@ The sequence of commands to run (for each repository branch matched in the `on` 
 
 ```yaml
 steps:
-  - run: echo "Hello World!">> README
-    container: alpine:3
+    - run: echo "Hello World!">> README
+      container: alpine:3
 ```
 
 ```yaml
 steps:
-  - run: comby -in-place 'fmt.Sprintf("%d", :[v])' 'strconv.Itoa(:[v])' .go -matcher .go -exclude-dir .,vendor
-    container: comby/comby
-  - run: gofmt -w ./
-    container: golang:1.15-alpine
+    - run: comby -in-place 'fmt.Sprintf("%d", :[v])' 'strconv.Itoa(:[v])' .go -matcher .go -exclude-dir .,vendor
+      container: comby/comby
+    - run: gofmt -w ./
+      container: golang:1.15-alpine
 ```
 
 ```yaml
 steps:
-  - run: ./update_dependency.sh
-    container: our-custom-image
-    env:
-      OLD_VERSION: 1.31.7
-      NEW_VERSION: 1.33.0
+    - run: ./update_dependency.sh
+      container: our-custom-image
+      env:
+          OLD_VERSION: 1.31.7
+          NEW_VERSION: 1.33.0
 ```
 
 ## `steps.run`
 
 The shell command to run in the container. It can also be a multi-line shell script. The working directory is the root directory of the repository checkout.
 
-<Callout type="note">`steps.run` can include [template variables](/batch-changes/batch-spec-templating).</Callout>
+<Callout type="note">
+	`steps.run` can include [template
+	variables](/batch-changes/batch-spec-templating).
+</Callout>
 
 ## `steps.container`
 
@@ -184,7 +203,10 @@ It is executed using `docker` on the machine on which the [Sourcegraph CLI (`src
 
 Environment variables to set in the environment when running this command. These may be defined either as an [object](#environment-object) or as an [array](#environment-array).
 
-<Callout type="note">`steps.env` can include [template variables](/batch-changes/batch-spec-templating).</Callout>
+<Callout type="note">
+	`steps.env` can include [template
+	variables](/batch-changes/batch-spec-templating).
+</Callout>
 
 ### Environment object
 
@@ -194,19 +216,19 @@ In this case, `steps.env` is an object, where the key is the environment variabl
 
 ```yaml
 steps:
-  - run: echo $MESSAGE >> README
-    container: alpine:3
-    env:
-      MESSAGE: Hello world!
+    - run: echo $MESSAGE >> README
+      container: alpine:3
+      env:
+          MESSAGE: Hello world!
 ```
 
 ### Environment array
 
 In this case, `steps.env` is an array. Each array item is either:
 
-- An object with a single property, in which case the key is used as the environment variable name and the value the value, or
-- **For src-cli execution**: A string that defines an environment variable to include from the environment `src` is being run within. This is useful to define secrets that you don't want to include in the spec file, but this makes the spec dependent on your environment, which means that the local execution cache will be invalidated each time the environment variable changes, and means that the batch spec file is no longer [the sole source of truth intended by the Batch Changes design](/batch-changes/design)
-- **For server-side execution**: A string that defines a secret value to expose as an environment variable. Follow [the guide on executor secrets](/admin/executors/executor_secrets) to set them up. The editor will suggest available secrets. This is useful to use secret values you don't want to include in the spec file. The execution cache will be invalidated each time the secret value changes, and this means that the batch spec file is no longer [the sole source of truth intended by the Batch Changes design](/batch-changes/design)
+-   An object with a single property, in which case the key is used as the environment variable name and the value the value, or
+-   **For src-cli execution**: A string that defines an environment variable to include from the environment `src` is being run within. This is useful to define secrets that you don't want to include in the spec file, but this makes the spec dependent on your environment, which means that the local execution cache will be invalidated each time the environment variable changes, and means that the batch spec file is no longer [the sole source of truth intended by the Batch Changes design](/batch-changes/design)
+-   **For server-side execution**: A string that defines a secret value to expose as an environment variable. Follow [the guide on executor secrets](/admin/executors/executor_secrets) to set them up. The editor will suggest available secrets. This is useful to use secret values you don't want to include in the spec file. The execution cache will be invalidated each time the secret value changes, and this means that the batch spec file is no longer [the sole source of truth intended by the Batch Changes design](/batch-changes/design)
 
 ### Examples
 
@@ -214,21 +236,21 @@ This example is functionally the same as the [object](#environment-object) examp
 
 ```yaml
 steps:
-  - run: echo $MESSAGE >> README
-    container: alpine:3
-    env:
-      - MESSAGE: Hello world!
+    - run: echo $MESSAGE >> README
+      container: alpine:3
+      env:
+          - MESSAGE: Hello world!
 ```
 
 This example pulls in the `USER` environment variable, or for server-side, uses the executor secret called `USER`, and uses it to construct the line that will be appended to `README`:
 
 ```yaml
 steps:
-  - run: echo $MESSAGE from $USER >> README
-    container: alpine:3
-    env:
-      - MESSAGE: Hello world!
-      - USER
+    - run: echo $MESSAGE from $USER >> README
+      container: alpine:3
+      env:
+          - MESSAGE: Hello world!
+          - USER
 ```
 
 For instance, if `USER` is set to `adam`, this would append `Hello world! from adam` to `README`.
@@ -237,35 +259,38 @@ For instance, if `USER` is set to `adam`, this would append `Hello world! from a
 
 Files to create on the host machine and mount into the container when running `steps.run`. `steps.files` is an object, where the key is the name of the file _inside the container_ and the value is the content of the file.
 
-<Callout type="note">`steps.files` can include [template variables](/batch-changes/batch-spec-templating).</Callout>
+<Callout type="note">
+	`steps.files` can include [template
+	variables](/batch-changes/batch-spec-templating).
+</Callout>
 
 ### Examples
 
 ```yaml
 steps:
-  - run: cat /tmp/my-temp-file.txt >> README
-    container: alpine:3
-    files:
-      /tmp/my-temp-file.txt: Hello world!
+    - run: cat /tmp/my-temp-file.txt >> README
+      container: alpine:3
+      files:
+          /tmp/my-temp-file.txt: Hello world!
 ```
 
 ```yaml
 steps:
-  - run: cat /tmp/global-gitignore >> .gitignore
-    container: alpine:3
-    files:
-      /tmp/global-gitignore: |
-        # Vim
-        *.swp
-        # JetBrains/IntelliJ
-        .idea
-        # Emacs
-        *~
-        \#*\#
-        /.emacs.desktop
-        /.emacs.desktop.lock
-        .\#*
-        .dir-locals.el
+    - run: cat /tmp/global-gitignore >> .gitignore
+      container: alpine:3
+      files:
+          /tmp/global-gitignore: |
+              # Vim
+              *.swp
+              # JetBrains/IntelliJ
+              .idea
+              # Emacs
+              *~
+              \#*\#
+              /.emacs.desktop
+              /.emacs.desktop.lock
+              .\#*
+              .dir-locals.el
 ```
 
 ## `steps.outputs`
@@ -276,23 +301,23 @@ Output variables that are set after the [`steps.run`](#steps-run) command has be
 
 ```yaml
 steps:
-  - run: yarn upgrade
-    container: alpine:3
-    outputs:
-      # Set output `friendlyMessage`
-      friendlyMessage:
-        value: "Hello there!"
+    - run: yarn upgrade
+      container: alpine:3
+      outputs:
+          # Set output `friendlyMessage`
+          friendlyMessage:
+              value: 'Hello there!'
 ```
 
 ```yaml
 steps:
-  - run: echo "Hello there!" >> message.txt && cat message.txt
-    container: alpine:3
-    outputs:
-      friendlyMessage:
-        # `value` supports templating variables and can access the just-executed
-        # step's stdout/stderr.
-        value: "${{ step.stdout }}"
+    - run: echo "Hello there!" >> message.txt && cat message.txt
+      container: alpine:3
+      outputs:
+          friendlyMessage:
+              # `value` supports templating variables and can access the just-executed
+              # step's stdout/stderr.
+              value: '${{ step.stdout }}'
 ```
 
 ```yaml
@@ -311,27 +336,30 @@ steps:
 
 ```yaml
 steps:
-  - run: cat .goreleaser.yml >&2
-    container: alpine:3
-    outputs:
-      goreleaserConfig:
-        value: "${{ step.stderr }}"
-        # Specifying a `format` tells Sourcegraph CLI how to parse the value before
-        # making it available as a template variable.
-        format: yaml
+    - run: cat .goreleaser.yml >&2
+      container: alpine:3
+      outputs:
+          goreleaserConfig:
+              value: '${{ step.stderr }}'
+              # Specifying a `format` tells Sourcegraph CLI how to parse the value before
+              # making it available as a template variable.
+              format: yaml
 
 changesetTemplate:
-  # [...]
-  body: |
-    The `goreleaser.yml` defines the following `before.hooks`:
-    ${{ outputs.goreleaserConfig.before.hooks }}
+    # [...]
+    body: |
+        The `goreleaser.yml` defines the following `before.hooks`:
+        ${{ outputs.goreleaserConfig.before.hooks }}
 ```
 
 ## `steps.outputs.<name>.value`
 
 The value the output should be set to.
 
-<Callout type="note">`steps.outputs.$name.value` can include [template variables](batch_spec_templating).</Callout>
+<Callout type="note">
+	`steps.outputs.$name.value` can include [template
+	variables](batch_spec_templating).
+</Callout>
 
 ## `steps.outputs.<name>.format`
 
@@ -347,68 +375,80 @@ As an optimization, the [Sourcegraph CLI](/cli/) tries to evaluate the condition
 
 Ahead-of-time evaluation is possible if the condition contains only static data. Example: `if: ${{ eq repository.name "github.com/my-org/my-repo" }}`. The repository name is known before the execution of the steps, so evaluation succeeds. Sourcegraph CLI will not include the given step in the list of steps to execute for repositories that don't have the matching name. That, in turn, allows the modification of this step's `run` attribute, for example, without invalidating the cache for the repositories in which it's never executed.
 
-<Callout type="note">`steps.if` can include [templating](/batch_spec_templating).</Callout>
+<Callout type="note">
+	`steps.if` can include [templating](/batch_spec_templating).
+</Callout>
 
 ### Examples
 
 ```yaml
 steps:
-  # `if:` is true, step always executes.
-  - if: true
-    run: echo "name of repository is ${{ repository.name }}" >> message.txt
-    container: alpine:3
+    # `if:` is true, step always executes.
+    - if: true
+      run: echo "name of repository is ${{ repository.name }}" >> message.txt
+      container: alpine:3
 ```
 
 ```yaml
 steps:
-  # `if:` is a static string that's not "true", step never executes.
-  - if: "random string"
-    run: echo "name of repository is ${{ repository.name }}" >> message.txt
-    container: alpine:3
+    # `if:` is a static string that's not "true", step never executes.
+    - if: 'random string'
+      run: echo "name of repository is ${{ repository.name }}" >> message.txt
+      container: alpine:3
 ```
 
 ```yaml
 steps:
-  # `if:` uses templating to check for repository name and produce a "true". Only runs in github.com/sourcegraph/automation-testing
-  - if: ${{ eq repository.name "github.com/sourcegraph/automation-testing" }}
-    run: echo "hello from automation-testing">> message.txt
-    container: alpine:3
+    # `if:` uses templating to check for repository name and produce a "true". Only runs in github.com/sourcegraph/automation-testing
+    - if: ${{ eq repository.name "github.com/sourcegraph/automation-testing" }}
+      run: echo "hello from automation-testing">> message.txt
+      container: alpine:3
 ```
 
 ```yaml
 steps:
-  # `if:` uses glob pattern to match repository name and produce "true" on match.
-  - if: ${{ matches repository.name "*sourcegraph-testing*" }}
-    run: echo "name contains sourcegraph-testing">> message.txt
-    container: alpine:3
+    # `if:` uses glob pattern to match repository name and produce "true" on match.
+    - if: ${{ matches repository.name "*sourcegraph-testing*" }}
+      run: echo "name contains sourcegraph-testing">> message.txt
+      container: alpine:3
 ```
 
 ```yaml
 steps:
-  # First step prints to standard out and saves to outputs
-  - run:  if [[ -f "go.mod" ]]; then echo "true"; else echo "false"; fi
-    container: alpine:3
-    outputs:
-      goModExists:
-        value: ${{ step.stdout }}
+    # First step prints to standard out and saves to outputs
+    - run: if [[ -f "go.mod" ]]; then echo "true"; else echo "false"; fi
+      container: alpine:3
+      outputs:
+          goModExists:
+              value: ${{ step.stdout }}
 
-  # `if:` uses the just-set `outputs.goModExists` value as condition
-  - if: ${{ outputs.goModExists }}
-    run: go fmt ./...
-    container: golang
+    # `if:` uses the just-set `outputs.goModExists` value as condition
+    - if: ${{ outputs.goModExists }}
+      run: go fmt ./...
+      container: golang
 ```
 
 ```yaml
 steps:
-  # `if:` checks for path, in case steps are executed in workspace.
-  - if: ${{ eq steps.path "sub/directory/in/repo"}}
-    run: echo "hello workspace">> workspace.txt
-    container: golang
+    # `if:` checks for path, in case steps are executed in workspace.
+    - if: ${{ eq steps.path "sub/directory/in/repo"}}
+      run: echo "hello workspace">> workspace.txt
+      container: golang
 ```
 
 ## `steps.mount`
 
-<Callout type="note">This feature is available only for <a href="https://sourcegraph.com/github.com/sourcegraph/src-cli">Sourcegraph CLI</a>. Using `mount` locally is supported in Sourcegraph v3.41 and [Sourcegraph CLI 3.41](https://sourcegraph.com/github.com/sourcegraph/src-cli). Using `mount` in batch changes server-side is supported in Sourcegraph v4.1 and [Sourcegraph CLI 4.0.1](https://sourcegraph.com/github.com/sourcegraph/src-cli).</Callout>
+<Callout type="note">
+	This feature is available only for{' '}
+	<a href="https://sourcegraph.com/github.com/sourcegraph/src-cli">
+		Sourcegraph CLI
+	</a>
+	. Using `mount` locally is supported in Sourcegraph v3.41 and [Sourcegraph
+	CLI 3.41](https://sourcegraph.com/github.com/sourcegraph/src-cli). Using
+	`mount` in batch changes server-side is supported in Sourcegraph v4.1 and
+	[Sourcegraph CLI
+	4.0.1](https://sourcegraph.com/github.com/sourcegraph/src-cli).
+</Callout>
 
 `steps.mount` functionality makes running custom scripts/binaries easier. It mounts a local `path` to a `path` in a Docker container. Mounted paths are accessible to the step's `run` command.
 
@@ -422,43 +462,43 @@ Individual files are restricted to a **max size of 10MB**. Do not include any se
 ```yaml
 # Mount a Python script and run the script
 steps:
-  run: python /tmp/some-script.py # execute the script located at the mountpoint
-  container: python:latest
-  mount:
-    - path: ./some-script.py # or absolute path /my/local/path/some-script.py
-      mountpoint: /tmp/some-script.py
+    run: python /tmp/some-script.py # execute the script located at the mountpoint
+    container: python:latest
+    mount:
+        - path: ./some-script.py # or absolute path /my/local/path/some-script.py
+          mountpoint: /tmp/some-script.py
 ```
 
 ```yaml
 # Mount a binary and run the binary
 steps:
-  run: /tmp/some-binary # execute the binary located at the mountpoint
-  container: alpine:latest
-  mount:
-    - path: ./some-binary # or absolute path /my/local/path/some-binary
-      mountpoint: /tmp/some-binary
+    run: /tmp/some-binary # execute the binary located at the mountpoint
+    container: alpine:latest
+    mount:
+        - path: ./some-binary # or absolute path /my/local/path/some-binary
+          mountpoint: /tmp/some-binary
 ```
 
 ```yaml
 # Mount a directory containing scripts and run a script from the directory
 steps:
-  run: python /tmp/scripts/some-script.py
-  container: python:latest
-  mount:
-    - path: ./scripts # or absolute path /my/local/path/scripts
-      mountpoint: /tmp/scripts
+    run: python /tmp/scripts/some-script.py
+    container: python:latest
+    mount:
+        - path: ./scripts # or absolute path /my/local/path/scripts
+          mountpoint: /tmp/scripts
 ```
 
 ```yaml
 # Mount a Python script and a directory with supporting files for the script and run the script
 steps:
-  run: python /tmp/some-script.py
-  container: python:latest
-  mount:
-    - path: ./some-script.py # or absolute path /my/local/path/some-script.py
-      mountpoint: /tmp/some-script.py
-    - path: ./supporting-files # or absolute path /my/local/path/supporting-files
-      mountpoint: /tmp/supporting-files
+    run: python /tmp/some-script.py
+    container: python:latest
+    mount:
+        - path: ./some-script.py # or absolute path /my/local/path/some-script.py
+          mountpoint: /tmp/some-script.py
+        - path: ./supporting-files # or absolute path /my/local/path/supporting-files
+          mountpoint: /tmp/supporting-files
 ```
 
 ## `importChangesets`
@@ -469,10 +509,10 @@ An array describing which already-existing changesets should be imported from th
 
 ```yaml
 importChangesets:
-  - repository: github.com/sourcegraph/sourcegraph
-    externalIDs: [13323, "13343", 13342, 13380]
-  - repository: github.com/sourcegraph/src-cli
-    externalIDs: [260, 271]
+    - repository: github.com/sourcegraph/sourcegraph
+      externalIDs: [13323, '13343', 13342, 13380]
+    - repository: github.com/sourcegraph/src-cli
+      externalIDs: [260, 271]
 ```
 
 ## `importChangesets.repository`
@@ -493,54 +533,60 @@ This defines what the changesets on the code hosts (pull requests on GitHub, mer
 
 ```yaml
 changesetTemplate:
-  title: Replace equivalent fmt.Sprintf calls with strconv.Itoa
-  body: This batch change replaces `fmt.Sprintf("%d", integer)` calls with semantically equivalent `strconv.Itoa` calls
-  branch: batch-changes/sprintf-to-itoa
-  commit:
-    message: Replacing fmt.Sprintf with strconv.Iota
-    author:
-      name: Lisa Coder
-      email: lisa@example.com
-  published: false
+    title: Replace equivalent fmt.Sprintf calls with strconv.Itoa
+    body: This batch change replaces `fmt.Sprintf("%d", integer)` calls with semantically equivalent `strconv.Itoa` calls
+    branch: batch-changes/sprintf-to-itoa
+    commit:
+        message: Replacing fmt.Sprintf with strconv.Iota
+        author:
+            name: Lisa Coder
+            email: lisa@example.com
+    published: false
 ```
 
 ```yaml
 changesetTemplate:
-  title: Update rxjs in package.json to newest version
-  body: This pull request updates rxjs to the newest version, `6.6.2`.
-  branch: batch-changes/update-rxjs
-  commit:
-    message: Update rxjs to 6.6.2
-  published: true
+    title: Update rxjs in package.json to newest version
+    body: This pull request updates rxjs to the newest version, `6.6.2`.
+    branch: batch-changes/update-rxjs
+    commit:
+        message: Update rxjs to 6.6.2
+    published: true
 ```
 
 ```yaml
 changesetTemplate:
-  title: Run go fmt over all Go files
-  body: Regular `go fmt` run over all our Go files.
-  branch: go-fmt
-  commit:
-    message: Run go fmt
-    author:
-      name: Anna Wizard
-      email: anna@example.com
-  published:
-    # Do not meddle in the affairs of wizards, for they are subtle and quick to anger.
-    - git.istari.example/*: false
-    - git.istari.example/anna/*: true
+    title: Run go fmt over all Go files
+    body: Regular `go fmt` run over all our Go files.
+    branch: go-fmt
+    commit:
+        message: Run go fmt
+        author:
+            name: Anna Wizard
+            email: anna@example.com
+    published:
+        # Do not meddle in the affairs of wizards, for they are subtle and quick to anger.
+        - git.istari.example/*: false
+        - git.istari.example/anna/*: true
 ```
 
 ## `changesetTemplate.title`
 
 The title of the changeset on the code host.
 
-<Callout type="note">`changesetTemplate.title` can include [template variables](/batch-changes/batch-spec-templating).</Callout>
+<Callout type="note">
+	`changesetTemplate.title` can include [template
+	variables](/batch-changes/batch-spec-templating).
+</Callout>
 
 ## `changesetTemplate.body`
 
 The body (description) of the changeset on the code host. If the code supports Markdown you can use it here.
 
-<Callout type="note">`changesetTemplate.body` can include [template variables](/batch-changes/batch-spec-templating).</Callout>
+<Callout type="note">
+	`changesetTemplate.body` can include [template
+	variables](/batch-changes/batch-spec-templating).
+</Callout>
 
 ## `changesetTemplate.branch`
 
@@ -550,16 +596,19 @@ If multiple branches within the same repository are matched in [`on.repository`]
 
 ```yaml
 on:
-  - repository: github.com/sourcegraph/sourcegraph
-    branches:
-      - 3.34
-      - 3.35
+    - repository: github.com/sourcegraph/sourcegraph
+      branches:
+          - 3.34
+          - 3.35
 
 changesetTemplate:
-  branch: new-feature-${{ repository.branch }}
+    branch: new-feature-${{ repository.branch }}
 ```
 
-<Callout type="note">`changesetTemplate.branch` can include [template variables](/batch-changes/batch-spec-templating).</Callout>
+<Callout type="note">
+	`changesetTemplate.branch` can include [template
+	variables](/batch-changes/batch-spec-templating).
+</Callout>
 
 ## `changesetTemplate.commit`
 
@@ -569,22 +618,28 @@ The Git commit to create with the batch changes.
 
 The Git commit message.
 
-<Callout type= "note">`changesetTemplate.commit.message` can include [template variables](/batch-changes/batch-spec-templating).</Callout>
+<Callout type="note">
+	`changesetTemplate.commit.message` can include [template
+	variables](/batch-changes/batch-spec-templating).
+</Callout>
 
 ## `changesetTemplate.commit.author`
 
 The `name` and `email` of the Git commit author.
 
-<Callout type= "note">`changesetTemplate.commit.author` can include [template variables](/batch-changes/batch-spec-templating).</Callout>
+<Callout type="note">
+	`changesetTemplate.commit.author` can include [template
+	variables](/batch-changes/batch-spec-templating).
+</Callout>
 
 ### Examples
 
 ```yaml
 changesetTemplate:
-  commit:
-    author:
-      name: Alan Turing
-      email: alan.turing@example.com
+    commit:
+        author:
+            name: Alan Turing
+            email: alan.turing@example.com
 ```
 
 ## `changesetTemplate.published`
@@ -595,11 +650,17 @@ An unpublished changeset can be previewed on Sourcegraph by any user who can vie
 
 When `published` is set to `draft`, a commit, branch, and pull request/merge request are created on the code host **in draft mode**. This means:
 
-- On GitHub the changeset will be a [draft pull request](https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/about-pull-requests#draft-pull-requests).
-- On GitLab, the changeset will be a merge request whose title is prefixed with "WIP:" to [flag it as a draft merge request](https://docs.gitlab.com/ee/user/project/merge_requests/work_in_progress_merge_requests.html#adding-the-draft-flag-to-a-merge-request).
-- On Bitbucket Server, Bitbucket Data Center, and Bitbucket Cloud, draft pull requests are not supported, and changesets published as `draft` won't be created.
+-   On GitHub the changeset will be a [draft pull request](https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/about-pull-requests#draft-pull-requests).
+-   On GitLab, the changeset will be a merge request whose title is prefixed with "WIP:" to [flag it as a draft merge request](https://docs.gitlab.com/ee/user/project/merge_requests/work_in_progress_merge_requests.html#adding-the-draft-flag-to-a-merge-request).
+-   On Bitbucket Server, Bitbucket Data Center, and Bitbucket Cloud, draft pull requests are not supported, and changesets published as `draft` won't be created.
 
-<Callout type= "note">Changesets that have already been published on a code host as a non-draft (`published: true`) cannot be converted to drafts. Changesets can only go from **unpublished** to **draft** to **published**, but not from **published** to **draft**. That also allows you to take it out of draft mode on your code host without risking Sourcegraph to revert to draft mode.</Callout>
+<Callout type="note">
+	Changesets that have already been published on a code host as a non-draft
+	(`published: true`) cannot be converted to drafts. Changesets can only go
+	from **unpublished** to **draft** to **published**, but not from
+	**published** to **draft**. That also allows you to take it out of draft
+	mode on your code host without risking Sourcegraph to revert to draft mode.
+</Callout>
 
 A published changeset creates a commit, branch, and pull request on the code host.
 
@@ -609,14 +670,14 @@ To publish only specific changesets within a batch change, an array of single-el
 
 ```yaml
 published:
-  - github.com/sourcegraph/sourcegraph: true
-  - github.com/sourcegraph/src-cli: false
-  - github.com/sourcegraph/batchutils: draft
+    - github.com/sourcegraph/sourcegraph: true
+    - github.com/sourcegraph/src-cli: false
+    - github.com/sourcegraph/batchutils: draft
 ```
 
 Each key will be matched against the repository name using [glob](https://godoc.org/github.com/gobwas/glob#Compile) syntax. The [gobwas/glob library](https://godoc.org/github.com/gobwas/glob#Compile) is used for matching, with the key operators being:
 
-|  **Term**   |                    **Meaning**                     |
+| **Term**    | **Meaning**                                        |
 | ----------- | -------------------------------------------------- |
 | `*`         | Match any sequence of characters                   |
 | `?`         | Match any single character                         |
@@ -628,26 +689,29 @@ If multiple entries match a repository, the last entry will be used. For example
 
 ```yaml
 published:
-  - github.com/a/*: true
-  - github.com/*: false
+    - github.com/a/*: true
+    - github.com/*: false
 ```
 
 If no entries match, then the repository will not be published. To make the default true, add a wildcard entry as the first item in the array:
 
 ```yaml
 published:
-  - "*": true
-  - github.com/*: false
+    - '*': true
+    - github.com/*: false
 ```
 
-<Callout type= "note">The standalone `"*``` is quoted in the key to avoid ambiguity in the YAML document.</Callout>
+<Callout type="note">
+	The standalone `"*``` is quoted in the key to avoid ambiguity in the YAML
+	document.
+</Callout>
 
 By adding a `@<branch>` at the end of a match-rule, the rule is only matched against changesets with that branch:
 
 ```yaml
 published:
-  - github.com/sourcegraph/src-*@my-branch: true
-  - github.com/sourcegraph/src-*@my-other-branch: true
+    - github.com/sourcegraph/src-*@my-branch: true
+    - github.com/sourcegraph/src-*@my-other-branch: true
 ```
 
 ### Examples
@@ -656,57 +720,59 @@ To publish all changesets created by a batch change:
 
 ```yaml
 changesetTemplate:
-  published: true
+    published: true
 ```
 
 To publish all changesets created by a batch change as drafts:
 
 ```yaml
 changesetTemplate:
-  published: draft
+    published: draft
 ```
 
 To only publish changesets within the `sourcegraph` GitHub organization:
 
 ```yaml
 changesetTemplate:
-  published:
-    - github.com/sourcegraph/*: true
+    published:
+        - github.com/sourcegraph/*: true
 ```
 
 To publish all changesets that are not on GitLab:
 
 ```yaml
 changesetTemplate:
-  published:
-    - "*": true
-    - gitlab.com/*: false
+    published:
+        - '*': true
+        - gitlab.com/*: false
 ```
 
 To publish all changesets on GitHub as draft:
 
 ```yaml
 changesetTemplate:
-  published:
-    - "*": true
-    - github.com/*: draft
+    published:
+        - '*': true
+        - github.com/*: draft
 ```
 
 To publish only one of many changesets in a repository by addressing them with their branch name:
 
 ```yaml
 changesetTemplate:
-  published:
-    - "*": true
-    - github.com/sourcegraph/*@my-branch-name-1: draft
-    - github.com/sourcegraph/*@my-branch-name-2: false
+    published:
+        - '*': true
+        - github.com/sourcegraph/*@my-branch-name-1: draft
+        - github.com/sourcegraph/*@my-branch-name-2: false
 ```
 
 (Multiple changesets in a single repository can be produced, for example, [per project in a monorepo](/batch-changes/creating-changesets-per-project-in-monorepos) or by [transforming large changes into multiple changesets](/batch-changes/creating-multiple-changesets-in-large-repositories)).
 
 ## `changesetTemplate.fork`
 
-<Callout type="info">It is supported on Sourcegraph versions 5.1 or more.</Callout>
+<Callout type="info">
+	It is supported on Sourcegraph versions 5.1 or more.
+</Callout>
 
 Whether or not each changeset should be created on a fork of the upstream repository in the namespace of the user publishing them (or the namespace of the service account if [global credentials](/batch-changes/configuring-credentials#global-service-account-tokens) are used).
 
@@ -714,7 +780,10 @@ This value will override the setting if the site config setting [`batchChanges.e
 
 The name of the fork Sourcegraph creates will be prefixed with the name of the original repo's namespace to prevent potential repo name collisions. For example, a batch spec targeting `github.com/my-org/project` would create or use any existing fork named `github.com/user/my-org-project`.
 
-<Callout type= "warning">If your code host does not support forking (e.g., Gerrit), trying to publish a changeset with `fork: true` will result in an error.</Callout>
+<Callout type="warning">
+	If your code host does not support forking (e.g., Gerrit), trying to publish
+	a changeset with `fork: true` will result in an error.
+</Callout>
 
 ### Examples
 
@@ -722,14 +791,14 @@ To publish all changesets created by this batch change to forks:
 
 ```yaml
 changesetTemplate:
-  fork: true
+    fork: true
 ```
 
 To publish all changesets created by this batch change to the target repository:
 
 ```yaml
 changesetTemplate:
-  fork: false
+    fork: false
 ```
 
 ## `transformChanges`
@@ -743,27 +812,27 @@ This allows the creation of multiple changeset specs (and thus changesets) in a 
 ```yaml
 # Transform the changes produced in each repository.
 transformChanges:
-  # Group the file diffs by directory and produce an additional changeset per group.
-  group:
-    # Create a separate changeset for all changes in the top-level `go` directory
-    - directory: go
-      branch: my-batch-change-go # will replace the `branch` in the `changesetTemplate`
+    # Group the file diffs by directory and produce an additional changeset per group.
+    group:
+        # Create a separate changeset for all changes in the top-level `go` directory
+        - directory: go
+          branch: my-batch-change-go # will replace the `branch` in the `changesetTemplate`
 
-    - directory: internal/codeintel
-      branch: my-batch-change-codeintel # will replace the `branch` in the `changesetTemplate`
-      repository: github.com/sourcegraph/src-cli # optional: only apply the rule in this repository
+        - directory: internal/codeintel
+          branch: my-batch-change-codeintel # will replace the `branch` in the `changesetTemplate`
+          repository: github.com/sourcegraph/src-cli # optional: only apply the rule in this repository
 ```
 
 ```yaml
 transformChanges:
-  group:
-    - directory: go/utils/time
-      branch: my-batch-change-go-time
+    group:
+        - directory: go/utils/time
+          branch: my-batch-change-go-time
 
-    # The *last* matching directory is used, not the most specific one,
-    # so only this changeset would be opened.
-    - directory: go/utils
-      branch: my-batch-change-go-date
+        # The *last* matching directory is used, not the most specific one,
+        # so only this changeset would be opened.
+        - directory: go/utils
+          branch: my-batch-change-go-date
 ```
 
 ## `transformChanges.group`
@@ -780,7 +849,14 @@ The name of the directory in which file diffs should be grouped together. The na
 
 The branch that should be used for this additional changeset. This **overwrites the [`changesetTemplate.branch`](#changesettemplate-branch)** when creating the additional changeset.
 
-<Callout type= "info">The branch cannot be nested under the [`changesetTemplate.branch`](#changesettemplate-branch), i.e. if the `changesetTemplate.branch` is `my-batch-change` then this can _not_ be `my-batch-change/my-subdirectory` since [git doesn't allow that](https://stackoverflow.com/a/22630664). Additionally, branch names must be unique and cannot be used as arguments for multiple `directory` fields.</Callout>
+<Callout type="info">
+	The branch cannot be nested under the
+	[`changesetTemplate.branch`](#changesettemplate-branch), i.e. if the
+	`changesetTemplate.branch` is `my-batch-change` then this can _not_ be
+	`my-batch-change/my-subdirectory` since [git doesn't allow
+	that](https://stackoverflow.com/a/22630664). Additionally, branch names must
+	be unique and cannot be used as arguments for multiple `directory` fields.
+</Callout>
 
 ## `transformChanges.group.repository`
 
@@ -792,7 +868,12 @@ The optional `workspaces` property allows users to define where projects are loc
 
 For each repository yielded by [`on`](#on), a Sourcegraph search is used to get the locations of the `rootAtLocationOf` file. Each location serves as a workspace for executing the `steps` instead of the repository's root. Use the [`workspaces.in`](#workspaces-in) property to scope the definitions of workspaces. Omitting it is treated as `*`.
 
-<Callout type= "info">Since multiple workspaces in the same repository can produce multiple changesets, it's **required** to use templating to produce a unique [`changesetTemplate.branch`](#changesettemplate-branch) for each produced changeset. See the [examples](#workspaces-examples) below.</Callout>
+<Callout type="info">
+	Since multiple workspaces in the same repository can produce multiple
+	changesets, it's **required** to use templating to produce a unique
+	[`changesetTemplate.branch`](#changesettemplate-branch) for each produced
+	changeset. See the [examples](#workspaces-examples) below.
+</Callout>
 
 ### Examples
 
@@ -800,59 +881,59 @@ Defining JavaScript projects that live in a monorepo by using the location of th
 
 ```yaml
 on:
-  - repository: github.com/sourcegraph/sourcegraph
+    - repository: github.com/sourcegraph/sourcegraph
 
 workspaces:
-  - rootAtLocationOf: package.json
-    in: github.com/sourcegraph/sourcegraph
+    - rootAtLocationOf: package.json
+      in: github.com/sourcegraph/sourcegraph
 
 changesetTemplate:
-  # [...]
+    # [...]
 
-  # Since a changeset is uniquely identified by its repository and its
-  # branch we need to ensure that each changesets has a unique branch name.
+    # Since a changeset is uniquely identified by its repository and its
+    # branch we need to ensure that each changesets has a unique branch name.
 
-  # We can use templating and helper functions get the `path` in which
-  # the `steps` executed and turn that into a branch name:
-  branch: my-multi-workspace-batch-change-${{ replace steps.path "/" "-"}}
+    # We can use templating and helper functions get the `path` in which
+    # the `steps` executed and turn that into a branch name:
+    branch: my-multi-workspace-batch-change-${{ replace steps.path "/" "-"}}
 ```
 
 Using templating to produce a unique branch name in repositories with workspaces and repositories without workspaces:
 
 ```yaml
 on:
-  - repository: github.com/sourcegraph/sourcegraph
-  - repository: github.com/sourcegraph/src-cli
+    - repository: github.com/sourcegraph/sourcegraph
+    - repository: github.com/sourcegraph/src-cli
 
 workspaces:
-  - rootAtLocationOf: package.json
-    in: github.com/sourcegraph/sourcegraph
+    - rootAtLocationOf: package.json
+      in: github.com/sourcegraph/sourcegraph
 
 changesetTemplate:
-  # [...]
+    # [...]
 
-  # Since the steps in `github.com/sourcegraph/src-cli` are executed in the
-  # root, where path is"", we can use `join_if` to drop it from the branch name
-  # if it's a blank string:
-  branch: ${{ join_if "-" "my-multi-workspace-batch-change" (replace steps.path "/" "-") }}
+    # Since the steps in `github.com/sourcegraph/src-cli` are executed in the
+    # root, where path is"", we can use `join_if` to drop it from the branch name
+    # if it's a blank string:
+    branch: ${{ join_if "-" "my-multi-workspace-batch-change" (replace steps.path "/" "-") }}
 ```
 
 Defining where Go, JavaScript, and Rust projects live in multiple repositories:
 
 ```yaml
 workspaces:
-  - rootAtLocationOf: go.mod
-    in: github.com/sourcegraph/go-*
-  - rootAtLocationOf: package.json
-    in: github.com/sourcegraph/*-js
-    onlyFetchWorkspace: true
-  - rootAtLocationOf: Cargo.toml
-    in: github.com/rusty-org/*
+    - rootAtLocationOf: go.mod
+      in: github.com/sourcegraph/go-*
+    - rootAtLocationOf: package.json
+      in: github.com/sourcegraph/*-js
+      onlyFetchWorkspace: true
+    - rootAtLocationOf: Cargo.toml
+      in: github.com/rusty-org/*
 
 changesetTemplate:
-  # [...]
+    # [...]
 
-  branch: ${{ join_if "-" "my-multi-workspace-batch-change" (replace steps.path "/" "-") }}
+    branch: ${{ join_if "-" "my-multi-workspace-batch-change" (replace steps.path "/" "-") }}
 ```
 
 Using [`steps.outputs`](#steps-outputs) to dynamically create unique branch names:
@@ -860,31 +941,31 @@ Using [`steps.outputs`](#steps-outputs) to dynamically create unique branch name
 ```yaml
 # [...]
 on:
-  # Find all repositories with a package.json file
-  - repositoriesMatchingQuery: repohasfile:package.json
+    # Find all repositories with a package.json file
+    - repositoriesMatchingQuery: repohasfile:package.json
 
 workspaces:
-  # Define that workspaces have their root folder at the location of the
-  # package.json files
-  - rootAtLocationOf: package.json
-    in: "*"
+    # Define that workspaces have their root folder at the location of the
+    # package.json files
+    - rootAtLocationOf: package.json
+      in: '*'
 
 steps:
-  # [... steps that produce changes ...]
+    # [... steps that produce changes ...]
 
-  # Run `jq` to extract the "name" from the package.json
-  - run:  jq -j .name package.json
-    container: jiapantw/jq-alpine:latest
-    outputs:
-      # Set outputs.packageName to stdout of this step's `run` command.
-      packageName:
-        value: ${{ step.stdout }}
+    # Run `jq` to extract the "name" from the package.json
+    - run: jq -j .name package.json
+      container: jiapantw/jq-alpine:latest
+      outputs:
+          # Set outputs.packageName to stdout of this step's `run` command.
+          packageName:
+              value: ${{ step.stdout }}
 
 changesetTemplate:
-  # [...]
+    # [...]
 
-  # Use `outputs` variables to create a unique branch name per changeset:
-  branch: my-batch-change-${{ outputs.projectName }}
+    # Use `outputs` variables to create a unique branch name per changeset:
+    branch: my-batch-change-${{ outputs.projectName }}
 ```
 
 Create changesets only on workspaces defined within subdirectories using `if:`:
@@ -922,15 +1003,15 @@ The full name of the file that sits at the root of one or more workspaces in a g
 
 For example, in a repository with the following files:
 
-- `packages/sourcegraph-ui/package.json`
-- `packages/sourcegraph-test-helper/package.json`
+-   `packages/sourcegraph-ui/package.json`
+-   `packages/sourcegraph-test-helper/package.json`
 
 the workspace configuration
 
 ```yaml
 workspaces:
-  - rootAtLocationOf: package.json
-    in: "*"
+    - rootAtLocationOf: package.json
+      in: '*'
 ```
 
 Would create **two changesets** in the repository, one in `packages/sourcegraph-ui` and one in `packages/sourcegraph-test-helper`.
@@ -947,16 +1028,16 @@ Match all repository names that begin with `github.com/`:
 
 ```yaml
 workspaces:
-  - rootAtLocationOf: go.mod
-    in: github.com/*
+    - rootAtLocationOf: go.mod
+      in: github.com/*
 ```
 
 Match all repository names that begin with `gitlab.com/my-javascript-org/` and end with `-plugin`:
 
 ```yaml
 workspaces:
-  - rootAtLocationOf: package.json
-    in: gitlab.com/my-javascript-org/*-plugin
+    - rootAtLocationOf: package.json
+      in: gitlab.com/my-javascript-org/*-plugin
 ```
 
 ## `workspaces.onlyFetchWorkspace`
@@ -985,17 +1066,17 @@ and this workspace configuration
 
 ```yaml
 workspaces:
-  - rootAtLocationOf: package.json
-    in: github.com/our-our/our-large-monorepo
-    onlyFetchWorkspace: true
+    - rootAtLocationOf: package.json
+      in: github.com/our-our/our-large-monorepo
+      onlyFetchWorkspace: true
 ```
 
 then
 
-- the `steps` will be executed in `b`
-- the complete contents of `b` will be downloaded and are available to the steps
-- the `.gitattributes` and `.gitignore` files in `a' will be downloaded and put in `a', **but only those**
-- the `.gitignore` files in the root will be downloaded and put in the root folder, **but only that file**
+-   the `steps` will be executed in `b`
+-   the complete contents of `b` will be downloaded and are available to the steps
+-   the `.gitattributes` and `.gitignore` files in `a' will be downloaded and put in `a', **but only those**
+-   the `.gitignore` files in the root will be downloaded and put in the root folder, **but only that file**
 
 ### Examples
 
@@ -1003,7 +1084,7 @@ Only download the workspaces of specific JavaScript projects in a large monorepo
 
 ```yaml
 workspaces:
-  - rootAtLocationOf: package.json
-    in: github.com/our-our/our-large-monorepo
-    onlyFetchWorkspace: true
+    - rootAtLocationOf: package.json
+      in: github.com/our-our/our-large-monorepo
+      onlyFetchWorkspace: true
 ```

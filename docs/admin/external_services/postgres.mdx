@@ -1,4 +1,7 @@
-import { CURRENT_VERSION_STRING_NO_V, CURRENT_VERSION_STRING } from 'src/components/PreCodeBlock'
+import {
+	CURRENT_VERSION_STRING_NO_V,
+	CURRENT_VERSION_STRING
+} from 'src/components/PreCodeBlock';
 
 # Using your own PostgreSQL server
 
@@ -6,7 +9,10 @@ You can use your own PostgreSQL v16+ server with Sourcegraph if you wish. For ex
 
 Please review the [PostgreSQL](/admin/postgres) documentation for a complete list of requirements.
 
-<Callout type="note">As of version 6.0.0 The Sourcegraph application will require PostgreSQL v16+, earlier versions worked with 12 or greater.</Callout>
+<Callout type="note">
+	As of version 6.0.0 The Sourcegraph application will require PostgreSQL
+	v16+, earlier versions worked with 12 or greater.
+</Callout>
 
 ## General recommendations
 
@@ -21,23 +27,29 @@ We also recommend having backups for the _codeintel-db_ as a best practice. The 
 
 The addition of `PG*` environment variables to your Sourcegraph deployment files will instruct Sourcegraph to target an external PostgreSQL server. To externalize the _frontend database_, use the following standard `PG*` variables:
 
-- `PGHOST`
-- `PGPORT`
-- `PGUSER`
-- `PGPASSWORD`
-- `PGDATABASE`
-- `PGSSLMODE`
+-   `PGHOST`
+-   `PGPORT`
+-   `PGUSER`
+-   `PGPASSWORD`
+-   `PGDATABASE`
+-   `PGSSLMODE`
 
 To externalize the _code navigation database_, use the following prefixed `CODEINTEL_PG*` variables:
 
-- `CODEINTEL_PGHOST`
-- `CODEINTEL_PGPORT`
-- `CODEINTEL_PGUSER`
-- `CODEINTEL_PGPASSWORD`
-- `CODEINTEL_PGDATABASE`
-- `CODEINTEL_PGSSLMODE`
+-   `CODEINTEL_PGHOST`
+-   `CODEINTEL_PGPORT`
+-   `CODEINTEL_PGUSER`
+-   `CODEINTEL_PGPASSWORD`
+-   `CODEINTEL_PGDATABASE`
+-   `CODEINTEL_PGSSLMODE`
 
-<Callout type="note">If you have configured both the frontend (pgsql) and code navigation (codeintel-db) databases with the same values, the Sourcegraph instance will refuse to start. Each database should either be configured to point to distinct hosts (recommended), or configured to point to distinct databases on the same host.</Callout>
+<Callout type="note">
+	If you have configured both the frontend (pgsql) and code navigation
+	(codeintel-db) databases with the same values, the Sourcegraph instance will
+	refuse to start. Each database should either be configured to point to
+	distinct hosts (recommended), or configured to point to distinct databases
+	on the same host.
+</Callout>
 
 ### sourcegraph/server
 
@@ -64,17 +76,17 @@ sourcegraph/server:{CURRENT_VERSION_NO_V}
 
 ```yaml
 sourcegraph-frontend-0:
-  environment:
-    - 'PGHOST=psql1.mycompany.org'
-    - 'PGUSER=sourcegraph'
-    - 'PGPASSWORD=secret'
-    - 'PGDATABASE=sourcegraph'
-    - 'PGSSLMODE=require'
-    - 'CODEINTEL_PGHOST=psql2.mycompany.org'
-    - 'CODEINTEL_PGUSER=sourcegraph'
-    - 'CODEINTEL_PGPASSWORD=secret'
-    - 'CODEINTEL_PGDATABASE=sourcegraph-codeintel'
-    - 'CODEINTEL_PGSSLMODE=require'
+    environment:
+        - 'PGHOST=psql1.mycompany.org'
+        - 'PGUSER=sourcegraph'
+        - 'PGPASSWORD=secret'
+        - 'PGDATABASE=sourcegraph'
+        - 'PGSSLMODE=require'
+        - 'CODEINTEL_PGHOST=psql2.mycompany.org'
+        - 'CODEINTEL_PGUSER=sourcegraph'
+        - 'CODEINTEL_PGPASSWORD=secret'
+        - 'CODEINTEL_PGDATABASE=sourcegraph-codeintel'
+        - 'CODEINTEL_PGSSLMODE=require'
 ```
 
 See [Environment variables in Compose](https://docs.docker.com/compose/environment-variables/) for other ways to pass these environment variables to the relevant services (including from the command line, a `.env` file, etc.).
@@ -93,36 +105,46 @@ Please refer to our [Postgres](/admin/postgres) documentation to learn about ver
 
 ### Caveats
 
-<Callout type="note">If your PostgreSQL server does not support SSL, set `PGSSLMODE=disable` instead of `PGSSLMODE=require`. Note that this is potentially insecure.</Callout>
+<Callout type="note">
+	If your PostgreSQL server does not support SSL, set `PGSSLMODE=disable`
+	instead of `PGSSLMODE=require`. Note that this is potentially insecure.
+</Callout>
 
 Most standard PostgreSQL environment variables may be specified (`PGPORT`, etc). See http://www.postgresql.org/docs/current/static/libpq-envars.html for a full list.
 
-<Callout type="note">On Mac/Windows, if trying to connect to a PostgreSQL server on the same host machine, remember that Sourcegraph is running inside a Docker container inside of the Docker virtual machine. You may need to specify your actual machine IP address and not `localhost` or `127.0.0.1` as that refers to the Docker VM itself.</Callout>
+<Callout type="note">
+	On Mac/Windows, if trying to connect to a PostgreSQL server on the same host
+	machine, remember that Sourcegraph is running inside a Docker container
+	inside of the Docker virtual machine. You may need to specify your actual
+	machine IP address and not `localhost` or `127.0.0.1` as that refers to the
+	Docker VM itself.
+</Callout>
 
-----
+---
 
 ## Usage with AWS RDS IAM Auth
 
 <aside class="experimental">
-<p>
-<span class="badge badge-experimental">Experimental</span>
-This method is experimental and may have performance implication. Please reach out to your account team for support.
-</p>
+	<p>
+		<span class="badge badge-experimental">Experimental</span>
+		This method is experimental and may have performance implication. Please
+		reach out to your account team for support.
+	</p>
 </aside>
 
 For AWS RDS for Postgres, you have the option to use IAM database authentication to avoid using static database credentials. Learn more from [AWS documentation](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.html).
 
 In order to enable IAM Auth, you first need to:
 
-- enabled [IAM authentication on the RDS instance](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.Enabling.html)
-- created [the database account using IAM authentication](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.DBAccounts.html#UsingWithRDS.IAMDBAuth.DBAccounts.PostgreSQL)
-- created [IAM policy for IAM database access](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.IAMPolicy.html)
-- created IAM roles for your compute workload and grant the role with the above policy
-- ensured your compute resources can assume those IAM roles
-  - For EKS (k8s deployment), use [IAM roles for service accounts](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html)
-  - For EC2 (docker-compose deployment), use [IAM roles for Amazon EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html)
+-   enabled [IAM authentication on the RDS instance](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.Enabling.html)
+-   created [the database account using IAM authentication](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.DBAccounts.html#UsingWithRDS.IAMDBAuth.DBAccounts.PostgreSQL)
+-   created [IAM policy for IAM database access](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.IAMPolicy.html)
+-   created IAM roles for your compute workload and grant the role with the above policy
+-   ensured your compute resources can assume those IAM roles
+    -   For EKS (k8s deployment), use [IAM roles for service accounts](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html)
+    -   For EC2 (docker-compose deployment), use [IAM roles for Amazon EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html)
 
-For [every services that require postgres database connection](https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/lib/servicecatalog/service-catalog.yaml), ensure below environment variables are configured:
+Configure the following environment variables for the **`sourcegraph-frontend`** service (or all `sourcegraph-frontend-*` services in Docker Compose deployments):
 
 - `PG_CONNECTION_UPDATER=EC2_ROLE_CREDENTIALS`
 - `PGSSLMODE=require`
@@ -131,14 +153,19 @@ For [every services that require postgres database connection](https://github.co
 - `PGUSER=<>` - this should be the database accounts created above
 - `PGDATABASE=<>`
 - `CODEINTEL_PGSSLMODE=require`
+- `CODEINTEL_PGHOST=<>`
 - `CODEINTEL_PGPORT=<>`
-- `CODEINTEL_PGUSER=<>` this should be the database accounts created above
+- `CODEINTEL_PGUSER=<>` - this should be the database accounts created above
 - `CODEINTEL_PGDATABASE=<>`
 - `CODEINSIGHTS_PGSSLMODE=require`
 - `CODEINSIGHTS_PGHOST=<>`
 - `CODEINSIGHTS_PGPORT=<>`
-- `CODEINSIGHTS_PGUSER=<>` this should be the database accounts created above
+- `CODEINSIGHTS_PGUSER=<>` - this should be the database accounts created above
 - `CODEINSIGHTS_PGDATABASE=<>`
+
+**Optional:** If your workloads are in a specific AWS Region and you want to use regional STS endpoints for improved latency and resiliency, also set:
+
+- `AWS_STS_REGIONAL_ENDPOINTS=regional` - This configures the AWS SDK to use regional STS endpoints (e.g., `sts.us-west-2.amazonaws.com`) instead of the global endpoint (`sts.amazonaws.com`). This is recommended for better performance and resilience. See [AWS documentation](https://docs.aws.amazon.com/sdkref/latest/guide/feature-sts-regionalized-endpoints.html) for more details.
 
 ## Usage with PgBouncer
 
@@ -150,7 +177,14 @@ When [PgBouncer] is used, we need to include `statement_cache_mode=describe` in 
 
 Add the following to your `docker run` command:
 
-<pre class="pre-wrap start-sourcegraph-command"><code>docker run [...]<span class="virtual-br"></span> -e PGDATASOURCE="postgres://username:password@sourcegraph-pgbouncer.mycompany.com:5432/sg?statement_cache_mode=describe"<span class="virtual-br"></span> -e CODEINSIGHTS_PGDATASOURCE="postgres://username:password@sourcegraph-codeintel-pgbouncer.mycompany.com:5432/sg?statement_cache_mode=describe"<span class="virtual-br"></span> sourcegraph/server:{CURRENT_VERSION_STRING_NO_V()}</code></pre>
+<pre class="pre-wrap start-sourcegraph-command">
+	<code>
+		docker run [...]<span class="virtual-br"></span> -e PGDATASOURCE="postgres://username:password@sourcegraph-pgbouncer.mycompany.com:5432/sg?statement_cache_mode=describe"
+		<span class="virtual-br"></span> -e
+		CODEINSIGHTS_PGDATASOURCE="postgres://username:password@sourcegraph-codeintel-pgbouncer.mycompany.com:5432/sg?statement_cache_mode=describe"
+		<span class="virtual-br"></span> sourcegraph/server:{CURRENT_VERSION_STRING_NO_V()}
+	</code>
+</pre>
 
 ### Docker Compose
 
@@ -158,9 +192,9 @@ Add the following to your `docker run` command:
 
 ```yaml
 sourcegraph-frontend-0:
-  environment:
-    - 'PGDATASOURCE=postgres://username:password@sourcegraph-pgbouncer.mycompany.com:5432/sg?statement_cache_mode=describe'
-    - 'CODEINSIGHTS_PGDATASOURCE=postgres://username:password@sourcegraph-codeintel-pgbouncer.mycompany.com:5432/sg?statement_cache_mode=describe'
+    environment:
+        - 'PGDATASOURCE=postgres://username:password@sourcegraph-pgbouncer.mycompany.com:5432/sg?statement_cache_mode=describe'
+        - 'CODEINSIGHTS_PGDATASOURCE=postgres://username:password@sourcegraph-codeintel-pgbouncer.mycompany.com:5432/sg?statement_cache_mode=describe'
 ```
 
 See ["Environment variables in Compose"](https://docs.docker.com/compose/environment-variables/) for other ways to pass these environment variables to the relevant services (including from the command line, a `.env` file, etc.).
@@ -175,18 +209,18 @@ Create a new [Secret](https://kubernetes.io/docs/concepts/configuration/secret/)
 apiVersion: v1
 kind: Secret
 metadata:
-  name: sourcegraph-pgbouncer-credentials
+    name: sourcegraph-pgbouncer-credentials
 data:
-  password: "" # note: secrets data has to be base64-encoded
+    password: '' # note: secrets data has to be base64-encoded
 ```
 
 ```yaml
 apiVersion: v1
 kind: Secret
 metadata:
-  name: sourcegraph-codeintel-pgbouncer-credentials
+    name: sourcegraph-codeintel-pgbouncer-credentials
 data:
-  password: "" # note: secrets data has to be base64-encoded
+    password: '' # note: secrets data has to be base64-encoded
 ```
 
 Update the environment variables in the `sourcegraph-frontend` deployment YAML.
@@ -195,50 +229,50 @@ Update the environment variables in the `sourcegraph-frontend` deployment YAML.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sourcegraph-frontend
+    name: sourcegraph-frontend
 spec:
-  template:
-    spec:
-      containers:
-      - name: frontend
-        env:
-        - name: PGDATABASE
-          value: sg
-        - name: PGHOST
-          value: sourcegraph-pgbouncer
-        - name: PGPORT
-          value: "5432"
-        - name: PGSSLMODE
-          value: disable
-        - name: PGUSER
-          value: sg
-        - name: PGPASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: sourcegraph-pgbouncer-credentials
-              key: password
-        - name: PGDATASOURCE
-          value: postgres://$(PGUSER):$(PGPASSWORD)@$(PGHOST):$(PGPORT)/$(PGDATABASE)?statement_cache_mode=describe
-        - name: CODEINTEL_PGDATABASE
-          value: sg-codeintel
-        - name: CODEINTEL_PGHOST
-          value: sourcegraph-codeintel-pgbouncer.mycompany.com
-        - name: CODEINTEL_PGPORT
-          value: "5432"
-        - name: CODEINTEL_PGSSLMODE
-          value: disable
-        - name: CODEINTEL_PGUSER
-          value: sg
-        - name: CODEINTEL_PGPASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: sourcegraph-codeintel-pgbouncer-credentials
-              key: password
-        - name: CODEINSIGHTS_PGDATASOURCE
-          value: postgres://$(CODEINTEL_PGUSER):$(CODEINTEL_PGPASSWORD)@$(CODEINTEL_PGHOST):$(CODEINTEL_PGPORT)/$(CODEINTEL_PGDATABASE)?statement_cache_mode=describe
+    template:
+        spec:
+            containers:
+                - name: frontend
+                  env:
+                      - name: PGDATABASE
+                        value: sg
+                      - name: PGHOST
+                        value: sourcegraph-pgbouncer
+                      - name: PGPORT
+                        value: '5432'
+                      - name: PGSSLMODE
+                        value: disable
+                      - name: PGUSER
+                        value: sg
+                      - name: PGPASSWORD
+                        valueFrom:
+                            secretKeyRef:
+                                name: sourcegraph-pgbouncer-credentials
+                                key: password
+                      - name: PGDATASOURCE
+                        value: postgres://$(PGUSER):$(PGPASSWORD)@$(PGHOST):$(PGPORT)/$(PGDATABASE)?statement_cache_mode=describe
+                      - name: CODEINTEL_PGDATABASE
+                        value: sg-codeintel
+                      - name: CODEINTEL_PGHOST
+                        value: sourcegraph-codeintel-pgbouncer.mycompany.com
+                      - name: CODEINTEL_PGPORT
+                        value: '5432'
+                      - name: CODEINTEL_PGSSLMODE
+                        value: disable
+                      - name: CODEINTEL_PGUSER
+                        value: sg
+                      - name: CODEINTEL_PGPASSWORD
+                        valueFrom:
+                            secretKeyRef:
+                                name: sourcegraph-codeintel-pgbouncer-credentials
+                                key: password
+                      - name: CODEINSIGHTS_PGDATASOURCE
+                        value: postgres://$(CODEINTEL_PGUSER):$(CODEINTEL_PGPASSWORD)@$(CODEINTEL_PGHOST):$(CODEINTEL_PGPORT)/$(CODEINTEL_PGDATABASE)?statement_cache_mode=describe
 ```
 
-----
+---
 
 ## Postgres Permissions and Database Migrations
 
@@ -246,27 +280,35 @@ There is a tight coupling between the respective database service accounts for t
 
 By default, the migrations that Sourcegraph runs expect `SUPERUSER` permissions. Sourcegraph migrations contain SQL that enable extensions and modify roles.
 
-<Callout type="note">On AWS RDS, you will need to perform the operations below using the `rds_superuser` role because RDS does not grant SUPERUSER privileges to user database accounts.</Callout>
+<Callout type="note">
+	On AWS RDS, you will need to perform the operations below using the
+	`rds_superuser` role because RDS does not grant SUPERUSER privileges to user
+	database accounts.
+</Callout>
 
 This may not be acceptable in all environments. At minimum we expect that the `PGUSER` and `CODEINTEL_PGUSER` have the `ALL` permissions on `PGDATABASE` and `CODEINTEL_PGDATABASE` respectively.
 
 `ALL` privileges on the [Database object](https://www.postgresql.org/docs/current/sql-grant.html) include:
- * `SELECT`
- * `INSERT`
- * `UPDATE`
- * `DELETE`
- * `TRUNCATE`
- * `REFERENCES`
- * `TRIGGER`
- * `CREATE`
- * `CONNECT`
- * `TEMPORARY`
- * `EXECUTE`
- * `USAGE`
+
+-   `SELECT`
+-   `INSERT`
+-   `UPDATE`
+-   `DELETE`
+-   `TRUNCATE`
+-   `REFERENCES`
+-   `TRIGGER`
+-   `CREATE`
+-   `CONNECT`
+-   `TEMPORARY`
+-   `EXECUTE`
+-   `USAGE`
 
 ### Using restricted permissions for pgsql (frontend DB)
 
-<Callout type="note">For AWS RDS, refer to the note from this [section](#postgres-permissions-and-database-migrations).</Callout>
+<Callout type="note">
+	For AWS RDS, refer to the note from this
+	[section](#postgres-permissions-and-database-migrations).
+</Callout>
 
 Sourcegraph requires some initial setup that requires `SUPERUSER` permissions. A database administrator needs to perform the necessary actions on behalf of Sourcegraph migrations as `SUPERUSER`.
 
@@ -321,11 +363,14 @@ In this case, locate the UP migration 1528395834 and apply all SQL after the fin
 
 The `sg_service` database role is a legacy role that should be removed from all Sourcegraph installations at this time. Migration `remove_sg_service_role` attempts to enforce this with a `DROP ROLE` command. The `PGUSER` does not have permissions to perform this action, therefore the migration fails. You can safely skip this migration.
 
-----
+---
 
 ### Using restricted permissions for CodeIntel DB
 
-<Callout type="note">For AWS RDS, refer to the note from this [section](#postgres-permissions-and-database-migrations).</Callout>
+<Callout type="note">
+	For AWS RDS, refer to the note from this
+	[section](#postgres-permissions-and-database-migrations).
+</Callout>
 
 CodeIntel requires some initial setup that requires `SUPERUSER` permissions. A database administrator needs to perform the necessary actions on behalf of Sourcegraph migrations as `SUPERUSER`.
 

@@ -1,8 +1,19 @@
 # Structural Search
 
-<p className="subtitle">Learn and understand about Sourcegraph's Structural Search and core functionality.</p>
+<p className="subtitle">
+	Learn and understand about Sourcegraph's Structural Search and core
+	functionality.
+</p>
 
-<Callout type="note"> Changed in version 5.3. Structural search is disabled by default. To enable it, ask your site administrator to set experimentalFeatures.structuralSearch = "enabled" in site configuration. Structural search has performance limitations and is not actively developed. We recommend using regex search or a combination of [Search Jobs](./search-jobs.mdx) and custom scripts instead. Please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com) for guidance on alternative approaches.</Callout>
+<Callout type="note">
+	{' '}
+	Changed in version 5.3. Structural search is disabled by default. To enable it,
+	ask your site administrator to set experimentalFeatures.structuralSearch = "enabled"
+	in site configuration. Structural search has performance limitations and is not
+	actively developed. We recommend using regex search or a combination of [Search
+	Jobs](./search-jobs.mdx) and custom scripts instead. Please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
+	for guidance on alternative approaches.
+</Callout>
 
 With structural search, you can match richer syntax patterns specifically in code and structured data formats like JSON. It can be awkward or difficult to match code blocks or nested expressions with regular expressions. To meet this challenge we've introduced a new and easier way to search code that operates more closely on a program's parse tree. We use [Comby syntax](https://comby.dev/docs/syntax-reference) for structural matching. Below you'll find examples and notes for this language-aware search functionality.
 
@@ -40,7 +51,7 @@ Here we didn't have to do any special thinking about matching contents that spre
 
 The syntax `...` above is an alias for a canonical syntax `:[hole]`, where `hole` is a descriptive identifier for the matched content. Identifiers are useful when expressing that matched content should be equal (see the [`return :[v.], :[v.]`](#match-equivalent-expressions) example below). Here is a table of additional syntax.
 
-|        **Syntax**        |             **Alias**             |                                                                                                                           **Description**                                                                                                                           |
+| **Syntax**               | **Alias**                         | **Description**                                                                                                                                                                                                                                                     |
 | ------------------------ | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `...`                    | `:[hole]`<br/>`:[_]`              | Match zero or more characters in a lazy fashion. When `:[hole]` is inside delimiters, as in `{:[h1], :[h2]}` or `(:[h])`, holes match within that group or code block, including newlines.                                                                          |
 | `:[~regexp]`             | `:[hole~regexp]`                  | Match an arbitrary [regular expression](https://golang.org/s/re2syntax) `regexp`. A descriptive identifier like `hole` is optional. Avoid regular expressions that match special syntax like `)` or `.*`, otherwise your pattern may fail to match balanced blocks. |
@@ -49,7 +60,11 @@ The syntax `...` above is an alias for a canonical syntax `:[hole]`, where `hole
 | `:[ ]`<br/>`:[ hole]`    | `:[~[ \t]+]`<br/>`:[hole~[ \t]+]` | Match only whitespace characters, excluding newlines.                                                                                                                                                                                                               |
 | `:[hole.]`               | `[_.]`                            | Match one or more alphanumeric characters and punctuation like `.`, `;`, and `-` that do not affect balanced syntax. Language dependent.                                                                                                                            |
 
-<Callout type="note"> To match the string `...` literally, use regular expression patterns like `:[~[.]{3}]` or `:[~\.\.\.]`.</Callout>
+<Callout type="note">
+	{' '}
+	To match the string `...` literally, use regular expression patterns like `:[~[.]
+	{3}]` or `:[~\.\.\.]`.
+</Callout>
 
 ### Rules
 
@@ -105,13 +120,17 @@ Structural search also works on structured data, like JSON. Use patterns to decl
 
 Matches all parts of a JSON document that have a member `"exclude"` where the value is an array of items.
 
-<Callout type="note">Visit our [structural search blog post](https://about.sourcegraph.com/blog/going-beyond-regular-expressions-with-structural-code-search) for more.</Callout>
+<Callout type="note">
+	Visit our [structural search blog
+	post](https://about.sourcegraph.com/blog/going-beyond-regular-expressions-with-structural-code-search)
+	for more.
+</Callout>
 
 ### Current functionality and configuration
 
 Structural search behaves differently to plain text search in key ways. We are continually improving the functionality of this new feature, so please note the following:
 
-- **Only indexed repos.** Structural search can currently only be performed on _indexed_ repositories. See [configuration](/admin/search) for more details if you host your own Sourcegraph installation. Our service hosted at [sourcegraph.com](https://sourcegraph.com/search) indexes approximately 200,000 of the most popular repositories on GitHub. Other repositories are currently unsupported. To see whether a repository on your instance is indexed, visit `https://<sourcegraph-host>.com/repo-org/repo-name/-/settings/index`.
-- **The `lang` filter is semantically significant.** Adding the `lang` [filter](/code-search/queries) informs the parser about language-specific syntax for comments, strings, and code. This makes structural search more accurate for that language. For example, `fmt.Sprintf(...) lang:go`. If `lang` is omitted, Sourcegraph will attempt a best-effort inference of the language based on matching file extensions or fall back to a generic structural matcher.
-- **Saved searches are not supported.** It is not currently possible to save structural searches.
-- **Matching blocks in indentation-sensitive languages.** It's not currently possible to match blocks of code that are indentation-sensitive. This is a feature planned for future work.
+-   **Only indexed repos.** Structural search can currently only be performed on _indexed_ repositories. See [configuration](/admin/search) for more details if you host your own Sourcegraph installation. Our service hosted at [sourcegraph.com](https://sourcegraph.com/search) indexes approximately 200,000 of the most popular repositories on GitHub. Other repositories are currently unsupported. To see whether a repository on your instance is indexed, visit `https://<sourcegraph-host>.com/repo-org/repo-name/-/settings/index`.
+-   **The `lang` filter is semantically significant.** Adding the `lang` [filter](/code-search/queries) informs the parser about language-specific syntax for comments, strings, and code. This makes structural search more accurate for that language. For example, `fmt.Sprintf(...) lang:go`. If `lang` is omitted, Sourcegraph will attempt a best-effort inference of the language based on matching file extensions or fall back to a generic structural matcher.
+-   **Saved searches are not supported.** It is not currently possible to save structural searches.
+-   **Matching blocks in indentation-sensitive languages.** It's not currently possible to match blocks of code that are indentation-sensitive. This is a feature planned for future work.

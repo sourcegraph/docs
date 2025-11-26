@@ -4,19 +4,20 @@ A Sourcegraph instance can be configured to receive events from code hosts via i
 
 Webhooks currently serve three purposes for reacting to external events:
 
-* Keeping code on Sourcegraph fresh by responding to new code being pushed to a repository
-* Keeping batch changes changeset details up to date
-* Speed up Sourcegraph reacting to permission changes on the code host
+-   Keeping code on Sourcegraph fresh by responding to new code being pushed to a repository
+-   Keeping batch changes changeset details up to date
+-   Speed up Sourcegraph reacting to permission changes on the code host
 
 See the table below for code host compatibility:
 
           Code host           | Code push | [Batch changes](/batch_changes) | User permissions
+
 ----------------------------- | :----------------------------------------------: | :-------: | :--------------:
-GitHub                        | 🟢 |     🟢     |        🟢
-GitLab                        | 🟢 |     🟢     |        🔴
-Bitbucket Server / Datacenter | 🟢 |     🟢     |        🔴
-Bitbucket Cloud               | 🟢 |     🟢     |        🔴
-Azure DevOps                  | 🔴 |     🟢     |        🔴
+GitHub | 🟢 | 🟢 | 🟢
+GitLab | 🟢 | 🟢 | 🔴
+Bitbucket Server / Datacenter | 🟢 | 🟢 | 🔴
+Bitbucket Cloud | 🟢 | 🟢 | 🔴
+Azure DevOps | 🔴 | 🟢 | 🔴
 
 To receive webhooks both Sourcegraph and the code host need to be configured. To configure Sourcegraph, [add an incoming webhook](#adding-an-incoming-webhook). Then [configure webhooks on your code host](#configuring-webhooks-on-the-code-host)
 
@@ -26,10 +27,10 @@ As of Sourcegraph 4.3.0 webhooks added via code host configuration are deprecate
 
 This includes any webhooks pointed at URLs starting with the following:
 
-* `.api/github-webhooks`
-* `.api/gitlab-webhooks`
-* `.api/bitbucket-server-webhooks`
-* `.api/bitbucket-cloud-webhooks`
+-   `.api/github-webhooks`
+-   `.api/gitlab-webhooks`
+-   `.api/bitbucket-server-webhooks`
+-   `.api/bitbucket-cloud-webhooks`
 
 In order to continue using webhooks you need to follow the steps below to [add an incoming webhook](#adding-an-incoming-webhook) and then update the webhook configured on your code host with the new webhook url which will look something like `https://sourcegraph-instance/.api/webhooks/{UUID}`
 
@@ -44,10 +45,10 @@ The incoming webhook will be configured to accept events from a specific code ho
 2. Click **+ Create webhook**
    ![Adding an incoming webhook](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/webhooks/adding-webhook.png)
 3. Fill out the form:
-   1. **Webhook name**: Descriptive name for the webhook.
-   1. **Code host type**: Select from the dropdown. This will be filtered based on code host connections added on your instance.
-   1. **Code host URN**: The URN for the code host. Again, this will be filtered by code host connections added on your instance.
-   1. **Secret**: An arbitrary shared secret between Sourcegraph and the code host. A default value is provided, but you are free to change it.
+    1. **Webhook name**: Descriptive name for the webhook.
+    1. **Code host type**: Select from the dropdown. This will be filtered based on code host connections added on your instance.
+    1. **Code host URN**: The URN for the code host. Again, this will be filtered by code host connections added on your instance.
+    1. **Secret**: An arbitrary shared secret between Sourcegraph and the code host. A default value is provided, but you are free to change it.
 4. Click **Create**
 
 The incoming webhook will now be created, and you will be redirected to a page showing more details.
@@ -68,31 +69,35 @@ If you use multiple organizations, make sure to configure the webhooks in all of
 1. Copy the **webhook endpoint** displayed after adding the incoming webhook as mentioned [above](#adding-an-incoming-webhook)
 1. On GitHub, go to the settings page of your organization. From there, click **Settings**, then **Webhooks**, then **Add webhook**.
 1. Fill in the webhook form:
-    * **Payload URL**: the URL you copied above from Sourcegraph.
-    * **Content type**: this must be set to `application/json`.
-    * **Secret**: the secret token you configured Sourcegraph to use above.
-    * **Which events**: select **Let me select individual events**, and then enable:
-        * **For repo changes**:
-            * `push`
-        * **For Batch Changes**:
-            * `Issue comments`
-            * `Pull requests`
-            * `Pull request reviews`
-            * `Pull request review comments`
-            * `Check runs`
-            * `Check suites`
-            * `Statuses`
-        * **For repository permissions**:
-            * `Collaborator add, remove, or changed`
-            * `Memberships`
-            * `Organizations`
-            * `Repositories`
-            * `Teams`
-    * **Active**: ensure this is enabled.
+    - **Payload URL**: the URL you copied above from Sourcegraph.
+    - **Content type**: this must be set to `application/json`.
+    - **Secret**: the secret token you configured Sourcegraph to use above.
+    - **Which events**: select **Let me select individual events**, and then enable:
+        - **For repo changes**:
+            - `push`
+        - **For Batch Changes**:
+            - `Issue comments`
+            - `Pull requests`
+            - `Pull request reviews`
+            - `Pull request review comments`
+            - `Check runs`
+            - `Check suites`
+            - `Statuses`
+        - **For repository permissions**:
+            - `Collaborator add, remove, or changed`
+            - `Memberships`
+            - `Organizations`
+            - `Repositories`
+            - `Teams`
+    - **Active**: ensure this is enabled.
 1. Click **Add webhook**.
 1. Confirm that the new webhook is listed.
 
-<Callout type="note">Permission changes can take a few seconds to reflect on GitHub. To prevent syncing permissions before the change reflects on GitHub, the permissions sync will only occur 10 seconds after the relevant event is received.</Callout>
+<Callout type="note">
+	Permission changes can take a few seconds to reflect on GitHub. To prevent
+	syncing permissions before the change reflects on GitHub, the permissions
+	sync will only occur 10 seconds after the relevant event is received.
+</Callout>
 
 Done! Sourcegraph will now receive webhook events to sync data with lower latency and more efficiently.
 
@@ -102,22 +107,26 @@ GitLab webhooks can be installed at the repository or project level. We strongly
 
 If you use multiple projects, make sure to configure the webhooks in all of them. The same webhook in Sourcegraph can be connected to multiple projects.
 
-<Callout type="note">We currently do not support [system webhooks](https://docs.gitlab.com/ee/administration/system_hooks.html), these do not provide the data needed for Sourcegraph.</Callout>
+<Callout type="note">
+	We currently do not support [system
+	webhooks](https://docs.gitlab.com/ee/administration/system_hooks.html),
+	these do not provide the data needed for Sourcegraph.
+</Callout>
 
 1. Copy the **webhook endpoint** displayed after adding the incoming webhook as mentioned [above](#adding-an-incoming-webhook)
 1. On GitLab, go to your project, and then **Settings > Webhooks** (or **Settings > Integration** on older GitLab versions that don't have the **Webhooks** option).
 1. Fill in the webhook form:
-    * **URL**: the URL you copied above from Sourcegraph.
-    * **Secret token**: the secret token you configured Sourcegraph to use above.
-    * **Trigger**:
-        * **For repo changes**:
-            * `Push events`
-        * **For Batch Changes**:
-            * `Merge request events`
-            * `Pipeline events`
-        * **For repository permissions**:
-            * _Not supported_
-    * **Enable SSL verification**: ensure this is enabled if you have configured SSL with a valid certificate in your Sourcegraph instance.
+    - **URL**: the URL you copied above from Sourcegraph.
+    - **Secret token**: the secret token you configured Sourcegraph to use above.
+    - **Trigger**:
+        - **For repo changes**:
+            - `Push events`
+        - **For Batch Changes**:
+            - `Merge request events`
+            - `Pipeline events`
+        - **For repository permissions**:
+            - _Not supported_
+    - **Enable SSL verification**: ensure this is enabled if you have configured SSL with a valid certificate in your Sourcegraph instance.
 1. Click **Add webhook**.
 1. Confirm that the new webhook is listed below **Project Hooks**.
 
@@ -132,24 +141,24 @@ Webhooks with the plugin can be installed globally, which is recommended to cove
 1. Install the latest version of the [Sourcegraph Bitbucket Server plugin](/integration/bitbucket_server#sourcegraph-bitbucket-server-plugin) on your Bitbucket Server / Bitbucket Data Center instance.
 1. On your Bitbucket Server / Bitbucket Data Center instance, go to **Administration > Add-ons > Sourcegraph**
 1. Fill in the **Add a webhook** form
-    * **Name**: A unique name representing your Sourcegraph instance.
-    * **Scope**: `global`.
-    * **Endpoint**: The URL found after creating an incoming webhook.
-    * **Events**:
-        * **For repo changes**:
-            * `repo:refs_changed`
-        * **For Batch Changes**:
-            * `repo:build_status`
-            * `pr:activity:status`
-            * `pr:activity:event`
-            * `pr:activity:rescope`
-            * `pr:activity:merge`
-            * `pr:activity:comment`
-            * `pr:activity:reviewers`
-            * `pr:participant:status`
-        * **For repository permissions**:
-            * _Not supported_
-    * **Secret**: The secret you configured when creating the incoming webhook.
+    - **Name**: A unique name representing your Sourcegraph instance.
+    - **Scope**: `global`.
+    - **Endpoint**: The URL found after creating an incoming webhook.
+    - **Events**:
+        - **For repo changes**:
+            - `repo:refs_changed`
+        - **For Batch Changes**:
+            - `repo:build_status`
+            - `pr:activity:status`
+            - `pr:activity:event`
+            - `pr:activity:rescope`
+            - `pr:activity:merge`
+            - `pr:activity:comment`
+            - `pr:activity:reviewers`
+            - `pr:participant:status`
+        - **For repository permissions**:
+            - _Not supported_
+    - **Secret**: The secret you configured when creating the incoming webhook.
 1. Confirm that the new webhook is listed under **All webhooks** with a timestamp in the **Last successful** column.
 
 Done! Sourcegraph will now receive webhook events to sync data with lower latency and more efficiently.
@@ -166,28 +175,28 @@ Follow the REST API docs from Bitbucket. To create a workspace webhook via the A
 
 This password requires **webhook read & write** and **repo read** scope, and you must be a workspace owner. You can then use the following command to create the webhook, and fill in the JSON properties as follows:
 
-* **Description**: A unique name representing your Sourcegraph instance.
-* **URL**: The URL found after creating an incoming webhook.
-* **Events**:
-  * **For repo changes**:
-    * `repo:push`
-  * **For Batch Changes**:
-    * `pullrequest:created`
-    * `pullrequest:updated`
-    * `pullrequest:changes_request_created`
-    * `pullrequest:changes_request_removed`
-    * `pullrequest:approved`
-    * `pullrequest:unapproved`
-    * `pullrequest:fulfilled`
-    * `pullrequest:rejected`
-    * `pullrequest:comment_created`
-    * `pullrequest:comment_updated`
-    * `pullrequest:comment_deleted`
-    * `pullrequest:comment_resolved`
-    * `pullrequest:comment_reopened`
-  * **For repository permissions**:
-    * _Not supported_
-* **Secret**: The secret you configured when creating the incoming webhook.
+-   **Description**: A unique name representing your Sourcegraph instance.
+-   **URL**: The URL found after creating an incoming webhook.
+-   **Events**:
+    -   **For repo changes**:
+        -   `repo:push`
+    -   **For Batch Changes**:
+        -   `pullrequest:created`
+        -   `pullrequest:updated`
+        -   `pullrequest:changes_request_created`
+        -   `pullrequest:changes_request_removed`
+        -   `pullrequest:approved`
+        -   `pullrequest:unapproved`
+        -   `pullrequest:fulfilled`
+        -   `pullrequest:rejected`
+        -   `pullrequest:comment_created`
+        -   `pullrequest:comment_updated`
+        -   `pullrequest:comment_deleted`
+        -   `pullrequest:comment_resolved`
+        -   `pullrequest:comment_reopened`
+    -   **For repository permissions**:
+        -   _Not supported_
+-   **Secret**: The secret you configured when creating the incoming webhook.
 
 ```bash
 $ curl -vf -X POST -u <YOURUSERNAME> -H 'Content-Type: application/json' https://api.bitbucket.org/2.0/workspaces/<YOURWORKSPACE>/hooks -d '
@@ -213,17 +222,17 @@ Done! Sourcegraph will now receive webhook events to sync data with lower latenc
 1. On Bitbucket Cloud, go to each repository, and then **Repository settings > Webhooks**.
 1. Click **Add webhook**.
 1. Fill in the webhook form:
-   * **Title**: Any title.
-   * **URL**: The URL found after creating an incoming webhook.
-   * **Triggers**:
-     * **For repo changes**:
-        * `Push`
-     * **For Batch Changes**:
-        * `Repository > Build status created`
-        * `Repository > Build status updated`
-        * `Pull request > All events`
-     * **For repository permissions**:
-        * _Not supported_
+    - **Title**: Any title.
+    - **URL**: The URL found after creating an incoming webhook.
+    - **Triggers**:
+        - **For repo changes**:
+            - `Push`
+        - **For Batch Changes**:
+            - `Repository > Build status created`
+            - `Repository > Build status updated`
+            - `Pull request > All events`
+        - **For repository permissions**:
+            - _Not supported_
 1. Click **Save**.
 1. Confirm that the new webhook is listed below **Repository hooks**.
 
@@ -231,7 +240,12 @@ Done! Sourcegraph will now receive webhook events to sync data with lower latenc
 
 ### Azure DevOps
 
-<Callout type="note">Experimental webhook support for Azure DevOps was added in Sourcegraph 5.0, and does not currently support secrets. Please <a href="https://about.sourcegraph.com/contact">contact us</a> with any issues found while using webhooks.</Callout>
+<Callout type="note">
+	Experimental webhook support for Azure DevOps was added in Sourcegraph 5.0,
+	and does not currently support secrets. Please{' '}
+	<a href="https://about.sourcegraph.com/contact">contact us</a> with any
+	issues found while using webhooks.
+</Callout>
 
 1. On Azure DevOps, go to each project, and then **Project settings > General > Service hooks**.
 2. Click **Create subscription**.
@@ -239,17 +253,17 @@ Done! Sourcegraph will now receive webhook events to sync data with lower latenc
 3. Select **Web Hooks** and click **Next** .
    ![](https://storage.googleapis.com/sourcegraph-assets/docs/images/admin/config/webhook-step-3.png)
 4. From the **Trigger on this type of event** drop-down, choose:
-   * **For repo changes**:
-     * _Not supported_
-   * **For Batch Changes**:
-     * `Pull request updated`
-   * **For repository permissions**:
-     * _Not supported_
-   ![](https://storage.googleapis.com/sourcegraph-assets/docs/images/admin/config/webhook-step-4.png)
+    - **For repo changes**:
+        - _Not supported_
+    - **For Batch Changes**:
+        - `Pull request updated`
+    - **For repository permissions**:
+        - _Not supported_
+          ![](https://storage.googleapis.com/sourcegraph-assets/docs/images/admin/config/webhook-step-4.png)
 5. Set the filters how you like, or leave them at the default: **[Any]** and click **Next**.
 6. Fill in the webhook form:
-   - **URL**: The URL found after creating an incoming webhook.
-   - Leave the rest of the fields on the default values.
+    - **URL**: The URL found after creating an incoming webhook.
+    - Leave the rest of the fields on the default values.
 7. Click **Test** to verify the webhook works. Then click **Finish**.
 8. Repeat the steps above, this time choosing **Pull request merged** as your event type.
 
@@ -271,7 +285,7 @@ By default, sites without [database encryption](/admin/config/encryption) enable
 Webhook logging is controlled by the `webhook.logging` site configuration
 option. This option is an object with the following keys:
 
-|     Key     |   Type    |                                                        Default                                                        |                         Description                         |
+| Key         | Type      | Default                                                                                                               | Description                                                 |
 | ----------- | --------- | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
 | `enabled`   | `boolean` | If `true`, incoming webhooks will be stored.                                                                          | `true` if no site encryption is enabled; `false` otherwise. |
 | `retention` | `string`  | The length of time to retain the webhooks, expressed as a valid [Go duration](https://pkg.go.dev/time#ParseDuration). | `72h`                                                       |
@@ -282,7 +296,7 @@ To disable webhook logging:
 
 ```json
 {
-  "webhook.logging": {"enabled": false}
+	"webhook.logging": {"enabled": false}
 }
 ```
 
@@ -290,10 +304,10 @@ To retain webhook logs for one day:
 
 ```json
 {
-  "webhook.logging": {
-    "enabled": true,
-    "retention": "24h"
-  }
+	"webhook.logging": {
+		"enabled": true,
+		"retention": "24h"
+	}
 }
 ```
 

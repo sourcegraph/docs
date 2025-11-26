@@ -1,10 +1,8 @@
 # Bitbucket Server/Bitbucket Data Center
 
 <TierCallout>
-  Supported on [Enterprise](/pricing/enterprise) plans.
-  <user>
-    Available via the Web app.
-  </user>
+	Supported on [Enterprise](/pricing/enterprise) plans.
+	<user>Available via the Web app.</user>
 </TierCallout>
 
 Site admins can sync Git repositories hosted on [Bitbucket Server](https://www.atlassian.com/software/bitbucket/server) or [Bitbucket Data Center](https://www.atlassian.com/enterprise/data-center/bitbucket) with Sourcegraph so that users can search and navigate their repositories.
@@ -32,14 +30,14 @@ For Bitbucket Server instances that don't support personal access tokens (Bitbuc
 
 There are four fields for configuring which repositories are mirrored:
 
-- [`repos`](/admin/code_hosts/bitbucket_server#configuration)
-  - A list of repositories in `projectKey/repositorySlug` format. The order determines the order in which we sync repository metadata and is safe to change.
-- [`repositoryQuery`](/admin/code_hosts/bitbucket_server#configuration)
-  - A list of strings with some pre-defined options (`none`, `all`), and/or a [Bitbucket Server / Bitbucket Data Center Repo Search Request Query Parameters](https://docs.atlassian.com/bitbucket-server/rest/6.1.2/bitbucket-rest.html#idp355).
-- [`exclude`](/admin/code_hosts/bitbucket_server#configuration)
-  - A list of repositories to exclude which takes precedence over the `repos`, and `repositoryQuery` fields.
-- [`excludePersonalRepositories`](/admin/code_hosts/bitbucket_server#configuration)
-  - With this enabled, Sourcegraph will exclude any personal repositories from being imported, even if it has access to them.
+-   [`repos`](/admin/code_hosts/bitbucket_server#configuration)
+    -   A list of repositories in `projectKey/repositorySlug` format. The order determines the order in which we sync repository metadata and is safe to change.
+-   [`repositoryQuery`](/admin/code_hosts/bitbucket_server#configuration)
+    -   A list of strings with some pre-defined options (`none`, `all`), and/or a [Bitbucket Server / Bitbucket Data Center Repo Search Request Query Parameters](https://docs.atlassian.com/bitbucket-server/rest/6.1.2/bitbucket-rest.html#idp355).
+-   [`exclude`](/admin/code_hosts/bitbucket_server#configuration)
+    -   A list of repositories to exclude which takes precedence over the `repos`, and `repositoryQuery` fields.
+-   [`excludePersonalRepositories`](/admin/code_hosts/bitbucket_server#configuration)
+    -   With this enabled, Sourcegraph will exclude any personal repositories from being imported, even if it has access to them.
 
 ## Webhooks
 
@@ -59,7 +57,6 @@ Enforcing Bitbucket Server / Bitbucket Data Center permissions can be configured
 
 1. You have the exact same user accounts, **with matching usernames**, in Sourcegraph and Bitbucket Server / Bitbucket Data Center. This can be accomplished by configuring an [external authentication provider](/admin/auth/) that mirrors user accounts from a central directory like LDAP or Active Directory. The same should be done on Bitbucket Server / Bitbucket Data Center with [external user directories](https://confluence.atlassian.com/bitbucketserver/external-user-directories-776640394.html).
 1. Ensure you have set `auth.enableUsernameChanges` to **`false`** in the [site config](/admin/config/site_config) to prevent users from changing their usernames and **escalating their privileges**.
-
 
 ### Setup
 
@@ -82,50 +79,50 @@ Once a user has connected their Bitbucket Server account, either by signing-in v
 
 #### OAuth1
 
-This section walks you through the process of setting up an *Application Link between Sourcegraph and Bitbucket Server / Bitbucket Data Center* and configuring the Sourcegraph Bitbucket Server / Bitbucket Data Center configuration with `authorization` settings. It assumes the above prerequisites are met.
+This section walks you through the process of setting up an _Application Link between Sourcegraph and Bitbucket Server / Bitbucket Data Center_ and configuring the Sourcegraph Bitbucket Server / Bitbucket Data Center configuration with `authorization` settings. It assumes the above prerequisites are met.
 
 As an admin user, go to the "Application Links" page. You can use the sidebar navigation in the admin dashboard, or go directly to [https://bitbucketserver.example.com/plugins/servlet/applinks/listApplicationLinks](https://bitbucketserver.example.com/plugins/servlet/applinks/listApplicationLinks).
 
 > NOTE: There has been some [changes to the flow in Bitbucket v7.20](https://confluence.atlassian.com/bitbucketserver/bitbucket-data-center-and-server-7-20-release-notes-1101934428.html). Depending on your Bitbucket version, the setup is slightly different. Please follow the instructions for the correct version of Bitbucket below:
 
-- [Bitbucket v7.20 and above](#bitbucket-v720-and-above)
-- [Bitbucket v7.19 and below](#bitbucket-v719-and-below)
+-   [Bitbucket v7.20 and above](#bitbucket-v720-and-above)
+-   [Bitbucket v7.19 and below](#bitbucket-v719-and-below)
 
 #### Bitbucket v7.20 and above
 
 {/* <!-- Duplicating content in this section and in 7.19 on purpose. If we decide to implement OAuth2 support, the 7.20 instructions would be much more different than now --> */}
 
 1. Click on **Create link** button.
-    ![Screenshot of Bitbucket Application Links page.](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/bitbucket_server/application_links_landing_page.png)
+   ![Screenshot of Bitbucket Application Links page.](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/bitbucket_server/application_links_landing_page.png)
 1. Make sure **Atlassian product** is selected (This will probably look confusing, but it is the only way to setup legacy OAuth app that Sourcegraph supports).
-Write Sourcegraph's external URL in the **Application URL** field and click **Continue**. Click **Continue** on the next screen again, even if Bitbucket Server / Bitbucket Data Center warns you about the given URL not responding.
-    ![Screenshot of Bitbucket Create Link form.](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/bitbucket_server/create_link_part_1.png)
-1. Write `Sourcegraph` as the *Application Name* and select `Generic Application` as the *Application Type*. Leave everything else unset and click **Continue**.
-    ![Screenshot of second part of Bitbucket Create Link form.](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/bitbucket_server/create_link_part_2.png)
+   Write Sourcegraph's external URL in the **Application URL** field and click **Continue**. Click **Continue** on the next screen again, even if Bitbucket Server / Bitbucket Data Center warns you about the given URL not responding.
+   ![Screenshot of Bitbucket Create Link form.](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/bitbucket_server/create_link_part_1.png)
+1. Write `Sourcegraph` as the _Application Name_ and select `Generic Application` as the _Application Type_. Leave everything else unset and click **Continue**.
+   ![Screenshot of second part of Bitbucket Create Link form.](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/bitbucket_server/create_link_part_2.png)
 1. Now click the **Edit** button in the `Sourcegraph` Application Link that you just created and select the **Incoming Authentication** panel.
-    ![Screenshot of first part of Bitbucket Edit Link form.](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/bitbucket_server/edit_link_part_1.png)
-1. Generate a *Consumer Key* in your terminal with `echo sourcegraph$(openssl rand -hex 16)`. Copy this command's output and paste it in the *Consumer Key* field. Write `Sourcegraph` in the *Consumer Name* field.
-    ![Screenshot of second part of Bitbucket Edit Link form.](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/bitbucket_server/edit_link_part_2.png)
-1. Generate an RSA key pair in your terminal with `ssh-keygen -t rsa -b 4096 -o -a 100 -f sourcegraph.pem -m PEM && openssl rsa -in sourcegraph.pem -pubout > sourcegraph.pub`. Note that the private key must be in PKCS#1 format. Copy the contents of `sourcegraph.pub` and paste them in the *Public Key* field.
-    ![Screenshot of third part of Bitbucket Edit Link form.](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/bitbucket_server/edit_link_part_3.png)
-1. Scroll to the bottom and check the ***Allow 2-Legged OAuth*** checkbox, then write your admin account's username (this **must** match the `username` used in the external service configuration. In an instance where you may choose to use a service account, make sure that it has admin privileges.) in the *Execute as* field and, lastly, check the ***Allow user impersonation through 2-Legged OAuth*** checkbox. Press **Save**.
-    ![Screenshot of last part of Bitbucket Edit Link form.](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/bitbucket_server/edit_link_part_4.png)
-1. Go to your Sourcegraph's *Manage code hosts* page (i.e. `https://sourcegraph.example.com/site-admin/external-services`) and either edit or create a new *Bitbucket Server / Bitbucket Data Center* connection. Add the following settings:
+   ![Screenshot of first part of Bitbucket Edit Link form.](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/bitbucket_server/edit_link_part_1.png)
+1. Generate a _Consumer Key_ in your terminal with `echo sourcegraph$(openssl rand -hex 16)`. Copy this command's output and paste it in the _Consumer Key_ field. Write `Sourcegraph` in the _Consumer Name_ field.
+   ![Screenshot of second part of Bitbucket Edit Link form.](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/bitbucket_server/edit_link_part_2.png)
+1. Generate an RSA key pair in your terminal with `ssh-keygen -t rsa -b 4096 -o -a 100 -f sourcegraph.pem -m PEM && openssl rsa -in sourcegraph.pem -pubout > sourcegraph.pub`. Note that the private key must be in PKCS#1 format. Copy the contents of `sourcegraph.pub` and paste them in the _Public Key_ field.
+   ![Screenshot of third part of Bitbucket Edit Link form.](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/bitbucket_server/edit_link_part_3.png)
+1. Scroll to the bottom and check the **_Allow 2-Legged OAuth_** checkbox, then write your admin account's username (this **must** match the `username` used in the external service configuration. In an instance where you may choose to use a service account, make sure that it has admin privileges.) in the _Execute as_ field and, lastly, check the **_Allow user impersonation through 2-Legged OAuth_** checkbox. Press **Save**.
+   ![Screenshot of last part of Bitbucket Edit Link form.](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/bitbucket_server/edit_link_part_4.png)
+1. Go to your Sourcegraph's _Manage code hosts_ page (i.e. `https://sourcegraph.example.com/site-admin/external-services`) and either edit or create a new _Bitbucket Server / Bitbucket Data Center_ connection. Add the following settings:
     ```json
     {
-      // Other config goes here
-      "authorization": {
-        "identityProvider": {
-          "type": "username"
-        },
-        "oauth": {
-          "consumerKey": "<KEY GOES HERE>",
-          "signingKey": "<KEY GOES HERE>"
-        }
-      }
+    	// Other config goes here
+    	"authorization": {
+    		"identityProvider": {
+    			"type": "username"
+    		},
+    		"oauth": {
+    			"consumerKey": "<KEY GOES HERE>",
+    			"signingKey": "<KEY GOES HERE>"
+    		}
+    	}
     }
     ```
-1. Copy the *Consumer Key* you generated before to the `oauth.consumerKey` field and the output of the command `base64 sourcegraph.pem | tr -d '\n'` to the `oauth.signingKey` field. Finally, **save the configuration**. You're done!
+1. Copy the _Consumer Key_ you generated before to the `oauth.consumerKey` field and the output of the command `base64 sourcegraph.pem | tr -d '\n'` to the `oauth.signingKey` field. Finally, **save the configuration**. You're done!
 
 #### Bitbucket v7.19 and below
 
@@ -133,32 +130,32 @@ Write Sourcegraph's external URL in the **Application URL** field and click **Co
     <img src="https://imgur.com/Hg4bzOf.png" />
 1. Click **Continue** even if Bitbucket Server / Bitbucket Data Center warns you about the given URL not responding.
     <img src="https://imgur.com/x6vFKIL.png" />
-1. Write `Sourcegraph` as the *Application Name* and select `Generic Application` as the *Application Type*. Leave everything else unset and click **Continue**.
+1. Write `Sourcegraph` as the _Application Name_ and select `Generic Application` as the _Application Type_. Leave everything else unset and click **Continue**.
     <img src="https://imgur.com/161rbB9.png" />
 1. Now click the edit button in the `Sourcegraph` Application Link that you just created and select the `Incoming Authentication` panel.
     <img src="https://imgur.com/sMGmzhH.png" />
-1. Generate a *Consumer Key* in your terminal with `echo sourcegraph$(openssl rand -hex 16)`. Copy this command's output and paste it in the *Consumer Key* field. Write `Sourcegraph` in the *Consumer Name* field.
+1. Generate a _Consumer Key_ in your terminal with `echo sourcegraph$(openssl rand -hex 16)`. Copy this command's output and paste it in the _Consumer Key_ field. Write `Sourcegraph` in the _Consumer Name_ field.
     <img src="https://imgur.com/1kK2Y5x.png" />
-1. Generate an RSA key pair in your terminal with `openssl genrsa -out sourcegraph.pem 4096 && openssl rsa -in sourcegraph.pem -pubout > sourcegraph.pub`. Copy the contents of `sourcegraph.pub` and paste them in the *Public Key* field.
+1. Generate an RSA key pair in your terminal with `openssl genrsa -out sourcegraph.pem 4096 && openssl rsa -in sourcegraph.pem -pubout > sourcegraph.pub`. Copy the contents of `sourcegraph.pub` and paste them in the _Public Key_ field.
     <img src="https://imgur.com/YHm1uSr.png" />
-1. Scroll to the bottom and check the *Allow 2-Legged OAuth* checkbox, then write your admin account's username in the *Execute as* field and, lastly, check the *Allow user impersonation through 2-Legged OAuth* checkbox. Press **Save**.
+1. Scroll to the bottom and check the _Allow 2-Legged OAuth_ checkbox, then write your admin account's username in the _Execute as_ field and, lastly, check the _Allow user impersonation through 2-Legged OAuth_ checkbox. Press **Save**.
     <img src="https://imgur.com/1qxEAye.png" />
-1. Go to your Sourcegraph's *Manage code hosts* page (i.e. `https://sourcegraph.example.com/site-admin/external-services`) and either edit or create a new *Bitbucket Server / Bitbucket Data Center* connection. Add the following settings:
+1. Go to your Sourcegraph's _Manage code hosts_ page (i.e. `https://sourcegraph.example.com/site-admin/external-services`) and either edit or create a new _Bitbucket Server / Bitbucket Data Center_ connection. Add the following settings:
     ```json
     {
-      // Other config goes here
-      "authorization": {
-        "identityProvider": {
-          "type": "username"
-        },
-        "oauth": {
-          "consumerKey": "<KEY GOES HERE>",
-          "signingKey": "<KEY GOES HERE>"
-        }
-      }
+    	// Other config goes here
+    	"authorization": {
+    		"identityProvider": {
+    			"type": "username"
+    		},
+    		"oauth": {
+    			"consumerKey": "<KEY GOES HERE>",
+    			"signingKey": "<KEY GOES HERE>"
+    		}
+    	}
     }
     ```
-1. Copy the *Consumer Key* you generated before to the `oauth.consumerKey` field and the output of the command `base64 sourcegraph.pem | tr -d '\n'` to the `oauth.signingKey` field. Finally, **save the configuration**. You're done!
+1. Copy the _Consumer Key_ you generated before to the `oauth.consumerKey` field and the output of the command `base64 sourcegraph.pem | tr -d '\n'` to the `oauth.signingKey` field. Finally, **save the configuration**. You're done!
 
 ### Fast permission sync with Bitbucket Server plugin
 
@@ -176,10 +173,10 @@ With the [Sourcegraph Bitbucket Server plugin](/integration/bitbucket_server#sou
 
 ```json
 {
-  // [...]
-  "plugin": {
-    "permissions": "enabled"
-  }
+	// [...]
+	"plugin": {
+		"permissions": "enabled"
+	}
 }
 ```
 
@@ -205,7 +202,7 @@ Bitbucket Server / Bitbucket Data Center connections support the following confi
 
 {/* SCHEMA_SYNC_START: admin/code_hosts/bitbucket_server.schema.json */}
 {/* WARNING: This section is auto-generated during releases. Do not edit manually. */}
-{/* Last updated: 2025-11-12T22:19:37Z via sourcegraph/sourcegraph@v6.10.0 */}
+{/* Last updated: 2025-11-25T00:35:28Z via sourcegraph/sourcegraph@v6.10.3349 */}
 ```json
 	// Authentication alternatives: token OR password
 

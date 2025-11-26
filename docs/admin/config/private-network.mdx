@@ -1,6 +1,7 @@
 # Private network configuration
 
 ## Overview
+
 A private network is your organization's secure, internal network space - separated from the public internet.
 Think of it as your company's own protected environment where internal systems can communicate safely,
 keeping your sensitive data and operations shielded from external access.
@@ -9,18 +10,19 @@ When deploying self-hosted Sourcegraph instances in private networks with specif
 additional configuration may be required to ensure all networking features function correctly. The reasons for applying the following configuration options depend on the specific functionality of the Sourcegraph service and the unique network and infrastructure requirements of the organization.
 
 The following is a list of Sourcegraph services that initiate outbound connections to external services. Sourcegraph services not included in this list can be assumed to only connect to services within the Sourcegraph deployment's network segment:
-- **executor**: Sourcegraph [Executor](../executors) batch change or precise indexing jobs may need to connect to
-services hosted within an organization's private network
-- **frontend**: The frontend service communicates externally when connecting to:
-    * External [auth providers](../auth)
-    * Sending [telemetry data](../pings)
-    * Testing [code host connections](../code_hosts)
-    * Connecting to [externally hosted](../external_services) Sourcegraph services
-    * Connecting to external [LLM providers](../../cody/capabilities/supported-models) with Cody
-- **gitserver**: Executes git commands against externally hosted [code hosts](../external_service)
-- **migrator**: Connects to Postgres instances (which may be [externally hosted](../external_services/postgres)) to process database migrations
-- **worker**: Sourcegraph [Worker](../workers) run various background jobs that may require establishing connections to
-services hosted within an organization's private network
+
+-   **executor**: Sourcegraph [Executor](../executors) batch change or precise indexing jobs may need to connect to
+    services hosted within an organization's private network
+-   **frontend**: The frontend service communicates externally when connecting to:
+    -   External [auth providers](../auth)
+    -   Sending [telemetry data](../pings)
+    -   Testing [code host connections](../code_hosts)
+    -   Connecting to [externally hosted](../external_services) Sourcegraph services
+    -   Connecting to external [LLM providers](../../cody/capabilities/supported-models) with Cody
+-   **gitserver**: Executes git commands against externally hosted [code hosts](../external_service)
+-   **migrator**: Connects to Postgres instances (which may be [externally hosted](../external_services/postgres)) to process database migrations
+-   **worker**: Sourcegraph [Worker](../workers) run various background jobs that may require establishing connections to
+    services hosted within an organization's private network
 
 ## HTTP proxy configuration
 
@@ -34,13 +36,13 @@ Add the proxy environment variables to your Sourcegraph Helm chart [override fil
 
 ```yaml
 executor|frontend|gitserver|migrator|worker:
-  env:
-    HTTP_PROXY:
-      value: http://proxy.example.com:8080
-    HTTPS_PROXY:
-      value: http://proxy.example.com:8080
-    NO_PROXY:
-      value: "blobstore,codeinsights-db,codeintel-db,sourcegraph-frontend-internal,sourcegraph-frontend,gitserver,grafana,indexed-search-indexer,indexed-search,jaeger-query,pgsql,precise-code-intel-worker,prometheus,redis-cache,redis-store,searcher,syntect-server,worker-executors,worker,cloud-sql-proxy,localhost,127.0.0.1,.svc,.svc.cluster.local,kubernetes.default.svc"
+    env:
+        HTTP_PROXY:
+            value: http://proxy.example.com:8080
+        HTTPS_PROXY:
+            value: http://proxy.example.com:8080
+        NO_PROXY:
+            value: 'blobstore,codeinsights-db,codeintel-db,sourcegraph-frontend-internal,sourcegraph-frontend,gitserver,grafana,indexed-search-indexer,indexed-search,jaeger-query,pgsql,precise-code-intel-worker,prometheus,redis-cache,redis-store,searcher,syntect-server,worker-executors,worker,cloud-sql-proxy,localhost,127.0.0.1,.svc,.svc.cluster.local,kubernetes.default.svc'
 ```
 
 <Callout type="info">
@@ -48,34 +50,40 @@ If the updated Sourcegraph pods fail to pass their readiness or health checks af
 
 ```yaml
 executor|frontend|gitserver|migrator|worker:
-  env:
-   NO_PROXY:
-     value: "blobstore,codeinsights-db,codeintel-db,sourcegraph-frontend-internal,sourcegraph-frontend,gitserver,grafana,indexed-search-indexer,indexed-search,jaeger-query,pgsql,precise-code-intel-worker,prometheus,redis-cache,redis-store,searcher,syntect-server,worker-executors,worker,cloud-sql-proxy,localhost,127.0.0.1,.svc,.svc.cluster.local,kubernetes.default.svc,10.10.0.0/16,10.20.0.0/16"
+    env:
+        NO_PROXY:
+            value: 'blobstore,codeinsights-db,codeintel-db,sourcegraph-frontend-internal,sourcegraph-frontend,gitserver,grafana,indexed-search-indexer,indexed-search,jaeger-query,pgsql,precise-code-intel-worker,prometheus,redis-cache,redis-store,searcher,syntect-server,worker-executors,worker,cloud-sql-proxy,localhost,127.0.0.1,.svc,.svc.cluster.local,kubernetes.default.svc,10.10.0.0/16,10.20.0.0/16'
 ```
+
 </Callout>
 
 ### Docker Compose
 
 Add the proxy environment variables your docker compose override file.
+
 ```yaml
 services:
-  <service-name>:
-    environment:
-      - HTTP_PROXY=http://proxy.example.com:8080
-      - HTTPS_PROXY=http://proxy.example.com:8080
-      - NO_PROXY='blobstore,caddy,cadvisor,codeintel-db,codeintel-db-exporter,codeinsights-db,codeinsights-db-exporter,sourcegraph-frontend-0,sourcegraph-frontend-internal,gitserver-0,grafana,migrator,node-exporter,otel-collector,pgsql,pgsql-exporter,precise-code-intel-worker,prometheus,redis-cache,redis-store,searcher-0,syntect-server,worker,zoekt-indexserver-0,zoekt-webserver-0,localhost,127.0.0.1'
+    <service-name>:
+        environment:
+            - HTTP_PROXY=http://proxy.example.com:8080
+            - HTTPS_PROXY=http://proxy.example.com:8080
+            - NO_PROXY='blobstore,caddy,cadvisor,codeintel-db,codeintel-db-exporter,codeinsights-db,codeinsights-db-exporter,sourcegraph-frontend-0,sourcegraph-frontend-internal,gitserver-0,grafana,migrator,node-exporter,otel-collector,pgsql,pgsql-exporter,precise-code-intel-worker,prometheus,redis-cache,redis-store,searcher-0,syntect-server,worker,zoekt-indexserver-0,zoekt-webserver-0,localhost,127.0.0.1'
 ```
 
-<Callout type="warning">Failure to configure `NO_PROXY` correctly can cause the proxy configuration to interfere with
-local networking between internal Sourcegraph services.</Callout>
+<Callout type="warning">
+	Failure to configure `NO_PROXY` correctly can cause the proxy configuration
+	to interfere with local networking between internal Sourcegraph services.
+</Callout>
 
 ## Docker networking configuration
+
 If there is an IP conflict on between the host network and the Docker network, you may need to configure the docker CIDR
 range in the docker-compose override file.
 
 Additional information on docker networking can be found here:
-* [Docker networking overview](https://docs.docker.com/network/)
-* [Networking in Compose](https://docs.docker.com/compose/how-tos/networking/)
+
+-   [Docker networking overview](https://docs.docker.com/network/)
+-   [Networking in Compose](https://docs.docker.com/compose/how-tos/networking/)
 
 ## Trusting TLS certificates using internal PKI
 
@@ -84,19 +92,22 @@ Sourcegraph instance to trust your internal Root Certificate Authorities, so you
 services, ex. code hosts, authentication providers, etc.
 
 This method offers several advantages:
-- Works consistently across both Cloud and self-hosted deployments
-- Requires minimal configuration changes
-- Can be managed entirely through the web UI
-- Maintains certificates in a centralized location
-- Aligns with enterprise PKI best practices
+
+-   Works consistently across both Cloud and self-hosted deployments
+-   Requires minimal configuration changes
+-   Can be managed entirely through the web UI
+-   Maintains certificates in a centralized location
+-   Aligns with enterprise PKI best practices
 
 The configuration process involves identifying and adding the public key of your organization's root Certificate
 Authority (CA) to Sourcegraph's site configuration. This approach is particularly efficient because:
-* Root CA certificates typically have long expiration periods (often measured in years)
-* A single root CA certificate usually covers multiple internal services
-* The configuration can be managed without container modifications or filesystem changes
+
+-   Root CA certificates typically have long expiration periods (often measured in years)
+-   A single root CA certificate usually covers multiple internal services
+-   The configuration can be managed without container modifications or filesystem changes
 
 ### Obtain the certificate chain
+
 Use the OpenSSL command to extract the certificate chain from your code host.
 Replace the domain and port with your internal code host's values:
 
@@ -106,18 +117,19 @@ openssl s_client -showcerts -connect example.com:8443 \
 ```
 
 ### Identify the root certificate
+
 In the generated `certs.log` file, locate the root CA certificate:
 
 Certificate chains typically include 3 certificates:
 
-* Root certificate authority (depth=2)
-* Intermediate certificate authority (depth=1)
-* Server (leaf) certificate (depth=0)
+-   Root certificate authority (depth=2)
+-   Intermediate certificate authority (depth=1)
+-   Server (leaf) certificate (depth=0)
 
 The last certificate in the chain will be the root CA certificate and will typically have:
 
-* A long expiration period (years)
-* A descriptive common name (e.g., "Enterprise Root CA 2023")
+-   A long expiration period (years)
+-   A descriptive common name (e.g., "Enterprise Root CA 2023")
 
 Example root CA certificate for github.com:
 
@@ -142,19 +154,20 @@ MII...c=
 ```
 
 ### Format the certificate
+
 Once you've identified the root CA certificate:
 
-* Extract the certificate content including the BEGIN and END markers.
-* Format the certificate for the site configuration:
-    * Replace newlines with \n characters
-    * Enclose the entire certificate in double quotes
-    * Add a trailing comma
-
+-   Extract the certificate content including the BEGIN and END markers.
+-   Format the certificate for the site configuration:
+    -   Replace newlines with \n characters
+    -   Enclose the entire certificate in double quotes
+    -   Add a trailing comma
 
 The following command can be used to easily obtain, extract, and format the root certificate from a 3 certificate chain.
 Be sure to adjust the hostname and port to match your internal code host. If your certificate chain is of a different
 depth, adjust the awk command accordingly. `awk '/BEGIN CERTIFICATE/{i++} i==X'`
- ```bash
+
+```bash
 openssl s_client -showcerts -connect example.com:8443 \
 -nameopt lname < /dev/null 2>&1 \
 | awk '/BEGIN CERTIFICATE/,/END CERTIFICATE/' \
@@ -164,31 +177,34 @@ openssl s_client -showcerts -connect example.com:8443 \
 ```
 
 ### Add the certificate to the site configuration
+
 Add the formatted certificate to your Sourcegraph site configuration.
 
 ```json
 {
-    "tls.external": {
-        "certificates": [
-            "-----BEGIN CERTIFICATE-----\naZ...==\n-----END CERTIFICATE-----"
-        ]
-    }
+	"tls.external": {
+		"certificates": [
+			"-----BEGIN CERTIFICATE-----\naZ...==\n-----END CERTIFICATE-----"
+		]
+	}
 }
 ```
 
 For organizations with multiple root CAs (uncommon), additional certificates can be added to the array:
+
 ```json
 {
-    "tls.external": {
-        "certificates": [
-            "-----BEGIN CERTIFICATE-----\naZ...==\n-----END CERTIFICATE-----",
-            "-----BEGIN CERTIFICATE-----\nMI...I7\n-----END CERTIFICATE-----"
-        ]
-    }
+	"tls.external": {
+		"certificates": [
+			"-----BEGIN CERTIFICATE-----\naZ...==\n-----END CERTIFICATE-----",
+			"-----BEGIN CERTIFICATE-----\nMI...I7\n-----END CERTIFICATE-----"
+		]
+	}
 }
 ```
 
 ### Validation of certificate configuration
+
 These steps confirms that configuring the root CA certificate through `tls.external` is sufficient for all standard
 Sourcegraph operations that require secure connections to internal services.
 
@@ -207,16 +223,15 @@ Sourcegraph operations that require secure connections to internal services.
         <Callout type="info">Executed by: worker service</Callout>
 
 <Callout type="note">
-Repository-centric permission sync jobs are expected to behave identically, as they use the same underlying TLS configuration mechanisms.
+	Repository-centric permission sync jobs are expected to behave identically,
+	as they use the same underlying TLS configuration mechanisms.
 </Callout>
 
 ### Recommended best practices
-* Only include root CA certificates, not intermediate or server certificates.
-* Avoid using `insecureSkipVerify: true` and add TLS certificates if needed, as it bypasses important security checks.
-* Document certificate sources and expiration dates in your organization's runbooks.
-* Plan for certificate rotation well before root CA expiration.
-* Most enterprises use a single root CA, so adding one certificate often covers all internal services.
-* Keep the certificate list minimal and well-maintained.
 
-
-
+-   Only include root CA certificates, not intermediate or server certificates.
+-   Avoid using `insecureSkipVerify: true` and add TLS certificates if needed, as it bypasses important security checks.
+-   Document certificate sources and expiration dates in your organization's runbooks.
+-   Plan for certificate rotation well before root CA expiration.
+-   Most enterprises use a single root CA, so adding one certificate often covers all internal services.
+-   Keep the certificate list minimal and well-maintained.
