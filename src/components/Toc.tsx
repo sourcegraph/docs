@@ -160,17 +160,6 @@ export function TableOfContents({headings}: Props) {
 								Edit this page on GitHub
 							</a>
 						</div>
-						<div className="mt-2 flex items-center text-sm">
-							<a
-								href={`https://sourcegraph.com/`}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-							>
-								<Globe className="mr-1 h-4 w-4" />
-								Go to Sourcegraph.com
-							</a>
-						</div>
 					</>
 				)}
 			</nav>
