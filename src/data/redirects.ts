@@ -5643,6 +5643,21 @@ const redirectsData = [
 		source: '/cody/core-concepts/enterprise-architecture',
 		destination: '/admin/architecture#cody',
 		permanent: true
+	},
+	{
+		source: '/how-to-videos',
+		destination: '/tutorials',
+		permanent: true
+	},
+	{
+		source: '/how-to-videos/code-search',
+		destination: '/tutorials#code-search-how-to-videos',
+		permanent: true
+	},
+	{
+		source: '/how-to-videos/cody',
+		destination: '/tutorials#cody',
+		permanent: true
 	}
 ];
 
