@@ -35,6 +35,37 @@ For programmatic access without storing credentials, use OAuth 2.0 with device f
 
 Before using OAuth, you must create an OAuth application in your Sourcegraph instance. Follow the instructions [here](/admin/oauth_apps#creating-an-oauth-app). (Note: you will need the `user:all` scope)
 
+#### Registering the MCP Server
+
+Once you have your Client ID, you can register the MCP server in your client using that ID.
+
+If your client does not natively support specifying an OAuth 2.0 Client ID, you can use `mcp-remote` as a fallback. Add the following configuration to the relevant section for MCP servers of your client to use the `stdio` transport with the following configuration:
+
+```json
+{
+    "sourcegraph": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://your-sourcegraph-instance.com/.api/mcp/v1",
+        "3334",
+        "--static-oauth-client-info",
+        "{\"client_id\":\"<your-client-id>\"}",
+        "--static-oauth-client-metadata",
+        "{\"scope\":\"user:all\"}"
+      ]
+    }
+}
+```
+
+<Callout type="info">
+  <ul>
+    <li>Replace `your-sourcegraph-instance.com` with your Sourcegraph instance URL and `<your-client-id>` with the ID of the client you registered in the prerequisites step.</li>
+    <li>When using the `mcp-remote` fallback, ensure the OAuth client you use has one of it's redirect URI set to `http://localhost:3334`.</li>
+  </ul>
+</Callout>
+
 ### Authorization Header
 
 Include your token in the Authorization header:
