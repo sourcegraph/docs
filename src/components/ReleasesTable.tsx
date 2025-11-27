@@ -62,7 +62,8 @@ export function SupportedReleasesTable() {
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		fetch('/api/releases')
+		const basePath = process.env.NEXT_PUBLIC_DOCS_BASE_PATH || '';
+		fetch(`${basePath}/api/releases`)
 			.then(res => {
 				if (!res.ok) throw new Error('Failed to fetch releases');
 				return res.json();
@@ -132,7 +133,9 @@ export function SupportedReleasesTable() {
 							<td className="px-4 py-2">✅</td>
 							<td className="px-4 py-2">
 								<a
-									href={`/technical-changelog#v${getChangelogAnchor(release.version)}`}
+									href={`/technical-changelog#v${getChangelogAnchor(
+										release.version
+									)}`}
 									className="text-blue-600 hover:underline dark:text-blue-400"
 								>
 									Notes
