@@ -257,11 +257,26 @@ curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1?filter_read_token
 
 -   `id` - Unique question identifier
 -   `question` - The original question text
--   `status` - Processing status: `pending`, `processing`, `completed`, `failed`
+-   `status` - Processing status: `pending`, `processing`, `completed`
+-   `error` - Error details if the question processing encountered an issue
 -   `title` - Generated title for the question
 -   `answer` - The AI-generated answer (when completed)
 -   `sources` - Array of sources used to generate the answer
 -   `suggested_followups` - Suggested follow-up questions
+
+If a question fails to process, the `status` will be `completed` and the `error` field will be populated, for example:
+
+```json
+{
+  "status": "completed",
+  "error": {
+    "title": "Token limit reached",
+    "kind": "TokenLimitExceeded",
+    "message": "The search exceeded the maximum token limit...",
+    "details": "Additional context about the error"
+  }
+}
+```
 
 ## Error handling
 
