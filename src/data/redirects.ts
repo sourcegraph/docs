@@ -854,7 +854,12 @@ const redirectsData = [
 	},
 	{
 		source: '/user/usage_statistics',
-		destination: '/admin/usage_statistics',
+		destination: '/analytics',
+		permanent: true
+	},
+	{
+		source: '/admin/analytics',
+		destination: '/analytics',
 		permanent: true
 	},
 	{
