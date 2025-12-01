@@ -481,11 +481,7 @@ export const navigation: NavigationItem[] = [
 				href: '/analytics',
 				sections: [
 					{title: 'Metrics', href: '/analytics#metrics'},
-					{title: 'API', href: '/analytics/api'},
-					{
-						title: 'Air-Gapped Analytics',
-						href: '/analytics/air-gapped'
-					}
+					{title: 'API', href: '/analytics/api'}
 				]
 			},
 			{
