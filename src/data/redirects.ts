@@ -5499,7 +5499,12 @@ const redirectsData = [
 
 	{
 		source: '/analytics/self-hosted',
-		destination: '/analytics/air-gapped',
+		destination: '/analytics',
+		permanent: true
+	},
+	{
+		source: '/analytics/air-gapped',
+		destination: '/analytics',
 		permanent: true
 	},
 
