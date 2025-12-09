@@ -10,15 +10,17 @@ const styles = {
 
 export function TierCallout({children}: {children: ReactNode}) {
 	const [flagContent, userContent] = Children.toArray(children).reduce<
-		[ReactNode, ReactNode]
+		[ReactNode[], ReactNode]
 	>(
 		(acc, child) => {
-			if (isValidElement(child) && child.type === 'user')
+			if (isValidElement(child) && child.type === 'user') {
 				acc[1] = child.props.children;
-			else acc[0] = child;
+			} else {
+				acc[0].push(child);
+			}
 			return acc;
 		},
-		[null, null]
+		[[], null]
 	);
 
 	return (
