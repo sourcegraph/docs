@@ -1,8 +1,4 @@
-<!-- Working Branch for May Release -->
-
 # Sourcegraph Docs
-
-<!-- Working branch for Sourcegraph 6.5 Release -->
 
 > [!IMPORTANT]
 > For support, please reach out to your account team or contact [support@sourcegraph.com](mailto:support@sourcegraph.com)
@@ -25,8 +21,8 @@ cd docs
 
 Before the dependencies are installed make sure your local machine has the following versions of `node` and `pnpm` installed:
 
--   node: `v20.8.1`
--   pnpm: `8.13.1`
+-   node: `v24.12.0`
+-   pnpm: `10.25.0`
 
 **Note**: If you have `mise` available you can install the above versions for only this repository by running the following command from your terminal in the root folder:
 
@@ -74,7 +70,7 @@ git switch -c BRANCH_NAME_HERE
 
 ### Folder structure
 
-The folder structure is exactly the same here. All the docs reside within the `/docs` folder. Here you'll find separate folders for every docs section like `cody`, `code_search`, `cli`, etc.
+The folder structure is exactly the same here. All the docs reside within the `/docs` folder. Here you'll find separate folders for every docs section like `cody`, `code-search`, `cli`, etc.
 
 -   Navigate to the relevant relevant section for your contribution
 -   If you're adding a new page, create a new MDX file (e.g., `my-new-page.mdx`) in the appropriate folder
@@ -113,7 +109,7 @@ For example the cards layout appears by using the `<Callout>` component that can
 You can use this component within your content as follows:
 
 ```js
-<Callout type="note">Cody is currently in Beta for all users.</Callout>
+<Callout type="note">This feature is currently in Beta for all users.</Callout>
 ```
 
 This snippet creates a single `<QuickLink>` titled as "Get Cody". You can add as many cards you want while filling out all the relevant details.
@@ -164,7 +160,6 @@ When you open a PR Vercel deploys and provides you with a preview deployment lin
 Once you're satisfied with your changes, follow these steps:
 
 -   Commit your changes
--   Create a pull request to the [Sourcegraph documentation repository](https://github.com/sourcegraph/docs).
--   Tag `@maedahbatool` in `#docs` channel through Slack to get a quick review
+-   Create a pull request to the [Sourcegraph documentation repository](https://github.com/sourcegraph/docs), and tag the appropriate reviewers.
 
 Thank you for contributing to Sourcegraph documentation! Your efforts help us provide top-notch learning experiences for our users. If you have any questions or need assistance, feel free to reach out.
