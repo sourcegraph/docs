@@ -5668,6 +5668,119 @@ const redirectsData = [
 		source: '/how-to-videos/cody',
 		destination: '/tutorials#cody',
 		permanent: true
+	},
+	{
+		source: '/code-search/code-navigation/auto_indexing',
+		destination: '/code-navigation/auto_indexing',
+		permanent: true
+	},
+	{
+		source: '/code-search/code-navigation/auto_indexing_configuration',
+		destination: '/code-navigation/auto_indexing_configuration',
+		permanent: true
+	},
+	{
+		source: '/code-search/code-navigation/envvars',
+		destination: '/code-navigation/envvars',
+		permanent: true
+	},
+	{
+		source: '/code-search/code-navigation/explanations/auto_indexing_inference',
+		destination: '/code-navigation/explanations/auto_indexing_inference',
+		permanent: true
+	},
+	{
+		source: '/code-search/code-navigation/explanations/uploads',
+		destination: '/code-navigation/explanations/uploads',
+		permanent: true
+	},
+	{
+		source: '/code-search/code-navigation/features',
+		destination: '/code-navigation/features',
+		permanent: true
+	},
+	{
+		source: '/code-search/code-navigation/how-to/adding_scip_to_workflows',
+		destination: '/code-navigation/how-to/adding_scip_to_workflows',
+		permanent: true
+	},
+	{
+		source: '/code-search/code-navigation/how-to/combining_scip_uploads_from_ci_cd_and_auto_indexing',
+		destination:
+			'/code-navigation/how-to/combining_scip_uploads_from_ci_cd_and_auto_indexing',
+		permanent: true
+	},
+	{
+		source: '/code-search/code-navigation/how-to',
+		destination: '/code-navigation/how-to',
+		permanent: true
+	},
+	{
+		source: '/code-search/code-navigation/how-to/index_a_go_repository',
+		destination: '/code-navigation/how-to/index_a_go_repository',
+		permanent: true
+	},
+	{
+		source: '/code-search/code-navigation/how-to/index_a_typescript_and_javascript_repository',
+		destination:
+			'/code-navigation/how-to/index_a_typescript_and_javascript_repository',
+		permanent: true
+	},
+	{
+		source: '/code-search/code-navigation/how-to/index_other_languages',
+		destination: '/code-navigation/how-to/index_other_languages',
+		permanent: true
+	},
+	{
+		source: '/code-search/code-navigation/how-to/policies_resource_usage_best_practices',
+		destination:
+			'/code-navigation/how-to/policies_resource_usage_best_practices',
+		permanent: true
+	},
+	{
+		source: '/code-search/code-navigation',
+		destination: '/code-navigation',
+		permanent: true
+	},
+	{
+		source: '/code-search/code-navigation/inference_configuration',
+		destination: '/code-navigation/inference_configuration',
+		permanent: true
+	},
+	{
+		source: '/code-search/code-navigation/precise_code_navigation',
+		destination: '/code-navigation/precise_code_navigation',
+		permanent: true
+	},
+	{
+		source: '/code-search/code-navigation/private-maven-repository-configuration',
+		destination: '/code-navigation/private-maven-repository-configuration',
+		permanent: true
+	},
+	{
+		source: '/code-search/code-navigation/rockskip',
+		destination: '/code-navigation/rockskip',
+		permanent: true
+	},
+	{
+		source: '/code-search/code-navigation/search_based_code_navigation',
+		destination: '/code-navigation/search_based_code_navigation',
+		permanent: true
+	},
+	{
+		source: '/code-search/code-navigation/syntactic_code_navigation',
+		destination: '/code-navigation/syntactic_code_navigation',
+		permanent: true
+	},
+	{
+		source: '/code-search/code-navigation/troubleshooting',
+		destination: '/code-navigation/troubleshooting',
+		permanent: true
+	},
+	{
+		source: '/code-search/code-navigation/writing_an_indexer',
+		destination: '/code-navigation/writing_an_indexer',
+		permanent: true
 	}
 ];
 
