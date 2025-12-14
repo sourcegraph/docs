@@ -474,9 +474,43 @@ export const navigation: NavigationItem[] = [
 				title: 'Enterprise Self-Hosted',
 				href: '/self-hosted',
 				sections: [
-					{title: 'Deploy', href: '/self-hosted/deploy'},
-					{title: 'Upgrade', href: '/self-hosted/updates'},
-					{title: 'Observability', href: '/self-hosted/observability'}
+					{
+						title: 'Deploy',
+						href: '/self-hosted/deploy',
+						subsections: [
+							{title: 'Single-node', href: '/self-hosted/deploy/single-node'},
+							{title: 'Docker Compose', href: '/self-hosted/deploy/docker-compose'},
+							{title: 'Kubernetes', href: '/self-hosted/deploy/kubernetes'},
+							{title: 'Machine Images', href: '/self-hosted/deploy/machine-images'}
+						]
+					},
+					{
+						title: 'Upgrade',
+						href: '/self-hosted/updates',
+						subsections: [
+							{title: 'Migrator', href: '/self-hosted/updates/migrator'}
+						]
+					},
+					{
+						title: 'External Services',
+						href: '/self-hosted/external_services'
+					},
+					{
+						title: 'Executors',
+						href: '/self-hosted/executors'
+					},
+					{
+						title: 'Observability',
+						href: '/self-hosted/observability'
+					},
+					{
+						title: 'How-to Guides',
+						href: '/self-hosted/how-to'
+					},
+					{
+						title: 'FAQs',
+						href: '/self-hosted/faq'
+					}
 				]
 			},
 			{
