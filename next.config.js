@@ -1,5 +1,6 @@
 const {withContentlayer} = require('next-contentlayer');
 const {generateRssFeed} = require('./dev/rss');
+const {execSync} = require('child_process');
 /** @type {import('next').NextConfig} */
 
 const nextConfig = {
@@ -20,6 +21,8 @@ const nextConfig = {
 
 module.exports = async () => {
 	// placing this here so its part of nextjs's build process
+	execSync('node dev/check-links.mjs', {stdio: 'inherit'});
+	execSync('node dev/check-filenames.mjs', {stdio: 'inherit'});
 	await generateRssFeed();
 	return withContentlayer(nextConfig);
 };
