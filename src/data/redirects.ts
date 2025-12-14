@@ -1,5 +1,10 @@
 const redirectsData = [
 	{
+		source: '/admin/tls_ssl',
+		destination: '/admin/http_https_configuration',
+		permanent: true
+	},
+	{
 		source: '/docs/admin/deploy_executors',
 		destination:
 			'https://sourcegraph.com/docs/admin/executors/deploy_executors',
@@ -5780,6 +5785,11 @@ const redirectsData = [
 	{
 		source: '/code-search/code-navigation/writing_an_indexer',
 		destination: '/code-navigation/writing_an_indexer',
+		permanent: true
+	},
+	{
+		source: '/admin/self-hosted',
+		destination: '/self-hosted',
 		permanent: true
 	}
 ];
