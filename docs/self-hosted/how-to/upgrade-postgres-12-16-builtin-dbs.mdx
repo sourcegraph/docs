@@ -1,0 +1,117 @@
+# Upgrading Built-in PostgreSQL
+
+The following doc contains detailed instructions for upgrading the built-in PostgreSQL databases. Via our `postgresql-16` and `postgresql-16-codeinsights` image entrypoint script. This doc assumes an admin is attempting to upgrade to Sourcegraph `6.0.0` from an older version (usually pre `5.10.0`) using one of our "deploy" repos. For more general info see [Upgrading PostgreSQL](/self-hosted/postgres#upgrading-postgresql).
+
+> WARNING: Upgrading the PostgreSQL database requires stopping your Sourcegraph deployment which will result in **downtime**.
+>
+> Additionally, once the upgrade process is started via the database container, interrupting the container before the upgrade is complete could result in corrupting the underlying Postgres database. **We strongly advise taking a backup before the upgrade.**
+
+## Docker Compose
+
+Docker compose supports [standard](/self-hosted/deploy/docker-compose/upgrade#standard-upgrades) and [multi-version](/self-hosted/deploy/docker-compose/upgrade#multi-version-upgrades) upgrades to Postgres 16 versions! However, if you prefer to upgrade your DBs independent of a Sourcegraph version upgrade see the following procedure.
+
+1. **Bring down your containers**
+
+```bash
+docker-compose down --remove-orphans
+```
+
+2. Change the `image:` in your `docker-compose.yaml` to the release of `pgsql`, `codeinsights-db`, and `codeintel-db`. Or [merge in changes](/self-hosted/deploy/docker-compose/upgrade#standard-upgrades) from the tagged sourcegraph release you're planning to upgrade to. **Example:**
+
+```yaml
+pgsql:
+    container_name: pgsql
+    image: 'index.docker.io/sourcegraph/postgresql-16:6.0.0'
+---
+codeintel-db:
+    container_name: codeintel-db
+    image: 'index.docker.io/sourcegraph/postgresql-16:6.0.0'
+---
+codeinsights-db:
+    container_name: codeintel-db
+    image: 'index.docker.io/sourcegraph/postgresql-16-codeinsights:6.0.0'
+```
+
+3. Bring up your deployments
+
+```bash
+docker-compose up -d pgsql codeintel-db codeinsights-db
+```
+
+Wait for the database containers to come up healthy. If for some reason the database containers fail to come up healthy, please check their logs and reach out to us for support at support@sourcegraph.com.
+
+## Kubernetes Kustomize
+
+Kubernetes Kustomize supports [standard](/self-hosted/deploy/kubernetes/upgrade#standard-upgrades) and [multi-version](/deploy/kubernetes/upgrade#multi-version-upgrades) upgrades to Postgres 16 versions! However, if you prefer to upgrade your DBs independent of a Sourcegraph version upgrade see the following procedure.
+
+1. **Disable Connections to the Database**:
+    - The following services must have their replicas scaled to 0: - Deployments (e.g., `kubectl scale deployment <name> --replicas=0`) - precise-code-intel-worker - repo-updater - searcher - sourcegraph-frontend - sourcegraph-frontend-internal - symbols - worker - Stateful sets (e.g., `kubectl scale sts <name> --replicas=0`): - gitserver - indexed-search
+      _convenience command:_
+
+```sh
+$ kubectl scale deployment precise-code-intel-worker repo-updater searcher sourcegraph-frontend sourcegraph-frontend-internal symbols worker --replicas=0 && kubectl scale sts gitserver indexed-search --replicas=0
+```
+
+2. **Update base files for the database statefulSets**:
+
+-   Update the `image` field in your `pgsql`, `codeintel-db` and `codeinsights-db` StatefulSets to `sourcegraph/postgresql-16:6.0.0` and `sourcegraph/codeinsights-db:6.0.0` respectively.
+    **Example:**
+
+```yaml
+# deploy-sourcegraph-k8s/base/sourcegraph/codeinsights-db/codeinsights-db.StatefulSet.yaml
+    containers:
+      - name: codeinsights
+        image: index.docker.io/sourcegraph/postgresql-16-codeinsights:6.0.0
+# deploy-sourcegraph-k8s/base/sourcegraph/codeintel-db/codeintel-db.StatefulSet.yaml
+    containers:
+      - name: pgsql
+        image: index.docker.io/sourcegraph/postgresql-16:6.0.0
+# deploy-sourcegraph-k8s/base/sourcegraph/pgsql/pgsql.StatefulSet.yaml
+    containers:
+      - name: pgsql
+        image: index.docker.io/sourcegraph/postgresql-16:6.0.0
+```
+
+3. Apply the new container images to the database statefulsets:
+
+```sh
+$ kubectl apply -f deploy-sourcegraph-k8s/base/sourcegraph/pgsql/pgsql.StatefulSet.yaml deploy-sourcegraph-k8s/base/sourcegraph/codeintel-db/codeintel-db.StatefulSet.yaml deploy-sourcegraph-k8s/base/sourcegraph/codeinsights-db/codeinsights-db.StatefulSet.yaml
+```
+
+-   Wait until the containers come up, and complete their migration to Postgresql 16
+
+## Helm
+
+When using the in-cluster PostgreSQL databases included in the Sourcegraph Helm chart, database upgrades are integrated with the overall application upgrade process and there is no mechanism to upgrade only the PostgreSQL containers independently. Therefore, the PostgreSQL upgrade must be performed as part of a full Sourcegraph version upgrade.
+
+For production deployments, we recommend using external PostgreSQL databases, which allows for more flexible database management outside the Helm deployment lifecycle.
+
+### Required Upgrade Path
+
+<Callout type="warning">
+	Sourcegraph versions `v6.0.x` and later require PostgreSQL 16 and will not
+	connect to PostgreSQL 12 databases. This means any direct upgrade from
+	versions earlier than `v5.10.3940` to any version `v6.0.x` or later will
+	fail because the migrator in `v6.0.x` and later cannot connect to PostgreSQL
+	12 to perform the upgrade.
+</Callout>
+
+To safely upgrade PostgreSQL in Helm deployments:
+
+1. **First upgrade to an intermediate version**:
+
+    - Upgrade to either Sourcegraph `v5.10.3940` or `v5.11.6271` using the [helm multi-version upgrade procedure](/self-hosted/deploy/kubernetes#multi-version-upgrade-procedure) or [standard upgrade procedure](/self-hosted/deploy/kubernetes#standard-upgrades)
+    - These specific versions include the necessary PostgreSQL upgrade scripts to safely migrate from PG12 to PG16
+
+2. **Verify the PostgreSQL upgrade** (optional):
+
+    - You can verify the PostgreSQL version has been successfully upgraded by connecting to the database:
+        ```bash
+        kubectl exec -it pgsql -- psql -U sg -c "SELECT version();"
+        ```
+    - The output should show PostgreSQL 16.x
+
+3. **Proceed to target version**:
+    - Once PostgreSQL has been upgraded to version 16, you can safely upgrade to your target version (`v6.0.x` or later) using the standard upgrade procedure
+
+For any issues during the PostgreSQL upgrade process, please contact support@sourcegraph.com.

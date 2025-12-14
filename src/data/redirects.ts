@@ -5791,6 +5791,598 @@ const redirectsData = [
 		source: '/admin/self-hosted',
 		destination: '/self-hosted',
 		permanent: true
+	},
+	{
+		source: '/enterprise-portal',
+		destination: '/admin/enterprise-portal',
+		permanent: true
+	},
+	{
+		source: '/admin/observability/outbound-request-log',
+		destination: '/admin/outbound-request-log',
+		permanent: true
+	},
+	{
+		source: '/admin/config/webhooks/incoming',
+		destination: '/admin/webhooks/incoming',
+		permanent: true
+	},
+	{
+		source: '/admin/config/webhooks',
+		destination: '/admin/webhooks',
+		permanent: true
+	},
+	{
+		source: '/admin/config/webhooks/outgoing',
+		destination: '/admin/webhooks/outgoing',
+		permanent: true
+	},
+	{
+		source: '/admin/config/advanced_config_file',
+		destination: '/self-hosted/advanced_config_file',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/docker-compose/aws',
+		destination: '/self-hosted/deploy/docker-compose/aws',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/docker-compose/azure',
+		destination: '/self-hosted/deploy/docker-compose/azure',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/docker-compose/configuration',
+		destination: '/self-hosted/deploy/docker-compose/configuration',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/docker-compose/digitalocean',
+		destination: '/self-hosted/deploy/docker-compose/digitalocean',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/docker-compose/google_cloud',
+		destination: '/self-hosted/deploy/docker-compose/google_cloud',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/docker-compose',
+		destination: '/self-hosted/deploy/docker-compose',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/docker-compose/migrate',
+		destination: '/self-hosted/deploy/docker-compose/migrate',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/docker-compose/operations',
+		destination: '/self-hosted/deploy/docker-compose/operations',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/docker-compose/upgrade',
+		destination: '/self-hosted/deploy/docker-compose/upgrade',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/docker-single-container/aws',
+		destination: '/self-hosted/deploy/docker-single-container/aws',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/docker-single-container/digitalocean',
+		destination: '/self-hosted/deploy/docker-single-container/digitalocean',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/docker-single-container/google_cloud',
+		destination: '/self-hosted/deploy/docker-single-container/google_cloud',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/docker-single-container',
+		destination: '/self-hosted/deploy/docker-single-container',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy',
+		destination: '/self-hosted/deploy',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/instance-size',
+		destination: '/self-hosted/deploy/instance-size',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/kubernetes/azure',
+		destination: '/self-hosted/deploy/kubernetes/azure',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/kubernetes/configure',
+		destination: '/self-hosted/deploy/kubernetes/configure',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/kubernetes/eks',
+		destination: '/self-hosted/deploy/kubernetes/eks',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/kubernetes',
+		destination: '/self-hosted/deploy/kubernetes',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/kubernetes/kustomize',
+		destination: '/self-hosted/deploy/kubernetes/kustomize',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/kubernetes/kustomize/eks',
+		destination: '/self-hosted/deploy/kubernetes/kustomize/eks',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/kubernetes/kustomize/gke',
+		destination: '/self-hosted/deploy/kubernetes/kustomize/gke',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/kubernetes/kustomize',
+		destination: '/self-hosted/deploy/kubernetes/kustomize',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/kubernetes/kustomize/migrate',
+		destination: '/self-hosted/deploy/kubernetes/kustomize/migrate',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/kubernetes/operations',
+		destination: '/self-hosted/deploy/kubernetes/operations',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/kubernetes/scale',
+		destination: '/self-hosted/deploy/kubernetes/scale',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/kubernetes/troubleshoot',
+		destination: '/self-hosted/deploy/kubernetes/troubleshoot',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/kubernetes/upgrade',
+		destination: '/self-hosted/deploy/kubernetes/upgrade',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/machine-images/aws-ami',
+		destination: '/self-hosted/deploy/machine-images/aws-ami',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/machine-images/aws-oneclick',
+		destination: '/self-hosted/deploy/machine-images/aws-oneclick',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/machine-images/gce',
+		destination: '/self-hosted/deploy/machine-images/gce',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/machine-images',
+		destination: '/self-hosted/deploy/machine-images',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/migrate-backup',
+		destination: '/self-hosted/deploy/migrate-backup',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/repositories',
+		destination: '/self-hosted/deploy/repositories',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/resource_estimator',
+		destination: '/self-hosted/deploy/resource_estimator',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/scale',
+		destination: '/self-hosted/deploy/scale',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/single-node',
+		destination: '/self-hosted/deploy/single-node',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/single-node/script',
+		destination: '/self-hosted/deploy/single-node/script',
+		permanent: true
+	},
+	{
+		source: '/admin/deploy/without_service_discovery',
+		destination: '/self-hosted/deploy/without_service_discovery',
+		permanent: true
+	},
+	{
+		source: '/admin/deployment_best_practices',
+		destination: '/self-hosted/deployment_best_practices',
+		permanent: true
+	},
+	{
+		source: '/admin/config/email',
+		destination: '/self-hosted/email',
+		permanent: true
+	},
+	{
+		source: '/admin/config/encryption',
+		destination: '/self-hosted/encryption',
+		permanent: true
+	},
+	{
+		source: '/admin/executors/deploy_executors',
+		destination: '/self-hosted/executors/deploy_executors',
+		permanent: true
+	},
+	{
+		source: '/admin/executors/deploy_executors_binary',
+		destination: '/self-hosted/executors/deploy_executors_binary',
+		permanent: true
+	},
+	{
+		source: '/admin/executors/deploy_executors_binary_offline',
+		destination: '/self-hosted/executors/deploy_executors_binary_offline',
+		permanent: true
+	},
+	{
+		source: '/admin/executors/deploy_executors_dind',
+		destination: '/self-hosted/executors/deploy_executors_dind',
+		permanent: true
+	},
+	{
+		source: '/admin/executors/deploy_executors_docker',
+		destination: '/self-hosted/executors/deploy_executors_docker',
+		permanent: true
+	},
+	{
+		source: '/admin/executors/deploy_executors_kubernetes',
+		destination: '/self-hosted/executors/deploy_executors_kubernetes',
+		permanent: true
+	},
+	{
+		source: '/admin/executors/deploy_executors_terraform',
+		destination: '/self-hosted/executors/deploy_executors_terraform',
+		permanent: true
+	},
+	{
+		source: '/admin/executors/executors_config',
+		destination: '/self-hosted/executors/executors_config',
+		permanent: true
+	},
+	{
+		source: '/admin/executors/executors_troubleshooting',
+		destination: '/self-hosted/executors/executors_troubleshooting',
+		permanent: true
+	},
+	{
+		source: '/admin/executors/firecracker',
+		destination: '/self-hosted/executors/firecracker',
+		permanent: true
+	},
+	{
+		source: '/admin/external_services',
+		destination: '/self-hosted/external_services',
+		permanent: true
+	},
+	{
+		source: '/admin/external_services/object_storage',
+		destination: '/self-hosted/external_services/object_storage',
+		permanent: true
+	},
+	{
+		source: '/admin/external_services/postgres',
+		destination: '/self-hosted/external_services/postgres',
+		permanent: true
+	},
+	{
+		source: '/admin/external_services/redis',
+		destination: '/self-hosted/external_services/redis',
+		permanent: true
+	},
+	{
+		source: '/admin/how-to/blobstore_debugging',
+		destination: '/self-hosted/how-to/blobstore_debugging',
+		permanent: true
+	},
+	{
+		source: '/admin/how-to/blobstore_update_notes',
+		destination: '/self-hosted/how-to/blobstore_update_notes',
+		permanent: true
+	},
+	{
+		source: '/admin/how-to/clear_codeintel_data',
+		destination: '/self-hosted/how-to/clear_codeintel_data',
+		permanent: true
+	},
+	{
+		source: '/admin/how-to/dirty_database',
+		destination: '/self-hosted/how-to/dirty_database',
+		permanent: true
+	},
+	{
+		source: '/admin/how-to/dirty_database_pre_3_37',
+		destination: '/self-hosted/how-to/dirty_database_pre_3_37',
+		permanent: true
+	},
+	{
+		source: '/admin/how-to/monitoring-guide',
+		destination: '/self-hosted/how-to/monitoring-guide',
+		permanent: true
+	},
+	{
+		source: '/admin/how-to/postgres14-index-corruption',
+		destination: '/self-hosted/how-to/postgres14-index-corruption',
+		permanent: true
+	},
+	{
+		source: '/admin/how-to/postgres_12_to_16_drift',
+		destination: '/self-hosted/how-to/postgres_12_to_16_drift',
+		permanent: true
+	},
+	{
+		source: '/admin/how-to/precise-code-intel-worker-crashloopbackoff',
+		destination:
+			'/self-hosted/how-to/precise-code-intel-worker-crashloopbackoff',
+		permanent: true
+	},
+	{
+		source: '/admin/how-to/privileged_migrations',
+		destination: '/self-hosted/how-to/privileged_migrations',
+		permanent: true
+	},
+	{
+		source: '/admin/how-to/rebuild-corrupt-postgres-indexes',
+		destination: '/self-hosted/how-to/rebuild-corrupt-postgres-indexes',
+		permanent: true
+	},
+	{
+		source: '/admin/how-to/redis_configmap',
+		destination: '/self-hosted/how-to/redis_configmap',
+		permanent: true
+	},
+	{
+		source: '/admin/how-to/rollback_database',
+		destination: '/self-hosted/how-to/rollback_database',
+		permanent: true
+	},
+	{
+		source: '/admin/how-to/run-psql',
+		destination: '/self-hosted/how-to/run-psql',
+		permanent: true
+	},
+	{
+		source: '/admin/how-to/setup-https',
+		destination: '/self-hosted/how-to/setup-https',
+		permanent: true
+	},
+	{
+		source: '/admin/how-to/troubleshoot-pod-eviction',
+		destination: '/self-hosted/how-to/troubleshoot-pod-eviction',
+		permanent: true
+	},
+	{
+		source: '/admin/how-to/unfinished_migration',
+		destination: '/self-hosted/how-to/unfinished_migration',
+		permanent: true
+	},
+	{
+		source: '/admin/how-to/upgrade-postgres-12-16-builtin-dbs',
+		destination: '/self-hosted/how-to/upgrade-postgres-12-16-builtin-dbs',
+		permanent: true
+	},
+	{
+		source: '/admin/http_https_configuration',
+		destination: '/self-hosted/http_https_configuration',
+		permanent: true
+	},
+	{
+		source: '/admin/config/network-filtering',
+		destination: '/self-hosted/network-filtering',
+		permanent: true
+	},
+	{
+		source: '/admin/observability/.gitattributes',
+		destination: '/self-hosted/observability/.gitattributes',
+		permanent: true
+	},
+	{
+		source: '/admin/observability/alerting',
+		destination: '/self-hosted/observability/alerting',
+		permanent: true
+	},
+	{
+		source: '/admin/observability/alerting_custom_consumption',
+		destination: '/self-hosted/observability/alerting_custom_consumption',
+		permanent: true
+	},
+	{
+		source: '/admin/observability/alerts',
+		destination: '/self-hosted/observability/alerts',
+		permanent: true
+	},
+	{
+		source: '/admin/observability/dashboards',
+		destination: '/self-hosted/observability/dashboards',
+		permanent: true
+	},
+	{
+		source: '/admin/observability/health_checks',
+		destination: '/self-hosted/observability/health_checks',
+		permanent: true
+	},
+	{
+		source: '/admin/observability',
+		destination: '/self-hosted/observability',
+		permanent: true
+	},
+	{
+		source: '/admin/observability/logs',
+		destination: '/self-hosted/observability/logs',
+		permanent: true
+	},
+	{
+		source: '/admin/observability/metrics',
+		destination: '/self-hosted/observability/metrics',
+		permanent: true
+	},
+	{
+		source: '/admin/observability/opentelemetry',
+		destination: '/self-hosted/observability/opentelemetry',
+		permanent: true
+	},
+	{
+		source: '/admin/observability/tracing',
+		destination: '/self-hosted/observability/tracing',
+		permanent: true
+	},
+	{
+		source: '/admin/observability/troubleshooting',
+		destination: '/self-hosted/observability/troubleshooting',
+		permanent: true
+	},
+	{
+		source: '/admin/config/postgres-conf',
+		destination: '/self-hosted/postgres-conf',
+		permanent: true
+	},
+	{
+		source: '/admin/postgres',
+		destination: '/self-hosted/postgres',
+		permanent: true
+	},
+	{
+		source: '/admin/postgres12_end_of_life_notice',
+		destination: '/self-hosted/postgres12_end_of_life_notice',
+		permanent: true
+	},
+	{
+		source: '/admin/postgresql_collation_version_mismatch_resolution',
+		destination:
+			'/self-hosted/postgresql_collation_version_mismatch_resolution',
+		permanent: true
+	},
+	{
+		source: '/admin/pprof',
+		destination: '/self-hosted/pprof',
+		permanent: true
+	},
+	{
+		source: '/admin/config/private-network',
+		destination: '/self-hosted/private-network',
+		permanent: true
+	},
+	{
+		source: '/admin/config/restore',
+		destination: '/self-hosted/restore',
+		permanent: true
+	},
+	{
+		source: '/admin/sourcegraph-nginx-mermaid',
+		destination: '/self-hosted/sourcegraph-nginx-mermaid',
+		permanent: true
+	},
+	{
+		source: '/admin/ssl_https_self_signed_cert_nginx',
+		destination: '/self-hosted/ssl_https_self_signed_cert_nginx',
+		permanent: true
+	},
+	{
+		source: '/admin/updates/automatic',
+		destination: '/self-hosted/updates/automatic',
+		permanent: true
+	},
+	{
+		source: '/admin/updates/docker_compose',
+		destination: '/self-hosted/updates/docker_compose',
+		permanent: true
+	},
+	{
+		source: '/admin/updates',
+		destination: '/self-hosted/updates',
+		permanent: true
+	},
+	{
+		source: '/admin/updates/kubernetes',
+		destination: '/self-hosted/updates/kubernetes',
+		permanent: true
+	},
+	{
+		source: '/admin/updates/migrator/downgrading',
+		destination: '/self-hosted/updates/migrator/downgrading',
+		permanent: true
+	},
+	{
+		source: '/admin/updates/migrator',
+		destination: '/self-hosted/updates/migrator',
+		permanent: true
+	},
+	{
+		source: '/admin/updates/migrator/migrator-operations',
+		destination: '/self-hosted/updates/migrator/migrator-operations',
+		permanent: true
+	},
+	{
+		source: '/admin/updates/migrator/schema-drift',
+		destination: '/self-hosted/updates/migrator/schema-drift',
+		permanent: true
+	},
+	{
+		source: '/admin/updates/migrator/troubleshooting-upgrades',
+		destination: '/self-hosted/updates/migrator/troubleshooting-upgrades',
+		permanent: true
+	},
+	{
+		source: '/admin/updates/migrator/upgrading-early-versions',
+		destination: '/self-hosted/updates/migrator/upgrading-early-versions',
+		permanent: true
+	},
+	{
+		source: '/admin/updates/pure_docker',
+		destination: '/self-hosted/updates/pure_docker',
+		permanent: true
+	},
+	{
+		source: '/admin/updates/server',
+		destination: '/self-hosted/updates/server',
+		permanent: true
+	},
+	{
+		source: '/admin/url',
+		destination: '/self-hosted/url',
+		permanent: true
+	},
+	{
+		source: '/admin/validation',
+		destination: '/self-hosted/validation',
+		permanent: true
+	},
+	{
+		source: '/admin/workers',
+		destination: '/self-hosted/workers',
+		permanent: true
 	}
 ];
 

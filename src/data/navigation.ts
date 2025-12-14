@@ -444,7 +444,10 @@ export const navigation: NavigationItem[] = [
 				sections: [
 					{title: 'Configuration', href: '/admin/config'},
 					{title: 'Licensing', href: '/admin/licensing'},
-					{title: 'Enterprise Portal', href: '/enterprise-portal'},
+					{
+						title: 'Enterprise Portal',
+						href: '/admin/enterprise-portal'
+					},
 					{title: 'Codehosts', href: '/admin/code_hosts'},
 					{title: 'User Authentication', href: '/admin/auth'},
 					{title: 'Access Control', href: '/admin/access_control'},
@@ -459,7 +462,8 @@ export const navigation: NavigationItem[] = [
 					{
 						title: 'Enterprise Getting Started',
 						href: '/admin/enterprise_getting_started_guide'
-					}
+					},
+					{title: 'Architecture', href: '/admin/architecture'}
 				]
 			},
 			{
@@ -470,10 +474,9 @@ export const navigation: NavigationItem[] = [
 				title: 'Enterprise Self-Hosted',
 				href: '/self-hosted',
 				sections: [
-					{title: 'Deploy', href: '/admin/deploy'},
-					{title: 'Architecture', href: '/admin/architecture'},
-					{title: 'Upgrade', href: '/admin/updates'},
-					{title: 'Observability', href: '/admin/observability'}
+					{title: 'Deploy', href: '/self-hosted/deploy'},
+					{title: 'Upgrade', href: '/self-hosted/updates'},
+					{title: 'Observability', href: '/self-hosted/observability'}
 				]
 			},
 			{
