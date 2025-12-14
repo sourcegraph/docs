@@ -21,14 +21,14 @@ To run a `migrator` command, follow the guide for your Sourcegraph distribution 
 
 The `migrator` is a Sourcegraph service whose purpose is to managed the state of `pgsql`, `codeintel-db`, and `codeinsights-db` database schemas.
 
-Whenever a `docker-compose` or `kubernetes` based deployment is started `migrator` is run with the default `up` command. In kubernetes as an [`initContainer`](https://github.com/sourcegraph/deploy-sourcegraph/blob/master/base/frontend/sourcegraph-frontend.Deployment.yaml#L30-L40), and in [docker-compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/master/docker-compose/docker-compose.yaml#L14-L53) as a `depends_on` of the `frontend`. `up` runs all necessary schema migrations in the case of a [standard upgrade](/admin/updates/#upgrade-types), and then exits. The `frontend` service will not start until `migrator` exits successfully.
+Whenever a `docker-compose` or `kubernetes` based deployment is started `migrator` is run with the default `up` command. In kubernetes as an [`initContainer`](https://github.com/sourcegraph/deploy-sourcegraph/blob/master/base/frontend/sourcegraph-frontend.Deployment.yaml#L30-L40), and in [docker-compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/master/docker-compose/docker-compose.yaml#L14-L53) as a `depends_on` of the `frontend`. `up` runs all necessary schema migrations in the case of a [standard upgrade](/self-hosted/updates/#upgrade-types), and then exits. The `frontend` service will not start until `migrator` exits successfully.
 
-`migrator` can also be used like a command line tool, accepting _command_ arguments with _flags_. The most common usage of `migrator` this way is to perform [multiversion upgrades](/admin/updates/#upgrade-types) with the [`upgrade`](#upgrade) command. Many other commands are also available.
+`migrator` can also be used like a command line tool, accepting _command_ arguments with _flags_. The most common usage of `migrator` this way is to perform [multiversion upgrades](/self-hosted/updates/#upgrade-types) with the [`upgrade`](#upgrade) command. Many other commands are also available.
 
 Some notes on `migrator`:
 
 -   The `migrator` service was introduced in `v3.37.0`.
--   `migrator`'s `upgrade` command was introduced in `v4.0.0` and is intended to be used to upgrade versions as old as `3.20.x`. **Always check your deployment types [upgrade notes](/admin/updates/#upgrades-index) before a multiversion upgrade.**
+-   `migrator`'s `upgrade` command was introduced in `v4.0.0` and is intended to be used to upgrade versions as old as `3.20.x`. **Always check your deployment types [upgrade notes](/self-hosted/updates/#upgrades-index) before a multiversion upgrade.**
 -   Commands such as `downgrade`, `drift`, `run-out-of-band-migrations`, and `upgrade`, all work against Sourcegraph versions as old as `v3.20.x`.
 
 ## Migrator environment variables
@@ -70,7 +70,7 @@ The `migrator` service exposes the following commands:
 
 ### upgrade
 
-The `upgrade` command performs database schema migrations and out-of-band migrations to rewrite existing instance data in-place into the shaped expected by a given target Sourcegraph version. This command is used by site-administrators to perform [multi-version upgrades](/admin/updates/#upgrade-types).
+The `upgrade` command performs database schema migrations and out-of-band migrations to rewrite existing instance data in-place into the shaped expected by a given target Sourcegraph version. This command is used by site-administrators to perform [multi-version upgrades](/self-hosted/updates/#upgrade-types).
 
 ```sh
 upgrade \
@@ -218,7 +218,7 @@ up \
 **Optional arguments**:
 
 -   `--db`: The target schema(s) to modify. Comma-separated values are allowed.
--   `--skip-upgrade-validation`: Skip asserting that the [standard upgrade policy](/admin/updates/#upgrade-types) is being followed.
+-   `--skip-upgrade-validation`: Skip asserting that the [standard upgrade policy](/self-hosted/updates/#upgrade-types) is being followed.
 -   `--skip-oobmigration-validation`: Skip reading the progress of out-of-band migrations to assert completion of newly deprecated migrations.
 -   `--ignore-single-dirty-log` and `--ignore-single-pending-log`: Re-attempt to apply the **next** migration that was marked as errored or as incomplete (respectively). See [how to troubleshoot a dirty database](/self-hosted/how-to/dirty_database#0-attempt-re-application).
 -   `--unprivileged-only`: Controls behavior of schema migrations the presence of [privileged definitions](/self-hosted/how-to/privileged_migrations).
