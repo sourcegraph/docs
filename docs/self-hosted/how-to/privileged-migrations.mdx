@@ -1,0 +1,20 @@
+# How to apply privileged migrations
+
+Postgres database migrations can be _privileged_ or _unprivileged_. The vast majority of migrations are unprivileged, and should require relatively low capabilities within the connected database. Some migrations are privileged and contain queries that require additional capabilities within the database. Currently, this includes the installation and modification (attached comments) of Postgres extensions.
+
+If your Sourcegraph instance does not connect to the database with a superuser, then privileged migrations will fail. **If you need to apply privileged migrations, please contact support@sourcegraph.com before proceeding.**
+
+Note that these flags affect the `migrator` commands `up`, `upto`, `downto`, `upgrade`, and `downgrade`.
+
+## `--unprivileged-only`
+
+Add the optional flag `--unprivileged-only` when [running the migrator](/self-hosted/updates/migrator/migrator-operations) against your Postgres instance. When the migration runner encounters an unapplied privileged migration, it will halt with an error message similar to the following.
+
+```
+❌ failed to run migration for schema "frontend": refusing to apply a privileged migration: schema "frontend" requires database migrations 1657908958 and 1657908965 to be applied by a database user with elevated permissions
+The migration runner is currently being run with -unprivileged-only. The indicated migration is marked as privileged and cannot be applied by this invocation of the migration runner. Before re-invoking the migration runner, follow the (instructions here)[https://sourcegraph.com/docs/admin/how-to/privileged_migrations]. Please contact support@sourcegraph.com for further assistance.
+```
+
+This option is used to fail-fast upgrades that require manual user intervention. To allow the migrator to make additional progress, the privileged query/queries must be applied manually with a superuser (most commonly via a psql shell attached to the Postgres instance).
+
+You can manually [find and apply the target privileged migrations](/self-hosted/how-to/dirty-database#2-run-the-sql-queries-to-finish-incomplete-migrations) and [manually add a migration log entry](/self-hosted/how-to/dirty-database#3-add-a-migration-log-entry).

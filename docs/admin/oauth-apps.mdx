@@ -1,0 +1,358 @@
+# OAuth Apps
+
+OAuth Apps let you build rich third-party experiences that interact with Sourcegraph **on behalf of end-users while honoring their repository permissions**. Every API request made with an OAuth access token is evaluated against the same authorization rules that apply inside the Sourcegraph UI, so your integration only sees the code each user is allowed to see.
+
+This makes OAuth the preferred choice for any multi-user integration like browser extensions, IDE plugins, chatbots, internal tools, or SaaS platforms where you need to:
+
+-   Authenticate users with familiar Sourcegraph credentials
+-   Operate without ever handling or storing users' passwords
+-   Rely on short-lived, scoped tokens that can be revoked at any time
+-   Guarantee that repository visibility and other access controls are enforced automatically
+
+OAuth Apps are in compliance with standards including [RFC 6749](https://tools.ietf.org/html/rfc6749), [RFC 7636 (PKCE)](https://tools.ietf.org/html/rfc7636), and [RFC 8628 (Device Authorization Grant)](https://tools.ietf.org/html/rfc8628).
+
+Consider using **M2M (client-credentials) service-account tokens** or traditional [access tokens](/cli/how-tos/creating-an-access-token) for server-to-server communication, automated scripts, CI/CD pipelines, or single-user applications that do not require per-user permission checks. See [service accounts](/admin/service-accounts#m2m-oauth-credentials-client-credentials-flow) for details.
+
+## Creating an OAuth App
+
+Site admins can create OAuth Apps in the site admin area:
+
+1. Navigate to **Site admin > OAuth clients**
+2. Click **Create OAuth client**
+3. Provide the following information:
+
+    - **Name**: A descriptive name for your application
+    - **Description**: (Optional) Additional details about the app's purpose
+    - **Redirect URI**: The URL where users will be redirected after authorization
+    - **Client type**: Choose between **Public** or **Private**
+    - **Scopes**: Select the permissions your app needs
+
+4. Click **Create** to generate the OAuth client
+
+After creation, you'll receive:
+
+-   **Client ID**: Public identifier for your application
+-   **Client Secret**: (Private clients only) Secret key for authentication
+
+<Callout type="warning">
+	Store the client secret securely. It won't be displayed again after initial
+	creation.
+</Callout>
+
+## Client Types
+
+### Public Clients
+
+Public clients are designed for applications that cannot securely store client secrets:
+
+-   **Browser-based applications** (SPAs)
+-   **Mobile applications**
+-   **Desktop applications**
+
+Public clients:
+
+-   Do not receive a client secret
+-   Must use PKCE (Proof Key for Code Exchange) for security
+-   Support RFC 8628 Device Authorization Grant flow
+-   Are suitable for environments where the client code is publicly accessible
+
+### Private Clients
+
+Private clients can securely store client secrets:
+
+-   **Server-side web applications**
+-   **Backend services**
+-   **Secure server environments**
+
+Private clients:
+
+-   Receive both client ID and client secret
+-   Can use the standard authorization code flow (PKCE strongly recommended)
+-   Allow client authentication with a secret and server-side code exchange
+
+## Available Scopes
+
+When creating an OAuth app, select the minimum scopes necessary for your application:
+
+| Scope            | Description                                              |
+| ---------------- | -------------------------------------------------------- |
+| `openid`         | Required for OpenID Connect authentication               |
+| `profile`        | Access to user profile information (name, picture, etc.) |
+| `email`          | Access to user's email address                           |
+| `offline_access` | Request refresh tokens for offline access                |
+| `user:all`       | Full access to Sourcegraph API on behalf of the user     |
+
+<Callout type="note">
+	The `user:all` scope is required for GraphQL API access with OAuth tokens.
+</Callout>
+
+## OAuth endpoints reference
+
+| Endpoint             | URL                                                           |
+| -------------------- | ------------------------------------------------------------- |
+| Authorization        | `https://sourcegraph.example.com/.auth/idp/oauth/authorize`   |
+| Token                | `https://sourcegraph.example.com/.auth/idp/oauth/token`       |
+| Device Authorization | `https://sourcegraph.example.com/.auth/idp/oauth/device/code` |
+| Token Revocation     | `https://sourcegraph.example.com/.auth/idp/oauth/revoke`      |
+| Token Introspection  | `https://sourcegraph.example.com/.auth/idp/oauth/introspect`  |
+| User Info            | `https://sourcegraph.example.com/.auth/idp/oauth/userinfo`    |
+
+## OAuth Flow Examples
+
+<Accordion title="Authorization Code Flow (Private Clients)">
+
+1. **Authorization Request**: Redirect users to Sourcegraph's authorization endpoint:
+
+```http
+https://sourcegraph.example.com/.auth/idp/oauth/authorize?
+  response_type=code&
+  client_id=YOUR_CLIENT_ID&
+  redirect_uri=YOUR_REDIRECT_URI&
+  scope=user:all&
+  state=RANDOM_STATE_STRING
+```
+
+The user may be asked for consent to grant your app the requested scopes if not previously granted.
+
+2. **Authorization Response**: Sourcegraph redirects back with an authorization code and the state parameter:
+
+```http
+https://your-app.com/callback?
+  code=AUTHORIZATION_CODE&
+  state=RANDOM_STATE_STRING
+```
+
+3. **Token Exchange**: Exchange the code for an access token:
+
+```bash
+curl -X POST https://sourcegraph.example.com/.auth/idp/oauth/token \
+  -H "Authorization: Basic $(echo -n 'YOUR_CLIENT_ID:YOUR_CLIENT_SECRET' | base64)" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=authorization_code" \
+  -d "code=AUTHORIZATION_CODE" \
+  -d "redirect_uri=YOUR_REDIRECT_URI"
+```
+
+**Response:**
+
+```json
+{
+	"access_token": "ACCESS_TOKEN",
+	"token_type": "Bearer",
+	"expires_in": 3600,
+	"refresh_token": "REFRESH_TOKEN",
+	"scope": "user:all"
+}
+```
+
+</Accordion>
+
+<Accordion title="Authorization Code with PKCE (Public Clients)">
+
+1. **Generate PKCE Parameters**:
+
+```javascript
+// Generate code verifier (43-128 characters)
+const codeVerifier = generateRandomString(128);
+
+// Create code challenge
+const codeChallenge = base64URLEncode(sha256(codeVerifier));
+```
+
+2. **Authorization Request**:
+
+```http
+https://sourcegraph.example.com/.auth/idp/oauth/authorize?
+  response_type=code&
+  client_id=YOUR_CLIENT_ID&
+  redirect_uri=YOUR_REDIRECT_URI&
+  scope=user:all&
+  state=RANDOM_STATE_STRING&
+  code_challenge=CODE_CHALLENGE&
+  code_challenge_method=S256
+```
+
+3. **Token Exchange**:
+
+```bash
+curl -X POST https://sourcegraph.example.com/.auth/idp/oauth/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=authorization_code" \
+  -d "code=AUTHORIZATION_CODE" \
+  -d "client_id=YOUR_CLIENT_ID" \
+  -d "redirect_uri=YOUR_REDIRECT_URI" \
+  -d "code_verifier=CODE_VERIFIER"
+```
+
+**Response:**
+
+```json
+{
+	"access_token": "ACCESS_TOKEN",
+	"token_type": "Bearer",
+	"expires_in": 3600,
+	"scope": "user:all"
+}
+```
+
+</Accordion>
+
+<Accordion title="Device Authorization Flow (Public Clients)">
+
+For applications without a web browser or with limited input capabilities like a CLI or a portable device:
+
+1. **Device Authorization Request**:
+
+```bash
+curl -X POST https://sourcegraph.example.com/.auth/idp/oauth/device/code \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "client_id=YOUR_CLIENT_ID" \
+  -d "scope=user:all"
+```
+
+2. **Response:**
+
+```json
+{
+	"device_code": "DEVICE_CODE",
+	"user_code": "USER-CODE",
+	"verification_uri": "https://sourcegraph.example.com/device",
+	"verification_uri_complete": "https://sourcegraph.example.com/device?user_code=USER-CODE",
+	"expires_in": 1800,
+	"interval": 5
+}
+```
+
+3. **Poll for Token** (respect the `interval` field to avoid rate limiting):
+
+```bash
+curl -X POST https://sourcegraph.example.com/.auth/idp/oauth/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=urn:ietf:params:oauth:grant-type:device_code" \
+  -d "client_id=YOUR_CLIENT_ID" \
+  -d "device_code=DEVICE_CODE"
+```
+
+**Success Response:**
+
+```json
+{
+	"access_token": "ACCESS_TOKEN",
+	"token_type": "Bearer",
+	"expires_in": 3600,
+	"scope": "user:all"
+}
+```
+
+**Pending Response** (continue polling):
+
+```json
+{
+	"error": "authorization_pending"
+}
+```
+
+</Accordion>
+
+<Accordion title="Client Credentials Flow (Service Accounts)">
+
+The client credentials flow is designed for server-to-server authentication without user interaction. Service accounts can create M2M (machine-to-machine) credentials that use this flow. You can create M2M credentials in the service account settings under **Access tokens > M2M credentials**.
+
+1. **Token Request** (no user interaction required):
+
+```bash
+curl -X POST https://sourcegraph.example.com/.auth/idp/oauth/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=client_credentials" \
+  -d "client_id=YOUR_SERVICE_ACCT_CLIENT_ID" \
+  -d "client_secret=YOUR_SERVICE_ACCT_CLIENT_SECRET" \
+  -d "scope=user:all"
+```
+
+**Successful Response:**
+
+```json
+{
+	"access_token": "ACCESS_TOKEN",
+	"token_type": "Bearer",
+	"expires_in": 3600,
+	"scope": "user:all"
+}
+```
+
+2. **Use the access token** exactly like any other OAuth bearer token:
+
+```bash
+curl -H "Authorization: Bearer ACCESS_TOKEN" \
+     -d '{"query": "query { currentUser { username } }"}' \
+     https://sourcegraph.example.com/.api/graphql
+```
+
+Note: No refresh token is returned; just repeat the client-credentials call when the token expires (cache for `expires_in` seconds).
+
+</Accordion>
+
+## Using OAuth Tokens
+
+Once you have an OAuth access token, use it to authenticate API requests:
+
+### GraphQL API
+
+```bash
+curl -H 'Authorization: Bearer YOUR_OAUTH_TOKEN' \
+  -d '{"query": "query { currentUser { username } }"}' \
+  https://sourcegraph.example.com/.api/graphql
+```
+
+### Streaming API
+
+```bash
+curl -H 'Authorization: Bearer YOUR_OAUTH_TOKEN' \
+  -H 'Accept: text/event-stream' \
+  --get \
+  --url 'https://sourcegraph.example.com/.api/search/stream' \
+  --data-urlencode 'q=your search query'
+```
+
+## Token Management
+
+### Token Expiration
+
+OAuth access tokens issued by Sourcegraph are always short-lived with a fixed expiration time. Non-expiring access tokens are not available through the OAuth flow. Access tokens typically expire after 1 hour.
+
+### Refresh Tokens
+
+Refresh tokens are issued alongside every access token and must be used to obtain new access tokens before the current token expires:
+
+```bash
+curl -X POST https://sourcegraph.example.com/.auth/idp/oauth/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=refresh_token" \
+  -d "refresh_token=YOUR_REFRESH_TOKEN" \
+  -d "client_id=YOUR_CLIENT_ID" \
+  -d "client_secret=YOUR_CLIENT_SECRET" # Only for private clients
+```
+
+**Important**: Always store the new refresh token returned in the response, as it may differ from the one you used in the request. Every refresh token is strictly one-time use, your application needs to handle the case when it's possible to have multiple processes initiating the token refresh process because only one of them will succeed for the same refresh token.
+
+### Token Expiration Handling
+
+Applications must proactively check token expiration and refresh tokens before they expire:
+
+1. **Monitor the `expires_in` field** from token responses to track when tokens expire
+2. **Refresh proactively** by checking expiration time before each API call
+3. **Use a safety buffer** of 60+ seconds to avoid race conditions
+4. **Handle 401 responses** by refreshing the token and retrying the request
+
+### Token Revocation
+
+Users can revoke OAuth consents through their account settings, or your integration can programmatically revoke tokens:
+
+```bash
+curl -X POST https://sourcegraph.example.com/.auth/idp/oauth/revoke \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "token=ACCESS_TOKEN_OR_REFRESH_TOKEN" \
+  -d "token_type_hint=access_token" \
+  -d "client_id=YOUR_CLIENT_ID" \
+  -d "client_secret=YOUR_CLIENT_SECRET" # Only for private clients
+```
