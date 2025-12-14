@@ -7054,6 +7054,16 @@ const redirectsData = [
 		source: '/self-hosted/updates/pure_docker',
 		destination: '/self-hosted/updates/pure-docker',
 		permanent: true
+	},
+	{
+		source: '/admin/enterprise-getting-started-guide',
+		destination: '/admin',
+		permanent: true
+	},
+	{
+		source: '/admin/config',
+		destination: '/admin',
+		permanent: true
 	}
 ];
 
