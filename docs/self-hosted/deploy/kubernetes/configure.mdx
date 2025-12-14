@@ -13,9 +13,9 @@ This guide will demonstrate how to customize a Kubernetes deployment (**non-Helm
 
 ## Overview
 
-To ensure optimal performance and functionality of your Sourcegraph deployment, please only include components listed in the [kustomization.template.yaml file](/admin/deploy/kubernetes/kustomize/#kustomization-yaml) for your instance overlay. These components include settings that have been specifically designed and tested for Sourcegraph and do not require any additional configuration changes.
+To ensure optimal performance and functionality of your Sourcegraph deployment, please only include components listed in the [kustomization.template.yaml file](/self-hosted/deploy/kubernetes/kustomize/#kustomization-yaml) for your instance overlay. These components include settings that have been specifically designed and tested for Sourcegraph and do not require any additional configuration changes.
 
-The order of components listed in the [kustomization.template.yaml file](/admin/deploy/kubernetes/kustomize/#kustomization-yaml) is important and should be maintained. The components are listed in a specific order to ensure proper dependency management and compatibility between components. Reordering components can introduce conflicts or prevent components from interacting as expected. Only modify the component order if explicitly instructed to do so by the documentation. Otherwise, leave the component order as-is to avoid issues.
+The order of components listed in the [kustomization.template.yaml file](/self-hosted/deploy/kubernetes/kustomize/#kustomization-yaml) is important and should be maintained. The components are listed in a specific order to ensure proper dependency management and compatibility between components. Reordering components can introduce conflicts or prevent components from interacting as expected. Only modify the component order if explicitly instructed to do so by the documentation. Otherwise, leave the component order as-is to avoid issues.
 
 Following these guidelines will help you create a seamless deployment and avoid conflicts.
 
@@ -38,11 +38,11 @@ To enable cluster metrics monitoring, you will need to [deploy cAdvisor](#deploy
 
 ### RBAC
 
-Sourcegraph has removed Role-Based Access Control (RBAC) resources from the default base cluster for the Kustomize deployment. This means that [service discovery](#service-discovery) is not enabled by default, and the endpoints for each service replica must be manually added to the frontend ConfigMap. When using the [size components](#instance-size-based-resources) included in the [kustomization file built for Sourcegraph](/admin/deploy/kubernetes/kustomize/#kustomization-yaml), service endpoints are automatically added to the ConfigMap.
+Sourcegraph has removed Role-Based Access Control (RBAC) resources from the default base cluster for the Kustomize deployment. This means that [service discovery](#service-discovery) is not enabled by default, and the endpoints for each service replica must be manually added to the frontend ConfigMap. When using the [size components](#instance-size-based-resources) included in the [kustomization file built for Sourcegraph](/self-hosted/deploy/kubernetes/kustomize/#kustomization-yaml), service endpoints are automatically added to the ConfigMap.
 
 ### Non-Privileged
 
-By default, all Sourcegraph services are deployed in a non-root and non-privileged mode, as defined in the [base](/admin/deploy/kubernetes/kustomize/#base) cluster.
+By default, all Sourcegraph services are deployed in a non-root and non-privileged mode, as defined in the [base](/self-hosted/deploy/kubernetes/kustomize/#base) cluster.
 
 ### Privileged
 
@@ -219,7 +219,7 @@ components:
 Follow these steps to configure the otel-collector to export traces to an external OTel-compatible backend:
 
 1. Create a subdirectory called 'patches' within the directory of your overlay
-2. Copy and paste the [base/otel-collector/otel-collector.ConfigMap.yaml file](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s@master/-/tree/base/otel-collector/otel-collector.ConfigMap.yaml) to the new [patches subdirectory](/admin/deploy/kubernetes/kustomize/#patches-directory)
+2. Copy and paste the [base/otel-collector/otel-collector.ConfigMap.yaml file](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s@master/-/tree/base/otel-collector/otel-collector.ConfigMap.yaml) to the new [patches subdirectory](/self-hosted/deploy/kubernetes/kustomize/#patches-directory)
 3. In the copied file, make the necessary changes to the `exporters` and `service` blocks to connect to your backend based on the documentation linked above
 4. Include the following content in your overlay:
 
@@ -570,7 +570,7 @@ components:
     - ../../components/storage-class/name-update
 ```
 
-**Step 2**: Enter the value of your existing storage class name in your [buildConfig.yaml](/admin/deploy/kubernetes/kustomize/#buildconfig-yaml) file using the `STORAGECLASS_NAME` config key
+**Step 2**: Enter the value of your existing storage class name in your [buildConfig.yaml](/self-hosted/deploy/kubernetes/kustomize/#buildconfig-yaml) file using the `STORAGECLASS_NAME` config key
 
 Example, set `STORAGECLASS_NAME=sourcegraph` if `sourcegraph` is the name for the existing storage class:
 
@@ -594,7 +594,7 @@ components:
     - ../../components/storage-class/cloud
 ```
 
-Update the following variables in your [buildConfig.yaml](/admin/deploy/kubernetes/kustomize/#buildconfig-yaml) file. Replace them with the correct values according to the instructions provided by your cloud provider:
+Update the following variables in your [buildConfig.yaml](/self-hosted/deploy/kubernetes/kustomize/#buildconfig-yaml) file. Replace them with the correct values according to the instructions provided by your cloud provider:
 
 ```yaml
 # instances/$INSTANCE_NAME/buildConfig.yaml
@@ -686,7 +686,7 @@ data:
 # the data is abbreviated in this example
 ```
 
-**Step 3**: Configure the TLS settings of your Ingress by adding the following variables to your [buildConfig.yaml](/admin/deploy/kubernetes/kustomize/#buildconfig-yaml) file:
+**Step 3**: Configure the TLS settings of your Ingress by adding the following variables to your [buildConfig.yaml](/self-hosted/deploy/kubernetes/kustomize/#buildconfig-yaml) file:
 
 -   **TLS_HOST**: your domain name
 -   **TLS_INGRESS_CLASS_NAME**: ingress class name required by your cluster-issuer
@@ -713,7 +713,7 @@ components:
 
 ### TLS with Let’s Encrypt
 
-Alternatively, you can configure [cert-manager with Let’s Encrypt](https://cert-manager.io/docs/configuration/acme/) in your cluster. Then, follow the steps listed above for configuring TLS certificate via TLS Secrets manually. However, when adding the variables to the [buildConfig.yaml/admin/deploy/kubernetes/kustomize/#buildconfig-yaml) file, set **TLS_CLUSTER_ISSUER=letsencrypt** to include the cert-manager with Let's Encrypt.
+Alternatively, you can configure [cert-manager with Let’s Encrypt](https://cert-manager.io/docs/configuration/acme/) in your cluster. Then, follow the steps listed above for configuring TLS certificate via TLS Secrets manually. However, when adding the variables to the [buildConfig.yaml/self-hosted/deploy/kubernetes/kustomize/#buildconfig-yaml) file, set **TLS_CLUSTER_ISSUER=letsencrypt** to include the cert-manager with Let's Encrypt.
 
 ### TLS secret name
 
@@ -776,7 +776,7 @@ components:
 
 To configure the hostname for your Sourcegraph ingress, follow these steps:
 
-**Step 1**: In your [buildConfig.yaml](/admin/deploy/kubernetes/kustomize/#buildconfig-yaml) file, include the `HOST_DOMAIN` variable and set it to your desired hostname, for example:
+**Step 1**: In your [buildConfig.yaml](/self-hosted/deploy/kubernetes/kustomize/#buildconfig-yaml) file, include the `HOST_DOMAIN` variable and set it to your desired hostname, for example:
 
 ```yaml
 # instances/$INSTANCE_NAME/buildConfig.yaml
@@ -829,7 +829,7 @@ To configure ingress-nginx annotations for the Sourcegraph frontend ingress:
 $ mkdir -p instances/$INSTANCE_NAME/patches
 ```
 
-**Step 2**: Copy the `frontend-ingress-annotations.yaml` patch file from the components/patches directory to the new [patches subdirectory](/admin/deploy/kubernetes/kustomize/#patches-directory)
+**Step 2**: Copy the `frontend-ingress-annotations.yaml` patch file from the components/patches directory to the new [patches subdirectory](/self-hosted/deploy/kubernetes/kustomize/#patches-directory)
 
 ```bash
 $ cp components/patches/frontend-ingress-annotations.yaml instances/$INSTANCE_NAME/patches/frontend-ingress-annotations.yaml
@@ -948,7 +948,7 @@ components:
 
 ### Frontend
 
-To update the environment variables for the **sourcegraph-frontend** service, add the new environment variables to the end of the _FRONTEND ENV VARS_ section at the bottom of your [kustomization file](/admin/deploy/kubernetes/kustomize/#kustomizationyaml). For example:
+To update the environment variables for the **sourcegraph-frontend** service, add the new environment variables to the end of the _FRONTEND ENV VARS_ section at the bottom of your [kustomization file](/self-hosted/deploy/kubernetes/kustomize/#kustomizationyaml). For example:
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
@@ -1058,7 +1058,7 @@ Similar changes will be required for other pods and services, depending on the s
 
 For optimal performance and resilience, it is recommended to use an external database when deploying Sourcegraph. For more information on database requirements, please refer to the [Postgres guide](/self-hosted/postgres).
 
-To connect Sourcegraph to an existing PostgreSQL instance, add the relevant environment variables ([such as PGHOST, PGPORT, PGUSER, etc.](http://www.postgresql.org/docs/current/static/libpq-envars.html)) to the frontend ConfigMap by adding the new environment variables to the end of the _FRONTEND ENV VARS_ section at the bottom of your [kustomization file](/admin/deploy/kubernetes/kustomize/#kustomizationyaml). For example:
+To connect Sourcegraph to an existing PostgreSQL instance, add the relevant environment variables ([such as PGHOST, PGPORT, PGUSER, etc.](http://www.postgresql.org/docs/current/static/libpq-envars.html)) to the frontend ConfigMap by adding the new environment variables to the end of the _FRONTEND ENV VARS_ section at the bottom of your [kustomization file](/self-hosted/deploy/kubernetes/kustomize/#kustomizationyaml). For example:
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
@@ -1099,7 +1099,7 @@ components:
     - ../../components/services/redis
 ```
 
-**Step 2**: Set the following variable in your [buildConfig.yaml/admin/deploy/kubernetes/kustomize/#buildconfig-yaml) file:
+**Step 2**: Set the following variable in your [buildConfig.yaml/self-hosted/deploy/kubernetes/kustomize/#buildconfig-yaml) file:
 
 ```yaml
 # instances/$INSTANCE_NAME/buildConfig.yaml
@@ -1187,7 +1187,7 @@ cAdvisor can pick up metrics for services unrelated to the Sourcegraph deploymen
 $ mkdir instances/$INSTANCE_NAME/patches
 ```
 
-2\. Create a copy of the `prometheus.ConfigMap.yaml` file in the new [patches subdirectory](/admin/deploy/kubernetes/kustomize/#patches-directory)
+2\. Create a copy of the `prometheus.ConfigMap.yaml` file in the new [patches subdirectory](/self-hosted/deploy/kubernetes/kustomize/#patches-directory)
 
 ```bash
 mv base/monitoring/prometheus/rbacs/prometheus.ConfigMap.yaml instances/$INSTANCE_NAME/patches/prometheus.ConfigMap.yaml
@@ -1228,7 +1228,7 @@ components:
     - ../../components/enable/private-registry
 ```
 
-**Step 2:** Set the `PRIVATE_REGISTRY` variable in your [buildConfig.yaml](/admin/deploy/kubernetes/kustomize/#buildconfig-yaml) file. For example:
+**Step 2:** Set the `PRIVATE_REGISTRY` variable in your [buildConfig.yaml](/self-hosted/deploy/kubernetes/kustomize/#buildconfig-yaml) file. For example:
 
 ```yaml
 # instances/$INSTANCE_NAME/buildConfig.yaml
@@ -1248,7 +1248,7 @@ components:
     - ../../components/resources/imagepullsecrets
 ```
 
-**Step 2:** Set the `IMAGE_PULL_SECRET_NAME` variable in your [buildConfig.yaml](/admin/deploy/kubernetes/kustomize/#buildconfig-yaml) file.
+**Step 2:** Set the `IMAGE_PULL_SECRET_NAME` variable in your [buildConfig.yaml](/self-hosted/deploy/kubernetes/kustomize/#buildconfig-yaml) file.
 
 For example:
 
@@ -1278,7 +1278,7 @@ patches:
 
 ## Multi-version upgrade
 
-In order to perform a [multi-version upgrade](/admin/updates/#multi-version-upgrades), all pods must be scaled down to 0 except databases, which can be handled by including the `utils/multi-version-upgrade` component:
+In order to perform a [multi-version upgrade](/self-hosted/updates/#multi-version-upgrades), all pods must be scaled down to 0 except databases, which can be handled by including the `utils/multi-version-upgrade` component:
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
