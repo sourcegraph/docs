@@ -1,0 +1,155 @@
+import {CURRENT_VERSION_STRING} from 'src/components/PreCodeBlock';
+
+# Upgrade Sourcegraph on Docker Compose
+
+This document describes the process to update a Docker Compose Sourcegraph instance. If you are unfamiliar with sourcegraph versioning or releases see our [general concepts documentation](/self-hosted/updates/).
+
+> <Callout type="note">
+> 	Always consult the [release notes](/self-hosted/updates/docker_compose) for the
+> 	versions your upgrade will pass over and end on.
+> </Callout>
+
+### Standard upgrades
+
+A [standard upgrade](/admin/updates/#upgrade-types) occurs between a Sourcegraph version and the minor or major version released immediately after it. If you would like to jump forward several versions, you must perform a [multi-version upgrade](#multi-version-upgrades) instead.
+
+If you've [configured Docker Compose with a release branch](/admin/deploy/docker-compose/#step-1-prepare-the-deployment-repository), please merge the upstream release tag for the next minor version into your `release` branch.
+
+In the following example, the release branch is being upgraded to {CURRENT_VERSION_STRING()}.
+
+```sh
+# first, checkout the release branch
+git checkout release
+# fetch updates
+git fetch upstream
+# merge the upstream release tag into your release branch
+git checkout release
+git merge {CURRENT_VERSION}
+```
+
+#### Address any merge conflicts you might have
+
+For each conflict, you need to reconcile any customizations you made with the updates from the new version. Use the information you gathered earlier from the change log and changes list to interpret the merge conflict and to ensure that it doesn't over-write your customizations. You may need to update your customizations to accommodate the new version.
+
+> NOTE: If you have made no changes or only very minimal changes to your configuration, you can also ask git to always select incoming changes in the event of merge conflicts. In the following example merges will be accepted from the upstream version {CURRENT_VERSION_STRING()}:
+>
+> `git merge -X theirs {CURRENT_VERSION_STRING}`
+>
+> If you do this, make sure your configuration is correct before proceeding because it may have made changes to your docker-compose YAML file.
+
+#### Clone the updated release branch to your server
+
+SSH into your instance and navigate to the appropriate folder:
+
+```sh
+# AWS
+cd /home/ec2-user/deploy-sourcegraph-docker/docker-compose
+# Azure, Digital Ocean, Google Cloud
+cd /root/deploy-sourcegraph-docker/docker-compose
+```
+
+Download all the latest docker images to your local docker daemon:
+
+```sh
+$ docker-compose pull --include-deps
+```
+
+Restart Docker Compose using the new minor version along with your customizations:
+
+```sh
+$ docker-compose up -d --remove-orphans
+```
+
+### Multi-version upgrades
+
+> <Callout type="warning">
+> 	Multiversion upgrades **require downtime**, please see our [cautionary
+> 	note](/admin/updates/#best-practices) on upgrades, if you have any
+> 	concerns about running a multiversion upgrade, please reach out to us at
+> 	[support@sourcegraph.com](mailto:support@sourcegraph.com) for
+> 	advisement.{' '}
+> </Callout>
+
+To perform a multi-version upgrade via migrators [upgrade](/self-hosted/updates/migrator/migrator-operations#upgrade) command on a Sourcegraph instance running on Docker compose follow the procedure below:
+
+1. **Check Upgrade Readiness**:
+
+    - Check the [upgrade notes](/self-hosted/updates/docker_compose#docker-compose-upgrade-notes) for the version range you're passing through.
+    - Check the `Site Admin > Updates` page to determine [upgrade readiness](/admin/updates/#upgrade-readiness).
+
+2. **Pull and merge upstream changes**:
+
+    - Follow the [standard upgrade procedure](#standard-upgrades) to pull and merge upstream changes from the version you are upgrading to your `release` branch.
+
+3. **Disable Connections to the Database**:
+
+    - Stop running containers connected to the databases and the databases:
+
+    ```
+    $ docker-compose down --remove-orphans
+    ```
+
+4. **Run Migrator with the `upgrade` command**:
+    - _For more detailed instructions and available command flags see our [migrator docs](/self-hosted/updates/migrator/migrator-operations#upgrade)._
+    1. If the migrator `image:` in your `docker-compose.yaml` wasn't updated to in the **latest** release of `migrator` in step 2 set migrator's image to the latest release.
+       **Example:**
+    ```yaml
+    migrator:
+        container_name: migrator
+        image: 'index.docker.io/sourcegraph/migrator:6.0.0'
+    ```
+    2. Set the migrator `command:` to `upgrade` you'll need to supply a `--to=` argument to the version you're upgrading to.
+       **Example:**
+    ```yaml
+    command: ['upgrade', '--from=v5.9.0', '--to=v6.0.0']
+    ```
+    > _Note: you may add the `--dry-run` flag to the `command:` to test things out before altering the dbs_ 3. Run migrator with `docker-compose up migrator`
+    - Migrator `depends_on:` will ensure the databases are ready before attempting to run the migrator. Ensuring that database entry point scripts are run before the migrator attempts to connect to the databases. For users upgrading from a version earlier than `5.10.0`, a PostgreSQL version is required and will be performed automatically here. For more details, see [Upgrading PostgreSQL](/admin/postgresql#upgrading-postgresql).
+    **Example:**
+    ```sh
+    $ ~/deploy-sourcegraph-docker/docker-compose/ docker-compose up migrator
+    ✔ Network docker-compose_sourcegraph Create... 0.1s
+    ✔ Container pgsql Created 0.1s
+    ✔ Container codeinsights-db Created 0.1s
+    ✔ Container codeintel-db Created 0.1s
+    ! codeinsights-db The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested 0.0s
+    ! pgsql The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested 0.0s
+    ! codeintel-db The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested 0.0s
+    ✔ Container migrator Created 0.0s
+    ! migrator The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested 0.0s
+    Attaching to migrator
+    migrator | ✱ Sourcegraph migrator 6.0.0
+    migrator | ⚠️ Failed to check for migrator update: unexpected status code 404. Continuing...
+    migrator | Attempting connection to frontend...
+    migrator | ✅ Connection to frontend succeeded
+    migrator | Attempting connection to frontend...
+    migrator | ✅ Connection to frontend succeeded
+    migrator | Attempting connection to codeintel...
+    migrator | ✅ Connection to codeintel succeeded
+    migrator | Attempting connection to codeinsights...
+    migrator | ✅ Connection to codeinsights succeeded
+    migrator | 👉 Migrating to v6.0 (step 1 of 1)
+    migrator | 👉 Running schema migrations
+    migrator | ✅ Schema migrations complete
+    migrator exited with code 0
+    ```
+5. **Run Migrator with the `up` command**
+
+    - Set your migrator `command:` to `up`
+        > _Note: If you aren't upgrading to the latest release remember to set the migrator image back to the version you are upgrading to._
+        > **Example:**
+
+    ```yaml
+    migrator:
+        container_name: migrator
+        image: 'index.docker.io/sourcegraph/migrator:6.0.0@sha256:ec295eb0b743da6bf56777ca6524972267a5c442b0288095e2fe12fce38ebacc'
+        cpus: 0.5
+        mem_limit: '500m'
+        command: ['up']
+    ```
+
+6. **Start your containers again**:
+    - run `docker-compose up -d` in the folder containing your `docker-compose.yaml` file.
+    ```sh
+    $ docker-compose up -d
+    ```

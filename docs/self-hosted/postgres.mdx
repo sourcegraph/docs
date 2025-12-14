@@ -1,0 +1,111 @@
+# PostgreSQL
+
+Sourcegraph uses several PostgreSQL databases to support various functionality. These databases are:
+
+-   `pgsql` or `primary`: responsible for user data and account information
+-   `codeintel-db`: provides support for lsif data and part of the code-intelligence
+-   `codeinsights-db`: provides support for code insights data
+
+## Requirements
+
+### Version requirements
+
+We support Postgres 16 and above. Older versions of Sourcegraph supported 12 see our [Postgres 12 deprecation notice](/self-hosted/postgres12_end_of_life_notice) for more details. Starting in Sourcegraph 6.0.0, sourcegraph services will no longer connect to a PostgreSQL 12 or lower database. Instead, it will display an error message in container logs for services attempting to connect to a PostgreSQL database below version 16.
+
+```
+migrator  | ✱ Sourcegraph migrator 6.0.0
+migrator  | ⚠️ Failed to check for migrator update: unexpected status code 404. Continuing...
+migrator  | Attempting connection to frontend...
+migrator  | {"SeverityText":"FATAL","Timestamp":1738107940979396426,"InstrumentationScope":"migrator","Caller":"migrator/main.go:24","Function":"main.main","Body":"new db handle: Sourcegraph requires PostgreSQL 16+. For more information about PostgreSQL requirements and upgrade guides, visit https://sourcegraph.com/docs/admin/postgres","Resource":{"service.name":"migrator","service.version":"6.0.0","service.instance.id":"23097a97-50f4-4b42-80b5-83802baffeb4"},"Attributes":{}}
+migrator exited with code 1
+```
+
+Sourcegraph services attempting to connect to a database running Postgres 12 or less will display the following error message:
+
+```
+"new db handle: Sourcegraph requires PostgreSQL 16+. For more information about PostgreSQL requirements and upgrade guides, visit https://sourcegraph.com/docs/admin/postgres"
+```
+
+See [below](#upgrading-postgresql) for more details about how to upgrade your PostgreSQL database.
+
+### Role requirements
+
+The user provided to Sourcegraph must have full access to the `sg` database and be able to create the following
+extensions:
+
+```
+citext
+hstore
+intarray
+pg_stat_statements
+pg_trgm
+pgcrypto
+vector
+```
+
+## Configuring PostgreSQL
+
+Sourcegraph databases come preconfigured, however admins may make custom configurations as needed. For more information see our [configuration docs](/self-hosted/postgres-conf).
+
+## Upgrading PostgreSQL
+
+### Upgrading Built-in PostgreSQL
+
+In Sourcegraph 5.10.0, we've upgraded our builtin database images to PostgreSQL 16.
+
+Database Image Updates:
+
+-   `postgres-12` is now `postgresql-16`
+-   `codeintel-db` is now `postgresql-16`
+-   `codeinsights-db` is now `postgresql-16-codeinsights`
+
+These images contain an entry script that will detect and upgrade Postgres instances from version 12 (the version in our previous images) to Postgres 16.
+
+> WARNING: Upgrading the PostgreSQL database requires stopping your Sourcegraph deployment which will result in **downtime**.
+>
+> Additionally, once the upgrade process is started via the database container, interrupting the container before the upgrade is complete could result in corrupting the underlying Postgres database. **We strongly advise taking a backup before the upgrade.**
+
+**For instance specfic instructions on how to upgrade a builtin Postgres database via the image entrypoint script, see [our instance specific operational instructions](/self-hosted/how-to/upgrade-postgres-12-16-builtin-dbs).**
+
+We have the following advisements to admins:
+
+-   Container orchestration management systems (e.g. Kubernetes) may restart containers at any time, **it is recommended that you take a backup of your database before starting the upgrade process.**
+-   Review your deployment types [upgrade notes](/self-hosted/updates#upgrades-index) before upgrading. The PostgreSQL upgrade process mutates the database schema in a way that may Sourcegraph `v5.10.0` and `v5.11.0` may not recognize. [Learn more about pg12 to pg16 schema drift here](/self-hosted/how-to/postgres_12_to_16_drift).
+
+For additional assistance with PostgreSQL upgrades, please contact support@sourcegraph.com.
+
+### Upgrade entrypoint script options
+
+The `PG_UPGRADE_EXTRA_ARGS` environment variable allows you to customize the `pg_upgrade` command in `postgresql-16` and `postgresql-16-codeinsights` deployments.
+
+-   **Quick upgrade option:**
+    Setting `PG_UPGRADE_EXTRA_ARGS=--link` creates hard links between old and new data directories instead of copying data. While faster and space-efficient, this method risks data corruption if containers are interrupted during an upgrade. It is best used when you have reliable container scheduling and solid backups.
+
+-   **Storage requirements:**
+    Without `--link`, you'll need double the current database size in free disk space. For example, a 100GiB database requires an additional 100GiB free space for the upgrade.
+
+### Upgrading external PostgreSQL instances
+
+When running an [external PostgreSQL instance](/self-hosted/external_services/postgres), please do the following:
+
+1. Back up the Postgres DB so that you can restore to the old version should anything go wrong.
+2. Turn off Sourcegraph entirely (bring down all containers and pods so they cannot talk to Postgres.)
+3. Upgrade Postgres to the latest version following your provider's instruction or your preferred method:
+
+-   [AWS RDS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.PostgreSQL.html)
+-   [AWS Aurora](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_UpgradeDBInstance.Upgrading.html)
+-   [GCP CloudSQL](https://cloud.google.com/sql/docs/postgres/db-versions)
+-   [Azure DB](https://docs.microsoft.com/en-us/azure/postgresql/concepts-supported-versions#managing-updates-and-upgrades)
+-   [Heroku](https://devcenter.heroku.com/articles/upgrading-heroku-postgres-databases)
+-   [EnterpriseDB](https://www.enterprisedb.com/docs/en/9.6/pg/upgrading.html)
+-   [Citus](http://docs.citusdata.com/en/v8.1/admin_guide/upgrading_citus.html)
+-   [Aiven PostgreSQL](https://aiven.io/docs/platform/concepts/maintenance-window#related-pages)
+-   [Your own PostgreSQL](https://www.postgresql.org/docs/16/pgupgrade.html)
+
+4. Turn Sourcegraph back on connecting to the now-upgraded database.
+
+> WARNING: **Do not allow Sourcegraph to run/connect to the new Postgres database until it has been fully populated with your data.** Doing so could result in Sourcegraph trying to create e.g. a new DB schema and partially migrating. If this happens to you, restore from the backup you previously took or contact us (support@sourcegraph.com)
+
+#### Single-container Sourcegraph
+
+Sourcegraph Single-container is not a supported production deployment and currently doesn't support upgrades to Postgres 16. Admins with production data in a single container deployment are advised to reach out to support@sourcegraph.com for assistance.
