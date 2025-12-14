@@ -7,13 +7,13 @@
 
 <p className="subtitle">Learn and understand how auto-indexing works.</p>
 
-With Sourcegraph deployments supporting [executors](/admin/executors/), your repository contents can be automatically analyzed to produce a code graph index file. Once [auto-indexing is enabled](/code-search/code-navigation/auto_indexing#enable-auto-indexing) and [auto-indexing policies are configured](/code-search/code-navigation/auto_indexing#configure-auto-indexing), repositories will be periodically cloned into an executor sandbox, analyzed, and the resulting index file will be uploaded back to the Sourcegraph instance.
+With Sourcegraph deployments supporting [executors](/admin/executors/), your repository contents can be automatically analyzed to produce a code graph index file. Once [auto-indexing is enabled](/code-navigation/auto_indexing#enable-auto-indexing) and [auto-indexing policies are configured](/code-navigation/auto_indexing#configure-auto-indexing), repositories will be periodically cloned into an executor sandbox, analyzed, and the resulting index file will be uploaded back to the Sourcegraph instance.
 
-Auto-indexing is currently available for Go, TypeScript, JavaScript, Python, Ruby and JVM repositories. See also [dependency navigation](/code-search/code-navigation/features#dependency-navigation) for instructions on how to setup cross-dependency navigation depending on what language ecosystem you use.
+Auto-indexing is currently available for Go, TypeScript, JavaScript, Python, Ruby and JVM repositories. See also [dependency navigation](/code-navigation/features#dependency-navigation) for instructions on how to setup cross-dependency navigation depending on what language ecosystem you use.
 
 ## Enable auto-indexing
 
-The following docs explains how to turn on [auto-indexing](/code-search/code-navigation/auto_indexing) on your Sourcegraph instance to enable [precise code navigation](/code-search/code-navigation/precise_code_navigation).
+The following docs explains how to turn on [auto-indexing](/code-navigation/auto_indexing) on your Sourcegraph instance to enable [precise code navigation](/code-navigation/precise_code_navigation).
 
 ### Deploy executors
 
@@ -48,22 +48,22 @@ The frequency of index job scheduling can be tuned via the following environment
 	This feature is in beta for self-hosted customers.
 </Callout>
 
-Precise code navigation [auto-indexing](/code-search/code-navigation/auto_indexing) jobs are scheduled based on two fronts of configuration.
+Precise code navigation [auto-indexing](/code-navigation/auto_indexing) jobs are scheduled based on two fronts of configuration.
 
 The first front selects the set of repositories and commits within those repositories that are candidates for auto-indexing. These candidates are controlled by [configuring auto-indexing policies](#configure-auto-indexing-policies).
 
-The second front determines the set of index jobs that can run over candidate commits. By default, index jobs are [inferred](/code-search/code-navigation/inference_configuration) from the repository structure's on disk. Index job inference uses heuristics such as the presence or contents of particular files to determine the paths and commands required to index a repository.
+The second front determines the set of index jobs that can run over candidate commits. By default, index jobs are [inferred](/code-navigation/inference_configuration) from the repository structure's on disk. Index job inference uses heuristics such as the presence or contents of particular files to determine the paths and commands required to index a repository.
 
 Alternatively, index job configuration [can be supplied explicitly](#explicit-index-job-configuration) for a repository when the inference heuristics are not powerful enough to create an index job that produces the correct results. This might be necessary for projects that have non-standard or complex dependency resolution or pre-compilation steps, for example.
 
 ### Configure auto-indexing policies
 
-Let's learn how to configure policies to control the scheduling of precise code navigation indexing jobs. An indexing jobs [produces a code graph data index](/code-search/code-navigation/precise_code_navigation) and uploads it to your Sourcegraph instance for use with code navigation.
+Let's learn how to configure policies to control the scheduling of precise code navigation indexing jobs. An indexing jobs [produces a code graph data index](/code-navigation/precise_code_navigation) and uploads it to your Sourcegraph instance for use with code navigation.
 
 <Callout type="note">
 	See the [best practices
-	guide](/code-search/code-navigation/how-to/policies_resource_usage_best_practices)
-	for additional details on how policies affect resource usage.
+	guide](/code-navigation/how-to/policies_resource_usage_best_practices) for
+	additional details on how policies affect resource usage.
 </Callout>
 
 Each policy has a number of configurable options, including:
@@ -112,7 +112,7 @@ In this example, we create an indexing policy that applies to all _versioned_ ta
 
 ### Explicit index job configuration
 
-For projects that have non-standard or complex dependency resolution or pre-compilation steps, inference heuristics might not be powerful enough to create an index job that produces the correct results. In these cases, explicit index job configuration can be supplied to a repository in two ways (listed below in order of decreasing precedence). Both methods of configuration share a common expected schema. See the [reference documentation](/code-search/code-navigation/auto_indexing_configuration) for additional information on the shape and content of the configuration.
+For projects that have non-standard or complex dependency resolution or pre-compilation steps, inference heuristics might not be powerful enough to create an index job that produces the correct results. In these cases, explicit index job configuration can be supplied to a repository in two ways (listed below in order of decreasing precedence). Both methods of configuration share a common expected schema. See the [reference documentation](/code-navigation/auto_indexing_configuration) for additional information on the shape and content of the configuration.
 
 1. Configure index jobs by committing a `sourcegraph.yaml` file to the root of the target repository. If you're new to YAML and want a short introduction, see [Learn YAML in five minutes](https://learnxinyminutes.com/docs/yaml/). Note that YAML is a strict superset of JSON, therefore the file contents can also be encoded as valid JSON (despite the file extension).
 
@@ -120,7 +120,7 @@ For projects that have non-standard or complex dependency resolution or pre-comp
 
 ![Repository index page](https://storage.googleapis.com/sourcegraph-assets/docs/images/code-intelligence/sg-3.33/repository-page.png)
 
-From there you can view or edit the repository's configuration. We use a superset of JSON that allows for comments and trailing commas. The set of index jobs that would be [inferred](/code-search/code-navigation/explanations/auto_indexing_inference) from the content of the repository (at the current tip of the default branch) can be viewed and may often be useful as a starting point to define more elaborate indexing jobs.
+From there you can view or edit the repository's configuration. We use a superset of JSON that allows for comments and trailing commas. The set of index jobs that would be [inferred](/code-navigation/explanations/auto_indexing_inference) from the content of the repository (at the current tip of the default branch) can be viewed and may often be useful as a starting point to define more elaborate indexing jobs.
 
 ![Auto-indexing configuration editor](https://storage.googleapis.com/sourcegraph-assets/docs/images/code-intelligence/renamed/configuration.png)
 
@@ -144,7 +144,7 @@ For **NPM**, you can create a [secret named `NPM_TOKEN`](https://docs.npmjs.com/
 
 ## Language support
 
-Auto-indexing is currently available for Go, TypeScript, JavaScript, Python, Ruby and JVM repositories. See also [dependency navigation](/code-search/code-navigation/features#dependency-navigation) for instructions on how to setup cross-dependency navigation depending on what language ecosystem you use.
+Auto-indexing is currently available for Go, TypeScript, JavaScript, Python, Ruby and JVM repositories. See also [dependency navigation](/code-navigation/features#dependency-navigation) for instructions on how to setup cross-dependency navigation depending on what language ecosystem you use.
 
 ## Lifecycle of an indexing job
 
@@ -152,7 +152,7 @@ Index jobs are run asynchronously from a queue. Each index job has an attached *
 
 ![Index job state diagram](https://storage.googleapis.com/sourcegraph-assets/Docs/index-states.svg)
 
-The general happy-path for an index job is: `QUEUED_FOR_INDEXING`, `INDEXING`, then `INDEXING_COMPLETED`. Once uploaded, the remaining lifecycle is described in [lifecycle of an upload](/code-search/code-navigation/explanations/uploads#lifecycle-of-an-upload).
+The general happy-path for an index job is: `QUEUED_FOR_INDEXING`, `INDEXING`, then `INDEXING_COMPLETED`. Once uploaded, the remaining lifecycle is described in [lifecycle of an upload](/code-navigation/explanations/uploads#lifecycle-of-an-upload).
 
 Index jobs may fail to complete due to the job configuration not aligning with the repository contents or due to transient errors related to the network (for example). An index job will enter the `INDEXING_ERRORED` state on such conditions. Errored index jobs may be retried a number of times before moving into a permanently errored state.
 
@@ -172,7 +172,7 @@ The detail page of an index job will show its current state as well as detailed 
 
 ![Upload in processing state](https://storage.googleapis.com/sourcegraph-assets/docs/images/code-intelligence/renamed/indexes-processing.png)
 
-The stdout and stderr of each command run during pre-indexing and indexing steps are viewable as the index job is processed. This information is valuable when troubleshooting a [custom index configuration](/code-search/code-navigation/auto_indexing_configuration) for your repository.
+The stdout and stderr of each command run during pre-indexing and indexing steps are viewable as the index job is processed. This information is valuable when troubleshooting a [custom index configuration](/code-navigation/auto_indexing_configuration) for your repository.
 
 ![Detailed look at index job logs](https://storage.googleapis.com/sourcegraph-assets/docs/images/code-intelligence/renamed/indexes-processing-detail.png)
 
@@ -186,13 +186,13 @@ Once the index job completes, a code graph data file has been uploaded to the So
 	This feature is in beta for self-hosted customers.
 </Callout>
 
-When a commit of a repository is selected as a candidate for [auto-indexing](/code-search/code-navigation/auto_indexing) but does not have an explicitly supplied index job configuration, index jobs are inferred from the content of the repository at that commit.
+When a commit of a repository is selected as a candidate for [auto-indexing](/code-navigation/auto_indexing) but does not have an explicitly supplied index job configuration, index jobs are inferred from the content of the repository at that commit.
 
 The site-config setting `codeIntelAutoIndexing.indexerMap` can be used to update the indexer image that is (globally) used on inferred jobs. For example, `"codeIntelAutoIndexing.indexerMap": {"go": "lsif-go:alternative-tag"}` will cause inferred jobs indexing Go code to use the specified container (with an alternative tag). This can also be useful for specifying alternative Docker registries.
 
-This document describes the heuristics used to determine the set of index jobs to schedule. See [configuration reference](/code-search/code-navigation/auto_indexing_configuration) for additional documentation on how index jobs are configured.
+This document describes the heuristics used to determine the set of index jobs to schedule. See [configuration reference](/code-navigation/auto_indexing_configuration) for additional documentation on how index jobs are configured.
 
-As a general rule of thumb, an indexer can be invoked successfully if the source code to index can be compiled successfully. The heuristics below attempt to cover the common cases of dependency resolution, but may not be sufficient if the target code requires additional steps such as code generation, header file linking, or installation of system dependencies to compile from a fresh clone of the repository. For such cases, we recommend using the inferred job as a starting point to [explicitly supply index job configuration](/code-search/code-navigation/auto_indexing#explicit-index-job-configuration).
+As a general rule of thumb, an indexer can be invoked successfully if the source code to index can be compiled successfully. The heuristics below attempt to cover the common cases of dependency resolution, but may not be sufficient if the target code requires additional steps such as code generation, header file linking, or installation of system dependencies to compile from a fresh clone of the repository. For such cases, we recommend using the inferred job as a starting point to [explicitly supply index job configuration](/code-navigation/auto_indexing#explicit-index-job-configuration).
 
 ### Go
 
@@ -291,35 +291,35 @@ If the repository contains both a `lsif-java.json` file as well as `*.java`, `*.
 
 <QuickLinks>
 	<QuickLink
-		href="/code-search/code-navigation/auto_indexing_configuration"
+		href="/code-navigation/auto_indexing_configuration"
 		icon="installation"
 		imgAlt="Code Navigation"
 		title="Auto-indexing configuration reference"
 		description="Outlines the anticipated elements of an explicit index job configuration, which might be represented in JSON based on the method of supply."
 	/>
 	<QuickLink
-		href="/code-search/code-navigation/explanations/auto_indexing_inference"
+		href="/code-navigation/explanations/auto_indexing_inference"
 		icon="lightbulb"
 		imgAlt="Code Navigation"
 		title="Auto-indexing inference"
 		description="What happens when a commit is chosen for auto-indexing without a specific index job configuration."
 	/>
 	<QuickLink
-		href="/code-search/code-navigation/inference_configuration"
+		href="/code-navigation/inference_configuration"
 		icon="theming"
 		imgAlt="Code Navigation"
 		title="Auto-indexing inference configuration reference"
 		description="Guide for site administrators on customizing code intelligence indexing jobs detection in Sourcegraph."
 	/>
 	<QuickLink
-		href="/code-search/code-navigation/how-to/combining_scip_uploads_from_ci_cd_and_auto_indexing"
+		href="/code-navigation/how-to/combining_scip_uploads_from_ci_cd_and_auto_indexing"
 		icon="presets"
 		imgAlt="Code Navigation"
 		title="Combine SCIP uploads from CI/CD & auto-indexing"
 		description="Learn about methods to precise SCIP index data for your team's repositories."
 	/>
 	<QuickLink
-		href="/code-search/code-navigation/how-to/policies_resource_usage_best_practices"
+		href="/code-navigation/how-to/policies_resource_usage_best_practices"
 		icon="installation"
 		imgAlt="Code Navigation"
 		title="Code intelligence policies resource usage best practices"
