@@ -468,7 +468,7 @@ export const navigation: NavigationItem[] = [
 			},
 			{
 				title: 'Enterprise Self-Hosted',
-				href: '/admin/self-hosted',
+				href: '/self-hosted',
 				sections: [
 					{title: 'Deploy', href: '/admin/deploy'},
 					{title: 'Architecture', href: '/admin/architecture'},
