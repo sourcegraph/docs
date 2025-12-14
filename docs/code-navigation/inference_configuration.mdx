@@ -4,16 +4,16 @@
 	This feature is in beta for self-hosted customers.
 </Callout>
 
-This document details how a site administrator can supply a Lua script to customize the way [Sourcegraph detects precise code intelligence indexing jobs from repository contents](/code-search/code-navigation/explanations/auto_indexing_inference).
+This document details how a site administrator can supply a Lua script to customize the way [Sourcegraph detects precise code intelligence indexing jobs from repository contents](/code-navigation/explanations/auto_indexing_inference).
 
 By default, Sourcegraph will attempt to infer index jobs for the following languages:
 
--   [`Go`](/code-search/code-navigation/explanations/auto_indexing_inference#go)
--   [`Java`/`Scala`/`Kotlin`](/code-search/code-navigation/explanations/auto_indexing_inference#java)
+-   [`Go`](/code-navigation/explanations/auto_indexing_inference#go)
+-   [`Java`/`Scala`/`Kotlin`](/code-navigation/explanations/auto_indexing_inference#java)
 -   `Python`
 -   `Ruby`
--   [`Rust`](/code-search/code-navigation/explanations/auto_indexing_inference#rust)
--   [`TypeScript`/`JavaScript`](/code-search/code-navigation/explanations/auto_indexing_inference#typescript)
+-   [`Rust`](/code-navigation/explanations/auto_indexing_inference#rust)
+-   [`TypeScript`/`JavaScript`](/code-navigation/explanations/auto_indexing_inference#typescript)
 
 Inference logic can be disabled or altered in the case when the target repositories do not conform to a pattern that the Sourcegraph default inference logic recognizes. Inference logic is controlled by a **Lua override script** that can be supplied in the UI under `Admin > Code graph > Inference`.
 
@@ -44,7 +44,7 @@ return require("sg.autoindex.config").new({
 
 To **add** additional behaviors, you can create and register a new **recognizer**. A recognizer is an interface that requests some set of files from a repository, and returns a set of auto-indexing job configurations that could produce a precise code intelligence index.
 
-A _path recognizer_ is a concrete recognizer that advertises a set of path _globs_ it is interested in, then invokes its `generate` function with matching paths from a repository. In the following, all files matching `Snek.module` (`Snek.module`, `proj/Snek.module`, `proj/sub/Snek.module`, etc) are passed to a call to `generate` (if non-empty). The generate function will then return a list of indexing job descriptions. The [guide for auto-indexing jobs configuration](/code-search/code-navigation/auto_indexing_configuration#keys-1) gives detailed descriptions on the fields of this object.
+A _path recognizer_ is a concrete recognizer that advertises a set of path _globs_ it is interested in, then invokes its `generate` function with matching paths from a repository. In the following, all files matching `Snek.module` (`Snek.module`, `proj/Snek.module`, `proj/sub/Snek.module`, etc) are passed to a call to `generate` (if non-empty). The generate function will then return a list of indexing job descriptions. The [guide for auto-indexing jobs configuration](/code-navigation/auto_indexing_configuration#keys-1) gives detailed descriptions on the fields of this object.
 
 The ordering of paths and limits are defined in the [Ordering guarantees and limits](#ordering-guarantees-and-limits) section.
 
