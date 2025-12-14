@@ -459,10 +459,6 @@ export const navigation: NavigationItem[] = [
 					{title: 'Executors', href: '/admin/executors'},
 					{title: 'FAQs', href: '/admin/faq'},
 					{title: 'How-to Guides', href: '/admin/how-to'},
-					{
-						title: 'Enterprise Getting Started',
-						href: '/admin/enterprise-getting-started-guide'
-					},
 					{title: 'Architecture', href: '/admin/architecture'}
 				]
 			},
