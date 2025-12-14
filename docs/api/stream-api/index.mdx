@@ -1,0 +1,148 @@
+# Sourcegraph Stream API
+
+With the Stream API you can consume search results and related metadata as
+a stream of events. The Sourcegraph UI calls the Stream API for all interactive searches.
+Compared to our [GraphQL API](/api/graphql/), it offers shorter times to first results and
+supports running exhaustive searches returning a large volume of results without
+putting pressure on the backend.
+
+## Endpoint
+
+`/.api/search/stream`
+
+## Request
+
+```bash
+# Using access token
+curl --header "Accept: text/event-stream" \
+     --header "Authorization: token <access token>" \
+     --get \
+     --url "<Sourcegraph URL>/.api/search/stream" \
+     --data-urlencode "q=<query>" \
+     --data-urlencode "v=<version>" \
+     --data-urlencode "t=<pattern type>" \
+     --data-urlencode "max-line-len=<maximum line length>" \
+     --data-urlencode "cm=<enable chunk matches>" \
+     --data-urlencode "display=<display limit>" \
+     --data-urlencode "cl=<context lines>"
+
+# Using OAuth token
+curl --header "Accept: text/event-stream" \
+     --header "Authorization: Bearer <oauth token>" \
+     --get \
+     --url "<Sourcegraph URL>/.api/search/stream" \
+     --data-urlencode "q=<query>" \
+     --data-urlencode "v=<version>" \
+     --data-urlencode "t=<pattern type>" \
+     --data-urlencode "max-line-len=<maximum line length>" \
+     --data-urlencode "cm=<enable chunk matches>" \
+     --data-urlencode "display=<display limit>" \
+     --data-urlencode "cl=<context lines>"
+```
+
+| Parameter                       | Description                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| access token / oauth token      | [Sourcegraph access token](/cli/how-tos/creating-an-access-token) or [OAuth token](/admin/oauth-apps) with `user:all` scope. See [GraphQL API authentication](/api/graphql#quickstart) for details on token refresh and expiration handling.                                                                                                                                          |
+| Sourcegraph URL                 | The URL of your Sourcegraph instance, or https://sourcegraph.com.                                                                                                                                                                                                                                                                                                                     |
+| query                           | A Sourcegraph query string, see our [search query syntax](/code-search/queries)                                                                                                                                                                                                                                                                                                       |
+| version (optional)              | The version of the search query syntax. We recommend to explicitly set the version. The latest version is "V3". (Default: "V3")                                                                                                                                                                                                                                                       |
+| pattern type (optional)         | Either "keyword", "standard", or "regexp". This pattern type is only used if the query doesn't already contain a `patternType:` filter. (Default: "standard")                                                                                                                                                                                                                         |
+| maximum line length (optional)  | If set, will truncate the context field of `ChunkMatch` such that no line is longer than max-line-len. (Default: -1 (no limit))                                                                                                                                                                                                                                                       |
+| enable chunk matches (optional) | Enables chunk matches. Must be parseable as boolean. (Default: false)                                                                                                                                                                                                                                                                                                                 |
+| display limit (optional)        | The maximum number of matches the backend returns. If the backend finds more than display-limit results, it will keep searching and aggregating statistics, but the matches will not be returned anymore. Note that the display-limit is different from the query filter `count:` which causes the search to stop and return once we found `count:` matches. (Default: -1 (no limit)) |
+| context lines (optional)        | The number of lines around a match that should be returned. Works only in conjunction with `cm=true`. Must be parseable as boolean. (Default: 1)                                                                                                                                                                                                                                      |
+
+See [Example](#example-curl).
+
+## Event stream format
+
+The API responds with a stream of events. Each event consists of exactly two
+fields, event and data, one per line. Events are separated by 2 newline
+characters, `\n\n`. The value of `event:` is always a string that describes the
+type of the event. The value of `data:` is always JSON.
+
+```text
+event: <event-type> // event 1
+data: <JSON>
+
+event: <event-type> // event 2
+data: <JSON>
+
+...
+
+event: done // last event
+data: {}
+```
+
+> NOTE:
+> The search stream API follows the [server-sent
+> events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#event_stream_format) format. However, we do not guarantee compatibility
+> with any third-party clients written for server-sent events, and recommend using the src-cli tool or writing your own wrapper around the API.
+
+### Event-types
+
+Events can be of the following types:
+
+| event-type | description                                                                      |
+| ---------- | -------------------------------------------------------------------------------- |
+| matches    | matches can be of type content, path, commit, diff, symbol and repo              |
+| progress   | statistics such as match count, count of repositories with matches, and duration |
+| filters    | suggestions for additional filters to further narrow down the search             |
+| alert      | info, warning and error messages                                                 |
+| done       | always the last event                                                            |
+
+## Example (curl)
+
+On Sourcegraph.com we can run queries without authentication.
+
+```shellsession
+$ curl --header "Accept: text/event-stream" \
+     --get \
+     --url "https://sourcegraph.com/.api/search/stream" \
+     --data-urlencode "q=r:sourcegraph/sourcegraph stream results patternType:keyword count:1" \
+     --data-urlencode "v=V3"
+
+
+event: filters
+data: [{"value":"archived:yes","label":"Include archived repos","count":15,"exhaustive":false,"kind":"utility"}]
+
+event: progress
+data: {"done":false,"matchCount":0,"durationMs":206,"skipped":[{"reason":"excluded-archive","title":"15 archived","message":"By default we exclude archived repositories. Include them with `archived:yes` in your query.","severity":"info","suggested":{"title":"include archived","queryExpression":"archived:yes"}}],"trace":"https://sourcegraph.com/-/debug/jaeger/trace/b1be66f71a79e0dbeda6bb200dae8326"}
+
+event: filters
+data: [{"value":"archived:yes","label":"Include archived repos","count":15,"exhaustive":false,"kind":"utility"},{"value":"type:file","label":"Code","count":1,"exhaustive":false,"kind":"type"},{"value":"type:path","label":"Paths","count":1,"exhaustive":false,"kind":"type"},{"value":"lang:go","label":"Go","count":1,"exhaustive":false,"kind":"lang"},{"value":"repo:^github\\.com/sourcegraph/sourcegraph$","label":"github.com/sourcegraph/sourcegraph","count":1,"exhaustive":false,"kind":"repo"}]
+
+event: matches
+data: [{"type":"content","path":"cmd/frontend/graphqlbackend/search_results.go","pathMatches":[{"start":{"offset":35,"line":0,"column":35},"end":{"offset":42,"line":0,"column":42}}],"repositoryID":36809250,"repository":"github.com/sourcegraph/sourcegraph","repoStars":9918,"repoLastFetched":"2024-07-11T13:40:33.306273Z","branches":[""],"commit":"be0cd097f5f20d1444786ed7bb6c34cbad85c676","hunks":null,"lineMatches":[{"line":"// Results are the results found by the search. It respects the limits set. To","lineNumber":124,"offsetAndLengths":[[3,7]]}],"language":"Go"}]
+
+event: filters
+data: [{"value":"archived:yes","label":"Include archived repos","count":15,"exhaustive":false,"kind":"utility"},{"value":"type:file","label":"Code","count":1,"exhaustive":false,"kind":"type"},{"value":"type:path","label":"Paths","count":1,"exhaustive":false,"kind":"type"},{"value":"lang:go","label":"Go","count":1,"exhaustive":false,"kind":"lang"},{"value":"repo:^github\\.com/sourcegraph/sourcegraph$","label":"github.com/sourcegraph/sourcegraph","count":1,"exhaustive":false,"kind":"repo"}]
+
+event: progress
+data: {"done":true,"repositoriesCount":1,"matchCount":1,"durationMs":359,"skipped":[{"reason":"shard-match-limit","title":"result limit hit","message":"Not all results have been returned due to hitting a match limit. Sourcegraph has limits for the number of results returned from a line, document and repository.","severity":"info","suggested":{"title":"increase limit","queryExpression":"count:1000"}},{"reason":"excluded-archive","title":"15 archived","message":"By default we exclude archived repositories. Include them with `archived:yes` in your query.","severity":"info","suggested":{"title":"include archived","queryExpression":"archived:yes"}}],"trace":"https://sourcegraph.com/-/debug/jaeger/trace/b1be66f71a79e0dbeda6bb200dae8326"}
+
+event: done
+data: {}
+```
+
+## FAQ
+
+### Q: How can I run an exhaustive search directly against the Stream API?
+
+To search a pattern over all indexed repositories, add `count:all` and remove all repo filters. For example, to search all indexed repositories for the string "secret", you can run the following command
+
+```bash
+curl --header "Accept:text/event-stream" --get --url "https://sourcegraph.com/.api/search/stream" --data-urlencode "q=secret count:all"
+```
+
+If you don't want to write your own client, you can also use Sourcegraph's [src-cli](https://sourcegraph.com/github.com/sourcegraph/src-cli).
+
+```bash
+src search -stream "secret count:all"
+```
+
+A community-maintained open source TypeScript/JavaScript client supporting Node.js, browsers, and Deno is available at [ziv/source-graph-stream-client](https://sourcegraph.com/github.com/ziv/source-graph-stream-client).
+
+### Q: Are there plans for supporting a streaming client or interface with more functionality (e.g., parallelizing multiple streaming requests or aggregating results from multiple streams)?
+
+There are currently no plans to support additional client-side functionality to interact with a streaming endpoint. We recommend users write their own scripts or client wrappers that handle, e.g., firing multiple requests, accepting and aggregating the return values, and additional result formatting or processing.

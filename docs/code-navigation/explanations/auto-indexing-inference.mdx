@@ -1,0 +1,106 @@
+# Inference of auto-indexing jobs
+
+<Callout type="note">
+	This feature is in beta for self-hosted customers.
+</Callout>
+
+When a commit of a repository is selected as a candidate for [auto-indexing](/code-navigation/auto-indexing) but does not have an explicitly supplied index job configuration, index jobs are inferred from the content of the repository at that commit.
+
+The site-config setting `codeIntelAutoIndexing.indexerMap` can be used to update the indexer image that is (globally) used on inferred jobs. For example, `"codeIntelAutoIndexing.indexerMap": {"go": "scip-go:alternative-tag"}` will cause inferred jobs indexing Go code to use the specified container (with an alternative tag). This can also be useful for specifying alternative Docker registries.
+
+This document describes the heuristics used to determine the set of index jobs to schedule. See [configuration reference](/code-navigation/auto-indexing-configuration) for additional documentation on how index jobs are configured.
+
+As a general rule of thumb, an indexer can be invoked successfully if the source code to index can be compiled successfully. The heuristics below attempt to cover the common cases of dependency resolution, but may not be sufficient if the target code requires additional steps such as code generation, header file linking, or installation of system dependencies to compile from a fresh clone of the repository. For such cases, we recommend using the inferred job as a starting point to [explicitly supply index job configuration](/code-navigation/auto-indexing#explicit-index-job-configuration).
+
+## Go
+
+For each directory containing a `go.mod` file, the following index job is scheduled.
+
+```json
+{
+	"index_jobs": [
+		{
+			"steps": [
+				{
+					"root": "<dir>",
+					"image": "sourcegraph/scip-go",
+					"commands": ["go mod download"]
+				}
+			],
+			"root": "<dir>",
+			"indexer": "sourcegraph/scip-go",
+			"indexer_args": ["scip-go", "--verbose"]
+		}
+	]
+}
+```
+
+For every _other_ directory excluding `vendor/` directories and their children containing one or more `*.go` files, the following index job is scheduled.
+
+```json
+{
+	"root": "<dir>",
+	"indexer": "sourcegraph/scip-go",
+	"indexer_args": ["GO111MODULE=off", "scip-go", "--verbose"]
+}
+```
+
+## TypeScript
+
+For each directory excluding `node_modules/` directories and their children containing a `tsconfig.json` file, the following index job is scheduled. Note that there are a dynamic number of pre-indexing steps used to resolve dependencies: for each ancestor directory `ancestor(dir)` containing a `package.json` file, the dependencies are installed via either `yarn` or `npm`. These steps run in order, depth-first.
+
+```json
+{
+	"steps": [
+		{
+			"root": "<ancestor(dir)>",
+			"image": "sourcegraph/scip-typescript:autoindex",
+			"commands": ["yarn"]
+		},
+		{
+			"root": "<ancestor(dir)>",
+			"image": "sourcegraph/scip-typescript:autoindex",
+			"commands": ["npm install"]
+		},
+		"..."
+	],
+	"local_steps": [
+		"N_NODE_MIRROR=https://unofficial-builds.nodejs.org/download/release n --arch x64-musl autol"
+	],
+	"root": "<dir>",
+	"indexer": "sourcegraph/scip-typescript:autoindex",
+	"indexer_args": ["scip-typescript", "index"]
+}
+```
+
+## Rust
+
+If the repository contains a `Cargo.toml` file, the following index job is scheduled.
+
+```json
+{
+	"root": "",
+	"indexer": "sourcegraph/lsif-rust",
+	"indexer_args": ["lsif-rust", "index"],
+	"outfile": "dump.lsif"
+}
+```
+
+## Java
+
+<Callout type="note">
+	Inference for languages supported by
+	[scip-java](https://github.com/sourcegraph/scip-java) is currently
+	restricted to Sourcegraph.com.
+</Callout>
+
+If the repository contains both a `lsif-java.json` file as well as `*.java`, `*.scala`, or `*.kt` files, the following index job is scheduled.
+
+```json
+{
+	"root": "",
+	"indexer": "sourcegraph/scip-java",
+	"indexer_args": ["scip-java", "index", "--build-tool=lsif"],
+	"outfile": "index.scip"
+}
+```

@@ -1,0 +1,240 @@
+# Indexers
+
+<p className="subtitle">
+	This page describes the process of writing an indexer and details all the
+	recommended indexers that Sourcegraph currently supports.
+</p>
+
+## Writing an Indexer
+
+The following documentation describes the [SCIP Code Intelligence Protocol](https://github.com/sourcegraph/scip) and explains steps to write an indexer to emit SCIP.
+
+1. Familiarize yourself with the [SCIP protobuf schema](https://github.com/sourcegraph/scip/blob/main/scip.proto)
+2. Import or generate SCIP bindings
+3. Generate minimal index with occurrence information
+4. Test your indexer using [scip CLI](https://github.com/sourcegraph/scip/blob/main/docs/CLI.md)'s `snapshot` subcommand
+5. Progressively add support for more features with tests
+
+<Callout type="note">
+	If you run into problems or have questions for any of these steps, please
+	open an issue on the [SCIP issue
+	tracker](https://github.com/sourcegraph/scip/issues).
+</Callout>
+
+Let's understand each of these steps in detail:
+
+## Understanding the SCIP protobuf schema
+
+The [SCIP protobuf schema](https://github.com/sourcegraph/scip/blob/main/scip.proto) describes the structure of a SCIP index in a machine-readable format.
+
+The main structure is an [`Index`](https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/scip%24+%5Emessage+Index+%7B%5Cn%28.%2B%5Cn%29%2B%7D&patternType=regexp) which consists of a list of documents along with some metadata.
+
+Optionally, an index can also provide hover documentation for external symbols that will not be indexed.
+
+A [`Document`](https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/scip%24+message+Document+%7B...%7D&patternType=structural) has a unique path relative to the project root. It also has a list of occurrences, which attach information to source ranges, as well as a list of symbols that are defined in the document.
+
+The information covered by an [`Occurrence`](https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/scip%24+message+Occurrence+%7B...%7D&patternType=structural) can be syntactic or semantic:
+
+-   Syntactic information such as the `syntax_kind` field is used for highlighting
+-   Semantic information such as the `symbol` and `symbol_role` fields are used to power code navigation features like Go to definition and Find references
+
+Occurrences also allow attaching diagnostic information, which can be used by static analysis tools.
+
+For more details, see the doc comments in the [SCIP protobuf schema](https://github.com/sourcegraph/scip/blob/main/scip.proto).
+
+You may also find it helpful to see how existing indexers emit information. For example, you can take a look at
+the [scip-typescript](https://github.com/sourcegraph/scip-typescript) or [scip-java](https://github.com/sourcegraph/scip-java) code to see how they emit SCIP indexes.
+
+## Importing or generating SCIP bindings
+
+The SCIP repository contains bindings for several languages. Depending on your indexer's implementation language, you can import the bindings directly using your language's package manager, or by using git submodules.
+
+One benefit of this approach is that you do not need to have a protobuf toolchain to generate code from the schema. This also makes it easier to bump the version of SCIP to pick up newer changes to the schema. Alternately, you can vendor the SCIP protobuf schema into your repository and set up Protobuf generation yourself. This has the benefit of being able to control the process from end-to-end, at the cost of making updates a bit more cumbersome.
+
+Newer Sourcegraph versions will maintain backwards compatibility with older SCIP versions, so there is no risk of not being able to upload SCIP indexes if a vendored schema has not been updated in a while.
+
+## Generating minimal index with occurrence information
+
+As a first pass, it's recommended generating occurrences for a subset of declarations and checking that the generation works from end-to-end. In the context of an indexer, this typically involves using a compiler frontend or a language server as a library.
+
+First, run the compiler pipeline until semantic analysis is completed. Next, perform a top-down traversal of ASTs for all files, recording information about different kinds of occurrences. At the end, write a conversion pass from the intermediate data to SCIP using the SCIP bindings.
+
+As a convention, indexers should use `index.scip` as the default filename for the output. The [Sourcegraph CLI](https://github.com/sourcegraph/src-cli) recognizes this filename and uses it as the default upload path.
+
+You can inspect the Protobuf output using `protoc`:
+
+```sh
+# assuming scip.proto and index.scip are in the current directory
+protoc --decode=scip.Index scip.proto < index.scip
+```
+
+For robust testing, it's recommended making sure that the result of indexing is deterministic. One potential source of issues here is non-determinstic iteration over the key-value pairs of a hash table. If re-running your indexer changes the order in which occurrences are emitted, snapshot testing may report different results.
+
+## Snapshot testing with scip CLI
+
+One of the key design criteria for SCIP was that it should be easy to understand an index file and test an indexer for correctness.
+
+The [scip CLI](https://github.com/sourcegraph/scip/blob/main/docs/CLI.md) has a `snapshot` subcommand which can be used for golden testing. It `snapshot` command inspects an index file and regenerates the source code, attaching comments describing occurrence information.
+
+Here is slightly cleaned up snippet from running `scip snapshot` on the index generated by running `scip-typescript` over itself:
+
+````ts
+  function scriptElementKind(
+//         ^^^^^^^^^^^^^^^^^ definition scip-typescript npm @sourcegraph/scip-typescript 0.2.0 src/FileIndexer.ts/scriptElementKind().
+    node: ts.Node,
+//  ^^^^ definition scip-typescript npm @sourcegraph/scip-typescript 0.2.0 src/FileIndexer.ts/scriptElementKind().(node)
+//        ^^ reference local 1
+//           ^^^^ reference scip-typescript npm typescript 4.6.2 lib/typescript.d.ts/ts/Node#
+    sym: ts.Symbol
+//  ^^^ definition scip-typescript npm @sourcegraph/scip-typescript 0.2.0 src/FileIndexer.ts/scriptElementKind().(sym)
+//  documentation ```ts
+//       ^^ reference local 1
+//          ^^^^^^ reference scip-typescript npm typescript 4.6.2 lib/typescript.d.ts/ts/Symbol#
+  ): ts.ScriptElementKind {
+//   ^^ reference local 1
+//      ^^^^^^^^^^^^^^^^^ reference scip-typescript npm typescript 4.6.2 lib/typescript.d.ts/ts/ScriptElementKind#
+````
+
+The carets and contextual information make it easy to visually check that:
+
+-   Occurrences are being emitted for the right source ranges
+-   Occurrences have the expected symbol strings. The exact syntax for the symbol strings is described in the doc comment for [`Symbol`](https://sourcegraph.com/github.com/sourcegraph/scip@12459c75fc15117e68b4c15a58e8581b738b855f/-/blob/scip.proto?L87-115) in the SCIP Protobuf schema
+-   Symbols correspond to the right package. For example, the `ScriptElementKind` is defined in the `typescript` package (the compiler) whereas `scriptElementKind` is defined in `@sourcegraph/scip-typescript`
+
+## Progressively adding support for language features
+
+It's recommended adding support for different features in the following order:
+
+1. Emit occurrences and symbols for a single file.
+    - Iterate over different kinds of entities (functions, classes, properties etc.)
+1. Emit hover documentation for entities.
+   If the markup is in a format other than CommonMark,
+   we recommend addressing that difference after addressing other features.
+1. Add support for implementation relationships, enabling Find implementations.
+1. (Optional) If the hover documentation uses markup in a format other than CommonMark,
+   implement a conversion from the custom markup language to CommonMark.
+
+<Callout type="note">
+	If implementing an indexer in C++, you need to careful about very large
+	indexes, as the default Protoc-generated code has a 2GB implementation limit
+	on message sizes. This limit can be worked around by writing documents to
+	disk one-by-one. For example, this PR [adds support to scip-ruby for writing
+	documents one-by-one](https://github.com/sourcegraph/scip-ruby/pull/190).
+</Callout>
+
+## Sourcegraph recommended indexers
+
+Language support is an ever-evolving feature of Sourcegraph. Some languages may be better supported than others due to demand or developer bandwidth/expertise. The following clarifies the status of the indexers which the Sourcegraph team can both recommend to customers and provide support for.
+
+### Quick reference
+
+This table is maintained as an authoritative resource for users, Sales, and Customer Engineers. Any major changes to the development of our indexers will be reflected here.
+
+| **Language**                  | **Indexer**                                   | **Status** | **Hover docs** | **Go to definition** | **Find references** | **Cross-file** | **Cross-repository** | **Find implementations** |
+| ----------------------------- | --------------------------------------------- | ---------- | -------------- | -------------------- | ------------------- | -------------- | -------------------- | ------------------------ |
+| Go                            | [scip-go]                                     | 🟢         | ✓              | ✓                    | ✓                   | ✓              | ✓                    | ✓                        |
+| TypeScript/ <br /> JavaScript | [scip-typescript]                             | 🟢         | ✓              | ✓                    | ✓                   | ✓              | ✓                    | ✓                        |
+| C/C++                         | [scip-clang]                                  | 🟢         | ✓              | ✓                    | ✓                   | ✓              | ✓                    | ✓                        |
+| Java                          | [scip-java]                                   | 🟢         | ✓              | ✓                    | ✓                   | ✓              | ✓                    | ✓                        |
+| Scala                         | [scip-java]                                   | 🟢         | ✓              | ✓                    | ✓                   | ✓              | ✓                    | ✓                        |
+| Kotlin                        | [scip-java]                                   | 🟢         | ✓              | ✓                    | ✓                   | ✓              | ✗                    | ✓                        |
+| Rust                          | [rust-analyzer]                               | 🟢         | ✓              | ✓                    | ✓                   | ✓              | ✗                    | ✓                        |
+| Python                        | [scip-python]                                 | 🟢         | ✓              | ✓                    | ✓                   | ✓              | ✓                    | ✓                        |
+| Ruby                          | [scip-ruby]                                   | 🟢         | ✓              | ✓                    | ✓                   | ✓              | ✓                    | ✓                        |
+| C#                            | [scip-dotnet] Build tools (`.sln`, `.csproj`) | 🟢         | ✓              | ✓                    | ✓                   | ✓              | ✗                    | ✓                        |
+
+[scip-go]: https://github.com/sourcegraph/scip-go
+[scip-typescript]: https://github.com/sourcegraph/scip-typescript
+[scip-clang]: https://github.com/sourcegraph/scip-clang
+[scip-java]: https://github.com/sourcegraph/scip-java
+[scip-ruby]: https://github.com/sourcegraph/scip-ruby
+[scip-python]: https://github.com/sourcegraph/scip-python
+[scip-dotnet]: https://github.com/sourcegraph/scip-dotnet
+[rust-analyzer]: https://rust-analyzer.github.io/
+
+<Callout type="info">
+	Requires enabling and setting up Sourcegraph's auto-indexing feature. Read
+	more about [Auto-indexing](/code-navigation/auto-indexing).
+</Callout>
+
+### Status definitions
+
+An indexer status is:
+
+-   🟢 **Generally Available**: Available as a normal product feature, no major features are absent.
+-   🟡 **Partially Available**: Available, but may be limited in some significant ways. No major features are absent but edge cases remain.
+-   🟠 **Beta**: Available in pre-release form on a limited basis. Could be useful to early adopters despite lack of features.
+-   🟣 **Experimental**: Available in pre-release form, with significant caveats. Early adopters can try it with expectations of failure.
+
+## Milestone definitions
+
+A common set of steps required to build feature-complete indexers is broadly outlined below. The implementation order and _doneness criteria_ of these steps may differ between language and development ecosystems. Major divergences will be detailed in the notes below.
+
+### Cross repository: Emits monikers for cross-repository support
+
+The next milestone provides support for cross-repository definitions and references.
+
+The indexer can emit a valid index including import monikers for each symbol defined non-locally, and export monikers for each symbol importable by another repository. This index should be consumed without error by the latest Sourcegraph instance and Go to Definition and Find References should work on cross-repository symbols given that **both repositories are indexed at the exact commit imported**.
+
+At this point, the indexer may be generally considered **ready**. Some languages and ecosystems may require some of the additional following milestones to be considered ready due to a bad out-of-the-box developer experience or absence of a critical language features. For example, `scip-java` is nearly useless without built-in support for build systems such as gradle.
+
+### Common build tool integration
+
+The next milestone integrates the indexer with a common build tool or framework for the language and surrounding ecosystem. The priority and applicability of this milestone will vary wildly by languages. For example, `scip-go` uses the standard library and the language has a built-in dependency manager; all of our customers use Gradle, making `scip-java` effectively unusable without native Gradle support.
+
+The indexer integrates natively with common mainstream build tools. We should aim to cover at least the majority of build tools used by existing enterprise customers.
+
+The implementation of this milestone will also vary wildly by language. It could be that the indexer runs as a step in a larger tool, or the indexer contains build-specific logic in order to determine the set of source code that needs to be analyzed.
+
+### The long tail: Find implementations
+
+The next milestone represents the never-finished long tail of feature additions. The **remaining 20%** of the language should be supported via incremental updates and releases over time. Support of Find implementations should be prioritized by popularity and demand.
+
+We may lack the language expertise or bandwidth to implement certain features on indexers. We will consider investing resources to add additional features when the demand for support is sufficiently high and the implementation is sufficiently difficult.
+
+## More resources
+
+<QuickLinks>
+	<QuickLink
+		href="/code-navigation/how-to/index-a-go-repository"
+		icon="installation"
+		imgAlt="Code Navigation"
+		title="Index a Go repository"
+		description="Learn how to automate data indexing in LSIF for Go codebases or index data manually."
+	/>
+	<QuickLink
+		href="/code-navigation/how-to/index-a-typescript-and-javascript-repository"
+		icon="lightbulb"
+		imgAlt="Code Navigation"
+		title="Index a TypeScript/JavaScript repository"
+		description="Learn how to create an index for JavaScript and TypeScript projects and uploading it to Sourcegraph."
+	/>
+	<QuickLink
+		href="/code-navigation/how-to/index-other-languages"
+		icon="presets"
+		imgAlt="Code Navigation"
+		title="Index other languages"
+		description="Learn how to create an index for other programming languages and uploading it to Sourcegraph."
+	/>
+	<QuickLink
+		href="https://sourcegraph.github.io/scip-java/docs/getting-started.html"
+		icon="theming"
+		imgAlt="Code Navigation"
+		title="Index a Java, Scala, or Kotlin repository"
+		description="Learn how to generate a SCIP index of your Java codebase using Gradle, Maven, sbt, or Bazel."
+	/>
+	<QuickLink
+		href="https://github.com/sourcegraph/scip-python"
+		icon="installation"
+		imgAlt="Code Navigation"
+		title="Index a Python repository"
+		description="Learn how to generate a SCIP index for your Python projects."
+	/>
+	<QuickLink
+		href="/code-navigation/explanations/uploads"
+		icon="lightbulb"
+		imgAlt="Code Navigation"
+		title="Code Graph Data uploads"
+		description="Learn how Code Graph indexers analyze code and generate an index file."
+	/>
+</QuickLinks>

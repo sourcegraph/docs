@@ -1,0 +1,88 @@
+# Code host connections
+
+<TierCallout>
+	[Enterprise Starter](/pricing/plans/enterprise-starter) only supports
+	GitHub.com, GitLab.com, and Bitbucket.org.
+	[Enterprise](/pricing/plans/enterprise) supports all listed code hosts.
+	<user>Available via the Web app.</user>
+</TierCallout>
+
+Sourcegraph can sync repositories from code hosts and other similar services. We designate code hosts between Tier 1 and Tier 2 based on Sourcegraph's capabilities when used with those code hosts.
+
+## Tier 1 code hosts
+
+Tier 1 code hosts are our highest level of support for code hosts. When leveraging a Tier 1 code host, you can expect:
+
+-   Scalable repository syncing - Sourcegraph is able to reliably sync repositories from this code host up to 100k repositories. (SLA TBD)
+-   Scalable permissions syncing - Sourcegraph is able to reliably sync permissions from this code host for up to 10k users. (SLA TBD)
+-   Authentication - Sourcegraph is able to leverage authentication from this code host (i.e. Login with GitHub).
+-   Code Search - A developer can seamlessly search across repositories from this code host. (SLAs TBD)
+-   Code Monitors - A developer can create a code monitor to monitor code in this repository.
+-   Code Insights - Code Insights reliably works on code sync'd from a tier 1 code host.
+-   Batch Changes - A Batch Change can be leveraged to submit code changes back to a tier 1 code host while respecting code host permissions.
+
+| Code Host                     | Status | Repository Syncing | Permissions Syncing | Authentication | Code Search | Code Monitors | Code Insights | Batch Changes |
+| ----------------------------- | ------ | ------------------ | ------------------- | -------------- | ----------- | ------------- | ------------- | ------------- |
+| GitHub.com                    | Tier 1 | ✓                  | ✓                   | ✓              | ✓           | ✓             | ✓             | ✓             |
+| GitHub Self-Hosted Enterprise | Tier 1 | ✓                  | ✓                   | ✓              | ✓           | ✓             | ✓             | ✓             |
+| GitLab.com                    | Tier 1 | ✓                  | ✓                   | ✓              | ✓           | ✓             | ✓             | ✓             |
+| GitLab Self-Hosted            | Tier 1 | ✓                  | ✓                   | ✓              | ✓           | ✓             | ✓             | ✓             |
+| Bitbucket Cloud               | Tier 1 | ✓                  | ✓                   | ✓              | ✓           | ✓             | ✓             | ✓             |
+| Bitbucket Server              | Tier 1 | ✓                  | ✓                   | ✓              | ✓           | ✓             | ✓             | ✓             |
+| Gerrit                        | Tier 1 | ✓                  | ✓                   | ✓              | ✓           | ✓             | ✓             | ✓             |
+| Azure DevOps                  | Tier 1 | ✓                  | ✓                   | ✓              | ✓           | ✓             | ✓             | ✓             |
+| AWS CodeCommit                | Tier 2 | ✓                  | ✗                   | ✗              | ✓           | ✓             | ✓             | ✗             |
+| Perforce                      | Tier 2 | ✓                  | ✓                   | ✗              | ✓           | ✓             | ✗             | ✗             |
+| Plastic SCM (Enterprise)      | Tier 2 | ✓                  | ✗                   | ✗              | ✓           | ✓             | ✓             | ✗             |
+
+## Tier 2: Code Hosts
+
+We recognize there are other code hosts including CVS, SVN, and many more. Today, we do not offer native integrations with these code hosts and customers are advised to leverage [Src-srv-git](/admin/code-hosts/non-git) and the [explicit permissions API](/admin/permissions/api) as a way to ingest code and permissions respectively into Sourcegraph.
+
+[Src-srv-git](/admin/code-hosts/non-git) and the [explicit permissions API](/admin/permissions/api) follow the same scale guidance shared above (up to 100k repos and 10k users).
+
+## Configure a code host connection
+
+**Site admins** can configure Sourcegraph to sync code from the following code hosts:
+
+-   [GitHub](/admin/code-hosts/github)
+-   [GitLab](/admin/code-hosts/gitlab)
+-   [Bitbucket Cloud](/admin/code-hosts/bitbucket-cloud)
+-   [Bitbucket Server / Bitbucket Data Center](/admin/code-hosts/bitbucket-server)
+-   [Azure DevOps](/admin/code-hosts/azuredevops)
+-   [Gerrit](/admin/code-hosts/gerrit)
+-   [AWS CodeCommit](/admin/code-hosts/aws-codecommit)
+-   [Other Git code hosts (using a Git URL)](/admin/code-hosts/other)
+-   [Non-Git code hosts](/admin/code-hosts/non-git)
+    -   [Perforce](/admin/repo/perforce)
+    -   [Plastic SCM](/admin/repo/plasticscm)
+
+## Rate limits
+
+For information on code host-related rate limits, see [rate limits](/admin/code-hosts/rate-limits).
+
+## Temporarily disabling requests to code hosts
+
+It may be the case that you'd like to temporarily disable all `git` and API requests from Sourcegraph to a code host. Adding the following to your site configuration will stop Sourcegraph from sending requests to the configured code host connections:
+
+> WARNING: disabling all git and API requests to codehosts will also disable permissions syncs, batch changes, discovery of new repos, and updates to currently synched repos. Synching with codehosts is a core functionality of Sourcegraph and many other features may also be affected.
+
+```json
+"disableAutoGitUpdates": true,
+"disableAutoCodeHostSyncs": true,
+"gitMaxCodehostRequestsPerSecond": 0,
+"gitMaxConcurrentClones": 0
+```
+
+## Using Self-signed TLS Certificates
+
+To use Sourcegraph with self-signed TLS Certificates, update the site configuration to add the certificate and skip verification of the certificate chain:
+
+```json
+    "tls.external": {
+      "certificates": [
+        "-----BEGIN CERTIFICATE-----\n..."
+      ],
+      "insecureSkipVerify": true
+    }
+```

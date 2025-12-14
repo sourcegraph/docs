@@ -1,0 +1,145 @@
+# Private Resources in On-Prem Data Centers via Sourcegraph Connect Agent
+
+<Callout type="note">
+	This feature is in the Experimental stage. [Contact
+	us](https://about.sourcegraph.com/contact) for more information.
+</Callout>
+
+As part of the [Enterprise tier](https://sourcegraph.com/pricing), Sourcegraph Cloud supports connecting to private code hosts and artifact registries in the customer's network by deploying the Sourcegraph Connect tunnel agent in the customer's network.
+
+## How it works
+
+Sourcegraph Connect consists of three components:
+
+### Tunnel Clients
+
+Forward proxy clients for the Sourcegraph Cloud instance's containers to reach the customer's private code hosts and artifact registries, through the tunnel server.
+
+Managed by Sourcegraph, and deployed in the customer's Sourcegraph Cloud instance's VPC.
+
+### Tunnel Server
+
+The broker between agents and clients, it authenticates agents and clients, enforces ACLs, sets up mTLS, and proxies encrypted traffic between agents and clients.
+
+Managed by Sourcegraph, and deployed in the customer's Sourcegraph Cloud instance's VPC.
+
+### Tunnel Agents
+
+Deployed by the customer inside their network, agents proxy and encrypt traffic between the customer's private resources and the Sourcegraph Cloud tunnel clients.
+
+The agent has its own identity, and using credentials provided to the customer during deployment, the agent authenticates and establishes a secure connection with the tunnel server. Only agents are allowed to establish secure connections with the tunnel server, and the server only accepts a connection if the agent's identity is approved.
+
+Agents can only communicate with permitted code hosts and artifact registries.
+
+<iframe
+	src="https://link.excalidraw.com/readonly/453uvY8infI8wskSecGJ"
+	width="100%"
+	height="100%"
+	style={{border: 'none'}}
+/>
+[Diagram link](https://link.excalidraw.com/readonly/453uvY8infI8wskSecGJ)
+
+## Steps
+
+### Initiate the process
+
+The customer reaches out to their account manager to request this feature be enabled on their Sourcegraph Cloud instance.
+
+The account manager collects the required information from the customer, including but not limited to:
+
+-   The DNS names of the needed private resources (e.g. `gitlab.internal.company.net`, `artifactory.internal.company.net`)
+-   The ports of the private resources (e.g. `443`, `80`, `22`)
+-   The type of TLS certificates used by the private resources (e.g. self-signed, internal PKI, or issued by a public CA)
+
+Sourcegraph provides:
+
+-   The instructions, config file, and credentials to run the agent
+-   The tunnel server's static public IPs and ports
+
+### Create the connection
+
+The customer installs the agent in their private network, following the instructions provided. At a high level:
+
+-   Configure internet egress to the provided tunnel server's static public IPs and ports
+-   Configure intranet egress to the needed private resources
+-   Deploy the tunnel agent via Docker container or binary, with the provided config file and credentials
+
+### Configure the code host connection
+
+Once the tunnel is established between the agent and server, the customer can configure the [code host connection](/admin/code-hosts/) on their Sourcegraph Cloud instance.
+
+## FAQ
+
+### Why TCP over gRPC?
+
+The tunnel between the client and agent is built using TCP over gRPC. gRPC is a high-performant and battle-tested framework, with built-in support for mTLS for a trusted secure connection. TCP and HTTP/2 are widely supported in the majority of customer environments. Compared to traditional VPN solutions, such as OpenVPN, IPSec, and SSH over bastion hosts, gRPC allows us to design our own protocol, and the programmable interface allows us to implement advanced features, such as fine-grained access control at a per-connection level, audit logging with effective metadata, etc.
+
+### How are connections encrypted? Can anyone else inspect the traffic?
+
+Tunnel connections use mTLS between the agent in the customer's network and the clients in the customer's Sourcegraph Cloud instance's VPC. Agents, clients, and the server all have their own certificates and encrypt / decrypt traffic over TCP. mTLS requires agents and clients to have a private key, and present a valid signed certificate from a trusted CA, which is not shared. This protects customers and Sourcegraph from [on-path and spoofing attacks](https://www.cloudflare.com/en-gb/learning/access-management/what-is-mutual-tls/).
+
+### How do you authenticate requests?
+
+Both tunnel agents and clients are assigned an identity corresponding to a GCP Service Account, and they are provided credentials to prove this identity. Agents use the Service Account key provided to the customer during deployment, and clients use Workload Identity to prove their identity. They use these credentials to authenticate to the tunnel server, by sending signed JWT tokens and public keys. JWT tokens contain details to specify the GCP Service Account credential public key required to validate their signature to confirm the identity of the requestor. The server then signs the requestor's public key and responds with a signed certificate containing the GCP Service Account email as a Subject Alternative Name (SAN).
+
+For an added layer of security, if the customer network's NAT / internet gateway uses public IPs in a stable CIDR range, Sourcegraph can provision firewall rules to restrict access to the tunnel server from the provided IP ranges.
+
+### How do you enforce authorization to restrict which requests can reach private resources?
+
+With mTLS, every entity in the network has its own identity. The tunnel server is configured with ACLs, using the client's identity as the source, and the agent's identity as the destination. This ensures only clients with a proven identity can communicate with agents.
+
+### How do you manage keys and certificates?
+
+We utilize GCP Certificate Authority Service (CAS), a managed Public Key Infrastructure (PKI) service. It is responsible for the storage of root and intermediate CA signing keys, and the signing of client certificates. Access to GCP CAS is governed by GCP IAM, and only necessary individuals and services can access CAS, with audit trails in GCP Logging.
+
+The TLS private keys in the agents and clients only exist in memory, and are never transmitted or shared. Only the public key is sent to the tunnel server, to issue a signed certificate, to establish the mTLS connection.
+
+### How often do you rotate the encryption keys?
+
+Encryption keys are short-lived, and both tunnel agents and clients refresh their certificates every 24h. The customer may also manually rotate the agent's certificate by restarting the agent.
+
+### How do you audit access?
+
+Tunnel server logs operations to GCP Logging, with sufficient metadata to identify the requester, and a 30-day retention policy. We also monitor unauthorized access events to watch for potential attacks.
+
+### What if an attacker gains access to the Sourcegraph Cloud instance?
+
+If an attacker gains access to the Sourcegraph Cloud instance's containers, this would be a security breach, and trigger our Incident Response process. However, we have many controls in place to prevent this from happening, where Cloud infrastructure access always requires approval, and the Security team is on-call for unexpected usage patterns. Learn more in our [security portal](https://security.sourcegraph.com/).
+
+Please reach out to us if you have any specific questions regarding our Cloud security posture, we are happy to provide more detail to address your concerns.
+
+### How do I need to configure my network for the agent to work?
+
+The tunnel agent needs to connect to the tunnel server, and your private resources. Sourcegraph provides dedicated static IPs and ports to connect to the tunnel server. The customer must configure network egress to allow TCP (HTTP/2) traffic access to these IPs and ports.
+
+### How can I restrict access to my private resources?
+
+The customer has full control of their network where they deploy the tunnel agent, and can configure, monitor, and terminate connections at will.
+
+We recommend implementing an allowlist to restrict the egress traffic of the agent to the IP addresses provided by Sourcegraph and to the specific private resources your Sourcegraph Cloud instance needs to access, and configuring your firewall to alert you if this ACL is hit.
+
+If your code hosts or registries use DNS names, the agent needs access to the DNS server configured on its host.
+
+### How can I harden the tunnel agent deployment?
+
+The tunnel agent is designed and built with a minimal footprint and attack surface, and is scanned for vulnerabilities.
+
+You can:
+
+-   Deploy the agent on a hardened container platform
+-   Store the agent credential and config content in a secrets management system and mount these secrets to the container
+-   Forward the agent's logs to your log management system
+
+### How can I inspect the agent's traffic, and audit the data the agent is accessing in my environment?
+
+If a customer needs to inspect and audit traffic, such as performing TLS inspection on the connection between the private resources and Sourcegraph Cloud, we recommend inspecting traffic on the connections between the tunnel agent and internal resources, as this traffic uses the protocols and encryption of the internal resources.
+
+The tunnel from the agent to the server is encrypted and authenticated by mTLS over gRPC, and uses a custom protocol, so the decrypted payload isn't usable for traffic inspection.
+
+### Can I use Internal PKI or self-signed TLS certificates for my private resources?
+
+Yes. Please work with your account team to add the public certificate chain of your internal CAs, and / or your private resources' self-signed certs, under `tls.external.certificates` in your instance's [site configuration](/admin/config/site-config).
+
+### Is this connection highly available?
+
+To achieve high availability, customers can run multiple tunnel agents across their network. Each agent uses the same GCP Service Account credentials, authenticates with the tunnel server, and establishes their own connection to it. Tunnel clients randomly select an available agent to forward traffic through.

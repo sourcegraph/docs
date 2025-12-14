@@ -37,7 +37,7 @@ export const navigation: NavigationItem[] = [
 						subsections: [
 							{
 								title: 'Search Filters Panel',
-								href: '/code-search/working/search_filters'
+								href: '/code-search/working/search-filters'
 							},
 							{
 								title: 'Search Examples',
@@ -55,7 +55,7 @@ export const navigation: NavigationItem[] = [
 					},
 					{
 						title: 'Advanced Features',
-						href: '/code-search/working/saved_searches',
+						href: '/code-search/working/saved-searches',
 						subsections: [
 							{
 								title: 'Fuzzy Finder',
@@ -63,7 +63,7 @@ export const navigation: NavigationItem[] = [
 							},
 							{
 								title: 'Search Contexts',
-								href: '/code-search/working/search_contexts'
+								href: '/code-search/working/search-contexts'
 							},
 							{
 								title: 'Search Jobs',
@@ -75,11 +75,11 @@ export const navigation: NavigationItem[] = [
 							},
 							{
 								title: 'Search Subexpressions',
-								href: '/code-search/working/search_subexpressions'
+								href: '/code-search/working/search-subexpressions'
 							},
 							{
 								title: 'Saved Searches',
-								href: '/code-search/working/saved_searches'
+								href: '/code-search/working/saved-searches'
 							},
 							{
 								title: 'Structural Search',
@@ -108,19 +108,19 @@ export const navigation: NavigationItem[] = [
 					},
 					{
 						title: 'Search-based code navigation',
-						href: '/code-navigation/search_based_code_navigation'
+						href: '/code-navigation/search-based-code-navigation'
 					},
 					{
 						title: 'Precise code navigation',
-						href: '/code-navigation/precise_code_navigation'
+						href: '/code-navigation/precise-code-navigation'
 					},
 					{
 						title: 'Syntactic code navigation',
-						href: '/code-navigation/syntactic_code_navigation'
+						href: '/code-navigation/syntactic-code-navigation'
 					},
 					{
 						title: 'Auto-indexing',
-						href: '/code-navigation/auto_indexing'
+						href: '/code-navigation/auto-indexing'
 					},
 					{
 						title: 'Environment Variables',
@@ -396,7 +396,7 @@ export const navigation: NavigationItem[] = [
 			},
 			{
 				title: 'Code Monitoring',
-				href: '/code_monitoring'
+				href: '/code-monitoring'
 			},
 			{
 				title: 'Code Ownership',
@@ -404,33 +404,33 @@ export const navigation: NavigationItem[] = [
 				sections: [
 					{
 						title: 'CODEOWNERS Format',
-						href: '/own/codeowners_format'
+						href: '/own/codeowners-format'
 					},
 					{
 						title: 'CODEOWNERS Ingestion',
-						href: '/own/codeowners_ingestion'
+						href: '/own/codeowners-ingestion'
 					},
 					{
 						title: 'Configuration Reference',
-						href: '/own/configuration_reference'
+						href: '/own/configuration-reference'
 					},
 					{
 						title: 'Assigned Ownership',
-						href: '/own/assigned_ownership'
+						href: '/own/assigned-ownership'
 					}
 				]
 			},
 			{
 				title: 'Code Insights',
-				href: '/code_insights',
+				href: '/code-insights',
 				sections: [
-					{title: 'Quickstart', href: '/code_insights/quickstart'},
+					{title: 'Quickstart', href: '/code-insights/quickstart'},
 					{
 						title: 'Explanations',
-						href: '/code_insights/explanations'
+						href: '/code-insights/explanations'
 					},
-					{title: 'How-to Guides', href: '/code_insights/how-tos'},
-					{title: 'References', href: '/code_insights/references'}
+					{title: 'How-to Guides', href: '/code-insights/how-tos'},
+					{title: 'References', href: '/code-insights/references'}
 				]
 			}
 		]
@@ -448,20 +448,20 @@ export const navigation: NavigationItem[] = [
 						title: 'Enterprise Portal',
 						href: '/admin/enterprise-portal'
 					},
-					{title: 'Codehosts', href: '/admin/code_hosts'},
+					{title: 'Codehosts', href: '/admin/code-hosts'},
 					{title: 'User Authentication', href: '/admin/auth'},
-					{title: 'Access Control', href: '/admin/access_control'},
+					{title: 'Access Control', href: '/admin/access-control'},
 					{
 						title: 'Repository Permissions',
 						href: '/admin/permissions'
 					},
-					{title: 'OAuth Apps', href: '/admin/oauth_apps'},
+					{title: 'OAuth Apps', href: '/admin/oauth-apps'},
 					{title: 'Executors', href: '/admin/executors'},
 					{title: 'FAQs', href: '/admin/faq'},
 					{title: 'How-to Guides', href: '/admin/how-to'},
 					{
 						title: 'Enterprise Getting Started',
-						href: '/admin/enterprise_getting_started_guide'
+						href: '/admin/enterprise-getting-started-guide'
 					},
 					{title: 'Architecture', href: '/admin/architecture'}
 				]
@@ -478,22 +478,37 @@ export const navigation: NavigationItem[] = [
 						title: 'Deploy',
 						href: '/self-hosted/deploy',
 						subsections: [
-							{title: 'Single-node', href: '/self-hosted/deploy/single-node'},
-							{title: 'Docker Compose', href: '/self-hosted/deploy/docker-compose'},
-							{title: 'Kubernetes', href: '/self-hosted/deploy/kubernetes'},
-							{title: 'Machine Images', href: '/self-hosted/deploy/machine-images'}
+							{
+								title: 'Single-node',
+								href: '/self-hosted/deploy/single-node'
+							},
+							{
+								title: 'Docker Compose',
+								href: '/self-hosted/deploy/docker-compose'
+							},
+							{
+								title: 'Kubernetes',
+								href: '/self-hosted/deploy/kubernetes'
+							},
+							{
+								title: 'Machine Images',
+								href: '/self-hosted/deploy/machine-images'
+							}
 						]
 					},
 					{
 						title: 'Upgrade',
 						href: '/self-hosted/updates',
 						subsections: [
-							{title: 'Migrator', href: '/self-hosted/updates/migrator'}
+							{
+								title: 'Migrator',
+								href: '/self-hosted/updates/migrator'
+							}
 						]
 					},
 					{
 						title: 'External Services',
-						href: '/self-hosted/external_services'
+						href: '/self-hosted/external-services'
 					},
 					{
 						title: 'Executors',
@@ -531,12 +546,12 @@ export const navigation: NavigationItem[] = [
 				sections: [
 					{
 						title: 'Browser Extension',
-						href: '/integration/browser_extension'
+						href: '/integration/browser-extension'
 					},
 					{title: 'Editors', href: '/integration/editor'},
 					{
 						title: 'Browser Search Engine',
-						href: '/integration/browser_extension/how-tos/browser_search_engine'
+						href: '/integration/browser-extension/how-tos/browser-search-engine'
 					}
 				]
 			}
@@ -562,7 +577,7 @@ export const navigation: NavigationItem[] = [
 			},
 			{
 				title: 'Sourcegraph Stream API',
-				href: '/api/stream_api'
+				href: '/api/stream-api'
 			},
 			{
 				title: 'Sourcegraph MCP Server',

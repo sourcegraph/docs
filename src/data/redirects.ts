@@ -1,7 +1,12 @@
 const redirectsData = [
 	{
 		source: '/admin/tls_ssl',
-		destination: '/admin/http_https_configuration',
+		destination: '/self-hosted/http-https-configuration',
+		permanent: true
+	},
+	{
+		source: '/admin/http_https_configuration',
+		destination: '/self-hosted/http-https-configuration',
 		permanent: true
 	},
 	{
@@ -6382,6 +6387,672 @@ const redirectsData = [
 	{
 		source: '/admin/workers',
 		destination: '/self-hosted/workers',
+		permanent: true
+	},
+	// Underscore to hyphen redirects (added for URL consistency)
+	{
+		source: '/admin/access_control',
+		destination: '/admin/access-control',
+		permanent: true
+	},
+	{
+		source: '/admin/access_control/batch_changes',
+		destination: '/admin/access-control/batch-changes',
+		permanent: true
+	},
+	{
+		source: '/admin/audit_log',
+		destination: '/admin/audit-log',
+		permanent: true
+	},
+	{
+		source: '/admin/auth/login_form',
+		destination: '/admin/auth/login-form',
+		permanent: true
+	},
+	{
+		source: '/admin/auth/saml/azure_ad',
+		destination: '/admin/auth/saml/azure-ad',
+		permanent: true
+	},
+	{
+		source: '/admin/auth/saml/jump_cloud',
+		destination: '/admin/auth/saml/jump-cloud',
+		permanent: true
+	},
+	{
+		source: '/admin/auth/saml/microsoft_adfs',
+		destination: '/admin/auth/saml/microsoft-adfs',
+		permanent: true
+	},
+	{
+		source: '/admin/auth/saml/one_login',
+		destination: '/admin/auth/saml/one-login',
+		permanent: true
+	},
+	{
+		source: '/admin/beta_and_experimental_features',
+		destination: '/admin/beta-and-experimental-features',
+		permanent: true
+	},
+	{
+		source: '/admin/code_hosts',
+		destination: '/admin/code-hosts',
+		permanent: true
+	},
+	{
+		source: '/admin/code_hosts/aws_codecommit',
+		destination: '/admin/code-hosts/aws-codecommit',
+		permanent: true
+	},
+	{
+		source: '/admin/code_hosts/bitbucket_cloud',
+		destination: '/admin/code-hosts/bitbucket-cloud',
+		permanent: true
+	},
+	{
+		source: '/admin/code_hosts/bitbucket_server',
+		destination: '/admin/code-hosts/bitbucket-server',
+		permanent: true
+	},
+	{
+		source: '/admin/code_hosts/rate_limits',
+		destination: '/admin/code-hosts/rate-limits',
+		permanent: true
+	},
+	{
+		source: '/admin/code_hosts/src_serve_git',
+		destination: '/admin/code-hosts/src-serve-git',
+		permanent: true
+	},
+	{
+		source: '/admin/config/authorization_and_authentication',
+		destination: '/admin/config/authorization-and-authentication',
+		permanent: true
+	},
+	{
+		source: '/admin/config/batch_changes',
+		destination: '/admin/config/batch-changes',
+		permanent: true
+	},
+	{
+		source: '/admin/config/site_config',
+		destination: '/admin/config/site-config',
+		permanent: true
+	},
+	{
+		source: '/admin/enterprise_getting_started_guide',
+		destination: '/admin/enterprise-getting-started-guide',
+		permanent: true
+	},
+	{
+		source: '/admin/executors/executor_secrets',
+		destination: '/admin/executors/executor-secrets',
+		permanent: true
+	},
+	{
+		source: '/admin/how-to/internal_github_repos',
+		destination: '/admin/how-to/internal-github-repos',
+		permanent: true
+	},
+	{
+		source: '/admin/how-to/lsif_scip_migration',
+		destination: '/admin/how-to/lsif-scip-migration',
+		permanent: true
+	},
+	{
+		source: '/admin/how-to/update_repo_failure',
+		destination: '/admin/how-to/update-repo-failure',
+		permanent: true
+	},
+	{
+		source: '/admin/oauth_apps',
+		destination: '/admin/oauth-apps',
+		permanent: true
+	},
+	{
+		source: '/admin/repo/git_config',
+		destination: '/admin/repo/git-config',
+		permanent: true
+	},
+	{
+		source: '/admin/repo/pre_load_from_local_disk',
+		destination: '/admin/repo/pre-load-from-local-disk',
+		permanent: true
+	},
+	{
+		source: '/admin/repo/update_frequency',
+		destination: '/admin/repo/update-frequency',
+		permanent: true
+	},
+	{
+		source: '/admin/security_event_logs',
+		destination: '/admin/security-event-logs',
+		permanent: true
+	},
+	{
+		source: '/admin/service_accounts',
+		destination: '/admin/service-accounts',
+		permanent: true
+	},
+	{
+		source: '/admin/user_data_deletion',
+		destination: '/admin/user-data-deletion',
+		permanent: true
+	},
+	{
+		source: '/admin/user_surveys',
+		destination: '/admin/user-surveys',
+		permanent: true
+	},
+	{
+		source: '/api/stream_api',
+		destination: '/api/stream-api',
+		permanent: true
+	},
+	{
+		source: '/cli/how-tos/creating_an_access_token',
+		destination: '/cli/how-tos/creating-an-access-token',
+		permanent: true
+	},
+	{
+		source: '/cli/how-tos/fetch_sboms',
+		destination: '/cli/how-tos/fetch-sboms',
+		permanent: true
+	},
+	{
+		source: '/cli/how-tos/managing_access_tokens',
+		destination: '/cli/how-tos/managing-access-tokens',
+		permanent: true
+	},
+	{
+		source: '/cli/how-tos/revoking_an_access_token',
+		destination: '/cli/how-tos/revoking-an-access-token',
+		permanent: true
+	},
+	{
+		source: '/cli/how-tos/verify_container_signatures',
+		destination: '/cli/how-tos/verify-container-signatures',
+		permanent: true
+	},
+	{
+		source: '/cloud/logpush_gcs',
+		destination: '/cloud/logpush-gcs',
+		permanent: true
+	},
+	{
+		source: '/cloud/logpush_s3',
+		destination: '/cloud/logpush-s3',
+		permanent: true
+	},
+	{
+		source: '/cloud/private_connectivity_aws',
+		destination: '/cloud/private-connectivity-aws',
+		permanent: true
+	},
+	{
+		source: '/cloud/private_connectivity_gcp',
+		destination: '/cloud/private-connectivity-gcp',
+		permanent: true
+	},
+	{
+		source: '/cloud/private_connectivity_public_lb',
+		destination: '/cloud/private-connectivity-public-lb',
+		permanent: true
+	},
+	{
+		source: '/cloud/private_connectivity_sourcegraph_connect',
+		destination: '/cloud/private-connectivity-sourcegraph-connect',
+		permanent: true
+	},
+	{
+		source: '/code_insights',
+		destination: '/code-insights',
+		permanent: true
+	},
+	{
+		source: '/code_insights/quickstart',
+		destination: '/code-insights/quickstart',
+		permanent: true
+	},
+	{
+		source: '/code_insights/explanations',
+		destination: '/code-insights/explanations',
+		permanent: true
+	},
+	{
+		source: '/code_insights/explanations/administration_and_security_of_code_insights',
+		destination:
+			'/code-insights/explanations/administration-and-security-of-code-insights',
+		permanent: true
+	},
+	{
+		source: '/code_insights/explanations/automatically_generated_data_series',
+		destination:
+			'/code-insights/explanations/automatically-generated-data-series',
+		permanent: true
+	},
+	{
+		source: '/code_insights/explanations/code_insights_filters',
+		destination: '/code-insights/explanations/code-insights-filters',
+		permanent: true
+	},
+	{
+		source: '/code_insights/explanations/current_limitations_of_code_insights',
+		destination:
+			'/code-insights/explanations/current-limitations-of-code-insights',
+		permanent: true
+	},
+	{
+		source: '/code_insights/explanations/data_retention',
+		destination: '/code-insights/explanations/data-retention',
+		permanent: true
+	},
+	{
+		source: '/code_insights/explanations/search_results_aggregations',
+		destination: '/code-insights/explanations/search-results-aggregations',
+		permanent: true
+	},
+	{
+		source: '/code_insights/explanations/viewing_code_insights',
+		destination: '/code-insights/explanations/viewing-code-insights',
+		permanent: true
+	},
+	{
+		source: '/code_insights/how-tos',
+		destination: '/code-insights/how-tos',
+		permanent: true
+	},
+	{
+		source: '/code_insights/how-tos/creating_a_custom_dashboard_of_code_insights',
+		destination:
+			'/code-insights/how-tos/creating-a-custom-dashboard-of-code-insights',
+		permanent: true
+	},
+	{
+		source: '/code_insights/how-tos/filtering_an_insight',
+		destination: '/code-insights/how-tos/filtering-an-insight',
+		permanent: true
+	},
+	{
+		source: '/code_insights/language_insight_quickstart',
+		destination: '/code-insights/language-insight-quickstart',
+		permanent: true
+	},
+	{
+		source: '/code_insights/references',
+		destination: '/code-insights/references',
+		permanent: true
+	},
+	{
+		source: '/code_insights/references/common_reasons_code_insights_may_not_match_search_results',
+		destination:
+			'/code-insights/references/common-reasons-code-insights-may-not-match-search-results',
+		permanent: true
+	},
+	{
+		source: '/code_insights/references/common_use_cases',
+		destination: '/code-insights/references/common-use-cases',
+		permanent: true
+	},
+	{
+		source: '/code_insights/references/incomplete_data_points',
+		destination: '/code-insights/references/incomplete-data-points',
+		permanent: true
+	},
+	{
+		source: '/code_insights/references/repository_scope',
+		destination: '/code-insights/references/repository-scope',
+		permanent: true
+	},
+	{
+		source: '/code_insights/references/search_aggregations_use_cases',
+		destination: '/code-insights/references/search-aggregations-use-cases',
+		permanent: true
+	},
+	{
+		source: '/code_monitoring',
+		destination: '/code-monitoring',
+		permanent: true
+	},
+	{
+		source: '/code-navigation/auto_indexing',
+		destination: '/code-navigation/auto-indexing',
+		permanent: true
+	},
+	{
+		source: '/code-navigation/auto_indexing_configuration',
+		destination: '/code-navigation/auto-indexing-configuration',
+		permanent: true
+	},
+	{
+		source: '/code-navigation/explanations/auto_indexing_inference',
+		destination: '/code-navigation/explanations/auto-indexing-inference',
+		permanent: true
+	},
+	{
+		source: '/code-navigation/how-to/adding_scip_to_workflows',
+		destination: '/code-navigation/how-to/adding-scip-to-workflows',
+		permanent: true
+	},
+	{
+		source: '/code-navigation/how-to/combining_scip_uploads_from_ci_cd_and_auto_indexing',
+		destination:
+			'/code-navigation/how-to/combining-scip-uploads-from-ci-cd-and-auto-indexing',
+		permanent: true
+	},
+	{
+		source: '/code-navigation/how-to/index_a_go_repository',
+		destination: '/code-navigation/how-to/index-a-go-repository',
+		permanent: true
+	},
+	{
+		source: '/code-navigation/how-to/index_a_typescript_and_javascript_repository',
+		destination:
+			'/code-navigation/how-to/index-a-typescript-and-javascript-repository',
+		permanent: true
+	},
+	{
+		source: '/code-navigation/how-to/index_other_languages',
+		destination: '/code-navigation/how-to/index-other-languages',
+		permanent: true
+	},
+	{
+		source: '/code-navigation/how-to/policies_resource_usage_best_practices',
+		destination:
+			'/code-navigation/how-to/policies-resource-usage-best-practices',
+		permanent: true
+	},
+	{
+		source: '/code-navigation/inference_configuration',
+		destination: '/code-navigation/inference-configuration',
+		permanent: true
+	},
+	{
+		source: '/code-navigation/precise_code_navigation',
+		destination: '/code-navigation/precise-code-navigation',
+		permanent: true
+	},
+	{
+		source: '/code-navigation/search_based_code_navigation',
+		destination: '/code-navigation/search-based-code-navigation',
+		permanent: true
+	},
+	{
+		source: '/code-navigation/syntactic_code_navigation',
+		destination: '/code-navigation/syntactic-code-navigation',
+		permanent: true
+	},
+	{
+		source: '/code-navigation/writing_an_indexer',
+		destination: '/code-navigation/writing-an-indexer',
+		permanent: true
+	},
+	{
+		source: '/code-search/how-to/create_search_context_graphql',
+		destination: '/code-search/how-to/create-search-context-graphql',
+		permanent: true
+	},
+	{
+		source: '/code-search/working/saved_searches',
+		destination: '/code-search/working/saved-searches',
+		permanent: true
+	},
+	{
+		source: '/code-search/working/search_contexts',
+		destination: '/code-search/working/search-contexts',
+		permanent: true
+	},
+	{
+		source: '/code-search/working/search_filters',
+		destination: '/code-search/working/search-filters',
+		permanent: true
+	},
+	{
+		source: '/code-search/working/search_subexpressions',
+		destination: '/code-search/working/search-subexpressions',
+		permanent: true
+	},
+	{
+		source: '/dotcom/indexing_open_source_code',
+		destination: '/dotcom/indexing-open-source-code',
+		permanent: true
+	},
+	{
+		source: '/integration/aws_codecommit',
+		destination: '/integration/aws-codecommit',
+		permanent: true
+	},
+	{
+		source: '/integration/bitbucket_cloud',
+		destination: '/integration/bitbucket-cloud',
+		permanent: true
+	},
+	{
+		source: '/integration/bitbucket_server',
+		destination: '/integration/bitbucket-server',
+		permanent: true
+	},
+	{
+		source: '/integration/browser_extension',
+		destination: '/integration/browser-extension',
+		permanent: true
+	},
+	{
+		source: '/integration/browser_extension/how-tos/browser_search_engine',
+		destination:
+			'/integration/browser-extension/how-tos/browser-search-engine',
+		permanent: true
+	},
+	{
+		source: '/integration/browser_extension/how-tos/google_workspace',
+		destination: '/integration/browser-extension/how-tos/google-workspace',
+		permanent: true
+	},
+	{
+		source: '/integration/migrating_firefox_extension',
+		destination: '/integration/migrating-firefox-extension',
+		permanent: true
+	},
+	{
+		source: '/integration/open_in_editor',
+		destination: '/integration/open-in-editor',
+		permanent: true
+	},
+	{
+		source: '/own/assigned_ownership',
+		destination: '/own/assigned-ownership',
+		permanent: true
+	},
+	{
+		source: '/own/codeowners_format',
+		destination: '/own/codeowners-format',
+		permanent: true
+	},
+	{
+		source: '/own/codeowners_ingestion',
+		destination: '/own/codeowners-ingestion',
+		permanent: true
+	},
+	{
+		source: '/own/configuration_reference',
+		destination: '/own/configuration-reference',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/advanced_config_file',
+		destination: '/self-hosted/advanced-config-file',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/deploy/docker-compose/google_cloud',
+		destination: '/self-hosted/deploy/docker-compose/google-cloud',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/deploy/docker-single-container/google_cloud',
+		destination: '/self-hosted/deploy/docker-single-container/google-cloud',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/deploy/resource_estimator',
+		destination: '/self-hosted/deploy/resource-estimator',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/deploy/without_service_discovery',
+		destination: '/self-hosted/deploy/without-service-discovery',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/deployment_best_practices',
+		destination: '/self-hosted/deployment-best-practices',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/executors/deploy_executors',
+		destination: '/self-hosted/executors/deploy-executors',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/executors/deploy_executors_binary',
+		destination: '/self-hosted/executors/deploy-executors-binary',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/executors/deploy_executors_binary_offline',
+		destination: '/self-hosted/executors/deploy-executors-binary-offline',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/executors/deploy_executors_dind',
+		destination: '/self-hosted/executors/deploy-executors-dind',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/executors/deploy_executors_docker',
+		destination: '/self-hosted/executors/deploy-executors-docker',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/executors/deploy_executors_kubernetes',
+		destination: '/self-hosted/executors/deploy-executors-kubernetes',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/executors/deploy_executors_terraform',
+		destination: '/self-hosted/executors/deploy-executors-terraform',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/executors/executors_config',
+		destination: '/self-hosted/executors/executors-config',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/executors/executors_troubleshooting',
+		destination: '/self-hosted/executors/executors-troubleshooting',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/external_services',
+		destination: '/self-hosted/external-services',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/external_services/object_storage',
+		destination: '/self-hosted/external-services/object-storage',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/how-to/blobstore_debugging',
+		destination: '/self-hosted/how-to/blobstore-debugging',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/how-to/blobstore_update_notes',
+		destination: '/self-hosted/how-to/blobstore-update-notes',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/how-to/clear_codeintel_data',
+		destination: '/self-hosted/how-to/clear-codeintel-data',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/how-to/dirty_database',
+		destination: '/self-hosted/how-to/dirty-database',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/how-to/dirty_database_pre_3_37',
+		destination: '/self-hosted/how-to/dirty-database-pre-3-37',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/how-to/postgres_12_to_16_drift',
+		destination: '/self-hosted/how-to/postgres-12-to-16-drift',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/how-to/privileged_migrations',
+		destination: '/self-hosted/how-to/privileged-migrations',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/how-to/redis_configmap',
+		destination: '/self-hosted/how-to/redis-configmap',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/how-to/rollback_database',
+		destination: '/self-hosted/how-to/rollback-database',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/how-to/unfinished_migration',
+		destination: '/self-hosted/how-to/unfinished-migration',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/http_https_configuration',
+		destination: '/self-hosted/http-https-configuration',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/observability/alerting_custom_consumption',
+		destination: '/self-hosted/observability/alerting-custom-consumption',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/observability/health_checks',
+		destination: '/self-hosted/observability/health-checks',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/postgres12_end_of_life_notice',
+		destination: '/self-hosted/postgres12-end-of-life-notice',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/postgresql_collation_version_mismatch_resolution',
+		destination:
+			'/self-hosted/postgresql-collation-version-mismatch-resolution',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/ssl_https_self_signed_cert_nginx',
+		destination: '/self-hosted/ssl-https-self-signed-cert-nginx',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/updates/docker_compose',
+		destination: '/self-hosted/updates/docker-compose',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/updates/pure_docker',
+		destination: '/self-hosted/updates/pure-docker',
 		permanent: true
 	}
 ];
