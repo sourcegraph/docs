@@ -1,5 +1,10 @@
 const redirectsData = [
 	{
+		source: '/integration/img/disable_extension.png',
+		destination: '/integration/img/disable-extension.png',
+		permanent: true
+	},
+	{
 		source: '/admin/tls_ssl',
 		destination: '/self-hosted/http-https-configuration',
 		permanent: true
