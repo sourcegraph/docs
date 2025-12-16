@@ -19,12 +19,16 @@ export const generateMetadata = ({params}: Props) => {
 	const path = params.slug.join('/');
 	const post = allPosts.find(post => post._raw.flattenedPath === path);
 	if (post && post.headings && post.headings.length > 0) {
+		const title = post.headings[0].title;
+		const ogImageUrl = `/api/og/${path}`;
 		return {
-			title: post.headings[0].title,
+			title,
 			openGraph: {
-				images: [
-					{url: 'https://sourcegraph.com/docs/sourcegraph-og-nw.png'}
-				]
+				images: [{url: ogImageUrl, width: 1200, height: 630}]
+			},
+			twitter: {
+				card: 'summary_large_image',
+				images: [{url: ogImageUrl, width: 1200, height: 630}]
 			}
 		};
 	}

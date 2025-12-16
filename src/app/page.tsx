@@ -6,11 +6,14 @@ import {getMDXComponent} from 'next-contentlayer/hooks';
 import {notFound} from 'next/navigation';
 
 export const generateMetadata = () => {
+	const ogImageUrl = '/api/og/index';
 	return {
 		openGraph: {
-			images: [
-				{url: 'https://sourcegraph.com/docs/sourcegraph-og-nw.png'}
-			]
+			images: [{url: ogImageUrl, width: 1200, height: 630}]
+		},
+		twitter: {
+			card: 'summary_large_image' as const,
+			images: [{url: ogImageUrl, width: 1200, height: 630}]
 		}
 	};
 };
