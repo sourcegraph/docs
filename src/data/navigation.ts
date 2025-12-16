@@ -20,8 +20,6 @@ export type NavigationItem = {
 	topics: Topic[];
 };
 
-export type VersionNavigations = Record<string, NavigationItem[]>;
-
 export const navigation: NavigationItem[] = [
 	{
 		separator: 'Code Intelligence',
@@ -638,7 +636,3 @@ export const navigation: NavigationItem[] = [
 		]
 	}
 ];
-
-export const versionNavigations: VersionNavigations = {
-	navigation // latest version
-};

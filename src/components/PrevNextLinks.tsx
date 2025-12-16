@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import {usePathname, useParams} from 'next/navigation';
+import {usePathname} from 'next/navigation';
 import clsx from 'clsx';
 
-import {versionNavigations} from '@/data/navigation';
+import {navigation} from '@/data/navigation';
 
 function ArrowIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -52,10 +52,6 @@ function PageLink({
 
 export function PrevNextLinks() {
 	let pathname = usePathname();
-	const params = useParams();
-
-	const navigation =
-		versionNavigations[(params.version as string) || 'navigation'];
 
 	const allLinks = navigation.flatMap(item =>
 		item.topics.flatMap(topic => [
