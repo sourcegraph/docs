@@ -25,11 +25,11 @@ export const metadata: Metadata = {
 		canonical: '/docs'
 	},
 	openGraph: {
-		images: [{url: '/api/og/index', width: 1200, height: 630}]
+		images: [{url: `${process.env.NEXT_PUBLIC_DOCS_BASE_PATH || ''}/api/og/index`, width: 1200, height: 630}]
 	},
 	twitter: {
 		card: 'summary_large_image',
-		images: [{url: '/api/og/index', width: 1200, height: 630}]
+		images: [{url: `${process.env.NEXT_PUBLIC_DOCS_BASE_PATH || ''}/api/og/index`, width: 1200, height: 630}]
 	}
 };
 
