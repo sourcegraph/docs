@@ -75,6 +75,26 @@ The folder structure is exactly the same here. All the docs reside within the `/
 -   Navigate to the relevant relevant section for your contribution
 -   If you're adding a new page, create a new MDX file (e.g., `my-new-page.mdx`) in the appropriate folder
 
+### Frontmatter
+
+Each MDX file can include frontmatter at the top of the file to configure page metadata. Here are the supported fields:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `title` | string | No | The page title |
+| `date` | date | No | Last modified date (used in sitemap) |
+| `seoPriority` | number | No | SEO priority for sitemap (0.0 to 1.0, default: 0.5) |
+
+Example:
+
+```yaml
+---
+title: Getting Started with Cody
+date: 2024-01-15
+seoPriority: 0.8
+---
+```
+
 ### Using MDX
 
 We use MDX for our documentation, which allows you to seamlessly integrate JSX (React components) within Markdown. Write your content using standard markdown syntax. For example,

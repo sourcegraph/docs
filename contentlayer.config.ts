@@ -15,7 +15,8 @@ export const Post = defineDocumentType(() => ({
 	contentType: 'mdx',
 	fields: {
 		title: {type: 'string', required: false},
-		date: {type: 'date', required: false}
+		date: {type: 'date', required: false},
+		seoPriority: {type: 'number', required: false}
 	},
 	computedFields: {
 		url: {type: 'string', resolve: post => `/${post._raw.flattenedPath}`},
