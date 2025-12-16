@@ -86,3 +86,29 @@ To use Sourcegraph with self-signed TLS Certificates, update the site configurat
       "insecureSkipVerify": true
     }
 ```
+
+## Using mTLS (Mutual TLS) for Code Hosts
+
+If your code host requires mutual TLS (mTLS) authentication, you can configure client certificates per host using the `mtlsConfigurations` field in your site configuration:
+
+```json
+    "tls.external": {
+      "mtlsConfigurations": [
+        {
+          "host": "git.example.com",
+          "clientCertificate": "-----BEGIN CERTIFICATE-----\n...",
+          "clientKey": "-----BEGIN PRIVATE KEY-----\n..."
+        }
+      ]
+    }
+```
+
+Each entry in `mtlsConfigurations` specifies:
+
+- `host`: The hostname of the code host requiring mTLS
+- `clientCertificate`: The PEM-encoded client certificate
+- `clientKey`: The PEM-encoded private key for the client certificate
+
+You can configure multiple hosts by adding additional entries to the `mtlsConfigurations` array.
+
+If your code host uses a self-signed server certificate, you can also set `insecureSkipVerify: true` to disable server certificate chain verification. However, this bypasses important security checks and should be avoided in production—prefer adding the server's CA certificate to `certificates` instead.
