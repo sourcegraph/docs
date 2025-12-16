@@ -34,7 +34,7 @@ export const CustomLink: React.FC<CustomLinkProps> = ({
 				target="_blank"
 				rel="noopener noreferrer"
 				{...rest}
-				className="dark:hover:visited-text-dark-text-secondary text-vermilion-00 underline visited:text-[#4A4A4A] hover:text-[#606060] hover:visited:text-[#606060] dark:text-vermilion-11 dark:visited:text-[#606060] dark:hover:text-dark-text-secondary"
+				className="text-vermilion-00 underline hover:text-[#606060] dark:text-vermilion-11 dark:hover:text-dark-text-secondary"
 			>
 				{children}
 			</a>
@@ -47,7 +47,7 @@ export const CustomLink: React.FC<CustomLinkProps> = ({
 			<a
 				href={href}
 				{...rest}
-				className="dark:hover:visited-text-dark-text-secondary text-vermilion-00 underline visited:text-[#4A4A4A] hover:text-[#606060] hover:visited:text-[#606060] dark:text-vermilion-11 dark:visited:text-[#606060] dark:hover:text-dark-text-secondary"
+				className="text-vermilion-00 underline hover:text-[#606060] dark:text-vermilion-11 dark:hover:text-dark-text-secondary"
 			>
 				{children}
 			</a>
@@ -78,7 +78,7 @@ export const CustomLink: React.FC<CustomLinkProps> = ({
 						href={cleanedHref.replaceAll("'", '')}
 						{...rest}
 						title=""
-						className="dark:hover:visited-text-dark-text-secondary inline text-vermilion-00 underline visited:text-[#4A4A4A] hover:text-[#606060] hover:visited:text-[#606060] dark:text-vermilion-11 dark:visited:text-[#606060] dark:hover:text-dark-text-secondary"
+						className="inline text-vermilion-00 underline hover:text-[#606060] dark:text-vermilion-11 dark:hover:text-dark-text-secondary"
 					>
 						{children}{' '}
 						<BookOpenText className="ml-1 inline h-3 w-3 text-current" />
@@ -101,7 +101,7 @@ export const CustomLink: React.FC<CustomLinkProps> = ({
 		<Link
 			href={cleanedHref}
 			{...rest}
-			className="dark:hover:visited-text-dark-text-secondary text-vermilion-00 underline visited:text-[#4A4A4A] hover:text-[#606060] hover:visited:text-[#606060] dark:text-vermilion-11 dark:visited:text-[#606060] dark:hover:text-dark-text-secondary"
+			className="text-vermilion-00 underline hover:text-[#606060] dark:text-vermilion-11 dark:hover:text-dark-text-secondary"
 		>
 			{children}
 			{/* Ensuring <a> is used inside <Link> for custom attributes like 'className' */}
