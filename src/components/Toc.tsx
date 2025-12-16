@@ -5,9 +5,9 @@ import {allPosts} from 'contentlayer/generated';
 import Link from 'next/link';
 import {useParams} from 'next/navigation';
 import {useCallback, useEffect, useState} from 'react';
-import {BugIcon} from './icons/BugIcon';
-import {Globe} from './icons/Globe';
+import {ClipboardIcon} from './icons/ClipboardIcon';
 import {PencilIcon} from './icons/PencilIcon';
+import {DocumentIcon} from './icons/DocumentIcon';
 
 interface Heading {
 	level: number;
@@ -17,6 +17,7 @@ interface Heading {
 
 interface Props {
 	headings: Heading[];
+	rawMarkdown?: string;
 }
 
 type ParamsType = {
@@ -24,10 +25,22 @@ type ParamsType = {
 	slug: string[];
 };
 
-export function TableOfContents({headings}: Props) {
+export function TableOfContents({headings, rawMarkdown}: Props) {
 	let [currentSection, setCurrentSection] = useState(headings[0]?.id);
 	const [path, setPath] = useState('');
+	const [copied, setCopied] = useState(false);
 	const params: ParamsType = useParams();
+
+	const handleCopyPage = useCallback(async () => {
+		if (!rawMarkdown) return;
+		try {
+			await navigator.clipboard.writeText(rawMarkdown);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		} catch (error) {
+			console.error('Failed to copy page:', error);
+		}
+	}, [rawMarkdown]);
 
 	let getHeadings = useCallback((headings: Heading[]) => {
 		return headings
@@ -98,7 +111,7 @@ export function TableOfContents({headings}: Props) {
 	}
 
 	return (
-		<div className="hidden xl:sticky xl:top-[4.75rem] xl:-mr-6 xl:block xl:h-[calc(100vh-4.75rem)] xl:flex-none xl:overflow-y-auto xl:py-16 xl:pr-6">
+		<div className="hidden xl:sticky xl:-mr-6 xl:block xl:h-[calc(100vh-8.75rem)] xl:flex-none xl:overflow-y-auto xl:pr-6">
 			<nav aria-labelledby="on-this-page-title" className="w-56">
 				{headings.length > 0 && (
 					<>
@@ -158,6 +171,26 @@ export function TableOfContents({headings}: Props) {
 							>
 								<PencilIcon className="mr-1 h-4 w-4" />
 								Edit this page on GitHub
+							</a>
+						</div>
+						<div className="mt-2 flex items-center text-sm">
+							<button
+								onClick={handleCopyPage}
+								className="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+							>
+								<ClipboardIcon className="mr-1 h-4 w-4" />
+								{copied ? 'Copied!' : 'Copy page as Markdown'}
+							</button>
+						</div>
+						<div className="mt-2 flex items-center text-sm">
+							<a
+								href={`/${params.slug.join('/')}.md`}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+							>
+								<DocumentIcon className="mr-1 h-4 w-4" />
+								View as Markdown
 							</a>
 						</div>
 					</>

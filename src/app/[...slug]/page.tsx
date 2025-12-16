@@ -57,7 +57,10 @@ const PostLayout = ({params}: Props) => {
 				</article>
 				<PrevNextLinks />
 			</div>
-			<TableOfContents headings={post.headings} />
+			<TableOfContents
+				headings={post.headings}
+				rawMarkdown={post.body.raw}
+			/>
 		</>
 	);
 };

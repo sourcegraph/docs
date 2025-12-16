@@ -52,9 +52,18 @@ function createRedirectUrl(
 		? `${request.nextUrl.origin}${basePath}${destination}`
 		: `${request.nextUrl.origin}${basePath}/${destination}`;
 }
+
 export function middleware(request: NextRequest) {
 	const path = request.nextUrl.pathname;
 	const pathWithoutBase = path.replace('/docs', '');
+
+	// Handle .md suffix - return raw markdown
+	if (pathWithoutBase.endsWith('.md')) {
+		const docPath = pathWithoutBase.replace(/\.md$/, '');
+		const url = request.nextUrl.clone();
+		url.pathname = `/api/md${docPath}`;
+		return NextResponse.rewrite(url);
+	}
 
 	// Handle base redirects from redirects.ts
 	const redirect = updatedRedirectsData.find(
