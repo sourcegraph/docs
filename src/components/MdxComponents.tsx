@@ -11,12 +11,10 @@ import {ProductCard, ProductCards} from './mdx/ProductCards';
 import {QuickLink, QuickLinks} from './mdx/QuickLinks';
 import {Tab, Tabs} from './mdx/Tabs';
 import {PreCode, PreCodeBlock} from './PreCodeBlock';
-import {
-	SupportedReleasesTable,
-	DeprecatedReleasesTable
-} from './ReleasesTable';
+import {SupportedReleasesTable, DeprecatedReleasesTable} from './ReleasesTable';
 import ResourceEstimator from './resource-estimator/ResourceEstimator';
 import {Badge} from './ui/badge';
+import {ZoomableImage} from './mdx/ZoomableImage';
 
 const MdxComponents = (version?: string) => {
 	return {
@@ -67,7 +65,7 @@ const MdxComponents = (version?: string) => {
 			return <Heading level="6" id={props.id} props={props} />;
 		},
 		img: (props: any) => {
-			return <img className="rounded-xl" {...props} />;
+			return <ZoomableImage {...props} />;
 		},
 		video: (props: any) => {
 			return <video className="rounded-xl" {...props} />;
