@@ -111,7 +111,7 @@ export function TableOfContents({headings, rawMarkdown}: Props) {
 	}
 
 	return (
-		<div className="hidden xl:sticky xl:-mr-6 xl:block xl:h-[calc(100vh-8.75rem)] xl:flex-none xl:overflow-y-auto xl:pr-6">
+		<div className="hidden py-16 xl:sticky xl:-mr-6 xl:block xl:h-[calc(100vh-8.75rem)] xl:flex-none xl:overflow-y-auto xl:pr-6">
 			<nav aria-labelledby="on-this-page-title" className="w-56">
 				{headings.length > 0 && (
 					<>
