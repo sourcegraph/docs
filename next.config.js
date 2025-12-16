@@ -23,6 +23,7 @@ module.exports = async () => {
 	// placing this here so its part of nextjs's build process
 	execSync('node dev/check-links.mjs', {stdio: 'inherit'});
 	execSync('node dev/check-filenames.mjs', {stdio: 'inherit'});
+	execSync('node dev/check-images.mjs', {stdio: 'inherit'});
 	await generateRssFeed();
 	return withContentlayer(nextConfig);
 };

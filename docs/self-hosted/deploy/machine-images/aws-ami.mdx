@@ -4,16 +4,16 @@ Sourcegraph [Amazon Machine Images (AMIs)](https://docs.aws.amazon.com/AWSEC2/la
 
 Following these docs will provision the following resources:
 
--   An EC2 node running Sourcegraph
--   A root EBS volume with 50GB of storage
--   An additional EBS volume with 500GB of storage for storing code and search indices
+- An EC2 node running Sourcegraph
+- A root EBS volume with 50GB of storage
+- An additional EBS volume with 500GB of storage for storing code and search indices
 
 ### Sourcegraph AMI account ID
 
 All Sourcegraph AMIs are published from one of the following AWS accounts:
 
--   Account ID: `840044800169`
--   Account ID: `870751268155`
+- Account ID: `840044800169`
+- Account ID: `870751268155`
 
 ### Instance sizing
 
@@ -27,11 +27,7 @@ Click [here](https://github.com/sourcegraph/deploy#amazon-ec2-amis) to see the c
 
 ## Deploy Sourcegraph
 
-<img
-	width="1256"
-	alt="Screenshot 2025-05-06 at 3 52 51 PM"
-	src="https://github.com/user-attachments/assets/8e98792b-16d9-4c0c-a3a1-981246a811b8"
-/>
+![Screenshot 2025-05-06 at 3 52 51 PM](https://github.com/user-attachments/assets/8e98792b-16d9-4c0c-a3a1-981246a811b8)
 
 1. Search for Sourcegraph in the AWS Marketplace or AMI catalog (see screenshot in the introduction).
 2. Choose **Launch instance from AMI**.
@@ -108,12 +104,12 @@ We suggest using an AWS Application Load Balancer (ALB) to manage HTTPS connecti
 
 #### Step 1: Request certificate
 
-<img src="https://user-images.githubusercontent.com/68532117/192369850-e90d1078-7ad6-4624-acc1-db093ef4d642.png" />
+![AWS Certificate Manager request](https://user-images.githubusercontent.com/68532117/192369850-e90d1078-7ad6-4624-acc1-db093ef4d642.png)
 
 Open the [AWS Certificate Manager console](https://console.aws.amazon.com/acm) to **Request a certificate**:
 
--   **Domain names**: Fully qualified domain name: your domain
--   **Select validation method**: DNS validation—recommended
+- **Domain names**: Fully qualified domain name: your domain
+- **Select validation method**: DNS validation—recommended
 
 After the certificate has been created, you will need to attach the `CNAME name` and `CNAME values` to your DNS.
 
@@ -140,29 +136,29 @@ Follow the steps below to attach the CNAME to your DNS if your DNS is hosted in 
 
 Click **Create subnet** in your VPC subnets dashboard:
 
--   **VPC ID**: Selected the VPC that the instance is in.
--   **Subnet name**: name the subnet.
--   **Availability Zone**: select an availability zone that is different from the current zone.
--   Click **Create subnet**
+- **VPC ID**: Selected the VPC that the instance is in.
+- **Subnet name**: name the subnet.
+- **Availability Zone**: select an availability zone that is different from the current zone.
+- Click **Create subnet**
 
 #### Step 4: Create an Application Load Balancer
 
 1. Open your [EC2 Load Balancers dashboard](https://console.aws.amazon.com/ec2#LoadBalancers) to **Create Load Balancer**.
 2. Choose **Application Load Balancer** as the Load balancer types using the following configurations:
 
--   **Basic configuration**
-    -   Load balancer name: `YOUR-LOAD-BALANCER-NAME`
-    -   Scheme: `Internet-facing`
-    -   IP address type: `IPv4`
--   **Network mapping**
-    -   VPC: Selected the VPC that the instance is in.
-    -   Mapping: Select two subnets associated with the selected VPC.
--   **Security groups**
-    -   Security groups: Make sure only the security group associated with the instance is selected.
--   **Listeners and routing**
-    -   Protocol: `HTTPS`
-    -   Port: `443`
-    -   Default action: Select the HTTPS target group created for the instance.
+- **Basic configuration**
+    - Load balancer name: `YOUR-LOAD-BALANCER-NAME`
+    - Scheme: `Internet-facing`
+    - IP address type: `IPv4`
+- **Network mapping**
+    - VPC: Selected the VPC that the instance is in.
+    - Mapping: Select two subnets associated with the selected VPC.
+- **Security groups**
+    - Security groups: Make sure only the security group associated with the instance is selected.
+- **Listeners and routing**
+    - Protocol: `HTTPS`
+    - Port: `443`
+    - Default action: Select the HTTPS target group created for the instance.
 
 ### Securing your instance
 
@@ -188,9 +184,9 @@ Now that your instance is confirmed to be working, and you have HTTPS working th
 
 Please take time to review the following before proceeding with the upgrades:
 
--   [Technical changelog](/technical-changelog)
--   [Update policy](/self-hosted/updates#update-policy)
--   [Update notes](/self-hosted/updates/kubernetes)
+- [Technical changelog](/technical-changelog)
+- [Update policy](/self-hosted/updates#update-policy)
+- [Update notes](/self-hosted/updates/kubernetes)
 
 <Callout type="warning">Back up your volumes before each upgrade!</Callout>
 
@@ -213,13 +209,13 @@ Please take time to review the following before proceeding with the upgrades:
 3. Select the appropriate **instance type**
 4. Under **Key Pair**
 
--   Select the **Key Pair** used by the old instance
+- Select the **Key Pair** used by the old instance
 
 5. Under **Network settings**
     - Select the **Security Group** used by the old instance
 6. Under **Configure storage**
 
--   Remove the **second** EBS volume
+- Remove the **second** EBS volume
 
 7. After reviewing the settings, click **Launch Instance**
 8. Attach the detached volume to the new instance
@@ -228,8 +224,8 @@ Please take time to review the following before proceeding with the upgrades:
     - Click **Actions > Attach Volume**
 9. On the `Attach volume` page:
 
--   **Instance**: select the new Sourcegraph AMI instance
--   **Device name**: /dev/sdb
+- **Instance**: select the new Sourcegraph AMI instance
+- **Device name**: /dev/sdb
 
 10. **Reboot** the new instance
 
@@ -247,5 +243,5 @@ We strongly recommend you taking [snapshots of the entire EBS volume](https://do
 
 ## Additional resources
 
--   [Increase the size of an Amazon EBS volume on an EC2 instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/modify-ebs-volume-on-instance.html)
--   [Change the instance type](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-resize.html)
+- [Increase the size of an Amazon EBS volume on an EC2 instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/modify-ebs-volume-on-instance.html)
+- [Change the instance type](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-resize.html)

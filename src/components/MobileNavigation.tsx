@@ -1,6 +1,7 @@
 'use client';
 
 import {Suspense, useCallback, useEffect, useState} from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import {usePathname, useSearchParams} from 'next/navigation';
 import {Dialog} from '@headlessui/react';
@@ -92,10 +93,12 @@ export function MobileNavigation() {
 							<CloseIcon className="h-6 w-6 stroke-slate-500" />
 						</button>
 						<Link href="/" className="ml-6" aria-label="Home page">
-							<img
+							<Image
 								className="h-9 w-9"
-								src="/docs/sourcegraph-mark.svg"
+								src="/sourcegraph-mark.svg"
 								alt="Sourcegraph Docs"
+								width={36}
+								height={36}
 							/>
 						</Link>
 					</div>

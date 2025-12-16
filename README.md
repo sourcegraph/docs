@@ -21,7 +21,7 @@ cd docs
 
 Before the dependencies are installed make sure your local machine has the following versions of `node` and `pnpm` installed:
 
--   node: `v24.12.0`
+-   node: `v20.19.6`
 -   pnpm: `10.25.0`
 
 **Note**: If you have `mise` available you can install the above versions for only this repository by running the following command from your terminal in the root folder:
@@ -74,6 +74,26 @@ The folder structure is exactly the same here. All the docs reside within the `/
 
 -   Navigate to the relevant relevant section for your contribution
 -   If you're adding a new page, create a new MDX file (e.g., `my-new-page.mdx`) in the appropriate folder
+
+### Frontmatter
+
+Each MDX file can include frontmatter at the top of the file to configure page metadata. Here are the supported fields:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `title` | string | No | The page title |
+| `date` | date | No | Last modified date (used in sitemap) |
+| `seoPriority` | number | No | SEO priority for sitemap (0.0 to 1.0, default: 0.5) |
+
+Example:
+
+```yaml
+---
+title: Getting Started with Cody
+date: 2024-01-15
+seoPriority: 0.8
+---
+```
 
 ### Using MDX
 

@@ -41,7 +41,7 @@ export default function VersionSelector() {
 					className="inline-flex w-full items-center justify-center gap-x-1.5
 				rounded-md px-2 py-2 text-xs font-medium text-slate-500 shadow-sm ring-1 ring-inset ring-light-border-2 hover:bg-vermilion-08 hover:text-vermilion-11 dark:bg-dark-bg-2 dark:text-dark-paragraph-text dark:ring-inset dark:ring-dark-border"
 				>
-					{selectedVersion.name}
+					{selectedVersion.label === 'latest' ? 'Latest' : selectedVersion.name}
 					<ChevronDownIcon
 						className="-mr-1 h-4 w-4"
 						aria-hidden="true"

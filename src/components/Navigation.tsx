@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import Link from 'next/link';
 import {usePathname, useParams} from 'next/navigation';
 
-import {NavigationItem, versionNavigations} from '@/data/navigation';
+import {navigation, NavigationItem} from '@/data/navigation';
 import {ChevronRightIcon} from '@heroicons/react/20/solid';
 import {useEffect, useState} from 'react';
 
@@ -20,9 +20,6 @@ export function Navigation({
 	const [expandedTopics, setExpandedTopics] = useState<string[]>([]);
 	const [expandedSections, setExpandedSections] = useState<string[]>([]);
 	const [expandUsingPath, setExpandUsingPath] = useState<boolean>(true);
-
-	const navigation =
-		versionNavigations[(params.version as string) || 'navigation'];
 
 	const handleTopicClick = (topicTitle: string, maximize?: boolean) => {
 		setExpandedTopics(prevExpandedTopics => {
@@ -122,7 +119,7 @@ export function Navigation({
 			<ul role="list" className="space-y-9">
 				{navigation.map(separator => (
 					<li key={separator.separator}>
-						<h2 className="mb-8 font-semibold tracking-wide text-slate-900 lg:mb-3 dark:text-dark-text-primary">
+						<h2 className="mb-8 font-semibold tracking-wide text-slate-900 dark:text-dark-text-primary lg:mb-3">
 							{separator.separator}
 						</h2>
 						<ul
@@ -175,7 +172,7 @@ export function Navigation({
 										expandedTopics.includes(
 											topic.title
 										) && (
-											<ul className="my-4 space-y-2 border-l-2 border-slate-100 lg:border-slate-200  dark:border-slate-800">
+											<ul className="my-4 space-y-2 border-l-2 border-slate-100 dark:border-slate-800  lg:border-slate-200">
 												{topic.sections.map(section => (
 													<>
 														<li
@@ -234,7 +231,7 @@ export function Navigation({
 															expandedSections.includes(
 																section.title
 															) && (
-																<ul className="my-4 ml-4 space-y-2 border-l-2 border-slate-100 lg:border-slate-200  dark:border-slate-800">
+																<ul className="my-4 ml-4 space-y-2 border-l-2 border-slate-100 dark:border-slate-800  lg:border-slate-200">
 																	{section.subsections.map(
 																		subsection => (
 																			<li

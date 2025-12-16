@@ -4,24 +4,10 @@ import {GoogleAnalytics} from '@next/third-parties/google';
 import clsx from 'clsx';
 import config from 'docs.config';
 import {type Metadata} from 'next';
-import {Inter} from 'next/font/google';
 import localFont from 'next/font/local';
 import Script from 'next/script';
 
 import '@/styles/tailwind.css';
-
-const inter = Inter({
-	subsets: ['latin'],
-	display: 'swap',
-	variable: '--font-inter'
-});
-
-// Use local version of Lexend so that we can use OpenType features
-const lexend = localFont({
-	src: '../fonts/lexend.woff2',
-	display: 'swap',
-	variable: '--font-lexend'
-});
 
 export const metadata: Metadata = {
 	metadataBase: new URL('https://sourcegraph.com'),
@@ -39,7 +25,11 @@ export const metadata: Metadata = {
 		canonical: '/docs'
 	},
 	openGraph: {
-		images: [{url: 'https://sourcegraph.com/docs/sourcegraph-og-nw.png'}]
+		images: [{url: '/api/og/index', width: 1200, height: 630}]
+	},
+	twitter: {
+		card: 'summary_large_image',
+		images: [{url: '/api/og/index', width: 1200, height: 630}]
 	}
 };
 
