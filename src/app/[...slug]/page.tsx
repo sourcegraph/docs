@@ -20,7 +20,7 @@ export const generateMetadata = ({params}: Props) => {
 	const post = allPosts.find(post => post._raw.flattenedPath === path);
 	if (post && post.headings && post.headings.length > 0) {
 		const title = post.headings[0].title;
-		const ogImageUrl = `/api/og/${path}`;
+		const ogImageUrl = `${process.env.NEXT_PUBLIC_DOCS_BASE_PATH || ''}/api/og/${path}`;
 		return {
 			title,
 			openGraph: {

@@ -6,7 +6,7 @@ import {getMDXComponent} from 'next-contentlayer/hooks';
 import {notFound} from 'next/navigation';
 
 export const generateMetadata = () => {
-	const ogImageUrl = '/api/og/index';
+	const ogImageUrl = `${process.env.NEXT_PUBLIC_DOCS_BASE_PATH || ''}/api/og/index`;
 	return {
 		openGraph: {
 			images: [{url: ogImageUrl, width: 1200, height: 630}]
