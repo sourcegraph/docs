@@ -95,8 +95,7 @@ export const navigation: NavigationItem[] = [
 			},
 			{
 				title: 'Deep Search',
-				href: '/deep-search',
-				sections: [{title: 'Deep Search API', href: '/deep-search/api'}]
+				href: '/deep-search'
 			},
 			{
 				title: 'Code Navigation',
@@ -436,13 +435,59 @@ export const navigation: NavigationItem[] = [
 		]
 	},
 	{
+		separator: 'Developer Tools',
+		topics: [
+			{
+				title: 'Sourcegraph CLI',
+				href: '/cli',
+				sections: [
+					{title: 'Quickstart', href: '/cli/quickstart'},
+					{title: 'Explanations', href: '/cli/explanations'},
+					{title: 'How-to Guides', href: '/cli/how-tos'},
+					{title: 'References', href: '/cli/references'}
+				]
+			},
+			{
+				title: 'Cody CLI',
+				href: '/cody/clients/install-cli'
+			},
+			{
+				title: 'Browser Extension',
+				href: '/integration/browser-extension',
+				sections: [
+					{
+						title: 'Browser Search Engine',
+						href: '/integration/browser-extension/how-tos/browser-search-engine'
+					}
+				]
+			},
+			{
+				title: 'Editor Extensions',
+				href: '/integration/editor'
+			},
+			{
+				title: 'APIs',
+				href: '/api/graphql',
+				sections: [
+					{title: 'GraphQL API', href: '/api/graphql'},
+					{title: 'Stream API', href: '/api/stream-api'},
+					{title: 'Deep Search API', href: '/deep-search/api'}
+				]
+			},
+			{
+				title: 'MCP Server',
+				href: '/api/mcp'
+			}
+		]
+	},
+	{
 		separator: 'Platform',
 		topics: [
 			{
 				title: 'Sourcegraph Admin',
 				href: '/admin',
 				sections: [
-					{title: 'Configuration', href: '/admin/config'},
+					{title: 'Configuration', href: '/admin'},
 					{title: 'Licensing', href: '/admin/licensing'},
 					{
 						title: 'Enterprise Portal',
@@ -535,49 +580,6 @@ export const navigation: NavigationItem[] = [
 			{
 				title: 'Sourcegraph Model Provider',
 				href: '/model-provider'
-			},
-			{
-				title: 'Integrations',
-				href: '/integration',
-				sections: [
-					{
-						title: 'Browser Extension',
-						href: '/integration/browser-extension'
-					},
-					{title: 'Editors', href: '/integration/editor'},
-					{
-						title: 'Browser Search Engine',
-						href: '/integration/browser-extension/how-tos/browser-search-engine'
-					}
-				]
-			}
-		]
-	},
-	{
-		separator: 'CLI & API',
-		topics: [
-			{
-				title: 'Sourcegraph & Cody CLI',
-				href: '/cli',
-				sections: [
-					{title: 'Quickstart', href: '/cli/quickstart'},
-					{title: 'Explanations', href: '/cli/explanations'},
-					{title: 'How-to Guides', href: '/cli/how-tos'},
-					{title: 'References', href: '/cli/references'},
-					{title: 'Cody CLI', href: '/cody/clients/install-cli'}
-				]
-			},
-			{
-				title: 'Sourcegraph GraphQL API',
-				href: '/api/graphql'
-			},
-			{
-				title: 'Sourcegraph Stream API',
-				href: '/api/stream-api'
-			},
-			{
-				title: 'Sourcegraph MCP Server',
-				href: '/api/mcp'
 			}
 		]
 	},
