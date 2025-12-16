@@ -21,7 +21,7 @@ export function Prose<T extends React.ElementType = 'div'>({
 				// lead
 				'prose-lead:text-slate-500 dark:prose-lead:text-dark-paragraph-text',
 				// links
-				'hover:prose-a-text:[#606060] visited:text-[#4A4A4A] hover:visited:text-[#606060] prose-a:font-semibold prose-a:text-vermilion-00 dark:visited:text-[#606060] dark:hover:visited:text-[#A9A9A9] dark:prose-a:text-vermilion-11 dark:hover:prose-a:text-dark-text-secondary',
+				'prose-a:font-semibold prose-a:text-vermilion-00 dark:prose-a:text-vermilion-11 dark:hover:prose-a:text-dark-text-secondary',
 				// link underline
 				'prose-a:underline hover:prose-a:text-[#606060] hover:prose-a:underline dark:prose-a:underline dark:hover:prose-a:underline',
 				// pre
