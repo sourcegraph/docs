@@ -7069,6 +7069,11 @@ const redirectsData = [
 		source: '/admin/config',
 		destination: '/admin',
 		permanent: true
+	},
+	{
+		source: '/admin/repo/permissions',
+		destination: '/admin/permissions',
+		permanent: true
 	}
 ];
 
