@@ -1,11 +1,17 @@
-# Permissions
+# Repository permissions
 
 <TierCallout>
 	Supported on [Enterprise](/pricing/plans/enterprise) plans.
-	<user>Available via the Web app.</user>
 </TierCallout>
 
-> NOTE: This page refers to repository access permissions synced between Sourcegraph and your code host, which has also historically been referred to as "authorization", "repository permissions", and "code host permissions". This is _not_ the same as [in-product permissions](/admin/access-control/), which determine who can, for example, create a batch change or who is a site admin.
+<Callout type="note">
+	This page refers to repository access permissions synced between Sourcegraph
+	and your code host, which has also historically been referred to as
+	"authorization", "repository permissions", and "code host permissions". This
+	is _not_ the same as [in-product permissions](/admin/access-control/), which
+	determine who can, for example, create a batch change or who is a site
+	admin.
+</Callout>
 
 Sourcegraph can be configured to enforce the same access to repositories and underlying
 source files as your code host. If configured, Sourcegraph will allow the user to only
@@ -15,10 +21,10 @@ including the existence of such repository on the code host.
 
 Imagine a scenario, with 2 users, `alice` and `bob`:
 
--   `alice` can access repositories `my-organisation/global` and `my-organisation/alice` on the code host
--   `bob` has access to repositories `my-organisation/global` and `my-organisation/docs` on the code host
--   There is a public repository `my-organisation/public`
--   All of the mentioned repositories are synced to Sourcegraph
+- `alice` can access repositories `my-organisation/global` and `my-organisation/alice` on the code host
+- `bob` has access to repositories `my-organisation/global` and `my-organisation/docs` on the code host
+- There is a public repository `my-organisation/public`
+- All of the mentioned repositories are synced to Sourcegraph
 
 With permissions set up, when `alice` tries to run a search on Sourcegraph, the results will only contain data from the public `my-organisation/public` repository and the ones she has access to (`my-organisation/global` and `my-organisation/alice`). `alice` will not be able to see results from the `my-organisation/docs`. If `alice` creates a code insight, she will only see results from the repositories she has access to.
 
@@ -91,9 +97,9 @@ Please contact support if you want to discuss bigger scale than specified.
 Each method of getting permissions to Sourcegraph has different SLA on how long it takes for permissions to appear
 in Sourcegraph.
 
--   [Permission syncing SLA](/admin/permissions/syncing#sla)
--   [Webhooks SLA](/admin/permissions/webhooks#sla)
--   [Explicit Permissions API SLA](/admin/permissions/api#sla)
+- [Permission syncing SLA](/admin/permissions/syncing#sla)
+- [Webhooks SLA](/admin/permissions/webhooks#sla)
+- [Explicit Permissions API SLA](/admin/permissions/api#sla)
 
 ## License requirements
 
@@ -115,10 +121,6 @@ might become an impossible task if the site admin cannot access that repository.
 
 ## Permissions mechanisms in parallel
 
-(Experimental)
-
-<span class="badge badge-note">Sourcegraph 5.0+</span>
-
 You can use the [explicit permissions API](/admin/permissions/api) alongside code host permission syncing.
 This allows you to configure explicit permissions for one code host while using synced permissions for another on the same Sourcegraph instance.
 
@@ -128,26 +130,7 @@ User `alice` has existing synced permissions to repositories `horsegraph/global`
 Alice also has explicit API permissions to repository `horsegraph/hay-dev`. So the overall repository permissions
 of `alice` are the following union set: [`horsegraph/global`, `horsegraph/hay-v1`, `horsegraph/hay-dev`]
 
-### Configuration
-
-**Prerequisites:**
-
-1. Sourcegraph version 5.0+
-1. Go to **Site Admin > Migrations** page. There is a migration called `Migrate data from user_permissions table to unified user_repo_permissions.`.
-   Make sure that it finished migrating all the data (it reports as 100%). Contact support if the migration does not seem to complete for a long time (multiple days).
-
-1. (Not required for Sourcegraph 5.1+) Enable the experimental feature in the [site configuration](/admin/config/site-config):
-
-```json
-{
-	"experimentalFeatures": {
-		"unifiedPermissions": "enabled"
-	}
-	// ...
-}
-```
-
-1. Continue [configuring the explicit permissions API](/admin/permissions/api#configuration) as you would before.
+See [configuring the explicit permissions API](/admin/permissions/api#configuration).
 
 ### Permission updates
 
