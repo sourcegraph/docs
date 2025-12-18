@@ -6,6 +6,7 @@ import config from 'docs.config';
 import {type Metadata} from 'next';
 import localFont from 'next/font/local';
 import Script from 'next/script';
+import {Suspense} from 'react';
 
 import '@/styles/tailwind.css';
 
@@ -87,9 +88,11 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
 				suppressHydrationWarning
 				className="flex min-h-full bg-light-bg dark:bg-dark-bg"
 			>
-				<Providers>
-					<Layout>{children}</Layout>
-				</Providers>
+				<Suspense fallback={null}>
+					<Providers>
+						<Layout>{children}</Layout>
+					</Providers>
+				</Suspense>
 				<Script
 					id="runllm-widget-script"
 					type="module"
