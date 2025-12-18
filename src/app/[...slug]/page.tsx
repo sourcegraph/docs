@@ -1,11 +1,13 @@
 import {Breadcrumbs} from '@/components/Breadcrumbs';
 import MdxComponents from '@/components/MdxComponents';
+import {PreviewGuard} from '@/components/PreviewGuard';
 import {PrevNextLinks} from '@/components/PrevNextLinks';
 import {Prose} from '@/components/Prose';
 import {TableOfContents} from '@/components/Toc';
 import {allPosts} from 'contentlayer/generated';
 import {getMDXComponent} from 'next-contentlayer/hooks';
 import {notFound} from 'next/navigation';
+import {Suspense} from 'react';
 
 export const maxDuration = 300;
 
@@ -38,21 +40,16 @@ interface Props {
 	params: {
 		slug: string[];
 	};
-	searchParams: {[key: string]: string | string[] | undefined};
 }
 
-const PostLayout = ({params, searchParams}: Props) => {
+const PostLayout = ({params}: Props) => {
 	const path = params.slug.join('/');
 	const post = allPosts.find(post => post._raw.flattenedPath === path);
 	if (!post) return notFound();
 
-	if (post.preview && !('preview' in searchParams)) {
-		return notFound();
-	}
-
 	const Content = getMDXComponent(post.body.code);
 
-	return (
+	const content = (
 		<>
 			<div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none lg:pl-8 lg:pr-0 xl:px-16">
 				<Breadcrumbs path={params.slug} />
@@ -69,6 +66,16 @@ const PostLayout = ({params, searchParams}: Props) => {
 			/>
 		</>
 	);
+
+	if (post.preview) {
+		return (
+			<Suspense fallback={null}>
+				<PreviewGuard isPreview={true}>{content}</PreviewGuard>
+			</Suspense>
+		);
+	}
+
+	return content;
 };
 
 export default PostLayout;
