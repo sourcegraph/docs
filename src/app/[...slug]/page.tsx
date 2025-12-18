@@ -38,12 +38,18 @@ interface Props {
 	params: {
 		slug: string[];
 	};
+	searchParams: {[key: string]: string | string[] | undefined};
 }
 
-const PostLayout = ({params}: Props) => {
+const PostLayout = ({params, searchParams}: Props) => {
 	const path = params.slug.join('/');
 	const post = allPosts.find(post => post._raw.flattenedPath === path);
 	if (!post) return notFound();
+
+	if (post.preview && !('preview' in searchParams)) {
+		return notFound();
+	}
+
 	const Content = getMDXComponent(post.body.code);
 
 	return (

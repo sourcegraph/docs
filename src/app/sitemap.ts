@@ -18,15 +18,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 		}
 	];
 
-	allPosts.forEach(post => {
-		const priority = post.seoPriority;
-		links.push({
-			url: `${baseUrl}${post.url}`,
-			lastModified: post.date ? new Date(post.date) : new Date(),
-			changeFrequency: 'weekly',
-			...(priority !== undefined && priority !== 0.5 && {priority})
+	allPosts
+		.filter(post => !post.preview)
+		.forEach(post => {
+			const priority = post.seoPriority;
+			links.push({
+				url: `${baseUrl}${post.url}`,
+				lastModified: post.date ? new Date(post.date) : new Date(),
+				changeFrequency: 'weekly',
+				...(priority !== undefined && priority !== 0.5 && {priority})
+			});
 		});
-	});
 
 	return links;
 }

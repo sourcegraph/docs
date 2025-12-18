@@ -57,6 +57,9 @@ export function allCoreContent<T extends MDXDocument>(
 	if (isProduction)
 		return contents
 			.map(c => coreContent(c))
-			.filter(c => !('draft' in c && c.draft === true));
-	return contents.map(c => coreContent(c));
+			.filter(c => !('draft' in c && c.draft === true))
+			.filter(c => !('preview' in c && c.preview === true));
+	return contents
+		.map(c => coreContent(c))
+		.filter(c => !('preview' in c && c.preview === true));
 }
