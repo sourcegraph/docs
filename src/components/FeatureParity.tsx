@@ -8,10 +8,6 @@ import {
 	SelectValue
 } from '@/components/ui/select';
 import {
-	autocompleteTableDataConf,
-	chatTableDataConf
-} from '@/utils/constants/supportedModelsConfiguration';
-import {
 	autocompleteTableDataEnt,
 	chatTableDataEnt,
 	options
@@ -33,40 +29,21 @@ interface TableData {
 	[key: string]: ProviderData[];
 }
 
-interface FeatureParityProps {
-	type: string;
-}
-
-const FeatureParity = ({type}: FeatureParityProps) => {
+const FeatureParity = () => {
 	const [selected, setSelected] = useState({
 		tableType: '',
 		deployment: ''
 	});
-	const [filteredDeployments, setFilteredDeployments] = useState<Option[]>(
-		options.deployment
-	);
+	const filteredDeployments = options.deployment;
 	const [showTable, setShowTable] = useState(false);
-	const [chatTableData, setChatTableData] =
-		useState<TableData>(chatTableDataEnt);
-	const [autocompleteTableData, setAutocompleteTableData] =
-		useState<TableData>(autocompleteTableDataEnt);
+
+	const chatTableData = chatTableDataEnt;
+	const autocompleteTableData = autocompleteTableDataEnt;
 
 	const handleChange = (key: keyof typeof selected, value: string) => {
 		setSelected(prev => ({...prev, [key]: value}));
 		setShowTable(true);
 	};
-
-	useEffect(() => {
-		if (type.toLowerCase() === 'ent') {
-			setChatTableData(chatTableDataEnt);
-			setAutocompleteTableData(autocompleteTableDataEnt);
-		} else if (type.toLowerCase() === 'configuration') {
-			setChatTableData(chatTableDataConf);
-			setAutocompleteTableData(autocompleteTableDataConf);
-		}
-
-		setFilteredDeployments(options.deployment);
-	}, [type]);
 
 	const renderTable = (data: ProviderData[]) => {
 		if (data.length === 0) return null;
@@ -130,7 +107,7 @@ const FeatureParity = ({type}: FeatureParityProps) => {
 					}
 					value={selected.tableType}
 				>
-					<SelectTrigger className="w-full border border-gray-300 bg-white text-gray-900 shadow-sm sm:w-56 dark:border-gray-700 dark:bg-black dark:text-gray-300 dark:shadow-black">
+					<SelectTrigger className="w-full border border-gray-300 bg-white text-gray-900 shadow-sm dark:border-gray-700 dark:bg-black dark:text-gray-300 dark:shadow-black sm:w-56">
 						<SelectValue placeholder="Feature" />
 					</SelectTrigger>
 					<SelectContent className="bg-white text-gray-900 shadow-sm dark:bg-black dark:text-gray-300 dark:shadow-black">
@@ -149,7 +126,7 @@ const FeatureParity = ({type}: FeatureParityProps) => {
 					value={selected.deployment}
 					disabled={!selected.tableType}
 				>
-					<SelectTrigger className="w-full border border-gray-300 bg-white text-gray-900 shadow-sm sm:w-56 dark:border-gray-700 dark:bg-black dark:text-gray-300 dark:shadow-black">
+					<SelectTrigger className="w-full border border-gray-300 bg-white text-gray-900 shadow-sm dark:border-gray-700 dark:bg-black dark:text-gray-300 dark:shadow-black sm:w-56">
 						<SelectValue placeholder="Provider" />
 					</SelectTrigger>
 					<SelectContent className="bg-white text-gray-900 shadow-sm dark:bg-black dark:text-gray-300 dark:shadow-black">

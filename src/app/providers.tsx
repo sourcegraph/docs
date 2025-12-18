@@ -1,7 +1,6 @@
 'use client';
 
 import {ThemeProvider, useTheme} from 'next-themes';
-import {searchMetadata} from '@/data/search';
 import {useEffect} from 'react';
 
 function ThemeWatcher() {

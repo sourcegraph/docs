@@ -15,24 +15,6 @@ type ConvertPick<T> = ConvertUndefined<T> & PickRequired<T>;
 
 /**
  * A typesafe omit helper function
- * @example pick(content, ['title', 'description'])
- *
- * @param {Obj} obj
- * @param {Keys[]} keys
- * @return {*}  {ConvertPick<{ [K in Keys]: Obj[K] }>}
- */
-export const pick = <Obj, Keys extends keyof Obj>(
-	obj: Obj,
-	keys: Keys[]
-): ConvertPick<{[K in Keys]: Obj[K]}> => {
-	return keys.reduce((acc, key) => {
-		acc[key] = obj[key] ?? null;
-		return acc;
-	}, {} as any);
-};
-
-/**
- * A typesafe omit helper function
  * @example omit(content, ['body', '_raw', '_id'])
  *
  * @param {Obj} obj
