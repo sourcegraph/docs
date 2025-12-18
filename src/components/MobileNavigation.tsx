@@ -102,10 +102,12 @@ export function MobileNavigation() {
 							/>
 						</Link>
 					</div>
-					<Navigation
-						className="mt-5 px-1"
-						onLinkClick={onLinkClick}
-					/>
+					<Suspense fallback={null}>
+						<Navigation
+							className="mt-5 px-1"
+							onLinkClick={onLinkClick}
+						/>
+					</Suspense>
 				</Dialog.Panel>
 			</Dialog>
 		</>

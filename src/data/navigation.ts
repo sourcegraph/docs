@@ -1,18 +1,21 @@
 type Subsection = {
 	title: string;
 	href: string;
+	preview?: boolean;
 };
 
 type Section = {
 	title: string;
 	href: string;
 	subsections?: Subsection[];
+	preview?: boolean;
 };
 
 export type Topic = {
 	title: string;
 	href: string;
 	sections?: Section[];
+	preview?: boolean;
 };
 
 export type NavigationItem = {
@@ -469,7 +472,11 @@ export const navigation: NavigationItem[] = [
 				sections: [
 					{title: 'GraphQL API', href: '/api/graphql'},
 					{title: 'Stream API', href: '/api/stream-api'},
-					{title: 'Deep Search API', href: '/deep-search/api'}
+					{
+						title: 'Deep Search API',
+						href: '/deep-search/api',
+						preview: true
+					}
 				]
 			},
 			{

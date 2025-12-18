@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import Link from 'next/link';
-import {usePathname, useParams} from 'next/navigation';
+import {usePathname, useSearchParams} from 'next/navigation';
 
 import {navigation, NavigationItem} from '@/data/navigation';
 import {ChevronRightIcon} from '@heroicons/react/20/solid';
@@ -14,7 +14,8 @@ export function Navigation({
 	onLinkClick?: React.MouseEventHandler<HTMLAnchorElement>;
 }) {
 	let pathname = usePathname();
-	const params = useParams();
+	const searchParams = useSearchParams();
+	const isPreviewMode = searchParams.has('preview');
 
 	const [version, setVersion] = useState<string | null>(null);
 	const [expandedTopics, setExpandedTopics] = useState<string[]>([]);
@@ -114,10 +115,27 @@ export function Navigation({
 		setVersion(versionName);
 	}, [pathname]);
 
+	const filteredNavigation = navigation.map(separator => ({
+		...separator,
+		topics: separator.topics
+			.filter(topic => isPreviewMode || !topic.preview)
+			.map(topic => ({
+				...topic,
+				sections: topic.sections
+					?.filter(section => isPreviewMode || !section.preview)
+					.map(section => ({
+						...section,
+						subsections: section.subsections?.filter(
+							subsection => isPreviewMode || !subsection.preview
+						)
+					}))
+			}))
+	}));
+
 	return (
 		<nav className={clsx('text-base lg:text-sm', className)}>
 			<ul role="list" className="space-y-9">
-				{navigation.map(separator => (
+				{filteredNavigation.map(separator => (
 					<li key={separator.separator}>
 						<h2 className="mb-8 font-semibold tracking-wide text-slate-900 dark:text-dark-text-primary lg:mb-3">
 							{separator.separator}

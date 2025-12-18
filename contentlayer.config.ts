@@ -16,7 +16,11 @@ export const Post = defineDocumentType(() => ({
 	fields: {
 		title: {type: 'string', required: false},
 		date: {type: 'date', required: false},
-		seoPriority: {type: 'number', required: false}
+		seoPriority: {type: 'number', required: false},
+		// Preview posts are excluded in the sitemap and the search index. They return a 404
+		// unless the ?preview query parameter is present. This is useful for sharing early
+		// docs pages internally or with select early customers.
+		preview: {type: 'boolean', required: false}
 	},
 	computedFields: {
 		url: {type: 'string', resolve: post => `/${post._raw.flattenedPath}`},
