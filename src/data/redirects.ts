@@ -6521,11 +6521,6 @@ const redirectsData = [
 		permanent: true
 	},
 	{
-		source: '/admin/repo/pre_load_from_local_disk',
-		destination: '/admin/repo/pre-load-from-local-disk',
-		permanent: true
-	},
-	{
 		source: '/admin/repo/update_frequency',
 		destination: '/admin/repo/update-frequency',
 		permanent: true
