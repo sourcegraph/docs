@@ -88,6 +88,30 @@ Where `extsvc.json` contains a JSON object that specifies _all_ of your code hos
 
 If you want to _allow_ edits to be made through the web UI (which will be overwritten with what is in the file on a subsequent restart), you may additionally set `EXTSVC_CONFIG_ALLOW_EDITS=true`. **Note** that if you do enable this, it is your responsibility to ensure the configuration on your instance and in the file remain in sync.
 
+### Configuring GitHub Apps declaratively
+
+GitHub Apps can be fully configured via the `EXTSVC_CONFIG_FILE`, eliminating the need to manually add apps through the UI after redeploying an instance.
+To configure a GitHub App, add `clientID` and `privateKey` fields to the `gitHubAppDetails` object in your GitHub connection. Both `clientID` and `privateKey` are required:
+
+```jsonc
+{
+	"GITHUB": [
+		{
+			"url": "https://github.com",
+			"gitHubAppDetails": {
+				"appID": 12345,
+				"installationID": 67890,
+				"clientID": "Iv1.abc123def456",
+				"privateKey": "-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----"
+			},
+			"repositoryQuery": ["affiliated"]
+		}
+	]
+}
+```
+
+> NOTE: Store the config file securely (e.g., as a Kubernetes Secret with restricted file permissions) since it contains sensitive credentials.
+
 ## Global settings
 
 Set `GLOBAL_SETTINGS_FILE=global-settings.json` and mount the config on:
@@ -160,19 +184,30 @@ data:
           ],
           "externalURL": "https://sourcegraph.example.com",
           "licenseKey": "..."
-          }
         }
 
     # Code host configuration, see: https://sourcegraph.com/docs/admin/config/advanced-config-file#code-host-configuration
     extsvc.json: |
         {
           "GITHUB": [
+            // Token-based authentication
             {
               "url": "https://github.com",
               "token": "...",
               "repositoryQuery": [
                 "none"
-              ],
+              ]
+            },
+            // GitHub App authentication
+            {
+              "url": "https://github.com",
+              "gitHubAppDetails": {
+                "appID": 12345,
+                "installationID": 67890,
+                "clientID": "Iv1.abc123def456",
+                "privateKey": "-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----"
+              },
+              "repositoryQuery": ["affiliated"]
             }
           ]
         }
