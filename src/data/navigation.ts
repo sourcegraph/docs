@@ -472,6 +472,7 @@ export const navigation: NavigationItem[] = [
 				sections: [
 					{title: 'GraphQL API', href: '/api/graphql'},
 					{title: 'Stream API', href: '/api/stream-api'},
+					{title: 'Analytics API', href: '/analytics/api'},
 					{
 						title: 'Deep Search API',
 						href: '/deep-search/api',
