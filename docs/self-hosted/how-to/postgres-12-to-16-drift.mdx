@@ -1,6 +1,8 @@
 # PostgreSQL 12 to 16 Schema Drift
 
-In Sourcegraph versions `5.10.x` and `5.11.x` we support both PostgreSQL 12 and 16. However, Sourcegraph's database management tool `migrator` expects the database schema of the various Sourcegraph databases to be in an exact expected state. The upgrade from PostgreSQL 12 to 16 is opinionated and automatically mutates the schema without running our application defined migrations. Starting in Sourcegraph `5.10.0` we expect databases to be in PostgresSQL 16 and as such our tooling will identify schema drift in PostgreSQL 12 databases. This drift does not impact the functionality of the Sourcegraph instance but will stop migrator's multiversion `upgrade` command and `autoupgrade` from executing.
+In Sourcegraph versions `5.10.x` and `5.11.x` we support both PostgreSQL 12 and 16. However, Sourcegraph's database management tool `migrator` expects the database schema of the various Sourcegraph databases to be in an exact expected state. The upgrade from PostgreSQL 12 to 16 is opinionated and automatically mutates the schema without running our application defined migrations. Starting in Sourcegraph `5.10.0` we expect databases to be in PostgresSQL 16 and as such our tooling will identify schema drift in PostgreSQL 12 databases. This drift does not impact the functionality of the Sourcegraph instance but will stop migrator's multiversion `upgrade` command from executing.
+
+> **Note:** The autoupgrade feature has been removed in Sourcegraph 6.12.0 and later. The instructions below for autoupgrade only apply to versions prior to 6.12.0.
 
 The drift takes the following general form, dropping table prefixes to columns in views, and changing `uuid` types to `gen_random_uuid()`:
 
@@ -178,9 +180,7 @@ Diff:
 
 ## Solutions for Handling Schema Drift
 
-If you're confident that your instance is seeing database drift associated with the PG12 to PG16 upgrade, you can run a multiversion upgrade via migrator `upgrade` or run `autoupgrade` using the following options.
-
-To run `autoupgrade` via the frontend, set the `SRC_AUTOUPGRADE_IGNORE_DRIFT=true` environment variable in the frontend container.
+If you're confident that your instance is seeing database drift associated with the PG12 to PG16 upgrade, you can run a multiversion upgrade via migrator `upgrade` using the `--skip-drift-check` flag.
 
 To run migrator's `upgrade` command add the `--skip-drift-check` flag to migrator's entrycommand as below:
 
