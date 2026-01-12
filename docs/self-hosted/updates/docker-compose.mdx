@@ -48,7 +48,9 @@ See our [PostgreSQL Collation Version Mismatch Resolution](/self-hosted/postgres
 
 ## v5.9.0 ➔ v5.10.1164
 
--   This release resolves an issue in the v5.10.0 release which prevented multiversion upgrades from working. You may now target `v5.10.1164` using migrator's `upgrade` command. Or use autoupgrade by setting the environment variable `SRC_AUTOUPGRADE_IGNORE_DRIFT=true` on the `frontend` container.
+-   This release resolves an issue in the v5.10.0 release which prevented multiversion upgrades from working. You may now target `v5.10.1164` using migrator's `upgrade` command.
+
+> **Note:** For versions prior to 6.12.0, you could also use autoupgrade by setting the environment variable `SRC_AUTOUPGRADE_IGNORE_DRIFT=true` on the `frontend` container. Autoupgrade has been removed in Sourcegraph 6.12.0 and later.
 
 ## v5.9.0 ➔ v5.10.0
 
@@ -63,7 +65,7 @@ See our [PostgreSQL Collation Version Mismatch Resolution](/self-hosted/postgres
 -   The container image for pgsql and codeintel-db have been renamed from `postgres-12-alpine` and `codeintel-db` respectively to `postgresql-16`. The `codeinsights-db` container has been renamed to `postgresql-16-codeinsights`.
 -   **Admins using external dbs who have not yet upgraded from postgres 12 to postgres 16**, can expect to see database drift after upgrading to `5.10.0`. The new expected schema definition for Sourcegraph is based on postgres 16. The schema drift is the result of automatic changes made to the schema by pg_upgrade utils, and will not cause issues in the application.
     -   Admins should not run migrators suggested drift fixes, and should instead upgrade their database from postgres 12 to postgres 16.
--   The [Autoupgrade](https://sourcegraph.com/docs/admin/updates/automatic#pre-v500-automatic-multiversion-upgrades) upgrade method, will detect drift and exit before conducting the upgrade unless the env var `SRC_AUTOUPGRADE_IGNORE_DRIFT=true` is set in the server container.
+-   For versions prior to 6.12.0, the [Autoupgrade](/self-hosted/updates/automatic) upgrade method would detect drift and exit before conducting the upgrade unless the env var `SRC_AUTOUPGRADE_IGNORE_DRIFT=true` was set in the server container. **Note:** Autoupgrade has been removed in Sourcegraph 6.12.0 and later.
 -   Postgres 12 image containers cannot be started with data volumes which have been upgraded by postgres 16.
 
 ## v5.1.4 ➔ v5.1.5
