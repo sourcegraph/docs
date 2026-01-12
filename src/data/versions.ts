@@ -8,10 +8,14 @@ export interface VersionI {
 
 // Ensure the first entry is the latest active version
 export const versions: VersionI[] = [
+        {
+                name: `v${config.DOCS_LATEST_VERSION}`,
+                label: 'latest',
+                url: '/docs'
+        },
 	{
-		name: `v${config.DOCS_LATEST_VERSION}`,
-		label: 'latest',
-		url: '/docs'
+		name: 'v6.11',
+		url: 'https://6.11.sourcegraph.com',
 	},
 	{
 		name: 'v6.10',
