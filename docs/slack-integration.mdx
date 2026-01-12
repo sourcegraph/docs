@@ -1,0 +1,108 @@
+# Slack Integration
+
+<TierCallout>
+	Supported on [Enterprise Starter](/pricing/plans/enterprise-starter) and
+	[Enterprise](/pricing/plans/enterprise) plans.
+</TierCallout>
+
+The Sourcegraph Slack integration brings the power of [Deep Search](/deep-search) directly into your Slack workspace. When you mention `@Sourcegraph` in any Slack channel or thread, a Deep Search conversation starts right there—no context switching required.
+
+<video autoplay loop muted playsinline>
+  <source src="https://storage.googleapis.com/changelog-static-assets-prod/20260108_deep-search-slack-integration_deep-search-slack-integration.mp4" type="video/mp4" />
+</video>
+
+## Features
+
+- **In-thread Deep Search**: Mention `@Sourcegraph` in any thread to ask questions—Deep Search uses the thread's messages as context to help answer
+- **Follow-up questions**: Continue the conversation by mentioning `@Sourcegraph` again in the same thread
+- **Direct messages**: Message the Sourcegraph bot directly to have private conversations about your code
+- **Rich link previews**: Deep Search links shared in Slack automatically unfurl with context
+
+![Deep Search rich preview in Slack](https://storage.googleapis.com/changelog-static-assets-prod/20260108_deep-search-slack-integration_rich-preview.png)
+
+## Getting started
+
+To set up the Sourcegraph Slack integration:
+
+1. Navigate to **Administration → Slack integration** in your Sourcegraph instance
+2. Click **Connect to Slack**
+3. Authorize the Sourcegraph app in your Slack workspace
+4. Once connected, you can mention `@Sourcegraph` in any channel where the app is added
+
+## Using the integration
+
+### Starting a conversation
+
+In any Slack channel or direct message where the Sourcegraph app is present, mention `@Sourcegraph` followed by your question. You can specify a repository to search in as part of your message:
+
+```
+@Sourcegraph How does the router handle middleware in the gorilla/mux repository?
+```
+
+Sourcegraph will respond in a thread with a detailed answer powered by Deep Search.
+
+### Using thread context
+
+Deep Search automatically uses the messages in the current Slack thread as context. This means you can have a discussion with colleagues and then ask:
+
+```
+@Sourcegraph Can you answer this?
+```
+
+Deep Search will understand what "this" refers to based on the preceding conversation.
+
+### Asking follow-up questions
+
+Continue the conversation by replying in the thread and mentioning `@Sourcegraph` again:
+
+```
+@Sourcegraph Can you show me where the JWT tokens are validated?
+```
+
+### Direct messages
+
+You can also message the Sourcegraph bot directly for private conversations about your codebase. Find the Sourcegraph app in your Slack workspace and start a direct message.
+
+## Troubleshooting
+
+### The app doesn't respond to mentions
+
+- Ensure the Sourcegraph app has been added to the channel
+- Verify the integration is properly connected in **Administration → Slack integration**—errors will appear on this page if the integration is not configured correctly
+- Check that [Deep Search is enabled](/deep-search#enabling-deep-search) for your Sourcegraph instance
+
+### Checking integration status
+
+The **Administration → Slack integration** page displays any configuration errors and automatically detects issues with your setup. It will verify that Slack can connect to your Sourcegraph instance and check that all required scopes and permissions are correctly configured in your Slack app.
+
+## Permissions reference
+
+This section explains the permissions used by the Sourcegraph Slack app. All required permissions are automatically provided via the app manifest during the setup process—no manual configuration is needed. The **Administration → Slack integration** page will automatically verify that your app's permissions match what Sourcegraph expects.
+
+### OAuth scopes
+
+| Permission | Purpose |
+|------------|---------|
+| `app_mentions:read` | Allows the app to detect when users mention `@Sourcegraph` to trigger Deep Search queries |
+| `channels:history` | Enables reading message history in public channels to provide conversation context for follow-up questions |
+| `chat:write` | Allows the app to send Deep Search responses back to Slack channels and threads |
+| `groups:history` | Enables reading message history in private channels the app is added to |
+| `im:history` | Enables reading direct message history for one-on-one conversations with the app |
+| `links:read` | Required for reading link metadata when unfurling Deep Search URLs |
+| `links:write` | Required for posting rich previews when Deep Search links are shared |
+| `mpim:history` | Enables reading message history in group direct messages |
+| `team:read` | Allows the app to access basic information about the Slack workspace for configuration |
+| `users:read` | Enables reading basic user profile information to associate Slack users with Sourcegraph accounts |
+| `users:read.email` | Allows reading user email addresses to match Slack users with their Sourcegraph accounts |
+
+### Event subscriptions
+
+| Event | Purpose |
+|-------|---------|
+| `app_mention` | Triggered when a user mentions `@Sourcegraph`, initiating a Deep Search query |
+| `link_shared` | Triggered when a Deep Search link is shared, enabling rich URL unfurling |
+| `entity_details_requested` | Supports rendering entity details in Slack's flexpane view |
+| `message.channels` | Receives messages in public channels for conversation context |
+| `message.groups` | Receives messages in private channels for conversation context |
+| `message.im` | Receives direct messages sent to the Sourcegraph app |
+| `message.mpim` | Receives messages in group direct messages |
