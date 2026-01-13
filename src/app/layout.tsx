@@ -5,7 +5,7 @@ import clsx from 'clsx';
 import config from 'docs.config';
 import {type Metadata} from 'next';
 import localFont from 'next/font/local';
-import Script from 'next/script';
+
 import {Suspense} from 'react';
 
 import '@/styles/tailwind.css';
@@ -93,20 +93,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
 						<Layout>{children}</Layout>
 					</Providers>
 				</Suspense>
-				<Script
-					id="runllm-widget-script"
-					type="module"
-					src="https://widget.runllm.com"
-					crossOrigin=""
-					runllm-keyboard-shortcut="Mod+j"
-					runllm-name="Sourcegraph Doc Assistant"
-					runllm-position="BOTTOM_RIGHT"
-					runllm-assistant-id="1119"
-					runllm-theme-color="#FF5543"
-					runllm-floating-button-text="Ask AI"
-					runllm-brand-logo="https://storage.googleapis.com/sourcegraph-assets/Docs/Media/sourcegraph-pictogram-light.png"
-					async
-				/>
+
 			</body>
 			<GoogleAnalytics gaId="GTM-TB4NLS7" />
 		</html>
