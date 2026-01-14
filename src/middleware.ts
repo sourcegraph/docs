@@ -141,7 +141,7 @@ export function middleware(request: NextRequest) {
 	}
 
 	if (pathWithoutBase === '/changelog.rss')
-		return NextResponse.redirect(TECHNICAL_CHANGELOG_RSS_URL, 301);
+		return NextResponse.redirect(TECHNICAL_CHANGELOG_RSS_URL, 308);
 
 	return NextResponse.next();
 }

@@ -7074,7 +7074,6 @@ const redirectsData = [
 	},
 	// RSS feed moved from /docs/technical-changelog.rss to /changelog/technical-changelog.rss
 	// This redirect preserves existing RSS subscriptions
-	// See: https://github.com/sourcegraph/sourcegraph/blob/main/cmd/docs/src/routes/changelog/technical-changelog.rss/%2Bserver.ts
 	{
 		source: '/technical-changelog.rss',
 		destination: TECHNICAL_CHANGELOG_RSS_URL,
