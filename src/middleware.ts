@@ -73,8 +73,7 @@ export function middleware(request: NextRequest) {
 	);
 	if (redirect) {
 		return NextResponse.redirect(
-			createRedirectUrl(request, redirect.destination, path),
-			redirect.permanent ? 308 : 307
+			createRedirectUrl(request, redirect.destination, path)
 		);
 	}
 
