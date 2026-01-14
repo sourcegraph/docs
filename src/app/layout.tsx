@@ -1,5 +1,6 @@
 import {Providers} from '@/app/providers';
 import {Layout} from '@/components/Layout';
+import {TECHNICAL_CHANGELOG_RSS_URL} from '@/data/constants';
 import {GoogleAnalytics} from '@next/third-parties/google';
 import clsx from 'clsx';
 import config from 'docs.config';
@@ -81,7 +82,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
 					rel="alternate"
 					type="application/rss+xml"
 					title="RSS Feed for Sourcegraph"
-					href="/technical-changelog.rss"
+					href={TECHNICAL_CHANGELOG_RSS_URL}
 				/>
 			</head>
 			<body
