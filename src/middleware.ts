@@ -2,6 +2,8 @@ import type {NextRequest} from 'next/server';
 import {NextResponse} from 'next/server';
 import docsConfig from '../docs.config.js';
 
+import {TECHNICAL_CHANGELOG_RSS_URL} from './data/constants';
+
 const {updatedRedirectsData} = require('./data/redirects.ts');
 
 function createRedirectUrl(
@@ -71,7 +73,8 @@ export function middleware(request: NextRequest) {
 	);
 	if (redirect) {
 		return NextResponse.redirect(
-			createRedirectUrl(request, redirect.destination, path)
+			createRedirectUrl(request, redirect.destination, path),
+			redirect.permanent ? 308 : 307
 		);
 	}
 
@@ -138,9 +141,7 @@ export function middleware(request: NextRequest) {
 	}
 
 	if (pathWithoutBase === '/changelog.rss')
-		return NextResponse.redirect(
-			createRedirectUrl(request, '/technical-changelog.rss', path)
-		);
+		return NextResponse.redirect(TECHNICAL_CHANGELOG_RSS_URL, 301);
 
 	return NextResponse.next();
 }
