@@ -1,12 +1,379 @@
 ---
-seoPriority: 1.0
+seoPriority: 0.1
 ---
 
 # Technical Changelog
 
-This page documents all notable changes to Sourcegraph. For curated highlights of key changes, please [read here](https://sourcegraph.com/changelog/).
+This page documents all changes to Sourcegraph.
+
+<Callout type="info">
+This content is also available in our new changelog at [sourcegraph.com/changelog/releases](https://sourcegraph.com/changelog/releases).
+</Callout>
 
 {/* CHANGELOG_START */}
+
+# 6.12 Patch 0
+
+## v6.12.0
+
+-   [sourcegraph](https://github.com/sourcegraph/sourcegraph/releases/tag/v6.12.0)
+
+-   [docker-compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/releases/tag/v6.12.0)
+
+-   [helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/releases/tag/v6.12.0)
+
+-   [kustomize](https://github.com/sourcegraph/deploy-sourcegraph-k8s/releases/tag/v6.12.0)
+
+### Features
+
+#### Deep Search
+
+-   Enable streaming by default `(PR #8715)`
+    -   Deep Search responses now stream in real-time for improved responsiveness.
+
+-   Enable Deep Search entitlements by default `(PR #8620)`
+    -   Deep Search entitlements are now enabled for all users by default.
+
+-   Add keyboard navigation to Deep Search history sidebar `(PR #8417)`
+    -   Navigate through conversation history using keyboard shortcuts.
+
+-   Enable dynamic auto-resizing for prompt input `(PR #8639)`
+    -   The prompt input field now automatically resizes based on content.
+
+-   Unify sources container with citations `(PR #8161)`
+    -   Improved presentation of sources and citations in Deep Search results.
+
+-   Add sidebar to blob view `(PR #8294)`
+    -   Deep Search sidebar is now available when viewing file contents.
+
+-   Add thinking support for Gemini 3 Pro `(PR #8053)`
+    -   Gemini 3 Pro model now supports thinking/reasoning display.
+
+#### Administration
+
+-   Rename 'Site admin' to 'Administration' `(PR #8786)`
+    -   Site administration section has been renamed for clarity.
+
+-   Add collapsible sidebars `(PR #8482)`
+    -   Admin sidebars can now be collapsed to save screen space.
+
+-   Introduce notifications widget and reworked dashboard `(PR #8439)`
+    -   New notifications widget and improved admin dashboard layout.
+
+-   Support GitHub App configuration via EXTSVC_CONFIG_FILE `(PR #8205)`
+    -   GitHub Apps can now be configured through external configuration files.
+
+#### Executor
+
+-   Add option to skip TLS verify `(PR #8936)`
+    -   Executors can now skip TLS certificate verification when needed.
+
+#### Cody
+
+-   Add Gemini 3 Flash `(PR #8470)`
+    -   Gemini 3 Flash is now available as a model option.
+
+#### Permissions
+
+-   Display total user count on repository permissions page `(PR #8547)`
+    -   Repository permissions page now shows total user counts.
+
+#### Alerts
+
+-   Add alert for repository cleanups failing consistently `(PR #8666)`
+    -   New alerting when repository cleanup operations fail repeatedly.
+
+#### Code Intelligence
+
+-   Categorise indexes by "User uploads" and "Auto-indexing" `(PR #8424)`
+    -   Indexes are now categorized for easier management.
+
+-   Add syntax highlighting for go.mod and go.sum files `(PR #8163)`
+    -   Go module files now have proper syntax highlighting.
+
+-   Add line-level highlighting for diff and patch files `(PR #8407)`
+    -   Improved highlighting for diff and patch file viewing.
+
+#### Security
+
+-   Add audit logs for repository reclone and deleteFromDisk `(PR #8204)`
+    -   Repository reclone and deletion operations are now logged for audit purposes.
+
+-   mTLS support for code hosts `(PR #8289)`
+    -   Mutual TLS authentication is now supported for code host connections.
+
+-   Add site setting auth.idpDynamicClientRegistrationEnabled `(PR #8267)`
+    -   New site setting to control dynamic OAuth client registration.
+
+### Fix
+
+#### Deep Search
+
+-   Fix default value for streaming `(PR #8903)`
+    -   Corrected the default streaming behavior in Deep Search.
+
+-   Add stats to turns when streaming `(PR #8773)`
+    -   Streaming responses now include turn statistics.
+
+-   Generate conversation title only once `(PR #8703)`
+    -   Fixed duplicate conversation title generation.
+
+-   Link to answer instead of question `(PR #8656)`
+    -   Fixed links to point to answers rather than questions.
+
+-   Fix tab title updates when switching between conversations `(PR #8648)`
+    -   Tab titles now correctly update when switching conversations.
+
+-   Return full commit hash in permalinks `(PR #8528)`
+    -   Permalinks now use full commit hashes for reliability.
+
+-   Prevent star/unstar actions for conversation viewers `(PR #8624)`
+    -   Viewers can no longer star/unstar conversations they don't own.
+
+-   Use correct icon color variable for submit button `(PR #8565)`
+    -   Fixed submit button icon color.
+
+-   Fix background color inconsistency in follow-up form `(PR #8512)`
+    -   Corrected background color in follow-up forms.
+
+-   Show errors when conversation creation fails `(PR #8541)`
+    -   Error messages now display when conversation creation fails.
+
+-   Increase input size for better visibility `(PR #8527)`
+    -   Improved input field visibility.
+
+-   Fix active question detection `(PR #8474)`
+    -   Fixed detection of the active question in conversations.
+
+-   Prevent feature flag flicker on initial page load `(PR #8374)`
+    -   Fixed UI flickering caused by feature flag loading.
+
+#### Search
+
+-   Fix file search result content not updating in certain situations `(PR #8836)`
+    -   Fixed stale file search results.
+
+-   Render branded logos on search homepage and global navigation `(PR #8830)`
+    -   Branded logos now display correctly.
+
+-   Disable implicit repo name search when `repo:` filter is present `(PR #8071)`
+    -   Search no longer implicitly matches repo names when a repo filter is specified.
+
+#### Batch Changes
+
+-   Fix push authorization for credentials with SSH key `(PR #8805)`
+    -   Fixed credential handling for SSH key-based authentication.
+
+-   Reduce query complexity of github requests to save tokens `(PR #8759)`
+    -   Optimized GitHub API queries for better performance.
+
+-   Count READONLY changesets as CLOSED in stats `(PR #8319)`
+    -   Fixed changeset statistics counting.
+
+-   Fix spacing on start page `(PR #8356)`
+    -   Corrected layout spacing on the batch changes start page.
+
+#### Administration
+
+-   Display presentation error on user creation failure `(PR #8718)`
+    -   User creation errors now display properly.
+
+-   Fix site admin navigation highlighting for batch specs `(PR #8519)`
+    -   Fixed navigation highlighting in admin section.
+
+-   Remove duplicate Users subtitle in site admin overview `(PR #8581)`
+    -   Removed duplicate subtitle in admin overview.
+
+-   Only set additionalProperties to false where it isn't explicitly true `(PR #8490)`
+    -   Fixed JSON schema handling in site configuration.
+
+#### Code Insights
+
+-   Fix combobox UI in repositories field `(PR #8558)`
+    -   Fixed combobox display in repository selection.
+
+-   Fix job mobile UI layout `(PR #8539)`
+    -   Corrected mobile layout for insight jobs.
+
+-   Remove hardcoded repo fallback from getting started page `(PR #8338)`
+    -   Removed hardcoded repository references.
+
+#### Code Intelligence
+
+-   Implement tree-sitter based CSS/SCSS extraction `(PR #8478)`
+    -   Improved CSS/SCSS symbol extraction using tree-sitter.
+
+#### Repositories
+
+-   Remove stale temporary files from repo directories `(PR #8532)`
+    -   Fixed cleanup of temporary repository files.
+
+-   Correctly set expiry for git objects `(PR #8522)`
+    -   Fixed git object expiration logic.
+
+#### Permissions
+
+-   Fix permission sync scheduler edge case causing excessive job enqueueing `(PR #8572)`
+    -   Fixed permission sync scheduling issue.
+
+#### Alerting
+
+-   Fix alerts documentation paths in alert notifications `(PR #8682)`
+    -   Corrected documentation links in alert notifications.
+
+-   Fix alert doc URL fragment identifiers to preserve underscores `(PR #8531)`
+    -   Fixed URL encoding in alert documentation links.
+
+#### Code Hosts
+
+-   Don't ping code host on every page load `(PR #8494)`
+    -   Reduced unnecessary code host connection checks.
+
+-   Fix Azure DevOps connection check for non-azure URLs `(PR #8492)`
+    -   Fixed Azure DevOps connectivity validation.
+
+#### Authentication
+
+-   Show clearer error when external account already in use `(PR #8459)`
+    -   Improved error messaging for account conflicts.
+
+-   Fix scrolling on device flow and auth consent pages `(PR #8317)`
+    -   Fixed page scrolling issues during authentication flows.
+
+-   Clear license key errors when applying new license key `(PR #8376)`
+    -   License key errors now clear when a new key is applied.
+
+#### Cody
+
+-   Block Cody requests when cody.enabled is false `(PR #8467)`
+    -   Cody requests are now properly blocked when disabled in configuration.
+
+#### Service Accounts
+
+-   Decouple access token life-cycle from creator `(PR #8358)`
+    -   Service account tokens no longer depend on their creator's account status.
+
+#### UI
+
+-   Preserve input focus during URL navigation `(PR #8571)`
+    -   Fixed input focus loss during navigation.
+
+-   Avoid content shift on webhooks page `(PR #8362)`
+    -   Fixed layout shifts on the webhooks configuration page.
+
+#### VSCode
+
+-   Correctly extract remote branch name when it differs from local `(PR #8433)`
+    -   Fixed branch name detection in VS Code extension.
+
+### Chore
+
+There were no chores for this release
+
+### Reverts
+
+There were no reverts for this release
+
+### Uncategorized
+
+#### Removals
+
+-   Remove autoupgrade toggle selector and readiness banner `(PR #8794)`
+    -   The autoupgrade feature has been removed.
+
+-   Remove setup wizard `(PR #8350)`
+    -   The initial setup wizard has been removed.
+
+-   Deprecate Sonnet 3.7 and Sonnet 4 `(PR #8328)`
+    -   These model versions are now deprecated.
+
+-   Remove Svelte/React app switching `(PR #8199)`
+    -   The application now uses Svelte exclusively.
+
+-   Disallow creation of custom auto-indexing policies by default `(PR #8171)`
+    -   Custom auto-indexing policy creation is now disabled by default.
+
+-   Remove 'x-requested-with' header requirement and format `(PR #8464)`
+    -   API no longer requires the x-requested-with header.
+
+{/* RSS={"version":"v6.12.0", "releasedAt": "2026-01-12"} */}
+
+
+# 6.11 Patch 4
+
+## v6.11.5639
+
+-   [sourcegraph](https://github.com/sourcegraph/sourcegraph/releases/tag/v6.11.5639)
+
+-   [docker-compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/releases/tag/v6.11.5639)
+
+-   [helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/releases/tag/v6.11.5639)
+
+-   [kustomize](https://github.com/sourcegraph/deploy-sourcegraph-k8s/releases/tag/v6.11.5639)
+
+### Features
+
+There were no features for this release
+
+### Fix
+
+#### Batch Changes
+
+-   Fix push authorization for credentials with SSH key `(PR #8804)`
+    -   Fixed an issue where credentials were not being set correctly for batch change pushes, causing authorization failures for both GitLab and GitHub.
+
+### Chore
+
+There were no chores for this release
+
+### Reverts
+
+There were no reverts for this release
+
+### Uncategorized
+
+There were no uncategorized changes for this release
+
+{/* RSS={"version":"v6.11.5639", "releasedAt": "2026-01-09"} */}
+
+
+# 6.11 Patch 3
+
+## v6.11.5428
+
+-   [sourcegraph](https://github.com/sourcegraph/sourcegraph/releases/tag/v6.11.5428)
+
+-   [docker-compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/releases/tag/v6.11.5428)
+
+-   [helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/releases/tag/v6.11.5428)
+
+-   [kustomize](https://github.com/sourcegraph/deploy-sourcegraph-k8s/releases/tag/v6.11.5428)
+
+### Features
+
+There were no features for this release
+
+### Fix
+
+#### Gitserver
+
+-   fix potential buffer overflow in logs redactor `(PR #8732)`
+    -   Fixed a potential issue where a buffer overflow can cause repository update processes to deadlock.
+
+### Chore
+
+There were no chores for this release
+
+### Reverts
+
+There were no reverts for this release
+
+### Uncategorized
+
+There were no uncategorized changes for this release
+
+{/* RSS={"version":"v6.11.5428", "releasedAt": "2026-01-08"} */}
+
 
 # 6.11 Patch 2
 

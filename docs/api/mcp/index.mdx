@@ -21,31 +21,59 @@ seoPriority: 1.0
 
 The Sourcegraph Model Context Protocol (MCP) Server provides AI agents and applications with programmatic access to your Sourcegraph instance's code search, navigation, and analysis capabilities through a standardized interface.
 
-## Server Endpoint
+## Server Endpoints
 
-The MCP server is available at:
+The MCP server provides different tool suites for various use cases:
+
+| Endpoint | Description |
+|----------|-------------|
+| `/.api/mcp` | Full suite of Sourcegraph tools |
+| `/.api/mcp/deepsearch` | Deep Search subagent |
+
+Example URL:
 
 ```
-https://your-sourcegraph-instance.com/.api/mcp/v1
+https://your-sourcegraph-instance.com/.api/mcp
 ```
 
 ## Authentication
 
 The Sourcegraph MCP server supports two authentication methods:
 
-### OAuth 2.0
+### OAuth 2.0 with Dynamic Client Registration
 
-For programmatic access without storing credentials, use OAuth 2.0 with device flow or authorization code flow with PKCE:
+Sourcegraph supports MCP spec-compliant OAuth with Dynamic Client Registration ([RFC 7591](https://datatracker.ietf.org/doc/html/rfc7591)), allowing AI agents to authenticate without pre-configured client IDs.
 
-#### Prerequisites
+#### Enabling Dynamic Client Registration
 
-Before using OAuth, you must create an OAuth application in your Sourcegraph instance. Follow the instructions [here](/admin/oauth-apps#creating-an-oauth-app). (Note: you will need the `user:all` scope)
+Enable this feature by setting the following site configuration:
 
-#### Registering the MCP Server
+```json
+{
+	"auth.idpDynamicClientRegistrationEnabled": true
+}
+```
 
-Once you have your Client ID, you can register the MCP server in your client using that ID.
+Once enabled, MCP clients that support OAuth can authenticate automatically. For example, for [Amp](https://ampcode.com/), you can run:
 
-If your client does not natively support specifying an OAuth 2.0 Client ID, you can use `mcp-remote` as a fallback. Add the following configuration to the relevant section for MCP servers of your client to use the `stdio` transport with the following configuration:
+```bash
+amp mcp add sg https://sourcegraph.example.com/.api/mcp
+```
+
+For [Claude Code](https://www.claude.com/product/claude-code), you can run:
+
+```bash
+claude mcp add --transport http sg https://sourcegraph.example.com/.api/mcp
+```
+
+This works similarly for other MCP-compatible agents.
+
+#### Manual OAuth Setup
+
+If your agent doesn't support Dynamic Client Registration, you can manually create an OAuth application:
+
+1. Create an OAuth application in your Sourcegraph instance following the instructions [here](/admin/oauth-apps#creating-an-oauth-app). (Note: you will need the `user:all` scope)
+2. Use `mcp-remote` as a fallback with the following configuration:
 
 ```json
 {
@@ -54,7 +82,7 @@ If your client does not natively support specifying an OAuth 2.0 Client ID, you 
 		"command": "npx",
 		"args": [
 			"mcp-remote",
-			"https://your-sourcegraph-instance.com/.api/mcp/v1",
+			"https://your-sourcegraph-instance.com/.api/mcp",
 			"3334",
 			"--static-oauth-client-info",
 			"{\"client_id\":\"<your-client-id>\"}",
@@ -67,8 +95,8 @@ If your client does not natively support specifying an OAuth 2.0 Client ID, you 
 
 <Callout type="info">
   <ul>
-    <li>Replace `your-sourcegraph-instance.com` with your Sourcegraph instance URL and `<your-client-id>` with the ID of the client you registered in the prerequisites step.</li>
-    <li>When using the `mcp-remote` fallback, ensure the OAuth client you use has one of it's redirect URI set to `http://localhost:3334`.</li>
+    <li>Replace `your-sourcegraph-instance.com` with your Sourcegraph instance URL and `<your-client-id>` with the ID of the client you registered.</li>
+    <li>When using the `mcp-remote` fallback, ensure the OAuth client has one of its redirect URIs set to `http://localhost:3334`.</li>
   </ul>
 </Callout>
 
@@ -112,7 +140,7 @@ You can add the Sourcegraph MCP server to [Amp](https://ampcode.com) in two ways
     {
     	"amp.mcpServers": {
     		"sourcegraph": {
-    			"url": "https://your-sourcegraph-instance.com/.api/mcp/v1",
+    			"url": "https://your-sourcegraph-instance.com/.api/mcp",
     			"headers": {
     				"Authorization": "token YOUR_ACCESS_TOKEN"
     			}
@@ -134,7 +162,7 @@ You can add the Sourcegraph MCP server to [Amp](https://ampcode.com) in two ways
 Run the following command in your terminal:
 
 ```bash
-amp mcp add sourcegraph --header "Authorization=token YOUR_ACCESS_TOKEN" https://sourcegraph.sourcegraph.com/.api/mcp/v1
+amp mcp add sourcegraph --header "Authorization=token YOUR_ACCESS_TOKEN" https://sourcegraph.sourcegraph.com/.api/mcp
 ```
 
 <Callout type="info">
@@ -156,7 +184,7 @@ You can add the Sourcegraph MCP server to [Claude Code](https://claude.ai/code) 
     	"mcpServers": {
     		"sourcegraph": {
     			"type": "http",
-    			"url": "https://your-sourcegraph-instance.com/.api/mcp/v1",
+    			"url": "https://your-sourcegraph-instance.com/.api/mcp",
     			"headers": {
     				"Authorization": "token YOUR_ACCESS_TOKEN"
     			}
@@ -180,7 +208,7 @@ You can also add the Sourcegraph MCP server as a locally-scoped server, which is
 1. Run the following command in your terminal:
 
     ```bash
-    claude mcp add --transport http sourcegraph https://your-sourcegraph-instance.com/.api/mcp/v1 \
+    claude mcp add --transport http sourcegraph https://your-sourcegraph-instance.com/.api/mcp \
       --header "Authorization: token YOUR_ACCESS_TOKEN"
     ```
 
@@ -202,7 +230,7 @@ You can add the Sourcegraph MCP server to Google Gemini Code Assist by configuri
     {
     	"mcpServers": {
     		"sourcegraph": {
-    			"httpUrl": "https://your-sourcegraph-instance.com/.api/mcp/v1",
+    			"httpUrl": "https://your-sourcegraph-instance.com/.api/mcp",
     			"headers": {
     				"Authorization": "token YOUR_ACCESS_TOKEN"
     			}
@@ -230,8 +258,8 @@ You can add the Sourcegraph MCP server to VS Code by configuring it in your MCP 
     {
     	"servers": {
     		"sourcegraph": {
-    			"url": "https://your-sourcegraph-instance.com/.api/mcp/v1",
     			"type": "http",
+    			"url": "https://your-sourcegraph-instance.com/.api/mcp",
     			"headers": {
     				"Authorization": "token YOUR_ACCESS_TOKEN"
     			}
@@ -258,6 +286,7 @@ You can add the Sourcegraph MCP server to VS Code by configuring it in your MCP 
     {
     	"mcpServers": {
     		"sourcegraph": {
+    			"url": "https://your-sourcegraph-instance.com/.api/mcp",
     			"type": "http",
     			"url": "https://your-sourcegraph-instance.com/.api/mcp/v1",
     			"headers": {
@@ -285,7 +314,7 @@ You can add the Sourcegraph MCP server to VS Code by configuring it in your MCP 
     {
     	"servers": {
     		"sourcegraph": {
-    			"url": "https://your-sourcegraph-instance.com/.api/mcp/v1",
+    			"url": "https://your-sourcegraph-instance.com/.api/mcp",
     			"type": "http",
     			"headers": {
     				"Authorization": "token YOUR_ACCESS_TOKEN"
@@ -309,19 +338,19 @@ You can add the Sourcegraph MCP server to OpenCode by configuring it in your MCP
 2. Add the following configuration:
 
     ```json
-    {
-    	"mcp": {
-    		"sourcegraph": {
-    			"type": "remote",
-    			"url": "https://your-sourcegraph-instance.com/.api/mcp/v1",
-    			"oauth": false,
-    			"headers": {
-    				"Authorization": "token {env:YOUR_ACCESS_TOKEN}"
-    			}
-    		}
-    	},
-    	"$schema": "https://opencode.ai/config.json"
-    }
+	{
+	  "mcp": {
+	    "sourcegraph": {
+	      "type": "remote",
+	      "url": "https://your-sourcegraph-instance.com/.api/mcp",
+	      "oauth": false,
+	      "headers": {
+	        "Authorization": "token {env:YOUR_ACCESS_TOKEN}"
+	      }
+	    }
+	  },
+	  "$schema": "https://opencode.ai/config.json"
+	}
     ```
 
     <Callout type="info">
@@ -346,7 +375,7 @@ The MCP server provides these tools for code exploration and analysis:
 
 ### File & Repository Operations
 
-#### `sg_read_file`
+#### `read_file`
 
 Read file contents with line numbers and support for specific ranges and revisions.
 
@@ -364,7 +393,7 @@ Read file contents with line numbers and support for specific ranges and revisio
 	File size limit is 128KB. Use line ranges for larger files.
 </Callout>
 
-#### `sg_list_files`
+#### `list_files`
 
 List files and directories in a repository path.
 
@@ -374,7 +403,7 @@ List files and directories in a repository path.
 - `path` - Directory path (optional, defaults to root)
 - `revision` - Branch, tag, or commit hash (optional)
 
-#### `sg_list_repos`
+#### `list_repos`
 
 Search and list repositories by name patterns with pagination support.
 
@@ -386,7 +415,7 @@ Search and list repositories by name patterns with pagination support.
 
 ### Code Search
 
-#### `sg_keyword_search`
+#### `keyword_search`
 
 Perform exact keyword searches with boolean operators and filters.
 
@@ -402,7 +431,7 @@ Perform exact keyword searches with boolean operators and filters.
 
 **Features:** Boolean AND/OR operators, regex patterns
 
-#### `sg_nls_search`
+#### `nls_search`
 
 Semantic search with flexible linguistic matching.
 
@@ -420,7 +449,7 @@ Semantic search with flexible linguistic matching.
 
 ### Code Navigation
 
-#### `sg_go_to_definition`
+#### `go_to_definition`
 
 Find the definition of a symbol from a usage location.
 
@@ -433,7 +462,7 @@ Find the definition of a symbol from a usage location.
 
 **Features:** Cross-repository support, compiler-level accuracy
 
-#### `sg_find_references`
+#### `find_references`
 
 Find all references to a symbol from its definition location.
 
@@ -446,7 +475,7 @@ Find all references to a symbol from its definition location.
 
 ### Version Control & History
 
-#### `sg_commit_search`
+#### `commit_search`
 
 Search commits by message, author, content, files, and date ranges.
 
@@ -459,7 +488,7 @@ Search commits by message, author, content, files, and date ranges.
 - `files` - Filter by file paths (optional)
 - `after`/`before` - Date range filters (optional)
 
-#### `sg_diff_search`
+#### `diff_search`
 
 Search actual code changes for specific patterns across repositories.
 
@@ -472,7 +501,7 @@ Search actual code changes for specific patterns across repositories.
 - `author` - Filter by author (optional)
 - `after`/`before` - Date range filters (optional)
 
-#### `sg_compare_revisions`
+#### `compare_revisions`
 
 Compare changes between two specific revisions.
 
@@ -484,7 +513,7 @@ Compare changes between two specific revisions.
 - `first` - Maximum file diffs to return (optional, default 50)
 - `after` - Pagination cursor (optional)
 
-#### `sg_get_contributor_repos`
+#### `get_contributor_repos`
 
 Find repositories where a contributor has made commits.
 
@@ -494,6 +523,20 @@ Find repositories where a contributor has made commits.
 - `limit` - Maximum repositories to return (optional, default 20)
 - `minCommits` - Minimum commits required (optional, default 1)
 
+### Deep Search
+
+#### `deepsearch_read`
+
+Read a Deep Search conversation and return the markdown content of the questions and answers.
+
+**Parameters:**
+
+-   `identifier` - The Deep Search conversation identifier (required). Can be:
+    -   A full Sourcegraph Deep Search URL (e.g., `https://sourcegraph.com/deepsearch/abc123` or `https://sourcegraph.com/deepsearch/shared/abc123`)
+    -   A read token (e.g., `abc123-def456-...`)
+
+**Use cases:** Reading or re-opening Deep Search results, summarizing existing answers, using past Deep Search as context for new questions
+
 ## Usage Examples
 
 ### Finding Authentication Code
@@ -502,7 +545,7 @@ Find repositories where a contributor has made commits.
 {
 	"method": "tools/call",
 	"params": {
-		"name": "sg_nls_search",
+		"name": "nls_search",
 		"arguments": {
 			"query": "authentication login user"
 		}
@@ -516,7 +559,7 @@ Find repositories where a contributor has made commits.
 {
 	"method": "tools/call",
 	"params": {
-		"name": "sg_read_file",
+		"name": "read_file",
 		"arguments": {
 			"repo": "github.com/myorg/myrepo",
 			"path": "src/auth/login.go",
@@ -533,7 +576,7 @@ Find repositories where a contributor has made commits.
 {
 	"method": "tools/call",
 	"params": {
-		"name": "sg_commit_search",
+		"name": "commit_search",
 		"arguments": {
 			"repos": ["github.com/myorg/myrepo"],
 			"messageTerms": ["bug fix"],
@@ -545,8 +588,8 @@ Find repositories where a contributor has made commits.
 
 ## Best Practices
 
-1. **Repository Scoping:** Use `sg_list_repos` first to find relevant repositories for better performance
-2. **Progressive Search:** Start with broad searches (`sg_nls_search`) then narrow with specific tools
-3. **File Verification:** Use `sg_list_files` before `sg_read_file` to verify file existence
+1. **Repository Scoping:** Use `list_repos` first to find relevant repositories for better performance
+2. **Progressive Search:** Start with broad searches (`nls_search`) then narrow with specific tools
+3. **File Verification:** Use `list_files` before `read_file` to verify file existence
 4. **Pagination:** Use `after`/`before` cursors for large result sets
-5. **Tool Combinations:** Chain tools together (e.g., `sg_list_repos` → `sg_commit_search`)
+5. **Tool Combinations:** Chain tools together (e.g., `list_repos` → `commit_search`)

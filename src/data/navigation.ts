@@ -96,7 +96,13 @@ export const navigation: NavigationItem[] = [
 			},
 			{
 				title: 'Deep Search',
-				href: '/deep-search'
+				href: '/deep-search',
+				sections: [
+					{
+						title: 'Slack Integration',
+						href: '/slack-integration'
+					}
+				]
 			},
 			{
 				title: 'Code Navigation',
@@ -472,6 +478,7 @@ export const navigation: NavigationItem[] = [
 				sections: [
 					{title: 'GraphQL API', href: '/api/graphql'},
 					{title: 'Stream API', href: '/api/stream-api'},
+					{title: 'Analytics API', href: '/analytics/api'},
 					{
 						title: 'Deep Search API',
 						href: '/deep-search/api',

@@ -1,3 +1,5 @@
+import {TECHNICAL_CHANGELOG_RSS_URL} from './constants';
+
 const redirectsData = [
 	{
 		source: '/integration/img/disable_extension.png',
@@ -7068,6 +7070,13 @@ const redirectsData = [
 	{
 		source: '/admin/repo/permissions',
 		destination: '/admin/permissions',
+		permanent: true
+	},
+	// RSS feed moved from /docs/technical-changelog.rss to /changelog/technical-changelog.rss
+	// This redirect preserves existing RSS subscriptions
+	{
+		source: '/technical-changelog.rss',
+		destination: TECHNICAL_CHANGELOG_RSS_URL,
 		permanent: true
 	}
 ];

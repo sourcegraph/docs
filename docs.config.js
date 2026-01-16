@@ -1,5 +1,5 @@
 const config = {
-	DOCS_LATEST_VERSION: '6.11'
+	DOCS_LATEST_VERSION: '6.12'
 };
 
 module.exports = config;
