@@ -7078,6 +7078,22 @@ const redirectsData = [
 		source: '/technical-changelog.rss',
 		destination: TECHNICAL_CHANGELOG_RSS_URL,
 		permanent: true
+	},
+	// Self-hosted update pages moved to /changelog/self-hosted/
+	{
+		source: '/self-hosted/updates/docker-compose',
+		destination: 'https://sourcegraph.com/changelog/self-hosted/docker-compose',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/updates/kubernetes',
+		destination: 'https://sourcegraph.com/changelog/self-hosted/kubernetes',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/updates/server',
+		destination: 'https://sourcegraph.com/changelog/self-hosted/server',
+		permanent: true
 	}
 ];
 
