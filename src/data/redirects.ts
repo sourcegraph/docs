@@ -6328,7 +6328,7 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/updates/docker_compose',
-		destination: '/self-hosted/updates/docker_compose',
+		destination: 'https://sourcegraph.com/changelog/self-hosted/docker-compose',
 		permanent: true
 	},
 	{
@@ -6338,7 +6338,7 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/updates/kubernetes',
-		destination: '/self-hosted/updates/kubernetes',
+		destination: 'https://sourcegraph.com/changelog/self-hosted/kubernetes',
 		permanent: true
 	},
 	{
@@ -6378,7 +6378,7 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/updates/server',
-		destination: '/self-hosted/updates/server',
+		destination: 'https://sourcegraph.com/changelog/self-hosted/server',
 		permanent: true
 	},
 	{
@@ -7049,7 +7049,7 @@ const redirectsData = [
 	},
 	{
 		source: '/self-hosted/updates/docker_compose',
-		destination: '/self-hosted/updates/docker-compose',
+		destination: 'https://sourcegraph.com/changelog/self-hosted/docker-compose',
 		permanent: true
 	},
 	{
