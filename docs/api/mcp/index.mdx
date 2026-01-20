@@ -112,6 +112,16 @@ Authorization: token YOUR_ACCESS_TOKEN
 
 The Sourcegraph MCP server can be integrated with various AI tools and IDEs that support the Model Context Protocol.
 
+### Supported Clients
+
+- [Amp](#amp)
+- [Claude Code](#claude-code)
+- [Google Gemini Code Assist](#google-gemini-code-assist)
+- [VS Code](#vs-code)
+    - [Cursor](#cursor)
+    - [Antigravity](#antigravity)
+- [OpenCode](#opencode)
+
 ### Amp
 
 <Callout type="info">
@@ -237,19 +247,48 @@ You can add the Sourcegraph MCP server to Google Gemini Code Assist by configuri
 3. Save the configuration file.
 4. Restart Gemini Code Assist to apply the new configuration.
 
-### Cursor
+### VS Code
 
-You can add the Sourcegraph MCP server to Cursor by configuring it in your MCP settings file:
+You can add the Sourcegraph MCP server to VS Code by configuring it in your MCP settings file:
+
+1. Create `.vscode/mcp.json` in your project.
+2. Add the following configuration:
+
+    ```json
+    {
+    	"servers": {
+    		"sourcegraph": {
+    			"type": "http",
+    			"url": "https://your-sourcegraph-instance.com/.api/mcp",
+    			"headers": {
+    				"Authorization": "token YOUR_ACCESS_TOKEN"
+    			}
+    		}
+    	},
+    	"inputs": []
+    }
+    ```
+
+    <Callout type="info">
+    	Replace `your-sourcegraph-instance.com` with your Sourcegraph instance
+    	URL and `YOUR_ACCESS_TOKEN` with your access token.
+    </Callout>
+
+3. Save the configuration file.
+4. Restart VS Code to apply the new configuration.
+
+#### Cursor
 
 1. Open or create the MCP configuration file at `~/.cursor/mcp.json` (or the equivalent path on your system).
-2. Add the following configuration:
+2. Add the following:
 
     ```json
     {
     	"mcpServers": {
     		"sourcegraph": {
-    			"type": "http",
     			"url": "https://your-sourcegraph-instance.com/.api/mcp",
+    			"type": "http",
+    			"url": "https://your-sourcegraph-instance.com/.api/mcp/v1",
     			"headers": {
     				"Authorization": "token YOUR_ACCESS_TOKEN"
     			}
@@ -265,31 +304,6 @@ You can add the Sourcegraph MCP server to Cursor by configuring it in your MCP s
 
 3. Save the configuration file.
 4. Restart Cursor to apply the new configuration.
-
-#### VS Code
-
-1. Create ⁠`.vscode/mcp.json` in your project.
-2. Add the following:
-
-    ```json
-    {
-    	"servers": {
-    		"sourcegraph": {
-    			"url": "https://your-sourcegraph-instance.com/.api/mcp",
-    			"type": "http",
-    			"headers": {
-    				"Authorization": "token YOUR_ACCESS_TOKEN"
-    			}
-    		}
-    	},
-    	"inputs": []
-    }
-    ```
-
-    <Callout type="info">
-    	Replace `your-sourcegraph-instance.com` with your Sourcegraph instance
-    	URL and `YOUR_ACCESS_TOKEN` with your access token.
-    </Callout>
 
 #### Antigravity
 
@@ -316,7 +330,7 @@ You can add the Sourcegraph MCP server to Cursor by configuring it in your MCP s
     	URL and `YOUR_ACCESS_TOKEN` with your access token.
     </Callout>
 
-#### OpenCode
+### OpenCode
 
 You can add the Sourcegraph MCP server to OpenCode by configuring it in your MCP settings file:
 
@@ -346,6 +360,7 @@ You can add the Sourcegraph MCP server to OpenCode by configuring it in your MCP
 
 3. Save the configuration file.
 4. Restart OpenCode to apply the changes.
+
 ## Available Tools
 
 <Callout type="info">
@@ -366,11 +381,11 @@ Read file contents with line numbers and support for specific ranges and revisio
 
 **Parameters:**
 
--   `repo` - Repository name (required)
--   `path` - File path within repository (required)
--   `startLine` - Starting line number (optional)
--   `endLine` - Ending line number (optional)
--   `revision` - Branch, tag, or commit hash (optional)
+- `repo` - Repository name (required)
+- `path` - File path within repository (required)
+- `startLine` - Starting line number (optional)
+- `endLine` - Ending line number (optional)
+- `revision` - Branch, tag, or commit hash (optional)
 
 **Use cases:** Reading specific files, examining code sections, reviewing different versions
 
@@ -384,9 +399,9 @@ List files and directories in a repository path.
 
 **Parameters:**
 
--   `repo` - Repository name (required)
--   `path` - Directory path (optional, defaults to root)
--   `revision` - Branch, tag, or commit hash (optional)
+- `repo` - Repository name (required)
+- `path` - Directory path (optional, defaults to root)
+- `revision` - Branch, tag, or commit hash (optional)
 
 #### `list_repos`
 
@@ -394,9 +409,9 @@ Search and list repositories by name patterns with pagination support.
 
 **Parameters:**
 
--   `query` - Search pattern for repository names (required)
--   `limit` - Maximum results per page (optional, default 50)
--   `after`/`before` - Pagination cursors (optional)
+- `query` - Search pattern for repository names (required)
+- `limit` - Maximum results per page (optional, default 50)
+- `after`/`before` - Pagination cursors (optional)
 
 ### Code Search
 
@@ -406,13 +421,13 @@ Perform exact keyword searches with boolean operators and filters.
 
 **Parameters:**
 
--   `query` - Search query with optional filters (required)
+- `query` - Search query with optional filters (required)
 
 **Supported filters:**
 
--   `repo:` - limit to specific repositories
--   `file:` - search specific file patterns
--   `rev:` - search specific revisions
+- `repo:` - limit to specific repositories
+- `file:` - search specific file patterns
+- `rev:` - search specific revisions
 
 **Features:** Boolean AND/OR operators, regex patterns
 
@@ -422,13 +437,13 @@ Semantic search with flexible linguistic matching.
 
 **Parameters:**
 
--   `query` - Natural language search query (required)
+- `query` - Natural language search query (required)
 
 **Supported filters:**
 
--   `repo:` - limit to specific repositories
--   `file:` - search specific file patterns
--   `rev:` - search specific revisions
+- `repo:` - limit to specific repositories
+- `file:` - search specific file patterns
+- `rev:` - search specific revisions
 
 **Features:** Flexible linguistic matching, stemming, broader results than keyword search
 
@@ -440,10 +455,10 @@ Find the definition of a symbol from a usage location.
 
 **Parameters:**
 
--   `repo` - Repository name (required)
--   `path` - File path containing symbol usage (required)
--   `symbol` - Symbol name to find definition for (required)
--   `revision` - Branch, tag, or commit hash (optional)
+- `repo` - Repository name (required)
+- `path` - File path containing symbol usage (required)
+- `symbol` - Symbol name to find definition for (required)
+- `revision` - Branch, tag, or commit hash (optional)
 
 **Features:** Cross-repository support, compiler-level accuracy
 
@@ -453,10 +468,10 @@ Find all references to a symbol from its definition location.
 
 **Parameters:**
 
--   `repo` - Repository name (required)
--   `path` - File path containing symbol definition (required)
--   `symbol` - Symbol name to find references for (required)
--   `revision` - Branch, tag, or commit hash (optional)
+- `repo` - Repository name (required)
+- `path` - File path containing symbol definition (required)
+- `symbol` - Symbol name to find references for (required)
+- `revision` - Branch, tag, or commit hash (optional)
 
 ### Version Control & History
 
@@ -466,12 +481,12 @@ Search commits by message, author, content, files, and date ranges.
 
 **Parameters:**
 
--   `repos` - Array of repository names (required)
--   `messageTerms` - Terms to search in commit messages (optional)
--   `authors` - Filter by commit authors (optional)
--   `contentTerms` - Search in actual code changes (optional)
--   `files` - Filter by file paths (optional)
--   `after`/`before` - Date range filters (optional)
+- `repos` - Array of repository names (required)
+- `messageTerms` - Terms to search in commit messages (optional)
+- `authors` - Filter by commit authors (optional)
+- `contentTerms` - Search in actual code changes (optional)
+- `files` - Filter by file paths (optional)
+- `after`/`before` - Date range filters (optional)
 
 #### `diff_search`
 
@@ -479,12 +494,12 @@ Search actual code changes for specific patterns across repositories.
 
 **Parameters:**
 
--   `pattern` - Search pattern for code changes (required)
--   `repos` - Array of repository names (required)
--   `added` - Search only added code (optional)
--   `removed` - Search only removed code (optional)
--   `author` - Filter by author (optional)
--   `after`/`before` - Date range filters (optional)
+- `pattern` - Search pattern for code changes (required)
+- `repos` - Array of repository names (required)
+- `added` - Search only added code (optional)
+- `removed` - Search only removed code (optional)
+- `author` - Filter by author (optional)
+- `after`/`before` - Date range filters (optional)
 
 #### `compare_revisions`
 
@@ -492,11 +507,11 @@ Compare changes between two specific revisions.
 
 **Parameters:**
 
--   `repo` - Repository name (required)
--   `base` - Base revision (older version) (required)
--   `head` - Head revision (newer version) (required)
--   `first` - Maximum file diffs to return (optional, default 50)
--   `after` - Pagination cursor (optional)
+- `repo` - Repository name (required)
+- `base` - Base revision (older version) (required)
+- `head` - Head revision (newer version) (required)
+- `first` - Maximum file diffs to return (optional, default 50)
+- `after` - Pagination cursor (optional)
 
 #### `get_contributor_repos`
 
@@ -504,9 +519,9 @@ Find repositories where a contributor has made commits.
 
 **Parameters:**
 
--   `author` - Author name or email (required)
--   `limit` - Maximum repositories to return (optional, default 20)
--   `minCommits` - Minimum commits required (optional, default 1)
+- `author` - Author name or email (required)
+- `limit` - Maximum repositories to return (optional, default 20)
+- `minCommits` - Minimum commits required (optional, default 1)
 
 ### Deep Search
 
