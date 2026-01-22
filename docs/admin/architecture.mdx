@@ -1,4 +1,4 @@
-# Sourcegraph Architecture
+# Sourcegraph architecture
 
 <p className="subtitle">
 	This document provides a high-level overview of Sourcegraph's architecture
@@ -7,14 +7,94 @@
 
 ## Diagram
 
-![sourcegraph-architecture](https://storage.googleapis.com/sourcegraph-assets/Docs/architecture.svg)
+```mermaid
+flowchart TB
+    subgraph Clients["Clients"]
+        Browser["Browser"]
+        CLI["src-cli"]
+        Extensions["Browser Extensions"]
+    end
+
+    subgraph Frontend["Frontend Layer"]
+        FE["frontend<br/>(GraphQL API)"]
+    end
+
+    subgraph Search["Search Services"]
+        Searcher["searcher<br/>(unindexed search)"]
+        ZoektIndex["zoekt-indexserver"]
+        ZoektWeb["zoekt-webserver<br/>(indexed search)"]
+        Syntect["syntect-server<br/>(syntax highlighting)"]
+    end
+
+    subgraph Backend["Backend Services"]
+        Worker["worker<br/>(background jobs)"]
+        Gitserver["gitserver<br/>(repository storage)"]
+        Symbols["symbols"]
+        PCIW["precise-code-intel-worker"]
+    end
+
+    subgraph Databases["Data Layer"]
+        Postgres[(pgsql<br/>primary DB)]
+        CodeIntelDB[(codeintel-db)]
+        InsightsDB[(codeinsights-db)]
+        Redis[(redis<br/>cache/sessions)]
+        Blobstore[(blobstore<br/>object storage)]
+    end
+
+    subgraph External["External Services"]
+        CodeHosts["Code Hosts<br/>(GitHub, GitLab, etc.)"]
+    end
+
+    subgraph Observability["Observability"]
+        Grafana["grafana"]
+        Prometheus["prometheus"]
+        Jaeger["jaeger"]
+    end
+
+    Browser --> FE
+    CLI --> FE
+    Extensions --> FE
+
+    FE --> Searcher
+    FE --> ZoektWeb
+    FE --> Gitserver
+    FE --> Symbols
+    FE --> Postgres
+    FE --> CodeIntelDB
+    FE --> InsightsDB
+    FE --> Redis
+
+    Worker --> Postgres
+    Worker --> CodeIntelDB
+    Worker --> InsightsDB
+    Worker --> Gitserver
+    Worker --> CodeHosts
+
+    Gitserver --> Postgres
+    Gitserver --> CodeHosts
+
+    ZoektIndex --> Gitserver
+    ZoektWeb --> ZoektIndex
+
+    PCIW --> CodeIntelDB
+    PCIW --> Postgres
+    PCIW --> Blobstore
+
+    Searcher --> Gitserver
+    Syntect --> FE
+
+    Prometheus --> FE
+    Prometheus --> Gitserver
+    Prometheus --> Worker
+    Grafana --> Prometheus
+```
 
 ## Repository syncing
 
 At its core, Sourcegraph maintains a persistent cache of all repositories that are connected to it. It is persistent because this data is critical for Sourcegraph to function. Still, it is ultimately a cache because the code host is the source of truth, and our cache is eventually consistent.
 
--   `gitserver` is the sharded service that stores repositories and makes them accessible to other Sourcegraph services
--   `worker` is responsible for ensuring all repositories in gitserver are as up-to-date as possible while respecting code host rate limits. It is also responsible for syncing repository metadata from the code host that is stored in the repo table of our Postgres database
+- `gitserver` is the sharded service that stores repositories and makes them accessible to other Sourcegraph services
+- `worker` is responsible for ensuring all repositories in gitserver are as up-to-date as possible while respecting code host rate limits. It is also responsible for syncing repository metadata from the code host that is stored in the repo table of our Postgres database
 
 ## Permission syncing
 
@@ -34,13 +114,13 @@ Developers can search for the entire codebase that is connected to their Sourceg
 
 By default, Sourcegraph uses `zoekt` to create a trigram index of the default branch of every repository, which makes searches fast. This trigram index is why Sourcegraph search is more powerful and faster than what is usually provided by code hosts.
 
--   [zoekt-indexserver](https://sourcegraph.com/github.com/sourcegraph/zoekt/-/tree/cmd/zoekt-sourcegraph-indexserver)
--   [zoekt-webserver](https://sourcegraph.com/github.com/sourcegraph/zoekt/-/tree/cmd/zoekt-webserver)
+- [zoekt-indexserver](https://sourcegraph.com/github.com/sourcegraph/zoekt/-/tree/cmd/zoekt-sourcegraph-indexserver)
+- [zoekt-webserver](https://sourcegraph.com/github.com/sourcegraph/zoekt/-/tree/cmd/zoekt-webserver)
 
 Sourcegraph also has a fast search path for code that isn't indexed yet or will never be indexed (for example, code that is not on a default branch). Indexing every branch of every repository isn't a pragmatic use of resources for most customers, so this decision balances optimizing the common case (searching all default branches) with space savings (not indexing everything).
 
--   `searcher` implements the non-indexed search
--   Syntax highlighting for any code view, including search results, is provided by `Syntect` server
+- `searcher` implements the non-indexed search
+- Syntax highlighting for any code view, including search results, is provided by `Syntect` server
 
 <Callout type="note">
 	Learn more in the [Code Search docs](/code-search)
@@ -62,9 +142,9 @@ With some setup, customers can enable [precise code navigation](/code-navigation
 
 ### Dependencies
 
--   Search: Symbol search is used for basic code navigation
--   Sourcegraph extension API: Hover and definition providers
--   Native integrations (for code hosts): UI of hover tooltips on code hosts
+- Search: Symbol search is used for basic code navigation
+- Sourcegraph extension API: Hover and definition providers
+- Native integrations (for code hosts): UI of hover tooltips on code hosts
 
 ## Batch Changes
 
@@ -78,8 +158,8 @@ Read the [Batch Changes](/batch-changes) docs to learn more.
 
 ### Dependencies
 
--   src-cli: Batch changes are currently executed client-side through the `src` CLI
--   Search: Repositories in which batch specs need to be executed are resolved through the search API
+- src-cli: Batch changes are currently executed client-side through the `src` CLI
+- Search: Repositories in which batch specs need to be executed are resolved through the search API
 
 ## Code Insights
 
@@ -97,17 +177,17 @@ You can learn more in the [Code Insights](/code-insights) docs.
 
 ### Dependencies
 
--   Search:
-    -   GraphQL API for text search, in particular `search()`, `matchCount`, `stats.languages`
-    -   Query syntax: Code insights "construct" search queries programmatically
-    -   Exhaustive search (with `count:all/count:999999` operator)
-    -   Historical search (= unindexed search, currently)
-    -   Commit search to find historical commits to search over
--   Repository Syncing: The code insights backend has a direct dependency on `gitserver`
--   Permission syncing: The code insights backend depends on synced repository permissions for access control
--   Settings cascade:
-    -   Insights and dashboard configuration are stored in user, organization, and global settings. This will change in the future and is planned to be moved to the database
-    -   Insights contributed by extensions are configured through settings (this will stay the same)
+- Search:
+    - GraphQL API for text search, in particular `search()`, `matchCount`, `stats.languages`
+    - Query syntax: Code insights "construct" search queries programmatically
+    - Exhaustive search (with `count:all/count:999999` operator)
+    - Historical search (= unindexed search, currently)
+    - Commit search to find historical commits to search over
+- Repository Syncing: The code insights backend has a direct dependency on `gitserver`
+- Permission syncing: The code insights backend depends on synced repository permissions for access control
+- Settings cascade:
+    - Insights and dashboard configuration are stored in user, organization, and global settings. This will change in the future and is planned to be moved to the database
+    - Insights contributed by extensions are configured through settings (this will stay the same)
 
 ## Code Monitoring
 
@@ -125,7 +205,7 @@ The actions are run in response to a trigger event. For now, the only supported 
 
 ### Dependencies
 
--   Search: Diff and commit search triggers
+- Search: Diff and commit search triggers
 
 ## Browser extensions
 
@@ -147,9 +227,9 @@ Instead of requiring a browser extension, native integrations inject a script by
 
 #### Dependencies
 
--   Repository Syncing: Uses the GraphQL API to resolve repositories and revisions on code hosts
--   Search: Query transformer API hooks into search in the web app
--   Settings cascade: Which extensions are enabled, and which configurations for extensions are stored in the settings. Extensions may also change settings
+- Repository Syncing: Uses the GraphQL API to resolve repositories and revisions on code hosts
+- Search: Query transformer API hooks into search in the web app
+- Settings cascade: Which extensions are enabled, and which configurations for extensions are stored in the settings. Extensions may also change settings
 
 ## src-cli
 
@@ -169,9 +249,9 @@ Instead of requiring a browser extension, native integrations inject a script by
 
 ### Dependencies
 
--   Search: GraphQL API
--   Batch Changes: GraphQL API
--   Code Intelligence: GraphQL API
+- Search: GraphQL API
+- Batch Changes: GraphQL API
+- Code Intelligence: GraphQL API
 
 ## Deployment
 
@@ -195,15 +275,15 @@ Observability encapsulates the monitoring and debugging of Sourcegraph deploymen
 
 Monitoring includes [metrics and dashboards](/self-hosted/observability/metrics), [alerting](/self-hosted/observability/alerting), and [health checking](/self-hosted/observability/health-checks) capabilities.
 
--   `grafana` is the frontend for service metrics and ships with customized dashboards for Sourcegraph services
--   prometheus handles the scraping of service metrics and ships with recording rules, alert rules, and alerting capabilities
--   `cadvisor` provides per-container performance metrics (scraped by Prometheus) in most Sourcegraph environments
--   Each Sourcegraph service provides health checks
+- `grafana` is the frontend for service metrics and ships with customized dashboards for Sourcegraph services
+- prometheus handles the scraping of service metrics and ships with recording rules, alert rules, and alerting capabilities
+- `cadvisor` provides per-container performance metrics (scraped by Prometheus) in most Sourcegraph environments
+- Each Sourcegraph service provides health checks
 
 Debugging includes [tracing](/self-hosted/observability/tracing) and [logging](/self-hosted/observability/logs).
 
--   jaeger is the distributed tracing service used by Sourcegraph
--   Each Sourcegraph service provides logs
+- jaeger is the distributed tracing service used by Sourcegraph
+- Each Sourcegraph service provides logs
 
 <Callout type="note">
 	Learn more in the [Observability docs](/self-hosted/observability).
@@ -219,16 +299,95 @@ Debugging includes [tracing](/self-hosted/observability/tracing) and [logging](/
 
 This is a recommended deployment for Cody Enterprise. It uses the Sourcegraph Cloud infrastructure and is backed by the [Sourcegraph Model Provider (Cody Gateway)](/model-provider).
 
-![Sourcegraph Cloud deployment architecture](https://sourcegraphstatic.com/docs/enterprise-architecture-cloud-v2.png)
+```mermaid
+flowchart LR
+    subgraph CustomerEnv["Customer Environment"]
+        IDE["IDE<br/>(VS Code, JetBrains)"]
+        WebApp["Sourcegraph Web App"]
+    end
+
+    subgraph SourcegraphCloud["Sourcegraph Cloud"]
+        SG["Sourcegraph Instance"]
+        Gateway["Cody Gateway<br/>(Model Provider)"]
+    end
+
+    subgraph LLMProviders["LLM Providers"]
+        Anthropic["Anthropic<br/>(Claude)"]
+        OpenAI["OpenAI<br/>(GPT)"]
+        Fireworks["Fireworks"]
+    end
+
+    subgraph CodeHosts["Code Hosts"]
+        GitHub["GitHub"]
+        GitLab["GitLab"]
+        Bitbucket["Bitbucket"]
+    end
+
+    IDE --> SG
+    WebApp --> SG
+    SG --> Gateway
+    Gateway --> Anthropic
+    Gateway --> OpenAI
+    Gateway --> Fireworks
+    SG --> GitHub
+    SG --> GitLab
+    SG --> Bitbucket
+```
 
 ### Sourcegraph Enterprise Server (self-hosted) on Amazon Bedrock
 
 This is an example of a more complex deployment that uses Sourcegraph Enterprise Server (self-hosted) and Amazon Bedrock.
 
-![Sourcegraph Enterprise Server on Amazon Bedrock architecture](https://sourcegraphstatic.com/docs/enterprise-architecture-aws-v0.png)
+```mermaid
+flowchart LR
+    subgraph CustomerEnv["Customer Environment"]
+        IDE["IDE<br/>(VS Code, JetBrains)"]
+    end
+
+    subgraph CustomerAWS["Customer AWS Account"]
+        subgraph VPC["VPC"]
+            SG["Sourcegraph<br/>Enterprise Server"]
+            EKS["Amazon EKS"]
+        end
+        Bedrock["Amazon Bedrock"]
+    end
+
+    subgraph CodeHosts["Code Hosts"]
+        GitHub["GitHub Enterprise"]
+        GitLab["GitLab"]
+    end
+
+    IDE --> SG
+    SG --> EKS
+    SG --> Bedrock
+    SG --> GitHub
+    SG --> GitLab
+```
 
 ### Cody Data flow
 
 The following diagram describes the data flow between the different components of Cody Enterprise.
 
-![Cody data flow diagram](https://sourcegraphstatic.com/docs/enterprise-architecture-data-flow-v0.png)
+```mermaid
+sequenceDiagram
+    participant User as User/IDE
+    participant Cody as Cody Client
+    participant SG as Sourcegraph Instance
+    participant Search as Search Services
+    participant Gateway as Cody Gateway
+    participant LLM as LLM Provider
+
+    User->>Cody: Ask question / Request completion
+    Cody->>SG: Send request with context
+
+    SG->>Search: Fetch relevant code context
+    Search-->>SG: Return code snippets
+
+    SG->>Gateway: Forward request + context
+    Gateway->>LLM: Send prompt to model
+    LLM-->>Gateway: Return generated response
+    Gateway-->>SG: Forward response
+
+    SG-->>Cody: Return response with context
+    Cody-->>User: Display response
+```
