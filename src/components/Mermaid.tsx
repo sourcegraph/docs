@@ -1,9 +1,12 @@
 'use client';
 
-import mermaid from 'mermaid';
+import type mermaidAPI from 'mermaid';
 import {useTheme} from 'next-themes';
 import {useCallback, useEffect, useId, useRef, useState} from 'react';
+
 import {createPortal} from 'react-dom';
+
+type MermaidType = typeof mermaidAPI;
 
 const LIGHT_THEME = {
 	primaryColor: '#FFF3F0',
@@ -83,6 +86,7 @@ export function Mermaid({chart}: MermaidProps) {
 	const [isExpanded, setIsExpanded] = useState(false);
 	const [mounted, setMounted] = useState(false);
 	const portalRef = useRef<HTMLDivElement | null>(null);
+	const mermaidRef = useRef<MermaidType | null>(null);
 	const {resolvedTheme} = useTheme();
 
 	useEffect(() => {
@@ -101,18 +105,26 @@ export function Mermaid({chart}: MermaidProps) {
 	useEffect(() => {
 		if (!mounted) return;
 
-		const isDark = resolvedTheme === 'dark';
-		mermaid.initialize({
-			startOnLoad: false,
-			theme: 'base',
-			themeVariables: isDark ? DARK_THEME : LIGHT_THEME
-		});
+		const initMermaid = async () => {
+			const mermaidModule = await import('mermaid');
+			const mermaid = mermaidModule.default;
+			mermaidRef.current = mermaid;
 
-		setRenderKey(Math.random().toString(36).slice(2));
+			const isDark = resolvedTheme === 'dark';
+			mermaid.initialize({
+				startOnLoad: false,
+				theme: 'base',
+				themeVariables: isDark ? DARK_THEME : LIGHT_THEME
+			});
+
+			setRenderKey(Math.random().toString(36).slice(2));
+		};
+
+		initMermaid();
 	}, [resolvedTheme, mounted]);
 
 	useEffect(() => {
-		if (!chart || !chart.trim() || !mounted) {
+		if (!chart || !chart.trim() || !mounted || !mermaidRef.current) {
 			return;
 		}
 
@@ -126,7 +138,7 @@ export function Mermaid({chart}: MermaidProps) {
 					existing.remove();
 				}
 
-				const {svg} = await mermaid.render(elementId, chart);
+				const {svg} = await mermaidRef.current!.render(elementId, chart);
 				if (isMounted) {
 					setSvg(svg);
 					setError(null);

@@ -120,7 +120,9 @@ export default makeSource({
 	documentTypes: [Post],
 	mdx: {
 		remarkPlugins: [remarkGfm],
-		rehypePlugins: rehypePlugins
+		rehypePlugins: rehypePlugins,
+		// Externalize mermaid to prevent bundling its problematic Unicode regex patterns
+		esbuildOptions: options => ({...options, external: [...(options.external ?? []), 'mermaid']})
 	},
 	onSuccess: async importData => {
 		const {allPosts} = await importData();
