@@ -30,41 +30,31 @@ Example URL:
 https://your-sourcegraph-instance.com/.api/mcp
 ```
 
-## Authentication
+## Getting Started
 
-The Sourcegraph MCP server supports two authentication methods:
+MCP clients that support OAuth can connect directly—just point them at your Sourcegraph instance and authenticate through your browser:
 
-### OAuth 2.0 with Dynamic Client Registration
-
-Sourcegraph supports MCP spec-compliant OAuth with Dynamic Client Registration ([RFC 7591](https://datatracker.ietf.org/doc/html/rfc7591)), allowing AI agents to authenticate without pre-configured client IDs. DCR is enabled by default starting in Sourcegraph 7.0.
-
-DCR-registered applications are restricted to the `mcp` scope, which limits access to MCP endpoints only.
-
-MCP clients that support OAuth can authenticate automatically. For example, for [Amp](https://ampcode.com/), you can run:
-
+**[Amp](https://ampcode.com/)**
 ```bash
 amp mcp add sg https://sourcegraph.example.com/.api/mcp
 ```
 
-For [Claude Code](https://www.claude.com/product/claude-code), you can run:
-
+**[Claude Code](https://www.claude.com/product/claude-code)**
 ```bash
 claude mcp add --transport http sg https://sourcegraph.example.com/.api/mcp
 ```
 
-This works similarly for other MCP-compatible agents.
+This works similarly for other MCP-compatible agents. See [Client Integration](#client-integration) for detailed setup instructions for each client.
 
-#### Disabling Dynamic Client Registration
+## Authentication
 
-To disable DCR, set the following site configuration:
+The MCP server supports OAuth 2.0 and access token authentication.
 
-```json
-{
-	"auth.idpDynamicClientRegistrationEnabled": false
-}
-```
+### OAuth 2.0
 
-#### Manual OAuth Setup
+Sourcegraph implements Dynamic Client Registration ([RFC 7591](https://datatracker.ietf.org/doc/html/rfc7591)), so compatible clients can authenticate automatically without pre-configured client IDs. DCR-registered applications are restricted to the `mcp` scope, which limits access to MCP endpoints only.
+
+<Accordion title="Manual OAuth Setup">
 
 If your agent doesn't support Dynamic Client Registration, you can manually create an OAuth application:
 
@@ -96,9 +86,23 @@ If your agent doesn't support Dynamic Client Registration, you can manually crea
   </ul>
 </Callout>
 
-### Authorization Header
+</Accordion>
 
-Include your token in the Authorization header:
+<Accordion title="Disabling Dynamic Client Registration">
+
+To disable DCR, set the following site configuration:
+
+```json
+{
+	"auth.idpDynamicClientRegistrationEnabled": false
+}
+```
+
+</Accordion>
+
+### Access Tokens
+
+Alternatively, include an access token in the Authorization header:
 
 ```
 Authorization: token YOUR_ACCESS_TOKEN
