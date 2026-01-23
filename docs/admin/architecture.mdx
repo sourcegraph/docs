@@ -10,83 +10,102 @@
 ```mermaid
 flowchart TB
     subgraph Clients["Clients"]
-        Browser["Browser"]
+        WebApp["Web App (SPA)"]
         CLI["src-cli"]
         Extensions["Browser Extensions"]
+        NativeInt["Native Integrations"]
+        EditorExt["Editor Extensions"]
+        Scripts["Customer Scripts"]
     end
 
-    subgraph Frontend["Frontend Layer"]
-        FE["frontend<br/>(GraphQL API)"]
+    subgraph K8s["K8s"]
+        FE["frontend"]
+        Worker["worker"]
+        Gitserver["gitserver"]
+        Syntect["syntect server"]
+
+        subgraph SearchCluster["Search"]
+            Searcher["searcher"]
+            subgraph IndexedSearch["Indexed search"]
+                ZoektWeb["zoekt webserver"]
+                ZoektIndex["zoekt indexserver"]
+            end
+        end
+
+        subgraph CodeIntelCluster["Code intelligence"]
+            PCIW["precise-code-intel-worker"]
+            SCIW["syntactic-code-intel-worker"]
+        end
     end
 
-    subgraph Search["Search Services"]
-        Searcher["searcher<br/>(unindexed search)"]
-        ZoektIndex["zoekt-indexserver"]
-        ZoektWeb["zoekt-webserver<br/>(indexed search)"]
-        Syntect["syntect-server<br/>(syntax highlighting)"]
+    subgraph Managed["Managed services"]
+        Redis[(redis)]
+        Blobstore[(blob store)]
+
+        subgraph PostgresCluster["Postgres"]
+            FrontendDB[(frontend db)]
+            CodeIntelDB[(codeintel db)]
+            InsightsDB[(codeinsights db)]
+        end
     end
 
-    subgraph Backend["Backend Services"]
-        Worker["worker<br/>(background jobs)"]
-        Gitserver["gitserver<br/>(repository storage)"]
-        Symbols["symbols"]
-        PCIW["precise-code-intel-worker"]
+    subgraph ExternalServices["External services (on raw compute nodes)"]
+        Executor["executor"]
     end
 
-    subgraph Databases["Data Layer"]
-        Postgres[(pgsql<br/>primary DB)]
-        CodeIntelDB[(codeintel-db)]
-        InsightsDB[(codeinsights-db)]
-        Redis[(redis<br/>cache/sessions)]
-        Blobstore[(blobstore<br/>object storage)]
+    subgraph CodeHosts["Code hosts"]
+        GitHub["github.com"]
+        GitLab["gitlab.com"]
+        Bitbucket["bitbucket.org"]
+        GHE["GitHub Enterprise"]
+        BBS["Bitbucket Server"]
     end
 
-    subgraph External["External Services"]
-        CodeHosts["Code Hosts<br/>(GitHub, GitLab, etc.)"]
-    end
-
-    subgraph Observability["Observability"]
-        Grafana["grafana"]
-        Prometheus["prometheus"]
-        Jaeger["jaeger"]
-    end
-
-    Browser --> FE
+    WebApp --> FE
     CLI --> FE
     Extensions --> FE
+    NativeInt --> FE
+    EditorExt --> FE
+    Scripts --> FE
 
-    FE --> Searcher
     FE --> ZoektWeb
+    FE --> Searcher
     FE --> Gitserver
-    FE --> Symbols
-    FE --> Postgres
+    FE --> Syntect
+    FE --> Redis
+    FE --> Blobstore
+    FE --> FrontendDB
     FE --> CodeIntelDB
     FE --> InsightsDB
-    FE --> Redis
 
-    Worker --> Postgres
+    Worker --> Gitserver
+    Worker --> FrontendDB
     Worker --> CodeIntelDB
     Worker --> InsightsDB
-    Worker --> Gitserver
-    Worker --> CodeHosts
+    Worker --> GitHub
+    Worker --> BBS
 
-    Gitserver --> Postgres
-    Gitserver --> CodeHosts
-
+    ZoektIndex --> FE
     ZoektIndex --> Gitserver
-    ZoektWeb --> ZoektIndex
-
-    PCIW --> CodeIntelDB
-    PCIW --> Postgres
-    PCIW --> Blobstore
-
+    Searcher --> ZoektWeb
     Searcher --> Gitserver
-    Syntect --> FE
 
-    Prometheus --> FE
-    Prometheus --> Gitserver
-    Prometheus --> Worker
-    Grafana --> Prometheus
+    PCIW --> Gitserver
+    PCIW --> Blobstore
+    PCIW --> FrontendDB
+    PCIW --> CodeIntelDB
+
+    SCIW --> FE
+    SCIW --> Gitserver
+    SCIW --> FrontendDB
+
+    Gitserver --> GitHub
+    Gitserver --> GitLab
+    Gitserver --> Bitbucket
+    Gitserver --> GHE
+    Gitserver --> BBS
+
+    Executor --> FE
 ```
 
 ## Repository syncing
@@ -301,37 +320,50 @@ This is a recommended deployment for Cody Enterprise. It uses the Sourcegraph Cl
 
 ```mermaid
 flowchart LR
-    subgraph CustomerEnv["Customer Environment"]
-        IDE["IDE<br/>(VS Code, JetBrains)"]
-        WebApp["Sourcegraph Web App"]
+    subgraph DevMachine["Cody editor extension on dev's machine"]
+        SOC2Dev["🛡️ SOC 2 TYPE 2"]
+        LocalCtx["Local context<br/>(relevant code from IDE)"]
+        subgraph IDEs[" "]
+            VSCode["VS Code"]
+            JetBrains["JetBrains"]
+        end
     end
 
     subgraph SourcegraphCloud["Sourcegraph Cloud"]
-        SG["Sourcegraph Instance"]
-        Gateway["Cody Gateway<br/>(Model Provider)"]
+        GCP["☁️ Google Cloud"]
+        SOC2Cloud["🛡️ SOC 2 TYPE 2"]
+        subgraph SG["Sourcegraph Enterprise Server (single-tenant)"]
+            SearchRank["Search and ranking<br/>of remote context"]
+        end
+        Prompt["Prompt with<br/>all relevant context"]
+        Gateway["Cody Gateway"]
     end
 
-    subgraph LLMProviders["LLM Providers"]
-        Anthropic["Anthropic<br/>(Claude)"]
-        OpenAI["OpenAI<br/>(GPT)"]
-        Fireworks["Fireworks"]
-    end
-
-    subgraph CodeHosts["Code Hosts"]
+    subgraph CodeHosts["Source code"]
         GitHub["GitHub"]
         GitLab["GitLab"]
         Bitbucket["Bitbucket"]
+        Perforce["Perforce"]
+        Azure["Azure DevOps"]
     end
 
-    IDE --> SG
-    WebApp --> SG
-    SG --> Gateway
-    Gateway --> Anthropic
-    Gateway --> OpenAI
-    Gateway --> Fireworks
-    SG --> GitHub
-    SG --> GitLab
-    SG --> Bitbucket
+    subgraph ChatModels["Chat Models"]
+        OpenAI["OpenAI<br/>GPT-3.5/4"]
+        Claude["Anthropic<br/>Claude"]
+    end
+
+    subgraph CompletionModels["Code Completion Models"]
+        Starcoder["fireworks.ai<br/>Starcoder"]
+        ClaudeComp["Anthropic<br/>Claude"]
+    end
+
+    IDEs --> LocalCtx
+    LocalCtx --> SearchRank
+    CodeHosts -->|Clone/Fetch| SearchRank
+    SearchRank --> Prompt
+    Prompt --> Gateway
+    Gateway --> ChatModels
+    Gateway --> CompletionModels
 ```
 
 ### Sourcegraph Enterprise Server (self-hosted) on Amazon Bedrock
@@ -340,28 +372,48 @@ This is an example of a more complex deployment that uses Sourcegraph Enterprise
 
 ```mermaid
 flowchart LR
-    subgraph CustomerEnv["Customer Environment"]
-        IDE["IDE<br/>(VS Code, JetBrains)"]
-    end
-
-    subgraph CustomerAWS["Customer AWS Account"]
-        subgraph VPC["VPC"]
-            SG["Sourcegraph<br/>Enterprise Server"]
-            EKS["Amazon EKS"]
+    subgraph DevMachine["Cody editor extension on dev's machine"]
+        SOC2Dev["🛡️ SOC 2 TYPE 2"]
+        LocalCtx["Local context<br/>(relevant code from IDE)"]
+        subgraph IDEs[" "]
+            VSCode["VS Code"]
+            JetBrains["JetBrains"]
         end
-        Bedrock["Amazon Bedrock"]
     end
 
-    subgraph CodeHosts["Code Hosts"]
-        GitHub["GitHub Enterprise"]
+    subgraph CodeHosts["Source code"]
+        GitHub["GitHub"]
         GitLab["GitLab"]
+        Bitbucket["Bitbucket"]
+        Perforce["Perforce"]
+        Azure["Azure DevOps"]
     end
 
-    IDE --> SG
-    SG --> EKS
-    SG --> Bedrock
-    SG --> GitHub
-    SG --> GitLab
+    subgraph AWS["AWS"]
+        subgraph VPC["Sourcegraph VPC"]
+            Ingress["Ingress"]
+            subgraph SG["Sourcegraph Enterprise Server<br/>(AWS AMI or EKS)"]
+                SearchRank["Search and ranking<br/>of remote context"]
+            end
+            EBS[("EBS Volume<br/>Git clones, indexes")]
+            Prompt["Prompt with<br/>all relevant context"]
+        end
+        VPCEndpoint["VPC Endpoint"]
+        subgraph Models["Models"]
+            Claude["Anthropic<br/>Claude"]
+            Bedrock["Amazon Bedrock"]
+        end
+    end
+
+    IDEs --> LocalCtx
+    LocalCtx --> Ingress
+    LocalCtx --> Prompt
+    Ingress --> SearchRank
+    CodeHosts -->|Clone/Fetch| EBS
+    EBS --> SearchRank
+    SearchRank --> Prompt
+    Prompt -->|VPC Endpoint| VPCEndpoint
+    VPCEndpoint --> Models
 ```
 
 ### Cody Data flow
@@ -370,24 +422,49 @@ The following diagram describes the data flow between the different components o
 
 ```mermaid
 sequenceDiagram
-    participant User as User/IDE
-    participant Cody as Cody Client
-    participant SG as Sourcegraph Instance
-    participant Search as Search Services
-    participant Gateway as Cody Gateway
-    participant LLM as LLM Provider
+    box Cody editor extension (on dev's machine)
+        participant LocalSnippets as Local code snippets
+        participant Assembler as Universal context assembler
+    end
 
-    User->>Cody: Ask question / Request completion
-    Cody->>SG: Send request with context
+    box Source code providers
+        participant Providers as GitHub / GitLab / Bitbucket / Perforce / Azure DevOps
+    end
 
-    SG->>Search: Fetch relevant code context
-    Search-->>SG: Return code snippets
+    box Sourcegraph instance (Single-tenant SaaS or self-hosted)
+        participant SourceCode as Source code (mirrored)
+        participant CodeIndex as Code index
+        participant CodyBackend as Cody backend
+    end
 
-    SG->>Gateway: Forward request + context
-    Gateway->>LLM: Send prompt to model
-    LLM-->>Gateway: Return generated response
-    Gateway-->>SG: Forward response
+    participant Gateway as Depending on configured model providers
 
-    SG-->>Cody: Return response with context
-    Cody-->>User: Display response
+    box LLM Providers
+        participant OpenAI as OpenAI (GPT-3.5/4)
+        participant Fireworks as fireworks.ai (Starcoder)
+        participant Anthropic as Anthropic (Claude)
+    end
+
+    Providers->>SourceCode: Sync repositories
+    SourceCode->>CodeIndex: Index code
+
+    LocalSnippets->>Assembler: Local code snippets
+    CodeIndex->>Assembler: Code snippets (remote context)
+
+    Assembler->>CodyBackend: Prompt and context
+    CodyBackend->>Gateway: Inference request
+
+    alt Chat request
+        Gateway->>OpenAI: Send prompt
+        OpenAI-->>Gateway: Response
+    else Code completion
+        Gateway->>Fireworks: Send prompt
+        Fireworks-->>Gateway: Response
+    else Claude model
+        Gateway->>Anthropic: Send prompt
+        Anthropic-->>Gateway: Response
+    end
+
+    Gateway-->>CodyBackend: Model response
+    CodyBackend-->>Assembler: Return response
 ```
