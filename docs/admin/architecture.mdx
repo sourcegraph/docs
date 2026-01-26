@@ -205,6 +205,8 @@ By default, Sourcegraph uses `zoekt` to create a trigram index of the default br
 
 Sourcegraph also has a fast search path for code that isn't indexed yet or will never be indexed (for example, code that is not on a default branch). Indexing every branch of every repository isn't a pragmatic use of resources for most customers, so this decision balances optimizing the common case (searching all default branches) with space savings (not indexing everything). This is handled by the `searcher` non-indexed search service.
 
+Note that all product features also [export telemetry](#analytics-and-telemetry).
+
 <Callout type="note">
 	Learn more in the [Code Search docs](/code-search).
 </Callout>
@@ -269,6 +271,8 @@ flowchart LR
     ModelProvider --> InferenceProviders
 ```
 
+Note that all product features also [export telemetry](#analytics-and-telemetry).
+
 <Callout type="warning">
 	Deep Search is undergoing active development, and its architecture is
 	rapidly changing.
@@ -284,6 +288,8 @@ This is the default because it works with no extra configuration and is good for
 
 With some setup, customers can enable [precise code navigation](/code-navigation/precise-code-navigation). Repositories add a step to their build pipeline that computes the index for that code revision and uploads it to Sourcegraph. We must write language-specific indexers, so adding precise code navigation support for new languages is a non-trivial task.
 
+Note that all product features also [export telemetry](#analytics-and-telemetry).
+
 <Callout type="note">
 	Learn more in the [Code Navigation docs](/code-navigation).
 </Callout>
@@ -295,6 +301,8 @@ Batch Changes creates and manages large-scale code changes across projects, repo
 To create a batch change, users write a [batch spec](/batch-changes/batch-spec-yaml-reference), which is a YAML file that specifies the changes that should be performed and the repositories that they should be performed upon — either through a Sourcegraph search or by declaring them directly. This spec is then executed by [src-cli](/cli/references/batch) on the user's machine, in CI or some other environment controlled by the user, or directly within the Sourcegraph UI by enabling Server-Side Batch Changes via executors. This results in changeset specs that are sent to Sourcegraph. Sourcegraph then applies these changeset specs to create one or more changesets per repository. (Depending on the code host, a changeset is a pull request or merge request.)
 
 Once created, Sourcegraph monitors changesets, and their current review and CI status can be viewed on the batch change page. This provides a single pane of glass view of all the changesets created as part of the batch change. The batch change can be updated at any time by re-applying the original batch spec: this will transparently add or remove changesets in repositories that now match or don't match the original search as needed.
+
+Note that all product features also [export telemetry](#analytics-and-telemetry).
 
 <Callout type="note">
 	Learn more in the [Batch Changes docs](/batch-changes).
@@ -312,6 +320,8 @@ Code Insights can generate data in the background or just-in-time when viewing c
 
 There is also a feature flag left over from the original development of the early-stage product that we retained in case a customer who doesn't purchase it ever has a justified need to disable insights. You can set `"experimentalFeatures": { "codeInsights": false }` in your settings to disable insights.
 
+Note that all product features also [export telemetry](#analytics-and-telemetry).
+
 <Callout type="note">
 	Learn more in the [Code Insights docs](/code-insights).
 </Callout>
@@ -326,13 +336,15 @@ The **trigger** watches for new data; if there is new data, we call this an even
 
 The actions are run in response to a trigger event. For now, the only supported action is an email notification to the primary email address of the code monitor's owner. To work, `email.address` and `email.smtp` must be configured in the site configuration. Code monitoring actions will be extended in the future to support webhooks.
 
+Note that all product features also [export telemetry](#analytics-and-telemetry).
+
 <Callout type="note">
 	Learn more in the [Code Monitoring docs](/code-monitoring).
 </Callout>
 
 ## Model Provider
 
-The **Sourcegraph Model Provider** is the default and recommended way to configure AI features like Deep Search and Cody. Through this service, we provide zero-configuration access to state-of-the-art models from various LLM providers, including Anthropic and OpenAI, with enterprise-grade privacy and security.
+The **Sourcegraph Model Provider** is the default and recommended way to configure AI features like Deep Search and Cody. Through this service, we provide zero-configuration access to state-of-the-art models from various LLM providers, including Anthropic and OpenAI, with enterprise-grade [privacy and security](../model-provider/index.mdx#privacy-and-security).
 
 <Callout type="note">
 	Learn more in the [Sourcegraph Model Provider docs](/model-provider).
@@ -344,10 +356,9 @@ The **Sourcegraph Model Provider** is the default and recommended way to configu
 
 Understanding how individuals and organizations use Sourcegraph is key to providing the highest level of support to Sourcegraph's customers. To enable this, Sourcegraph collects several types of usage data from Sourcegraph instances by having Sourcegraph instances emit telemetry from most product capabilities.
 
-<Callout type="note">
-	Learn more in the [Sourcegraph Analytics docs](/analytics) and [Telemetry
-	docs](/admin/telemetry).
-</Callout>
+The data we collect powers the [Sourcegraph Analytics service](../analytics/index.mdx).
+
+We take sensitive data/PII exfiltration, intentional or not, very seriously. Our [Telemetry docs](./telemetry.mdx) outline some of the measures we take to ensure privacy and data security.
 
 Telemetry is exported through the `worker` service to the Sourcegraph-managed "Telemetry Gateway" service.
 
@@ -376,6 +387,11 @@ flowchart LR
     analytics --> bq
     click analytics "https://analytics.sourcegraph.com"
 ```
+
+<Callout type="note">
+	Learn more in the [Sourcegraph Analytics docs](/analytics) and [Telemetry
+	docs](/admin/telemetry).
+</Callout>
 
 ## Enterprise Portal
 
