@@ -1,14 +1,16 @@
 # Pings
 
-Sourcegraph periodically sends a ping to `pings.sourcegraph.com` to help our product and customer teams. It sends only the high-level data below. It never sends code, repository names, usernames, or any other specific data. To learn more, go to the **Site admin > Pings** page on your instance (the URL is `https://sourcegraph.example.com/site-admin/pings`).
+Sourcegraph periodically sends a ping to `pings.sourcegraph.com` to help our product and customer teams. It sends only the high-level, aggregated data below. It never sends code, repository names, usernames, or any other specific data. To learn more, go to the **Site admin > Pings** page on your instance (the URL is `https://sourcegraph.example.com/site-admin/pings`).
 
 Sourcegraph will also periodically perform a license verification check, to verify the validity of the configured Sourcegraph license. Tampering with these checks, or preventing them from occuring, will cause Sourcegraph to disable many features until a successful check is completed. Certain Enterprise licenses can request to be exempt from these license verification checks.
 
-## Telemetry
+To learn more about all types of telemetry emitted by Sourcegraph instances, [Telemetry docs](./telemetry.mdx).
+
+## Ping payloads
 
 Sourcegraph aggregates usage and performance metrics for some product features in our enterprise deployments. No personal or specific information is ever included.
 
-### List of other telemetry
+### List of attributes
 
 -   Randomly generated site identifier
 -   The email address of the initial site installer (or if deleted, the first active site admin), to know who to contact regarding sales, product updates, security updates, and policy updates
@@ -211,17 +213,11 @@ Sourcegraph aggregates usage and performance metrics for some product features i
 
 ## Allowlist IPs / CIDR Ranges for Sourcegraph
 
-Starting 5.2.0:
+Refer to the [Telemetry docs](./telemetry.mdx) for the list of ranges to allowlist.
 
--   For `pings.sourcegraph.com`, allowlist the IP address: `34.36.231.254`
--   For `telemetry-gateway.sourcegraph.com`, allowlist the IP address: `34.107.157.31`
--   For `sourcegraph.com`, allowlist the full [Cloudflare IP ranges](https://www.cloudflare.com/ips/)
+## Using an HTTP proxy for ping requests
 
-Prior to 5.2.0, allowlist the full [Cloudflare IP ranges](https://www.cloudflare.com/ips/).
-
-## Using an HTTP proxy for telemetry requests
-
-The environment variable `TELEMETRY_HTTP_PROXY` can be set on the `sourcegraph-frontend` service, to use an HTTP proxy for telemetry requests.
+The environment variable `TELEMETRY_HTTP_PROXY` can be set on the `sourcegraph-frontend` service, to use an HTTP proxy for ping requests.
 
 Be sure to update the enviornment variable like so : `TELEMETRY_HTTP_PROXY:"http://proxy.example.com:8080"`
 
@@ -241,12 +237,12 @@ There are no other automatic external connections to Sourcegraph.com (or any oth
 
 The Cody app connects to Sourcegraph.com to send a limited selection of the pings described above in order to infer value to our users and send update notifications. They include:
 
--   Randomly generated site identifier
--   Deployment type (the Cody app)
--   Release version
--   Operating system
--   Total number of repositories added
--   Whether a user was active today (boolean)
+- Randomly generated site identifier
+- Deployment type (the Cody app)
+- Release version
+- Operating system
+- Total number of repositories added
+- Whether a user was active today (boolean)
 
 ## Troubleshooting Pings
 
