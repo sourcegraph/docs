@@ -231,7 +231,7 @@ export function Mermaid({chart}: MermaidProps) {
 						<path d="M15 3h6v6M14 10l6.1-6.1M9 21H3v-6M10 14l-6.1 6.1" />
 					</svg>
 				</button>
-				{!isExpanded && <div dangerouslySetInnerHTML={{__html: svg}} />}
+				{!isExpanded && <div className="[&_.clickable]:cursor-pointer [&_.clickable]:underline [&_.clickable:hover]:opacity-80" dangerouslySetInnerHTML={{__html: svg}} />}
 			</div>
 
 			{isExpanded &&
@@ -245,7 +245,14 @@ export function Mermaid({chart}: MermaidProps) {
 						<div
 							className="relative max-w-[95vw] max-h-[95vh] overflow-auto rounded-lg p-8 pt-16 shadow-2xl"
 							style={{backgroundColor: bgColor}}
-							onClick={e => e.stopPropagation()}
+							onClick={e => {
+								// Close if clicking on a clickable element (link), otherwise prevent closing
+								if ((e.target as HTMLElement).closest('.clickable')) {
+									setIsExpanded(false);
+								} else {
+									e.stopPropagation();
+								}
+							}}
 						>
 							<button
 								type="button"
@@ -268,7 +275,7 @@ export function Mermaid({chart}: MermaidProps) {
 								</svg>
 							</button>
 							<div
-								className="flex items-center justify-center [&_svg]:w-auto [&_svg]:h-auto [&_svg]:min-w-[80vw] [&_svg]:max-h-[80vh]"
+								className="flex items-center justify-center [&_svg]:w-auto [&_svg]:h-auto [&_svg]:min-w-[80vw] [&_svg]:max-h-[80vh] [&_.clickable]:cursor-pointer [&_.clickable]:underline [&_.clickable:hover]:opacity-80"
 								dangerouslySetInnerHTML={{__html: svg}}
 							/>
 						</div>
