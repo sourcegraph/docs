@@ -79,6 +79,7 @@ flowchart LR
 
 	subgraph ManagedServices["Sourcegraph&nbsp;managed&nbsp;services"]
 		EnterprisePortal["Enterprise Portal"]
+        click EnterprisePortal "#enterprise-portal"
 		TelemetryGateway["Telemetry Gateway"]
         click TelemetryGateway "#analytics-and-telemetry"
 		Pings["Pings"]
@@ -182,22 +183,9 @@ For customers with specific needs, a variety of self-hosted deployment methods a
 	Learn more in the [Sourcegraph self-hosted docs](/self-hosted).
 </Callout>
 
-## Repository syncing
+## Core features
 
-At its core, Sourcegraph maintains a persistent cache of all repositories that are connected to it. It is persistent because this data is critical for Sourcegraph to function. Still, it is ultimately a cache because the code host is the source of truth, and our cache is eventually consistent.
-
-- `gitserver` is the sharded service that stores repositories and makes them accessible to other Sourcegraph services
-- `worker` is responsible for ensuring all repositories in gitserver are as up-to-date as possible while respecting code host rate limits. It is also responsible for syncing repository metadata from the code host that is stored in the repo table of our Postgres database
-
-## Permission syncing
-
-Repository permissions are mirrored from code hosts to Sourcegraph by default. This builds the foundation of Sourcegraph authorization for repositories to ensure users see consistent content on code hosts. Currently, the background permissions syncer resides in the `worker`.
-
-<Callout type="note">
-	Learn more in the [Permission Syncing docs](/admin/permissions/syncing).
-</Callout>
-
-## Code Search
+### Code Search
 
 Developers can search for the entire codebase that is connected to their Sourcegraph instance.
 
@@ -211,7 +199,7 @@ Note that all product features also [export telemetry](#analytics-and-telemetry)
 	Learn more in the [Code Search docs](/code-search).
 </Callout>
 
-## Deep Search
+### Deep Search
 
 Deep Search is an agentic code search tool that understands natural language questions about your codebase. Under the hood, Deep Search is an AI agent that uses various tools to generate its answer. The tools are functionalities available in Sourcegraph.
 
@@ -278,15 +266,13 @@ Note that all product features also [export telemetry](#analytics-and-telemetry)
 	rapidly changing.
 </Callout>
 
-## Code Navigation
+### Code Navigation
 
 Unlike Search (which is completely text-based), Code Navigation surfaces data such as doc comments for a symbol and actions such as the "go to definition" or "find references" features based on our semantic understanding of code.
 
-By default, Sourcegraph provides [search-based code navigation](/code-navigation/search-based-code-navigation). This reuses all the architecture that makes search fast, but it can result in false positives (for example, finding two definitions for a symbol or references that aren't actually references) or false negatives (for example, not being able to find the definition or all references).
+By default, Sourcegraph provides [search-based code navigation](/code-navigation/search-based-code-navigation). This reuses all the architecture that makes search fast, but it can result in false positives (for example, finding two definitions for a symbol or references that aren't actually references) or false negatives (for example, not being able to find the definition or all references). This is the default because it works with no extra configuration and is good for many use cases and languages.
 
-This is the default because it works with no extra configuration and is good for many use cases and languages. We support many languages this way because it only requires writing a few regular expressions.
-
-With some setup, customers can enable [precise code navigation](/code-navigation/precise-code-navigation). Repositories add a step to their build pipeline that computes the index for that code revision and uploads it to Sourcegraph. We must write language-specific indexers, so adding precise code navigation support for new languages is a non-trivial task.
+With some setup, customers can enable [precise code navigation](/code-navigation/precise-code-navigation). Repositories add a step to their build pipeline that computes the index for that code revision and uploads it to Sourcegraph. This provides precise results that search-based code navigation cannot.
 
 Note that all product features also [export telemetry](#analytics-and-telemetry).
 
@@ -294,7 +280,7 @@ Note that all product features also [export telemetry](#analytics-and-telemetry)
 	Learn more in the [Code Navigation docs](/code-navigation).
 </Callout>
 
-## Batch Changes
+### Batch Changes
 
 Batch Changes creates and manages large-scale code changes across projects, repositories, and code hosts.
 
@@ -308,7 +294,7 @@ Note that all product features also [export telemetry](#analytics-and-telemetry)
 	Learn more in the [Batch Changes docs](/batch-changes).
 </Callout>
 
-## Code Insights
+### Code Insights
 
 Code Insights surface higher-level, aggregated information to leaders in engineering organizations in dashboards. For example, code insights can track the number of matches of a search query over time, the number of code navigation diagnostic warnings in a codebase, or the usage of different programming languages. Sample use cases for this are tracking migrations, the usage of libraries across an organization, tech debt, code base health, and much more.
 
@@ -316,25 +302,17 @@ Code Insights persist in a separate database called `codeinsights-db`. The web a
 
 Code Insights uses data from the `frontend` database for repository metadata and repository permissions to filter time series data.
 
-Code Insights can generate data in the background or just-in-time when viewing charts. This decision is currently enforced in the product, depending on the type and scope of the insight. For code insights being run just-in-time in the client, the performance of code insights is bound to the performance of the underlying data source. These insights are relatively fast as long as the scope doesn't include many repositories (or large monorepos), but performance degrades when trying to include a lot of repositories. Insights that are processed in the background are rate-limited and will perform approximately 28,000 queries per hour when fully saturated on default settings.
-
-There is also a feature flag left over from the original development of the early-stage product that we retained in case a customer who doesn't purchase it ever has a justified need to disable insights. You can set `"experimentalFeatures": { "codeInsights": false }` in your settings to disable insights.
-
 Note that all product features also [export telemetry](#analytics-and-telemetry).
 
 <Callout type="note">
 	Learn more in the [Code Insights docs](/code-insights).
 </Callout>
 
-## Code Monitoring
+### Code Monitoring
 
 Code Monitoring allows users to get notified of changes to their codebase.
 
-Users can view, edit, and create code monitors through the code monitoring UI. A code monitor comprises a trigger and one or more actions.
-
-The **trigger** watches for new data; if there is new data, we call this an event. The only supported trigger is a search query of `type:diff` or `type:commit`, run every five minutes by the Go backend with an automatically added `after:` parameter narrowing down the diffs/commits that should be searched. The monitor's configured actions are run when this query returns a non-zero number of results.
-
-The actions are run in response to a trigger event. For now, the only supported action is an email notification to the primary email address of the code monitor's owner. To work, `email.address` and `email.smtp` must be configured in the site configuration. Code monitoring actions will be extended in the future to support webhooks.
+Configured Code Monitors run in the `worker` service. The **trigger** is a search query executed to look for new data; if there is new data, we call this an event. The monitor's configured **actions** are run when this query returns a non-zero number of results.
 
 Note that all product features also [export telemetry](#analytics-and-telemetry).
 
@@ -342,7 +320,26 @@ Note that all product features also [export telemetry](#analytics-and-telemetry)
 	Learn more in the [Code Monitoring docs](/code-monitoring).
 </Callout>
 
-## Model Provider
+## Repositories
+
+### Repository syncing
+
+At its core, Sourcegraph maintains a persistent cache of all repositories that are connected to it. It is persistent because this data is critical for Sourcegraph to function. Still, it is ultimately a cache because the code host is the source of truth, and our cache is eventually consistent.
+
+- `gitserver` is the sharded service that stores repositories and makes them accessible to other Sourcegraph services
+- `worker` is responsible for ensuring all repositories in gitserver are as up-to-date as possible while respecting code host rate limits. It is also responsible for syncing repository metadata from the code host that is stored in the repo table of our Postgres database
+
+### Permission syncing
+
+Repository permissions are mirrored from code hosts to Sourcegraph by default. This builds the foundation of Sourcegraph authorization for repositories to ensure users see consistent content on code hosts. Currently, the background permissions syncer resides in the `worker` service.
+
+<Callout type="note">
+	Learn more in the [Permission Syncing docs](/admin/permissions/syncing).
+</Callout>
+
+## Supporting features
+
+### Model Provider
 
 The **Sourcegraph Model Provider** is the default and recommended way to configure AI features like Deep Search and Cody. Through this service, we provide zero-configuration access to state-of-the-art models from various LLM providers, including Anthropic and OpenAI, with enterprise-grade [privacy and security](../model-provider/index.mdx#privacy-and-security).
 
@@ -352,7 +349,7 @@ The **Sourcegraph Model Provider** is the default and recommended way to configu
 
 [Cody](/cody) customers have access to [model configuration](../cody/enterprise/model-configuration.mdx) for bypassing the Sourcegraph Model Provider to use inference providers directly.
 
-## Analytics and telemetry
+### Analytics and telemetry
 
 Understanding how individuals and organizations use Sourcegraph is key to providing the highest level of support to Sourcegraph's customers. To enable this, Sourcegraph collects several types of usage data from Sourcegraph instances by having Sourcegraph instances emit telemetry from most product capabilities.
 
@@ -360,7 +357,7 @@ The data we collect powers the [Sourcegraph Analytics service](../analytics/inde
 
 We take sensitive data/PII exfiltration, intentional or not, very seriously. Our [Telemetry docs](./telemetry.mdx) outline some of the measures we take to ensure privacy and data security.
 
-Telemetry is exported through the `worker` service to the Sourcegraph-managed "Telemetry Gateway" service.
+Telemetry is exported through the `worker` service to the Sourcegraph-managed "Telemetry Gateway" service and "Pings" service, for telemetry events and aggregated reports, respectively.
 
 ```mermaid
 flowchart LR
@@ -375,9 +372,11 @@ flowchart LR
         end
     end
 
+    worker -- "HTTPS + license key" --> pings[Pings]
     worker -- "HTTPS + license key" --> tg[Telemetry Gateway]
 
     tg --> pipelines
+    pings --> pipelines
     subgraph datalake["Analytics backend"]
         pipelines[Processing pipelines]
         pipelines --> bq[(BigQuery)]
@@ -393,7 +392,7 @@ flowchart LR
 	docs](/admin/telemetry).
 </Callout>
 
-## Enterprise Portal
+### Enterprise Portal
 
 Sourcegraph Enterprise Portal is the Sourcegraph-managed service for viewing your enterprise subscription and managing user access to Sourcegraph operated services.
 
@@ -404,7 +403,7 @@ Enterprise Portal also handles Sourcegraph licensing and metering. Sourcegraph w
 	docs](/admin/enterprise-portal).
 </Callout>
 
-## Observability
+### Observability
 
 Observability encapsulates the monitoring and debugging of Sourcegraph deployments. Sourcegraph is designed and ships several observability tools and out-of-the-box capabilities to enable visibility into the health and state of a Sourcegraph deployment.
 
@@ -429,29 +428,3 @@ Debugging includes [tracing](/self-hosted/observability/tracing) and [logging](/
 <Callout type="note">
 	Learn more in the [Observability docs](/self-hosted/observability).
 </Callout>
-
-## Legacy diagrams
-
-<Callout type="warning">
-	These diagrams are oudated, but remain available for historical reference.
-</Callout>
-
-### Cody in Sourcegraph Cloud
-
-{/* Figma source: https://www.figma.com/file/lAPHpdhtEmOJ22IQXVZ0vs/Cody-architecture-diagrams-SQS-draft-2024-04?type=whiteboard&node-id=0-1&t=blg78H2YXXbdGSPc-0 */}
-
-[Cody Enterprise](/cody/clients/enable-cody-enterprise) on [Sourcegraph Cloud](/cloud) is the recommended deployment for Cody Enterprise. It uses the Sourcegraph Cloud infrastructure and is backed by the [Sourcegraph Model Provider (Cody Gateway)](/model-provider).
-
-![Sourcegraph Cloud deployment architecture](https://sourcegraphstatic.com/docs/enterprise-architecture-cloud-v2.png)
-
-### Cody on Amazon Bedrock (self-hosted)
-
-This is an example of a more complex deployment that uses Sourcegraph Enterprise Server (self-hosted) and Amazon Bedrock.
-
-![Sourcegraph Enterprise Server on Amazon Bedrock architecture](https://sourcegraphstatic.com/docs/enterprise-architecture-aws-v0.png)
-
-### Cody Data flow
-
-The following diagram describes the data flow between the different components of Cody Enterprise.
-
-![Cody data flow diagram](https://sourcegraphstatic.com/docs/enterprise-architecture-data-flow-v0.png)
