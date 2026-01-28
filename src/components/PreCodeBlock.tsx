@@ -1,10 +1,17 @@
 import {CopyButton} from '@/components/CopyButton';
+import dynamic from 'next/dynamic';
 import React, {DetailedHTMLProps, HTMLAttributes} from 'react';
 import config from '../../docs.config';
+
+const Mermaid = dynamic(() => import('@/components/Mermaid').then(mod => mod.Mermaid), {
+	ssr: false
+});
 
 interface PreProps
 	extends DetailedHTMLProps<HTMLAttributes<HTMLPreElement>, HTMLPreElement> {
 	raw?: string;
+	'data-language'?: string;
+	'data-theme'?: string;
 }
 
 interface ReleaseInfo {
@@ -62,20 +69,30 @@ export async function CURRENT_VERSION_STRING_NO_V() {
 }
 
 export async function PreCodeBlock({children, ...props}: PreProps) {
-	const propsObj = {...props};
-	const propsValues = Object.values(propsObj);
-	const [, , , dataLanguage, dataTheme] = propsValues;
+	const dataLanguage = props['data-language'];
+	const dataTheme = props['data-theme'];
 	const lang = dataLanguage || 'shell';
 
 	let codeContent = props?.raw || '';
 
 	// If raw prop is not available, try to extract content from children
 	if (!codeContent && children) {
-		React.Children.forEach(children, child => {
-			if (React.isValidElement(child) && child.props.children) {
-				codeContent += child.props.children;
+		const extractText = (node: React.ReactNode): string => {
+			if (typeof node === 'string') return node;
+			if (typeof node === 'number') return String(node);
+			if (!node) return '';
+			if (Array.isArray(node)) return node.map(extractText).join('');
+			if (React.isValidElement(node) && node.props.children) {
+				return extractText(node.props.children);
 			}
-		});
+			return '';
+		};
+		codeContent = extractText(children);
+	}
+
+	// Render mermaid diagrams
+	if (lang === 'mermaid') {
+		return <Mermaid chart={codeContent} />;
 	}
 
 	const version = await getLatestVersion();
