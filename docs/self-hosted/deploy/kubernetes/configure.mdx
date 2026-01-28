@@ -109,10 +109,10 @@ cAdvisor requires a service account and certain permissions to access and gather
 
 To deploy cAdvisor with privileged access, include the following:
 
--   [monitoring base resources](#monitoring-stack)
--   [monitoring/privileged component](#monitoring-stack)
--   [privileged component](#privileged)
--   [cadvisor component](#deploy-cadvisor)
+- [monitoring base resources](#monitoring-stack)
+- [monitoring/privileged component](#monitoring-stack)
+- [privileged component](#privileged)
+- [cadvisor component](#deploy-cadvisor)
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
@@ -187,12 +187,12 @@ Once a tracing backend has been deployed, see our [Tracing](/self-hosted/observa
 
 ### Deploy the bundled OpenTelemetry Collector and Jaeger
 
-The quickest way to get started with HTTP tracing is by deploying our bundled OTel and Jaeger containers together.
+The quickest way to get started with HTTP tracing is by deploying our bundled OTEL and Jaeger containers together.
 
 Include the `tracing` component to deploy both OpenTelemetry and Jaeger together. This component also configures the following services:
 
--   `otel-collector` to export to this Jaeger instance
--   `grafana` to get metrics from this Jaeger instance
+- `otel-collector` to export to this Jaeger instance
+- `grafana` to get metrics from this Jaeger instance
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
@@ -216,7 +216,7 @@ components:
 
 #### Configure a tracing backend
 
-Follow these steps to configure the otel-collector to export traces to an external OTel-compatible backend:
+Follow these steps to configure the otel-collector to export traces to an external OTEL-compatible backend:
 
 1. Create a subdirectory called 'patches' within the directory of your overlay
 2. Copy and paste the [base/otel-collector/otel-collector.ConfigMap.yaml file](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s@master/-/tree/base/otel-collector/otel-collector.ConfigMap.yaml) to the new [patches subdirectory](/self-hosted/deploy/kubernetes/kustomize/#patches-directory)
@@ -352,11 +352,11 @@ $ cp -R components/custom/resources instances/$INSTANCE_NAME/custom-resources
 
 For example, the following patches update the resources for:
 
--   gitserver
-    -   increase replica count to 2
-    -   adjust resources limits and requests
--   pgsql
-    -   increase storage size to 500Gi
+- gitserver
+    - increase replica count to 2
+    - adjust resources limits and requests
+- pgsql
+    - increase storage size to 500Gi
 
 ```yaml
 # instances/$INSTANCE_NAME/custom-resources/kustomization.yaml
@@ -454,8 +454,8 @@ components:
 
 The component takes care of creating a new storage class named `sourcegraph` with the following configurations:
 
--   Provisioner: pd.csi.storage.gke.io
--   SSD: types: pd-ssd
+- Provisioner: pd.csi.storage.gke.io
+- SSD: types: pd-ssd
 
 It also updates the storage class name for all resources to `sourcegraph`.
 
@@ -467,8 +467,8 @@ It also updates the storage class name for all resources to `sourcegraph`.
 
 **Step 2**: Include one of the AWS storage class components in your overlay: [storage-class/aws/eks](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/tree/components/storage-class/aws/eks) or [storage-class/aws/ebs](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/tree/components/storage-class/aws/ebs)
 
--   The [storage-class/aws/ebs-csi](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/tree/components/storage-class/aws/eks) component is configured with the `ebs.csi.aws.com` storage class provisioner for clusters with self-managed Amazon EBS Container Storage Interface driver installed
--   The [storage-class/aws/aws-ebs](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/tree/components/storage-class/aws/ebs) component is configured with the `kubernetes.io/aws-ebs` storage class provisioner for clusters with the [AWS EBS CSI driver installed as Amazon EKS add-on](https://docs.aws.amazon.com/eks/latest/userguide/managing-ebs-csi.html)
+- The [storage-class/aws/ebs-csi](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/tree/components/storage-class/aws/eks) component is configured with the `ebs.csi.aws.com` storage class provisioner for clusters with self-managed Amazon EBS Container Storage Interface driver installed
+- The [storage-class/aws/aws-ebs](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/tree/components/storage-class/aws/ebs) component is configured with the `kubernetes.io/aws-ebs` storage class provisioner for clusters with the [AWS EBS CSI driver installed as Amazon EKS add-on](https://docs.aws.amazon.com/eks/latest/userguide/managing-ebs-csi.html)
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
@@ -497,10 +497,10 @@ components:
 
 This component creates a new storage class named `sourcegraph` in your cluster with the following configurations:
 
--   provisioner: disk.csi.azure.com
--   parameters.storageaccounttype: Premium_LRS
-    -   This configures SSDs and is highly recommended.
-    -   **A Premium VM is required.**
+- provisioner: disk.csi.azure.com
+- parameters.storageaccounttype: Premium_LRS
+    - This configures SSDs and is highly recommended.
+    - **A Premium VM is required.**
 
 [Additional documentation](https://docs.microsoft.com/en-us/azure/aks/csi-storage-drivers) for more information.
 
@@ -688,9 +688,9 @@ data:
 
 **Step 3**: Configure the TLS settings of your Ingress by adding the following variables to your [buildConfig.yaml](/self-hosted/deploy/kubernetes/kustomize/#buildconfig-yaml) file:
 
--   **TLS_HOST**: your domain name
--   **TLS_INGRESS_CLASS_NAME**: ingress class name required by your cluster-issuer
--   **TLS_CLUSTER_ISSUER**: name of the cluster-issuer
+- **TLS_HOST**: your domain name
+- **TLS_INGRESS_CLASS_NAME**: ingress class name required by your cluster-issuer
+- **TLS_CLUSTER_ISSUER**: name of the cluster-issuer
 
 Example:
 
@@ -878,13 +878,13 @@ Add a network rule that allows incoming traffic on port 30080 (HTTP) to at least
 
 ### Google Cloud Platform Firewall
 
--   Expose the necessary ports.
+- Expose the necessary ports.
 
 ```bash
 $ gcloud compute --project=$PROJECT firewall-rules create sourcegraph-frontend-http --direction=INGRESS --priority=1000 --network=default --action=ALLOW --rules=tcp:30080
 ```
 
--   Include the nodeport component to change the type of the `sourcegraph-frontend` service from `ClusterIP` to `NodePort` with the `nodeport` component:
+- Include the nodeport component to change the type of the `sourcegraph-frontend` service from `ClusterIP` to `NodePort` with the `nodeport` component:
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
@@ -892,19 +892,19 @@ components:
     - ../../components/network/nodeport/30080
 ```
 
--   Directly applying this change to a running service [will fail](https://github.com/kubernetes/kubernetes/issues/42282). You must first delete the old service before redeploying a new one (with a few seconds of downtime):
+- Directly applying this change to a running service [will fail](https://github.com/kubernetes/kubernetes/issues/42282). You must first delete the old service before redeploying a new one (with a few seconds of downtime):
 
 ```bash
 $ kubectl delete svc sourcegraph-frontend
 ```
 
--   Find a node name.
+- Find a node name.
 
 ```bash
 $ kubectl get pods -l app=sourcegraph-frontend -o=custom-columns=NODE:.spec.nodeName
 ```
 
--   Get the EXTERNAL-IP address (will be ephemeral unless you [make it static](https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address#promote_ephemeral_ip)).
+- Get the EXTERNAL-IP address (will be ephemeral unless you [make it static](https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address#promote_ephemeral_ip)).
 
 ```bash
 $ kubectl get node $NODE -o wide
@@ -1079,15 +1079,15 @@ configMapGenerator:
 
 Sourcegraph supports specifying an external Redis server with these environment variables:
 
--   **REDIS_CACHE_ENDPOINT**=[redis-cache:6379](https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24++REDIS_CACHE_ENDPOINT+AND+REDIS_STORE_ENDPOINT+-file:doc+file:internal&patternType=literal) for caching information.
--   **REDIS_STORE_ENDPOINT**=[redis-store:6379](https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24++REDIS_CACHE_ENDPOINT+AND+REDIS_STORE_ENDPOINT+-file:doc+file:internal&patternType=literal) for storing information (session data and job queues).
+- **REDIS_CACHE_ENDPOINT**=[redis-cache:6379](https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24++REDIS_CACHE_ENDPOINT+AND+REDIS_STORE_ENDPOINT+-file:doc+file:internal&patternType=literal) for caching information.
+- **REDIS_STORE_ENDPOINT**=[redis-store:6379](https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24++REDIS_CACHE_ENDPOINT+AND+REDIS_STORE_ENDPOINT+-file:doc+file:internal&patternType=literal) for storing information (session data and job queues).
 
 When using an external Redis server, the corresponding environment variable must also be added to the following services:
 
--   `sourcegraph-frontend`
--   `gitserver`
--   `searcher`
--   `worker`
+- `sourcegraph-frontend`
+- `gitserver`
+- `searcher`
+- `worker`
 
 **Step 1**: Include the `services/redis` component in your components:
 
