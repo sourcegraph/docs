@@ -144,7 +144,7 @@ flowchart LR
 
     cloudflare["<b>Sourcegraph DNS (Cloudflare)</b><br/>WAF, Rate-limiting, VPN-only firewall (optional)"]
 
-    subgraph gcp_project["GCP Project - Dedicated per customer"]
+    subgraph gcp_project["GCP project - Dedicated per customer"]
         gcp_lb["<b>GCP Load Balancer</b><br/>SSL termination"]
         nat["Cloud NAT Gateway"]
         subgraph gke["GKE"]
@@ -170,6 +170,8 @@ flowchart LR
     nat -->|"HTTPS"| managed_services
     gke --> nat
 ```
+
+For customers connecting to private resources in on-prem data centers, also refer to the [Sourcegraph Connect agent for Sourcegraph Cloud](#sourcegraph-connect-agent-for-sourcegraph-cloud) section.
 
 <Callout type="note">
 	Learn more in the [Sourcegraph Cloud docs](/cloud).
@@ -403,6 +405,56 @@ Enterprise Portal also handles Sourcegraph licensing and metering. Sourcegraph w
 	docs](/admin/enterprise-portal).
 </Callout>
 
+### Sourcegraph Connect agent for Sourcegraph Cloud
+
+Sourcegraph Cloud supports connecting to private code hosts and artifact registries in the customer's network by deploying the Sourcegraph Connect tunnel agent in the customer's network.
+
+Sourcegraph Connect consists of three components:
+
+- **Connect tunnel clients:** Forward proxy clients for the Sourcegraph Cloud instance's containers to reach the customer's private code hosts and artifact registries, through the tunnel server.
+    - Clients are managed by Sourcegraph, and deployed in the customer's Sourcegraph Cloud instance's VPC.
+- **Connect tunnel servers:** The broker between agents and clients, it authenticates agents and clients, enforces ACLs, sets up mTLS, and proxies encrypted traffic between agents and clients.
+    - Tunnels are managed by Sourcegraph, and deployed in the customer's Sourcegraph Cloud instance's VPC.
+    - mTLS certificates are rotated every 6 hours by default.
+- **Connect agents:** Deployed by the customer inside their network, agents proxy and encrypt traffic between the customer's private resources and the Sourcegraph Cloud tunnel clients.
+    - The agent has its own identity, and using credentials provided to the customer during deployment, the agent authenticates and establishes a secure connection with the tunnel server. Only agents are allowed to establish secure connections with the tunnel server, and the server only accepts a connection if the agent's identity is approved.
+    - Agents can only communicate with permitted code hosts and artifact registries.
+    - The handshake between agents and tunnel servers occurs over a mTLS-encrypted connection using TCP/HTTP2 (gRPC) on port 50050.
+
+```mermaid
+flowchart LR
+    subgraph gcp["Dedicated&nbsp;Sourcegraph&nbsp;Cloud&nbsp;GCP&nbsp;project"]
+        subgraph frontend_pod["sourcegraph-frontend pod"]
+            frontend["frontend"]
+            tunnel_client_1["Connect tunnel client"]
+            frontend -->|"HTTPS"| tunnel_client_1
+        end
+
+        subgraph gitserver_pod["gitserver pod"]
+            gitserver["gitserver"]
+            tunnel_client_2["Connect tunnel client"]
+            gitserver -->|"HTTPS"| tunnel_client_2
+        end
+
+        tunnel_server["Connect tunnel server"]
+        tunnel_client_1 -->|"mTLS"| tunnel_server
+        tunnel_client_2 -->|"mTLS"| tunnel_server
+    end
+
+    subgraph customer["Customer Private Network"]
+        tunnel_agent["Connect agent"]
+        code_host["private code host"]
+        tunnel_agent -->|"HTTPS"| code_host
+    end
+
+    tunnel_server -->|"mTLS"| tunnel_agent
+```
+
+<Callout type="note">
+	Learn more in the [Sourcegraph Connect agent
+	docs](/cloud/private-connectivity-sourcegraph-connect).
+</Callout>
+
 ### Observability
 
 Observability encapsulates the monitoring and debugging of Sourcegraph deployments. Sourcegraph is designed and ships several observability tools and out-of-the-box capabilities to enable visibility into the health and state of a Sourcegraph deployment.
@@ -428,3 +480,18 @@ Debugging includes [tracing](/self-hosted/observability/tracing) and [logging](/
 <Callout type="note">
 	Learn more in the [Observability docs](/self-hosted/observability).
 </Callout>
+
+## Glossary
+
+### Standard ports
+
+Unless otherwise mentioned:
+
+- HTTPS: 443
+- SSH: 22
+- HTTP: 80
+
+### Data encryption
+
+- Where TLS is used, at minimum, TLS 1.2 (TLS 1.3 also supported) is required.
+- All data is encrypted in transit and at rest.
