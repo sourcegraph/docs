@@ -1,4 +1,4 @@
-# Private Resources in On-Prem Data Centers via Sourcegraph Connect Agent
+# Private resources in on-prem data centers via the Sourcegraph Connect agent
 
 <Callout type="note">
 	This feature is in the Experimental stage. [Contact
@@ -9,35 +9,7 @@ As part of the [Enterprise tier](https://sourcegraph.com/pricing), Sourcegraph C
 
 ## How it works
 
-Sourcegraph Connect consists of three components:
-
-### Tunnel Clients
-
-Forward proxy clients for the Sourcegraph Cloud instance's containers to reach the customer's private code hosts and artifact registries, through the tunnel server.
-
-Managed by Sourcegraph, and deployed in the customer's Sourcegraph Cloud instance's VPC.
-
-### Tunnel Server
-
-The broker between agents and clients, it authenticates agents and clients, enforces ACLs, sets up mTLS, and proxies encrypted traffic between agents and clients.
-
-Managed by Sourcegraph, and deployed in the customer's Sourcegraph Cloud instance's VPC.
-
-### Tunnel Agents
-
-Deployed by the customer inside their network, agents proxy and encrypt traffic between the customer's private resources and the Sourcegraph Cloud tunnel clients.
-
-The agent has its own identity, and using credentials provided to the customer during deployment, the agent authenticates and establishes a secure connection with the tunnel server. Only agents are allowed to establish secure connections with the tunnel server, and the server only accepts a connection if the agent's identity is approved.
-
-Agents can only communicate with permitted code hosts and artifact registries.
-
-<iframe
-	src="https://link.excalidraw.com/readonly/453uvY8infI8wskSecGJ"
-	width="100%"
-	height="100%"
-	style={{border: 'none'}}
-/>
-[Diagram link](https://link.excalidraw.com/readonly/453uvY8infI8wskSecGJ)
+A technical overview is available in [the architecture diagrams page](/admin/architecture#sourcegraph-connect-agent-for-sourcegraph-cloud).
 
 ## Steps
 
@@ -47,22 +19,22 @@ The customer reaches out to their account manager to request this feature be ena
 
 The account manager collects the required information from the customer, including but not limited to:
 
--   The DNS names of the needed private resources (e.g. `gitlab.internal.company.net`, `artifactory.internal.company.net`)
--   The ports of the private resources (e.g. `443`, `80`, `22`)
--   The type of TLS certificates used by the private resources (e.g. self-signed, internal PKI, or issued by a public CA)
+- The DNS names of the needed private resources (e.g. `gitlab.internal.company.net`, `artifactory.internal.company.net`)
+- The ports of the private resources (e.g. `443`, `80`, `22`)
+- The type of TLS certificates used by the private resources (e.g. self-signed, internal PKI, or issued by a public CA)
 
 Sourcegraph provides:
 
--   The instructions, config file, and credentials to run the agent
--   The tunnel server's static public IPs and ports
+- The instructions, config file, and credentials to run the agent
+- The tunnel server's static public IPs and ports
 
 ### Create the connection
 
 The customer installs the agent in their private network, following the instructions provided. At a high level:
 
--   Configure internet egress to the provided tunnel server's static public IPs and ports
--   Configure intranet egress to the needed private resources
--   Deploy the tunnel agent via Docker container or binary, with the provided config file and credentials
+- Configure internet egress to the provided tunnel server's static public IPs and ports
+- Configure intranet egress to the needed private resources
+- Deploy the tunnel agent via Docker container or binary, with the provided config file and credentials
 
 ### Configure the code host connection
 
@@ -126,9 +98,9 @@ The tunnel agent is designed and built with a minimal footprint and attack surfa
 
 You can:
 
--   Deploy the agent on a hardened container platform
--   Store the agent credential and config content in a secrets management system and mount these secrets to the container
--   Forward the agent's logs to your log management system
+- Deploy the agent on a hardened container platform
+- Store the agent credential and config content in a secrets management system and mount these secrets to the container
+- Forward the agent's logs to your log management system
 
 ### How can I inspect the agent's traffic, and audit the data the agent is accessing in my environment?
 
