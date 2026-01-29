@@ -2,11 +2,11 @@
 
 > This page is a deep dive into OpenTelemetry and customizing it. To get started with HTTP Tracing, see the [Tracing](/self-hosted/observability/tracing) page.
 
-[OpenTelemetry](https://opentelemetry.io/) (OTel) is an industry-standard toolset to handle observability data, ex. metrics, logs, and traces.
+[OpenTelemetry](https://opentelemetry.io/) (OTEL) is an industry-standard toolset to handle observability data, ex. metrics, logs, and traces.
 
 To handle this data, Sourcegraph deployments include a bundled [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) (otel-collector) container, which can be configured to ingest, process, and export observability data to a backend of your choice. This approach offers great flexibility.
 
-> NOTE: Sourcegraph currently uses OTel for HTTP Traces, and may use it for metrics and logs in the future.
+> NOTE: Sourcegraph currently uses OTEL for tracing, and may use it for metrics and logs in the future.
 
 For an in-depth explanation of the parts that compose a full collector pipeline, see OpenTelemetry's [documentation](https://opentelemetry.io/docs/collector/configuration/).
 
@@ -16,20 +16,20 @@ Sourcegraph's bundled otel-collector is deployed via Docker image, and is config
 
 For details on how to deploy the otel-collector, and where to find its configuration file, refer to the docs page specific to your deployment type:
 
--   [Kubernetes with Helm](/self-hosted/deploy/kubernetes#configure-opentelemetry-collector-to-use-an-external-tracing-backend)
--   [Kubernetes with Kustomize](/self-hosted/deploy/kubernetes/configure#deploy-opentelemetry-collector-to-use-an-external-tracing-backend)
--   [Docker Compose](/self-hosted/deploy/docker-compose/configuration#configure-an-external-tracing-backend)
+- [Kubernetes with Helm](/self-hosted/deploy/kubernetes#configure-opentelemetry-collector-to-use-an-external-tracing-backend)
+- [Kubernetes with Kustomize](/self-hosted/deploy/kubernetes/configure#deploy-opentelemetry-collector-to-use-an-external-tracing-backend)
+- [Docker Compose](/self-hosted/deploy/docker-compose/configuration#configure-an-external-tracing-backend)
 
 ## HTTP Tracing Backends
 
-Sourcegraph containers export HTTP traces in OTel format to the bundled otel-collector.
-For more information about HTTP traces, see the [Tracing](/self-hosted/observability/tracing) page.
+Sourcegraph containers export traces in OTEL format to the bundled otel-collector.
+For more information about traces, see the [Tracing](/self-hosted/observability/tracing) page.
 
-The bundled otel-collector includes the following exporters, which support HTTP traces in OTel format:
+The bundled otel-collector includes the following exporters, which support traces in OTEL format:
 
--   [OTLP-compatible backends](#otlp-compatible-backends), ex. Honeycomb, Grafana Tempo
--   [Jaeger](#jaeger)
--   [Google Cloud](#google-cloud)
+- [OTLP-compatible backends](#otlp-compatible-backends), ex. Honeycomb, Grafana Tempo
+- [Jaeger](#jaeger)
+- [Google Cloud](#google-cloud)
 
 Basic configuration for each tracing backend type is described below.
 
@@ -45,7 +45,7 @@ receivers:
             http:
 
 exporters:
-    logging: # Export HTTP traces as log events
+    logging: # Export traces as log events
         loglevel: warn
         sampling_initial: 5
         sampling_thereafter: 200
@@ -161,7 +161,7 @@ service:
 ## Exporters
 
 Exporters send observability data from the otel-collector to the needed backend(s).
-Each exporter can support one or more OTel signals.
+Each exporter can support one or more OTEL signals.
 
 This section outlines some common exporter configurations. For details, see OpenTelemetry's [exporters](https://opentelemetry.io/docs/collector/configuration/#exporters) page.
 
@@ -171,8 +171,8 @@ This section outlines some common exporter configurations. For details, see Open
 
 Backends compatible with the [OpenTelemetry Protocol (OTLP)](https://opentelemetry.io/docs/specs/otlp/) include services such as:
 
--   [Honeycomb](https://docs.honeycomb.io/getting-data-in/opentelemetry-overview/)
--   [Grafana Tempo](https://grafana.com/blog/2021/04/13/how-to-send-traces-to-grafana-clouds-tempo-service-with-opentelemetry-collector/)
+- [Honeycomb](https://docs.honeycomb.io/getting-data-in/opentelemetry-overview/)
+- [Grafana Tempo](https://grafana.com/blog/2021/04/13/how-to-send-traces-to-grafana-clouds-tempo-service-with-opentelemetry-collector/)
 
 OTLP-compatible backends typically accept the [OTLP gRPC protocol](#otlp-grpc-backends), but may require the [OTLP HTTP protocol](#otlp-http-backends) instead.
 
@@ -209,14 +209,13 @@ If you're looking for information about Sourcegraph's bundled Jaeger instance, h
 
 Refer to the [Jaeger](https://opentelemetry.io/docs/languages/js/exporters/#jaeger) documentation for options.
 
-If you must use your own Jaeger instance, and if the bundled otel-collector's basic configuration with the Jaeger OTel exporter enabled meets your needs, configure the otel-collector's startup command to `/usr/bin/otelcol-sourcegraph --config=/etc/otel-collector/configs/jaeger.yaml`. Note that this requires the environment variable `$JAEGER_HOST` to be set on the otel-collector service / container:
+If you must use your own Jaeger instance, and if the bundled otel-collector's basic configuration with the Jaeger OTLP exporter enabled meets your needs, configure the otel-collector's startup command to `/usr/bin/otelcol-sourcegraph --config=/etc/otel-collector/configs/jaeger.yaml`. Note that this requires the environment variable `$JAEGER_HOST` to be set on the otel-collector service / container:
 
 ```yaml
 # otel-collector config.yaml
 exporters:
-    jaeger:
-        # Default Jaeger gRPC server
-        endpoint: '$JAEGER_HOST:14250'
+    otlp/jaeger:
+        endpoint: '$JAEGER_HOST:4317'
         tls:
             insecure: true
 ```
@@ -225,7 +224,7 @@ The Sourcegraph frontend automatically proxies Jaeger's web UI to make it availa
 
 ### Google Cloud
 
-If you run Sourcegraph in GCP and wish to export your HTTP traces to Google Cloud Trace, otel-collector can use project authentication. See the [Google Cloud Exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/exporter/googlecloudexporter/README.md) documentation for available options.
+If you run Sourcegraph in GCP and wish to export your traces to Google Cloud Trace, otel-collector can use project authentication. See the [Google Cloud Exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/exporter/googlecloudexporter/README.md) documentation for available options.
 
 ```yaml
 exporters:
