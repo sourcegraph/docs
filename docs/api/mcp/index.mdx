@@ -13,12 +13,6 @@ seoPriority: 1.0
 	Supported on [Enterprise](/pricing/plans/enterprise) plans.
 </TierCallout>
 
-<Callout type="note">
-	This feature is
-	[experimental](/admin/beta-and-experimental-features#experimental-features)
-	and might change or be removed in the future.
-</Callout>
-
 The Sourcegraph Model Context Protocol (MCP) Server provides AI agents and applications with programmatic access to your Sourcegraph instance's code search, navigation, and analysis capabilities through a standardized interface.
 
 ## Server Endpoints
@@ -36,43 +30,35 @@ Example URL:
 https://your-sourcegraph-instance.com/.api/mcp
 ```
 
-## Authentication
+## Getting Started
 
-The Sourcegraph MCP server supports two authentication methods:
+MCP clients that support OAuth can connect directly—just point them at your Sourcegraph instance and authenticate through your browser:
 
-### OAuth 2.0 with Dynamic Client Registration
-
-Sourcegraph supports MCP spec-compliant OAuth with Dynamic Client Registration ([RFC 7591](https://datatracker.ietf.org/doc/html/rfc7591)), allowing AI agents to authenticate without pre-configured client IDs.
-
-#### Enabling Dynamic Client Registration
-
-Enable this feature by setting the following site configuration:
-
-```json
-{
-	"auth.idpDynamicClientRegistrationEnabled": true
-}
-```
-
-Once enabled, MCP clients that support OAuth can authenticate automatically. For example, for [Amp](https://ampcode.com/), you can run:
-
+**[Amp](https://ampcode.com/)**
 ```bash
 amp mcp add sg https://sourcegraph.example.com/.api/mcp
 ```
 
-For [Claude Code](https://www.claude.com/product/claude-code), you can run:
-
+**[Claude Code](https://www.claude.com/product/claude-code)**
 ```bash
 claude mcp add --transport http sg https://sourcegraph.example.com/.api/mcp
 ```
 
-This works similarly for other MCP-compatible agents.
+This works similarly for other MCP-compatible agents. See [Client Integration](#client-integration) for detailed setup instructions for each client.
 
-#### Manual OAuth Setup
+## Authentication
+
+The MCP server supports OAuth 2.0 and access token authentication.
+
+### OAuth 2.0
+
+Sourcegraph implements Dynamic Client Registration ([RFC 7591](https://datatracker.ietf.org/doc/html/rfc7591)), so compatible clients can authenticate automatically without pre-configured client IDs. DCR-registered applications are restricted to the `mcp` scope, which limits access to MCP endpoints only.
+
+<Accordion title="Manual OAuth Setup">
 
 If your agent doesn't support Dynamic Client Registration, you can manually create an OAuth application:
 
-1. Create an OAuth application in your Sourcegraph instance following the instructions [here](/admin/oauth-apps#creating-an-oauth-app). (Note: you will need the `user:all` scope)
+1. Create an OAuth application in your Sourcegraph instance following the instructions [here](/admin/oauth-apps#creating-an-oauth-app). (Note: you can use the `mcp` scope for MCP-only access, or `user:all` for full access)
 2. Use `mcp-remote` as a fallback with the following configuration:
 
 ```json
@@ -87,7 +73,7 @@ If your agent doesn't support Dynamic Client Registration, you can manually crea
 			"--static-oauth-client-info",
 			"{\"client_id\":\"<your-client-id>\"}",
 			"--static-oauth-client-metadata",
-			"{\"scope\":\"user:all\"}"
+			"{\"scope\":\"mcp\"}"
 		]
 	}
 }
@@ -100,13 +86,29 @@ If your agent doesn't support Dynamic Client Registration, you can manually crea
   </ul>
 </Callout>
 
-### Authorization Header
+</Accordion>
 
-Include your token in the Authorization header:
+<Accordion title="Disabling Dynamic Client Registration">
+
+To disable DCR, set the following site configuration:
+
+```json
+{
+	"auth.idpDynamicClientRegistrationEnabled": false
+}
+```
+
+</Accordion>
+
+### Access Tokens
+
+Alternatively, include an access token in the Authorization header:
 
 ```
 Authorization: token YOUR_ACCESS_TOKEN
 ```
+
+Access tokens can use the `mcp` scope to restrict access to MCP endpoints only.
 
 ## Client Integration
 
