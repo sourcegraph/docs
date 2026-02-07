@@ -523,6 +523,67 @@ The repository name as configured on your Sourcegraph instance.
 
 The changesets to import from the code host. For GitHub, this is the pull request number; for GitLab, this is the merge request number; and for Bitbucket Server, Bitbucket Data Center, or Bitbucket Cloud, this is the pull request number.
 
+## `maxConcurrency`
+
+The maximum number of workspaces that can execute concurrently for this batch change during server-side execution. When specified, limits how many workspace execution jobs can run simultaneously.
+
+This is useful when:
+- You want to avoid overwhelming CI systems that are triggered by batch change commits
+- You need to stay within rate limits on external services your steps interact with
+- You want to control resource consumption for large batch changes that span many repositories
+
+The effective concurrency limit is the **minimum** of:
+1. This `maxConcurrency` value (if specified)
+2. The instance-wide execution limit configured by site administrators
+
+If not specified, only the instance-wide limit applies.
+
+<Callout type="note">
+  This field only affects server-side execution. It has no effect when running batch specs locally with `src batch preview` or `src batch apply`.
+</Callout>
+
+### Examples
+
+Limit to 5 concurrent workspace executions:
+
+```yaml
+name: update-dependencies
+maxConcurrency: 5
+
+on:
+  - repositoriesMatchingQuery: file:package.json
+
+steps:
+  - run: npm update
+    container: node:18
+
+changesetTemplate:
+  title: Update npm dependencies
+  branch: update-deps
+  commit:
+    message: Update npm dependencies
+```
+
+For batch changes that trigger CI on each repository, limit concurrency to avoid overloading CI infrastructure:
+
+```yaml
+name: security-fix
+maxConcurrency: 3
+
+on:
+  - repositoriesMatchingQuery: file:go.mod
+
+steps:
+  - run: go get -u ./... && go mod tidy
+    container: golang:1.21
+
+changesetTemplate:
+  title: Update Go dependencies for security fixes
+  branch: security-deps-update
+  commit:
+    message: Update Go dependencies
+```
+
 ## `changesetTemplate`
 
 A template describing how to create (and update) changesets with the file changes produced by the command steps.
