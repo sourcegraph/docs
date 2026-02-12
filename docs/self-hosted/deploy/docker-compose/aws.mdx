@@ -142,6 +142,10 @@ Instead of using static AWS credentials, create an [IAM role for EC2](https://do
 
 The EC2 instance role should only include permissions for the specific AWS services that Sourcegraph will access (e.g., S3 buckets, RDS databases).
 
+<Callout type="note">
+IAM roles for EC2 instances work seamlessly with IMDSv2. When you configure IMDSv2 (as described in the [Metadata Service Configuration](#advanced-details--metadata-service-configuration) section), Sourcegraph's AWS SDK will automatically retrieve temporary credentials securely via IMDSv2.
+</Callout>
+
 ---
 
 ## Network Configuration
@@ -770,6 +774,68 @@ Click **Launch Instance** from the [EC2 dashboard](https://console.aws.amazon.co
     -   Sourcegraph needs at least as much space as all your repositories combined take up
     -   Allocating as much disk space as you can upfront minimize the need for [resizing your volume](https://aws.amazon.com/premiumsupport/knowledge-center/expand-root-ebs-linux/) in the future
 -   `Delete on Termination`: `No`
+
+#### Advanced details > Metadata Service Configuration
+
+For enhanced security, configure your EC2 instance to use Instance Metadata Service Version 2 (IMDSv2). IMDSv2 provides additional protection against certain types of attacks, such as Server-Side Request Forgery (SSRF), by requiring session tokens for all metadata requests.
+
+<Callout type="tip">
+Enforcing IMDSv2 is an AWS security best practice and may be required by your organization's security policies. It prevents unauthorized access to instance metadata from compromised applications.
+</Callout>
+
+**Configuring IMDSv2 via AWS Console:**
+
+In the **Advanced details** section of the Launch Instance wizard:
+
+1. Scroll to **Metadata accessible** and set it to **Enabled**
+2. Set **Metadata version** to **V2 only (token required)**
+3. Set **Metadata response hop limit** to:
+   - `1` for direct host access (default)
+   - `2` if using Docker containers (recommended for Sourcegraph)
+
+**Configuring IMDSv2 via AWS CLI:**
+
+Add the following parameters when launching your instance:
+
+```bash
+aws ec2 run-instances \
+  --image-id ami-xxxxxxxxx \
+  --instance-type m5.4xlarge \
+  --key-name your-key-pair \
+  --security-group-ids sg-xxxxxxxxx \
+  --subnet-id subnet-xxxxxxxxx \
+  --metadata-options "HttpTokens=required,HttpPutResponseHopLimit=2" \
+  ...
+```
+
+**Verifying IMDSv2 Configuration:**
+
+After launching your instance, verify the configuration:
+
+```bash
+aws ec2 describe-instances \
+  --instance-ids i-xxxxxxxxx \
+  --query 'Reservations[0].Instances[0].MetadataOptions'
+```
+
+Expected output:
+
+```json
+{
+    "State": "applied",
+    "HttpTokens": "required",
+    "HttpPutResponseHopLimit": 2,
+    "HttpEndpoint": "enabled"
+}
+```
+
+**Important Notes:**
+
+- **Hop Limit**: Set to `2` for Docker containers to allow metadata requests from containers to reach the host's metadata service. A value of `1` may cause authentication failures for AWS SDK calls from within containers.
+- **AWS SDK Compatibility**: Sourcegraph uses AWS SDKs that fully support IMDSv2 for features like S3 storage, RDS authentication, and IAM role credentials.
+- **Disabling IMDSv1**: Setting `HttpTokens=required` automatically disables IMDSv1 and enforces IMDSv2-only access.
+
+For more information, see [AWS IMDSv2 documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html) and [EKS best practices for IMDSv2](https://aws.github.io/aws-eks-best-practices/security/docs/iam/#when-your-application-needs-access-to-imds-use-imdsv2-and-increase-the-hop-limit-on-ec2-instances-to-2).
 
 #### Advanced details > User Data
 
