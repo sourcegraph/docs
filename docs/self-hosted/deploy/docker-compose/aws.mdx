@@ -727,6 +727,64 @@ See the [HTTP and HTTPS/SSL configuration](/self-hosted/http-https-configuration
 
 ---
 
+## AWS Services and Cost Considerations
+
+### Billable AWS Services
+
+This section lists all AWS services used in a Sourcegraph deployment and indicates whether each service is mandatory or optional.
+
+#### Mandatory Services
+
+The following AWS services are required for a basic Sourcegraph deployment:
+
+| Service | Purpose | Cost Factors |
+| ------- | ------- | ------------ |
+| **EC2 (Elastic Compute Cloud)** | Hosts the Sourcegraph application and Docker containers | Instance type, running hours, data transfer |
+| **EBS (Elastic Block Store)** | Persistent storage for Sourcegraph data (repositories, databases, indices) | Volume size (minimum 250GB), volume type (gp3 recommended), IOPS, snapshots |
+| **Data Transfer** | Outbound data transfer from AWS to the internet | GB transferred out, inter-region transfer |
+
+#### Optional Services
+
+The following AWS services enhance security, scalability, or operational capabilities but are not required:
+
+| Service | Purpose | When to Use | Cost Factors |
+| ------- | ------- | ----------- | ------------ |
+| **RDS for PostgreSQL** | Managed PostgreSQL database | Production deployments requiring high availability and automated backups | Instance type, storage, backup retention, multi-AZ |
+| **S3 (Simple Storage Service)** | Object storage for code intelligence uploads | When using precise code intelligence features | Storage size, requests, data transfer |
+| **Application Load Balancer (ALB)** | Load balancing and HTTPS/TLS termination | High-availability deployments with multiple instances | Load balancer hours, data processed |
+| **AWS Certificate Manager (ACM)** | SSL/TLS certificates for HTTPS | When using ALB for HTTPS termination | Free for public certificates with AWS services |
+| **NAT Gateway** | Outbound internet access for private subnets | Production deployments in private subnets | Gateway hours, data processed |
+| **Elastic IP** | Static public IP address | When requiring a persistent IP address | Hourly charge when not associated with instance |
+| **Route 53** | DNS management | Custom domain configuration | Hosted zones, DNS queries |
+| **CloudWatch** | Monitoring and logging | Enhanced monitoring and alerting | Metrics, logs stored, API requests |
+| **CloudTrail** | API call logging | Security and compliance requirements | Events recorded, S3 storage for logs |
+| **AWS Systems Manager** | Secure instance access | Enhanced security posture | Parameter Store usage, sessions |
+| **KMS (Key Management Service)** | Customer-managed encryption keys | Enhanced control over encryption | Key storage, API requests |
+
+### Cost Estimation
+
+To estimate your total AWS infrastructure costs:
+
+1. **Use the AWS Pricing Calculator**: Visit [calculator.aws.amazon.com](https://calculator.aws.amazon.com/) to build a custom estimate
+2. **Reference the Resource Estimator**: Use our [resource estimator](/self-hosted/deploy/resource-estimator) to determine the appropriate EC2 instance type based on your user count
+3. **Consider your usage patterns**:
+   - Number of active users
+   - Total repository size
+   - Expected data transfer volume
+   - Snapshot and backup retention requirements
+
+**Sourcegraph Licensing**: AWS infrastructure costs are separate from Sourcegraph software licensing. Sourcegraph pricing is based on total active user accounts. See [Sourcegraph pricing](https://sourcegraph.com/pricing) for details.
+
+**Cost Optimization**:
+
+- Right-size EC2 instances using the [resource estimator](/self-hosted/deploy/resource-estimator)
+- Use gp3 EBS volumes for better price-performance
+- Consider Reserved Instances or Savings Plans for long-term deployments
+- Enable EBS snapshot lifecycle policies to manage backup costs
+- Monitor and optimize data transfer patterns
+
+---
+
 ## Configure
 
 Click **Launch Instance** from the [EC2 dashboard](https://console.aws.amazon.com/ec2/v2/home), then fill in the following values for each section:
