@@ -23,5 +23,6 @@ module.exports = async () => {
 	execSync('node dev/check-links.mjs', {stdio: 'inherit'});
 	execSync('node dev/check-filenames.mjs', {stdio: 'inherit'});
 	execSync('node dev/check-images.mjs', {stdio: 'inherit'});
+	execSync('node dev/generate-mermaid-icons.mjs', {stdio: 'inherit'});
 	return withContentlayer(nextConfig);
 };
