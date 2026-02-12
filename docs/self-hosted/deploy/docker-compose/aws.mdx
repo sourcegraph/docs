@@ -142,6 +142,587 @@ Instead of using static AWS credentials, create an [IAM role for EC2](https://do
 
 The EC2 instance role should only include permissions for the specific AWS services that Sourcegraph will access (e.g., S3 buckets, RDS databases).
 
+---
+
+## Network Configuration
+
+This section describes the network architecture and configuration required for deploying Sourcegraph on AWS.
+
+### VPC Architecture
+
+Sourcegraph requires a properly configured Virtual Private Cloud (VPC) with appropriate network segmentation and security controls.
+
+#### VPC Design
+
+A production Sourcegraph deployment should use the following VPC architecture:
+
+- **VPC CIDR Block**: Choose a CIDR block that doesn't conflict with your existing networks (e.g., `10.0.0.0/16`)
+- **Subnets**: Deploy across multiple Availability Zones for high availability
+- **Internet Gateway**: Required for public internet access
+- **NAT Gateway**: Recommended for private subnet internet access
+
+#### Creating a VPC
+
+**Using AWS Console:**
+
+1. Navigate to [VPC Console](https://console.aws.amazon.com/vpc)
+2. Click **Create VPC**
+3. Configure the following:
+   - **Name tag**: `sourcegraph-vpc`
+   - **IPv4 CIDR block**: `10.0.0.0/16`
+   - **IPv6 CIDR block**: No IPv6 CIDR block (optional)
+   - **Tenancy**: Default
+4. Click **Create VPC**
+
+**Using AWS CLI:**
+
+```bash
+aws ec2 create-vpc \
+  --cidr-block 10.0.0.0/16 \
+  --tag-specifications 'ResourceType=vpc,Tags=[{Key=Name,Value=sourcegraph-vpc}]'
+```
+
+### Subnet Configuration
+
+Deploy Sourcegraph across public and private subnets for security and isolation.
+
+#### Recommended Subnet Layout
+
+| Subnet Type | CIDR Block | Availability Zone | Purpose |
+| ----------- | ---------- | ----------------- | ------- |
+| Public Subnet 1 | 10.0.1.0/24 | us-east-1a | Load balancers, NAT gateway |
+| Public Subnet 2 | 10.0.2.0/24 | us-east-1b | Load balancers, NAT gateway |
+| Private Subnet 1 | 10.0.10.0/24 | us-east-1a | Sourcegraph application instances |
+| Private Subnet 2 | 10.0.11.0/24 | us-east-1b | Sourcegraph application instances |
+
+#### Creating Subnets
+
+**Public subnet configuration:**
+
+```bash
+# Create public subnet
+aws ec2 create-subnet \
+  --vpc-id vpc-xxxxxxxxx \
+  --cidr-block 10.0.1.0/24 \
+  --availability-zone us-east-1a \
+  --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=sourcegraph-public-1a}]'
+
+# Enable auto-assign public IP
+aws ec2 modify-subnet-attribute \
+  --subnet-id subnet-xxxxxxxxx \
+  --map-public-ip-on-launch
+```
+
+**Private subnet configuration:**
+
+```bash
+aws ec2 create-subnet \
+  --vpc-id vpc-xxxxxxxxx \
+  --cidr-block 10.0.10.0/24 \
+  --availability-zone us-east-1a \
+  --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=sourcegraph-private-1a}]'
+```
+
+Repeat for each subnet across multiple availability zones for high availability.
+
+### Internet Gateway and NAT Gateway
+
+#### Internet Gateway
+
+Required for public internet access from public subnets:
+
+```bash
+# Create Internet Gateway
+aws ec2 create-internet-gateway \
+  --tag-specifications 'ResourceType=internet-gateway,Tags=[{Key=Name,Value=sourcegraph-igw}]'
+
+# Attach to VPC
+aws ec2 attach-internet-gateway \
+  --vpc-id vpc-xxxxxxxxx \
+  --internet-gateway-id igw-xxxxxxxxx
+```
+
+#### NAT Gateway
+
+Required for private subnet instances to access the internet (for updates, external APIs):
+
+```bash
+# Allocate Elastic IP
+aws ec2 allocate-address --domain vpc
+
+# Create NAT Gateway in public subnet
+aws ec2 create-nat-gateway \
+  --subnet-id subnet-xxxxxxxxx \
+  --allocation-id eipalloc-xxxxxxxxx \
+  --tag-specifications 'ResourceType=nat-gateway,Tags=[{Key=Name,Value=sourcegraph-nat}]'
+```
+
+### Route Tables
+
+Route tables control network traffic routing within your VPC.
+
+#### Public Route Table
+
+Routes traffic from public subnets to the internet via the Internet Gateway:
+
+```bash
+# Create route table
+aws ec2 create-route-table \
+  --vpc-id vpc-xxxxxxxxx \
+  --tag-specifications 'ResourceType=route-table,Tags=[{Key=Name,Value=sourcegraph-public-rt}]'
+
+# Add route to Internet Gateway
+aws ec2 create-route \
+  --route-table-id rtb-xxxxxxxxx \
+  --destination-cidr-block 0.0.0.0/0 \
+  --gateway-id igw-xxxxxxxxx
+
+# Associate with public subnets
+aws ec2 associate-route-table \
+  --route-table-id rtb-xxxxxxxxx \
+  --subnet-id subnet-xxxxxxxxx
+```
+
+#### Private Route Table
+
+Routes traffic from private subnets to the internet via NAT Gateway:
+
+```bash
+# Create route table
+aws ec2 create-route-table \
+  --vpc-id vpc-xxxxxxxxx \
+  --tag-specifications 'ResourceType=route-table,Tags=[{Key=Name,Value=sourcegraph-private-rt}]'
+
+# Add route to NAT Gateway
+aws ec2 create-route \
+  --route-table-id rtb-xxxxxxxxx \
+  --destination-cidr-block 0.0.0.0/0 \
+  --nat-gateway-id nat-xxxxxxxxx
+
+# Associate with private subnets
+aws ec2 associate-route-table \
+  --route-table-id rtb-xxxxxxxxx \
+  --subnet-id subnet-xxxxxxxxx
+```
+
+#### Verifying Route Tables
+
+```bash
+# Describe route tables
+aws ec2 describe-route-tables \
+  --filters "Name=vpc-id,Values=vpc-xxxxxxxxx"
+```
+
+### Security Groups
+
+Security groups act as virtual firewalls controlling inbound and outbound traffic. The Network settings section below configures basic security group rules for the deployment.
+
+#### Application Security Group
+
+For EC2 instances running Sourcegraph:
+
+```bash
+# Create security group
+aws ec2 create-security-group \
+  --group-name sourcegraph-app-sg \
+  --description "Security group for Sourcegraph application instances" \
+  --vpc-id vpc-xxxxxxxxx
+
+# Allow HTTPS from Load Balancer (if using ALB)
+aws ec2 authorize-security-group-ingress \
+  --group-id sg-xxxxxxxxx \
+  --protocol tcp \
+  --port 443 \
+  --source-group sg-lb-xxxxxxxxx
+
+# Allow HTTP from Load Balancer (if using ALB)
+aws ec2 authorize-security-group-ingress \
+  --group-id sg-xxxxxxxxx \
+  --protocol tcp \
+  --port 80 \
+  --source-group sg-lb-xxxxxxxxx
+
+# Allow SSH from bastion/admin (replace with your IP)
+aws ec2 authorize-security-group-ingress \
+  --group-id sg-xxxxxxxxx \
+  --protocol tcp \
+  --port 22 \
+  --cidr 203.0.113.0/24
+
+# Allow all outbound traffic
+aws ec2 authorize-security-group-egress \
+  --group-id sg-xxxxxxxxx \
+  --protocol -1 \
+  --cidr 0.0.0.0/0
+```
+
+### Network Access Control Lists (NACLs)
+
+Network ACLs provide an additional layer of security at the subnet level. Unlike security groups, NACLs are stateless and evaluate both inbound and outbound rules.
+
+#### Public Subnet NACL
+
+```bash
+# Create NACL
+aws ec2 create-network-acl \
+  --vpc-id vpc-xxxxxxxxx \
+  --tag-specifications 'ResourceType=network-acl,Tags=[{Key=Name,Value=sourcegraph-public-nacl}]'
+
+# Allow inbound HTTPS
+aws ec2 create-network-acl-entry \
+  --network-acl-id acl-xxxxxxxxx \
+  --rule-number 100 \
+  --protocol tcp \
+  --port-range From=443,To=443 \
+  --cidr-block 0.0.0.0/0 \
+  --rule-action allow \
+  --ingress
+
+# Allow inbound HTTP
+aws ec2 create-network-acl-entry \
+  --network-acl-id acl-xxxxxxxxx \
+  --rule-number 110 \
+  --protocol tcp \
+  --port-range From=80,To=80 \
+  --cidr-block 0.0.0.0/0 \
+  --rule-action allow \
+  --ingress
+
+# Allow inbound SSH (from admin network only)
+aws ec2 create-network-acl-entry \
+  --network-acl-id acl-xxxxxxxxx \
+  --rule-number 120 \
+  --protocol tcp \
+  --port-range From=22,To=22 \
+  --cidr-block 203.0.113.0/24 \
+  --rule-action allow \
+  --ingress
+
+# Allow inbound ephemeral ports (for return traffic)
+aws ec2 create-network-acl-entry \
+  --network-acl-id acl-xxxxxxxxx \
+  --rule-number 130 \
+  --protocol tcp \
+  --port-range From=1024,To=65535 \
+  --cidr-block 0.0.0.0/0 \
+  --rule-action allow \
+  --ingress
+
+# Allow all outbound (customize based on security requirements)
+aws ec2 create-network-acl-entry \
+  --network-acl-id acl-xxxxxxxxx \
+  --rule-number 100 \
+  --protocol -1 \
+  --cidr-block 0.0.0.0/0 \
+  --rule-action allow \
+  --egress
+
+# Associate with public subnets
+aws ec2 replace-network-acl-association \
+  --association-id aclassoc-xxxxxxxxx \
+  --network-acl-id acl-xxxxxxxxx
+```
+
+#### Private Subnet NACL
+
+```bash
+# Create NACL
+aws ec2 create-network-acl \
+  --vpc-id vpc-xxxxxxxxx \
+  --tag-specifications 'ResourceType=network-acl,Tags=[{Key=Name,Value=sourcegraph-private-nacl}]'
+
+# Allow inbound from public subnets
+aws ec2 create-network-acl-entry \
+  --network-acl-id acl-xxxxxxxxx \
+  --rule-number 100 \
+  --protocol -1 \
+  --cidr-block 10.0.1.0/24 \
+  --rule-action allow \
+  --ingress
+
+# Allow inbound ephemeral ports
+aws ec2 create-network-acl-entry \
+  --network-acl-id acl-xxxxxxxxx \
+  --rule-number 110 \
+  --protocol tcp \
+  --port-range From=1024,To=65535 \
+  --cidr-block 0.0.0.0/0 \
+  --rule-action allow \
+  --ingress
+
+# Allow all outbound
+aws ec2 create-network-acl-entry \
+  --network-acl-id acl-xxxxxxxxx \
+  --rule-number 100 \
+  --protocol -1 \
+  --cidr-block 0.0.0.0/0 \
+  --rule-action allow \
+  --egress
+
+# Associate with private subnets
+aws ec2 replace-network-acl-association \
+  --association-id aclassoc-xxxxxxxxx \
+  --network-acl-id acl-xxxxxxxxx
+```
+
+<Callout type="note">
+Use rule numbers in increments of 10 (e.g., 100, 110, 120) to allow for future rule insertions. Always include ephemeral ports (1024-65535) for return traffic.
+</Callout>
+
+### Network Configuration Summary
+
+The complete network architecture diagram:
+
+```text
+Internet
+    │
+    ├─── Internet Gateway (igw-xxx)
+    │
+    └─── VPC (10.0.0.0/16)
+         │
+         ├─── Public Subnets (10.0.1.0/24, 10.0.2.0/24)
+         │    ├─── NAT Gateway
+         │    └─── Security Group: sourcegraph-app-sg
+         │
+         └─── Private Subnets (10.0.10.0/24, 10.0.11.0/24)
+              ├─── EC2 Instances (Sourcegraph)
+              └─── Route to NAT Gateway for internet access
+```
+
+For additional troubleshooting, use [VPC Flow Logs](https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html) to capture and analyze network traffic.
+
+---
+
+## Data Encryption
+
+Sourcegraph on AWS supports multiple layers of encryption to protect your data at rest and in transit.
+
+### EBS Volume Encryption
+
+All EBS volumes used by Sourcegraph should be encrypted to protect data at rest. AWS EBS encryption uses AWS Key Management Service (KMS) keys.
+
+#### Enabling EBS Encryption During Deployment
+
+When launching your EC2 instance, enable EBS encryption in the **Configure storage** step:
+
+1. Check the **Encrypted** checkbox for each EBS volume
+2. Select a KMS key from the dropdown (or use the default `aws/ebs` key)
+3. Apply this to both the root volume and the data volume (`/dev/sdb`)
+
+**Using AWS CLI:**
+
+```bash
+# Create encrypted volume
+aws ec2 create-volume \
+  --availability-zone us-east-1a \
+  --size 250 \
+  --volume-type gp3 \
+  --encrypted \
+  --kms-key-id arn:aws:kms:REGION:ACCOUNT:key/KEY-ID \
+  --tag-specifications 'ResourceType=volume,Tags=[{Key=Name,Value=sourcegraph-data}]'
+```
+
+**Verify encryption status:**
+
+```bash
+aws ec2 describe-volumes --volume-ids vol-xxxxxxxxx --query 'Volumes[*].Encrypted'
+```
+
+#### Using Customer-Managed KMS Keys
+
+For enhanced security and audit capabilities, use customer-managed KMS keys instead of AWS-managed keys:
+
+1. Create a KMS key in [AWS KMS Console](https://console.aws.amazon.com/kms)
+2. Grant the IAM role/user permission to use the key:
+
+   ```json
+   {
+     "Sid": "AllowEBSEncryption",
+     "Effect": "Allow",
+     "Action": [
+       "kms:CreateGrant",
+       "kms:Decrypt",
+       "kms:DescribeKey",
+       "kms:Encrypt",
+       "kms:GenerateDataKey",
+       "kms:ReEncrypt"
+     ],
+     "Resource": "arn:aws:kms:REGION:ACCOUNT:key/KEY-ID"
+   }
+   ```
+
+3. Specify the KMS key ARN when creating volumes
+
+<Callout type="tip">
+Enable default EBS encryption for your AWS account in the EC2 console under **Settings > EBS encryption**. This ensures all new volumes are automatically encrypted.
+</Callout>
+
+### S3 Bucket Encryption
+
+If you're using external S3 storage for code intelligence uploads or backups, enable server-side encryption.
+
+#### S3 Server-Side Encryption (SSE)
+
+**Using SSE-S3** (AWS-managed keys):
+
+```bash
+aws s3api put-bucket-encryption \
+  --bucket YOUR-BUCKET-NAME \
+  --server-side-encryption-configuration '{
+    "Rules": [{
+      "ApplyServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+      },
+      "BucketKeyEnabled": true
+    }]
+  }'
+```
+
+**Using SSE-KMS** (customer-managed keys):
+
+```bash
+aws s3api put-bucket-encryption \
+  --bucket YOUR-BUCKET-NAME \
+  --server-side-encryption-configuration '{
+    "Rules": [{
+      "ApplyServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "aws:kms",
+        "KMSMasterKeyID": "arn:aws:kms:REGION:ACCOUNT:key/KEY-ID"
+      },
+      "BucketKeyEnabled": true
+    }]
+  }'
+```
+
+**Verify S3 bucket encryption:**
+
+```bash
+aws s3api get-bucket-encryption --bucket YOUR-BUCKET-NAME
+```
+
+#### S3 Bucket Policy for Encryption Enforcement
+
+Enforce encryption by denying unencrypted uploads:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DenyUnencryptedObjectUploads",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::YOUR-BUCKET-NAME/*",
+      "Condition": {
+        "StringNotEquals": {
+          "s3:x-amz-server-side-encryption": ["AES256", "aws:kms"]
+        }
+      }
+    }
+  ]
+}
+```
+
+### Linux Unified Key Setup (LUKS)
+
+For additional encryption at the disk level, you can configure LUKS encryption on the EBS data volume. This provides an extra layer of security independent of AWS encryption.
+
+<Callout type="warning">
+LUKS encryption adds complexity to the deployment and requires careful key management. Only implement this if your security requirements mandate multiple encryption layers.
+</Callout>
+
+#### Setting Up LUKS Encryption
+
+1. **Install cryptsetup** on your EC2 instance:
+
+   ```bash
+   sudo yum install cryptsetup -y  # Amazon Linux
+   ```
+
+2. **Create a LUKS-encrypted volume**:
+
+   ```bash
+   # Create the LUKS container (WARNING: This will erase all data on the device)
+   sudo cryptsetup luksFormat /dev/sdb
+
+   # Open the encrypted device
+   sudo cryptsetup luksOpen /dev/sdb sourcegraph-data
+   ```
+
+3. **Format and mount the encrypted volume**:
+
+   ```bash
+   # Create filesystem on the encrypted device
+   sudo mkfs.xfs /dev/mapper/sourcegraph-data
+
+   # Mount the encrypted volume
+   sudo mkdir -p /mnt/docker-data
+   sudo mount /dev/mapper/sourcegraph-data /mnt/docker-data
+   ```
+
+4. **Configure automatic unlock at boot**:
+
+   Store the encryption key securely:
+
+   ```bash
+   # Create a key file (store this securely!)
+   sudo dd if=/dev/urandom of=/root/luks-key bs=1024 count=4
+   sudo chmod 0400 /root/luks-key
+
+   # Add the key file to LUKS
+   sudo cryptsetup luksAddKey /dev/sdb /root/luks-key
+   ```
+
+   Add to `/etc/crypttab`:
+
+   ```text
+   sourcegraph-data /dev/sdb /root/luks-key luks
+   ```
+
+   Add to `/etc/fstab`:
+
+   ```text
+   /dev/mapper/sourcegraph-data /mnt/docker-data xfs defaults,nofail 0 2
+   ```
+
+#### LUKS Key Management Best Practices
+
+- Store LUKS keys in AWS Secrets Manager or AWS Systems Manager Parameter Store (encrypted with KMS)
+- Use automated key rotation policies
+- Maintain backup keys in a secure, separate location
+- Document key recovery procedures
+- Consider using AWS CloudHSM for hardware security module (HSM) backed key storage
+
+### Encryption in Transit
+
+Sourcegraph uses TLS/SSL for encryption in transit:
+
+- **HTTPS**: Configure TLS certificates via AWS Certificate Manager (ACM) for ALB/ELB
+- **PostgreSQL**: Enable SSL connections to RDS or external PostgreSQL instances
+- **Internal communication**: Docker networking provides isolated container communication
+
+See the [HTTP and HTTPS/SSL configuration](/self-hosted/http-https-configuration#sourcegraph-via-docker-compose-caddy-2) guide for configuring TLS certificates.
+
+### Compliance and Auditing
+
+- **AWS CloudTrail**: Enable CloudTrail to log all KMS key usage and S3 access
+- **AWS Config**: Use Config rules to monitor encryption compliance
+- **Access logs**: Enable S3 access logging and EBS volume access logs
+- **Regular audits**: Review encryption keys, access patterns, and compliance status quarterly
+
+### Encryption Configuration Summary
+
+| Component | Encryption Method | Configuration Location |
+| --------- | ----------------- | ---------------------- |
+| EBS Volumes | AWS KMS or SSE | EC2 Console > Configure storage section |
+| S3 Buckets | SSE-S3 or SSE-KMS | S3 Console or AWS CLI |
+| LUKS | dm-crypt | Instance OS configuration |
+| Network Traffic | TLS/SSL | Load Balancer & ACM |
+| PostgreSQL | SSL/TLS | RDS Console or connection string |
+
+---
+
 ## Configure
 
 Click **Launch Instance** from the [EC2 dashboard](https://console.aws.amazon.com/ec2/v2/home), then fill in the following values for each section:

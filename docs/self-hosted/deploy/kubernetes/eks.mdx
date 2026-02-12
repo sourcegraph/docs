@@ -233,6 +233,87 @@ When using IRSA:
 
 Create specific IAM roles with only the permissions needed for each service account, scoped to the specific AWS resources (S3 buckets, RDS databases) that Sourcegraph will access.
 
+---
+
+## Network Configuration
+
+For detailed network configuration including VPCs, subnets, security groups, Network ACLs, and route tables, see the [Network Configuration section in the Docker Compose AWS deployment guide](/self-hosted/deploy/docker-compose/aws#network-configuration).
+
+The network configuration principles apply to EKS deployments with the following EKS-specific considerations:
+
+- **EKS-managed VPC**: When using `eksctl create cluster`, a VPC is automatically created with appropriate subnet and route table configuration
+- **Node groups**: Place EKS node groups in private subnets for enhanced security
+- **Pod networking**: EKS uses the Amazon VPC CNI plugin for pod networking, which assigns VPC IP addresses to pods
+- **Security groups**: Configure both cluster security groups and node security groups as defined in the IAM permissions section above
+
+### EKS-Specific Network Configuration
+
+When creating an EKS cluster with custom VPC settings:
+
+```yaml
+vpc:
+  cidr: 10.0.0.0/16
+  nat:
+    gateway: HighlyAvailable  # Deploy NAT gateways in multiple AZs
+  clusterEndpoints:
+    publicAccess: true
+    privateAccess: true
+  subnets:
+    private:
+      us-east-1a: { id: subnet-xxx }
+      us-east-1b: { id: subnet-xxx }
+    public:
+      us-east-1a: { id: subnet-xxx }
+      us-east-1b: { id: subnet-xxx }
+```
+
+---
+
+## Data Encryption
+
+For comprehensive data encryption configuration including EBS encryption, S3 encryption, and LUKS setup, see the [Data Encryption section in the Docker Compose AWS deployment guide](/self-hosted/deploy/docker-compose/aws#data-encryption).
+
+### EKS-Specific Encryption Considerations
+
+For EKS deployments, additionally configure:
+
+- **Secrets encryption**: Enable envelope encryption for Kubernetes secrets using AWS KMS
+- **EBS CSI driver encryption**: When using the EBS CSI driver for persistent volumes, enable encryption in StorageClass definitions
+
+#### Enabling Kubernetes Secrets Encryption
+
+Enable envelope encryption for Kubernetes secrets at rest:
+
+```bash
+# Create a KMS key for secrets encryption
+aws kms create-key --description "EKS secrets encryption key"
+
+# Enable secrets encryption when creating the cluster
+eksctl create cluster \
+  --name $CLUSTER_NAME \
+  --region $REGION \
+  --encryption-config kms-key-arn=arn:aws:kms:REGION:ACCOUNT:key/KEY-ID
+```
+
+#### EBS Encryption for Persistent Volumes
+
+Create an encrypted StorageClass for persistent volume claims:
+
+```yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: encrypted-gp3
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp3
+  encrypted: "true"
+  kmsKeyId: arn:aws:kms:REGION:ACCOUNT:key/KEY-ID
+volumeBindingMode: WaitForFirstConsumer
+```
+
+---
+
 ## Parameters
 
 Through this guide, we will be using a number of parameters starting with `$` that you will need to replace with your desired values:
