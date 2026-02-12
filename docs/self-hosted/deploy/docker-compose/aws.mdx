@@ -727,6 +727,61 @@ See the [HTTP and HTTPS/SSL configuration](/self-hosted/http-https-configuration
 
 ---
 
+## Credential and Key Rotation
+
+Regular rotation of credentials and keys is a security best practice. Follow these procedures to rotate programmatic credentials and cryptographic keys in your Sourcegraph deployment.
+
+### Rotating IAM Access Keys
+
+<Callout type="note">
+Prefer [IAM roles for EC2](#iam-role-for-the-ec2-instance-recommended) over access keys. Roles provide temporary credentials that rotate automatically.
+</Callout>
+
+If using IAM access keys:
+
+1. Create new access key: IAM Console > Users > [Select user] > Security credentials > Create access key
+2. Update credentials in Sourcegraph configuration (environment variables or `~/.aws/credentials`)
+3. Restart services: `docker-compose restart`
+4. Verify new credentials work by checking logs
+5. Deactivate old key in IAM Console and monitor for 24-48 hours
+6. Delete old access key
+
+### Rotating KMS Keys
+
+**Enable automatic rotation** (recommended):
+
+```bash
+aws kms enable-key-rotation --key-id arn:aws:kms:REGION:ACCOUNT:key/KEY-ID
+```
+
+AWS automatically rotates key material annually while maintaining the same key ID.
+
+**Manual rotation** (new key):
+
+1. Create new KMS key: `aws kms create-key --description "Sourcegraph key 2026"`
+2. For existing volumes: Create snapshot, copy with new key, create volume from new snapshot
+3. Update S3 bucket encryption configuration with new key ID
+4. Schedule old key deletion after 30-day waiting period
+
+### Rotating LUKS Keys
+
+1. Create new key: `sudo dd if=/dev/urandom of=/root/luks-key-new bs=1024 count=4`
+2. Add to LUKS: `sudo cryptsetup luksAddKey /dev/sdb /root/luks-key-new`
+3. Update `/etc/crypttab` to reference new key file
+4. Test by stopping services, closing/reopening volume with new key, and restarting services
+5. Remove old key: `sudo cryptsetup luksRemoveKey /dev/sdb /root/luks-key`
+6. Securely delete old key file: `sudo shred -vfz -n 10 /root/luks-key`
+
+### Rotating Application Credentials
+
+**Code host tokens:** Generate new token from code host → Update in Site admin > Manage code hosts → Save → Delete old token
+
+**Database passwords:** Create new DB user with privileges → Update connection string in `docker-compose.yaml` → Restart services → Drop old user
+
+**Admin passwords:** User Settings > Password, or use `docker exec -it sourcegraph-frontend-0 src users reset-password --email=admin@example.com`
+
+---
+
 ## AWS Services and Cost Considerations
 
 ### Billable AWS Services
@@ -782,6 +837,72 @@ To estimate your total AWS infrastructure costs:
 - Consider Reserved Instances or Savings Plans for long-term deployments
 - Enable EBS snapshot lifecycle policies to manage backup costs
 - Monitor and optimize data transfer patterns
+
+---
+
+## Managing AWS Service Limits
+
+AWS enforces service quotas (limits) on resources in your account. Verify your account has sufficient quotas before deploying Sourcegraph and request increases as needed.
+
+### Checking Service Quotas
+
+**AWS Console:**
+
+1. Navigate to [Service Quotas Console](https://console.aws.amazon.com/servicequotas/)
+2. Select **AWS services** > Choose the service (e.g., **Amazon EC2**, **Amazon EBS**)
+3. Review current quotas and applied values for your deployment region
+
+**AWS CLI:**
+
+```bash
+# List all quotas for a service
+aws service-quotas list-service-quotas --service-code ec2 --region us-east-1
+
+# Check specific quota
+aws service-quotas get-service-quota \
+  --service-code ec2 \
+  --quota-code QUOTA-CODE \
+  --region us-east-1
+```
+
+### Services to Review
+
+Before deployment, check quotas for:
+
+- **EC2**: Running On-Demand instances (for your chosen instance type)
+- **EBS**: Storage capacity for gp3 volumes (at least 250GB as specified in deployment)
+- **EBS**: Number of volumes and snapshots
+- **VPC**: VPCs, subnets, internet gateways, NAT gateways
+- **EC2**: Elastic IP addresses (if using static IPs)
+- **Security Groups**: Number of security groups and rules per group
+
+Use the [resource estimator](/self-hosted/deploy/resource-estimator) to determine required instance types and sizes based on your user count.
+
+### Requesting Quota Increases
+
+**AWS Console:**
+
+1. Go to [Service Quotas Console](https://console.aws.amazon.com/servicequotas/)
+2. Choose **AWS services** > Select the service
+3. Find the quota and click **Request quota increase**
+4. Enter desired value and business justification
+5. Submit request
+
+**AWS CLI:**
+
+```bash
+aws service-quotas request-service-quota-increase \
+  --service-code ec2 \
+  --quota-code QUOTA-CODE \
+  --desired-value NEW-VALUE \
+  --region us-east-1
+```
+
+Check request status: **Service Quotas Console** > **Quota request history**
+
+### Monitoring Quotas
+
+Track quota utilization using AWS Trusted Advisor (requires Business or Enterprise Support) or set up CloudWatch alarms for critical resources. Regularly review quota usage as your Sourcegraph deployment grows.
 
 ---
 
@@ -1000,13 +1121,26 @@ See the [Docker Compose upgrade docs](/self-hosted/deploy/docker-compose/upgrade
 
 ## Storage and Backups
 
+### What to Back Up
+
+**Data stores:** PostgreSQL database, Docker volumes at `/mnt/docker-data/volumes`, and Git repositories.
+**Configurations:** docker-compose.yaml file and Site configuration (stored in PostgreSQL).
+
 Data is persisted within a [Docker volume](https://docs.docker.com/storage/volumes/) as defined in the [deployment repository](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/master/docker-compose/docker-compose.yaml). The startup script configures Docker using a [daemon configuration file](https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file) to store all the data on the attached data volume, which is mounted at `/mnt/docker-data`, where volumes are stored within `/mnt/docker-data/volumes`.
 
-There are two, non-mutually-exclusive ways to back up data:
+### Backup Procedure
 
--   [Snapshot the entire `/mnt/docker-data` EBS volume](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-creating-snapshot.html) on an [automatic, scheduled basis](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/snapshot-lifecycle.html).
+**Option 1:** [Snapshot the entire `/mnt/docker-data` EBS volume](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-creating-snapshot.html) on an [automatic, scheduled basis](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/snapshot-lifecycle.html).
 
-Use [AWS RDS for PostgreSQL](https://aws.amazon.com/rds/) instead of the Dockerized PostgreSQL instance included by default. All data from Sourcegraph is derivable from the data stored in this database. Note, however, that it may take awhile to reclone repositories and rebuild indices afresh. If you require a faster restoration process, we recommend also snapshotting the EBS volume. (Recommended)
+**Option 2:** Use [AWS RDS for PostgreSQL](https://aws.amazon.com/rds/) instead of the Dockerized PostgreSQL instance included by default. All data from Sourcegraph is derivable from the data stored in this database. Note, however, that it may take awhile to reclone repositories and rebuild indices afresh. If you require a faster restoration process, we recommend also snapshotting the EBS volume. (Recommended)
+
+### Recovery Procedure
+
+**From EBS snapshot:** Create a new volume from the snapshot, detach the old volume, attach the new volume to `/dev/sdb`, mount it, and restart Docker Compose.
+
+**From RDS backup:** Restore the RDS instance from backup via the RDS Console and update Sourcegraph's database connection string.
+
+**Deployment guide reference:** This guide (Install Sourcegraph on AWS), Section "Storage and Backups" covers backup and recovery details.
 
 ---
 
