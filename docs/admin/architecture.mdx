@@ -120,71 +120,6 @@ flowchart LR
 	ModelProvider --> InferenceProviders
 ```
 
-## Deployment
-
-### Sourcegraph Cloud
-
-Sourcegraph Cloud is the best way to experience Sourcegraph Enterprise with all the features that come with the Sourcegraph platform. Sourcegraph Cloud customers get private, dedicated, SOC 2 Type II accredited instances provisioned and managed by a dedicated team of Sourcegraph experts. We maintain 24x7x365 incident response and an uptime SLA.
-
-Sourcegraph Cloud instances are single-tenant, limiting exposure to outages and security risks to individual instances. Each customer instance is isolated in a dedicated and fully segregated GCP project.
-
-```mermaid
-flowchart LR
-    subgraph corporate["Corporate VPN (optional)"]
-        browser["Sourcegraph user browser"]
-    end
-
-    auth["<b>Auth / SSO provider</b><br/>Okta, GitHub, etc."]
-
-    code_hosts["<b>Code hosts</b><br/>GitHub, GitLab, Bitbucket, etc."]
-
-    subgraph corp_firewall["Corporate Firewall"]
-        ghe["GitHub Enterprise, etc."]
-    end
-
-    cloudflare["<b>Sourcegraph DNS (Cloudflare)</b><br/>WAF, Rate-limiting, VPN-only firewall (optional)"]
-
-    subgraph gcp_project["GCP project - Dedicated per customer"]
-        gcp_lb["<b>GCP Load Balancer</b><br/>SSL termination"]
-        nat["Cloud NAT Gateway"]
-        subgraph gke["GKE"]
-            disk["<b>GCP regional disk</b><br/>Source code storage, Computed indexes"]
-            monolith["Sourcegraph core"]
-        end
-        cloud_sql[("<b>Cloud SQL</b><br/>User data, Repo metadata, Configuration")]
-        cloud_storage[("<b>Cloud Storage</b><br/>Indexes, Caches")]
-    end
-
-    managed_services["Sourcegraph managed services"]
-    click managed_services "#overview"
-
-    browser -->|"HTTPS + SSO"| cloudflare
-    cloudflare -->|"HTTPS"| gcp_lb
-    gcp_lb --> monolith
-    monolith --> cloud_sql
-    monolith --> cloud_storage
-    monolith --> disk
-    nat -->|"HTTPS"| auth
-    nat -->|"HTTPS + Access token"| code_hosts
-    nat -->|"HTTPS + Access token"| ghe
-    nat -->|"HTTPS"| managed_services
-    gke --> nat
-```
-
-For customers connecting to private resources in on-prem data centers, also refer to the [Sourcegraph Connect agent for Sourcegraph Cloud](#sourcegraph-connect-agent-for-sourcegraph-cloud) section.
-
-<Callout type="note">
-	Learn more in the [Sourcegraph Cloud docs](/cloud).
-</Callout>
-
-### Sourcegraph self-hosted
-
-For customers with specific needs, a variety of self-hosted deployment methods are available.
-
-<Callout type="note">
-	Learn more in the [Sourcegraph self-hosted docs](/self-hosted).
-</Callout>
-
 ## Core features
 
 ### Code Search
@@ -480,6 +415,114 @@ Debugging includes [tracing](/self-hosted/observability/tracing) and [logging](/
 <Callout type="note">
 	Learn more in the [Observability docs](/self-hosted/observability).
 </Callout>
+
+## Deployment
+
+### Sourcegraph Cloud
+
+Sourcegraph Cloud is the best way to experience Sourcegraph Enterprise with all the features that come with the Sourcegraph platform. Sourcegraph Cloud customers get private, dedicated, SOC 2 Type II accredited instances provisioned and managed by a dedicated team of Sourcegraph experts. We maintain 24x7x365 incident response and an uptime SLA.
+
+Sourcegraph Cloud instances are single-tenant, limiting exposure to outages and security risks to individual instances. Each customer instance is isolated in a dedicated and fully segregated GCP project.
+
+```mermaid
+flowchart LR
+    subgraph corporate["Corporate VPN (optional)"]
+        browser["Sourcegraph user browser"]
+    end
+
+    auth["<b>Auth / SSO provider</b><br/>Okta, GitHub, etc."]
+
+    code_hosts["<b>Code hosts</b><br/>GitHub, GitLab, Bitbucket, etc."]
+
+    subgraph corp_firewall["Corporate Firewall"]
+        ghe["GitHub Enterprise, etc."]
+    end
+
+    cloudflare["<b>Sourcegraph DNS (Cloudflare)</b><br/>WAF, Rate-limiting, VPN-only firewall (optional)"]
+
+    subgraph gcp_project["GCP project - Dedicated per customer"]
+        gcp_lb["<b>GCP Load Balancer</b><br/>SSL termination"]
+        nat["Cloud NAT Gateway"]
+        subgraph gke["GKE"]
+            disk["<b>GCP regional disk</b><br/>Source code storage, Computed indexes"]
+            monolith["Sourcegraph core"]
+        end
+        cloud_sql[("<b>Cloud SQL</b><br/>User data, Repo metadata, Configuration")]
+        cloud_storage[("<b>Cloud Storage</b><br/>Indexes, Caches")]
+    end
+
+    managed_services["Sourcegraph managed services"]
+    click managed_services "#overview"
+
+    browser -->|"HTTPS + SSO"| cloudflare
+    cloudflare -->|"HTTPS"| gcp_lb
+    gcp_lb --> monolith
+    monolith --> cloud_sql
+    monolith --> cloud_storage
+    monolith --> disk
+    nat -->|"HTTPS"| auth
+    nat -->|"HTTPS + Access token"| code_hosts
+    nat -->|"HTTPS + Access token"| ghe
+    nat -->|"HTTPS"| managed_services
+    gke --> nat
+```
+
+For customers connecting to private resources in on-prem data centers, also refer to the [Sourcegraph Connect agent for Sourcegraph Cloud](#sourcegraph-connect-agent-for-sourcegraph-cloud) section.
+
+<Callout type="note">
+	Learn more in the [Sourcegraph Cloud docs](/cloud).
+</Callout>
+
+### Sourcegraph self-hosted
+
+For customers with specific needs, a variety of self-hosted deployment methods are available. Below diagrams are only for reference purposes. Please reach out to your account team for details on the deployment instructions.
+
+<Callout type="note">
+	Learn more in the [Sourcegraph self-hosted docs](/self-hosted).
+</Callout>
+
+#### AWS (Docker Compose)
+
+```mermaid
+architecture-beta
+    group vpc(aws:vpc)[VPC]
+
+    group public_subnet(aws:public-subnet)[Public Subnet] in vpc
+    group ec2_sg[Security Group] in public_subnet
+    service ec2(aws:ec2)[Sourcegraph Deployment] in ec2_sg
+    service ebs(aws:ebs)[Data Volume] in ec2_sg
+
+    group private_subnet(aws:private-subnet)[Private Subnet] in vpc
+    group rds_sg[Security Group] in private_subnet
+    service rds(aws:rds)[RDS PostgreSQL] in rds_sg
+
+    ec2:R -- L:ebs
+    ec2:B -- T:rds
+```
+
+#### AWS (EKS)
+
+```mermaid
+architecture-beta
+    group account(aws:account)[AWS Account]
+    service s3(aws:s3)[Indexes and Caches] in account
+
+    group vpc(aws:vpc)[VPC] in account
+    service alb(aws:alb)[Application Load Balancer] in vpc
+    service ebs(aws:ebs)[Data Storage] in vpc
+
+    group public_subnet(aws:public-subnet)[Public Subnet] in vpc
+    group eks(aws:eks)[EKS] in public_subnet
+    service sg_core(server)[Sourcegraph core] in eks
+
+    group private_subnet(aws:private-subnet)[DB Private Subnet] in vpc
+    service rds(aws:rds)[RDS PostgreSQL] in private_subnet
+
+    sg_core:L -- R:alb
+    sg_core:B -- T:rds
+    sg_core:R -- L:s3
+    sg_core:R -- L:ebs
+```
 
 ## Glossary
 
