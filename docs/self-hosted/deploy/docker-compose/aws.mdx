@@ -2,6 +2,910 @@
 
 This guide will take you through how to deploy Sourcegraph with [Docker Compose](https://docs.docker.com/compose/) to a single EC2 instance on Amazon Web Services (AWS).
 
+<Callout type="note">
+	For security, please follow [Amazon best
+	practices](https://docs.aws.amazon.com/accounts/latest/reference/best-practices-root-user.html)
+	and _do not deploy Sourcegraph using your AWS account root user._
+</Callout>
+
+## IAM permissions
+
+To deploy Sourcegraph on AWS, you will need an IAM user or role with the following permissions. Following the [principle of least privilege](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#grant-least-privilege), only grant the minimum permissions required for deployment and operation.
+
+### Required IAM policy for deployment
+
+The IAM user or role performing the deployment needs the following permissions:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "EC2InstanceManagement",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:RunInstances",
+        "ec2:DescribeInstances",
+        "ec2:DescribeInstanceStatus",
+        "ec2:DescribeInstanceAttribute",
+        "ec2:TerminateInstances",
+        "ec2:StartInstances",
+        "ec2:StopInstances",
+        "ec2:RebootInstances"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "EC2NetworkManagement",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeSecurityGroups",
+        "ec2:CreateSecurityGroup",
+        "ec2:AuthorizeSecurityGroupIngress",
+        "ec2:AuthorizeSecurityGroupEgress",
+        "ec2:RevokeSecurityGroupIngress",
+        "ec2:RevokeSecurityGroupEgress",
+        "ec2:DescribeVpcs",
+        "ec2:DescribeSubnets",
+        "ec2:DescribeRouteTables"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "EBSVolumeManagement",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:CreateVolume",
+        "ec2:DescribeVolumes",
+        "ec2:AttachVolume",
+        "ec2:DetachVolume",
+        "ec2:ModifyVolume",
+        "ec2:CreateSnapshot",
+        "ec2:DescribeSnapshots",
+        "ec2:DeleteSnapshot",
+        "ec2:CreateTags"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "KeyPairManagement",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeKeyPairs",
+        "ec2:CreateKeyPair",
+        "ec2:DeleteKeyPair"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+**Purpose of each permission set:**
+
+- **EC2InstanceManagement**: Allows you to create, configure, start, stop, and manage EC2 instances that run Sourcegraph. These permissions are required to launch the EC2 instance and perform lifecycle operations like restarts and maintenance.
+
+- **EC2NetworkManagement**: Enables creation and configuration of security groups (firewall rules) that control network access to your Sourcegraph instance. This includes managing inbound and outbound traffic rules to protect your deployment from unauthorized access.
+
+- **EBSVolumeManagement**: Provides the ability to create and manage EBS volumes for persistent storage of Sourcegraph data, including code repositories, search indices, and database files. Snapshot permissions enable backup capabilities for disaster recovery.
+
+- **KeyPairManagement**: Allows management of SSH key pairs for secure remote access to your EC2 instance. This is necessary for troubleshooting and maintenance tasks.
+
+### Optional permissions for advanced features
+
+If you plan to configure HTTPS/TLS using AWS Load Balancer and Certificate Manager, add these permissions:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "LoadBalancerManagement",
+      "Effect": "Allow",
+      "Action": [
+        "elasticloadbalancing:CreateLoadBalancer",
+        "elasticloadbalancing:DescribeLoadBalancers",
+        "elasticloadbalancing:DeleteLoadBalancer",
+        "elasticloadbalancing:CreateTargetGroup",
+        "elasticloadbalancing:DescribeTargetGroups",
+        "elasticloadbalancing:RegisterTargets",
+        "elasticloadbalancing:CreateListener",
+        "elasticloadbalancing:DescribeListeners"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "CertificateManagement",
+      "Effect": "Allow",
+      "Action": [
+        "acm:RequestCertificate",
+        "acm:DescribeCertificate",
+        "acm:ListCertificates"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+**Purpose of each permission set:**
+
+- **LoadBalancerManagement**: Enables creation and management of Application Load Balancers for HTTPS/TLS termination, providing secure encrypted connections to Sourcegraph and distributing traffic for high availability.
+
+- **CertificateManagement**: Allows requesting and managing SSL/TLS certificates through AWS Certificate Manager for securing your Sourcegraph instance with HTTPS, eliminating the need to manually manage certificates.
+
+### IAM role for the EC2 instance (recommended)
+
+Instead of using static AWS credentials, create an [IAM role for EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html) and attach it to your Sourcegraph instance. This is recommended when using:
+- [External S3 storage](/self-hosted/external-services/object-storage) for code intelligence uploads
+- [AWS RDS for PostgreSQL](/self-hosted/external-services/postgres#usage-with-aws-rds-iam-auth) with IAM authentication
+
+The EC2 instance role should only include permissions for the specific AWS services that Sourcegraph will access (e.g., S3 buckets, RDS databases).
+
+<Callout type="note">
+IAM roles for EC2 instances work seamlessly with IMDSv2. When you configure IMDSv2 (as described in the [Metadata Service Configuration](#advanced-details--metadata-service-configuration) section), Sourcegraph's AWS SDK will automatically retrieve temporary credentials securely via IMDSv2.
+</Callout>
+
+---
+
+## Network Configuration
+
+This section describes the network architecture and configuration required for deploying Sourcegraph on AWS.
+
+### VPC Architecture
+
+Sourcegraph requires a properly configured Virtual Private Cloud (VPC) with appropriate network segmentation and security controls.
+
+#### VPC Design
+
+A production Sourcegraph deployment should use the following VPC architecture:
+
+- **VPC CIDR Block**: Choose a CIDR block that doesn't conflict with your existing networks (e.g., `10.0.0.0/16`)
+- **Subnets**: Deploy across multiple Availability Zones for high availability
+- **Internet Gateway**: Required for public internet access
+- **NAT Gateway**: Recommended for private subnet internet access
+
+#### Creating a VPC
+
+**Using AWS Console:**
+
+1. Navigate to [VPC Console](https://console.aws.amazon.com/vpc)
+2. Click **Create VPC**
+3. Configure the following:
+   - **Name tag**: `sourcegraph-vpc`
+   - **IPv4 CIDR block**: `10.0.0.0/16`
+   - **IPv6 CIDR block**: No IPv6 CIDR block (optional)
+   - **Tenancy**: Default
+4. Click **Create VPC**
+
+**Using AWS CLI:**
+
+```bash
+aws ec2 create-vpc \
+  --cidr-block 10.0.0.0/16 \
+  --tag-specifications 'ResourceType=vpc,Tags=[{Key=Name,Value=sourcegraph-vpc}]'
+```
+
+### Subnet Configuration
+
+Deploy Sourcegraph across public and private subnets for security and isolation.
+
+#### Recommended Subnet Layout
+
+| Subnet Type | CIDR Block | Availability Zone | Purpose |
+| ----------- | ---------- | ----------------- | ------- |
+| Public Subnet 1 | 10.0.1.0/24 | us-east-1a | Load balancers, NAT gateway |
+| Public Subnet 2 | 10.0.2.0/24 | us-east-1b | Load balancers, NAT gateway |
+| Private Subnet 1 | 10.0.10.0/24 | us-east-1a | Sourcegraph application instances |
+| Private Subnet 2 | 10.0.11.0/24 | us-east-1b | Sourcegraph application instances |
+
+#### Creating Subnets
+
+**Public subnet configuration:**
+
+```bash
+# Create public subnet
+aws ec2 create-subnet \
+  --vpc-id vpc-xxxxxxxxx \
+  --cidr-block 10.0.1.0/24 \
+  --availability-zone us-east-1a \
+  --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=sourcegraph-public-1a}]'
+
+# Enable auto-assign public IP
+aws ec2 modify-subnet-attribute \
+  --subnet-id subnet-xxxxxxxxx \
+  --map-public-ip-on-launch
+```
+
+**Private subnet configuration:**
+
+```bash
+aws ec2 create-subnet \
+  --vpc-id vpc-xxxxxxxxx \
+  --cidr-block 10.0.10.0/24 \
+  --availability-zone us-east-1a \
+  --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=sourcegraph-private-1a}]'
+```
+
+Repeat for each subnet across multiple availability zones for high availability.
+
+### Internet Gateway and NAT Gateway
+
+#### Internet Gateway
+
+Required for public internet access from public subnets:
+
+```bash
+# Create Internet Gateway
+aws ec2 create-internet-gateway \
+  --tag-specifications 'ResourceType=internet-gateway,Tags=[{Key=Name,Value=sourcegraph-igw}]'
+
+# Attach to VPC
+aws ec2 attach-internet-gateway \
+  --vpc-id vpc-xxxxxxxxx \
+  --internet-gateway-id igw-xxxxxxxxx
+```
+
+#### NAT Gateway
+
+Required for private subnet instances to access the internet (for updates, external APIs):
+
+```bash
+# Allocate Elastic IP
+aws ec2 allocate-address --domain vpc
+
+# Create NAT Gateway in public subnet
+aws ec2 create-nat-gateway \
+  --subnet-id subnet-xxxxxxxxx \
+  --allocation-id eipalloc-xxxxxxxxx \
+  --tag-specifications 'ResourceType=nat-gateway,Tags=[{Key=Name,Value=sourcegraph-nat}]'
+```
+
+### Route Tables
+
+Route tables control network traffic routing within your VPC.
+
+#### Public Route Table
+
+Routes traffic from public subnets to the internet via the Internet Gateway:
+
+```bash
+# Create route table
+aws ec2 create-route-table \
+  --vpc-id vpc-xxxxxxxxx \
+  --tag-specifications 'ResourceType=route-table,Tags=[{Key=Name,Value=sourcegraph-public-rt}]'
+
+# Add route to Internet Gateway
+aws ec2 create-route \
+  --route-table-id rtb-xxxxxxxxx \
+  --destination-cidr-block 0.0.0.0/0 \
+  --gateway-id igw-xxxxxxxxx
+
+# Associate with public subnets
+aws ec2 associate-route-table \
+  --route-table-id rtb-xxxxxxxxx \
+  --subnet-id subnet-xxxxxxxxx
+```
+
+#### Private Route Table
+
+Routes traffic from private subnets to the internet via NAT Gateway:
+
+```bash
+# Create route table
+aws ec2 create-route-table \
+  --vpc-id vpc-xxxxxxxxx \
+  --tag-specifications 'ResourceType=route-table,Tags=[{Key=Name,Value=sourcegraph-private-rt}]'
+
+# Add route to NAT Gateway
+aws ec2 create-route \
+  --route-table-id rtb-xxxxxxxxx \
+  --destination-cidr-block 0.0.0.0/0 \
+  --nat-gateway-id nat-xxxxxxxxx
+
+# Associate with private subnets
+aws ec2 associate-route-table \
+  --route-table-id rtb-xxxxxxxxx \
+  --subnet-id subnet-xxxxxxxxx
+```
+
+#### Verifying Route Tables
+
+```bash
+# Describe route tables
+aws ec2 describe-route-tables \
+  --filters "Name=vpc-id,Values=vpc-xxxxxxxxx"
+```
+
+### Security Groups
+
+Security groups act as virtual firewalls controlling inbound and outbound traffic. The Network settings section below configures basic security group rules for the deployment.
+
+#### Application Security Group
+
+For EC2 instances running Sourcegraph:
+
+```bash
+# Create security group
+aws ec2 create-security-group \
+  --group-name sourcegraph-app-sg \
+  --description "Security group for Sourcegraph application instances" \
+  --vpc-id vpc-xxxxxxxxx
+
+# Allow HTTPS from Load Balancer (if using ALB)
+aws ec2 authorize-security-group-ingress \
+  --group-id sg-xxxxxxxxx \
+  --protocol tcp \
+  --port 443 \
+  --source-group sg-lb-xxxxxxxxx
+
+# Allow HTTP from Load Balancer (if using ALB)
+aws ec2 authorize-security-group-ingress \
+  --group-id sg-xxxxxxxxx \
+  --protocol tcp \
+  --port 80 \
+  --source-group sg-lb-xxxxxxxxx
+
+# Allow SSH from bastion/admin (replace with your IP)
+aws ec2 authorize-security-group-ingress \
+  --group-id sg-xxxxxxxxx \
+  --protocol tcp \
+  --port 22 \
+  --cidr 203.0.113.0/24
+
+# Allow all outbound traffic
+aws ec2 authorize-security-group-egress \
+  --group-id sg-xxxxxxxxx \
+  --protocol -1 \
+  --cidr 0.0.0.0/0
+```
+
+### Network Access Control Lists (NACLs)
+
+Network ACLs provide an additional layer of security at the subnet level. Unlike security groups, NACLs are stateless and evaluate both inbound and outbound rules.
+
+#### Public Subnet NACL
+
+```bash
+# Create NACL
+aws ec2 create-network-acl \
+  --vpc-id vpc-xxxxxxxxx \
+  --tag-specifications 'ResourceType=network-acl,Tags=[{Key=Name,Value=sourcegraph-public-nacl}]'
+
+# Allow inbound HTTPS
+aws ec2 create-network-acl-entry \
+  --network-acl-id acl-xxxxxxxxx \
+  --rule-number 100 \
+  --protocol tcp \
+  --port-range From=443,To=443 \
+  --cidr-block 0.0.0.0/0 \
+  --rule-action allow \
+  --ingress
+
+# Allow inbound HTTP
+aws ec2 create-network-acl-entry \
+  --network-acl-id acl-xxxxxxxxx \
+  --rule-number 110 \
+  --protocol tcp \
+  --port-range From=80,To=80 \
+  --cidr-block 0.0.0.0/0 \
+  --rule-action allow \
+  --ingress
+
+# Allow inbound SSH (from admin network only)
+aws ec2 create-network-acl-entry \
+  --network-acl-id acl-xxxxxxxxx \
+  --rule-number 120 \
+  --protocol tcp \
+  --port-range From=22,To=22 \
+  --cidr-block 203.0.113.0/24 \
+  --rule-action allow \
+  --ingress
+
+# Allow inbound ephemeral ports (for return traffic)
+aws ec2 create-network-acl-entry \
+  --network-acl-id acl-xxxxxxxxx \
+  --rule-number 130 \
+  --protocol tcp \
+  --port-range From=1024,To=65535 \
+  --cidr-block 0.0.0.0/0 \
+  --rule-action allow \
+  --ingress
+
+# Allow all outbound (customize based on security requirements)
+aws ec2 create-network-acl-entry \
+  --network-acl-id acl-xxxxxxxxx \
+  --rule-number 100 \
+  --protocol -1 \
+  --cidr-block 0.0.0.0/0 \
+  --rule-action allow \
+  --egress
+
+# Associate with public subnets
+aws ec2 replace-network-acl-association \
+  --association-id aclassoc-xxxxxxxxx \
+  --network-acl-id acl-xxxxxxxxx
+```
+
+#### Private Subnet NACL
+
+```bash
+# Create NACL
+aws ec2 create-network-acl \
+  --vpc-id vpc-xxxxxxxxx \
+  --tag-specifications 'ResourceType=network-acl,Tags=[{Key=Name,Value=sourcegraph-private-nacl}]'
+
+# Allow inbound from public subnets
+aws ec2 create-network-acl-entry \
+  --network-acl-id acl-xxxxxxxxx \
+  --rule-number 100 \
+  --protocol -1 \
+  --cidr-block 10.0.1.0/24 \
+  --rule-action allow \
+  --ingress
+
+# Allow inbound ephemeral ports
+aws ec2 create-network-acl-entry \
+  --network-acl-id acl-xxxxxxxxx \
+  --rule-number 110 \
+  --protocol tcp \
+  --port-range From=1024,To=65535 \
+  --cidr-block 0.0.0.0/0 \
+  --rule-action allow \
+  --ingress
+
+# Allow all outbound
+aws ec2 create-network-acl-entry \
+  --network-acl-id acl-xxxxxxxxx \
+  --rule-number 100 \
+  --protocol -1 \
+  --cidr-block 0.0.0.0/0 \
+  --rule-action allow \
+  --egress
+
+# Associate with private subnets
+aws ec2 replace-network-acl-association \
+  --association-id aclassoc-xxxxxxxxx \
+  --network-acl-id acl-xxxxxxxxx
+```
+
+<Callout type="note">
+Use rule numbers in increments of 10 (e.g., 100, 110, 120) to allow for future rule insertions. Always include ephemeral ports (1024-65535) for return traffic.
+</Callout>
+
+### Network Configuration Summary
+
+The complete network architecture diagram:
+
+```text
+Internet
+    │
+    ├─── Internet Gateway (igw-xxx)
+    │
+    └─── VPC (10.0.0.0/16)
+         │
+         ├─── Public Subnets (10.0.1.0/24, 10.0.2.0/24)
+         │    ├─── NAT Gateway
+         │    └─── Security Group: sourcegraph-app-sg
+         │
+         └─── Private Subnets (10.0.10.0/24, 10.0.11.0/24)
+              ├─── EC2 Instances (Sourcegraph)
+              └─── Route to NAT Gateway for internet access
+```
+
+For additional troubleshooting, use [VPC Flow Logs](https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html) to capture and analyze network traffic.
+
+---
+
+## Data Encryption
+
+Sourcegraph on AWS supports multiple layers of encryption to protect your data at rest and in transit.
+
+### EBS Volume Encryption
+
+All EBS volumes used by Sourcegraph should be encrypted to protect data at rest. AWS EBS encryption uses AWS Key Management Service (KMS) keys.
+
+#### Enabling EBS Encryption During Deployment
+
+When launching your EC2 instance, enable EBS encryption in the **Configure storage** step:
+
+1. Check the **Encrypted** checkbox for each EBS volume
+2. Select a KMS key from the dropdown (or use the default `aws/ebs` key)
+3. Apply this to both the root volume and the data volume (`/dev/sdb`)
+
+**Using AWS CLI:**
+
+```bash
+# Create encrypted volume
+aws ec2 create-volume \
+  --availability-zone us-east-1a \
+  --size 250 \
+  --volume-type gp3 \
+  --encrypted \
+  --kms-key-id arn:aws:kms:REGION:ACCOUNT:key/KEY-ID \
+  --tag-specifications 'ResourceType=volume,Tags=[{Key=Name,Value=sourcegraph-data}]'
+```
+
+**Verify encryption status:**
+
+```bash
+aws ec2 describe-volumes --volume-ids vol-xxxxxxxxx --query 'Volumes[*].Encrypted'
+```
+
+#### Using Customer-Managed KMS Keys
+
+For enhanced security and audit capabilities, use customer-managed KMS keys instead of AWS-managed keys:
+
+1. Create a KMS key in [AWS KMS Console](https://console.aws.amazon.com/kms)
+2. Grant the IAM role/user permission to use the key:
+
+   ```json
+   {
+     "Sid": "AllowEBSEncryption",
+     "Effect": "Allow",
+     "Action": [
+       "kms:CreateGrant",
+       "kms:Decrypt",
+       "kms:DescribeKey",
+       "kms:Encrypt",
+       "kms:GenerateDataKey",
+       "kms:ReEncrypt"
+     ],
+     "Resource": "arn:aws:kms:REGION:ACCOUNT:key/KEY-ID"
+   }
+   ```
+
+3. Specify the KMS key ARN when creating volumes
+
+<Callout type="tip">
+Enable default EBS encryption for your AWS account in the EC2 console under **Settings > EBS encryption**. This ensures all new volumes are automatically encrypted.
+</Callout>
+
+### S3 Bucket Encryption
+
+If you're using external S3 storage for code intelligence uploads or backups, enable server-side encryption.
+
+#### S3 Server-Side Encryption (SSE)
+
+**Using SSE-S3** (AWS-managed keys):
+
+```bash
+aws s3api put-bucket-encryption \
+  --bucket YOUR-BUCKET-NAME \
+  --server-side-encryption-configuration '{
+    "Rules": [{
+      "ApplyServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+      },
+      "BucketKeyEnabled": true
+    }]
+  }'
+```
+
+**Using SSE-KMS** (customer-managed keys):
+
+```bash
+aws s3api put-bucket-encryption \
+  --bucket YOUR-BUCKET-NAME \
+  --server-side-encryption-configuration '{
+    "Rules": [{
+      "ApplyServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "aws:kms",
+        "KMSMasterKeyID": "arn:aws:kms:REGION:ACCOUNT:key/KEY-ID"
+      },
+      "BucketKeyEnabled": true
+    }]
+  }'
+```
+
+**Verify S3 bucket encryption:**
+
+```bash
+aws s3api get-bucket-encryption --bucket YOUR-BUCKET-NAME
+```
+
+#### S3 Bucket Policy for Encryption Enforcement
+
+Enforce encryption by denying unencrypted uploads:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DenyUnencryptedObjectUploads",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::YOUR-BUCKET-NAME/*",
+      "Condition": {
+        "StringNotEquals": {
+          "s3:x-amz-server-side-encryption": ["AES256", "aws:kms"]
+        }
+      }
+    }
+  ]
+}
+```
+
+### Linux Unified Key Setup (LUKS)
+
+For additional encryption at the disk level, you can configure LUKS encryption on the EBS data volume. This provides an extra layer of security independent of AWS encryption.
+
+<Callout type="warning">
+LUKS encryption adds complexity to the deployment and requires careful key management. Only implement this if your security requirements mandate multiple encryption layers.
+</Callout>
+
+#### Setting Up LUKS Encryption
+
+1. **Install cryptsetup** on your EC2 instance:
+
+   ```bash
+   sudo yum install cryptsetup -y  # Amazon Linux
+   ```
+
+2. **Create a LUKS-encrypted volume**:
+
+   ```bash
+   # Create the LUKS container (WARNING: This will erase all data on the device)
+   sudo cryptsetup luksFormat /dev/sdb
+
+   # Open the encrypted device
+   sudo cryptsetup luksOpen /dev/sdb sourcegraph-data
+   ```
+
+3. **Format and mount the encrypted volume**:
+
+   ```bash
+   # Create filesystem on the encrypted device
+   sudo mkfs.xfs /dev/mapper/sourcegraph-data
+
+   # Mount the encrypted volume
+   sudo mkdir -p /mnt/docker-data
+   sudo mount /dev/mapper/sourcegraph-data /mnt/docker-data
+   ```
+
+4. **Configure automatic unlock at boot**:
+
+   Store the encryption key securely:
+
+   ```bash
+   # Create a key file (store this securely!)
+   sudo dd if=/dev/urandom of=/root/luks-key bs=1024 count=4
+   sudo chmod 0400 /root/luks-key
+
+   # Add the key file to LUKS
+   sudo cryptsetup luksAddKey /dev/sdb /root/luks-key
+   ```
+
+   Add to `/etc/crypttab`:
+
+   ```text
+   sourcegraph-data /dev/sdb /root/luks-key luks
+   ```
+
+   Add to `/etc/fstab`:
+
+   ```text
+   /dev/mapper/sourcegraph-data /mnt/docker-data xfs defaults,nofail 0 2
+   ```
+
+#### LUKS Key Management Best Practices
+
+- Store LUKS keys in AWS Secrets Manager or AWS Systems Manager Parameter Store (encrypted with KMS)
+- Use automated key rotation policies
+- Maintain backup keys in a secure, separate location
+- Document key recovery procedures
+- Consider using AWS CloudHSM for hardware security module (HSM) backed key storage
+
+### Encryption in Transit
+
+Sourcegraph uses TLS/SSL for encryption in transit:
+
+- **HTTPS**: Configure TLS certificates via AWS Certificate Manager (ACM) for ALB/ELB
+- **PostgreSQL**: Enable SSL connections to RDS or external PostgreSQL instances
+- **Internal communication**: Docker networking provides isolated container communication
+
+See the [HTTP and HTTPS/SSL configuration](/self-hosted/http-https-configuration#sourcegraph-via-docker-compose-caddy-2) guide for configuring TLS certificates.
+
+### Compliance and Auditing
+
+- **AWS CloudTrail**: Enable CloudTrail to log all KMS key usage and S3 access
+- **AWS Config**: Use Config rules to monitor encryption compliance
+- **Access logs**: Enable S3 access logging and EBS volume access logs
+- **Regular audits**: Review encryption keys, access patterns, and compliance status quarterly
+
+### Encryption Configuration Summary
+
+| Component | Encryption Method | Configuration Location |
+| --------- | ----------------- | ---------------------- |
+| EBS Volumes | AWS KMS or SSE | EC2 Console > Configure storage section |
+| S3 Buckets | SSE-S3 or SSE-KMS | S3 Console or AWS CLI |
+| LUKS | dm-crypt | Instance OS configuration |
+| Network Traffic | TLS/SSL | Load Balancer & ACM |
+| PostgreSQL | SSL/TLS | RDS Console or connection string |
+
+---
+
+## Credential and Key Rotation
+
+Regular rotation of credentials and keys is a security best practice. Follow these procedures to rotate programmatic credentials and cryptographic keys in your Sourcegraph deployment.
+
+### Rotating IAM Access Keys
+
+<Callout type="note">
+Prefer [IAM roles for EC2](#iam-role-for-the-ec2-instance-recommended) over access keys. Roles provide temporary credentials that rotate automatically.
+</Callout>
+
+If using IAM access keys:
+
+1. Create new access key: IAM Console > Users > [Select user] > Security credentials > Create access key
+2. Update credentials in Sourcegraph configuration (environment variables or `~/.aws/credentials`)
+3. Restart services: `docker-compose restart`
+4. Verify new credentials work by checking logs
+5. Deactivate old key in IAM Console and monitor for 24-48 hours
+6. Delete old access key
+
+### Rotating KMS Keys
+
+**Enable automatic rotation** (recommended):
+
+```bash
+aws kms enable-key-rotation --key-id arn:aws:kms:REGION:ACCOUNT:key/KEY-ID
+```
+
+AWS automatically rotates key material annually while maintaining the same key ID.
+
+**Manual rotation** (new key):
+
+1. Create new KMS key: `aws kms create-key --description "Sourcegraph key 2026"`
+2. For existing volumes: Create snapshot, copy with new key, create volume from new snapshot
+3. Update S3 bucket encryption configuration with new key ID
+4. Schedule old key deletion after 30-day waiting period
+
+### Rotating LUKS Keys
+
+1. Create new key: `sudo dd if=/dev/urandom of=/root/luks-key-new bs=1024 count=4`
+2. Add to LUKS: `sudo cryptsetup luksAddKey /dev/sdb /root/luks-key-new`
+3. Update `/etc/crypttab` to reference new key file
+4. Test by stopping services, closing/reopening volume with new key, and restarting services
+5. Remove old key: `sudo cryptsetup luksRemoveKey /dev/sdb /root/luks-key`
+6. Securely delete old key file: `sudo shred -vfz -n 10 /root/luks-key`
+
+### Rotating Application Credentials
+
+**Code host tokens:** Generate new token from code host → Update in Site admin > Manage code hosts → Save → Delete old token
+
+**Database passwords:** Create new DB user with privileges → Update connection string in `docker-compose.yaml` → Restart services → Drop old user
+
+**Admin passwords:** User Settings > Password, or use `docker exec -it sourcegraph-frontend-0 src users reset-password --email=admin@example.com`
+
+---
+
+## AWS Services and Cost Considerations
+
+### Billable AWS Services
+
+This section lists all AWS services used in a Sourcegraph deployment and indicates whether each service is mandatory or optional.
+
+#### Mandatory Services
+
+The following AWS services are required for a basic Sourcegraph deployment:
+
+| Service | Purpose | Cost Factors |
+| ------- | ------- | ------------ |
+| **EC2 (Elastic Compute Cloud)** | Hosts the Sourcegraph application and Docker containers | Instance type, running hours, data transfer |
+| **EBS (Elastic Block Store)** | Persistent storage for Sourcegraph data (repositories, databases, indices) | Volume size (minimum 250GB), volume type (gp3 recommended), IOPS, snapshots |
+| **Data Transfer** | Outbound data transfer from AWS to the internet | GB transferred out, inter-region transfer |
+
+#### Optional Services
+
+The following AWS services enhance security, scalability, or operational capabilities but are not required:
+
+| Service | Purpose | When to Use | Cost Factors |
+| ------- | ------- | ----------- | ------------ |
+| **RDS for PostgreSQL** | Managed PostgreSQL database | Production deployments requiring high availability and automated backups | Instance type, storage, backup retention, multi-AZ |
+| **S3 (Simple Storage Service)** | Object storage for code intelligence uploads | When using precise code intelligence features | Storage size, requests, data transfer |
+| **Application Load Balancer (ALB)** | Load balancing and HTTPS/TLS termination | High-availability deployments with multiple instances | Load balancer hours, data processed |
+| **AWS Certificate Manager (ACM)** | SSL/TLS certificates for HTTPS | When using ALB for HTTPS termination | Free for public certificates with AWS services |
+| **NAT Gateway** | Outbound internet access for private subnets | Production deployments in private subnets | Gateway hours, data processed |
+| **Elastic IP** | Static public IP address | When requiring a persistent IP address | Hourly charge when not associated with instance |
+| **Route 53** | DNS management | Custom domain configuration | Hosted zones, DNS queries |
+| **CloudWatch** | Monitoring and logging | Enhanced monitoring and alerting | Metrics, logs stored, API requests |
+| **CloudTrail** | API call logging | Security and compliance requirements | Events recorded, S3 storage for logs |
+| **AWS Systems Manager** | Secure instance access | Enhanced security posture | Parameter Store usage, sessions |
+| **KMS (Key Management Service)** | Customer-managed encryption keys | Enhanced control over encryption | Key storage, API requests |
+
+### Cost Estimation
+
+To estimate your total AWS infrastructure costs:
+
+1. **Use the AWS Pricing Calculator**: Visit [calculator.aws.amazon.com](https://calculator.aws.amazon.com/) to build a custom estimate
+2. **Reference the Resource Estimator**: Use our [resource estimator](/self-hosted/deploy/resource-estimator) to determine the appropriate EC2 instance type based on your user count
+3. **Consider your usage patterns**:
+   - Number of active users
+   - Total repository size
+   - Expected data transfer volume
+   - Snapshot and backup retention requirements
+
+**Sourcegraph Licensing**: AWS infrastructure costs are separate from Sourcegraph software licensing. Sourcegraph pricing is based on total active user accounts. See [Sourcegraph pricing](https://sourcegraph.com/pricing) for details.
+
+**Cost Optimization**:
+
+- Right-size EC2 instances using the [resource estimator](/self-hosted/deploy/resource-estimator)
+- Use gp3 EBS volumes for better price-performance
+- Consider Reserved Instances or Savings Plans for long-term deployments
+- Enable EBS snapshot lifecycle policies to manage backup costs
+- Monitor and optimize data transfer patterns
+
+---
+
+## Managing AWS Service Limits
+
+AWS enforces service quotas (limits) on resources in your account. Verify your account has sufficient quotas before deploying Sourcegraph and request increases as needed.
+
+### Checking Service Quotas
+
+**AWS Console:**
+
+1. Navigate to [Service Quotas Console](https://console.aws.amazon.com/servicequotas/)
+2. Select **AWS services** > Choose the service (e.g., **Amazon EC2**, **Amazon EBS**)
+3. Review current quotas and applied values for your deployment region
+
+**AWS CLI:**
+
+```bash
+# List all quotas for a service
+aws service-quotas list-service-quotas --service-code ec2 --region us-east-1
+
+# Check specific quota
+aws service-quotas get-service-quota \
+  --service-code ec2 \
+  --quota-code QUOTA-CODE \
+  --region us-east-1
+```
+
+### Services to Review
+
+Before deployment, check quotas for:
+
+- **EC2**: Running On-Demand instances (for your chosen instance type)
+- **EBS**: Storage capacity for gp3 volumes (at least 250GB as specified in deployment)
+- **EBS**: Number of volumes and snapshots
+- **VPC**: VPCs, subnets, internet gateways, NAT gateways
+- **EC2**: Elastic IP addresses (if using static IPs)
+- **Security Groups**: Number of security groups and rules per group
+
+Use the [resource estimator](/self-hosted/deploy/resource-estimator) to determine required instance types and sizes based on your user count.
+
+### Requesting Quota Increases
+
+**AWS Console:**
+
+1. Go to [Service Quotas Console](https://console.aws.amazon.com/servicequotas/)
+2. Choose **AWS services** > Select the service
+3. Find the quota and click **Request quota increase**
+4. Enter desired value and business justification
+5. Submit request
+
+**AWS CLI:**
+
+```bash
+aws service-quotas request-service-quota-increase \
+  --service-code ec2 \
+  --quota-code QUOTA-CODE \
+  --desired-value NEW-VALUE \
+  --region us-east-1
+```
+
+Check request status: **Service Quotas Console** > **Quota request history**
+
+### Monitoring Quotas
+
+Track quota utilization using AWS Trusted Advisor (requires Business or Enterprise Support) or set up CloudWatch alarms for critical resources. Regularly review quota usage as your Sourcegraph deployment grows.
+
+---
+
 ## Configure
 
 Click **Launch Instance** from the [EC2 dashboard](https://console.aws.amazon.com/ec2/v2/home), then fill in the following values for each section:
@@ -49,6 +953,68 @@ Click **Launch Instance** from the [EC2 dashboard](https://console.aws.amazon.co
     -   Sourcegraph needs at least as much space as all your repositories combined take up
     -   Allocating as much disk space as you can upfront minimize the need for [resizing your volume](https://aws.amazon.com/premiumsupport/knowledge-center/expand-root-ebs-linux/) in the future
 -   `Delete on Termination`: `No`
+
+#### Advanced details > Metadata Service Configuration
+
+For enhanced security, configure your EC2 instance to use Instance Metadata Service Version 2 (IMDSv2). IMDSv2 provides additional protection against certain types of attacks, such as Server-Side Request Forgery (SSRF), by requiring session tokens for all metadata requests.
+
+<Callout type="tip">
+Enforcing IMDSv2 is an AWS security best practice and may be required by your organization's security policies. It prevents unauthorized access to instance metadata from compromised applications.
+</Callout>
+
+**Configuring IMDSv2 via AWS Console:**
+
+In the **Advanced details** section of the Launch Instance wizard:
+
+1. Scroll to **Metadata accessible** and set it to **Enabled**
+2. Set **Metadata version** to **V2 only (token required)**
+3. Set **Metadata response hop limit** to:
+   - `1` for direct host access (default)
+   - `2` if using Docker containers (recommended for Sourcegraph)
+
+**Configuring IMDSv2 via AWS CLI:**
+
+Add the following parameters when launching your instance:
+
+```bash
+aws ec2 run-instances \
+  --image-id ami-xxxxxxxxx \
+  --instance-type m5.4xlarge \
+  --key-name your-key-pair \
+  --security-group-ids sg-xxxxxxxxx \
+  --subnet-id subnet-xxxxxxxxx \
+  --metadata-options "HttpTokens=required,HttpPutResponseHopLimit=2" \
+  ...
+```
+
+**Verifying IMDSv2 Configuration:**
+
+After launching your instance, verify the configuration:
+
+```bash
+aws ec2 describe-instances \
+  --instance-ids i-xxxxxxxxx \
+  --query 'Reservations[0].Instances[0].MetadataOptions'
+```
+
+Expected output:
+
+```json
+{
+    "State": "applied",
+    "HttpTokens": "required",
+    "HttpPutResponseHopLimit": 2,
+    "HttpEndpoint": "enabled"
+}
+```
+
+**Important Notes:**
+
+- **Hop Limit**: Set to `2` for Docker containers to allow metadata requests from containers to reach the host's metadata service. A value of `1` may cause authentication failures for AWS SDK calls from within containers.
+- **AWS SDK Compatibility**: Sourcegraph uses AWS SDKs that fully support IMDSv2 for features like S3 storage, RDS authentication, and IAM role credentials.
+- **Disabling IMDSv1**: Setting `HttpTokens=required` automatically disables IMDSv1 and enforces IMDSv2-only access.
+
+For more information, see [AWS IMDSv2 documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html) and [EKS best practices for IMDSv2](https://aws.github.io/aws-eks-best-practices/security/docs/iam/#when-your-application-needs-access-to-imds-use-imdsv2-and-increase-the-hop-limit-on-ec2-instances-to-2).
 
 #### Advanced details > User Data
 
@@ -155,13 +1121,26 @@ See the [Docker Compose upgrade docs](/self-hosted/deploy/docker-compose/upgrade
 
 ## Storage and Backups
 
+### What to Back Up
+
+**Data stores:** PostgreSQL database, Docker volumes at `/mnt/docker-data/volumes`, and Git repositories.
+**Configurations:** docker-compose.yaml file and Site configuration (stored in PostgreSQL).
+
 Data is persisted within a [Docker volume](https://docs.docker.com/storage/volumes/) as defined in the [deployment repository](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/master/docker-compose/docker-compose.yaml). The startup script configures Docker using a [daemon configuration file](https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file) to store all the data on the attached data volume, which is mounted at `/mnt/docker-data`, where volumes are stored within `/mnt/docker-data/volumes`.
 
-There are two, non-mutually-exclusive ways to back up data:
+### Backup Procedure
 
--   [Snapshot the entire `/mnt/docker-data` EBS volume](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-creating-snapshot.html) on an [automatic, scheduled basis](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/snapshot-lifecycle.html).
+**Option 1:** [Snapshot the entire `/mnt/docker-data` EBS volume](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-creating-snapshot.html) on an [automatic, scheduled basis](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/snapshot-lifecycle.html).
 
-Use [AWS RDS for PostgreSQL](https://aws.amazon.com/rds/) instead of the Dockerized PostgreSQL instance included by default. All data from Sourcegraph is derivable from the data stored in this database. Note, however, that it may take awhile to reclone repositories and rebuild indices afresh. If you require a faster restoration process, we recommend also snapshotting the EBS volume. (Recommended)
+**Option 2:** Use [AWS RDS for PostgreSQL](https://aws.amazon.com/rds/) instead of the Dockerized PostgreSQL instance included by default. All data from Sourcegraph is derivable from the data stored in this database. Note, however, that it may take awhile to reclone repositories and rebuild indices afresh. If you require a faster restoration process, we recommend also snapshotting the EBS volume. (Recommended)
+
+### Recovery Procedure
+
+**From EBS snapshot:** Create a new volume from the snapshot, detach the old volume, attach the new volume to `/dev/sdb`, mount it, and restart Docker Compose.
+
+**From RDS backup:** Restore the RDS instance from backup via the RDS Console and update Sourcegraph's database connection string.
+
+**Deployment guide reference:** This guide (Install Sourcegraph on AWS), Section "Storage and Backups" covers backup and recovery details.
 
 ---
 
