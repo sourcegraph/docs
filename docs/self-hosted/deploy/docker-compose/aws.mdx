@@ -2,6 +2,146 @@
 
 This guide will take you through how to deploy Sourcegraph with [Docker Compose](https://docs.docker.com/compose/) to a single EC2 instance on Amazon Web Services (AWS).
 
+<Callout type="note">
+	For security, please follow [Amazon best
+	practices](https://docs.aws.amazon.com/accounts/latest/reference/best-practices-root-user.html)
+	and _do not deploy Sourcegraph using your AWS account root user._
+</Callout>
+
+## IAM permissions
+
+To deploy Sourcegraph on AWS, you will need an IAM user or role with the following permissions. Following the [principle of least privilege](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#grant-least-privilege), only grant the minimum permissions required for deployment and operation.
+
+### Required IAM policy for deployment
+
+The IAM user or role performing the deployment needs the following permissions:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "EC2InstanceManagement",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:RunInstances",
+        "ec2:DescribeInstances",
+        "ec2:DescribeInstanceStatus",
+        "ec2:DescribeInstanceAttribute",
+        "ec2:TerminateInstances",
+        "ec2:StartInstances",
+        "ec2:StopInstances",
+        "ec2:RebootInstances"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "EC2NetworkManagement",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeSecurityGroups",
+        "ec2:CreateSecurityGroup",
+        "ec2:AuthorizeSecurityGroupIngress",
+        "ec2:AuthorizeSecurityGroupEgress",
+        "ec2:RevokeSecurityGroupIngress",
+        "ec2:RevokeSecurityGroupEgress",
+        "ec2:DescribeVpcs",
+        "ec2:DescribeSubnets",
+        "ec2:DescribeRouteTables"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "EBSVolumeManagement",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:CreateVolume",
+        "ec2:DescribeVolumes",
+        "ec2:AttachVolume",
+        "ec2:DetachVolume",
+        "ec2:ModifyVolume",
+        "ec2:CreateSnapshot",
+        "ec2:DescribeSnapshots",
+        "ec2:DeleteSnapshot",
+        "ec2:CreateTags"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "KeyPairManagement",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeKeyPairs",
+        "ec2:CreateKeyPair",
+        "ec2:DeleteKeyPair"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+**Purpose of each permission set:**
+
+- **EC2InstanceManagement**: Allows you to create, configure, start, stop, and manage EC2 instances that run Sourcegraph. These permissions are required to launch the EC2 instance and perform lifecycle operations like restarts and maintenance.
+
+- **EC2NetworkManagement**: Enables creation and configuration of security groups (firewall rules) that control network access to your Sourcegraph instance. This includes managing inbound and outbound traffic rules to protect your deployment from unauthorized access.
+
+- **EBSVolumeManagement**: Provides the ability to create and manage EBS volumes for persistent storage of Sourcegraph data, including code repositories, search indices, and database files. Snapshot permissions enable backup capabilities for disaster recovery.
+
+- **KeyPairManagement**: Allows management of SSH key pairs for secure remote access to your EC2 instance. This is necessary for troubleshooting and maintenance tasks.
+
+### Optional permissions for advanced features
+
+If you plan to configure HTTPS/TLS using AWS Load Balancer and Certificate Manager, add these permissions:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "LoadBalancerManagement",
+      "Effect": "Allow",
+      "Action": [
+        "elasticloadbalancing:CreateLoadBalancer",
+        "elasticloadbalancing:DescribeLoadBalancers",
+        "elasticloadbalancing:DeleteLoadBalancer",
+        "elasticloadbalancing:CreateTargetGroup",
+        "elasticloadbalancing:DescribeTargetGroups",
+        "elasticloadbalancing:RegisterTargets",
+        "elasticloadbalancing:CreateListener",
+        "elasticloadbalancing:DescribeListeners"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "CertificateManagement",
+      "Effect": "Allow",
+      "Action": [
+        "acm:RequestCertificate",
+        "acm:DescribeCertificate",
+        "acm:ListCertificates"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+**Purpose of each permission set:**
+
+- **LoadBalancerManagement**: Enables creation and management of Application Load Balancers for HTTPS/TLS termination, providing secure encrypted connections to Sourcegraph and distributing traffic for high availability.
+
+- **CertificateManagement**: Allows requesting and managing SSL/TLS certificates through AWS Certificate Manager for securing your Sourcegraph instance with HTTPS, eliminating the need to manually manage certificates.
+
+### IAM role for the EC2 instance (recommended)
+
+Instead of using static AWS credentials, create an [IAM role for EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html) and attach it to your Sourcegraph instance. This is recommended when using:
+- [External S3 storage](/self-hosted/external-services/object-storage) for code intelligence uploads
+- [AWS RDS for PostgreSQL](/self-hosted/external-services/postgres#usage-with-aws-rds-iam-auth) with IAM authentication
+
+The EC2 instance role should only include permissions for the specific AWS services that Sourcegraph will access (e.g., S3 buckets, RDS databases).
+
 ## Configure
 
 Click **Launch Instance** from the [EC2 dashboard](https://console.aws.amazon.com/ec2/v2/home), then fill in the following values for each section:

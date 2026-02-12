@@ -4,6 +4,76 @@ This tutorial shows you how to deploy [single-container Sourcegraph with Docker]
 
 > NOTE: We _do not_ recommend using this method for a production instance. If deploying a production instance, see [our recommendations](/self-hosted/deploy/) for how to choose a deployment type that suits your needs. We recommend [Docker Compose](/self-hosted/deploy/docker-compose/aws) for most initial production deployments.
 
+<Callout type="note">
+	For security, please follow [Amazon best
+	practices](https://docs.aws.amazon.com/accounts/latest/reference/best-practices-root-user.html)
+	and _do not deploy Sourcegraph using your AWS account root user._
+</Callout>
+
+## IAM permissions
+
+To deploy Sourcegraph on AWS, you will need an IAM user or role with the following permissions. Following the [principle of least privilege](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#grant-least-privilege), only grant the minimum permissions required for deployment and operation.
+
+### Required IAM policy for deployment
+
+The IAM user or role performing the deployment needs the following permissions:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "EC2InstanceManagement",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:RunInstances",
+        "ec2:DescribeInstances",
+        "ec2:DescribeInstanceStatus",
+        "ec2:TerminateInstances",
+        "ec2:StartInstances",
+        "ec2:StopInstances"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "EC2NetworkManagement",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeSecurityGroups",
+        "ec2:CreateSecurityGroup",
+        "ec2:AuthorizeSecurityGroupIngress",
+        "ec2:DescribeVpcs",
+        "ec2:DescribeSubnets"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "KeyPairManagement",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeKeyPairs",
+        "ec2:CreateKeyPair"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+**Purpose of each permission set:**
+
+- **EC2InstanceManagement**: Allows you to create, start, stop, and manage the EC2 instance that runs the Sourcegraph Docker container. These are the basic permissions required for instance lifecycle operations.
+
+- **EC2NetworkManagement**: Enables creation and configuration of security groups (firewall rules) to control network access to your Sourcegraph instance, allowing HTTP/HTTPS traffic while protecting against unauthorized access.
+
+- **KeyPairManagement**: Allows management of SSH key pairs for secure remote access to your EC2 instance for troubleshooting and maintenance tasks.
+
+### IAM role for the EC2 instance (optional)
+
+If you plan to use [external services](/self-hosted/external-services/) such as [AWS RDS for PostgreSQL](https://aws.amazon.com/rds/), [Amazon ElastiCache](https://aws.amazon.com/elasticache/redis/), or [S3](https://aws.amazon.com/s3/) for persistence, create an [IAM role for EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html) and attach it to your Sourcegraph instance during launch.
+
+The EC2 instance role should only include permissions for the specific AWS services that Sourcegraph will access (e.g., S3 buckets, RDS databases, ElastiCache clusters).
+
 ---
 
 ## Deploy to EC2

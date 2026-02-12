@@ -2,6 +2,12 @@
 
 This section is aimed at providing high-level guidance on deploying Sourcegraph using a Kustomize overlay on Amazon Elastic Kubernetes Service (EKS).
 
+<Callout type="note">
+	For security, please follow [Amazon best
+	practices](https://docs.aws.amazon.com/accounts/latest/reference/best-practices-root-user.html)
+	and _do not deploy Sourcegraph using your AWS account root user._
+</Callout>
+
 ## Overview
 
 The installation instructions below will guide you through deploying Sourcegraph on Elastic Kubernetes Service (EKS) with our quick-start overlay.
@@ -11,6 +17,118 @@ The overlay will:
 -   Deploy a Sourcegraph instance without RBAC resources
 -   Configure Ingress to use [AWS Load Balancer Controller](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html) to expose Sourcegraph publicly on your domain
 -   Configure the Storage Class to use [AWS EBS CSI driver](https://docs.aws.amazon.com/eks/latest/userguide/managing-ebs-csi.html) (installed as adds-on)
+
+## IAM permissions
+
+To deploy Sourcegraph on Amazon EKS using Kustomize, you will need an IAM user or role with the following permissions. Following the [principle of least privilege](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#grant-least-privilege), only grant the minimum permissions required for deployment and operation.
+
+### Required IAM policy for deployment
+
+This guide assumes you already have an EKS cluster. If you need to create the cluster, see the [EKS deployment guide](/self-hosted/deploy/kubernetes/eks#iam-permissions) for cluster creation permissions.
+
+For deploying Sourcegraph to an existing EKS cluster, the IAM user or role needs:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "EKSClusterAccess",
+      "Effect": "Allow",
+      "Action": [
+        "eks:DescribeCluster",
+        "eks:ListClusters",
+        "eks:AccessKubernetesApi"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "EBSVolumeManagement",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:CreateVolume",
+        "ec2:DescribeVolumes",
+        "ec2:AttachVolume",
+        "ec2:DetachVolume",
+        "ec2:DeleteVolume",
+        "ec2:CreateSnapshot",
+        "ec2:DescribeSnapshots",
+        "ec2:DeleteSnapshot",
+        "ec2:CreateTags",
+        "ec2:DescribeAvailabilityZones",
+        "ec2:DescribeInstances"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "LoadBalancerManagement",
+      "Effect": "Allow",
+      "Action": [
+        "elasticloadbalancing:CreateLoadBalancer",
+        "elasticloadbalancing:DescribeLoadBalancers",
+        "elasticloadbalancing:DeleteLoadBalancer",
+        "elasticloadbalancing:CreateTargetGroup",
+        "elasticloadbalancing:DescribeTargetGroups",
+        "elasticloadbalancing:DeleteTargetGroup",
+        "elasticloadbalancing:RegisterTargets",
+        "elasticloadbalancing:DeregisterTargets",
+        "elasticloadbalancing:CreateListener",
+        "elasticloadbalancing:DescribeListeners",
+        "elasticloadbalancing:DeleteListener",
+        "elasticloadbalancing:ModifyLoadBalancerAttributes",
+        "elasticloadbalancing:ModifyTargetGroupAttributes",
+        "elasticloadbalancing:AddTags",
+        "elasticloadbalancing:RemoveTags"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SecurityGroupManagement",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeSecurityGroups",
+        "ec2:CreateSecurityGroup",
+        "ec2:DeleteSecurityGroup",
+        "ec2:AuthorizeSecurityGroupIngress",
+        "ec2:RevokeSecurityGroupIngress",
+        "ec2:DescribeVpcs",
+        "ec2:DescribeSubnets"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+**Purpose of each permission set:**
+
+- **EKSClusterAccess**: Allows interaction with the existing EKS cluster to deploy and manage Kubernetes resources. Required to authenticate kubectl commands and access the Kubernetes API.
+
+- **EBSVolumeManagement**: Enables the EBS CSI driver to dynamically provision and manage persistent volumes for Sourcegraph pods, storing application data, databases, and search indices. Required for StatefulSets and PersistentVolumeClaims.
+
+- **LoadBalancerManagement**: Permits the AWS Load Balancer Controller to automatically create and manage Application Load Balancers based on Kubernetes ingress resources, providing HTTPS/TLS termination and external access to Sourcegraph.
+
+- **SecurityGroupManagement**: Allows the AWS Load Balancer Controller to manage security groups for load balancers, controlling network traffic to ensure secure access to the Sourcegraph deployment.
+
+### IAM roles for Kubernetes service accounts
+
+The AWS Load Balancer Controller and EBS CSI driver require [IAM roles for service accounts (IRSA)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html) to access AWS APIs. These roles should be configured when setting up the addons:
+
+- **AWS Load Balancer Controller IAM Role**: Requires permissions to manage Application Load Balancers and Target Groups
+- **EBS CSI Driver IAM Role**: Requires permissions to manage EBS volumes
+
+For detailed instructions on creating these IAM roles, see:
+- [AWS Load Balancer Controller IAM policy](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html)
+- [EBS CSI driver IAM policy](https://docs.aws.amazon.com/eks/latest/userguide/csi-iam-role.html)
+
+### IAM roles for Sourcegraph workloads (recommended)
+
+For production deployments, use IRSA to grant Sourcegraph pods access to AWS services:
+
+- [External S3 storage](/self-hosted/external-services/object-storage) for code intelligence uploads
+- [AWS RDS for PostgreSQL](/self-hosted/external-services/postgres#usage-with-aws-rds-iam-auth) with IAM authentication
+
+Create specific IAM roles with only the permissions needed for each service account, scoped to the specific AWS resources (S3 buckets, RDS databases) that Sourcegraph will access.
 
 ## Prerequisites
 

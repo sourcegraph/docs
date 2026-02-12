@@ -8,6 +8,12 @@ If your preferred cloud provider is Amazon, we strongly recommend using EKS inst
 
 This guide will help you create a simple Kuberentes cluster using EKS, for more information or other advanced use-cases, please check [Amazon EKS documentation](https://docs.aws.amazon.com/eks/latest/userguide/getting-started.html).
 
+<Callout type="note">
+	For security, please follow [Amazon best
+	practices](https://docs.aws.amazon.com/accounts/latest/reference/best-practices-root-user.html)
+	and _do not deploy Sourcegraph using your AWS account root user._
+</Callout>
+
 ## Requirements
 
 The easiest way to get started with Amazon EKS is using the `eksctl`. This tool will create all the necesary resources to bootstrap a simple Kuberentes cluster in AWS.
@@ -18,7 +24,216 @@ Before moving forward, you will need:
 -   `awscli`: The command line tool provided by Amazon to work with AWS resources. [Installation guide](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) and [Configuration guide](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html#cli-configure-quickstart-config).
 -   `kubectl`: The command line tool used for working with Kuberentes clusters and resources. [Installation guide](https://kubernetes.io/docs/tasks/tools/).
 -   `eksctl`: A tool provided by Waveworks for configuring and creating EKS clusters in Amazon. [Installation guide](https://eksctl.io/introduction/#installation).
--   **IAM permissions**: The user that will be performing the installation must have permissions to work with Amazon EKS IAM roles and service linked roles, AWS CloudFormation, and a VPC and related resources.
+
+## IAM permissions
+
+To deploy Sourcegraph on Amazon EKS, you will need an IAM user or role with the following permissions. Following the [principle of least privilege](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#grant-least-privilege), only grant the minimum permissions required for deployment and operation.
+
+### Required IAM policy for EKS deployment
+
+The IAM user or role performing the deployment needs the following permissions:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "EKSClusterManagement",
+      "Effect": "Allow",
+      "Action": [
+        "eks:CreateCluster",
+        "eks:DescribeCluster",
+        "eks:ListClusters",
+        "eks:UpdateClusterConfig",
+        "eks:UpdateClusterVersion",
+        "eks:DeleteCluster",
+        "eks:TagResource",
+        "eks:CreateNodegroup",
+        "eks:DescribeNodegroup",
+        "eks:DeleteNodegroup",
+        "eks:UpdateNodegroupConfig",
+        "eks:ListNodegroups"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "CloudFormationManagement",
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:CreateStack",
+        "cloudformation:DescribeStacks",
+        "cloudformation:DescribeStackEvents",
+        "cloudformation:DescribeStackResources",
+        "cloudformation:UpdateStack",
+        "cloudformation:DeleteStack",
+        "cloudformation:GetTemplate",
+        "cloudformation:ListStacks"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "IAMRoleManagement",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:GetRole",
+        "iam:PassRole",
+        "iam:AttachRolePolicy",
+        "iam:DetachRolePolicy",
+        "iam:CreateServiceLinkedRole",
+        "iam:PutRolePolicy",
+        "iam:DeleteRolePolicy",
+        "iam:GetRolePolicy",
+        "iam:ListAttachedRolePolicies",
+        "iam:ListRolePolicies",
+        "iam:TagRole"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "VPCAndNetworkingManagement",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:CreateVpc",
+        "ec2:DescribeVpcs",
+        "ec2:DeleteVpc",
+        "ec2:CreateSubnet",
+        "ec2:DescribeSubnets",
+        "ec2:DeleteSubnet",
+        "ec2:CreateInternetGateway",
+        "ec2:AttachInternetGateway",
+        "ec2:DescribeInternetGateways",
+        "ec2:DeleteInternetGateway",
+        "ec2:CreateRouteTable",
+        "ec2:DescribeRouteTables",
+        "ec2:DeleteRouteTable",
+        "ec2:CreateRoute",
+        "ec2:AssociateRouteTable",
+        "ec2:CreateSecurityGroup",
+        "ec2:DescribeSecurityGroups",
+        "ec2:DeleteSecurityGroup",
+        "ec2:AuthorizeSecurityGroupIngress",
+        "ec2:AuthorizeSecurityGroupEgress",
+        "ec2:RevokeSecurityGroupIngress",
+        "ec2:RevokeSecurityGroupEgress",
+        "ec2:CreateTags",
+        "ec2:DescribeTags",
+        "ec2:DescribeAvailabilityZones"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "EC2InstanceManagement",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:RunInstances",
+        "ec2:DescribeInstances",
+        "ec2:TerminateInstances",
+        "ec2:DescribeKeyPairs",
+        "ec2:CreateKeyPair",
+        "ec2:DescribeImages",
+        "ec2:DescribeLaunchTemplates",
+        "ec2:CreateLaunchTemplate",
+        "ec2:DeleteLaunchTemplate",
+        "autoscaling:CreateAutoScalingGroup",
+        "autoscaling:DescribeAutoScalingGroups",
+        "autoscaling:UpdateAutoScalingGroup",
+        "autoscaling:DeleteAutoScalingGroup",
+        "autoscaling:CreateLaunchConfiguration",
+        "autoscaling:DescribeLaunchConfigurations"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "EBSVolumeManagement",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:CreateVolume",
+        "ec2:DescribeVolumes",
+        "ec2:AttachVolume",
+        "ec2:DetachVolume",
+        "ec2:DeleteVolume",
+        "ec2:CreateSnapshot",
+        "ec2:DescribeSnapshots",
+        "ec2:DeleteSnapshot"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+**Purpose of each permission set:**
+
+- **EKSClusterManagement**: Allows creation and management of the EKS cluster itself, including control plane configuration and node group management. This provides the managed Kubernetes environment where Sourcegraph will run.
+
+- **CloudFormationManagement**: Enables `eksctl` to use CloudFormation stacks for provisioning and managing EKS infrastructure components. CloudFormation provides declarative infrastructure management and automatic rollback on failures.
+
+- **IAMRoleManagement**: Permits creation of IAM roles required by EKS, including cluster service roles, node group roles, and pod execution roles. These roles enable secure communication between Kubernetes components and AWS services.
+
+- **VPCAndNetworkingManagement**: Creates and configures dedicated VPC network infrastructure for the EKS cluster, including subnets, routing, internet gateways, and security groups. This isolates the cluster and controls network traffic for security.
+
+- **EC2InstanceManagement**: Manages EC2 instances that serve as Kubernetes worker nodes, including launch templates and auto-scaling groups. Auto-scaling enables dynamic scaling of compute resources based on workload demands.
+
+- **EBSVolumeManagement**: Provides persistent storage for Sourcegraph pods using EBS volumes, storing application data, databases, and search indices. Snapshot permissions enable backup capabilities.
+
+### Optional permissions for advanced features
+
+If you plan to use AWS Load Balancer Controller for ingress or enable EBS CSI driver for persistent volumes, add these permissions:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "LoadBalancerManagement",
+      "Effect": "Allow",
+      "Action": [
+        "elasticloadbalancing:CreateLoadBalancer",
+        "elasticloadbalancing:DescribeLoadBalancers",
+        "elasticloadbalancing:DeleteLoadBalancer",
+        "elasticloadbalancing:CreateTargetGroup",
+        "elasticloadbalancing:DescribeTargetGroups",
+        "elasticloadbalancing:RegisterTargets",
+        "elasticloadbalancing:CreateListener",
+        "elasticloadbalancing:DescribeListeners",
+        "elasticloadbalancing:ModifyLoadBalancerAttributes",
+        "elasticloadbalancing:AddTags"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "CertificateManagement",
+      "Effect": "Allow",
+      "Action": [
+        "acm:RequestCertificate",
+        "acm:DescribeCertificate",
+        "acm:ListCertificates"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+**Purpose of each permission set:**
+
+- **LoadBalancerManagement**: Enables the AWS Load Balancer Controller to automatically provision and manage Application Load Balancers for Kubernetes ingress resources, providing HTTPS/TLS termination and traffic distribution.
+
+- **CertificateManagement**: Allows automatic SSL/TLS certificate provisioning and management through AWS Certificate Manager for securing ingress endpoints.
+
+### IAM roles for service accounts (IRSA)
+
+For production deployments, it's recommended to use [IAM roles for service accounts (IRSA)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html) to grant Sourcegraph pods access to AWS services like S3 or RDS. This eliminates the need for static credentials and follows the principle of least privilege.
+
+When using IRSA:
+- [External S3 storage](/self-hosted/external-services/object-storage) for code intelligence uploads
+- [AWS RDS for PostgreSQL](/self-hosted/external-services/postgres#usage-with-aws-rds-iam-auth) with IAM authentication
+
+Create specific IAM roles with only the permissions needed for each service account, scoped to the specific AWS resources (S3 buckets, RDS databases) that Sourcegraph will access.
+
+## Parameters
 
 Through this guide, we will be using a number of parameters starting with `$` that you will need to replace with your desired values:
 
