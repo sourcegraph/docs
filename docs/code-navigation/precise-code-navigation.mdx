@@ -5,57 +5,46 @@
 	<user>Available via the Web app.</user>
 </TierCallout>
 
-<p className="subtitle">Learn and understand about Precise Code Navigation.</p>
+<p className="subtitle">Learn and understand Precise Code Navigation.</p>
 
 Precise Code Navigation is an opt-in feature that is enabled from your admin settings and requires you to upload indexes for each repository to your Sourcegraph instance. Once setup is complete on Sourcegraph, precise code navigation is available for use across popular development tools:
 
--   On the Sourcegraph web UI
--   On code files on your code host, via [integrations](/integration/)
--   On diffs in your code review tool, via integrations
--   Via the [Sourcegraph API](/api/graphql)
+- On the Sourcegraph web UI
+- On code files on your code host, via [integrations](/integration/)
+- On diffs in your code review tool, via integrations
+- Via the [Sourcegraph API](/api/graphql)
+- Via the [Sourcegraph MCP Tools](api/mcp): `go_to_definition` and `find_references`
 
 Sourcegraph automatically uses Precise Code Navigation whenever available, and Search-based Code Navigation is used as a fallback when precise navigation is not available.
 
 Precise code navigation relies on the open source [SCIP Code Intelligence Protocol](https://github.com/sourcegraph/scip), which is a language-agnostic protocol for indexing source code.
 
-## Setting up code navigation for your codebase
+## Setting up precise code navigation
+
+Precise Code Navigation requires language-specific indexes to be generated and uploaded to your Sourcegraph instance. Start with the guide for your preferred language. Each guide covers indexer installation, index generation, uploading, and CI integration steps specific to that language. See the [indexers page](/code-navigation/writing-an-indexer) for a detailed breakdown of each indexer's status.
+
+| Language               | Indexer                                                                           | Status                 | Setup guide                                                                        |
+| ---------------------- | --------------------------------------------------------------------------------- | ---------------------- | ---------------------------------------------------------------------------------- |
+| Go                     | [scip-go](https://sourcegraph.com/github.com/sourcegraph/scip-go)                 | 🟢 Generally available | [Go guide](/code-navigation/how-to/index-a-go-repository)                          |
+| TypeScript, JavaScript | [scip-typescript](https://sourcegraph.com/github.com/sourcegraph/scip-typescript) | 🟢 Generally available | [TS/JS guide](/code-navigation/how-to/index-a-typescript-and-javascript-repository) |
+| C, C++, CUDA           | [scip-clang](https://sourcegraph.com/github.com/sourcegraph/scip-clang)           | 🟢 Generally available | [C/C++ guide](/code-navigation/how-to/index-a-cpp-repository)                      |
+| Java, Kotlin, Scala    | [scip-java](https://sourcegraph.com/github.com/sourcegraph/scip-java)             | 🟢 Generally available | [JVM guide](/code-navigation/how-to/index-a-jvm-repository)                        |
+| Rust                   | [rust-analyzer](https://sourcegraph.com/github.com/rust-lang/rust-analyzer)       | 🟢 Generally available | [Rust guide](/code-navigation/how-to/index-a-rust-repository)                      |
+| Python                 | [scip-python](https://sourcegraph.com/github.com/sourcegraph/scip-python)         | 🟢 Generally available | [Python guide](/code-navigation/how-to/index-a-python-repository)                  |
+| Ruby                   | [scip-ruby](https://sourcegraph.com/github.com/sourcegraph/scip-ruby)             | 🟢 Generally available | [Ruby guide](/code-navigation/how-to/index-a-ruby-repository)                      |
+| C#, Visual Basic       | [scip-dotnet](https://github.com/sourcegraph/scip-dotnet)                         | 🟢 Generally available | [C# guide](/code-navigation/how-to/index-a-csharp-repository)                      |
+
+Once you've verified the indexer works locally, you can automate it as part of your CI/CD pipelines:
+
+-   [**CI/CD integration patterns**](/code-navigation/how-to/adding-scip-to-workflows) — general guidance for GitHub Actions, CircleCI, and other CI frameworks (sub-projects, custom build environments, upload frequency).
+-   [**Auto-indexing**](/code-navigation/auto-indexing#enable-auto-indexing) — let Sourcegraph automatically index your repositories using [executors](/admin/executors/).
 
 <Callout type="info">
-	Auto-indexing is a fast way to get started, but for complex or
-	authenticated builds we recommend [running SCIP indexing in your CI
-	pipeline](/code-navigation/how-to/adding-scip-to-workflows). This reuses
-	your existing build configuration and secrets, delivering more reliable,
-	repeatable precise code navigation. For best results, verify the indexer
-	runs successfully on your machine first, then add it as a CI job.
+	For complex or authenticated builds, we recommend [running SCIP indexing
+	in your CI pipeline](/code-navigation/how-to/adding-scip-to-workflows)
+	rather than auto-indexing. CI reuses your existing build configuration and
+	secrets, delivering more reliable, repeatable precise code navigation.
 </Callout>
-
-1. **Manual indexing**. Index a repository and upload it to your Sourcegraph instance:
-
-    - [Index a Go repository](/code-navigation/how-to/index-a-go-repository#manual-indexing)
-    - [Index a TypeScript or JavaScript repository](/code-navigation/how-to/index-a-typescript-and-javascript-repository#manual-indexing)
-    - [Index a Java, Scala, or Kotlin repository](https://sourcegraph.github.io/scip-java/docs/getting-started.html)
-    - [Index a Python repository](https://sourcegraph.com/github.com/sourcegraph/scip-python)
-    - [Index a Ruby repository](https://sourcegraph.com/github.com/sourcegraph/scip-ruby)
-
-2. [**Automate indexing via CI**](/code-navigation/how-to/adding-scip-to-workflows): Add indexing and uploading to your CI setup.
-3. [**Auto-indexing**](/code-navigation/auto-indexing#enable-auto-indexing): Sourcegraph will automatically index your repositories and enable precise code navigation for them.
-
-## Supported languages and indexers
-
-Precise Code Navigation requires language-specific indexes to be generated and uploaded to your Sourcegraph instance. We currently have precise code navigation support for the languages below. See the [indexers page](/code-navigation/writing-an-indexer) for a detailed breakdown of each indexer's status.
-
-| Language               | Indexer                                                                           | Status                 |
-| ---------------------- | --------------------------------------------------------------------------------- | ---------------------- |
-| Go                     | [scip-go](https://sourcegraph.com/github.com/sourcegraph/scip-go)                 | 🟢 Generally available |
-| TypeScript, JavaScript | [scip-typescript](https://sourcegraph.com/github.com/sourcegraph/scip-typescript) | 🟢 Generally available |
-| C, C++, CUDA           | [scip-clang](https://sourcegraph.com/github.com/sourcegraph/scip-clang)           | 🟢 Generally available |
-| Java, Kotlin, Scala    | [scip-java](https://sourcegraph.com/github.com/sourcegraph/scip-java)             | 🟢 Generally available |
-| Rust                   | [rust-analyzer](https://sourcegraph.com/github.com/rust-lang/rust-analyzer)       | 🟢 Generally available |
-| Python                 | [scip-python](https://sourcegraph.com/github.com/sourcegraph/scip-python)         | 🟢 Generally available |
-| Ruby                   | [scip-ruby](https://sourcegraph.com/github.com/sourcegraph/scip-ruby)             | 🟢 Generally available |
-| C#, Visual Basic       | [scip-dotnet](https://github.com/sourcegraph/scip-dotnet)                         | 🟢 Generally available |
-
-The easiest way to configure precise code navigation is with [auto-indexing](/code-navigation/auto-indexing). This feature uses [Sourcegraph executors](/admin/executors/) to automatically create indexes for the code, keeping precise code navigation available and up-to-date.
 
 ## Precise navigation examples
 

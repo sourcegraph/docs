@@ -1,0 +1,83 @@
+# Index a C/C++ repository
+
+<p className="subtitle">
+	This page describes how you can use [scip-clang](https://github.com/sourcegraph/scip-clang) and [src-cli](https://github.com/sourcegraph/src-cli) to enable precise indexing for C/C++ codebases.
+</p>
+
+<Callout type="note">
+	Binary releases of scip-clang are available for x86_64 Linux (glibc 2.16+) and x86_64 macOS (arm64 macOS is supported via Rosetta). Windows support is being explored.
+</Callout>
+
+## CI/CD Integrations and Local Indexing
+
+For integration with other CI/CD systems, or to test precise indexing of an individual repository, the following instructions can be used
+to install and run `scip-clang` and `src-cli`.
+
+<Callout type="info">
+	For general CI patterns (sub-projects, custom build environments, and upload frequency), see [Adding precise code navigation to CI/CD workflows](/code-navigation/how-to/adding-scip-to-workflows).
+</Callout>
+
+### Prerequisites
+
+scip-clang requires a [JSON compilation database](https://clang.llvm.org/docs/JSONCompilationDatabase.html) (`compile_commands.json`). How to generate one depends on your build system:
+
+-   **CMake**: Pass `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON` when configuring.
+-   **Bazel**: Use [hedronvision/bazel-compile-commands-extractor](https://github.com/hedronvision/bazel-compile-commands-extractor) or [grailbio/bazel-compilation-database](https://github.com/grailbio/bazel-compilation-database).
+-   **Meson**: Use the Ninja backend (the default), which generates `compile_commands.json` automatically.
+-   **Make / other**: Use [Bear](https://github.com/rizsotto/Bear) to record compiler invocations.
+
+### Setup
+
+1. Download the latest scip-clang binary from the [releases page](https://github.com/sourcegraph/scip-clang/releases):
+
+```shell
+curl -L https://github.com/sourcegraph/scip-clang/releases/latest/download/scip-clang-x86_64-linux -o /usr/local/bin/scip-clang
+chmod +x /usr/local/bin/scip-clang
+```
+
+-   **macOS**: Replace `linux` with `macos` in the URL.
+
+2. Install the [Sourcegraph CLI](https://github.com/sourcegraph/src-cli):
+
+```shell
+ curl -L https://sourcegraph.com/.api/src-cli/src_linux_amd64 -o /usr/local/bin/src
+ chmod +x /usr/local/bin/src
+```
+
+-   **macOS**: Replace `linux` with `darwin` in the URL and choose the appropriate architecture: M1/M2 chips - `arm64`, Intel chips - `amd64`.
+-   **Windows**: Visit [the CLI repo](https://github.com/sourcegraph/src-cli) for further instructions.
+
+### Indexing
+
+1. Build your project first so that any generated source files are present on disk.
+
+2. `cd` into your project's root and run:
+
+```shell
+scip-clang --compdb-path=compile_commands.json
+```
+
+<Callout type="note">
+	scip-clang must be invoked from the project root, not from a subdirectory. The compilation database path is relative to the current working directory.
+</Callout>
+
+<Callout type="note">
+	scip-clang uses approximately 2 MB of temporary disk space per translation unit and about 2 GB of RAM per core. For large codebases, consider testing on a subset first by slicing the compilation database with jq:
+
+```shell
+jq '.[0:10]' compile_commands.json > compile_commands_subset.json
+scip-clang --compdb-path=compile_commands_subset.json
+```
+</Callout>
+
+3. Upload the data to a Sourcegraph instance with:
+
+```shell
+export SRC_ENDPOINT="YOUR_SOURCEGRAPH_URL"
+export SRC_ACCESS_TOKEN="YOUR_SOURCEGRAPH_API_TOKEN"
+
+cd path/to/index.scip
+src code-intel upload
+```
+
+The upload command will provide a URL you can visit to see the upload status.

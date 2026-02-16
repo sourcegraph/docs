@@ -1,133 +1,59 @@
-# Index a TypeScript or JavaScript repository
+# TypeScript and JavaScript SCIP indexing
 
 <p className="subtitle">
-	This page describes how to create an index for JavaScript and TypeScript
-	projects and uploading it to Sourcegraph.
+	This page describes how you can use [scip-typescript](https://github.com/sourcegraph/scip-typescript) 
+	and [src-cli](https://github.com/sourcegraph/src-cli) to enable precise indexing for TypeScript and JavaScript codebases.
 </p>
 
-We will use [`scip-typescript`](https://github.com/sourcegraph/scip-typescript) to create the index and the [Sourcegraph CLI](https://github.com/sourcegraph/src-cli) to upload it to Sourcegraph.
+## CI/CD Integrations and Local Indexing
 
-## Indexing in CI using scip-typescript directly
+For integration with other CI/CD systems, or to test precise indexing of an individual repository, the following instructions can be used
+to install and run `scip-typescript` and `src-cli`.
 
-In this approach, you will directly install `scip-typescript` and `src-cli` in CI. This is particularly useful if you are already using some other Docker image for your build.
+<Callout type="info">
+	For general CI patterns (sub-projects, custom build environments, and upload frequency), see [Adding precise code navigation to CI/CD workflows](/code-navigation/how-to/adding-scip-to-workflows).
+</Callout>
 
-Here is an example using GitHub Actions to create and upload an index for a TypeScript project.
+### Setup
 
-```yaml
-jobs:
-    create-index-and-upload:
-        # prevent forks of this repo from uploading lsif indexes
-        if: github.repository == '<insert your repo name>'
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v3
-            - name: Install dependencies
-              run: npm install
-            - name: Install scip-typescript
-              run: npm install -g @sourcegraph/scip-typescript
-            - name: Generate index
-              uses: scip-typescript index
-            - name: Install src-cli
-              run: |
-                  curl -L https://sourcegraph.com/.api/src-cli/src_linux_amd64 -o /usr/local/bin/src
-                  chmod +x /usr/local/bin/src
-            - name: Upload index
-              run: src code-intel upload -github-token='${{ secrets.GITHUB_TOKEN }}' -no-progress
-              env:
-                  SRC_ENDPOINT: https://sourcegraph.com/
+1. Install the [TypeScript SCIP indexer](https://github.com/sourcegraph/scip-typescript):
+
+```shell
+npm install -g @sourcegraph/scip-typescript
+```
+
+2. Install the [Sourcegraph CLI](https://github.com/sourcegraph/src-cli):
+
+```shell
+ curl -L https://sourcegraph.com/.api/src-cli/src_linux_amd64 -o /usr/local/bin/src
+ chmod +x /usr/local/bin/src
+```
+
+-   **macOS**: Replace `linux` with `darwin` in the URL and choose the appropriate architecture: M1/M2 chips - `arm64`, Intel chips - `amd64`.
+-   **Windows**: Visit [the CLI repo](https://github.com/sourcegraph/src-cli) for further instructions.
+
+### Indexing
+
+1. `cd` into your project's root (where `package.json`/`tsconfig.json` lives) and run:
+
+```shell
+ npm install
+ scip-typescript index # generates a file named index.scip
 ```
 
 <Callout type="note">
-	`src-cli` ignores index upload failures by default to avoid disrupting CI
-	pipelines with non-critical errors.
+	If you are indexing a JavaScript project instead of TypeScript, add the `--infer-tsconfig` flag.
+	For Yarn workspaces, add `--yarn-workspaces`. For Pnpm workspaces, add `--pnpm-workspaces`.
 </Callout>
 
-On CI providers other than GitHub Actions, you may need to explicitly install [Node.js](https://nodejs.org/) as a first step. See the [`scip-typescript` README](https://github.com/sourcegraph/scip-typescript) for the list of supported Node.js versions.
+2. Upload the data to a Sourcegraph instance with:
 
-### Optional scip-typescript flags
+```shell
+export SRC_ENDPOINT="YOUR_SOURCEGRAPH_URL"
+export SRC_ACCESS_TOKEN="YOUR_SOURCEGRAPH_API_TOKEN"
 
-The exact `scip-typescript` invocation will vary based on your configuration. For example:
-
--   If you are indexing a JavaScript project instead of TypeScript, add the `--infer-tsconfig` flag.
-
-    ```sh
-        scip-typescript index --infer-tsconfig
-    ```
-
--   If you are indexing a project using Yarn workspaces, add the `--yarn-workspaces` flag.
-
-    ```sh
-        scip-typescript index --yarn-workspaces
-    ```
-
--   If you are indexing a project using Pnpm workspaces, add the `--pnpm-workspaces` flag.
-
-    ```sh
-        scip-typescript index --pnpm-workspaces
-    ```
-
-## Indexing in CI using the scip-typescript Docker image
-
-Sourcegraph provides a Docker image for `sourcegraph/scip-typescript`, which bundles `src-cli` for convenience.
-
-Here is an example using the `scip-typescript` Docker image with GitHub Actions to index a TypeScript project.
-
-```yaml
-jobs:
-    create-and-upload-index:
-        # prevent forks of this repo from uploading lsif indexes
-        if: github.repository == '<insert your repo name>'
-        runs-on: ubuntu-latest
-        container: sourcegraph/scip-typescript:latest
-        steps:
-            - uses: actions/checkout@v3
-            - name: Install dependencies
-              run: npm install
-            - name: Generate index
-              run: scip-typescript index
-            - name: Upload index
-              run: src code-intel upload -github-token=${{ secrets.GITHUB_TOKEN }} -no-progress
-              env:
-                  SRC_ENDPOINT: https://sourcegraph.com/
+cd path/to/index.scip
+src code-intel upload
 ```
 
-If you are indexing a JavaScript codebase or a project using Yarn workspaces, tweak the `scip-typescript` invocation as documented in the [Optional scip-typescript flags](#optional-scip-typescript-flags) section.
-
-## One-off indexing using scip-typescript locally
-
-Creating one-off indexes and uploading them is valuable as a proof of concept, but indexes are not kept up to date.
-
-The steps here are similar to those in the previous GitHub Actions example.
-
-1. Install `scip-typescript`.
-
-```sh
-  npm install -g @sourcegraph/scip-typescript
-```
-
-2. Install the Sourcegraph CLI.
-
-```sh
-    curl -L https://sourcegraph.com/.api/src-cli/src_linux_amd64 -o /usr/local/bin/src
-    chmod +x /usr/local/bin/src
-```
-
-The exact invocation may change depending on the OS and architecture. See the [`src-cli` README](https://github.com/sourcegraph/src-cli#installation) for details.
-
-3. `cd` into your project's root (which contains `package.json`/`tsconfig.json`) and run the following:
-
-```sh
-  npm install # Enable (1) type-checking code used from external packages and (2) cross-repo navigation by installing dependencies first with npm or yarn
-  scip-typescript index # for TypeScript projects
-```
-
-If you are indexing a JavaScript codebase or a project using Yarn workspaces, tweak the `scip-typescript` invocation as documented in the [Optional scip-typescript flags](#optional-scip-typescript-flags) section.
-
-4. Upload the data to a Sourcegraph instance.
-
-```sh
-  SRC_ENDPOINT=<your sourcegraph endpoint> src code-intel upload # for private instances
-  src code-intel upload -github-token=<your github token>  # for public instances
-```
-
-The upload command will provide a URL you can visit to see the upload status. Once the upload has finished processing, you can visit the repo and enjoy precise code navigation!
+The upload command will provide a URL you can visit to see the upload status.

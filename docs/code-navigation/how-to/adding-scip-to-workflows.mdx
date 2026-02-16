@@ -1,12 +1,12 @@
 # Adding precise code navigation to CI/CD workflows
 
-## Language-specific guides
-
-We are working on creating language specific guides for use with different indexers, so make sure to check for the documentation for your language! If there isn't a guide for your language, this general guide will help you through the precise code navigation setup process.
+<Callout type="info">
+	This page covers **general CI/CD patterns** — container usage, sub-projects, custom build environments, and upload frequency. For language-specific indexer installation and usage, start with the [language guide for your codebase](/code-navigation/precise-code-navigation#setting-up-code-navigation-for-your-codebase).
+</Callout>
 
 ## Benefits of CI integration
 
-Setting up a source code indexing job in your CI build provides you with fast code navigation that gives you more control on when source code gets indexed, and ensures accuracy of your code navigation by keeping in sync with changes in your repository. Due to the large number of CI frameworks and languages we may not have specific documentation for your use case. Feel free to [contact us](https://help.sourcegraph.com/hc/en-us/requests/new) if you're having difficulties and we can help troubleshoot your setup.
+Setting up a [SCIP](https://github.com/sourcegraph/scip) indexing job in your CI build gives you more control over when source code gets indexed and ensures accuracy of your code navigation by keeping in sync with changes in your repository. Due to the large number of CI frameworks and languages we may not have specific documentation for your use case. Feel free to [contact us](https://help.sourcegraph.com/hc/en-us/requests/new) if you're having difficulties and we can help troubleshoot your setup.
 
 ## Using indexer containers
 
@@ -19,12 +19,12 @@ Some indexers will work out of the box by just running them in your project root
 ```yaml
 jobs:
     scip-go:
-        #this line will prevent forks of this repo from uploading lsif indexes
+        # Prevent forks of this repo from uploading SCIP indexes
         if: github.repository == '<insert your repo name>'
         runs-on: ubuntu-latest
         container: sourcegraph/scip-go:latest
         steps:
-            - uses: actions/checkout@v1
+            - uses: actions/checkout@v4
             - name: Generate index
               run: scip-go
             - name: Install src CLI
@@ -49,7 +49,7 @@ jobs:
         runs-on: ubuntu-latest
         container: sourcegraph/scip-go:latest
         steps:
-            - uses: actions/checkout@v1
+            - uses: actions/checkout@v4
             - name: Generate index
               working-directory: backend/
               run: scip-go
@@ -78,12 +78,12 @@ This second step is easy in GitHub actions because our container can be used as 
 ```yaml
 jobs:
     scip-typescript:
-        # this line will prevent forks of this repo from uploading scip indexes
+        # Prevent forks of this repo from uploading SCIP indexes
         if: github.repository == '<insert your repo name>'
         runs-on: ubuntu-latest
         container: my-awesome-container
         steps:
-            - uses: actions/checkout@v1
+            - uses: actions/checkout@v4
             - name: Install dependencies
               run: <install dependencies>
             - name: Generate index
@@ -98,9 +98,9 @@ jobs:
                   args: src code-intel upload -github-token=${{ secrets.GITHUB_TOKEN }} -ignore-upload-failure
 ```
 
-### Circle CI Examples
+### CircleCI examples
 
-Certain frameworks like Circle CI may require you to explicitly cache artifacts between jobs. In CircleCI this might look like the following:
+Certain frameworks like CircleCI may require you to explicitly cache artifacts between jobs. This might look like the following:
 
 ```yaml
 version: 2.1
@@ -142,7 +142,7 @@ workflows:
 
 ## CI from scratch
 
-If you're indexing a language we haven't documented yet in our [language-specific guides](/code-navigation/precise-code-navigation#setting-up-code-navigation-for-your-codebase), follow the instructions in this section. We want to have containers available for every language with a robust indexer, so please [contact](https://help.sourcegraph.com/hc/en-us/requests/new) to let us know we're missing one.
+If you're indexing a language that doesn't have a dedicated guide in our [language-specific guides](/code-navigation/precise-code-navigation#setting-up-code-navigation-for-your-codebase), follow the instructions in this section. We want to have containers available for every language with a robust indexer, so please [contact us](https://help.sourcegraph.com/hc/en-us/requests/new) to let us know we're missing one.
 
 ### Set up your CI machines
 
@@ -153,8 +153,8 @@ Your CI machines will need two command-line tools installed. Depending on your b
 
 ### Add steps to your CI
 
-1. **Generate an index** for a project within your repository by running the indexer in the project directory (consult your indexer's docs).
-1. **[Upload that generated index](/code-navigation/precise-code-navigation#setting-up-code-navigation-for-your-codebase)** to your Sourcegraph instance.
+1. **Generate a SCIP index** for a project within your repository by running the indexer in the project directory (consult your indexer's docs).
+1. **[Upload the generated index](/code-navigation/precise-code-navigation#setting-up-code-navigation-for-your-codebase)** to your Sourcegraph instance.
 
 ## Recommended upload frequency
 
@@ -169,3 +169,20 @@ With periodic jobs, you should still receive precise code navigation on non-inde
 Indexes can be uploaded to a self-hosted Sourcegraph instance or to [Sourcegraph.com](https://sourcegraph.com). Using the [Sourcegraph.com](https://sourcegraph.com) endpoint will surface code navigation for your public repositories directly on GitHub via the [Sourcegraph browser extension](/integration/browser-extension) and at `https://sourcegraph.com/github.com/<your-username>/<your-repo>`.
 
 Using the [Sourcegraph.com](https://sourcegraph.com) endpoint is free and your index is treated as User-Generated Content (you own it, as covered in our [Sourcegraph.com terms of service](https://about.sourcegraph.com/terms-dotcom#3-proprietary-rights-and-licenses)). If you run into trouble, or a situation arises where you need all of your index expunged, please reach out to us at [support@sourcegraph.com](mailto:support@sourcegraph.com).
+
+### Proving ownership of a GitHub repository
+
+<Callout type="note">
+	If you're using Sourcegraph.com or have enabled
+	[`lsifEnforceAuth`](/admin/config/site-config#lsifEnforceAuth), you need to
+	supply a GitHub token via the `-github-token` flag when uploading. This token
+	is used to verify repository ownership.
+</Callout>
+
+To upload to Sourcegraph.com, use the `-github-token` flag:
+
+```sh
+src code-intel upload -github-token=YourGitHubToken -file=index.scip
+```
+
+The `src` upload command will try to infer the repository and git commit by invoking git commands on your local clone. If git is not installed, is older than version 2.7.0, or you are running on code outside of a git clone, you will need to also specify the `-repo` and `-commit` flags explicitly.
