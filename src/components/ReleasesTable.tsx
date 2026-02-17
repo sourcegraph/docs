@@ -1,6 +1,7 @@
 'use client';
 
 import {useEffect, useState} from 'react';
+import Link from 'next/link';
 
 type Release = {
 	id: number;
@@ -24,27 +25,24 @@ function formatDate(dateString: string): string {
 	});
 }
 
-function getChangelogAnchor(version: string): string {
-	return version.replace(/^v/, '').replace(/\./g, '');
-}
-
 type LegacyRelease = {
 	name: string;
 	date: string;
-	anchor: string;
+	anchor?: string;
+	url?: string;
 };
 
 const legacySupportedReleases: LegacyRelease[] = [
-	{name: '5.10 Patch 1', date: 'December 2024', anchor: 'v5101164'},
-	{name: '5.10 Patch 0', date: 'November 2024', anchor: 'v5100'},
-	{name: '5.9 Patch 3', date: 'November 2024', anchor: 'v591590'},
-	{name: '5.9 Patch 2', date: 'November 2024', anchor: 'v59347'},
-	{name: '5.9 Patch 1', date: 'November 2024', anchor: 'v5945'},
-	{name: '5.9 Patch 0', date: 'October 2024', anchor: 'v590'},
-	{name: '5.8 Patch 1', date: 'October 2024', anchor: 'v581579'},
-	{name: '5.8 Patch 0', date: 'October 2024', anchor: 'v580'},
-	{name: '5.7 Patch 1', date: 'September 2024', anchor: 'v572474'},
-	{name: '5.7 Patch 0', date: 'September 2024', anchor: 'v570'},
+	{name: '5.10 Patch 1', date: 'December 2024', url: 'https://sourcegraph.com/changelog/releases/5.10.1164'},
+	{name: '5.10 Patch 0', date: 'November 2024', url: 'https://sourcegraph.com/changelog/releases/5.10.0'},
+	{name: '5.9 Patch 3', date: 'November 2024', url: 'https://sourcegraph.com/changelog/releases/5.9.1590'},
+	{name: '5.9 Patch 2', date: 'November 2024', url: 'https://sourcegraph.com/changelog/releases/5.9.347'},
+	{name: '5.9 Patch 1', date: 'November 2024', url: 'https://sourcegraph.com/changelog/releases/5.9.45'},
+	{name: '5.9 Patch 0', date: 'October 2024', url: 'https://sourcegraph.com/changelog/releases/5.9.0'},
+	{name: '5.8 Patch 1', date: 'October 2024', url: 'https://sourcegraph.com/changelog/releases/5.8.1579'},
+	{name: '5.8 Patch 0', date: 'October 2024', url: 'https://sourcegraph.com/changelog/releases/5.8.0'},
+	{name: '5.7 Patch 1', date: 'September 2024', url: 'https://sourcegraph.com/changelog/releases/5.7.2474'},
+	{name: '5.7 Patch 0', date: 'September 2024', url: 'https://sourcegraph.com/changelog/releases/5.7.0'},
 	{name: '5.6 Patch 2', date: 'August 2024', anchor: 'v562535'},
 	{name: '5.6 Patch 1', date: 'August 2024', anchor: 'v56185'},
 	{name: '5.6', date: 'August 2024', anchor: 'v560'},
@@ -133,21 +131,19 @@ export function SupportedReleasesTable() {
 							<td className="px-4 py-2">✅</td>
 							<td className="px-4 py-2">
 								<a
-									href={`/technical-changelog#v${getChangelogAnchor(
-										release.version
-									)}`}
+									href={`https://sourcegraph.com/changelog/releases/${release.version.replace(/^v/, '')}`}
 									className="text-blue-600 hover:underline dark:text-blue-400"
 								>
 									Notes
 								</a>
 							</td>
 							<td className="px-4 py-2">
-								<a
+								<Link
 									href="/admin/deploy"
 									className="text-blue-600 hover:underline dark:text-blue-400"
 								>
 									Install
-								</a>
+								</Link>
 							</td>
 						</tr>
 					))}
@@ -157,20 +153,29 @@ export function SupportedReleasesTable() {
 							<td className="px-4 py-2">{release.date}</td>
 							<td className="px-4 py-2">✅</td>
 							<td className="px-4 py-2">
-								<a
-									href={`/technical-changelog#${release.anchor}`}
-									className="text-blue-600 hover:underline dark:text-blue-400"
-								>
-									Notes
-								</a>
+								{release.url ? (
+									<a
+										href={release.url}
+										className="text-blue-600 hover:underline dark:text-blue-400"
+									>
+										Notes
+									</a>
+								) : (
+									<Link
+										href={`/technical-changelog#${release.anchor}`}
+										className="text-blue-600 hover:underline dark:text-blue-400"
+									>
+										Notes
+									</Link>
+								)}
 							</td>
 							<td className="px-4 py-2">
-								<a
+								<Link
 									href="/admin/deploy"
 									className="text-blue-600 hover:underline dark:text-blue-400"
 								>
 									Install
-								</a>
+								</Link>
 							</td>
 						</tr>
 					))}
@@ -201,7 +206,7 @@ export function DeprecatedReleasesTable() {
 		{
 			version: '3.41',
 			date: 'June 2022',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3422'
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3411'
 		},
 		{
 			version: '3.40',
@@ -216,12 +221,12 @@ export function DeprecatedReleasesTable() {
 		{
 			version: '3.38',
 			date: 'March 2022',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3391'
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3381'
 		},
 		{
 			version: '3.37',
 			date: 'February 2022',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3391'
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3370'
 		},
 		{
 			version: '3.36',
@@ -236,7 +241,7 @@ export function DeprecatedReleasesTable() {
 		{
 			version: '3.34',
 			date: 'November 2021',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3352'
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3342'
 		},
 		{
 			version: '3.33',
@@ -251,17 +256,17 @@ export function DeprecatedReleasesTable() {
 		{
 			version: '3.31',
 			date: 'August 2021',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3321'
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3312'
 		},
 		{
 			version: '3.30',
 			date: 'July 2021',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3321'
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3304'
 		},
 		{
 			version: '3.29',
 			date: 'June 2021',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3321'
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3290'
 		}
 	];
 
@@ -291,15 +296,21 @@ export function DeprecatedReleasesTable() {
 							<td className="px-4 py-2">{release.date}</td>
 							<td className="px-4 py-2">❌</td>
 							<td className="px-4 py-2">
-								<a
-									href={
-										release.url ||
-										`/technical-changelog#${release.anchor}`
-									}
-									className="text-blue-600 hover:underline dark:text-blue-400"
-								>
-									Notes
-								</a>
+								{release.url ? (
+									<a
+										href={release.url}
+										className="text-blue-600 hover:underline dark:text-blue-400"
+									>
+										Notes
+									</a>
+								) : (
+									<Link
+										href={`/technical-changelog#${release.anchor}`}
+										className="text-blue-600 hover:underline dark:text-blue-400"
+									>
+										Notes
+									</Link>
+								)}
 							</td>
 						</tr>
 					))}

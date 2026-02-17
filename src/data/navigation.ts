@@ -640,10 +640,6 @@ export const navigation: NavigationItem[] = [
 				href: 'https://sourcegraph.com/changelog'
 			},
 			{
-				title: 'Technical changelog',
-				href: '/technical-changelog'
-			},
-			{
 				title: 'Releases',
 				href: '/releases'
 			}
