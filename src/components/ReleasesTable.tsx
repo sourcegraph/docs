@@ -1,6 +1,7 @@
 'use client';
 
 import {useEffect, useState} from 'react';
+import Link from 'next/link';
 
 type Release = {
 	id: number;
@@ -132,22 +133,22 @@ export function SupportedReleasesTable() {
 							</td>
 							<td className="px-4 py-2">✅</td>
 							<td className="px-4 py-2">
-								<a
+								<Link
 									href={`/technical-changelog#v${getChangelogAnchor(
 										release.version
 									)}`}
 									className="text-blue-600 hover:underline dark:text-blue-400"
 								>
 									Notes
-								</a>
+								</Link>
 							</td>
 							<td className="px-4 py-2">
-								<a
+								<Link
 									href="/admin/deploy"
 									className="text-blue-600 hover:underline dark:text-blue-400"
 								>
 									Install
-								</a>
+								</Link>
 							</td>
 						</tr>
 					))}
@@ -157,20 +158,20 @@ export function SupportedReleasesTable() {
 							<td className="px-4 py-2">{release.date}</td>
 							<td className="px-4 py-2">✅</td>
 							<td className="px-4 py-2">
-								<a
+								<Link
 									href={`/technical-changelog#${release.anchor}`}
 									className="text-blue-600 hover:underline dark:text-blue-400"
 								>
 									Notes
-								</a>
+								</Link>
 							</td>
 							<td className="px-4 py-2">
-								<a
+								<Link
 									href="/admin/deploy"
 									className="text-blue-600 hover:underline dark:text-blue-400"
 								>
 									Install
-								</a>
+								</Link>
 							</td>
 						</tr>
 					))}
@@ -201,7 +202,7 @@ export function DeprecatedReleasesTable() {
 		{
 			version: '3.41',
 			date: 'June 2022',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3422'
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3411'
 		},
 		{
 			version: '3.40',
@@ -216,12 +217,12 @@ export function DeprecatedReleasesTable() {
 		{
 			version: '3.38',
 			date: 'March 2022',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3391'
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3381'
 		},
 		{
 			version: '3.37',
 			date: 'February 2022',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3391'
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3370'
 		},
 		{
 			version: '3.36',
@@ -236,7 +237,7 @@ export function DeprecatedReleasesTable() {
 		{
 			version: '3.34',
 			date: 'November 2021',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3352'
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3342'
 		},
 		{
 			version: '3.33',
@@ -251,17 +252,17 @@ export function DeprecatedReleasesTable() {
 		{
 			version: '3.31',
 			date: 'August 2021',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3321'
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3312'
 		},
 		{
 			version: '3.30',
 			date: 'July 2021',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3321'
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3304'
 		},
 		{
 			version: '3.29',
 			date: 'June 2021',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3321'
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3290'
 		}
 	];
 
@@ -291,15 +292,21 @@ export function DeprecatedReleasesTable() {
 							<td className="px-4 py-2">{release.date}</td>
 							<td className="px-4 py-2">❌</td>
 							<td className="px-4 py-2">
-								<a
-									href={
-										release.url ||
-										`/technical-changelog#${release.anchor}`
-									}
-									className="text-blue-600 hover:underline dark:text-blue-400"
-								>
-									Notes
-								</a>
+								{release.url ? (
+									<a
+										href={release.url}
+										className="text-blue-600 hover:underline dark:text-blue-400"
+									>
+										Notes
+									</a>
+								) : (
+									<Link
+										href={`/technical-changelog#${release.anchor}`}
+										className="text-blue-600 hover:underline dark:text-blue-400"
+									>
+										Notes
+									</Link>
+								)}
 							</td>
 						</tr>
 					))}
