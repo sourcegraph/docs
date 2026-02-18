@@ -21,7 +21,7 @@ All site configuration options and their default values are shown below.
 
 {/* SCHEMA_SYNC_START: admin/config/site.schema.json */}
 {/* WARNING: This section is auto-generated during releases. Do not edit manually. */}
-{/* Last updated: 2026-01-22T04:55:03Z */}
+{/* Last updated: 2026-02-18T20:30:29Z */}
 ```json
 {
 
@@ -78,6 +78,9 @@ All site configuration options and their default values are shown below.
 
 	// Reject unverified commits when creating a Batch Change
 	"batchChanges.rejectUnverifiedCommit": false,
+
+	// When enabled, only site admins can merge changesets using the Batch Changes UI. This is useful when the Batch Changes GitHub App has elevated access and you want to restrict who can merge changes.
+	"batchChanges.restrictMergeToAdmins": false,
 
 	// When enabled, only site admins can create and apply batch changes.
 	"batchChanges.restrictToAdmins": false,
@@ -168,6 +171,9 @@ All site configuration options and their default values are shown below.
 	// - 20
 	"debug.search.symbolsParallelism": 0,
 
+	// Use database-backed worker for Deep Search question processing instead of in-memory worker pool. Enables persistence across frontend restarts.
+	"deepSearch.worker.enabled": true,
+
 	// The rate limit (in requests per hour) for the default rate limiter in the rate limiters registry. By default this is disabled and the default rate limit is infinity.
 	"defaultRateLimit": -1,
 
@@ -176,6 +182,9 @@ All site configuration options and their default values are shown below.
 
 	// Disable periodically fetching git contents for existing repositories.
 	"disableAutoGitUpdates": false,
+
+	// Disable fetching changelog posts from the external Sourcegraph changelog API. Useful for airgapped environments.
+	"disableChangelog": false,
 
 	// Disable the feedback survey
 	"disableFeedbackSurvey": false,
@@ -269,13 +278,16 @@ All site configuration options and their default values are shown below.
 			"extsvc.gitlab": false
 		},
 		"deepSearch.enabled": false,
+		"deepSearch.model": "anthropic::2024-10-22::claude-sonnet-4-latest",
 		"deepSearch.sharing.enabled": false,
+		"deepSearch.showCodyWeb": false,
 		"enableGithubInternalRepoVisibility": false,
 		"enablePermissionsWebhooks": false,
 		"enableStorm": false,
 		"eventLogging": "enabled",
 		"gitServerPinnedRepos": null,
 		"goPackages": "disabled",
+		"homepage": null,
 		"insightsAlternateLoadingStrategy": false,
 		"insightsBackfillerV2": true,
 		"insightsDataRetention": true,
@@ -429,7 +441,7 @@ All site configuration options and their default values are shown below.
 
 	"modelConfiguration": null,
 
-	// Notifications recieved from Sourcegraph.com to display in Sourcegraph.
+	// Notifications received from Sourcegraph.com to display in Sourcegraph.
 	// Other example values:
 	// - {
 	//     "key": "2023-03-10-my-key",
@@ -543,6 +555,9 @@ All site configuration options and their default values are shown below.
 	// Identity provider used for SCIM support.  "STANDARD" should be used unless a more specific value is available
 	// Valid options: "STANDARD", "Azure AD"
 	"scim.identityProvider": "STANDARD",
+
+	// Enable AI query helper mode in search, including natural language query translation suggestions.
+	"search.aiQueryHelper.enabled": false,
 
 	// The number of threads each indexserver should use to index shards. If not set, indexserver will use the number of available CPUs. This is exposed as a safeguard and should usually not require being set.
 	// Other example values:
@@ -694,7 +709,13 @@ All site configuration options and their default values are shown below.
 		]
 	},
 
-	// IP allowlist for access to the Sourcegraph instance. If set, only requests from these IP addresses will be allowed. By default client IP is infered connected client IP address, and you may configure to use a request header to determine the user IP.
+	// Requires PIN or biometric verification when using admin passkeys. When enabled, authenticators must support and perform user verification (PIN entry, fingerprint, face recognition, etc.). This provides stronger assurance that the person using the passkey is the legitimate owner.
+	"auth.adminPasskeyPINRequired": false,
+
+	// Requires site admin users to verify their identity using a FIDO2/WebAuthn passkey before accessing admin pages. When enabled, admins must register at least one passkey and re-verify periodically (default: every hour). This provides step-up authentication for sensitive admin operations.
+	"auth.adminPasskeyRequired": false,
+
+	// IP allowlist for access to the Sourcegraph instance. If set, only requests from these IP addresses will be allowed. By default client IP is inferred connected client IP address, and you may configure to use a request header to determine the user IP.
 	"auth.allowedIpAddress": {
 		"clientIpAddress": null,
 		"enabled": false,
@@ -707,8 +728,11 @@ All site configuration options and their default values are shown below.
 	// Enables users to change their username after account creation. Warning: setting this to be true has security implications if you have enabled (or will at any point in the future enable) repository permissions with an option that relies on username equivalency between Sourcegraph and an external service or authentication provider. Do NOT set this to true if you are using non-built-in authentication OR rely on username equivalency for repository permissions.
 	"auth.enableUsernameChanges": false,
 
+	// When enabled, users are required to connect at least one external account to their Sourcegraph account. Site admins are exempt from this requirement.
+	"auth.enforceExternalAccountConnection": false,
+
 	// Enables OAuth 2.0 Dynamic Client Registration (RFC 7591) for the Sourcegraph identity provider. When enabled, OAuth clients can self-register programmatically instead of requiring manual pre-configuration. Required for MCP clients and other applications that use dynamic registration for authorization.
-	"auth.idpDynamicClientRegistrationEnabled": false,
+	"auth.idpDynamicClientRegistrationEnabled": true,
 
 	// The config options for account lockout
 	// Other example values:
@@ -761,7 +785,7 @@ All site configuration options and their default values are shown below.
 	],
 
 	// The maximum duration of a user session, after which it expires and the user is required to re-authenticate. The default is 90 days. Must be at least 1 hour. There is typically no need to set this, but some users may have specific internal security requirements.
-	// The string format is that of the Duration type in the Go time package (https://golang.org/pkg/time/#ParseDuration). E.g., "720h", "43200m", "2592000s" all indicate a timespan of 30 days.
+	// The string format is that of the Duration type in the Go time package (https://golang.org/pkg/time/#ParseDuration). E.g., "720h", "43200m", "2592000s" all indicate a time span of 30 days.
 	// Other example values:
 	// - "168h"
 	"auth.sessionExpiry": "2160h",
@@ -778,7 +802,7 @@ All site configuration options and their default values are shown below.
 	// Other example values:
 	// - {
 	//     "*": [
-	//       "myorg1"
+	//       "org1"
 	//     ]
 	//   }
 	"auth.userOrgMap": null,
@@ -830,7 +854,6 @@ All site configuration options and their default values are shown below.
 	//     "accessToken": "abc123",
 	//     "chatModel": "chat",
 	//     "completionModel": "code-completion",
-	//     "enabled": true,
 	//     "perUserDailyLimit": 100,
 	//     "provider": "openai"
 	//   }
@@ -951,7 +974,7 @@ All site configuration options and their default values are shown below.
 	// Maximum number of git clone processes that will be run concurrently per gitserver to update repositories. <= 0 means disabled.
 	"gitMaxConcurrentCleanups": 5,
 
-	// Maximum number of git clone processes that will be run concurrently per gitserver to update repositories. Note: the global git update scheduler respects gitMaxConcurrentClones. However, we allow each gitserver to run upto gitMaxConcurrentClones to allow for urgent fetches. Urgent fetches are used when a user is browsing a PR and we do not have the commit yet.
+	// Maximum number of git clone processes that will be run concurrently per gitserver to update repositories. Note: the global git update scheduler respects gitMaxConcurrentClones. However, we allow each gitserver to run up to gitMaxConcurrentClones to allow for urgent fetches. Urgent fetches are used when a user is browsing a PR and we do not have the commit yet.
 	"gitMaxConcurrentClones": 5,
 
 	// Record git operations that are executed on configured repositories.
@@ -1012,7 +1035,6 @@ All site configuration options and their default values are shown below.
 	//       "logo": "https://example.com/logo_dark.png",
 	//       "symbol": "https://example.com/search_symbol_dark_24x24.png"
 	//     },
-	//     "disableSymbolSpin": true,
 	//     "favicon": "https://example.com/favicon.ico",
 	//     "light": {
 	//       "logo": "https://example.com/logo_light.png",
@@ -1118,15 +1140,13 @@ All site configuration options and their default values are shown below.
 	// Configures distributed tracing within Sourcegraph. To learn more, refer to https://sourcegraph.com/docs/admin/observability/tracing
 	// Other example values:
 	// - {
-	//     "debug": false,
 	//     "sampling": "selective",
 	//     "type": "opentelemetry",
 	//     "urlTemplate": "https://ui.honeycomb.io/$ORG/environments/$DATASET/trace?trace_id={{ .TraceID }}"
 	//   }
 	// - {
-	//     "debug": true,
 	//     "sampling": "all",
-	//     "type": "jaeger",
+	//     "type": "opentelemetry",
 	//     "urlTemplate": "{{ .ExternalURL }}/-/debug/jaeger/trace/{{ .TraceID }}"
 	//   }
 	"observability.tracing": {
