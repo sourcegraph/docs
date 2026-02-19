@@ -61,6 +61,10 @@ Database Image Updates:
 
 These images contain an entry script that will detect and upgrade Postgres instances from version 12 (the version in our previous images) to Postgres 16.
 
+<Callout type="warning">
+Starting in Sourcegraph 7.0.0, the entrypoint script that automatically upgrades PostgreSQL 12 to 16 has been removed from the database container images. Users still on PostgreSQL 12 must upgrade to a 6.x version first to perform the automatic upgrade before upgrading to 7.0.0 or later.
+</Callout>
+
 > WARNING: Upgrading the PostgreSQL database requires stopping your Sourcegraph deployment which will result in **downtime**.
 >
 > Additionally, once the upgrade process is started via the database container, interrupting the container before the upgrade is complete could result in corrupting the underlying Postgres database. **We strongly advise taking a backup before the upgrade.**
@@ -75,6 +79,10 @@ We have the following advisements to admins:
 For additional assistance with PostgreSQL upgrades, please contact support@sourcegraph.com.
 
 ### Upgrade entrypoint script options
+
+<Callout type="note">
+The entrypoint upgrade script and its configuration options described below were removed in Sourcegraph 7.0.0. This section only applies to Sourcegraph 5.10.x through 6.x releases.
+</Callout>
 
 The `PG_UPGRADE_EXTRA_ARGS` environment variable allows you to customize the `pg_upgrade` command in `postgresql-16` and `postgresql-16-codeinsights` deployments.
 
@@ -108,4 +116,8 @@ When running an [external PostgreSQL instance](/self-hosted/external-services/po
 
 #### Single-container Sourcegraph
 
-Sourcegraph Single-container is not a supported production deployment and currently doesn't support upgrades to Postgres 16. Admins with production data in a single container deployment are advised to reach out to support@sourcegraph.com for assistance.
+<Callout type="warning">
+The single-container deployment (`sourcegraph/server`) is sunset in Sourcegraph 7.0.0 and is no longer supported. Admins using single-container deployments should migrate to a supported deployment type such as [Docker Compose](/self-hosted/deploy/docker-compose/) or [Kubernetes](/self-hosted/deploy/kubernetes/) before upgrading to 7.0.0.
+</Callout>
+
+For versions prior to 7.0.0, single-container deployments do not support automatic PostgreSQL upgrades. Admins with production data in a single-container deployment are advised to reach out to support@sourcegraph.com for assistance.
