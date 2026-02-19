@@ -481,26 +481,37 @@ For customers with specific needs, a variety of self-hosted deployment methods a
 	Learn more in the [Sourcegraph self-hosted docs](/self-hosted).
 </Callout>
 
+<Callout type="note">
+	Below diagrams are used to outline the architecture of Sourcegraph
+	self-hosted deployments on AWS. For more details on the core application
+	architecture, please refer to the [Sourcegraph architecture
+	overview](#overview) section above.
+</Callout>
+
 #### AWS (Docker Compose)
 
 ```mermaid
 architecture-beta
-    group vpc(aws:vpc)[VPC]
+    group account(aws:account)[AWS Account]
+
+    group vpc(aws:vpc)[VPC] in account
+    service ebs(aws:ebs)[Data Volume] in vpc
 
     group public_subnet(aws:public-subnet)[Public Subnet] in vpc
     group ec2_sg[Security Group] in public_subnet
-    service ec2(aws:ec2)[Sourcegraph Deployment] in ec2_sg
-    service ebs(aws:ebs)[Data Volume] in ec2_sg
+
+    group ec2(aws:ec2)[EC2] in ec2_sg
+    service sg_core(server)[Sourcegraph core] in ec2
 
     group private_subnet(aws:private-subnet)[Private Subnet] in vpc
     group rds_sg[Security Group] in private_subnet
     service rds(aws:rds)[RDS PostgreSQL] in rds_sg
 
-    ec2:R -- L:ebs
-    ec2:B -- T:rds
+    sg_core{group}:R -- L:ebs
+    sg_core:B -- T:rds
 ```
 
-#### AWS (EKS)
+#### AWS (Kubernetes)
 
 ```mermaid
 architecture-beta
