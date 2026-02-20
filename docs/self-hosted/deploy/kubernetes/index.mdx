@@ -969,13 +969,9 @@ The following procedures describe the process to update a Helm Sourcegraph insta
 
 ### Standard upgrades
 
-A [standard upgrade](/self-hosted/updates/#upgrade-types) occurs between a Sourcegraph version and the minor or major version released immediately after it. If you would like to jump forward several versions, you must perform a [multi-version upgrade](#multi-version-upgrades) instead.
+A [standard upgrade](/self-hosted/updates/#upgrade-types) occurs between your current Sourcegraph version and the next minor version released immediately after it. If you would like to jump forward several versions, you must perform a [multi-version upgrade](#multi-version-upgrades) instead.
 
 **Step 1:** Review [Helm Changelog] and [Sourcegraph Changelog] and select the most recent version compatible with your current Sourcegraph version.
-
-<Callout type="warning">
-	You can only upgrade one minor version of Sourcegraph at a time.
-</Callout>
 
 **Step 2:** Update your copy of the Sourcegraph Helm repo to ensure you have all the latest versions:
 
@@ -1019,16 +1015,13 @@ When all pods have restarted and show as Running, you can browse to your Sourceg
 
 <Callout type="warning">
 
-    The Kubernetes Helm deployment type does not support MVU from Sourcegraph
-    `v5.9.45` versions and earlier to ANY version `v6.0.x` or later. Admins
-    seeking to upgrade to any Sourcegraph version `v6.0.x` or later (including
-    `v6.1.x`, `v6.2.x`, etc.) must first upgrade to `v5.10.3940` or
-    `v5.11.6271` and then use the standard upgrade procedure to get to their
-    target version. This is because migrator in all versions from `v6.0.0`
-    onwards will no longer connect to Postgres 12 databases. Additionally,
-    starting in Sourcegraph 7.0.0, the automatic PostgreSQL 12 to 16 upgrade
-    entrypoint script has been removed entirely. For more info see
-    our [PostgreSQL upgrade docs](/self-hosted/postgres#requirements).
+	- The minimum supported version of Postgres is v16, as of Sourcegraph v6
+	- If using external databases, ensure their Postgres version is >= v16 before upgrading to Sourcegraph >= v6
+	- If using our default Postgres pods, and upgrading from < v5.10.3940, then prior to upgrading >= v7, you must either:
+		- Upgrade the 3x Postgres pods to a v6 version, so they can run our Postgres v12 -> v16 upgrade script, which was removed in v7
+		- Migrate your databases to an external database management service, using Postgres >= v16
+	
+	For details, see our [PostgreSQL upgrade docs](/self-hosted/postgres#requirements).
 
 </Callout>
 
