@@ -15979,7 +15979,11 @@ histogram_quantile(0.95, max by (le, type) (rate(src_repo_perms_syncer_sync_dura
 
 <p class="subtitle">Permissions sync error rate</p>
 
-Refer to the [alerts reference](alerts#worker-perms_syncer_sync_errors) for 1 alert related to this panel.
+Permissions sync errors are often transient and rarely actionable.
+- Check the network connectivity the Sourcegraph and the code host.
+- Check if API rate limit quota is exhausted on the code host.
+
+This panel has no related alerts.
 
 To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101170` on your Sourcegraph instance.
 
@@ -34943,6 +34947,484 @@ histogram_quantile(0.50, sum(rate(src_completions_upstream_connection_dial_durat
 
 <br />
 
+## Deep Search
+
+<p class="subtitle">Monitoring for Deep Search question processing.</p>
+
+To see this dashboard, visit `/-/debug/grafana/d/deepsearch/deepsearch` on your Sourcegraph instance.
+
+### Deep Search: Question processing
+
+#### deepsearch: deepsearch_questions_in_flight
+
+<p class="subtitle">Number of questions currently being processed</p>
+
+The number of deep search questions currently being processed.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100000` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(src_deepsearch_questions_in_flight)
+```
+</details>
+
+<br />
+
+#### deepsearch: deepsearch_questions_in_flight_growth
+
+<p class="subtitle">Rate of growth of in-flight questions over 1h</p>
+
+A positive value indicates the queue is growing faster than it`s being processed.
+
+Refer to the [alerts reference](alerts#deepsearch-deepsearch_questions_in_flight_growth) for 2 alerts related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100001` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max(deriv(src_deepsearch_questions_in_flight[1h]))
+```
+</details>
+
+<br />
+
+#### deepsearch: deepsearch_question_processing_rate
+
+<p class="subtitle">Questions processed per minute</p>
+
+Rate of deep search questions being processed.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100010` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(src_deepsearch_question_processing_total{operation="question"}[5m])) * 60
+```
+</details>
+
+<br />
+
+#### deepsearch: deepsearch_question_processing_error_rate
+
+<p class="subtitle">Question processing error rate over 5m</p>
+
+Percentage of deep search questions that result in an error.
+
+Refer to the [alerts reference](alerts#deepsearch-deepsearch_question_processing_error_rate) for 2 alerts related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100011` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(src_deepsearch_question_processing_errors_total{operation="question"}[5m])) / (sum(rate(src_deepsearch_question_processing_total{operation="question"}[5m])) > 0) * 100
+```
+</details>
+
+<br />
+
+#### deepsearch: deepsearch_question_processing_p99_duration
+
+<p class="subtitle">99th percentile question processing duration</p>
+
+99th percentile time to process a deep search question.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100020` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.99, sum(rate(src_deepsearch_question_processing_duration_seconds_bucket{operation="question"}[5m])) by (le))
+```
+</details>
+
+<br />
+
+#### deepsearch: deepsearch_question_processing_p50_duration
+
+<p class="subtitle">50th percentile question processing duration</p>
+
+Median time to process a deep search question.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100021` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.50, sum(rate(src_deepsearch_question_processing_duration_seconds_bucket{operation="question"}[5m])) by (le))
+```
+</details>
+
+<br />
+
+### Deep Search: LLM streaming
+
+#### deepsearch: deepsearch_llm_stream_fatal_errors
+
+<p class="subtitle">Fatal LLM stream errors over 5m</p>
+
+Number of fatal errors during LLM streaming in the last 5 minutes.
+
+Refer to the [alerts reference](alerts#deepsearch-deepsearch_llm_stream_fatal_errors) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100100` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_deepsearch_question_processing_errors_total{operation="llm_stream_fatal"}[5m]))
+```
+</details>
+
+<br />
+
+#### deepsearch: deepsearch_llm_stream_non_fatal_errors
+
+<p class="subtitle">Non-fatal LLM stream errors over 5m</p>
+
+Number of non-fatal errors during LLM streaming.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100101` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_deepsearch_question_processing_errors_total{operation="llm_stream_non_fatal"}[5m]))
+```
+</details>
+
+<br />
+
+## Sourcegraph external API
+
+<p class="subtitle">Monitoring for the Sourcegraph external API.</p>
+
+To see this dashboard, visit `/-/debug/grafana/d/externalapi/externalapi` on your Sourcegraph instance.
+
+### Sourcegraph external API: Request rate and errors
+
+#### externalapi: externalapi_request_rate
+
+<p class="subtitle">Requests per second by service</p>
+
+Rate of external API requests by service.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/externalapi/externalapi?viewPanel=100000` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (rpc_service)(rate(rpc_server_duration_milliseconds_count{rpc_service=~"$rpc_service"}[5m]))
+```
+</details>
+
+<br />
+
+#### externalapi: externalapi_request_rate_by_method
+
+<p class="subtitle">Requests per second by method</p>
+
+Rate of external API requests by RPC method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/externalapi/externalapi?viewPanel=100001` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (rpc_method)(rate(rpc_server_duration_milliseconds_count{rpc_service=~"$rpc_service"}[5m]))
+```
+</details>
+
+<br />
+
+#### externalapi: externalapi_error_rate
+
+<p class="subtitle">Error rate over 5m</p>
+
+Percentage of external API requests that result in an error.
+
+Refer to the [alerts reference](alerts#externalapi-externalapi_error_rate) for 2 alerts related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/externalapi/externalapi?viewPanel=100010` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(rpc_server_duration_milliseconds_count{rpc_service=~"$rpc_service",rpc_connect_error_code!=""}[5m])) / (sum(rate(rpc_server_duration_milliseconds_count{rpc_service=~"$rpc_service"}[5m])) > 0) * 100
+```
+</details>
+
+<br />
+
+#### externalapi: externalapi_errors_by_code
+
+<p class="subtitle">Errors by error code over 5m</p>
+
+Rate of external API errors by ConnectRPC error code.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/externalapi/externalapi?viewPanel=100011` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (rpc_connect_error_code)(rate(rpc_server_duration_milliseconds_count{rpc_service=~"$rpc_service",rpc_connect_error_code!=""}[5m]))
+```
+</details>
+
+<br />
+
+### Sourcegraph external API: Latency
+
+#### externalapi: externalapi_p99_duration
+
+<p class="subtitle">99th percentile request duration</p>
+
+99th percentile external API request duration.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/externalapi/externalapi?viewPanel=100100` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.99, sum by (le)(rate(rpc_server_duration_milliseconds_bucket{rpc_service=~"$rpc_service"}[5m])))
+```
+</details>
+
+<br />
+
+#### externalapi: externalapi_p90_duration
+
+<p class="subtitle">90th percentile request duration</p>
+
+90th percentile external API request duration.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/externalapi/externalapi?viewPanel=100101` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.90, sum by (le)(rate(rpc_server_duration_milliseconds_bucket{rpc_service=~"$rpc_service"}[5m])))
+```
+</details>
+
+<br />
+
+#### externalapi: externalapi_p50_duration
+
+<p class="subtitle">50th percentile request duration</p>
+
+Median external API request duration.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/externalapi/externalapi?viewPanel=100102` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.50, sum by (le)(rate(rpc_server_duration_milliseconds_bucket{rpc_service=~"$rpc_service"}[5m])))
+```
+</details>
+
+<br />
+
+#### externalapi: externalapi_p99_duration_by_method
+
+<p class="subtitle">99th percentile request duration by method</p>
+
+99th percentile external API request duration per RPC method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/externalapi/externalapi?viewPanel=100110` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.99, sum by (le, rpc_method)(rate(rpc_server_duration_milliseconds_bucket{rpc_service=~"$rpc_service"}[5m])))
+```
+</details>
+
+<br />
+
+#### externalapi: externalapi_p50_duration_by_method
+
+<p class="subtitle">50th percentile request duration by method</p>
+
+Median external API request duration per RPC method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/externalapi/externalapi?viewPanel=100111` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.50, sum by (le, rpc_method)(rate(rpc_server_duration_milliseconds_bucket{rpc_service=~"$rpc_service"}[5m])))
+```
+</details>
+
+<br />
+
+### Sourcegraph external API: Request and response sizes
+
+#### externalapi: externalapi_p99_request_size
+
+<p class="subtitle">99th percentile request size</p>
+
+99th percentile external API request message size.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/externalapi/externalapi?viewPanel=100200` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.99, sum by (le)(rate(rpc_server_request_size_bytes_bucket{rpc_service=~"$rpc_service"}[5m])))
+```
+</details>
+
+<br />
+
+#### externalapi: externalapi_p99_response_size
+
+<p class="subtitle">99th percentile response size</p>
+
+99th percentile external API response message size.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/externalapi/externalapi?viewPanel=100201` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.99, sum by (le)(rate(rpc_server_response_size_bytes_bucket{rpc_service=~"$rpc_service"}[5m])))
+```
+</details>
+
+<br />
+
 ## Periodic Goroutines
 
 <p class="subtitle">Overview of all periodic background routines across Sourcegraph services.</p>
@@ -35441,7 +35923,7 @@ To see this panel, visit `/-/debug/grafana/d/background-jobs/background-jobs?vie
 Query:
 
 ```
-(sum by (op) (rate(src_workerutil_dbworker_store_errors_total{domain=~"$dbworker_domain"}[5m])) / sum by (op) (rate(src_workerutil_dbworker_store_total{domain=~"$dbworker_domain"}[5m]))) * 100
+(sum by (op) (rate(src_workerutil_dbworker_store_errors_total{domain=~"$dbworker_domain"}[5m])) / (sum by (op) (rate(src_workerutil_dbworker_store_errors_total{domain=~"$dbworker_domain"}[5m])) + sum by (op) (rate(src_workerutil_dbworker_store_total{domain=~"$dbworker_domain"}[5m])))) * 100
 ```
 </details>
 
@@ -35463,7 +35945,7 @@ To see this panel, visit `/-/debug/grafana/d/background-jobs/background-jobs?vie
 Query:
 
 ```
-(sum by (domain) (rate(src_workerutil_dbworker_store_errors_total{domain=~"$dbworker_domain"}[5m])) / sum by (domain) (rate(src_workerutil_dbworker_store_total{domain=~"$dbworker_domain"}[5m]))) * 100
+(sum by (domain) (rate(src_workerutil_dbworker_store_errors_total{domain=~"$dbworker_domain"}[5m])) / (sum by (domain) (rate(src_workerutil_dbworker_store_errors_total{domain=~"$dbworker_domain"}[5m])) + sum by (domain) (rate(src_workerutil_dbworker_store_total{domain=~"$dbworker_domain"}[5m])))) * 100
 ```
 </details>
 
