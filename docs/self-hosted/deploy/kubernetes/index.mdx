@@ -969,13 +969,9 @@ The following procedures describe the process to update a Helm Sourcegraph insta
 
 ### Standard upgrades
 
-A [standard upgrade](/self-hosted/updates/#upgrade-types) occurs between a Sourcegraph version and the minor or major version released immediately after it. If you would like to jump forward several versions, you must perform a [multi-version upgrade](#multi-version-upgrades) instead.
+A [standard upgrade](/self-hosted/updates/#upgrade-types) occurs between your current Sourcegraph version and the next minor version released immediately after it. If you would like to jump forward several versions, you must perform a [multi-version upgrade](#multi-version-upgrades) instead.
 
 **Step 1:** Review [Helm Changelog] and [Sourcegraph Changelog] and select the most recent version compatible with your current Sourcegraph version.
-
-<Callout type="warning">
-	You can only upgrade one minor version of Sourcegraph at a time.
-</Callout>
 
 **Step 2:** Update your copy of the Sourcegraph Helm repo to ensure you have all the latest versions:
 
@@ -1001,11 +997,32 @@ When all pods have restarted and show as Running, you can browse to your Sourceg
 
 ### Multi-version upgrades
 
+<Callout type="info">
+
+	Please see our [best practices](/self-hosted/updates/#best-practices) on upgrades; if you have any concerns about running a multi-version upgrade, please contact us at [support@sourcegraph.com](mailto:support@sourcegraph.com)
+
+</Callout>
+
 <Callout type="warning">
-	Please see our [cautionary note](/self-hosted/updates/#best-practices) on
-	upgrades, if you have any concerns about running a multi-version upgrade,
-	please reach out to us at
-	[support@sourcegraph.com](mailto:support@sourcegraph.com) for advisement.
+
+	As of Sourcegraph v6, the minimum supported version of Postgres has been increased from v12 to v16
+	
+	As of Sourcegraph v7, the scripts to upgrade the Postgres version inside our Postgres pods have been removed
+
+	- If using our Postgres pods, and upgrading Sourcegraph from `< v5.10.3940`, then prior to upgrading Sourcegraph to >= v7, you must either:
+
+		- Upgrade the 3x Postgres pods to a Sourcegraph v6 version:
+
+			- Deploy a v6 version of either the `sourcegraph` or `sourcegraph-migrator` Helm chart
+			- Watch the 3x Postgres pods' logs, and wait for them to finish running the upgrade scripts
+			- Deploy a v7 version of the `sourcegraph` Helm chart to run the Migrator MVU
+
+		- Or, migrate the 3x Postgres databases to an external database management service, using Postgres >= v16 (recommended)
+
+	- If using an external database management service, ensure Postgres is upgraded >= v16 prior to upgrading Sourcegraph >= v7
+
+	For details, see our [PostgreSQL upgrade docs](/self-hosted/postgres#requirements)
+
 </Callout>
 
 ### Multi-version upgrade procedure
@@ -1016,21 +1033,6 @@ When all pods have restarted and show as Running, you can browse to your Sourceg
 - Check the `Site Admin > Updates` page to determine [upgrade readiness](/self-hosted/updates/#upgrade-readiness).
 
 **Step 2:**
-
-<Callout type="warning">
-
-    The Kubernetes Helm deployment type does not support MVU from Sourcegraph
-    `v5.9.45` versions and earlier to ANY version `v6.0.x` or later. Admins
-    seeking to upgrade to any Sourcegraph version `v6.0.x` or later (including
-    `v6.1.x`, `v6.2.x`, etc.) must first upgrade to `v5.10.3940` or
-    `v5.11.6271` and then use the standard upgrade procedure to get to their
-    target version. This is because migrator in all versions from `v6.0.0`
-    onwards will no longer connect to Postgres 12 databases. Additionally,
-    starting in Sourcegraph 7.0.0, the automatic PostgreSQL 12 to 16 upgrade
-    entrypoint script has been removed entirely. For more info see
-    our [PostgreSQL upgrade docs](/self-hosted/postgres#requirements).
-
-</Callout>
 
 Scale down `deployments` and `statefulSets` that access the database, _this step prevents services from accessing the database while schema migrations are in process._
 The following services must have their replicas scaled to 0:
