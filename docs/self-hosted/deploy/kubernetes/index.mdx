@@ -997,11 +997,20 @@ When all pods have restarted and show as Running, you can browse to your Sourceg
 
 ### Multi-version upgrades
 
+<Callout type="info">
+	Please see our [best practices](/self-hosted/updates/#best-practices) on
+	upgrades; if you have any concerns about running a multi-version upgrade,
+	please contact us at
+	[support@sourcegraph.com](mailto:support@sourcegraph.com).
+</Callout>
+
 <Callout type="warning">
-	Please see our [cautionary note](/self-hosted/updates/#best-practices) on
-	upgrades, if you have any concerns about running a multi-version upgrade,
-	please reach out to us at
-	[support@sourcegraph.com](mailto:support@sourcegraph.com) for advisement.
+	- The minimum supported version of Postgres is v16, as of Sourcegraph v6
+	- If using external databases, ensure their Postgres version is >= v16 before upgrading to Sourcegraph >= v6
+	- If using our default Postgres pods, and upgrading from < v5.10.3940, then prior to upgrading >= v7, you must either:
+		- Upgrade the 3x Postgres pods to a v6 version, so they can run our Postgres v12 -> v16 upgrade script, which was removed in v7
+		- Migrate your databases to an external database management service, using Postgres >= v16
+	For details, see our [PostgreSQL upgrade docs](/self-hosted/postgres#requirements).
 </Callout>
 
 ### Multi-version upgrade procedure
@@ -1012,18 +1021,6 @@ When all pods have restarted and show as Running, you can browse to your Sourceg
 - Check the `Site Admin > Updates` page to determine [upgrade readiness](/self-hosted/updates/#upgrade-readiness).
 
 **Step 2:**
-
-<Callout type="warning">
-
-	- The minimum supported version of Postgres is v16, as of Sourcegraph v6
-	- If using external databases, ensure their Postgres version is >= v16 before upgrading to Sourcegraph >= v6
-	- If using our default Postgres pods, and upgrading from < v5.10.3940, then prior to upgrading >= v7, you must either:
-		- Upgrade the 3x Postgres pods to a v6 version, so they can run our Postgres v12 -> v16 upgrade script, which was removed in v7
-		- Migrate your databases to an external database management service, using Postgres >= v16
-	
-	For details, see our [PostgreSQL upgrade docs](/self-hosted/postgres#requirements).
-
-</Callout>
 
 Scale down `deployments` and `statefulSets` that access the database, _this step prevents services from accessing the database while schema migrations are in process._
 The following services must have their replicas scaled to 0:
