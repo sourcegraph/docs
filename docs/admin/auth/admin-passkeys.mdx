@@ -1,0 +1,103 @@
+# Admin passkey step-up authentication
+
+<TierCallout>
+	Supported on [Enterprise](/pricing/plans/enterprise) plans.
+	<user>Available via the Web app.</user>
+</TierCallout>
+
+Sourcegraph supports requiring site admin users to verify their identity using a [FIDO2/WebAuthn](https://fidoalliance.org/fido2-2/fido2-web-authentication-webauthn/) passkey before accessing admin pages. This provides **step-up authentication** — admins are already logged in via their normal auth provider, but must additionally prove their identity with a passkey before performing sensitive admin operations.
+
+This is useful for organizations that want an extra layer of security for site administration, similar to how services like GitHub require re-authentication before changing account settings.
+
+## How it works
+
+1. An admin enables the `auth.adminPasskeyRequired` site configuration setting.
+2. Site admins are prompted to **register a passkey** (e.g., a hardware security key, built-in biometric authenticator, or platform passkey) the next time they access the site admin panel.
+3. After registering, admins must **verify with their passkey** periodically (default: every hour) to continue accessing admin pages.
+4. Non-admin users are not affected by this feature.
+5. Requests authenticated via **access tokens** (e.g., API clients, CI/CD systems) bypass passkey verification, since access tokens cannot perform interactive WebAuthn ceremonies.
+
+## Enabling admin passkey verification
+
+Add the following to your [site configuration](/admin/config/site-config):
+
+```json
+{
+	// ...
+	"auth.adminPasskeyRequired": true
+}
+```
+
+Once enabled, site admins will be redirected to a passkey setup page when they next visit the site admin panel. After registering at least one passkey, subsequent visits require verification with a registered passkey.
+
+## Requiring PIN or biometric verification
+
+By default, passkey verification accepts any FIDO2-compatible authenticator response. To require that the authenticator also performs **user verification** (PIN entry, fingerprint, face recognition, etc.), enable the following setting:
+
+```json
+{
+	// ...
+	"auth.adminPasskeyRequired": true,
+	"auth.adminPasskeyPINRequired": true
+}
+```
+
+This provides stronger assurance that the person using the passkey is the legitimate owner, rather than someone who merely has physical access to the authenticator.
+
+## Registering a passkey
+
+When an admin with no registered passkeys visits the site admin panel (with `auth.adminPasskeyRequired` enabled), they are automatically redirected to the passkey setup page at **User settings > Passkeys > Setup**.
+
+During registration:
+
+1. The browser prompts the user to insert or activate their authenticator (security key, fingerprint reader, etc.).
+2. The user provides an optional **nickname** for the passkey (e.g., "MacBook Pro", "YubiKey 5").
+3. The credential is registered and stored server-side.
+
+Admins can register **multiple passkeys** for redundancy (e.g., a primary security key and a backup).
+
+## Verifying with a passkey
+
+Once a passkey is registered, admins are periodically required to verify before accessing admin pages. The verification flow:
+
+1. The admin visits any site admin page.
+2. If verification has expired (default: 1 hour since last verification), they are redirected to the verification page.
+3. The browser prompts the user to activate their authenticator.
+4. On success, the admin is redirected to their original destination.
+
+## Managing passkeys
+
+Admins can manage their registered passkeys at **User settings > Passkeys**. From this page, they can:
+
+- View all registered passkeys, including nicknames and last-used timestamps.
+- Register additional passkeys.
+- **Revoke** a passkey that is lost or no longer needed (soft-delete).
+
+## Site configuration reference
+
+| Setting                        | Type      | Default | Description                                                                 |
+| ------------------------------ | --------- | ------- | --------------------------------------------------------------------------- |
+| `auth.adminPasskeyRequired`    | `boolean` | `false` | Requires site admins to verify with a passkey before accessing admin pages. |
+| `auth.adminPasskeyPINRequired` | `boolean` | `false` | Requires PIN or biometric user verification when using admin passkeys.      |
+
+## Supported authenticators
+
+Any FIDO2/WebAuthn-compatible authenticator is supported, including:
+
+- **Hardware security keys**: YubiKey 5 series, Google Titan, SoloKeys, etc.
+- **Platform authenticators**: Touch ID (macOS), Windows Hello, Android biometrics.
+- **Software passkeys**: iCloud Keychain, Google Password Manager, 1Password, etc.
+
+## Troubleshooting
+
+### Admin lost their passkey
+
+The passkey management pages (**User settings > Passkeys**) are not behind the passkey verification prompt, so an admin who loses their passkey can simply navigate there and register a new one.
+
+### WebAuthn not available error
+
+The WebAuthn API requires a [secure context](https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts) (HTTPS). If your Sourcegraph instance is served over plain HTTP (other than `localhost`), passkey registration and verification will not work. Ensure your instance's `externalURL` uses `https://`.
+
+### Passkey verification keeps expiring
+
+The default verification TTL is 1 hour. This is currently not configurable via site configuration. If you need a different TTL, please [contact support](https://sourcegraph.com/contact).
