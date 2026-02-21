@@ -6835,6 +6835,111 @@ Generated query for critical alert: `min((sum by (app) (up{app=~".*otel-collecto
 
 <br />
 
+## deepsearch: deepsearch_questions_in_flight_growth
+
+<p class="subtitle">rate of growth of in-flight questions over 1h</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> deepsearch: 1+ rate of growth of in-flight questions over 1h for 30m0s
+- <span class="badge badge-critical">critical</span> deepsearch: 1+ rate of growth of in-flight questions over 1h for 1h0m0s
+
+**Next steps**
+
+- Check for questions that are never stopping.
+- Check for slow LLM responses or tool execution times.
+- Review `deepsearch_question_processing_duration` for processing time trends.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#deepsearch-deepsearch_questions_in_flight_growth).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_deepsearch_deepsearch_questions_in_flight_growth",
+  "critical_deepsearch_deepsearch_questions_in_flight_growth"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((max(deriv(src_deepsearch_questions_in_flight[1h]))) &gt; 1)`
+
+Generated query for critical alert: `max((max(deriv(src_deepsearch_questions_in_flight[1h]))) &gt; 1)`
+
+</details>
+
+<br />
+
+## deepsearch: deepsearch_question_processing_error_rate
+
+<p class="subtitle">question processing error rate over 5m</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> deepsearch: 10%+ question processing error rate over 5m for 10m0s
+- <span class="badge badge-critical">critical</span> deepsearch: 20%+ question processing error rate over 5m for 10m0s
+
+**Next steps**
+
+- Check frontend logs for `Worker failed to process question` errors.
+- Review LLM stream errors in the `LLM streaming` panel below.
+- Check for upstream LLM provider issues.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#deepsearch-deepsearch_question_processing_error_rate).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_deepsearch_deepsearch_question_processing_error_rate",
+  "critical_deepsearch_deepsearch_question_processing_error_rate"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((sum(rate(src_deepsearch_question_processing_errors_total{operation="question"\}[5m])) / (sum(rate(src_deepsearch_question_processing_total\{operation="question"}[5m])) &gt; 0) * 100) &gt; 10)`
+
+Generated query for critical alert: `max((sum(rate(src_deepsearch_question_processing_errors_total{operation="question"\}[5m])) / (sum(rate(src_deepsearch_question_processing_total\{operation="question"}[5m])) &gt; 0) * 100) &gt; 20)`
+
+</details>
+
+<br />
+
+## deepsearch: deepsearch_llm_stream_fatal_errors
+
+<p class="subtitle">fatal LLM stream errors over 5m</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> deepsearch: 20+ fatal LLM stream errors over 5m
+
+**Next steps**
+
+- Check frontend logs for `fatal error in LLM stream`.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#deepsearch-deepsearch_llm_stream_fatal_errors).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_deepsearch_deepsearch_llm_stream_fatal_errors"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((sum(increase(src_deepsearch_question_processing_errors_total{operation="llm_stream_fatal"}[5m]))) &gt; 20)`
+
+</details>
+
+<br />
+
 ## background-jobs: error_percentage_by_method
 
 <p class="subtitle">percentage of operations resulting in error by method</p>
