@@ -7102,6 +7102,21 @@ const redirectsData = [
 		permanant: true,
 	},
 	{
+		source: '/own/assigned-ownership',
+		destination: '/code-ownership',
+		permanant: true,
+	},
+	{
+		source: '/own/configuration-reference',
+		destination: '/code-ownership',
+		permanant: true,
+	},
+	{
+		source: '/own/codeowners-ingestion',
+		destination: '/code-ownership',
+		permanant: true,
+	},
+	{
 		source: '/own/codeowners-format',
 		destination: '/code-ownership/codeowners-format',
 		permanant: true,
