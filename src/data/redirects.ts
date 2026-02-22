@@ -7094,6 +7094,17 @@ const redirectsData = [
 		source: '/self-hosted/updates/server',
 		destination: 'https://sourcegraph.com/changelog/self-hosted/server',
 		permanent: true
+	},
+	// code ownership redirects
+	{
+		source: '/own',
+		destination: '/code-ownership',
+		permanant: true,
+	},
+	{
+		source: '/own/codeowners-format',
+		destination: '/code-ownership/codeowners-format',
+		permanant: true,
 	}
 ];
 
