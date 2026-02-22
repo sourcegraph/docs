@@ -7103,7 +7103,7 @@ const redirectsData = [
 	},
 	{
 		source: '/own/codeowners-format',
-		destination: '/code-ownerhsip/codeowners-format',
+		destination: '/code-ownership/codeowners-format',
 		permanant: true,
 	}
 ];
