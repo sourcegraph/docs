@@ -7098,7 +7098,7 @@ const redirectsData = [
 	// code ownership redirects
 	{
 		source: '/own',
-		destination: '/code-ownerhsip',
+		destination: '/code-ownership',
 		permanant: true,
 	},
 	{
