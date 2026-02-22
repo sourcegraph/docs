@@ -1,0 +1,57 @@
+# Code ownership
+
+Code ownership is aimed at helping find the right person and team to contact, for any question, at any time.
+
+## Concepts
+
+**Owner**: An owner is defined as a person in Sourcegraph.
+
+A _person_ can be:
+
+-   a Sourcegraph user which we were able to resolve from the `CODEOWNERS` handle or email, in which case we link to their profile.
+-   an unknown user for which we were unable to resolve a profile, in which case we will return the `CODEOWNERS` data we have.
+
+## Code ownership
+
+Code ownership is set via [the `CODEOWNERS` format](/code-ownership/codeowners-format).
+
+## Limitations
+
+-   The feature has not been fully validated to work well on large repositories or large `CODEOWNERS` rulesets. This is a future area of improvement, but please contact us if you run into issues.
+
+## Browsing ownership
+
+The ownership information is available for browsing once ownership data is available through [a `CODEOWNERS` file](#code-ownership).
+
+When displaying a source file, there is an "Owernship" button at the bottom. Clicking it will open the "Owernship" panel.
+
+![File view with the ownership tab selected in the bottom panel](https://storage.googleapis.com/sourcegraph-assets/docs/own/blob-view-panel-v2.png)
+
+## Ownership search
+
+### Searching for files with owners
+
+Code ownership is a first-class citizen in search. Ownership can be either a query input or a search result:
+
+-   `file:has.owner(user@example.com)` keeps only the search results associated with given user (here referred to by e-mail).
+-   `-file:has.owner(@username)` removes all results owned by specific user (here referred to by name).
+
+Ownership predicate can also be used without parameters:
+
+-`file:has.owner()` will only include files with an owner assigned to them. -`-file:has.owner()` will only include files without an owner.
+
+When performing a search the `select:file.owners` predicate will return the owners for the result of that search.
+
+For instance one can find all the owners of TypeScript files in a given repository by using `repo:^github\.com/sourcegraph/sourcegraph$ lang:TypeScript select:file.owners`.
+
+### Find commits in given release for given owner
+
+To find all commits between versions `5.0` and `5.1` made by `sourcegraph/own` team, the following query could be used:
+
+`repo:^github\.com/sourcegraph/sourcegraph$@5.1:^5.0 type:commit file:has.owner(sourcegraph/own)`
+
+## Further reading
+
+In order to learn more please check out our references:
+
+-   [CODEOWNERS format](/code-ownership/codeowners-format) - Guide to using the CODEOWNERS file format to define ownership

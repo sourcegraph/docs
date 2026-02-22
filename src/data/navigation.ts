@@ -406,24 +406,12 @@ export const navigation: NavigationItem[] = [
 			},
 			{
 				title: 'Code Ownership',
-				href: '/own',
+				href: '/code-ownership',
 				sections: [
 					{
 						title: 'CODEOWNERS Format',
-						href: '/own/codeowners-format'
+						href: '/code-ownership/codeowners-format'
 					},
-					{
-						title: 'CODEOWNERS Ingestion',
-						href: '/own/codeowners-ingestion'
-					},
-					{
-						title: 'Configuration Reference',
-						href: '/own/configuration-reference'
-					},
-					{
-						title: 'Assigned Ownership',
-						href: '/own/assigned-ownership'
-					}
 				]
 			},
 			{
