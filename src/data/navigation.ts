@@ -411,7 +411,7 @@ export const navigation: NavigationItem[] = [
 					{
 						title: 'CODEOWNERS Format',
 						href: '/code-ownership/codeowners-format'
-					},
+					}
 				]
 			},
 			{
@@ -464,14 +464,10 @@ export const navigation: NavigationItem[] = [
 				title: 'APIs',
 				href: '/api/graphql',
 				sections: [
-					{title: 'GraphQL API', href: '/api/graphql'},
-					{title: 'Stream API', href: '/api/stream-api'},
+					{title: 'Sourcegraph API', href: '/api'},
+					{title: 'Streaming search API', href: '/api/stream-api'},
 					{title: 'Analytics API', href: '/analytics/api'},
-					{
-						title: 'Deep Search API',
-						href: '/deep-search/api',
-						preview: true
-					}
+					{title: 'Debug API', href: '/api/graphql'}
 				]
 			},
 			{
