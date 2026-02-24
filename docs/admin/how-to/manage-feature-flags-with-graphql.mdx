@@ -1,0 +1,128 @@
+# How to manage feature flags with the GraphQL API
+
+Some Sourcegraph instances do not expose the feature flag admin UI. In those cases, site admins can manage feature flags through the GraphQL API using the `src` CLI.
+
+## Prerequisites
+
+-   Install `src` by following the [`src-cli` installation instructions](https://github.com/sourcegraph/src-cli#installation).
+-   Sign in to your instance:
+
+```bash
+src login https://your-sourcegraph-instance.com
+```
+
+## List all feature flags
+
+```bash
+src api -query='
+query {
+  featureFlags {
+    ... on FeatureFlagBoolean {
+      name
+      value
+    }
+    ... on FeatureFlagRollout {
+      name
+      rolloutBasisPoints
+    }
+  }
+}'
+```
+
+## Get a single feature flag
+
+```bash
+src api -query='
+query {
+  featureFlag(name: "my-feature-flag") {
+    ... on FeatureFlagBoolean {
+      name
+      value
+    }
+    ... on FeatureFlagRollout {
+      name
+      rolloutBasisPoints
+    }
+  }
+}'
+```
+
+## Update a feature flag
+
+Update a boolean flag:
+
+```bash
+src api -query='
+mutation {
+  updateFeatureFlag(name: "my-feature-flag", value: false) {
+    ... on FeatureFlagBoolean {
+      name
+      value
+    }
+  }
+}'
+```
+
+Update a rollout flag:
+
+```bash
+src api -query='
+mutation {
+  updateFeatureFlag(name: "my-rollout-flag", rolloutBasisPoints: 5000) {
+    ... on FeatureFlagRollout {
+      name
+      rolloutBasisPoints
+    }
+  }
+}'
+```
+
+`rolloutBasisPoints` uses basis points where `10000 = 100%` and `5000 = 50%`.
+
+## Delete a feature flag
+
+```bash
+src api -query='
+mutation {
+  deleteFeatureFlag(name: "my-feature-flag") {
+    alwaysNil
+  }
+}'
+```
+
+## Create a user or organization override
+
+```bash
+src api -query='
+mutation {
+  createFeatureFlagOverride(
+    namespace: "VXNlcjox"
+    flagName: "my-feature-flag"
+    value: true
+  ) {
+    id
+    value
+  }
+}'
+```
+
+The `namespace` argument must be the GraphQL ID of a user or organization.
+
+Use a query like this to discover IDs:
+
+```bash
+src api -query='
+query {
+  users(first: 10) {
+    nodes {
+      id
+      username
+    }
+  }
+}'
+```
+
+## Related docs
+
+-   [GraphQL API reference](/api/graphql)
+-   [`src` CLI references](/cli/references)
