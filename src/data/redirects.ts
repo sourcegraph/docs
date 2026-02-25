@@ -6328,7 +6328,8 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/updates/docker_compose',
-		destination: 'https://sourcegraph.com/changelog/self-hosted/docker-compose',
+		destination:
+			'https://sourcegraph.com/changelog/self-hosted/docker-compose',
 		permanent: true
 	},
 	{
@@ -7049,7 +7050,8 @@ const redirectsData = [
 	},
 	{
 		source: '/self-hosted/updates/docker_compose',
-		destination: 'https://sourcegraph.com/changelog/self-hosted/docker-compose',
+		destination:
+			'https://sourcegraph.com/changelog/self-hosted/docker-compose',
 		permanent: true
 	},
 	{
@@ -7082,7 +7084,8 @@ const redirectsData = [
 	// Self-hosted update pages moved to /changelog/self-hosted/
 	{
 		source: '/self-hosted/updates/docker-compose',
-		destination: 'https://sourcegraph.com/changelog/self-hosted/docker-compose',
+		destination:
+			'https://sourcegraph.com/changelog/self-hosted/docker-compose',
 		permanent: true
 	},
 	{
@@ -7099,27 +7102,57 @@ const redirectsData = [
 	{
 		source: '/own',
 		destination: '/code-ownership',
-		permanant: true,
+		permanant: true
 	},
 	{
 		source: '/own/assigned-ownership',
 		destination: '/code-ownership',
-		permanant: true,
+		permanant: true
 	},
 	{
 		source: '/own/configuration-reference',
 		destination: '/code-ownership',
-		permanant: true,
+		permanant: true
 	},
 	{
 		source: '/own/codeowners-ingestion',
 		destination: '/code-ownership',
-		permanant: true,
+		permanant: true
 	},
 	{
 		source: '/own/codeowners-format',
 		destination: '/code-ownership/codeowners-format',
-		permanant: true,
+		permanant: true
+	},
+	{
+		source: '/api/graphql/examples',
+		destination: '/api/graphql',
+		permanent: true
+	},
+	{
+		source: '/api/graphql/search',
+		destination: '/api/stream-api',
+		permanent: true
+	},
+	{
+		source: '/api/graphql/managing-code-insights-with-api',
+		destination: '/api/graphql',
+		permanent: true
+	},
+	{
+		source: '/api/graphql/managing-search-contexts-with-api',
+		destination: '/api/graphql',
+		permanent: true
+	},
+	{
+		source: '/code-search/how-to/create-search-context-graphql',
+		destination: '/api',
+		permanent: true
+	},
+	{
+		source: '/deep-search/api',
+		destination: '/api',
+		permanent: true
 	}
 ];
 
