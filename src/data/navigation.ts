@@ -462,7 +462,7 @@ export const navigation: NavigationItem[] = [
 			},
 			{
 				title: 'APIs',
-				href: '/api/graphql',
+				href: '/api',
 				sections: [
 					{title: 'Sourcegraph API', href: '/api'},
 					{title: 'Streaming search API', href: '/api/stream-api'},
