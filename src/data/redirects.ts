@@ -7149,11 +7149,6 @@ const redirectsData = [
 		destination: '/api',
 		permanent: true
 	},
-	{
-		source: '/deep-search/api',
-		destination: '/api',
-		permanent: true
-	}
 ];
 
 const updatedRedirectsData = redirectsData.map(redirect => {
