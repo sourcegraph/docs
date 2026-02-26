@@ -32,24 +32,24 @@ An interactive API reference is available at `/api-reference` on your Sourcegrap
 
 ### Deep Search (`/.api/deepsearch/v1` → `deepsearch.v1.Service`)
 
-| Operation | Old endpoint | New endpoint |
-|---|---|---|
-| Create conversation | `POST /.api/deepsearch/v1` | `POST /api/deepsearch.v1.Service/CreateConversation` |
-| Get conversation | `GET /.api/deepsearch/v1/{id}` | `POST /api/deepsearch.v1.Service/GetConversation` |
-| List conversations | `GET /.api/deepsearch/v1` | `POST /api/deepsearch.v1.Service/ListConversationSummaries` |
-| Add follow-up | `POST /.api/deepsearch/v1/{id}/questions` | `POST /api/deepsearch.v1.Service/AddConversationQuestion` |
-| Cancel question | `POST /.api/deepsearch/v1/{id}/questions/{qid}/cancel` | `POST /api/deepsearch.v1.Service/CancelConversation` |
-| Delete conversation | `DELETE /.api/deepsearch/v1/{id}` | `POST /api/deepsearch.v1.Service/DeleteConversation` |
+| Operation           | Old endpoint                                           | New endpoint                                                |
+| ------------------- | ------------------------------------------------------ | ----------------------------------------------------------- |
+| Create conversation | `POST /.api/deepsearch/v1`                             | `POST /api/deepsearch.v1.Service/CreateConversation`        |
+| Get conversation    | `GET /.api/deepsearch/v1/{id}`                         | `POST /api/deepsearch.v1.Service/GetConversation`           |
+| List conversations  | `GET /.api/deepsearch/v1`                              | `POST /api/deepsearch.v1.Service/ListConversationSummaries` |
+| Add follow-up       | `POST /.api/deepsearch/v1/{id}/questions`              | `POST /api/deepsearch.v1.Service/AddConversationQuestion`   |
+| Cancel question     | `POST /.api/deepsearch/v1/{id}/questions/{qid}/cancel` | `POST /api/deepsearch.v1.Service/CancelConversation`        |
+| Delete conversation | `DELETE /.api/deepsearch/v1/{id}`                      | `POST /api/deepsearch.v1.Service/DeleteConversation`        |
 
 ### User management (`/.api/graphql` → `users.v1.Service`)
 
-| Operation | GraphQL | New endpoint |
-|---|---|---|
-| Get user | `query { user(username: "alice") { ... } }` | `POST /api/users.v1.Service/GetUser` |
-| List users | `query { users { nodes { ... } } }` | `POST /api/users.v1.Service/ListUsers` |
-| Update user | `mutation { updateUser(...) { ... } }` | `POST /api/users.v1.Service/UpdateUser` |
-| Delete users | `mutation { deleteUser(...) { ... } }` | `POST /api/users.v1.Service/BatchDeleteUsers` |
-| Undelete users | *(not available in GraphQL)* | `POST /api/users.v1.Service/BatchUndeleteUsers` |
+| Operation      | GraphQL                                     | New endpoint                                    |
+| -------------- | ------------------------------------------- | ----------------------------------------------- |
+| Get user       | `query { user(username: "alice") { ... } }` | `POST /api/users.v1.Service/GetUser`            |
+| List users     | `query { users { nodes { ... } } }`         | `POST /api/users.v1.Service/ListUsers`          |
+| Update user    | `mutation { updateUser(...) { ... } }`      | `POST /api/users.v1.Service/UpdateUser`         |
+| Delete users   | `mutation { deleteUser(...) { ... } }`      | `POST /api/users.v1.Service/BatchDeleteUsers`   |
+| Undelete users | _(not available in GraphQL)_                | `POST /api/users.v1.Service/BatchUndeleteUsers` |
 
 ## Migration by example (Python)
 
@@ -271,25 +271,25 @@ users = resp.json()["users"]
 
 ### Deep Search
 
-| Old field | New field |
-|---|---|
-| `id: 140` | `name: "users/1/conversations/140"` |
-| `status: "processing"` | `state: "STATE_PROCESSING"` |
-| `status: "completed"` | `state: "STATE_COMPLETED"` |
-| `questions[].answer` | `questions[].answer` (unchanged) |
-| `read_token` | Not exposed |
-| `share_url` | Not exposed |
+| Old field              | New field                           |
+| ---------------------- | ----------------------------------- |
+| `id: 140`              | `name: "users/1/conversations/140"` |
+| `status: "processing"` | `state: "STATE_PROCESSING"`         |
+| `status: "completed"`  | `state: "STATE_COMPLETED"`          |
+| `questions[].answer`   | `questions[].answer` (unchanged)    |
+| `read_token`           | Not exposed                         |
+| `share_url`            | Not exposed                         |
 
 ### User management
 
-| GraphQL field | New field |
-|---|---|
-| `id` (opaque GraphQL ID) | `name: "users/alice"` |
-| `username` | `username` (unchanged) |
-| `displayName` | `display_name` |
-| `avatarURL` | `avatar_uri` |
-| `createdAt` | `create_time` |
-| `updatedAt` | `update_time` |
+| GraphQL field            | New field              |
+| ------------------------ | ---------------------- |
+| `id` (opaque GraphQL ID) | `name: "users/alice"`  |
+| `username`               | `username` (unchanged) |
+| `displayName`            | `display_name`         |
+| `avatarURL`              | `avatar_uri`           |
+| `createdAt`              | `create_time`          |
+| `updatedAt`              | `update_time`          |
 
 ## Features not yet in the new API
 
@@ -305,15 +305,15 @@ If you depend on any of these, please reach out at **support@sourcegraph.com**.
 
 ## Migration checklist
 
-[ ] Generate a new access token with `externalapi:read` / `externalapi:write` scopes
-[ ] Update `Authorization` header from `token <TOKEN>` to `Bearer <TOKEN>`
-[ ] Remove the `X-Requested-With` header
-[ ] Update Deep Search endpoint URLs from `/.api/deepsearch/v1/...` to `/api/deepsearch.v1.Service/...`
-[ ] Update user management calls from `/.api/graphql` to `/api/users.v1.Service/...`
-[ ] Change all HTTP methods to `POST`
-[ ] Update resource identifiers from numeric IDs to resource names (e.g. `users/-/conversations/140`)
-[ ] Update status checks from `"completed"` to `"STATE_COMPLETED"` (Deep Search)
-[ ] Test end-to-end
+- [ ] Generate a new access token with `externalapi:read` / `externalapi:write` scopes
+- [ ] Update `Authorization` header from `token <TOKEN>` to `Bearer <TOKEN>`
+- [ ] Remove the `X-Requested-With` header
+- [ ] Update Deep Search endpoint URLs from `/.api/deepsearch/v1/...` to `/api/deepsearch.v1.Service/...`
+- [ ] Update user management calls from `/.api/graphql` to `/api/users.v1.Service/...`
+- [ ] Change all HTTP methods to `POST`
+- [ ] Update resource identifiers from numeric IDs to resource names (e.g. `users/-/conversations/140`)
+- [ ] Update status checks from `"completed"` to `"STATE_COMPLETED"` (Deep Search)
+- [ ] Test end-to-end
 
 ## Other Sourcegraph APIs
 
