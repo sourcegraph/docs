@@ -299,7 +299,7 @@ The API returns standard HTTP status codes with descriptive error messages:
 - `404` - Not Found
 - `500` - Internal Server Error
 
-## Upgrading to the Sourcegraph /api/ endpoints
+## Migrating to the New Sourcegraph API
 
 Starting in [Sourcegraph 7.0](/changelog/releases/7.0), Sourcegraph introduces a new, versioned [API](/api/) at `/api/`. **The new API provides stable, supported endpoints** for functionality previously served by this experimental Deep Search API. See the [Sourcegraph API changelog](/changelog/sourcegraph-api) for more details.
 
@@ -315,13 +315,6 @@ An interactive API reference is available at `/api-reference` on your Sourcegrap
 4. **Resource identifiers**: Numeric IDs (`140`) → resource names (`users/-/conversations/140`)
 5. **Status field**: `status: "processing"` → `state: "STATE_PROCESSING"`
 
-### Why migrate
-
-- **Stability guarantees** — the new API is versioned with backwards compatibility commitments
-- **Interactive documentation** — explore and test at `/api-reference`
-- **OpenAPI schema** — generate typed clients in any language
-- **Scoped tokens** — finer-grained access control with `externalapi:read` / `externalapi:write`
-
 ### Endpoint mapping
 
 | Operation           | Old endpoint                                           | New endpoint                                                |
@@ -332,140 +325,6 @@ An interactive API reference is available at `/api-reference` on your Sourcegrap
 | Add follow-up       | `POST /.api/deepsearch/v1/{id}/questions`              | `POST /api/deepsearch.v1.Service/AddConversationQuestion`   |
 | Cancel question     | `POST /.api/deepsearch/v1/{id}/questions/{qid}/cancel` | `POST /api/deepsearch.v1.Service/CancelConversation`        |
 | Delete conversation | `DELETE /.api/deepsearch/v1/{id}`                      | `POST /api/deepsearch.v1.Service/DeleteConversation`        |
-
-### Migration examples
-
-#### Create a conversation
-
-**Before:**
-
-```python
-import requests
-
-resp = requests.post(
-    "https://sourcegraph.example.com/.api/deepsearch/v1",
-    headers={
-        "Authorization": f"token {TOKEN}",
-        "X-Requested-With": "my-client 1.0.0",
-    },
-    json={"question": "Does the repo have a README?"},
-)
-conversation = resp.json()
-conversation_id = conversation["id"]
-```
-
-**After:**
-
-```python
-import requests
-
-resp = requests.post(
-    "https://sourcegraph.example.com/api/deepsearch.v1.Service/CreateConversation",
-    headers={
-        "Authorization": f"Bearer {TOKEN}",
-        "Content-Type": "application/json",
-    },
-    json={"question": "Does the repo have a README?"},
-)
-conversation = resp.json()
-conversation_name = conversation["name"]  # e.g. "users/1/conversations/140"
-```
-
-**With curl:**
-
-```bash
-# Before
-curl 'https://sourcegraph.example.com/.api/deepsearch/v1' \
-  -H "Authorization: token $TOKEN" \
-  -H 'X-Requested-With: my-client 1.0.0' \
-  -H 'Content-Type: application/json' \
-  -d '{"question":"Does the repo have a README?"}'
-
-# After
-curl 'https://sourcegraph.example.com/api/deepsearch.v1.Service/CreateConversation' \
-  -H "Authorization: Bearer $TOKEN" \
-  -H 'Content-Type: application/json' \
-  -d '{"question":"Does the repo have a README?"}'
-```
-
-#### Poll for the result
-
-The polling workflow is the same — keep calling until the status indicates completion. The only changes are the URL, method, and status field name.
-
-**Before:**
-
-```python
-import time
-
-while True:
-    resp = requests.get(
-        f"https://sourcegraph.example.com/.api/deepsearch/v1/{conversation_id}",
-        headers={
-            "Authorization": f"token {TOKEN}",
-            "X-Requested-With": "my-client 1.0.0",
-        },
-    )
-    data = resp.json()
-    if data["questions"][0]["status"] == "completed":
-        print(data["questions"][0]["answer"])
-        break
-    time.sleep(2)
-```
-
-**After:**
-
-```python
-import time
-
-while True:
-    resp = requests.post(
-        "https://sourcegraph.example.com/api/deepsearch.v1.Service/GetConversation",
-        headers={
-            "Authorization": f"Bearer {TOKEN}",
-            "Content-Type": "application/json",
-        },
-        json={"name": conversation_name},
-    )
-    data = resp.json()
-    if data["state"] == "STATE_COMPLETED":
-        print(data["questions"][0]["answer"])
-        break
-    time.sleep(2)
-```
-
-#### Add a follow-up question
-
-**Before:**
-
-```python
-resp = requests.post(
-    f"https://sourcegraph.example.com/.api/deepsearch/v1/{conversation_id}/questions",
-    headers={
-        "Authorization": f"token {TOKEN}",
-        "X-Requested-With": "my-client 1.0.0",
-    },
-    json={
-        "conversation_id": conversation_id,
-        "question": "What does the README contain?",
-    },
-)
-```
-
-**After:**
-
-```python
-resp = requests.post(
-    "https://sourcegraph.example.com/api/deepsearch.v1.Service/AddConversationQuestion",
-    headers={
-        "Authorization": f"Bearer {TOKEN}",
-        "Content-Type": "application/json",
-    },
-    json={
-        "parent": conversation_name,
-        "question": "What does the README contain?",
-    },
-)
-```
 
 ### Response field mapping
 
