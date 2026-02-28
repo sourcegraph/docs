@@ -8,20 +8,38 @@ To enable this, Sourcegraph collects several types of usage data from Sourcegrap
 
 If you have any questions about telemetry collection, please reach out to your Sourcegraph account representative.
 
-## Telemetry Events
+## Telemetry events
 
-Sourcegraph instances 5.2.1 and later collect telemetry events from all Sourcegraph end-user client applications to understand usage patterns and help improve the product. Telemetry events can be generated when certain user actions occur, like opening files or performing searches. This data helps us provide the highest level of support to Sourcegraph's customers, and powers the [Sourcegraph Analytics](../../analytics/index.mdx) service.
+Sourcegraph collects telemetry events from all Sourcegraph end-user client applications, as well as Sourcegraph backend operations, to understand usage patterns and help improve the product. Telemetry events can be generated when certain user actions occur, like opening files or performing searches. This data helps us provide the highest level of support to Sourcegraph's customers, and powers the [Sourcegraph Analytics](../../analytics/index.mdx) service.
 
 Sensitive data/PII exfiltration, intentional or not, is a significant concern to Sourcegraph that we take very seriously.
 Some of the measures we take to ensure privacy and data security are:
 
-1. Telemetry events are, by default, only allowed to export numeric metadata - for example, string values that may contain sensitive contents are generally redacted. String values we do retain are generally categorized information.
+1. Telemetry events are, by default, only allowed to export numeric metadata - for example, string values that may contain sensitive contents are generally redacted.
+    1. A carefully audited set of arbitrary properties we do export contain only categorized, enumerated information - you can see the full list [here](/admin/telemetry/private-metadata-allowlist).
 2. User identifiers are numeric and anonymized, as identifiers are specific per-instance.
 3. Data will be encrypted while in motion from each Sourcegraph instance to Sourcegraph.
 
+Specifics of the exported data structure is available in the [Telemetry protocol](/admin/telemetry/protocol) reference.
+
+Recently exported events can be retrieved via the [debug console](../../api/graphql/index.mdx) for review.
+You can find the API console at any time by going to **Settings**, and then clicking **Debug console** from the left sidebar, or by visiting it directly at `/debug/console`. Use the following query:
+
+```gql
+query {
+	telemetry {
+		exportedEvents(first: 5) {
+			nodes {
+				payload
+			}
+		}
+	}
+}
+```
+
 You can reach out to support@sourcegraph.com for additional information about how telemetry events are recorded and which attributes are exported by default.
 
-## Allowlist IPs / CIDR Ranges for Sourcegraph
+## Allowlist IPs / CIDR ranges for Sourcegraph
 
 Starting 5.2.0:
 
