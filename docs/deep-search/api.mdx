@@ -1,15 +1,11 @@
----
-preview: true
----
-
 # Deep Search API
 
 <Callout type="warning">
 	<p>
 		The **experimental** Deep Search API has been **deprecated** as of
-		[Sourcegraph 7.0](https://sourcegraph.com/changelog/releases/7.0). In this release, [a new versioned Sourcegraph API is
-		being introduced for custom
-		integrations](https://sourcegraph.com/changelog/sourcegraph-api),
+		[Sourcegraph 7.0](https://sourcegraph.com/changelog/releases/7.0). In
+		this release, [a new versioned Sourcegraph API is being introduced for
+		custom integrations](https://sourcegraph.com/changelog/sourcegraph-api),
 		available at `/api-reference` (e.g.
 		`https://sourcegraph.example.com/api-reference`). This experimental Deep
 		Search API remains available, but we recommend migrating to the new API
@@ -18,6 +14,60 @@ preview: true
 	</p>
 	<p>Learn more about the Sourcegraph API [here](/api).</p>
 </Callout>
+
+<Callout type="info">
+	If you're using the experimental Deep Search API, see the [migration
+	guide](#migrating-to-the-new-sourcegraph-api) to upgrade to the new `/api/`
+	endpoints.
+</Callout>
+
+## Migrating to the New Sourcegraph API
+
+Starting in [Sourcegraph 7.0](https://sourcegraph.com/changelog/releases/7.0), Sourcegraph introduces a new, versioned [API](/api/) at `/api/`. **The new API provides stable, supported endpoints** for functionality previously served by this experimental Deep Search API. See the [Sourcegraph API changelog](https://sourcegraph.com/changelog/sourcegraph-api) for more details.
+
+An interactive API reference is available at `/api-reference` on your Sourcegraph instance (e.g. `https://sourcegraph.example.com/api-reference`), where you can view all operations and download the OpenAPI schema.
+
+![API reference](https://storage.googleapis.com/sourcegraph-assets/Docs/api-reference-dark.png)
+
+### What changed
+
+1. **Base URL**: `/.api/deepsearch/v1/...` → `/api/deepsearch.v1.Service/...`
+2. **Token scopes**: Any access token → token with `externalapi:read` / `externalapi:write` scope
+3. **`X-Requested-With` header**: No longer required
+4. **Resource identifiers**: Numeric IDs (`140`) → resource names (`users/~self/conversations/140`). For requests that require a parent, the current user name is `users/~self`.
+5. **Status field**: `status: "processing"` → `state: "STATE_PROCESSING"`
+
+### AI-assisted migration
+
+The fastest way to migrate is to give your AI coding agent the OpenAPI schema and this migration guide, and let it update your code. You can download the schema from `/api-reference` on your Sourcegraph instance (e.g. `https://sourcegraph.example.com/api-reference`) — look for the **Download OpenAPI** button. Then tell your agent to migrate your Deep Search API calls to the new `/api/` equivalents.
+
+For a real-world example, see [this Amp thread](https://ampcode.com/threads/T-019ca189-6ef4-746b-a844-3a068df71b25) migrating the [raycast-sourcegraph](https://github.com/bobheadxi/raycast-sourcegraph) extension from the old API to the new endpoints.
+
+### Endpoint mapping
+
+| Operation           | Old endpoint                                           | New endpoint                                                |
+| ------------------- | ------------------------------------------------------ | ----------------------------------------------------------- |
+| Create conversation | `POST /.api/deepsearch/v1`                             | `POST /api/deepsearch.v1.Service/CreateConversation`        |
+| Get conversation    | `GET /.api/deepsearch/v1/{id}`                         | `POST /api/deepsearch.v1.Service/GetConversation`           |
+| List conversations  | `GET /.api/deepsearch/v1`                              | `POST /api/deepsearch.v1.Service/ListConversationSummaries` |
+| Add follow-up       | `POST /.api/deepsearch/v1/{id}/questions`              | `POST /api/deepsearch.v1.Service/AddConversationQuestion`   |
+| Cancel question     | `POST /.api/deepsearch/v1/{id}/questions/{qid}/cancel` | `POST /api/deepsearch.v1.Service/CancelConversation`        |
+| Delete conversation | `DELETE /.api/deepsearch/v1/{id}`                      | `POST /api/deepsearch.v1.Service/DeleteConversation`        |
+
+### Response field mapping
+
+| Old field              | New field                               |
+| ---------------------- | --------------------------------------- |
+| `id: 140`              | `name: "users/~self/conversations/140"` |
+| `status: "processing"` | `state: "STATE_PROCESSING"`             |
+| `status: "completed"`  | `state: "STATE_COMPLETED"`              |
+| `questions[].answer`   | `questions[].answer` (unchanged)        |
+| `read_token`           | Not exposed                             |
+| `share_url`            | Not exposed                             |
+
+If you have questions about the migration or need features not yet available in the new API, reach out at **support@sourcegraph.com**.
+
+## Legacy API reference
 
 The Deep Search API provides programmatic access to Sourcegraph's agentic code search capabilities. Use this API to integrate Deep Search into your development workflows, build custom tools, or automate code analysis tasks.
 
