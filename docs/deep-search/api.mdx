@@ -34,7 +34,7 @@ An interactive API reference is available at `/api-reference` on your Sourcegrap
 1. **Base URL**: `/.api/deepsearch/v1/...` → `/api/deepsearch.v1.Service/...`
 2. **Token scopes**: Any access token → token with `externalapi:read` / `externalapi:write` scope
 3. **`X-Requested-With` header**: No longer required
-4. **Resource identifiers**: Numeric IDs (`140`) → resource names (`users/{username}/conversations/140`)
+4. **Resource identifiers**: Numeric IDs (`140`) → resource names (`users/~self/conversations/140`). For requests that require a parent, the current user name is `users/~self`.
 5. **Status field**: `status: "processing"` → `state: "STATE_PROCESSING"`
 
 ### AI-assisted migration
@@ -56,14 +56,14 @@ For a real-world example, see [this Amp thread](https://ampcode.com/threads/T-01
 
 ### Response field mapping
 
-| Old field              | New field                                    |
-| ---------------------- | -------------------------------------------- |
-| `id: 140`              | `name: "users/{username}/conversations/140"` |
-| `status: "processing"` | `state: "STATE_PROCESSING"`                  |
-| `status: "completed"`  | `state: "STATE_COMPLETED"`                   |
-| `questions[].answer`   | `questions[].answer` (unchanged)             |
-| `read_token`           | Not exposed                                  |
-| `share_url`            | Not exposed                                  |
+| Old field              | New field                               |
+| ---------------------- | --------------------------------------- |
+| `id: 140`              | `name: "users/~self/conversations/140"` |
+| `status: "processing"` | `state: "STATE_PROCESSING"`             |
+| `status: "completed"`  | `state: "STATE_COMPLETED"`              |
+| `questions[].answer`   | `questions[].answer` (unchanged)        |
+| `read_token`           | Not exposed                             |
+| `share_url`            | Not exposed                             |
 
 ### Migration checklist
 
@@ -71,7 +71,7 @@ For a real-world example, see [this Amp thread](https://ampcode.com/threads/T-01
 - [ ] Remove the `X-Requested-With` header
 - [ ] Update endpoint URLs from `/.api/deepsearch/v1/...` to `/api/deepsearch.v1.Service/...`
 - [ ] Change all HTTP methods to `POST`
-- [ ] Update resource identifiers from numeric IDs to resource names (e.g. `users/{username}/conversations/140`)
+- [ ] Update resource identifiers from numeric IDs to resource names (e.g. `users/~self/conversations/140`)
 - [ ] Update status checks from `"completed"` to `"STATE_COMPLETED"`
 - [ ] Test end-to-end
 
