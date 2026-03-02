@@ -101,6 +101,10 @@ export const navigation: NavigationItem[] = [
 					{
 						title: 'Slack Integration',
 						href: '/slack-integration'
+					},
+					{
+						title: 'Deep Search API',
+						href: '/deep-search/api'
 					}
 				]
 			},
