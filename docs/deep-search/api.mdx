@@ -34,8 +34,35 @@ An interactive API reference is available at `/api-reference` on your Sourcegrap
 1. **Base URL**: `/.api/deepsearch/v1/...` → `/api/deepsearch.v1.Service/...`
 2. **Token scopes**: Any access token → token with `externalapi:read` / `externalapi:write` scope
 3. **`X-Requested-With` header**: No longer required
-4. **Resource identifiers**: Numeric IDs (`140`) → resource names (`users/~self/conversations/140`). For requests that require a parent, the current user name is `users/~self`.
-5. **Status field**: `status: "processing"` → `state: "STATE_PROCESSING"`
+4. **Resource identifiers**: Numeric IDs (`140`) → resource names (`users/~self/conversations/140`). For requests that require a parent, use `users/~self` for the authenticated user.
+5. **Request format**: Flat JSON (`{"question": "..."}`) → nested structure (`conversation.questions[].input[].question.text`)
+6. **Status field**: Plain string (`status: "processing"`) → `oneof` object (`state: { "processing": {} }`)
+
+### Endpoint mapping
+
+| Operation           | Old endpoint                                           | New endpoint                                                |
+| ------------------- | ------------------------------------------------------ | ----------------------------------------------------------- |
+| Create conversation | `POST /.api/deepsearch/v1`                             | `POST /api/deepsearch.v1.Service/CreateConversation`        |
+| Get conversation    | `GET /.api/deepsearch/v1/{id}`                         | `POST /api/deepsearch.v1.Service/GetConversation`           |
+| List conversations  | `GET /.api/deepsearch/v1`                              | `POST /api/deepsearch.v1.Service/ListConversationSummaries` |
+| Add follow-up       | `POST /.api/deepsearch/v1/{id}/questions`              | `POST /api/deepsearch.v1.Service/AddConversationQuestion`   |
+| Cancel question     | `POST /.api/deepsearch/v1/{id}/questions/{qid}/cancel` | `POST /api/deepsearch.v1.Service/CancelConversation`        |
+| Delete conversation | `DELETE /.api/deepsearch/v1/{id}`                      | `POST /api/deepsearch.v1.Service/DeleteConversation`        |
+
+### Response field mapping
+
+| Old field                       | New field                                                 |
+| ------------------------------- | --------------------------------------------------------- |
+| `id: 140`                       | `name: "users/~self/conversations/140"`                   |
+| `status: "processing"`          | `state: { "processing": {} }`                             |
+| `status: "completed"` + `error` | `state: { "error": { "code": "...", "message": "..." } }` |
+| `questions[].answer`            | `questions[].answer` (unchanged)                          |
+
+### Notes on the new request format
+
+The new API uses a nested request structure. For example, `CreateConversation` requires `conversation.questions[].input[].question.text` rather than a flat `{"question": "..."}`. See the interactive API reference at `/api-reference` on your instance for request examples and exact schemas.
+
+Conversations are still processed asynchronously — poll `GetConversation` until the `state` field reaches a terminal value (`completed`, `error`, or `canceled`). For `error` states, inspect `code` for the error type (`ERROR_QUOTA_EXCEEDED`, `ERROR_TOKEN_LIMIT_EXCEEDED`, etc.) and `message` for details.
 
 ### AI-assisted migration
 
@@ -55,28 +82,6 @@ specification for the new API.
 Replace `<path-to-your-file>` with the file(s) in your project that call the Deep Search API, and attach the downloaded OpenAPI schema so the agent can reference the exact request/response shapes.
 
 For a real-world example, see [this Amp thread](https://ampcode.com/threads/T-019ca189-6ef4-746b-a844-3a068df71b25) migrating the [raycast-sourcegraph](https://github.com/bobheadxi/raycast-sourcegraph) extension from the old API to the new endpoints.
-
-### Endpoint mapping
-
-| Operation           | Old endpoint                                           | New endpoint                                                |
-| ------------------- | ------------------------------------------------------ | ----------------------------------------------------------- |
-| Create conversation | `POST /.api/deepsearch/v1`                             | `POST /api/deepsearch.v1.Service/CreateConversation`        |
-| Get conversation    | `GET /.api/deepsearch/v1/{id}`                         | `POST /api/deepsearch.v1.Service/GetConversation`           |
-| List conversations  | `GET /.api/deepsearch/v1`                              | `POST /api/deepsearch.v1.Service/ListConversationSummaries` |
-| Add follow-up       | `POST /.api/deepsearch/v1/{id}/questions`              | `POST /api/deepsearch.v1.Service/AddConversationQuestion`   |
-| Cancel question     | `POST /.api/deepsearch/v1/{id}/questions/{qid}/cancel` | `POST /api/deepsearch.v1.Service/CancelConversation`        |
-| Delete conversation | `DELETE /.api/deepsearch/v1/{id}`                      | `POST /api/deepsearch.v1.Service/DeleteConversation`        |
-
-### Response field mapping
-
-| Old field              | New field                               |
-| ---------------------- | --------------------------------------- |
-| `id: 140`              | `name: "users/~self/conversations/140"` |
-| `status: "processing"` | `state: "STATE_PROCESSING"`             |
-| `status: "completed"`  | `state: "STATE_COMPLETED"`              |
-| `questions[].answer`   | `questions[].answer` (unchanged)        |
-| `read_token`           | Not exposed                             |
-| `share_url`            | Not exposed                             |
 
 If you have questions about the migration or need features not yet available in the new API, reach out at **support@sourcegraph.com**.
 
