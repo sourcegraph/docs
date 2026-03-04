@@ -37,6 +37,16 @@ An interactive API reference is available at `/api-reference` on your Sourcegrap
 4. **Resource identifiers**: Numeric IDs (`140`) → resource names (`users/~self/conversations/140`). For requests that require a parent, use `users/~self` for the authenticated user.
 5. **Request format**: Flat JSON (`{"question": "..."}`) → nested structure (`conversation.questions[].input[].question.text`)
 6. **Status field**: Plain string (`status: "processing"`) → `oneof` object (`state: { "processing": {} }`)
+   - **Errors** are now a distinct state rather than a `completed` status with an `error` field:
+     ```json
+     "state": {
+       "error": {
+         "code": "ERROR_INTERNAL | ERROR_QUOTA_EXCEEDED | ERROR_ENTITLEMENT_EXCEEDED | ERROR_TOKEN_LIMIT_EXCEEDED",
+         "message": "...",
+         "retry_time": "..."
+       }
+     }
+     ```
 
 ### Endpoint mapping
 
@@ -60,7 +70,7 @@ An interactive API reference is available at `/api-reference` on your Sourcegrap
 
 ### Notes on the new request format
 
-The new API uses a nested request structure. For example, `CreateConversation` requires `conversation.questions[].input[].question.text` rather than a flat `{"question": "..."}`. See the interactive API reference at `/api-reference` on your instance for request examples and exact schemas.
+The new API uses a nested request structure. For example, `CreateConversation` requires `conversation.questions[].input[].question.text` rather than a flat `{"question": "..."}`. See the interactive API reference at `/api-reference` on your instance for request examples and exact schemas. You can also download the OpenAPI schema from that page (look for the **Download** button).
 
 Conversations are still processed asynchronously — poll `GetConversation` until the `state` field reaches a terminal value (`completed`, `error`, or `canceled`). For `error` states, inspect `code` for the error type (`ERROR_QUOTA_EXCEEDED`, `ERROR_TOKEN_LIMIT_EXCEEDED`, etc.) and `message` for details.
 
