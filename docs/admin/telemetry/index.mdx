@@ -15,12 +15,12 @@ Sourcegraph collects telemetry events from all Sourcegraph end-user client appli
 Sensitive data/PII exfiltration, intentional or not, is a significant concern to Sourcegraph that we take very seriously.
 Some of the measures we take to ensure privacy and data security are:
 
-1. Telemetry events are, by default, only allowed to export numeric metadata - for example, string values that may contain sensitive contents are generally redacted.
-    1. A carefully audited set of arbitrary properties we do export contain only categorized, enumerated information - you can see the full list [here](/admin/telemetry/private-metadata-allowlist).
-2. User identifiers are numeric and anonymized, as identifiers are specific per-instance.
-3. Data will be encrypted while in motion from each Sourcegraph instance to Sourcegraph.
-
-Specifics of the exported data structure is available in the [Telemetry protocol](/admin/telemetry/protocol) reference.
+1. Telemetry event parameters that can be provided by our features and exported by default - referred to as "event metadata" - [are only allowed to include numeric values](/admin/telemetry/protocol#telemetrygateway-v1-EventParameters-MetadataEntry).
+    1. [Non-numeric event metadata](/admin/telemetry/protocol#eventparameters) that may contain sensitive contents, like strings, cannot be exported by default. Only a [carefully audited allowlist of non-numeric metadata properties are exported](/admin/telemetry/private-metadata-allowlist): each of these are reviewed and monitored to ensure they contain only categorized, enumerated information.
+    2. We use programming language types-based enforcement to ensure that event metadata keys are known statically, rather than coming from arbitrary sources.
+2. [User identifiers](/admin/telemetry/protocol#telemetrygateway-v1-EventUser) are numeric and anonymized, as identifiers are specific per-instance.
+3. For all other properties, we use a well-defined data structure (available in the [Telemetry protocol reference](/admin/telemetry/protocol)) to ensure that we never export sensitive data. Changes to this data structure and data collection implementations are carefully monitored and reviewed.
+4. Data is encrypted while in transit from each Sourcegraph instance to Sourcegraph.
 
 Recently exported events can be retrieved via the [debug console](../../api/graphql/index.mdx) for review.
 You can find the API console at any time by going to **Settings**, and then clicking **Debug console** from the left sidebar, or by visiting it directly at `/debug/console`. Use the following query:
@@ -51,4 +51,4 @@ Prior to 5.2.0, allowlist the full [Cloudflare IP ranges](https://www.cloudflare
 
 ## Architecture
 
-To learn more about how telemetry data if handled, refer to the [Architecture page](../../admin/architecture.mdx#analytics-and-telemetry).
+To learn more about how telemetry data is processed, refer to the [Architecture page](/admin/architecture#analytics-and-telemetry).
