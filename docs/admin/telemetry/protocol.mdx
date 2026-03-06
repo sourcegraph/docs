@@ -3,7 +3,7 @@
 
 This page contains the core schema for telemetry event data that gets exported from Sourcegraph.
 
-To learn more, refer to our [telemetry documentation](https://sourcegraph.com/docs/telemetry).
+To learn more, refer to our [telemetry documentation](https://sourcegraph.com/docs/admin/telemetry).
 
 ## Table of Contents
 
@@ -185,15 +185,16 @@ Sourcegraph.com instance and managed services.
 <a name="telemetrygateway-v1-EventParameters"></a>
 
 ### EventParameters
-
+EventParameters carries the metadata provided by individual Sourcegraph telemetry SDK
+callsites, and is the primary means of recording product interaction metadata.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | version | [int32](#int32) |  | <p>Version of the event parameters, used for indicating the "shape" of this</p><p>event's metadata, beginning at 0. Useful for denoting if the shape of</p><p>metadata has changed in any way.</p> |
 | legacy_metadata | [EventParameters.LegacyMetadataEntry](#telemetrygateway-v1-EventParameters-LegacyMetadataEntry) | repeated | **Deprecated.** <p>DEPRECATED, legacy metadata format that only accepted int64 - use the new</p><p>'metadata' field instead, which accepts float values. Values sent through</p><p>this proto field will be merged into the new metadata attributes.</p> |
-| metadata | [EventParameters.MetadataEntry](#telemetrygateway-v1-EventParameters-MetadataEntry) | repeated | <p>Strictly typed metadata, restricted to integer values to avoid accidentally</p><p>exporting sensitive or private data.</p> |
-| private_metadata | [google.protobuf.Struct](#google-protobuf-Struct) | optional | <p>Additional potentially sensitive metadata - i.e. not restricted to integer</p><p>values.</p><p>🚨 SECURITY: This metadata is NOT exported from instances by default, as it</p><p>can contain arbitrarily-shaped data that may accidentally contain sensitive</p><p>or private contents.</p><p>This metadata is only exported on an allowlist basis based on terms of</p><p>use agreements and combinations of event feature and action, alongside</p><p>careful audit of callsites.</p> |
+| metadata | [EventParameters.MetadataEntry](#telemetrygateway-v1-EventParameters-MetadataEntry) | repeated | <p>Strictly typed exported-by-default metadata, restricted to numeric values</p><p>to ensure no sensitive attributes are exported. Sourcegraph telemetry SDKs</p><p>must use programming language type-checking to ensure metadata keys are</p><p>statically known.</p> |
+| private_metadata | [google.protobuf.Struct](#google-protobuf-Struct) | optional | <p>Additional potentially sensitive metadata - i.e. not restricted to numeric</p><p>values.</p><p>🚨 SECURITY: This metadata is NOT exported from instances by default, as it</p><p>can contain arbitrarily-shaped data that may accidentally contain sensitive</p><p>or private contents.</p><p>This metadata is only exported on an allowlist basis based on terms of</p><p>use agreements and combinations of event feature and action, alongside</p><p>careful audit of callsites. For the list of allowlisted properties, refer</p><p>to this generated page:</p><p>https://sourcegraph.com/docs/admin/telemetry/private-metadata-allowlist</p> |
 | billing_metadata | [EventBillingMetadata](#telemetrygateway-v1-EventBillingMetadata) | optional | <p>Optional billing-related metadata.</p> |
 
 
@@ -407,7 +408,9 @@ metadata about users for instances that consent to it.
 <a name="telemetrygateway-v1-InstanceOrganizationMetadata"></a>
 
 ### InstanceOrganizationMetadata
-🚨 SECURITY: This metadata is NOT exported from instances by default.
+🚨 SECURITY: This metadata is NOT exported from instances by default. It is
+exported if the customer specifically requests it to be enabled for optional
+Sourcegraph Analytics features.
 
 
 | Field | Type | Label | Description |
@@ -425,7 +428,9 @@ metadata about users for instances that consent to it.
 <a name="telemetrygateway-v1-InstanceUserMetadata"></a>
 
 ### InstanceUserMetadata
-🚨 SECURITY: This metadata is NOT exported from instances by default.
+🚨 SECURITY: This metadata is NOT exported from instances by default. It is
+exported if the customer specifically requests it to be enabled for optional
+Sourcegraph Analytics features.
 
 
 | Field | Type | Label | Description |
@@ -443,14 +448,16 @@ metadata about users for instances that consent to it.
 <a name="telemetrygateway-v1-PublishInstanceUserMetadataRequest"></a>
 
 ### PublishInstanceUserMetadataRequest
-🚨 SECURITY: This metadata is NOT exported from instances by default.
+🚨 SECURITY: This metadata is NOT exported from instances by default. It is
+exported if the customer specifically requests it to be enabled for optional
+Sourcegraph Analytics features.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | metadata | [PublishInstanceUserMetadataRequestMetadata](#telemetrygateway-v1-PublishInstanceUserMetadataRequestMetadata) |  | <p>Metadata about the events being recorded.</p> |
-| user_metadata | [PublishInstanceUserMetadataRequest.UserMetadataPayload](#telemetrygateway-v1-PublishInstanceUserMetadataRequest-UserMetadataPayload) |  | <p>Batch of user metadata to publish in a single message. Clients should aim</p><p>to batch large uploads into a series of smaller requests in the RecordEvents</p><p>stream, being mindful of common limits in individual message sizes:</p><p>https://protobuf.dev/programming-guides/api/#bound-req-res-sizes</p><p>🚨 SECURITY: Callers exporting for single-tenant Sourcegraph should always</p><p>respect in-instance toggles for what user metadata should be exported.</p> |
-| organization_metadata | [PublishInstanceUserMetadataRequest.OrganizationMetadataPayload](#telemetrygateway-v1-PublishInstanceUserMetadataRequest-OrganizationMetadataPayload) |  | <p>Batch of organization metadata to publish in a single message. Clients</p><p>should aim to batch large uploads into a series of smaller requests in the</p><p>RecordEvents stream, being mindful of common limits in individual message</p><p>sizes: https://protobuf.dev/programming-guides/api/#bound-req-res-sizes</p><p>🚨 SECURITY: Callers exporting for single-tenant Sourcegraph should always</p><p>respect in-instance toggles for what user metadata should be exported.</p> |
+| user_metadata | [PublishInstanceUserMetadataRequest.UserMetadataPayload](#telemetrygateway-v1-PublishInstanceUserMetadataRequest-UserMetadataPayload) |  | <p>Batch of user metadata to publish in a single message. Clients should aim</p><p>to batch large uploads into a series of smaller requests in the RecordEvents</p><p>stream, being mindful of common limits in individual message sizes:</p><p>https://protobuf.dev/programming-guides/api/#bound-req-res-sizes</p><p>🚨 SECURITY: This metadata is NOT exported from instances by default. It is</p><p>exported if the customer specifically requests it to be enabled for optional</p><p>Sourcegraph Analytics features.</p> |
+| organization_metadata | [PublishInstanceUserMetadataRequest.OrganizationMetadataPayload](#telemetrygateway-v1-PublishInstanceUserMetadataRequest-OrganizationMetadataPayload) |  | <p>Batch of organization metadata to publish in a single message. Clients</p><p>should aim to batch large uploads into a series of smaller requests in the</p><p>RecordEvents stream, being mindful of common limits in individual message</p><p>sizes: https://protobuf.dev/programming-guides/api/#bound-req-res-sizes</p><p>🚨 SECURITY: This metadata is NOT exported from instances by default. It is</p><p>exported if the customer specifically requests it to be enabled for optional</p><p>Sourcegraph Analytics features.</p> |
 
 
 
@@ -460,7 +467,9 @@ metadata about users for instances that consent to it.
 <a name="telemetrygateway-v1-PublishInstanceUserMetadataRequest-OrganizationMetadataPayload"></a>
 
 ### PublishInstanceUserMetadataRequest.OrganizationMetadataPayload
-🚨 SECURITY: This metadata is NOT exported from instances by default.
+🚨 SECURITY: This metadata is NOT exported from instances by default. It is
+exported if the customer specifically requests it to be enabled for optional
+Sourcegraph Analytics features.
 
 
 | Field | Type | Label | Description |
@@ -475,7 +484,9 @@ metadata about users for instances that consent to it.
 <a name="telemetrygateway-v1-PublishInstanceUserMetadataRequest-UserMetadataPayload"></a>
 
 ### PublishInstanceUserMetadataRequest.UserMetadataPayload
-🚨 SECURITY: This metadata is NOT exported from instances by default.
+🚨 SECURITY: This metadata is NOT exported from instances by default. It is
+exported if the customer specifically requests it to be enabled for optional
+Sourcegraph Analytics features.
 
 
 | Field | Type | Label | Description |
