@@ -406,23 +406,11 @@ export const navigation: NavigationItem[] = [
 			},
 			{
 				title: 'Code Ownership',
-				href: '/own',
+				href: '/code-ownership',
 				sections: [
 					{
 						title: 'CODEOWNERS Format',
-						href: '/own/codeowners-format'
-					},
-					{
-						title: 'CODEOWNERS Ingestion',
-						href: '/own/codeowners-ingestion'
-					},
-					{
-						title: 'Configuration Reference',
-						href: '/own/configuration-reference'
-					},
-					{
-						title: 'Assigned Ownership',
-						href: '/own/assigned-ownership'
+						href: '/code-ownership/codeowners-format'
 					}
 				]
 			},
@@ -474,16 +462,12 @@ export const navigation: NavigationItem[] = [
 			},
 			{
 				title: 'APIs',
-				href: '/api/graphql',
+				href: '/api',
 				sections: [
-					{title: 'GraphQL API', href: '/api/graphql'},
-					{title: 'Stream API', href: '/api/stream-api'},
+					{title: 'Sourcegraph API', href: '/api'},
+					{title: 'Streaming search API', href: '/api/stream-api'},
 					{title: 'Analytics API', href: '/analytics/api'},
-					{
-						title: 'Deep Search API',
-						href: '/deep-search/api',
-						preview: true
-					}
+					{title: 'Debug API', href: '/api/graphql'}
 				]
 			},
 			{
@@ -638,10 +622,6 @@ export const navigation: NavigationItem[] = [
 			{
 				title: 'Changelog',
 				href: 'https://sourcegraph.com/changelog'
-			},
-			{
-				title: 'Technical changelog',
-				href: '/technical-changelog'
 			},
 			{
 				title: 'Releases',

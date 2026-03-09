@@ -1,5 +1,7 @@
 # Docker Single Container Deployment
 
+<Callout type="warning">The single-container (`sourcegraph/server`) deployment mode has been **removed in [Sourcegraph 7.0.0](https://sourcegraph.com/changelog/releases/7.0)**. The `sourcegraph/server` Docker image is no longer published starting with 7.0.0. Customers must [migrate to Docker Compose](/self-hosted/deploy/docker-compose/migrate) or [Kubernetes](/self-hosted/deploy/kubernetes/) before upgrading to 7.0.0.</Callout>
+
 The Docker Single Container deployment type is a way to very quickly get an instance of Sourcegraph set up locally to experiment with many of its features. However, it is **not recommended** for a production instance, and **has limitations** depending on the OS you are deploying to, as well as the associated resources. See the [troubleshooting section](#troubleshooting) for additional information.
 
 [Code Insights](/code-insights/) is not supported in Single Container deployments. To try Code Insights you must deploy using [Docker Compose](/self-hosted/deploy/docker-compose/) or [Kubernetes](/self-hosted/deploy/kubernetes/). [Tracing](/self-hosted/observability/tracing) is disabled by default, and if you intend to enable it, you will have to deploy and configure the [OpenTelemetry Collector](/self-hosted/observability/opentelemetry). The Single Container deployment does not ship with this service included. It is strongly recommended to use one of the aforementioned deployment methods if tracing support is a requirement.
@@ -138,6 +140,10 @@ SELECT * FROM users;
 
 ### Postgresql 16
 
+<Callout type="warning">
+The single-container deployment (`sourcegraph/server`) is sunset in [Sourcegraph 7.0.0](https://sourcegraph.com/changelog/releases/7.0) and is no longer supported. The automatic PostgreSQL 12 to 16 upgrade procedure described below only applies to Sourcegraph 5.10.x through 6.x releases. Users should migrate to a supported deployment type before upgrading to 7.0.0.
+</Callout>
+
 > Warning: The 5.11 release updates the database container images from Postgres 12 to Postgres 16. Customers are advised to have a database backup before upgrading! See our [postgres 12 end of life](https://sourcegraph.com/docs/self-hosted/postgres12-end-of-life-notice#postgres-12-end-of-life) notice!
 
 From sourcegraph version 5.11 onwards, the Sourcegraph single container Docker image uses Postgresql 16. Upgrading from Postgresql 12 to Postgresql 16 is a manual process, that is similar to the one outlined below for multi-version upgrades, but migrator has been merged into the container, allowing for a simpler upgrade.
@@ -174,7 +180,7 @@ A [standard upgrade](/self-hosted/updates/#standard-upgrades) occurs between two
 -   Read our [update policy](/self-hosted/updates/#update-policy) to learn about Sourcegraph updates.
 -   Find the relevant entry for your update in the [update notes for single-container Sourcegraph with Docker](https://sourcegraph.com/changelog/self-hosted/server).
 
-To update, just use the newer `sourcegraph/server:N.N.N` Docker image (where `N.N.N` is a patch or single minor release away your current version) in place of the older one, using the same Docker volumes. Your server's data will be migrated automatically if needed. You can always find the version number details of the latest release via the [technical changelog](/technical-changelog).
+To update, just use the newer `sourcegraph/server:N.N.N` Docker image (where `N.N.N` is a patch or single minor release away your current version) in place of the older one, using the same Docker volumes. Your server's data will be migrated automatically if needed. You can always find the version number details of the latest release via the [technical changelog](https://sourcegraph.com/changelog/releases).
 
 ### Multi-version upgrades
 
@@ -184,7 +190,7 @@ To update, just use the newer `sourcegraph/server:N.N.N` Docker image (where `N.
 >
 > The below docs are kept for posterity for users on older versions of Sourcegraph that are looking to upgrade or run the migrator tool.
 
-To update, just use the newer `sourcegraph/server:N.N.N` Docker image in place of the older one, using the same Docker volumes. Your server's data will be migrated automatically if needed. You can always find the version number details of the latest release via the [technical changelog](/technical-changelog).
+To update, just use the newer `sourcegraph/server:N.N.N` Docker image in place of the older one, using the same Docker volumes. Your server's data will be migrated automatically if needed. You can always find the version number details of the latest release via the [technical changelog](https://sourcegraph.com/changelog/releases).
 
 ### (Legacy) Multi-version upgrades
 
@@ -265,7 +271,7 @@ The version of this Postgres container is dependent on the version of the instan
 | `3.20.X` - `3.29.X` | `postgres-12.6`        |
 | `3.30.X` - `3.37.X` | `postgres-12.6-alpine` |
 | `3.38.X` - `5.9.X`  | `postgres-12-alpine`   |
-| `5.10.X` -          | `postgresql-16`        |
+| `5.10.X` - `6.x`   | `postgresql-16`        |
 
 ## Troubleshooting
 
@@ -298,7 +304,7 @@ Sourcegraph can be **tested** on Windows 10 using roughly the same steps provide
 	<code>
 		docker run<span class="virtual-br"></span> --publish 7080:7080 --publish
 		127.0.0.1:3370:3370 --rm<span class="virtual-br"></span>{' '}
-		sourcegraph/server:{CURRENT_VERSION_STRING_NO_V()}
+		sourcegraph/server:<CURRENT_VERSION_STRING_NO_V />
 	</code>
 </pre>
 

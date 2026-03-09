@@ -6,6 +6,8 @@ import {useCallback, useEffect, useId, useRef, useState} from 'react';
 
 import {createPortal} from 'react-dom';
 
+import * as logoPacks from '../images/logos/';
+
 type MermaidType = typeof mermaidAPI;
 
 const LIGHT_THEME = {
@@ -110,11 +112,21 @@ export function Mermaid({chart}: MermaidProps) {
 			const mermaid = mermaidModule.default;
 			mermaidRef.current = mermaid;
 
+			mermaid.registerIconPacks(
+				Object.values(logoPacks).map(icons => ({
+					name: icons.prefix,
+					icons
+				}))
+			);
+
 			const isDark = resolvedTheme === 'dark';
 			mermaid.initialize({
 				startOnLoad: false,
 				theme: 'base',
-				themeVariables: isDark ? DARK_THEME : LIGHT_THEME
+				themeVariables: isDark ? DARK_THEME : LIGHT_THEME,
+				themeCSS: isDark
+					? '.node-bkg { stroke: #F34E3F !important; }'
+					: ''
 			});
 
 			setRenderKey(Math.random().toString(36).slice(2));
@@ -138,7 +150,10 @@ export function Mermaid({chart}: MermaidProps) {
 					existing.remove();
 				}
 
-				const {svg} = await mermaidRef.current!.render(elementId, chart);
+				const {svg} = await mermaidRef.current!.render(
+					elementId,
+					chart
+				);
 				if (isMounted) {
 					setSvg(svg);
 					setError(null);
@@ -197,7 +212,9 @@ export function Mermaid({chart}: MermaidProps) {
 	if (!svg) {
 		return (
 			<div className="flex h-32 items-center justify-center rounded-lg bg-light-bg-2 dark:bg-vermilion-01">
-				<span className="text-vermilion-07 dark:text-vermilion-08">Loading diagram...</span>
+				<span className="text-vermilion-07 dark:text-vermilion-08">
+					Loading diagram...
+				</span>
 			</div>
 		);
 	}
@@ -208,13 +225,13 @@ export function Mermaid({chart}: MermaidProps) {
 	return (
 		<>
 			<div
-				className="group relative my-4 overflow-x-auto rounded-lg p-4 border border-light-border dark:border-vermilion-02"
+				className="group relative my-4 overflow-x-auto rounded-lg border border-light-border p-4 dark:border-vermilion-02"
 				style={{backgroundColor: bgColor}}
 			>
 				<button
 					type="button"
 					onClick={() => setIsExpanded(true)}
-					className="absolute top-2 right-2 p-2 rounded-md bg-black/20 hover:bg-black/30 dark:bg-white/20 dark:hover:bg-white/30 text-slate-700 dark:text-white z-20"
+					className="absolute right-2 top-2 z-20 rounded-md bg-black/20 p-2 text-slate-700 hover:bg-black/30 dark:bg-white/20 dark:text-white dark:hover:bg-white/30"
 					aria-label="Expand diagram"
 				>
 					<svg
@@ -231,7 +248,12 @@ export function Mermaid({chart}: MermaidProps) {
 						<path d="M15 3h6v6M14 10l6.1-6.1M9 21H3v-6M10 14l-6.1 6.1" />
 					</svg>
 				</button>
-				{!isExpanded && <div className="[&_.clickable]:cursor-pointer [&_.clickable]:underline [&_.clickable:hover]:opacity-80" dangerouslySetInnerHTML={{__html: svg}} />}
+				{!isExpanded && (
+					<div
+						className="[&_.clickable:hover]:opacity-80 [&_.clickable]:cursor-pointer [&_.clickable]:underline"
+						dangerouslySetInnerHTML={{__html: svg}}
+					/>
+				)}
 			</div>
 
 			{isExpanded &&
@@ -243,11 +265,15 @@ export function Mermaid({chart}: MermaidProps) {
 						onClick={() => setIsExpanded(false)}
 					>
 						<div
-							className="relative max-w-[95vw] max-h-[95vh] overflow-auto rounded-lg p-8 pt-16 shadow-2xl"
+							className="relative max-h-[95vh] max-w-[95vw] overflow-auto rounded-lg p-8 pt-16 shadow-2xl"
 							style={{backgroundColor: bgColor}}
 							onClick={e => {
 								// Close if clicking on a clickable element (link), otherwise prevent closing
-								if ((e.target as HTMLElement).closest('.clickable')) {
+								if (
+									(e.target as HTMLElement).closest(
+										'.clickable'
+									)
+								) {
 									setIsExpanded(false);
 								} else {
 									e.stopPropagation();
@@ -257,7 +283,7 @@ export function Mermaid({chart}: MermaidProps) {
 							<button
 								type="button"
 								onClick={() => setIsExpanded(false)}
-								className="absolute top-4 right-4 p-2 rounded-md bg-black/20 hover:bg-black/30 dark:bg-white/20 dark:hover:bg-white/30 text-slate-700 dark:text-white z-10"
+								className="absolute right-4 top-4 z-10 rounded-md bg-black/20 p-2 text-slate-700 hover:bg-black/30 dark:bg-white/20 dark:text-white dark:hover:bg-white/30"
 								aria-label="Close expanded diagram"
 							>
 								<svg
@@ -275,7 +301,7 @@ export function Mermaid({chart}: MermaidProps) {
 								</svg>
 							</button>
 							<div
-								className="flex items-center justify-center [&_svg]:w-auto [&_svg]:h-auto [&_svg]:min-w-[80vw] [&_svg]:max-h-[80vh] [&_.clickable]:cursor-pointer [&_.clickable]:underline [&_.clickable:hover]:opacity-80"
+								className="flex items-center justify-center [&_.clickable:hover]:opacity-80 [&_.clickable]:cursor-pointer [&_.clickable]:underline [&_svg]:h-auto [&_svg]:max-h-[80vh] [&_svg]:w-auto [&_svg]:min-w-[80vw]"
 								dangerouslySetInnerHTML={{__html: svg}}
 							/>
 						</div>

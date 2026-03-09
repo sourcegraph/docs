@@ -1,26 +1,105 @@
----
-preview: true
----
-
 # Deep Search API
 
-<p className="subtitle">
-	Programmatic access to Sourcegraph's agentic code search capabilities.
-</p>
-
-<Callout type="note">
-	The **experimental** Deep Search API is available in Sourcegraph version
-	6.7+. This API allows you to programmatically create and manage Deep Search
-	conversations.
-
-    We are looking for feedback on the API and its usage. Please let us know your
-    thoughts and suggestions.
-
+<Callout type="warning">
+	<p>
+		The **experimental** Deep Search API has been **deprecated** as of
+		[Sourcegraph 7.0](https://sourcegraph.com/changelog/releases/7.0). In
+		this release, [a new versioned Sourcegraph API is being introduced for
+		custom integrations](https://sourcegraph.com/changelog/sourcegraph-api),
+		available at `/api-reference` (e.g.
+		`https://sourcegraph.example.com/api-reference`). This experimental Deep
+		Search API remains available, but we recommend migrating to the new API
+		for a stable integration experience. If you need migration assistance,
+		please reach out at support@sourcegraph.com.
+	</p>
+	<p>Learn more about the Sourcegraph API [here](/api).</p>
 </Callout>
+
+<Callout type="info">
+	If you're using the experimental Deep Search API, see the [migration
+	guide](#migrating-to-the-new-sourcegraph-api) to upgrade to the new `/api/`
+	endpoints.
+</Callout>
+
+## Migrating to the New Sourcegraph API
+
+Starting in [Sourcegraph 7.0](https://sourcegraph.com/changelog/releases/7.0), Sourcegraph introduces a new, versioned [API](/api/) at `/api/`. **The new API provides stable, supported endpoints** for functionality previously served by this experimental Deep Search API. See the [Sourcegraph API changelog](https://sourcegraph.com/changelog/sourcegraph-api) for more details.
+
+An interactive API reference is available at `/api-reference` on your Sourcegraph instance (e.g. `https://sourcegraph.example.com/api-reference`), where you can view all operations and download the OpenAPI schema.
+
+![API reference](https://storage.googleapis.com/sourcegraph-assets/Docs/api-reference-dark.png)
+
+### What changed
+
+1. **Base URL**: `/.api/deepsearch/v1/...` → `/api/deepsearch.v1.Service/...`
+2. **Token scopes**: Any access token → token with `externalapi:read` / `externalapi:write` scope
+3. **`X-Requested-With` header**: No longer required
+4. **Resource identifiers**: Numeric IDs (`140`) → resource names (`users/~self/conversations/140`). For requests that require a parent, use `users/~self` for the authenticated user.
+5. **Request format**: Flat JSON (`{"question": "..."}`) → nested structure (`conversation.questions[].input[].question.text`)
+6. **Status field**: Plain string (`status: "processing"`) → `oneof` object (`state: { "processing": {} }`)
+    - **Errors** are now a distinct state rather than a `completed` status with an `error` field:
+        ```json
+        "state": {
+          "error": {
+            "code": "ERROR_INTERNAL | ERROR_QUOTA_EXCEEDED | ERROR_ENTITLEMENT_EXCEEDED | ERROR_TOKEN_LIMIT_EXCEEDED",
+            "message": "...",
+            "retry_time": "..."
+          }
+        }
+        ```
+
+### Endpoint mapping
+
+| Operation           | Old endpoint                                           | New endpoint                                                |
+| ------------------- | ------------------------------------------------------ | ----------------------------------------------------------- |
+| Create conversation | `POST /.api/deepsearch/v1`                             | `POST /api/deepsearch.v1.Service/CreateConversation`        |
+| Get conversation    | `GET /.api/deepsearch/v1/{id}`                         | `POST /api/deepsearch.v1.Service/GetConversation`           |
+| List conversations  | `GET /.api/deepsearch/v1`                              | `POST /api/deepsearch.v1.Service/ListConversationSummaries` |
+| Add follow-up       | `POST /.api/deepsearch/v1/{id}/questions`              | `POST /api/deepsearch.v1.Service/AddConversationQuestion`   |
+| Cancel question     | `POST /.api/deepsearch/v1/{id}/questions/{qid}/cancel` | `POST /api/deepsearch.v1.Service/CancelConversation`        |
+| Delete conversation | `DELETE /.api/deepsearch/v1/{id}`                      | `POST /api/deepsearch.v1.Service/DeleteConversation`        |
+
+### Response field mapping
+
+| Old field                       | New field                                                 |
+| ------------------------------- | --------------------------------------------------------- |
+| `id: 140`                       | `name: "users/~self/conversations/140"`                   |
+| `status: "processing"`          | `state: { "processing": {} }`                             |
+| `status: "completed"` + `error` | `state: { "error": { "code": "...", "message": "..." } }` |
+| `questions[].answer`            | `questions[].answer` (unchanged)                          |
+
+### Notes on the new request format
+
+The new API uses a nested request structure. For example, `CreateConversation` requires `conversation.questions[].input[].question.text` rather than a flat `{"question": "..."}`. See the interactive API reference at `/api-reference` on your instance for request examples and exact schemas.
+
+Conversations are still processed asynchronously — poll `GetConversation` until the `state` field reaches a terminal value (`completed`, `error`, or `canceled`). For `error` states, inspect `code` for the error type (`ERROR_QUOTA_EXCEEDED`, `ERROR_TOKEN_LIMIT_EXCEEDED`, etc.) and `message` for details.
+
+### AI-assisted migration
+
+The fastest way to migrate is to give your AI coding agent the OpenAPI schema and this migration guide, and let it update your code. You can download the schema from `/api-reference` on your Sourcegraph instance (e.g. `https://sourcegraph.example.com/api-reference`) — look for the **Download** button. Then use a prompt like the following:
+
+```text
+Migrate the Deep Search API calls in this project from the deprecated
+/.api/deepsearch/v1 endpoints to the new Sourcegraph /api/deepsearch.v1.Service/
+endpoints. The main file to update is <path-to-your-file>.
+
+Use the migration guide on
+https://sourcegraph.com/docs/deep-search/api#migrating-to-the-new-sourcegraph-api
+for reference. Use the attached OpenAPI schema (@sourcegraph-openapi.yml) as the
+specification for the new API.
+```
+
+Replace `<path-to-your-file>` with the file(s) in your project that call the Deep Search API, and attach the downloaded OpenAPI schema so the agent can reference the exact request/response shapes.
+
+For a real-world example, see [this Amp thread](https://ampcode.com/threads/T-019ca189-6ef4-746b-a844-3a068df71b25) migrating the [raycast-sourcegraph](https://github.com/bobheadxi/raycast-sourcegraph) extension from the old API to the new endpoints.
+
+If you have questions about the migration or need features not yet available in the new API, reach out at **support@sourcegraph.com**.
+
+## Legacy API reference
 
 The Deep Search API provides programmatic access to Sourcegraph's agentic code search capabilities. Use this API to integrate Deep Search into your development workflows, build custom tools, or automate code analysis tasks.
 
-## Authentication
+### Authentication
 
 All API requests require authentication using a Sourcegraph access token. You can generate an access token from your user settings.
 
@@ -29,7 +108,7 @@ All API requests require authentication using a Sourcegraph access token. You ca
 export SRC_ACCESS_TOKEN="your-token-here"
 ```
 
-## Base URL
+### Base URL
 
 All Deep Search API endpoints are prefixed with `/.api/deepsearch/v1` and require the `X-Requested-With` header to identify the client:
 
@@ -46,7 +125,7 @@ curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1' \
 	name and version number.
 </Callout>
 
-## Creating conversations
+### Creating conversations
 
 All Deep Search conversations are processed asynchronously. When you create a conversation, the API will return immediately with a conversation object containing the question in `processing` status.
 
@@ -165,7 +244,7 @@ Once processing is complete, the response will include the answer:
 }
 ```
 
-## Adding follow-up questions
+### Adding follow-up questions
 
 Continue a conversation by adding follow-up questions. The `conversation_id` in the request body must match the conversation ID in the URL:
 
@@ -178,7 +257,7 @@ curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/140/questions' \
   -d '{"conversation_id":140,"question":"What does the README file contain?"}'
 ```
 
-## Listing conversations
+### Listing conversations
 
 Get all your conversations with optional filtering:
 
@@ -206,7 +285,7 @@ Available query parameters:
 - `page_after` - Pagination cursor
 - `sort` - Sort order: `id`, `-id`, `created_at`, `-created_at`, `updated_at`, `-updated_at` (default: `-updated_at`)
 
-## Managing conversations
+### Managing conversations
 
 **Get a specific conversation:**
 
@@ -236,7 +315,7 @@ curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/140/questions/163
   -H 'X-Requested-With: my-client 1.0.0'
 ```
 
-## Accessing conversations via read tokens
+### Accessing conversations via read tokens
 
 You can retrieve a conversation using its read token with the `filter_read_token` query parameter.
 
@@ -251,7 +330,7 @@ curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1?filter_read_token
   -H 'X-Requested-With: my-client 1.0.0'
 ```
 
-## Response structure
+### Response structure
 
 **Conversation object:**
 
@@ -287,7 +366,7 @@ If a question fails to process, the `status` will be `completed` and the `error`
 }
 ```
 
-## Error handling
+### Error handling
 
 The API returns standard HTTP status codes with descriptive error messages:
 
