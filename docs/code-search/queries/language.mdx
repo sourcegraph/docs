@@ -260,12 +260,13 @@ For example,
 Sourcegraph admins can increase the maximum timeout of 1 minute through [site configuration](/admin/search#maximum-timeout).
 
 <Callout type="note">
-	The maximum timeout can also depend on the HTTP load balancer in front of
-	Sourcegraph (nginx/ELB/Cloudflare/etc). Sourcegraph admins may need to
-	increase timeouts for Sourcegraph paths, particularly the
-	`.api/search/stream` path. This uses
-	[SSE](https://en.wikipedia.org/wiki/Server-sent_events), so your reverse
-	proxy may have specific support for these requests.
+	The maximum timeout also depends on the HTTP load balancer or ingress controller
+	in front of Sourcegraph (nginx/ELB/Cloudflare/etc). Sourcegraph admins must ensure
+	timeouts for the `.api/search/stream` path are set to at least **5 minutes**, as
+	this endpoint uses [SSE](https://en.wikipedia.org/wiki/Server-sent_events) for
+	streaming search results. This requirement also applies to [Deep Search](/deep-search).
+	See the [Kubernetes deployment guide](/self-hosted/deploy/kubernetes#cloud-providers-guides)
+	for further guidance.
 </Callout>
 
 ### Visibility

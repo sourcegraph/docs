@@ -90,6 +90,19 @@ Conversation sharing is disabled by default. To enable conversation sharing, ask
 
 Deep Search is only available to customers using the [Sourcegraph Model Provider](/model-provider). Customers who configure and access their own models via BYOK cannot use the Deep Search feature.
 
+## Self-hosted network requirements
+
+Deep Search streams its responses using [Server-Sent Events (SSE)](https://en.wikipedia.org/wiki/Server-sent_events). Responses are streamed progressively as the agent works, and a single Deep Search request can remain open for up to 5 minutes.
+
+If your Sourcegraph instance sits behind a reverse proxy, load balancer, or ingress controller, you must ensure the timeout for connections to Sourcegraph is set to at least **5 minutes**. The default timeout for many proxies (often 30–60 seconds) will cause in-progress Deep Search responses to be cut off prematurely.
+
+<Callout type="warning">
+	SSE streaming is the default and recommended transport for Deep Search. A polling
+	fallback exists via the `deepsearch-streaming` feature flag, but it will be
+	removed in a future release. Ensure your ingress or proxy timeout is raised to
+	at least 5 minutes before enabling Deep Search for your users.
+</Callout>
+
 ## Managing usage
 
 Deep Search usage is managed on two levels:
