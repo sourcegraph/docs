@@ -99,13 +99,17 @@ export const navigation: NavigationItem[] = [
 				href: '/deep-search',
 				sections: [
 					{
+						title: 'Guide',
+						href: '/deep-search/guide'
+					},
+					{
 						title: 'Slack Integration',
 						href: '/slack-integration'
 					}
-				]
-			},
-			{
-				title: 'Code Navigation',
+					]
+					},
+					{
+					title: 'Code Navigation',
 				href: '/code-navigation',
 				sections: [
 					{
