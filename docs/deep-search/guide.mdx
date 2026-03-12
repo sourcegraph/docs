@@ -1,8 +1,6 @@
 # Guide
 
-<p className="subtitle">
-	Overview, configuration, and troubleshooting guide for Deep Search.
-</p>
+<p className="subtitle">Models, clients, dashboards, and troubleshooting for Deep Search.</p>
 
 ## Overview
 
@@ -10,18 +8,11 @@ Deep Search is an agentic code search tool that uses AI to answer natural langua
 
 All processing happens within your Sourcegraph instance. The only external calls are made to the configured [LLM](/model-provider).
 
-### Models
+## Models
 
 Deep Search uses a combination of models selected by Sourcegraph. These are not configurable by end users or site admins — the models are managed by Sourcegraph to ensure optimal performance.
 
-| Role | Model | Purpose |
-| --- | --- | --- |
-| Main agentic loop | `claude-sonnet-4-5-thinking-latest` (Anthropic) | Core reasoning, tool calls, and answer generation |
-| Title generation | `gemini-3-flash-preview` (Google) | Generates a short conversation title |
-| Token-limit summarization | `claude-haiku-4-5-latest` (Anthropic) | Produces a progress summary if the agent hits the token limit |
-| Query categorization | `gemini-3-flash-preview` (Google) | Categorizes questions by intent for analytics |
-
-All models are routed through [Cody Gateway](/model-provider). Deep Search is **not available for BYOK** (Bring Your Own Key) customers.
+All models are routed through [Cody Gateway](/model-provider). Deep Search is [not available for BYOK customers](/deep-search#custom-model-configuration-and-byok-bring-your-own-key).
 
 ## Clients
 
@@ -45,10 +36,6 @@ The versioned [Sourcegraph API](/api) at `/api/deepsearch.v1.Service/` provides 
 
 The legacy `/.api/deepsearch/v1` REST API is deprecated — see the [migration guide](/deep-search/api).
 
-### src-cli and other tools
-
-Any tool that calls the Deep Search REST API (`/.api/deepsearch/v1`) or the external API is tracked as an external client via the `X-Requested-With` header. The [Sourcegraph MCP server](/api/mcp) also exposes Deep Search tools.
-
 ## Dashboards
 
 Site admins can monitor Deep Search health via a dedicated Grafana dashboard at `/-/debug/grafana/d/deepsearch/deepsearch`. Key panels include:
@@ -67,15 +54,7 @@ See the full [dashboards reference](/self-hosted/observability/dashboards#deep-s
 
 ## Config options
 
-### Site config
-
-These settings are configured in **Administration → Site configuration** (`/site-admin/configuration`):
-
-| Setting | Default | Description |
-| --- | --- | --- |
-| `deepSearch.enabled` | `false` | Enable or disable Deep Search |
-| `deepSearch.sharing.enabled` | `false` | Enable sharing of conversations via read tokens |
-| `deepSearch.worker.enabled` | `true` | Use a database-backed worker for question processing (enables persistence across frontend restarts) |
+For site configuration settings (`deepSearch.enabled`, `deepSearch.sharing.enabled`, `deepSearch.worker.enabled`), see [Enabling Deep Search](/deep-search#enabling-deep-search).
 
 ### User / org settings
 
@@ -84,22 +63,6 @@ These settings are configured in **Administration → Site configuration** (`/si
 | `deepSearch.slackCta.disabled` | `false` | Disable the Slack community call-to-action banner on the Deep Search page |
 
 ## FAQ
-
-### Who can turn on Deep Search?
-
-Deep Search is available on [Enterprise Starter](/pricing/plans/enterprise-starter) and [Enterprise](/pricing/plans/enterprise) plans. A **site administrator** must enable it by setting `"deepSearch.enabled": true` in the [site configuration](/admin/config/site-config). For new customers, the [Enterprise AI Terms of Use](https://sourcegraph.com/terms/ai-terms) apply and Deep Search is enabled by default. For existing customers with licenses predating the AI terms, contact your account team to sign the AI terms addendum.
-
-### How can one enable Deep Search?
-
-1. A site admin navigates to **Administration → Site configuration** (`/site-admin/configuration`).
-2. Add `"deepSearch.enabled": true` to the site configuration JSON.
-3. Optionally enable conversation sharing: `"deepSearch.sharing.enabled": true`.
-
-Deep Search also requires a valid Code Search license and [Sourcegraph Model Provider](/model-provider) access (not BYOK).
-
-### What is our security model for sharing?
-
-Conversation sharing is **disabled by default**. When enabled via `"deepSearch.sharing.enabled": true`, any user on the instance with the share link can view the conversation, **regardless of their repository permissions**. The owner can rotate the share link to invalidate previous links.
 
 ### External vs. internal API
 
@@ -112,15 +75,6 @@ Conversation sharing is **disabled by default**. When enabled via `"deepSearch.s
 | Status | Deprecated (legacy) | Supported, versioned |
 
 See the [API migration guide](/deep-search/api) for details on moving from the internal to the external API.
-
-### How much does a Deep Search question cost?
-
-Each question consumes **credits** based on the number of tokens processed. The `stats.credits` field in the API response shows the credit cost for each question. Usage is tracked against your subscription's quota and any [entitlements](/admin/entitlements) configured by your admin.
-
-- **Enterprise Starter**: 10 questions per week included.
-- **Enterprise**: Available as an add-on.
-
-Monitor quota consumption via [Enterprise Portal](/admin/enterprise-portal#deep-search-usage-monitoring).
 
 ### What is the difference between a source and a citation?
 
@@ -136,24 +90,29 @@ Monitor quota consumption via [Enterprise Portal](/admin/enterprise-portal#deep-
 
 ## What to do if...
 
-**Deep Search is not available on my instance:**
+### Deep Search is not available on my instance
+
 - Verify your plan supports Deep Search ([Enterprise Starter](/pricing/plans/enterprise-starter) or [Enterprise](/pricing/plans/enterprise)).
-- Check that `"deepSearch.enabled": true` is set in site configuration.
+- Check that `"deepSearch.enabled": true` is set in [site configuration](/deep-search#enabling-deep-search).
 - Confirm you are not using BYOK model configuration.
 - Ask your site admin to check the Grafana dashboard for errors.
 
-**Questions are stuck in "processing":**
+### Questions are stuck in "processing"
+
 - Check the Grafana dashboard at `/-/debug/grafana/d/deepsearch/deepsearch` for in-flight question growth or errors.
 - Verify LLM connectivity — Deep Search requires access to Cody Gateway.
 - If using the database-backed worker (`deepSearch.worker.enabled: true`), ensure the worker service is running.
 
-**Answers seem incomplete or hit a token limit:**
+### Answers seem incomplete or hit a token limit
+
 - Deep Search will generate a progress summary when the token limit is reached. Use the summary's suggested next steps to start a new, more focused conversation.
 - Provide more specific `@`-mentions to narrow the search scope.
 
-**The Slack integration doesn't respond:**
+### The Slack integration doesn't respond
+
 - See [Slack integration troubleshooting](/slack-integration#troubleshooting).
 
-**API requests return 401 or 403:**
+### API requests return 401 or 403
+
 - For the external API, ensure your access token has `externalapi:read` and/or `externalapi:write` scopes.
 - Check that the user has the required RBAC permissions (`DEEP_SEARCH#READ` / `DEEP_SEARCH#WRITE`).
