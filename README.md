@@ -7,42 +7,68 @@ Welcome to the Sourcegraph documentation! We're excited to have you contribute t
 
 ## Get started
 
-To get started with this template, clone this repository to your local machine using the following command:
+To get started with this template, clone this repository to your local machine using the following steps to run the Sourcegraph docs locally:
 
-```sh
+### Step 1 — Clone the repository
+
+```bash
 git clone https://github.com/sourcegraph/docs.git docs
 ```
 
-Navigate to the project directory by typing the following command in your terminal:
+This will create a local copy of the repository.
 
-```sh
+### Step 2 — Navigate into the project folder by typing the following command in your terminal:
+
+```bash
 cd docs
 ```
 
-Before the dependencies are installed make sure your local machine has the following versions of `node` and `pnpm` installed:
+### Step 3 — Ensure required versions are installed
 
--   node: `v20.19.6`
--   pnpm: `10.25.0`
+Before the dependencies are installed make sure your local machine has the following versions of node and pnpm installed:
+
+- node v20.8.1
+- pnpm 8.13.1
 
 **Note**: If you have `mise` available you can install the above versions for only this repository by running the following command from your terminal in the root folder:
 
-```sh
+```bash
 mise install
 ```
 
+### Step 4 — Install dependencies
+
 Now that the base requirements of the project have been satisfied, we can install the required dependencies to run the development server!
 
-```sh
+```bash
 pnpm install
 ```
 
-Next, run the development server:
+Expected result:
 
-```sh
+- node_modules folder created
+- no errors in terminal
+
+### Step 5 — Run the development server
+
+```bash
 pnpm run dev
 ```
 
-Finally, open [`http://localhost:3000`](http://localhost:3000) in your browser to view the website.
+Expected output:
+
+```
+Local: http://localhost:3000
+```
+
+### Step 6 — Finally, open [`http://localhost:3000`](http://localhost:3000) in your browser to view the website.
+
+Open:
+
+```
+http://localhost:3000
+```
+You should see the Sourcegraph docs site running locally.
 
 ## Writing and contributing to Sourcegraph Docs
 
