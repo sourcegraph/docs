@@ -58,8 +58,8 @@ export const navigation: NavigationItem[] = [
 						]
 					},
 					{
-						title: 'Saved Searches',
-						href: '/code-search/working/saved-searches',
+						title: 'Advanced features',
+						href: '/code-search/features',
 						subsections: [
 							{
 								title: 'Fuzzy finder',
