@@ -25,69 +25,69 @@ export type NavigationItem = {
 
 export const navigation: NavigationItem[] = [
 	{
-		separator: 'Code Intelligence',
+		separator: 'Code intelligence',
 		topics: [
 			{
 				title: 'Code Search',
 				href: '/code-search',
 				sections: [
 					{title: 'Features', href: '/code-search/features'},
-					{
-						title: 'Search Query Syntax',
-						href: '/code-search/queries',
-						subsections: [
-							{
-								title: 'Search Filters Panel',
-								href: '/code-search/working/search-filters'
-							},
-							{
-								title: 'Search Examples',
-								href: '/code-search/queries/examples'
-							},
-							{
-								title: 'Symbol Search',
-								href: '/code-search/types/symbol'
-							},
-							{
-								title: 'Language Reference',
-								href: '/code-search/queries/language'
-							}
-						]
-					},
-					{
-						title: 'Advanced Features',
-						href: '/code-search/working/saved-searches',
-						subsections: [
-							{
-								title: 'Fuzzy Finder',
-								href: '/code-search/types/fuzzy'
-							},
-							{
-								title: 'Search Contexts',
-								href: '/code-search/working/search-contexts'
-							},
-							{
-								title: 'Search Jobs',
-								href: '/code-search/types/search-jobs'
-							},
-							{
-								title: 'Search Snippets',
-								href: '/code-search/working/snippets'
-							},
-							{
-								title: 'Search Subexpressions',
-								href: '/code-search/working/search-subexpressions'
-							},
-							{
-								title: 'Saved Searches',
-								href: '/code-search/working/saved-searches'
-							},
-							{
-								title: 'Structural Search',
-								href: '/code-search/types/structural'
-							}
-						]
-					},
+						{
+							title: 'Search query syntax',
+							href: '/code-search/queries',
+							subsections: [
+								{
+									title: 'Search filters panel',
+									href: '/code-search/working/search-filters'
+								},
+								{
+									title: 'Search examples',
+									href: '/code-search/queries/examples'
+								},
+								{
+									title: 'Symbol search',
+									href: '/code-search/types/symbol'
+								},
+								{
+									title: 'Language reference',
+									href: '/code-search/queries/language'
+								}
+							]
+						},
+						{
+							title: 'Advanced features',
+							href: '/code-search/working/saved-searches',
+							subsections: [
+								{
+									title: 'Fuzzy finder',
+									href: '/code-search/types/fuzzy'
+								},
+								{
+									title: 'Search contexts',
+									href: '/code-search/working/search-contexts'
+								},
+								{
+									title: 'Search jobs',
+									href: '/code-search/types/search-jobs'
+								},
+								{
+									title: 'Search snippets',
+									href: '/code-search/working/snippets'
+								},
+								{
+									title: 'Search subexpressions',
+									href: '/code-search/working/search-subexpressions'
+								},
+								{
+									title: 'Saved searches',
+									href: '/code-search/working/saved-searches'
+								},
+								{
+									title: 'Structural search',
+									href: '/code-search/types/structural'
+								}
+							]
+						},
 					{
 						title: 'FAQs',
 						href: '/code-search/faq'
@@ -98,10 +98,10 @@ export const navigation: NavigationItem[] = [
 				title: 'Deep Search',
 				href: '/deep-search',
 				sections: [
-					{
-						title: 'Slack Integration',
-						href: '/slack-integration'
-					}
+						{
+							title: 'Slack integration',
+							href: '/slack-integration'
+						}
 				]
 			},
 			{
@@ -128,10 +128,10 @@ export const navigation: NavigationItem[] = [
 						title: 'Auto-indexing',
 						href: '/code-navigation/auto-indexing'
 					},
-					{
-						title: 'Environment Variables',
-						href: '/code-navigation/envvars'
-					},
+						{
+							title: 'Environment variables',
+							href: '/code-navigation/envvars'
+						},
 					{
 						title: 'Troubleshooting',
 						href: '/code-navigation/troubleshooting'
@@ -174,18 +174,18 @@ export const navigation: NavigationItem[] = [
 								title: 'Features',
 								href: '/cody/enterprise/features'
 							},
-							{
-								title: 'Completions Configuration',
-								href: '/cody/enterprise/completions-configuration'
-							},
-							{
-								title: 'Model Configuration',
-								href: '/cody/enterprise/model-configuration'
-							},
-							{
-								title: 'Model Configuration examples',
-								href: '/cody/enterprise/model-config-examples'
-							}
+						{
+							title: 'Completions configuration',
+							href: '/cody/enterprise/completions-configuration'
+						},
+						{
+							title: 'Model configuration',
+							href: '/cody/enterprise/model-configuration'
+						},
+						{
+							title: 'Model configuration examples',
+							href: '/cody/enterprise/model-config-examples'
+						}
 						]
 					},
 					{
@@ -193,10 +193,10 @@ export const navigation: NavigationItem[] = [
 						href: '/cody/capabilities',
 						subsections: [
 							{title: 'Chat', href: '/cody/capabilities/chat'},
-							{
-								title: 'Agentic Context Fetching',
-								href: '/cody/capabilities/agentic-context-fetching'
-							},
+								{
+									title: 'Agentic context fetching',
+									href: '/cody/capabilities/agentic-context-fetching'
+								},
 							{
 								title: 'Auto-edit',
 								href: '/cody/capabilities/auto-edit'
@@ -209,49 +209,49 @@ export const navigation: NavigationItem[] = [
 								title: 'Prompts',
 								href: '/cody/capabilities/prompts'
 							},
-							{
-								title: 'Debug Code',
-								href: '/cody/capabilities/debug-code'
-							},
-							{
-								title: 'Context Filters',
-								href: '/cody/capabilities/ignore-context'
-							},
-							{
-								title: 'Proxy Setup',
-								href: '/cody/capabilities/proxy-setup'
-							},
-							{
-								title: 'Supported Models',
-								href: '/cody/capabilities/supported-models'
-							},
-							{
-								title: 'Feature Parity Reference',
-								href: '/cody/clients/feature-reference'
-							}
-						]
-					},
-					{
-						title: 'Core Concepts',
-						href: '/cody/core-concepts/context',
-						subsections: [
+								{
+									title: 'Debug code',
+									href: '/cody/capabilities/debug-code'
+								},
+								{
+									title: 'Context filters',
+									href: '/cody/capabilities/ignore-context'
+								},
+								{
+									title: 'Proxy setup',
+									href: '/cody/capabilities/proxy-setup'
+								},
+								{
+									title: 'Supported models',
+									href: '/cody/capabilities/supported-models'
+								},
+								{
+									title: 'Feature parity reference',
+									href: '/cody/clients/feature-reference'
+								}
+							]
+						},
+						{
+							title: 'Core concepts',
+							href: '/cody/core-concepts/context',
+							subsections: [
 							{
 								title: 'Context',
 								href: '/cody/core-concepts/context'
 							},
-							{
-								title: 'Token Limits',
-								href: '/cody/core-concepts/token-limits'
-							},
-							{
-								title: 'Prompts Guide',
-								href: '/cody/prompts-guide'
-							},
-							{
-								title: 'Enterprise Architecture',
-								href: '/admin/architecture#cody'
-							}
-						]
+								{
+									title: 'Token limits',
+									href: '/cody/core-concepts/token-limits'
+								},
+								{
+									title: 'Prompts guide',
+									href: '/cody/prompts-guide'
+								},
+								{
+									title: 'Enterprise architecture',
+									href: '/admin/architecture#cody'
+								}
+							]
 					},
 					{title: 'Troubleshooting', href: '/cody/troubleshooting'},
 					{title: 'FAQs', href: '/cody/faq'}
@@ -259,17 +259,17 @@ export const navigation: NavigationItem[] = [
 			}
 		]
 	},
-	{
-		separator: 'Code Management',
+		{
+			separator: 'Code management',
 		topics: [
 			{
 				title: 'Batch Changes',
 				href: '/batch-changes',
 				sections: [
 					{title: 'Quickstart', href: '/batch-changes/quickstart'},
-					{
-						title: 'Create a Batch Change',
-						href: '/batch-changes/create-a-batch-change',
+						{
+							title: 'Create a batch change',
+							href: '/batch-changes/create-a-batch-change',
 						subsections: [
 							{
 								title: 'Sourcegraph UI',
@@ -281,118 +281,118 @@ export const navigation: NavigationItem[] = [
 							}
 						]
 					},
-					{
-						title: 'View Batch Changes',
-						href: '/batch-changes/view-batch-changes'
-					},
-					{
-						title: 'Update a Batch Change',
-						href: '/batch-changes/update-a-batch-change'
-					},
-					{
-						title: 'Close a Batch Change',
-						href: '/batch-changes/delete-a-batch-change'
-					},
-					{
-						title: 'Bulk Operations',
-						href: '/batch-changes/bulk-operations-on-changesets',
-						subsections: [
-							{
-								title: 'Publishing Changesets',
-								href: '/batch-changes/publishing-changesets'
-							},
-							{
-								title: 'Pushing Code',
-								href: '/batch-changes/push-only-changesets'
-							},
-							{
-								title: 'Tracking Changesets',
-								href: '/batch-changes/tracking-existing-changesets'
-							},
-							{
-								title: 'Rebasing Changesets',
-								href: '/batch-changes/rebasing-changesets'
-							}
-						]
-					},
-					{
-						title: 'Configuring Credentials',
-						href: '/batch-changes/configuring-credentials',
-						subsections: [
-							{
-								title: 'Site Admin Config',
-								href: '/batch-changes/site-admin-configuration'
-							}
-						]
-					},
-					{
-						title: 'Access Permissions',
-						href: '/batch-changes/permissions-in-batch-changes'
-					},
-					{
-						title: 'Changesets in Monorepos',
-						href: '/batch-changes/creating-changesets-per-project-in-monorepos',
-						subsections: [
-							{
-								title: 'Changesets in Large Repos',
-								href: '/batch-changes/creating-multiple-changesets-in-large-repositories'
-							}
-						]
-					},
-					{
-						title: 'Error Handling',
-						href: '/batch-changes/handling-errored-changesets'
-					},
+						{
+							title: 'View Batch Changes',
+							href: '/batch-changes/view-batch-changes'
+						},
+						{
+							title: 'Update a batch change',
+							href: '/batch-changes/update-a-batch-change'
+						},
+						{
+							title: 'Close a batch change',
+							href: '/batch-changes/delete-a-batch-change'
+						},
+						{
+							title: 'Bulk operations',
+							href: '/batch-changes/bulk-operations-on-changesets',
+							subsections: [
+								{
+									title: 'Publishing changesets',
+									href: '/batch-changes/publishing-changesets'
+								},
+								{
+									title: 'Pushing code',
+									href: '/batch-changes/push-only-changesets'
+								},
+								{
+									title: 'Tracking changesets',
+									href: '/batch-changes/tracking-existing-changesets'
+								},
+								{
+									title: 'Rebasing changesets',
+									href: '/batch-changes/rebasing-changesets'
+								}
+							]
+						},
+						{
+							title: 'Configuring credentials',
+							href: '/batch-changes/configuring-credentials',
+							subsections: [
+								{
+									title: 'Site admin config',
+									href: '/batch-changes/site-admin-configuration'
+								}
+							]
+						},
+						{
+							title: 'Access permissions',
+							href: '/batch-changes/permissions-in-batch-changes'
+						},
+						{
+							title: 'Changesets in monorepos',
+							href: '/batch-changes/creating-changesets-per-project-in-monorepos',
+							subsections: [
+								{
+									title: 'Changesets in large repos',
+									href: '/batch-changes/creating-multiple-changesets-in-large-repositories'
+								}
+							]
+						},
+						{
+							title: 'Error handling',
+							href: '/batch-changes/handling-errored-changesets'
+						},
 					{
 						title: 'Examples',
 						href: '/batch-changes/examples',
 						subsections: [
-							{
-								title: 'Refactor Go Code via Comby',
-								href: '/batch-changes/refactor-go-comby'
-							},
-							{
-								title: 'Update Go Import Statements via Comby',
-								href: '/batch-changes/updating-go-import-statements'
-							},
-							{
-								title: 'Update Base Images in Dockerfiles',
-								href: '/batch-changes/update-base-images-in-dockerfiles'
-							},
-							{
-								title: 'Search and Replace Specific Terms',
-								href: '/batch-changes/search-and-replace-specific-terms'
-							}
-						]
-					},
-					{
-						title: 'Batch Spec Reference',
-						href: '/batch-changes/batch-spec-yaml-reference',
-						subsections: [
-							{
-								title: 'Batch Spec Templating',
-								href: '/batch-changes/batch-spec-templating'
-							},
-							{
-								title: 'Batch Spec Cheatsheet',
-								href: '/batch-changes/batch-spec-cheat-sheet'
-							}
-						]
-					},
+								{
+									title: 'Refactor Go code via Comby',
+									href: '/batch-changes/refactor-go-comby'
+								},
+								{
+									title: 'Update Go import statements via Comby',
+									href: '/batch-changes/updating-go-import-statements'
+								},
+								{
+									title: 'Update base images in Dockerfiles',
+									href: '/batch-changes/update-base-images-in-dockerfiles'
+								},
+								{
+									title: 'Search and replace specific terms',
+									href: '/batch-changes/search-and-replace-specific-terms'
+								}
+							]
+						},
+						{
+							title: 'Batch spec reference',
+							href: '/batch-changes/batch-spec-yaml-reference',
+							subsections: [
+								{
+									title: 'Batch spec templating',
+									href: '/batch-changes/batch-spec-templating'
+								},
+								{
+									title: 'Batch spec cheatsheet',
+									href: '/batch-changes/batch-spec-cheat-sheet'
+								}
+							]
+						},
 					{
 						title: 'Working with the CLI',
 						href: '/batch-changes/how-src-executes-a-batch-spec',
 						subsections: [
-							{
-								title: 'Re-executing Batch Specs',
-								href: '/batch-changes/reexecuting-batch-specs-multiple-times'
-							},
-							{
-								title: 'CLI Subcommands',
-								href: '/cli/references/batch'
-							}
-						]
-					},
+								{
+									title: 'Re-executing batch specs',
+									href: '/batch-changes/reexecuting-batch-specs-multiple-times'
+								},
+								{
+									title: 'CLI subcommands',
+									href: '/cli/references/batch'
+								}
+							]
+						},
 					{
 						title: 'Troubleshooting',
 						href: '/batch-changes/troubleshooting'
@@ -404,16 +404,16 @@ export const navigation: NavigationItem[] = [
 				title: 'Code Monitoring',
 				href: '/code-monitoring'
 			},
-			{
-				title: 'Code Ownership',
-				href: '/code-ownership',
-				sections: [
-					{
-						title: 'CODEOWNERS Format',
-						href: '/code-ownership/codeowners-format'
-					}
-				]
-			},
+				{
+					title: 'Code Ownership',
+					href: '/code-ownership',
+					sections: [
+						{
+							title: 'CODEOWNERS format',
+							href: '/code-ownership/codeowners-format'
+						}
+					]
+				},
 			{
 				title: 'Code Insights',
 				href: '/code-insights',
@@ -423,14 +423,14 @@ export const navigation: NavigationItem[] = [
 						title: 'Explanations',
 						href: '/code-insights/explanations'
 					},
-					{title: 'How-to Guides', href: '/code-insights/how-tos'},
+						{title: 'How-to guides', href: '/code-insights/how-tos'},
 					{title: 'References', href: '/code-insights/references'}
 				]
 			}
 		]
 	},
-	{
-		separator: 'Developer Tools',
+		{
+			separator: 'Developer tools',
 		topics: [
 			{
 				title: 'Sourcegraph CLI',
@@ -438,7 +438,7 @@ export const navigation: NavigationItem[] = [
 				sections: [
 					{title: 'Quickstart', href: '/cli/quickstart'},
 					{title: 'Explanations', href: '/cli/explanations'},
-					{title: 'How-to Guides', href: '/cli/how-tos'},
+						{title: 'How-to guides', href: '/cli/how-tos'},
 					{title: 'References', href: '/cli/references'}
 				]
 			},
@@ -446,20 +446,20 @@ export const navigation: NavigationItem[] = [
 				title: 'Cody CLI',
 				href: '/cody/clients/install-cli'
 			},
-			{
-				title: 'Browser Extension',
-				href: '/integration/browser-extension',
-				sections: [
-					{
-						title: 'Browser Search Engine',
-						href: '/integration/browser-extension/how-tos/browser-search-engine'
-					}
-				]
-			},
-			{
-				title: 'Editor Extensions',
-				href: '/integration/editor'
-			},
+				{
+					title: 'Browser extension',
+					href: '/integration/browser-extension',
+					sections: [
+						{
+							title: 'Browser search engine',
+							href: '/integration/browser-extension/how-tos/browser-search-engine'
+						}
+					]
+				},
+				{
+					title: 'Editor extensions',
+					href: '/integration/editor'
+				},
 			{
 				title: 'APIs',
 				href: '/api',
@@ -470,10 +470,10 @@ export const navigation: NavigationItem[] = [
 					{title: 'Debug API', href: '/api/graphql'}
 				]
 			},
-			{
-				title: 'MCP Server',
-				href: '/api/mcp'
-			}
+				{
+					title: 'MCP server',
+					href: '/api/mcp'
+				}
 		]
 	},
 	{
@@ -485,21 +485,21 @@ export const navigation: NavigationItem[] = [
 				sections: [
 					{title: 'Configuration', href: '/admin'},
 					{title: 'Licensing', href: '/admin/licensing'},
-					{
-						title: 'Enterprise Portal',
-						href: '/admin/enterprise-portal'
-					},
+						{
+							title: 'Enterprise portal',
+							href: '/admin/enterprise-portal'
+						},
 					{title: 'Codehosts', href: '/admin/code-hosts'},
-					{title: 'User Authentication', href: '/admin/auth'},
-					{title: 'Access Control', href: '/admin/access-control'},
-					{
-						title: 'Repository Permissions',
-						href: '/admin/permissions'
-					},
-					{title: 'OAuth Apps', href: '/admin/oauth-apps'},
+						{title: 'User authentication', href: '/admin/auth'},
+						{title: 'Access control', href: '/admin/access-control'},
+						{
+							title: 'Repository permissions',
+							href: '/admin/permissions'
+						},
+						{title: 'OAuth apps', href: '/admin/oauth-apps'},
 					{title: 'Executors', href: '/admin/executors'},
 					{title: 'FAQs', href: '/admin/faq'},
-					{title: 'How-to Guides', href: '/admin/how-to'},
+						{title: 'How-to guides', href: '/admin/how-to'},
 					{title: 'Architecture', href: '/admin/architecture'}
 				]
 			},
@@ -507,9 +507,9 @@ export const navigation: NavigationItem[] = [
 				title: 'Sourcegraph Cloud',
 				href: '/cloud'
 			},
-			{
-				title: 'Enterprise Self-Hosted',
-				href: '/self-hosted',
+				{
+					title: 'Enterprise self-hosted',
+					href: '/self-hosted',
 				sections: [
 					{
 						title: 'Deploy',
@@ -543,10 +543,10 @@ export const navigation: NavigationItem[] = [
 							}
 						]
 					},
-					{
-						title: 'External Services',
-						href: '/self-hosted/external-services'
-					},
+						{
+							title: 'External services',
+							href: '/self-hosted/external-services'
+						},
 					{
 						title: 'Executors',
 						href: '/self-hosted/executors'
@@ -555,10 +555,10 @@ export const navigation: NavigationItem[] = [
 						title: 'Observability',
 						href: '/self-hosted/observability'
 					},
-					{
-						title: 'How-to Guides',
-						href: '/self-hosted/how-to'
-					},
+						{
+							title: 'How-to guides',
+							href: '/self-hosted/how-to'
+						},
 					{
 						title: 'FAQs',
 						href: '/self-hosted/faq'
@@ -594,10 +594,10 @@ export const navigation: NavigationItem[] = [
 					{title: 'Enterprise', href: '/pricing/plans/enterprise'}
 				]
 			},
-			{
-				title: 'Plan Comparison',
-				href: '/pricing/plan-comparison'
-			},
+				{
+					title: 'Plan comparison',
+					href: '/pricing/plan-comparison'
+				},
 			{
 				title: 'FAQs',
 				href: '/pricing/faqs'
@@ -607,18 +607,18 @@ export const navigation: NavigationItem[] = [
 	{
 		separator: 'Help & Support',
 		topics: [
-			{
-				title: 'SLAs & Premium Support',
-				href: '/sla'
-			},
+				{
+					title: 'SLAs & premium support',
+					href: '/sla'
+				},
 			{
 				title: 'Tutorials',
 				href: '/tutorials'
 			},
-			{
-				title: 'Sourcegraph Accounts',
-				href: '/sourcegraph-accounts'
-			},
+				{
+					title: 'Sourcegraph accounts',
+					href: '/sourcegraph-accounts'
+				},
 			{
 				title: 'Changelog',
 				href: 'https://sourcegraph.com/changelog'
