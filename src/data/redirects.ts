@@ -6454,6 +6454,11 @@ const redirectsData = [
 		permanent: true
 	},
 	{
+		source: '/admin/code_hosts/azuredevops',
+		destination: '/admin/code-hosts/azuredevops',
+		permanent: true
+	},
+	{
 		source: '/admin/code_hosts/bitbucket_cloud',
 		destination: '/admin/code-hosts/bitbucket-cloud',
 		permanent: true
@@ -6461,6 +6466,41 @@ const redirectsData = [
 	{
 		source: '/admin/code_hosts/bitbucket_server',
 		destination: '/admin/code-hosts/bitbucket-server',
+		permanent: true
+	},
+	{
+		source: '/admin/code_hosts/gerrit',
+		destination: '/admin/code-hosts/gerrit',
+		permanent: true
+	},
+	{
+		source: '/admin/code_hosts/github',
+		destination: '/admin/code-hosts/github',
+		permanent: true
+	},
+	{
+		source: '/admin/code_hosts/gitlab',
+		destination: '/admin/code-hosts/gitlab',
+		permanent: true
+	},
+	{
+		source: '/admin/code_hosts/gitolite',
+		destination: '/admin/code-hosts/gitolite',
+		permanent: true
+	},
+	{
+		source: '/admin/code_hosts/non-git',
+		destination: '/admin/code-hosts/non-git',
+		permanent: true
+	},
+	{
+		source: '/admin/code_hosts/other',
+		destination: '/admin/code-hosts/other',
+		permanent: true
+	},
+	{
+		source: '/admin/code_hosts/phabricator',
+		destination: '/admin/code-hosts/phabricator',
 		permanent: true
 	},
 	{
