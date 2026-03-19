@@ -397,30 +397,33 @@ jaeger:
 
 #### Customize Jaeger configuration
 
-Starting with Sourcegraph 7.1.0, the bundled Jaeger instance uses an [OpenTelemetry Collector-style YAML configuration](https://www.jaegertracing.io/docs/2.16/configuration/) instead of CLI flags. The full configuration is exposed through the `jaeger.config` Helm value and rendered into a ConfigMap.
+Starting with Sourcegraph 7.1.0, the bundled Jaeger instance uses an [OpenTelemetry Collector-style YAML configuration](https://www.jaegertracing.io/docs/2.16/configuration/) instead of CLI flags. Common settings are exposed through the `jaeger.config` Helm value.
 
-You can override individual settings in your Helm values override file. For example, to increase the maximum number of in-memory traces:
+You can override these settings in your Helm values override file. For example, to increase the maximum number of in-memory traces:
 
 ```yaml
 jaeger:
     enabled: true
     config:
-        extensions:
-            jaeger_storage:
-                backends:
-                    main_store:
-                        memory:
-                            max_traces: 50000
+        maxTraces: 50000
 ```
 
 Or using `--set` on the command line:
 
 ```bash
 helm upgrade sourcegraph sourcegraph/sourcegraph \
-    --set jaeger.config.extensions.jaeger_storage.backends.main_store.memory.max_traces=50000
+    --set jaeger.config.maxTraces=50000
 ```
 
-See the [Jaeger v2 configuration reference](https://www.jaegertracing.io/docs/2.16/configuration/) for all available options. The full default configuration can be found in the [`jaeger.config` value](https://github.com/sourcegraph/deploy-sourcegraph-helm/blob/main/charts/sourcegraph/values.yaml) in the Helm chart.
+The available configuration options are:
+
+| Value | Default | Description |
+| --- | --- | --- |
+| `jaeger.config.maxTraces` | `20000` | Maximum number of traces stored in memory |
+| `jaeger.config.logLevel` | `info` | Log level (`debug`, `info`, `warn`, `error`) |
+| `jaeger.config.samplingDefaultProbability` | `1.0` | Default sampling probability (0.0–1.0) returned to services that query Jaeger for sampling config |
+
+For advanced customization beyond these options, you can mount a custom configuration file using `jaeger.extraVolumes` and `jaeger.extraVolumeMounts`. See the [Jaeger v2 configuration reference](https://www.jaegertracing.io/docs/2.16/configuration/) for all available options.
 
 #### Configure OpenTelemetry Collector to use an external tracing backend
 
