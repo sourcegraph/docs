@@ -4539,6 +4539,32 @@ sum by (name, job_name) (rate(src_periodic_goroutine_errors_total{job=~".*fronte
 
 <br />
 
+#### frontend: goroutine_error_percentage_long_window
+
+<p class="subtitle">Percentage of failed periodic goroutine executions over a long window</p>
+
+The percentage of failed executions over the last 6 hours for each periodic goroutine.
+A value above 30% sustained for at least 3 hours indicates persistent failures.
+A value above 50% sustained for at least 3 hours indicates that most executions are failing continuously.
+
+Refer to the [alerts reference](alerts#frontend-goroutine_error_percentage_long_window) for 2 alerts related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=102920` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+(sum by (name, job_name) (increase(src_periodic_goroutine_errors_total{job=~".*frontend.*"}[6h])) / clamp_min(sum by (name, job_name) (increase(src_periodic_goroutine_total{job=~".*frontend.*"}[6h])), 1)) * 100
+```
+</details>
+
+<br />
+
 #### frontend: goroutine_handler_duration
 
 <p class="subtitle">95th percentile handler execution time</p>
@@ -4548,7 +4574,7 @@ Longer durations might indicate increased load or processing time.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=102920` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=102930` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -4573,7 +4599,7 @@ This represents how long a complete loop iteration takes before sleeping for the
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=102921` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=102931` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -4598,7 +4624,7 @@ Higher values indicate that tenant processing is taking longer and may affect ov
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=102930` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=102940` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -4623,7 +4649,7 @@ Consistently high values might indicate problematic tenants or inefficient proce
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=102931` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=102941` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -4648,7 +4674,7 @@ Unexpected changes can indicate tenant configuration issues or scaling events.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=102940` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=102950` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -4673,7 +4699,7 @@ A healthy routine should maintain a consistent processing rate.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=102941` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=102951` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -4698,7 +4724,7 @@ Consistent errors indicate problems with specific tenants.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=102950` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=102960` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -4723,7 +4749,7 @@ Values above 5% indicate significant tenant processing problems.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=102951` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=102961` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -4993,7 +5019,7 @@ max by (name) (container_memory_working_set_bytes{name=~"^(frontend|sourcegraph-
 
 <p class="subtitle">Memory (RSS)</p>
 
-The total anonymous memory in use by the application, which includes Go stack and heap. This memory is is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS because to match the cadvisor name, but `anonymous` is more accurate."
+The total anonymous memory in use by the application, which includes Go stack and heap. This memory is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS to match the cadvisor name, but "anonymous" is more accurate.
 
 Refer to the [alerts reference](alerts#frontend-memory_rss) for 1 alert related to this panel.
 
@@ -6025,81 +6051,6 @@ Query:
 
 <br />
 
-#### gitserver: cpu_throttling_time
-
-<p class="subtitle">Container CPU throttling time %</p>
-
-- A high value indicates that the container is spending too much time waiting for CPU cycles.
-
-Refer to the [alerts reference](alerts#gitserver-cpu_throttling_time) for 1 alert related to this panel.
-
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100010` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-sum by (container_label_io_kubernetes_pod_name) ((rate(container_cpu_cfs_throttled_periods_total{container_label_io_kubernetes_container_name="gitserver", container_label_io_kubernetes_pod_name=~`${shard:regex}`}[5m]) / rate(container_cpu_cfs_periods_total{container_label_io_kubernetes_container_name="gitserver", container_label_io_kubernetes_pod_name=~`${shard:regex}`}[5m])) * 100)
-```
-</details>
-
-<br />
-
-#### gitserver: cpu_usage_seconds
-
-<p class="subtitle">Cpu usage seconds</p>
-
-- This value should not exceed 75% of the CPU limit over a longer period of time.
-	- We cannot alert on this as we don`t know the resource allocation.
-
-	- If this value is high for a longer time, consider increasing the CPU limit for the container.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100011` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-sum by (container_label_io_kubernetes_pod_name) (rate(container_cpu_usage_seconds_total{container_label_io_kubernetes_container_name="gitserver", container_label_io_kubernetes_pod_name=~`${shard:regex}`}[5m]))
-```
-</details>
-
-<br />
-
-#### gitserver: memory_major_page_faults
-
-<p class="subtitle">Gitserver page faults</p>
-
-The number of major page faults in a 5 minute window for gitserver. If this number increases significantly, it indicates that more git API calls need to load data from disk. There may not be enough memory to efficiently support the amount of API requests served concurrently.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100020` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-rate(container_memory_failures_total{failure_type="pgmajfault", name=~"^gitserver.*"}[5m])
-```
-</details>
-
-<br />
-
 #### gitserver: high_memory_git_commands
 
 <p class="subtitle">Number of git commands that exceeded the threshold for high memory usage</p>
@@ -6115,7 +6066,7 @@ OOM killed and this graph shows spikes, increasing the memory might be useful.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100021` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100010` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6139,7 +6090,7 @@ A high value signals load.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100030` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100011` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6163,7 +6114,7 @@ per second rate per command
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100031` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100012` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6187,7 +6138,7 @@ sum by (cmd) (rate(src_gitserver_exec_duration_seconds_count{instance=~`${shard:
 
 Refer to the [alerts reference](alerts#gitserver-echo_command_duration_test) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100040` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100020` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6213,7 +6164,7 @@ by recloning repositories, but this may take a while depending on repo size.
 
 Refer to the [alerts reference](alerts#gitserver-repo_corrupted) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100041` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100021` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6235,7 +6186,7 @@ sum(rate(src_gitserver_repo_corrupted[5m]))
 
 Refer to the [alerts reference](alerts#gitserver-repository_clone_queue_size) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100050` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100030` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6261,7 +6212,7 @@ It does not indicate any problems with the instance, but can give a good indicat
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100051` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100031` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6277,6 +6228,237 @@ sum by (job, instance) (src_gitserver_client_concurrent_requests)
 
 <br />
 
+### Git Server: Gitserver (CPU, Memory)
+
+Gitserver leverages memory mapping to optimize file reads: it is generally expected to consume all the memory provided to it, if it can. When it finds data that is not available in memory yet, this causes a 'page fault', and the data is loaded into memory from disk.
+
+A trend to watch out for: when something in-application happens to take a lot of memory, and active file previously used nearly all remaining memory, then:
+
+1. 'Memory (RSS)' goes up, due to in-application usage
+2. 'Memory usage (Active file)' goes down, as file data held in memory is evicted
+3. 'Page faults' go up, as less data is held in memory (and with that, IOPS, disk read throughput, ...)
+
+This can also happen without 'Memory (RSS)' increasing, if the provisioned memory is insufficent to start with.
+A small degree of this is behaviour generally expected, but if it happens significantly or causes user-noticeable impact, it's likely gitserver could benefit from more memory. Look for more user-facing metrics to make a final determination on appropriate resource allocation.
+
+_See https://en.wikipedia.org/wiki/Memory-mapped_file and the related articles for more information about memory maps._
+
+#### gitserver: cpu_usage_percentage
+
+<p class="subtitle">CPU usage</p>
+
+Refer to the [alerts reference](alerts#gitserver-cpu_usage_percentage) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100100` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+cadvisor_container_cpu_usage_percentage_total{name=~"^gitserver.*"}
+```
+</details>
+
+<br />
+
+#### gitserver: memory_usage_percentage
+
+<p class="subtitle">Memory usage percentage (total)</p>
+
+An estimate for the active memory in use, which includes anonymous memory, file memory, and kernel memory. Some of this memory is reclaimable, so high usage does not necessarily indicate memory pressure.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100101` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+cadvisor_container_memory_usage_percentage_total{name=~"^gitserver.*"}
+```
+</details>
+
+<br />
+
+#### gitserver: memory_working_set_bytes
+
+<p class="subtitle">Memory usage bytes (total)</p>
+
+An estimate for the active memory in use in bytes, which includes anonymous memory, file memory, and kernel memory. Some of this memory is reclaimable, so high usage does not necessarily indicate memory pressure.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100102` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max by (name) (container_memory_working_set_bytes{name=~"^gitserver.*"})
+```
+</details>
+
+<br />
+
+#### gitserver: memory_rss
+
+<p class="subtitle">Memory (RSS)</p>
+
+The total anonymous memory in use by the application, which includes Go stack and heap. This memory is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS to match the cadvisor name, but "anonymous" is more accurate.
+
+Refer to the [alerts reference](alerts#gitserver-memory_rss) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100110` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max(container_memory_rss{name=~"^gitserver.*"} / container_spec_memory_limit_bytes{name=~"^gitserver.*"}) by (name) * 100.0 
+```
+</details>
+
+<br />
+
+#### gitserver: memory_total_active_file
+
+<p class="subtitle">Memory usage (active file)</p>
+
+This metric shows the total active file-backed memory currently in use by the application. Some of it may be reclaimable, so high usage does not necessarily indicate memory pressure.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100111` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max(container_memory_total_active_file_bytes{name=~"^gitserver.*"} / container_spec_memory_limit_bytes{name=~"^gitserver.*"}) by (name) * 100.0 
+```
+</details>
+
+<br />
+
+#### gitserver: memory_kernel_usage
+
+<p class="subtitle">Memory usage (kernel)</p>
+
+The kernel usage metric shows the amount of memory used by the kernel on behalf of the application. Some of it may be reclaimable, so high usage does not necessarily indicate memory pressure.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100112` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max(container_memory_kernel_usage{name=~"^gitserver.*"} / container_spec_memory_limit_bytes{name=~"^gitserver.*"}) by (name) * 100.0 
+```
+</details>
+
+<br />
+
+#### gitserver: memory_major_page_faults
+
+<p class="subtitle">Gitserver page faults</p>
+
+The number of major page faults in a 5 minute window for gitserver. If this number increases significantly, it indicates that more git API calls need to load data from disk. There may not be enough memory to efficiently support the amount of API requests served concurrently.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100120` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+rate(container_memory_failures_total{failure_type="pgmajfault", name=~"^gitserver.*"}[5m])
+```
+</details>
+
+<br />
+
+#### gitserver: cpu_throttling_time
+
+<p class="subtitle">Container CPU throttling time %</p>
+
+A high value indicates that the container is spending too much time waiting for CPU cycles.
+
+Refer to the [alerts reference](alerts#gitserver-cpu_throttling_time) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100130` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (container_label_io_kubernetes_pod_name) ((rate(container_cpu_cfs_throttled_periods_total{container_label_io_kubernetes_container_name="gitserver", container_label_io_kubernetes_pod_name=~`${shard:regex}`}[5m]) / rate(container_cpu_cfs_periods_total{container_label_io_kubernetes_container_name="gitserver", container_label_io_kubernetes_pod_name=~`${shard:regex}`}[5m])) * 100)
+```
+</details>
+
+<br />
+
+#### gitserver: cpu_usage_seconds
+
+<p class="subtitle">Cpu usage seconds</p>
+
+- This value should not exceed 75% of the CPU limit over a longer period of time.
+- We cannot alert on this as we don`t know the resource allocation.
+- If this value is high for a longer time, consider increasing the CPU limit for the container.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100131` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (container_label_io_kubernetes_pod_name) (rate(container_cpu_usage_seconds_total{container_label_io_kubernetes_container_name="gitserver", container_label_io_kubernetes_pod_name=~`${shard:regex}`}[5m]))
+```
+</details>
+
+<br />
+
 ### Git Server: Gitservice for internal cloning
 
 #### gitserver: gitservice_request_duration
@@ -6287,7 +6469,7 @@ A high value means any internal service trying to clone a repo from gitserver is
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100100` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100200` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6311,7 +6493,7 @@ Per shard gitservice request rate
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100101` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100201` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6335,7 +6517,7 @@ Per shard gitservice requests running
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100102` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100202` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6361,7 +6543,7 @@ The rate of housekeeping tasks performed in repositories, broken down by task ty
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100200` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100300` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6385,7 +6567,7 @@ The 90th percentile latency of successful housekeeping tasks, broken down by tas
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100210` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100310` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6409,7 +6591,7 @@ The 95th percentile latency of successful housekeeping tasks, broken down by tas
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100211` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100311` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6433,7 +6615,7 @@ The 99th percentile latency of successful housekeeping tasks, broken down by tas
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100212` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100312` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6457,7 +6639,7 @@ The 90th percentile latency of failed housekeeping tasks, broken down by task ty
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100220` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100320` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6481,7 +6663,7 @@ The 95th percentile latency of failed housekeeping tasks, broken down by task ty
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100221` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100321` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6505,7 +6687,7 @@ The 99th percentile latency of failed housekeeping tasks, broken down by task ty
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100222` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100322` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6529,7 +6711,7 @@ The rate of files pruned during cleanup, broken down by file type
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100230` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100330` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6553,7 +6735,7 @@ The count distribution of various Git data structures in repositories
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100240` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100340` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6577,7 +6759,7 @@ The size distribution of various Git data structures in repositories
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100250` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100350` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6601,7 +6783,7 @@ The time elapsed since last optimization of various Git data structures
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100260` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100360` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6625,7 +6807,7 @@ The rate at which data structures are reported to exist in repositories
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100270` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100370` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6653,7 +6835,7 @@ This metric helps track how often the retry mechanism is triggered.
 
 Refer to the [alerts reference](alerts#gitserver-git_command_retry_attempts_rate) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100300` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100400` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6678,7 +6860,7 @@ This indicates how effective the retry mechanism is at resolving transient corru
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100301` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100401` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6703,7 +6885,7 @@ These failures will result in repository corruption marking and potential reclon
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100310` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100410` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6729,7 +6911,7 @@ Common causes include network issues, permission changes, or concurrent reposito
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100311` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100411` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6755,7 +6937,7 @@ A low ratio may indicate persistent corruption issues requiring investigation.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100312` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100412` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6782,7 +6964,7 @@ A value of 0 indicates the routine isn`t running currently, it awaits it`s next 
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100400` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100500` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -6807,7 +6989,7 @@ A low or zero value could indicate that a routine is stalled or encountering err
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100401` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100501` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -6832,7 +7014,7 @@ A sustained high error rate may indicate a problem with the routine`s configurat
 
 Refer to the [alerts reference](alerts#gitserver-goroutine_error_rate) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100410` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100510` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6857,7 +7039,7 @@ A value above 5% indicates that a significant portion of routine executions are 
 
 Refer to the [alerts reference](alerts#gitserver-goroutine_error_percentage) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100411` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100511` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6873,6 +7055,32 @@ sum by (name, job_name) (rate(src_periodic_goroutine_errors_total{job=~".*gitser
 
 <br />
 
+#### gitserver: goroutine_error_percentage_long_window
+
+<p class="subtitle">Percentage of failed periodic goroutine executions over a long window</p>
+
+The percentage of failed executions over the last 6 hours for each periodic goroutine.
+A value above 30% sustained for at least 3 hours indicates persistent failures.
+A value above 50% sustained for at least 3 hours indicates that most executions are failing continuously.
+
+Refer to the [alerts reference](alerts#gitserver-goroutine_error_percentage_long_window) for 2 alerts related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100520` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+(sum by (name, job_name) (increase(src_periodic_goroutine_errors_total{job=~".*gitserver.*"}[6h])) / clamp_min(sum by (name, job_name) (increase(src_periodic_goroutine_total{job=~".*gitserver.*"}[6h])), 1)) * 100
+```
+</details>
+
+<br />
+
 #### gitserver: goroutine_handler_duration
 
 <p class="subtitle">95th percentile handler execution time</p>
@@ -6882,7 +7090,7 @@ Longer durations might indicate increased load or processing time.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100420` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100530` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -6907,7 +7115,7 @@ This represents how long a complete loop iteration takes before sleeping for the
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100421` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100531` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -6932,7 +7140,7 @@ Higher values indicate that tenant processing is taking longer and may affect ov
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100430` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100540` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -6957,7 +7165,7 @@ Consistently high values might indicate problematic tenants or inefficient proce
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100431` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100541` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -6982,7 +7190,7 @@ Unexpected changes can indicate tenant configuration issues or scaling events.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100440` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100550` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -7007,7 +7215,7 @@ A healthy routine should maintain a consistent processing rate.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100441` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100551` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -7032,7 +7240,7 @@ Consistent errors indicate problems with specific tenants.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100450` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100560` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -7057,7 +7265,7 @@ Values above 5% indicate significant tenant processing problems.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100451` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100561` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -7068,150 +7276,6 @@ Query:
 
 ```
 (sum by (name, job_name) (rate(src_periodic_goroutine_tenant_errors_total{job=~".*gitserver.*"}[5m])) / (sum by (name, job_name) (rate(src_periodic_goroutine_tenant_success_total{job=~".*gitserver.*"}[5m])) + sum by (name, job_name) (rate(src_periodic_goroutine_tenant_errors_total{job=~".*gitserver.*"}[5m])))) * 100
-```
-</details>
-
-<br />
-
-### Git Server: Gitserver (CPU, Memory)
-
-#### gitserver: cpu_usage_percentage
-
-<p class="subtitle">CPU usage</p>
-
-Refer to the [alerts reference](alerts#gitserver-cpu_usage_percentage) for 1 alert related to this panel.
-
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100500` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-cadvisor_container_cpu_usage_percentage_total{name=~"^gitserver.*"}
-```
-</details>
-
-<br />
-
-#### gitserver: memory_usage_percentage
-
-<p class="subtitle">Memory usage percentage (total)</p>
-
-An estimate for the active memory in use, which includes anonymous memory, file memory, and kernel memory. Some of this memory is reclaimable, so high usage does not necessarily indicate memory pressure.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100501` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-cadvisor_container_memory_usage_percentage_total{name=~"^gitserver.*"}
-```
-</details>
-
-<br />
-
-#### gitserver: memory_working_set_bytes
-
-<p class="subtitle">Memory usage bytes (total)</p>
-
-An estimate for the active memory in use in bytes, which includes anonymous memory, file memory, and kernel memory. Some of this memory is reclaimable, so high usage does not necessarily indicate memory pressure.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100502` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-max by (name) (container_memory_working_set_bytes{name=~"^gitserver.*"})
-```
-</details>
-
-<br />
-
-#### gitserver: memory_rss
-
-<p class="subtitle">Memory (RSS)</p>
-
-The total anonymous memory in use by the application, which includes Go stack and heap. This memory is is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS because to match the cadvisor name, but `anonymous` is more accurate."
-
-Refer to the [alerts reference](alerts#gitserver-memory_rss) for 1 alert related to this panel.
-
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100510` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-max(container_memory_rss{name=~"^gitserver.*"} / container_spec_memory_limit_bytes{name=~"^gitserver.*"}) by (name) * 100.0 
-```
-</details>
-
-<br />
-
-#### gitserver: memory_total_active_file
-
-<p class="subtitle">Memory usage (active file)</p>
-
-This metric shows the total active file-backed memory currently in use by the application. Some of it may be reclaimable, so high usage does not necessarily indicate memory pressure.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100511` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-max(container_memory_total_active_file_bytes{name=~"^gitserver.*"} / container_spec_memory_limit_bytes{name=~"^gitserver.*"}) by (name) * 100.0 
-```
-</details>
-
-<br />
-
-#### gitserver: memory_kernel_usage
-
-<p class="subtitle">Memory usage (kernel)</p>
-
-The kernel usage metric shows the amount of memory used by the kernel on behalf of the application. Some of it may be reclaimable, so high usage does not necessarily indicate memory pressure.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100512` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-max(container_memory_kernel_usage{name=~"^gitserver.*"} / container_spec_memory_limit_bytes{name=~"^gitserver.*"}) by (name) * 100.0 
 ```
 </details>
 
@@ -17130,6 +17194,32 @@ sum by (name, job_name) (rate(src_periodic_goroutine_errors_total{job=~".*worker
 
 <br />
 
+#### worker: goroutine_error_percentage_long_window
+
+<p class="subtitle">Percentage of failed periodic goroutine executions over a long window</p>
+
+The percentage of failed executions over the last 6 hours for each periodic goroutine.
+A value above 30% sustained for at least 3 hours indicates persistent failures.
+A value above 50% sustained for at least 3 hours indicates that most executions are failing continuously.
+
+Refer to the [alerts reference](alerts#worker-goroutine_error_percentage_long_window) for 2 alerts related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101820` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+(sum by (name, job_name) (increase(src_periodic_goroutine_errors_total{job=~".*worker.*"}[6h])) / clamp_min(sum by (name, job_name) (increase(src_periodic_goroutine_total{job=~".*worker.*"}[6h])), 1)) * 100
+```
+</details>
+
+<br />
+
 #### worker: goroutine_handler_duration
 
 <p class="subtitle">95th percentile handler execution time</p>
@@ -17139,7 +17229,7 @@ Longer durations might indicate increased load or processing time.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101820` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101830` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -17164,7 +17254,7 @@ This represents how long a complete loop iteration takes before sleeping for the
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101821` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101831` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -17189,7 +17279,7 @@ Higher values indicate that tenant processing is taking longer and may affect ov
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101830` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101840` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -17214,7 +17304,7 @@ Consistently high values might indicate problematic tenants or inefficient proce
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101831` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101841` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -17239,7 +17329,7 @@ Unexpected changes can indicate tenant configuration issues or scaling events.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101840` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101850` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -17264,7 +17354,7 @@ A healthy routine should maintain a consistent processing rate.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101841` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101851` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -17289,7 +17379,7 @@ Consistent errors indicate problems with specific tenants.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101850` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101860` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -17314,7 +17404,7 @@ Values above 5% indicate significant tenant processing problems.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101851` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101861` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -17584,7 +17674,7 @@ max by (name) (container_memory_working_set_bytes{name=~"^worker.*"})
 
 <p class="subtitle">Memory (RSS)</p>
 
-The total anonymous memory in use by the application, which includes Go stack and heap. This memory is is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS because to match the cadvisor name, but `anonymous` is more accurate."
+The total anonymous memory in use by the application, which includes Go stack and heap. This memory is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS to match the cadvisor name, but "anonymous" is more accurate.
 
 Refer to the [alerts reference](alerts#worker-memory_rss) for 1 alert related to this panel.
 
@@ -20833,6 +20923,32 @@ sum by (name, job_name) (rate(src_periodic_goroutine_errors_total{job=~".*search
 
 <br />
 
+#### searcher: goroutine_error_percentage_long_window
+
+<p class="subtitle">Percentage of failed periodic goroutine executions over a long window</p>
+
+The percentage of failed executions over the last 6 hours for each periodic goroutine.
+A value above 30% sustained for at least 3 hours indicates persistent failures.
+A value above 50% sustained for at least 3 hours indicates that most executions are failing continuously.
+
+Refer to the [alerts reference](alerts#searcher-goroutine_error_percentage_long_window) for 2 alerts related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=101420` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+(sum by (name, job_name) (increase(src_periodic_goroutine_errors_total{job=~".*searcher.*"}[6h])) / clamp_min(sum by (name, job_name) (increase(src_periodic_goroutine_total{job=~".*searcher.*"}[6h])), 1)) * 100
+```
+</details>
+
+<br />
+
 #### searcher: goroutine_handler_duration
 
 <p class="subtitle">95th percentile handler execution time</p>
@@ -20842,7 +20958,7 @@ Longer durations might indicate increased load or processing time.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=101420` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=101430` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -20867,7 +20983,7 @@ This represents how long a complete loop iteration takes before sleeping for the
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=101421` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=101431` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -20892,7 +21008,7 @@ Higher values indicate that tenant processing is taking longer and may affect ov
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=101430` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=101440` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -20917,7 +21033,7 @@ Consistently high values might indicate problematic tenants or inefficient proce
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=101431` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=101441` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -20942,7 +21058,7 @@ Unexpected changes can indicate tenant configuration issues or scaling events.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=101440` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=101450` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -20967,7 +21083,7 @@ A healthy routine should maintain a consistent processing rate.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=101441` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=101451` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -20992,7 +21108,7 @@ Consistent errors indicate problems with specific tenants.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=101450` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=101460` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -21017,7 +21133,7 @@ Values above 5% indicate significant tenant processing problems.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=101451` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=101461` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -21287,7 +21403,7 @@ max by (name) (container_memory_working_set_bytes{name=~"^searcher.*"})
 
 <p class="subtitle">Memory (RSS)</p>
 
-The total anonymous memory in use by the application, which includes Go stack and heap. This memory is is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS because to match the cadvisor name, but `anonymous` is more accurate."
+The total anonymous memory in use by the application, which includes Go stack and heap. This memory is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS to match the cadvisor name, but "anonymous" is more accurate.
 
 Refer to the [alerts reference](alerts#searcher-memory_rss) for 1 alert related to this panel.
 
@@ -21815,7 +21931,7 @@ max by (name) (container_memory_working_set_bytes{name=~"^syntect-server.*"})
 
 <p class="subtitle">Memory (RSS)</p>
 
-The total anonymous memory in use by the application, which includes Go stack and heap. This memory is is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS because to match the cadvisor name, but `anonymous` is more accurate."
+The total anonymous memory in use by the application, which includes Go stack and heap. This memory is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS to match the cadvisor name, but "anonymous" is more accurate.
 
 Refer to the [alerts reference](alerts#syntect-server-memory_rss) for 1 alert related to this panel.
 
@@ -22369,7 +22485,7 @@ max by (name) (container_memory_working_set_bytes{name=~"^zoekt-indexserver.*"})
 
 <p class="subtitle">Memory (RSS)</p>
 
-The total anonymous memory in use by the application, which includes Go stack and heap. This memory is is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS because to match the cadvisor name, but `anonymous` is more accurate."
+The total anonymous memory in use by the application, which includes Go stack and heap. This memory is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS to match the cadvisor name, but "anonymous" is more accurate.
 
 Refer to the [alerts reference](alerts#zoekt-memory_rss) for 1 alert related to this panel.
 
@@ -22438,6 +22554,19 @@ max(container_memory_kernel_usage{name=~"^zoekt-indexserver.*"} / container_spec
 <br />
 
 ### Zoekt: Zoekt-webserver (CPU, Memory)
+
+Zoekt web server leverages memory mapping to optimize file reads: it is generally expected to consume all the memory provided to it, if it can. When it finds data that is not available in memory yet, this causes a 'page fault', and the data is loaded into memory from disk.
+
+A trend to watch out for: when something in-application happens to take a lot of memory, and active file previously used nearly all remaining memory, then:
+
+1. 'Memory (RSS)' goes up, due to in-application usage
+2. 'Memory usage (Active file)' goes down, as file data held in memory is evicted
+3. 'Page faults' go up, as less data is held in memory (and with that, IOPS, disk read throughput, ...)
+
+This can also happen without 'Memory (RSS)' increasing, if the provisioned memory is insufficent to start with.
+A small degree of this is behaviour generally expected, but if it happens significantly or causes user-noticeable impact, it's likely zoekt web server could benefit from more memory. Look for more user-facing metrics to make a final determination on appropriate resource allocation.
+
+_See https://en.wikipedia.org/wiki/Memory-mapped_file and the related articles for more information about memory maps._
 
 #### zoekt: cpu_usage_percentage
 
@@ -22513,7 +22642,7 @@ max by (name) (container_memory_working_set_bytes{name=~"^zoekt-webserver.*"})
 
 <p class="subtitle">Memory (RSS)</p>
 
-The total anonymous memory in use by the application, which includes Go stack and heap. This memory is is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS because to match the cadvisor name, but `anonymous` is more accurate."
+The total anonymous memory in use by the application, which includes Go stack and heap. This memory is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS to match the cadvisor name, but "anonymous" is more accurate.
 
 Refer to the [alerts reference](alerts#zoekt-memory_rss) for 1 alert related to this panel.
 
