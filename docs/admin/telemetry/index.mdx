@@ -22,13 +22,19 @@ Some of the measures we take to ensure privacy and data security include:
 3. For all other properties, we use a well-defined data structure (available in the [Telemetry protocol reference](/admin/telemetry/protocol)) to ensure that we never export sensitive data. Changes to this data structure and data collection implementations are carefully monitored and reviewed.
 4. Data is encrypted while in transit from each Sourcegraph instance to Sourcegraph.
 
-Recently exported events can be retrieved via the [debug console](/api/graphql) for review.
+Exported events can be retrieved via the [debug console](/api/graphql) for review.
 You can find the API console at any time by going to **Settings**, and then clicking **Debug console** from the left sidebar, or by visiting it directly at `/debug/console`. Use the following query:
 
 ```gql
 query {
 	telemetry {
 		exportedEvents(first: 5) {
+			nodes {
+				payload
+			}
+		}
+		# Added in https://sourcegraph.com/changelog/releases/7.0.2178
+		eventsQueuedForExport(first: 5) {
 			nodes {
 				payload
 			}
