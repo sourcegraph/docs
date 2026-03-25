@@ -472,7 +472,10 @@ export const navigation: NavigationItem[] = [
 			},
 			{
 				title: 'MCP Server',
-				href: '/api/mcp'
+				href: '/api/mcp',
+				sections: [
+					{title: 'Client Integrations', href: '/api/mcp/client-integrations'}
+				]
 			}
 		]
 	},
