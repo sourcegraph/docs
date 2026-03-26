@@ -92,13 +92,16 @@ If your agent doesn't support Dynamic Client Registration, you can manually crea
 
 <Accordion title="Disabling Dynamic Client Registration">
 
-To disable DCR, set the following site configuration:
+To disable DCR while leaving MCP available, set the following site configuration:
 
 ```json
 {
 	"auth.idpDynamicClientRegistrationEnabled": false
 }
 ```
+
+If `mcp.enabled` is `false`, DCR is also unavailable and the registration
+endpoint returns `404`.
 
 </Accordion>
 
@@ -117,9 +120,10 @@ Authorization: token YOUR_ACCESS_TOKEN
 
 ## Availability and Access Control
 
-Admins can control MCP at two levels:
+Admins can control MCP at three levels:
 
 - Site configuration: `mcp.enabled` enables or disables the MCP HTTP endpoints.
+- OAuth Dynamic Client Registration: `auth.idpDynamicClientRegistrationEnabled` controls whether OAuth clients can self-register; it is effectively disabled whenever `mcp.enabled` is `false`.
 - RBAC: users must have the `MCP#ACCESS` permission to use MCP.
 
 ### Site-Level Enablement
@@ -134,6 +138,21 @@ Use the `mcp.enabled` site configuration to turn the MCP server on or off for th
 
 `mcp.enabled` defaults to `true`. When set to `false`, requests to `/.api/mcp`
 and its subpaths return `404 no route`.
+
+### OAuth Dynamic Client Registration
+
+Use `auth.idpDynamicClientRegistrationEnabled` to control whether compatible
+OAuth clients can self-register against the Sourcegraph identity provider:
+
+```json
+{
+	"auth.idpDynamicClientRegistrationEnabled": true
+}
+```
+
+`auth.idpDynamicClientRegistrationEnabled` defaults to `true`, but it is
+treated as `false` whenever `mcp.enabled` is `false`. When DCR is unavailable,
+requests to `/.auth/idp/oauth/register` return `404 not found`.
 
 ### Restricting MCP with RBAC
 

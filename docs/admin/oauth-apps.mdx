@@ -91,14 +91,15 @@ When creating an OAuth app, select the minimum scopes necessary for your applica
 
 ## OAuth endpoints reference
 
-| Endpoint             | URL                                                           |
-| -------------------- | ------------------------------------------------------------- |
-| Authorization        | `https://sourcegraph.example.com/.auth/idp/oauth/authorize`   |
-| Token                | `https://sourcegraph.example.com/.auth/idp/oauth/token`       |
-| Device Authorization | `https://sourcegraph.example.com/.auth/idp/oauth/device/code` |
-| Token Revocation     | `https://sourcegraph.example.com/.auth/idp/oauth/revoke`      |
-| Token Introspection  | `https://sourcegraph.example.com/.auth/idp/oauth/introspect`  |
-| User Info            | `https://sourcegraph.example.com/.auth/idp/oauth/userinfo`    |
+| Endpoint                    | URL                                                           |
+|-----------------------------|---------------------------------------------------------------|
+| Authorization               | `https://sourcegraph.example.com/.auth/idp/oauth/authorize`   |
+| Dynamic Client Registration | `https://sourcegraph.example.com/.auth/idp/oauth/register`    |
+| Token                       | `https://sourcegraph.example.com/.auth/idp/oauth/token`       |
+| Device Authorization        | `https://sourcegraph.example.com/.auth/idp/oauth/device/code` |
+| Token Revocation            | `https://sourcegraph.example.com/.auth/idp/oauth/revoke`      |
+| Token Introspection         | `https://sourcegraph.example.com/.auth/idp/oauth/introspect`  |
+| User Info                   | `https://sourcegraph.example.com/.auth/idp/oauth/userinfo`    |
 
 ## OAuth Flow Examples
 
@@ -359,3 +360,23 @@ curl -X POST https://sourcegraph.example.com/.auth/idp/oauth/revoke \
   -d "client_id=YOUR_CLIENT_ID" \
   -d "client_secret=YOUR_CLIENT_SECRET" # Only for private clients
 ```
+
+## Dynamic Client Registration for MCP
+
+Sourcegraph also supports OAuth 2.0 Dynamic Client Registration (RFC 7591) at
+`/.auth/idp/oauth/register` for MCP clients that can self-register.
+
+This endpoint can be disabled by setting either `mcp.enabled` or
+`auth.idpDynamicClientRegistrationEnabled` to `false`.
+
+Applications created through Dynamic Client Registration are limited to the
+`mcp` scope. For general OAuth integrations that need scopes such as
+`user:all`, `openid`, or `offline_access`, create an OAuth app manually.
+
+<Callout type="note">
+	To disable self-registration, set
+	`auth.idpDynamicClientRegistrationEnabled` to `false`. If `mcp.enabled` is
+	`false`, Dynamic Client Registration is also unavailable. See
+	[MCP authentication and access control](/api/mcp#availability-and-access-control)
+	for the MCP-specific behavior.
+</Callout>
