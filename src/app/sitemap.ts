@@ -1,13 +1,8 @@
 import {MetadataRoute} from 'next';
-import {headers} from 'next/headers';
 import {allPosts} from 'contentlayer/generated';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-	const headersList = await headers();
-	const host = headersList.get('host') || 'sourcegraph.com';
-	const protocol = host.includes('localhost') ? 'http' : 'https';
-	const docsPath = host === 'sourcegraph.com' ? '/docs' : '';
-	const baseUrl = `${protocol}://${host}${docsPath}`;
+	const baseUrl = 'https://sourcegraph.com/docs';
 
 	const links: MetadataRoute.Sitemap = [
 		{
