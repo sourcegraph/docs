@@ -31,10 +31,8 @@ export const navigation: NavigationItem[] = [
 				title: 'Code Search',
 				href: '/code-search',
 				sections: [
-					{
-						title: 'Code Search capabilities',
-						href: '/code-search/features'
-					},
+					{title: 'Features', href: '/code-search/features'},
+					{title: 'Query assist', href: '/code-search/query-assist'},
 					{
 						title: 'Search query syntax',
 						href: '/code-search/queries',
@@ -491,6 +489,9 @@ export const navigation: NavigationItem[] = [
 			{
 				title: 'Sourcegraph MCP server',
 				href: '/api/mcp'
+				sections: [
+					{title: 'Client integrations', href: '/api/mcp/client-integrations'}
+				]
 			}
 		]
 	},
