@@ -488,7 +488,7 @@ export const navigation: NavigationItem[] = [
 			},
 			{
 				title: 'Sourcegraph MCP server',
-				href: '/api/mcp'
+				href: '/api/mcp',
 				sections: [
 					{title: 'Client integrations', href: '/api/mcp/client-integrations'}
 				]
