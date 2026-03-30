@@ -1,0 +1,63 @@
+# Query assist
+
+<p className="subtitle">
+	Search your code using natural language with query assist.
+</p>
+
+Query assist enables you to describe what you're looking for in plain natural language, and Sourcegraph automatically translates your input into a precise [search query](/code-search/queries). It is powered by a custom-trained LLM that understands Sourcegraph's search query syntax, so you can focus on what you want to find rather than how to express it.
+
+## How to use query assist
+
+1. Press `#` in the search bar to activate query assist mode
+2. Type a natural language description of what you're looking for — for example, "find all usages of the authToken field in Go files"
+3. As you type, query assist suggests translated [search queries](/code-search/queries) in a dropdown below the search bar
+4. Select a suggestion and press `Enter` to execute the query
+
+You can mix and match precise and natural language input. For example, you can type `repo:foo/bar` manually, then enter query assist mode and type "jane's work in january 2026", then finish by manually typing `refactor auth check`. The full query should then look like `repo:foo/bar type:commit author:jane after:"2026-01-01" before:"2026-01-31" refactor auth check`.
+
+## Examples
+
+### Basic searches
+
+| Natural language input                    | Generated query                                |
+| ----------------------------------------- | ---------------------------------------------- |
+| "TODO comments in python files"           | `lang:python TODO`                             |
+| "find all uses of @Deprecated in java"    | `lang:java @Deprecated`                        |
+| "find function definitions for parseJSON" | `type:symbol select:symbol.function parseJSON` |
+
+### Filtering and scoping
+
+| Natural language input                        | Generated query                      |
+| --------------------------------------------- | ------------------------------------ |
+| "find numpy in requirements.txt"              | `file:requirements.txt numpy`        |
+| "javascript files excluding test directories" | `lang:javascript -file:test`         |
+| "find auth middleware in repo django/django"  | `repo:django/django auth middleware` |
+
+### History and diffs
+
+| Natural language input                             | Generated query                                                      |
+| -------------------------------------------------- | -------------------------------------------------------------------- |
+| "what did alice work on in the acme/backend repo?" | `repo:acme/backend type:commit author:alice`                         |
+| "show me diffs with console.log added last month"  | `type:diff select:commit.diff.added after:"1 month ago" console.log` |
+| "commits mentioning deploy but not rollback"       | `type:commit deploy NOT rollback`                                    |
+
+### Repository predicates and metadata
+
+| Natural language input                                | Generated query                                    |
+| ----------------------------------------------------- | -------------------------------------------------- |
+| "repos that have a package.json containing express"   | `repo:has.file(path:package.json content:express)` |
+| "which repositories contain a Dockerfile?"            | `repo:has.path(Dockerfile) select:repo`            |
+| "show me repos that haven't been updated in 6 months" | `-repo:has.commit.after(6 months ago) select:repo` |
+
+### Complex queries
+
+| Natural language input                                                         | Generated query                                                                                  |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| "useState or useEffect in typescript but not in tests"                         | `lang:typescript -file:test useState OR useEffect`                                               |
+| "deprecated code removed in the last 2 weeks in java or kotlin"                | `(lang:java OR lang:kotlin) type:diff select:commit.diff.removed after:"2 weeks ago" deprecated` |
+| "commits by alice or bob mentioning refactor in backend repos after june 2023" | `repo:backend type:commit (author:alice OR author:bob) after:2023-06-01 refactor`                |
+| "FIXME on all branches except main in linker repo"                             | `repo:linker rev:*refs/heads/*:*!refs/heads/main FIXME`                                          |
+
+## Requirements
+
+Query assist is available for customers using [Sourcegraph Model Provider](/model-provider). No additional configuration is required — it is enabled by default in the search bar.

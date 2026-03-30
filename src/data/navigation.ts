@@ -32,6 +32,7 @@ export const navigation: NavigationItem[] = [
 				href: '/code-search',
 				sections: [
 					{title: 'Features', href: '/code-search/features'},
+					{title: 'Query assist', href: '/code-search/query-assist'},
 					{
 						title: 'Search Query Syntax',
 						href: '/code-search/queries',
