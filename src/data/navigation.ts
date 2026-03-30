@@ -647,6 +647,10 @@ export const navigation: NavigationItem[] = [
 			{
 				title: 'SLAs and premium support',
 				href: '/sla'
+			},
+			{
+				title: 'Tutorials',
+				href: '/tutorials'
 			}
 		]
 	}
