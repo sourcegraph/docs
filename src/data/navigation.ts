@@ -90,7 +90,7 @@ export const navigation: NavigationItem[] = [
 						]
 					},
 					{
-						title: 'Cody FAQs',
+						title: 'Code Search FAQs',
 						href: '/code-search/faq'
 					}
 				]
