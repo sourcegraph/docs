@@ -6440,7 +6440,7 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/beta_and_experimental_features',
-		destination: '/admin/beta-and-experimental-features',
+		destination: '/beta-and-experimental',
 		permanent: true
 	},
 	{
@@ -7112,6 +7112,11 @@ const redirectsData = [
 	{
 		source: '/admin/repo/permissions',
 		destination: '/admin/permissions',
+		permanent: true
+	},
+	{
+		source: '/admin/beta-and-experimental-features',
+		destination: '/beta-and-experimental',
 		permanent: true
 	},
 	// RSS feed moved from /docs/technical-changelog.rss to /changelog/technical-changelog.rss

@@ -258,7 +258,7 @@ export const navigation: NavigationItem[] = [
 						title: 'Troubleshooting Cody',
 						href: '/cody/troubleshooting'
 					},
-					{title: 'Administration FAQ', href: '/cody/faq'}
+					{title: 'Cody FAQ', href: '/cody/faq'}
 				]
 			}
 		]
@@ -490,7 +490,10 @@ export const navigation: NavigationItem[] = [
 				title: 'Sourcegraph MCP server',
 				href: '/api/mcp',
 				sections: [
-					{title: 'Client integrations', href: '/api/mcp/client-integrations'}
+					{
+						title: 'Client integrations',
+						href: '/api/mcp/client-integrations'
+					}
 				]
 			}
 		]
@@ -588,6 +591,10 @@ export const navigation: NavigationItem[] = [
 				]
 			},
 			{
+				title: 'Sourcegraph Model Provider',
+				href: '/model-provider'
+			},
+			{
 				title: 'Sourcegraph Analytics',
 				href: '/analytics',
 				sections: [
@@ -596,8 +603,8 @@ export const navigation: NavigationItem[] = [
 				]
 			},
 			{
-				title: 'Sourcegraph Model Provider',
-				href: '/model-provider'
+				title: 'Sourcegraph Accounts',
+				href: '/sourcegraph-accounts'
 			}
 		]
 	},
@@ -630,24 +637,16 @@ export const navigation: NavigationItem[] = [
 		separator: 'Help & support',
 		topics: [
 			{
-				title: 'SLAs and premium support',
-				href: '/sla'
-			},
-			{
-				title: 'Sourcegraph tutorials',
-				href: '/tutorials'
-			},
-			{
-				title: 'Sourcegraph Accounts',
-				href: '/sourcegraph-accounts'
-			},
-			{
 				title: 'Changelog',
 				href: 'https://sourcegraph.com/changelog'
 			},
 			{
-				title: 'Sourcegraph releases',
-				href: '/releases'
+				title: 'Beta and experimental features',
+				href: '/beta-and-experimental'
+			},
+			{
+				title: 'SLAs and premium support',
+				href: '/sla'
 			}
 		]
 	}
