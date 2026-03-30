@@ -612,23 +612,11 @@ export const navigation: NavigationItem[] = [
 		separator: 'Pricing',
 		topics: [
 			{
-				title: 'Sourcegraph pricing plans',
-				href: '/pricing/plans',
-				sections: [
-					{title: 'Free', href: '/pricing/plans/free'},
-					{
-						title: 'Enterprise Starter',
-						href: '/pricing/plans/enterprise-starter'
-					},
-					{title: 'Enterprise', href: '/pricing/plans/enterprise'}
-				]
+				title: 'Sourcegraph pricing',
+				href: 'https://sourcegraph.com/pricing'
 			},
 			{
-				title: 'Sourcegraph pricing plan comparison',
-				href: '/pricing/plan-comparison'
-			},
-			{
-				title: 'FAQs',
+				title: 'Pricing FAQs',
 				href: '/pricing/faqs'
 			}
 		]
