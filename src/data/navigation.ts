@@ -32,50 +32,51 @@ export const navigation: NavigationItem[] = [
 				href: '/code-search',
 				sections: [
 					{title: 'Features', href: '/code-search/features'},
+					{title: 'Query assist', href: '/code-search/query-assist'},
 					{
-						title: 'Search Query Syntax',
+						title: 'Search query syntax',
 						href: '/code-search/queries',
 						subsections: [
 							{
-								title: 'Search Filters Panel',
+								title: 'Search filters',
 								href: '/code-search/working/search-filters'
 							},
 							{
-								title: 'Search Examples',
+								title: 'Search examples',
 								href: '/code-search/queries/examples'
 							},
 							{
-								title: 'Symbol Search',
+								title: 'Symbol search',
 								href: '/code-search/types/symbol'
 							},
 							{
-								title: 'Language Reference',
+								title: 'Search query language reference',
 								href: '/code-search/queries/language'
 							}
 						]
 					},
 					{
-						title: 'Advanced Features',
-						href: '/code-search/working/saved-searches',
+						title: 'Advanced features',
+						href: '/code-search/features',
 						subsections: [
 							{
-								title: 'Fuzzy Finder',
+								title: 'Fuzzy finder',
 								href: '/code-search/types/fuzzy'
 							},
 							{
-								title: 'Search Contexts',
+								title: 'Search contexts',
 								href: '/code-search/working/search-contexts'
 							},
 							{
-								title: 'Search Jobs',
+								title: 'Search jobs',
 								href: '/code-search/types/search-jobs'
 							},
 							{
-								title: 'Search Snippets',
+								title: 'Search snippets',
 								href: '/code-search/working/snippets'
 							},
 							{
-								title: 'Search Subexpressions',
+								title: 'Search subexpressions',
 								href: '/code-search/working/search-subexpressions'
 							},
 							{
@@ -83,13 +84,13 @@ export const navigation: NavigationItem[] = [
 								href: '/code-search/working/saved-searches'
 							},
 							{
-								title: 'Structural Search',
+								title: 'Structural search',
 								href: '/code-search/types/structural'
 							}
 						]
 					},
 					{
-						title: 'FAQs',
+						title: 'Cody FAQs',
 						href: '/code-search/faq'
 					}
 				]
@@ -99,7 +100,7 @@ export const navigation: NavigationItem[] = [
 				href: '/deep-search',
 				sections: [
 					{
-						title: 'Slack Integration',
+						title: 'Slack integration',
 						href: '/slack-integration'
 					}
 				]
@@ -109,19 +110,19 @@ export const navigation: NavigationItem[] = [
 				href: '/code-navigation',
 				sections: [
 					{
-						title: 'Features',
+						title: 'Code Navigation features',
 						href: '/code-navigation/features'
 					},
 					{
-						title: 'Search-based code navigation',
+						title: 'Search-based Code Navigation',
 						href: '/code-navigation/search-based-code-navigation'
 					},
 					{
-						title: 'Precise code navigation',
+						title: 'Precise Code Navigation',
 						href: '/code-navigation/precise-code-navigation'
 					},
 					{
-						title: 'Syntactic code navigation',
+						title: 'Syntactic Code Navigation',
 						href: '/code-navigation/syntactic-code-navigation'
 					},
 					{
@@ -129,11 +130,11 @@ export const navigation: NavigationItem[] = [
 						href: '/code-navigation/auto-indexing'
 					},
 					{
-						title: 'Environment Variables',
+						title: 'Code Navigation environment variables',
 						href: '/code-navigation/envvars'
 					},
 					{
-						title: 'Troubleshooting',
+						title: 'Code Navigation troubleshooting guide',
 						href: '/code-navigation/troubleshooting'
 					}
 				]
@@ -142,21 +143,21 @@ export const navigation: NavigationItem[] = [
 				title: 'Cody',
 				href: '/cody',
 				sections: [
-					{title: 'Quickstart', href: '/cody/quickstart'},
+					{title: 'Cody quickstart', href: '/cody/quickstart'},
 					{
-						title: 'Installation',
+						title: 'Cody clients',
 						href: '/cody/clients',
 						subsections: [
 							{
-								title: 'Cody for VS Code',
+								title: 'Installing Cody in VS Code',
 								href: '/cody/clients/install-vscode'
 							},
 							{
-								title: 'Cody for JetBrains',
+								title: 'Installing Cody for JetBrains',
 								href: '/cody/clients/install-jetbrains'
 							},
 							{
-								title: 'Cody for Visual Studio',
+								title: 'Installing Cody in Visual Studio',
 								href: '/cody/clients/install-visual-studio'
 							},
 							// { title: "Cody for Eclipse", href: "/cody/clients/install-eclipse", },
@@ -171,30 +172,30 @@ export const navigation: NavigationItem[] = [
 						href: '/cody/clients/enable-cody-enterprise',
 						subsections: [
 							{
-								title: 'Features',
+								title: 'Cody Enterprise features',
 								href: '/cody/enterprise/features'
 							},
 							{
-								title: 'Completions Configuration',
+								title: 'Completions configuration',
 								href: '/cody/enterprise/completions-configuration'
 							},
 							{
-								title: 'Model Configuration',
+								title: 'Model configuration',
 								href: '/cody/enterprise/model-configuration'
 							},
 							{
-								title: 'Model Configuration examples',
+								title: 'Model configuration examples',
 								href: '/cody/enterprise/model-config-examples'
 							}
 						]
 					},
 					{
-						title: 'Capabilities',
+						title: 'Cody capabilities',
 						href: '/cody/capabilities',
 						subsections: [
 							{title: 'Chat', href: '/cody/capabilities/chat'},
 							{
-								title: 'Agentic Context Fetching',
+								title: 'Agentic context fetching',
 								href: '/cody/capabilities/agentic-context-fetching'
 							},
 							{
@@ -210,57 +211,60 @@ export const navigation: NavigationItem[] = [
 								href: '/cody/capabilities/prompts'
 							},
 							{
-								title: 'Debug Code',
+								title: 'Debug code',
 								href: '/cody/capabilities/debug-code'
 							},
 							{
-								title: 'Context Filters',
+								title: 'Manage Cody context',
 								href: '/cody/capabilities/ignore-context'
 							},
 							{
-								title: 'Proxy Setup',
+								title: 'Run Cody via proxies',
 								href: '/cody/capabilities/proxy-setup'
 							},
 							{
-								title: 'Supported Models',
+								title: 'Supported LLMs',
 								href: '/cody/capabilities/supported-models'
 							},
 							{
-								title: 'Feature Parity Reference',
+								title: 'Feature parity reference for Cody clients',
 								href: '/cody/clients/feature-reference'
 							}
 						]
 					},
 					{
-						title: 'Core Concepts',
+						title: 'Cody context',
 						href: '/cody/core-concepts/context',
 						subsections: [
 							{
-								title: 'Context',
+								title: 'Cody context',
 								href: '/cody/core-concepts/context'
 							},
 							{
-								title: 'Token Limits',
+								title: 'Cody input and output token limits',
 								href: '/cody/core-concepts/token-limits'
 							},
 							{
-								title: 'Prompts Guide',
+								title: 'Cody prompting guide',
 								href: '/cody/prompts-guide'
 							},
 							{
-								title: 'Enterprise Architecture',
+								title: 'Sourcegraph architecture',
 								href: '/admin/architecture#cody'
 							}
 						]
 					},
-					{title: 'Troubleshooting', href: '/cody/troubleshooting'},
-					{title: 'FAQs', href: '/cody/faq'}
+					{
+						title: 'Troubleshooting Cody',
+						href: '/cody/troubleshooting'
+					},
+					{title: 'Administration FAQ', href: '/cody/faq'}
 				]
 			}
 		]
 	},
 	{
-		separator: 'Code Management',
+		separator: 'Code management',
 		topics: [
 			{
 				title: 'Batch Changes',
@@ -268,79 +272,79 @@ export const navigation: NavigationItem[] = [
 				sections: [
 					{title: 'Quickstart', href: '/batch-changes/quickstart'},
 					{
-						title: 'Create a Batch Change',
+						title: 'Creating a batch change',
 						href: '/batch-changes/create-a-batch-change',
 						subsections: [
 							{
-								title: 'Sourcegraph UI',
+								title: 'On your Sourcegraph instance',
 								href: '/batch-changes/create-a-batch-change#on-your-sourcegraph-instance'
 							},
 							{
-								title: 'Sourcegraph CLI',
+								title: 'Using the Sourcegraph CLI',
 								href: '/batch-changes/create-a-batch-change#using-the-sourcegraph-cli'
 							}
 						]
 					},
 					{
-						title: 'View Batch Changes',
+						title: 'Viewing batch changes',
 						href: '/batch-changes/view-batch-changes'
 					},
 					{
-						title: 'Update a Batch Change',
+						title: 'Update a batch change',
 						href: '/batch-changes/update-a-batch-change'
 					},
 					{
-						title: 'Close a Batch Change',
+						title: 'Closing and deleting a batch change',
 						href: '/batch-changes/delete-a-batch-change'
 					},
 					{
-						title: 'Bulk Operations',
+						title: 'Bulk operations on changesets',
 						href: '/batch-changes/bulk-operations-on-changesets',
 						subsections: [
 							{
-								title: 'Publishing Changesets',
+								title: 'Publishing changesets to the code host',
 								href: '/batch-changes/publishing-changesets'
 							},
 							{
-								title: 'Pushing Code',
+								title: 'Pushing code to a code host',
 								href: '/batch-changes/push-only-changesets'
 							},
 							{
-								title: 'Tracking Changesets',
+								title: 'Tracking existing changesets',
 								href: '/batch-changes/tracking-existing-changesets'
 							},
 							{
-								title: 'Rebasing Changesets',
+								title: 'Rebasing changesets',
 								href: '/batch-changes/rebasing-changesets'
 							}
 						]
 					},
 					{
-						title: 'Configuring Credentials',
+						title: 'Configuring credentials',
 						href: '/batch-changes/configuring-credentials',
 						subsections: [
 							{
-								title: 'Site Admin Config',
+								title: 'Admin configuration for Batch Changes',
 								href: '/batch-changes/site-admin-configuration'
 							}
 						]
 					},
 					{
-						title: 'Access Permissions',
+						title: 'Permissions in Batch Changes',
 						href: '/batch-changes/permissions-in-batch-changes'
 					},
 					{
-						title: 'Changesets in Monorepos',
+						title: 'Creating changesets per project in monorepos',
 						href: '/batch-changes/creating-changesets-per-project-in-monorepos',
 						subsections: [
 							{
-								title: 'Changesets in Large Repos',
+								title: 'Creating multiple changesets in large repositories',
 								href: '/batch-changes/creating-multiple-changesets-in-large-repositories'
 							}
 						]
 					},
 					{
-						title: 'Error Handling',
+						title: 'Error handling of changesets',
 						href: '/batch-changes/handling-errored-changesets'
 					},
 					{
@@ -348,47 +352,47 @@ export const navigation: NavigationItem[] = [
 						href: '/batch-changes/examples',
 						subsections: [
 							{
-								title: 'Refactor Go Code via Comby',
+								title: 'Refactor Go code using Comby',
 								href: '/batch-changes/refactor-go-comby'
 							},
 							{
-								title: 'Update Go Import Statements via Comby',
+								title: 'Updating Go import statements using Comby',
 								href: '/batch-changes/updating-go-import-statements'
 							},
 							{
-								title: 'Update Base Images in Dockerfiles',
+								title: 'Updating base images in Dockerfiles',
 								href: '/batch-changes/update-base-images-in-dockerfiles'
 							},
 							{
-								title: 'Search and Replace Specific Terms',
+								title: 'Search and replace specific terms',
 								href: '/batch-changes/search-and-replace-specific-terms'
 							}
 						]
 					},
 					{
-						title: 'Batch Spec Reference',
+						title: 'Batch spec YAML reference',
 						href: '/batch-changes/batch-spec-yaml-reference',
 						subsections: [
 							{
-								title: 'Batch Spec Templating',
+								title: 'Batch spec templating',
 								href: '/batch-changes/batch-spec-templating'
 							},
 							{
-								title: 'Batch Spec Cheatsheet',
+								title: 'Batch spec cheatsheet',
 								href: '/batch-changes/batch-spec-cheat-sheet'
 							}
 						]
 					},
 					{
-						title: 'Working with the CLI',
+						title: 'How `src` executes a batch spec',
 						href: '/batch-changes/how-src-executes-a-batch-spec',
 						subsections: [
 							{
-								title: 'Re-executing Batch Specs',
+								title: 'Re-executing batch specs multiple times',
 								href: '/batch-changes/reexecuting-batch-specs-multiple-times'
 							},
 							{
-								title: 'CLI Subcommands',
+								title: '`src batch`',
 								href: '/cli/references/batch'
 							}
 						]
@@ -405,32 +409,35 @@ export const navigation: NavigationItem[] = [
 				href: '/code-monitoring'
 			},
 			{
-				title: 'Code Ownership',
-				href: '/code-ownership',
-				sections: [
-					{
-						title: 'CODEOWNERS Format',
-						href: '/code-ownership/codeowners-format'
-					}
-				]
-			},
-			{
 				title: 'Code Insights',
 				href: '/code-insights',
 				sections: [
-					{title: 'Quickstart', href: '/code-insights/quickstart'},
+					{
+						title: 'Quickstart for src',
+						href: '/code-insights/quickstart'
+					},
 					{
 						title: 'Explanations',
 						href: '/code-insights/explanations'
 					},
-					{title: 'How-to Guides', href: '/code-insights/how-tos'},
-					{title: 'References', href: '/code-insights/references'}
+					{title: 'How-tos', href: '/code-insights/how-tos'},
+					{title: '`src`', href: '/code-insights/references'}
+				]
+			},
+			{
+				title: 'Code Ownership',
+				href: '/code-ownership',
+				sections: [
+					{
+						title: 'The CODEOWNERS format',
+						href: '/code-ownership/codeowners-format'
+					}
 				]
 			}
 		]
 	},
 	{
-		separator: 'Developer Tools',
+		separator: 'Developer tools',
 		topics: [
 			{
 				title: 'Sourcegraph CLI',
@@ -438,43 +445,55 @@ export const navigation: NavigationItem[] = [
 				sections: [
 					{title: 'Quickstart', href: '/cli/quickstart'},
 					{title: 'Explanations', href: '/cli/explanations'},
-					{title: 'How-to Guides', href: '/cli/how-tos'},
+					{title: 'How-tos', href: '/cli/how-tos'},
 					{title: 'References', href: '/cli/references'}
 				]
 			},
 			{
-				title: 'Cody CLI',
+				title: 'Install Cody CLI',
 				href: '/cody/clients/install-cli'
 			},
 			{
-				title: 'Browser Extension',
+				title: 'Browser extensions',
 				href: '/integration/browser-extension',
 				sections: [
 					{
-						title: 'Browser Search Engine',
+						title: 'Browser search engine shortcuts',
 						href: '/integration/browser-extension/how-tos/browser-search-engine'
 					}
 				]
 			},
 			{
-				title: 'Editor Extensions',
+				title: 'Editor integrations',
 				href: '/integration/editor'
 			},
 			{
-				title: 'APIs',
+				title: 'Sourcegraph API',
 				href: '/api',
 				sections: [
 					{title: 'Sourcegraph API', href: '/api'},
-					{title: 'Streaming search API', href: '/api/stream-api'},
-					{title: 'Analytics API', href: '/analytics/api'},
-					{title: 'Debug API', href: '/api/graphql'}
+					{
+						title: 'Sourcegraph streaming search API',
+						href: '/api/stream-api'
+					},
+					{
+						title: 'Sourcegraph Analytics API',
+						href: '/analytics/api'
+					},
+					{
+						title: 'Sourcegraph GraphQL debug API',
+						href: '/api/graphql'
+					}
 				]
 			},
 			{
-				title: 'MCP Server',
+				title: 'Sourcegraph MCP server',
 				href: '/api/mcp',
 				sections: [
-					{title: 'Client Integrations', href: '/api/mcp/client-integrations'}
+					{
+						title: 'Client integrations',
+						href: '/api/mcp/client-integrations'
+					}
 				]
 			}
 		]
@@ -483,27 +502,30 @@ export const navigation: NavigationItem[] = [
 		separator: 'Platform',
 		topics: [
 			{
-				title: 'Sourcegraph Admin',
+				title: 'Administration',
 				href: '/admin',
 				sections: [
-					{title: 'Configuration', href: '/admin'},
+					{title: 'Administration', href: '/admin'},
 					{title: 'Licensing', href: '/admin/licensing'},
 					{
-						title: 'Enterprise Portal',
+						title: 'Sourcegraph Enterprise Portal',
 						href: '/admin/enterprise-portal'
 					},
-					{title: 'Codehosts', href: '/admin/code-hosts'},
-					{title: 'User Authentication', href: '/admin/auth'},
-					{title: 'Access Control', href: '/admin/access-control'},
+					{title: 'Code host connections', href: '/admin/code-hosts'},
+					{title: 'User authentication', href: '/admin/auth'},
+					{title: 'Access control', href: '/admin/access-control'},
 					{
-						title: 'Repository Permissions',
+						title: 'Repository permissions',
 						href: '/admin/permissions'
 					},
-					{title: 'OAuth Apps', href: '/admin/oauth-apps'},
+					{title: 'OAuth apps', href: '/admin/oauth-apps'},
 					{title: 'Executors', href: '/admin/executors'},
 					{title: 'FAQs', href: '/admin/faq'},
-					{title: 'How-to Guides', href: '/admin/how-to'},
-					{title: 'Architecture', href: '/admin/architecture'}
+					{title: 'How-to guides', href: '/admin/how-to'},
+					{
+						title: 'Sourcegraph architecture',
+						href: '/admin/architecture'
+					}
 				]
 			},
 			{
@@ -511,11 +533,11 @@ export const navigation: NavigationItem[] = [
 				href: '/cloud'
 			},
 			{
-				title: 'Enterprise Self-Hosted',
+				title: 'Enterprise self-hosted',
 				href: '/self-hosted',
 				sections: [
 					{
-						title: 'Deploy',
+						title: 'Deployment',
 						href: '/self-hosted/deploy',
 						subsections: [
 							{
@@ -527,27 +549,27 @@ export const navigation: NavigationItem[] = [
 								href: '/self-hosted/deploy/docker-compose'
 							},
 							{
-								title: 'Kubernetes',
+								title: 'Sourcegraph on Kubernetes with Helm',
 								href: '/self-hosted/deploy/kubernetes'
 							},
 							{
-								title: 'Machine Images',
+								title: 'Sourcegraph machine images',
 								href: '/self-hosted/deploy/machine-images'
 							}
 						]
 					},
 					{
-						title: 'Upgrade',
+						title: 'Updating Sourcegraph',
 						href: '/self-hosted/updates',
 						subsections: [
 							{
-								title: 'Migrator',
+								title: 'Migrator resources',
 								href: '/self-hosted/updates/migrator'
 							}
 						]
 					},
 					{
-						title: 'External Services',
+						title: 'Using external services',
 						href: '/self-hosted/external-services'
 					},
 					{
@@ -559,7 +581,7 @@ export const navigation: NavigationItem[] = [
 						href: '/self-hosted/observability'
 					},
 					{
-						title: 'How-to Guides',
+						title: 'How-to guides',
 						href: '/self-hosted/how-to'
 					},
 					{
@@ -573,7 +595,7 @@ export const navigation: NavigationItem[] = [
 				href: '/analytics',
 				sections: [
 					{title: 'Metrics', href: '/analytics#metrics'},
-					{title: 'API', href: '/analytics/api'}
+					{title: 'Sourcegraph Analytics API', href: '/analytics/api'}
 				]
 			},
 			{
@@ -586,36 +608,24 @@ export const navigation: NavigationItem[] = [
 		separator: 'Pricing',
 		topics: [
 			{
-				title: 'Plans',
-				href: '/pricing/plans',
-				sections: [
-					{title: 'Free', href: '/pricing/plans/free'},
-					{
-						title: 'Enterprise Starter',
-						href: '/pricing/plans/enterprise-starter'
-					},
-					{title: 'Enterprise', href: '/pricing/plans/enterprise'}
-				]
+				title: 'Sourcegraph pricing',
+				href: 'https://sourcegraph.com/pricing'
 			},
 			{
-				title: 'Plan Comparison',
-				href: '/pricing/plan-comparison'
-			},
-			{
-				title: 'FAQs',
+				title: 'Pricing FAQs',
 				href: '/pricing/faqs'
 			}
 		]
 	},
 	{
-		separator: 'Help & Support',
+		separator: 'Help & support',
 		topics: [
 			{
-				title: 'SLAs & Premium Support',
+				title: 'SLAs and premium support',
 				href: '/sla'
 			},
 			{
-				title: 'Tutorials',
+				title: 'Sourcegraph tutorials',
 				href: '/tutorials'
 			},
 			{
@@ -627,7 +637,7 @@ export const navigation: NavigationItem[] = [
 				href: 'https://sourcegraph.com/changelog'
 			},
 			{
-				title: 'Releases',
+				title: 'Sourcegraph releases',
 				href: '/releases'
 			}
 		]
