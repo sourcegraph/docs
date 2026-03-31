@@ -5466,8 +5466,18 @@ const redirectsData = [
 
 	//Pricing redirects
 	{
+		source: '/pricing',
+		destination: 'https://sourcegraph.com/pricing',
+		permanent: true
+	},
+	{
 		source: '/pricing/free',
-		destination: '/pricing/plans/free',
+		destination: 'https://sourcegraph.com/pricing',
+		permanent: true
+	},
+	{
+		source: '/pricing/plans/free',
+		destination: 'https://sourcegraph.com/pricing',
 		permanent: true
 	},
 	{
@@ -5481,6 +5491,11 @@ const redirectsData = [
 		permanent: true
 	},
 	{
+		source: '/pricing/plan-comparison',
+		destination: 'https://sourcegraph.com/pricing',
+		permanent: true
+	},
+	{
 		source: '/pricing/billing-faqs',
 		destination: '/pricing/faqs',
 		permanent: true
@@ -5489,7 +5504,12 @@ const redirectsData = [
 	// Admin pricing docs redirects
 	{
 		source: '/admin/pricing',
-		destination: '/pricing/plans',
+		destination: 'https://sourcegraph.com/pricing',
+		permanent: true
+	},
+	{
+		source: '/pricing/plans',
+		destination: 'https://sourcegraph.com/pricing',
 		permanent: true
 	},
 

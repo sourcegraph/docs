@@ -1386,37 +1386,6 @@ Generated query for critical alert: `min(((src_gitserver_disk_space_available / 
 
 <br />
 
-## gitserver: cpu_throttling_time
-
-<p class="subtitle">container CPU throttling time %</p>
-
-**Descriptions**
-
-- <span class="badge badge-warning">warning</span> gitserver: 75%+ container CPU throttling time % for 2m0s
-
-**Next steps**
-
-- 	- Consider increasing the CPU limit for the container.
-- More help interpreting this metric is available in the [dashboards reference](dashboards#gitserver-cpu_throttling_time).
-- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
-
-```json
-"observability.silenceAlerts": [
-  "warning_gitserver_cpu_throttling_time"
-]
-```
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Generated query for warning alert: `max((sum by (container_label_io_kubernetes_pod_name) ((rate(container_cpu_cfs_throttled_periods_total{container_label_io_kubernetes_container_name="gitserver"\}[5m]) / rate(container_cpu_cfs_periods_total\{container_label_io_kubernetes_container_name="gitserver"}[5m])) * 100)) &gt;= 75)`
-
-</details>
-
-<br />
-
 ## gitserver: echo_command_duration_test
 
 <p class="subtitle">echo test command duration</p>
@@ -1508,6 +1477,99 @@ Generated query for critical alert: `max((sum(rate(src_gitserver_repo_corrupted[
 <summary>Technical details</summary>
 
 Generated query for warning alert: `max((sum(src_gitserver_clone_queue)) &gt;= 25)`
+
+</details>
+
+<br />
+
+## gitserver: cpu_usage_percentage
+
+<p class="subtitle">CPU usage</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> gitserver: 95%+ CPU usage for 10m0s
+
+**Next steps**
+
+- Consider increasing CPU limits or scaling out.
+- Learn more about the related dashboard panel in the [dashboards reference](dashboards#gitserver-cpu_usage_percentage).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_gitserver_cpu_usage_percentage"
+]
+```
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((cadvisor_container_cpu_usage_percentage_total{name=~"^gitserver.*"}) &gt;= 95)`
+
+</details>
+
+<br />
+
+## gitserver: memory_rss
+
+<p class="subtitle">memory (RSS)</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> gitserver: 90%+ memory (RSS) for 10m0s
+
+**Next steps**
+
+- Consider increasing memory limits or scaling out.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#gitserver-memory_rss).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_gitserver_memory_rss"
+]
+```
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((max by (name) (container_memory_rss{name=~"^gitserver.*"\} / container_spec_memory_limit_bytes\{name=~"^gitserver.*"}) * 100) &gt;= 90)`
+
+</details>
+
+<br />
+
+## gitserver: cpu_throttling_time
+
+<p class="subtitle">container CPU throttling time %</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> gitserver: 75%+ container CPU throttling time % for 2m0s
+
+**Next steps**
+
+- Consider increasing the CPU limit for the container.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#gitserver-cpu_throttling_time).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_gitserver_cpu_throttling_time"
+]
+```
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((sum by (container_label_io_kubernetes_pod_name) ((rate(container_cpu_cfs_throttled_periods_total{container_label_io_kubernetes_container_name="gitserver"\}[5m]) / rate(container_cpu_cfs_periods_total\{container_label_io_kubernetes_container_name="gitserver"}[5m])) * 100)) &gt;= 75)`
 
 </details>
 
@@ -1608,68 +1670,6 @@ Generated query for warning alert: `max((sum by (name, job_name) (rate(src_perio
 <summary>Technical details</summary>
 
 Generated query for warning alert: `max((sum by (name, job_name) (rate(src_periodic_goroutine_errors_total{job=~".*gitserver.*"\}[5m])) / sum by (name, job_name) (rate(src_periodic_goroutine_total\{job=~".*gitserver.*"}[5m]) &gt; 0) * 100) &gt;= 5)`
-
-</details>
-
-<br />
-
-## gitserver: cpu_usage_percentage
-
-<p class="subtitle">CPU usage</p>
-
-**Descriptions**
-
-- <span class="badge badge-warning">warning</span> gitserver: 95%+ CPU usage for 10m0s
-
-**Next steps**
-
-- Consider increasing CPU limits or scaling out.
-- Learn more about the related dashboard panel in the [dashboards reference](dashboards#gitserver-cpu_usage_percentage).
-- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
-
-```json
-"observability.silenceAlerts": [
-  "warning_gitserver_cpu_usage_percentage"
-]
-```
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Generated query for warning alert: `max((cadvisor_container_cpu_usage_percentage_total{name=~"^gitserver.*"}) &gt;= 95)`
-
-</details>
-
-<br />
-
-## gitserver: memory_rss
-
-<p class="subtitle">memory (RSS)</p>
-
-**Descriptions**
-
-- <span class="badge badge-warning">warning</span> gitserver: 90%+ memory (RSS) for 10m0s
-
-**Next steps**
-
-- Consider increasing memory limits or scaling out.
-- More help interpreting this metric is available in the [dashboards reference](dashboards#gitserver-memory_rss).
-- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
-
-```json
-"observability.silenceAlerts": [
-  "warning_gitserver_memory_rss"
-]
-```
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Generated query for warning alert: `max((max by (name) (container_memory_rss{name=~"^gitserver.*"\} / container_spec_memory_limit_bytes\{name=~"^gitserver.*"}) * 100) &gt;= 90)`
 
 </details>
 
