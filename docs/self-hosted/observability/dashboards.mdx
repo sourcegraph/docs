@@ -33673,6 +33673,56 @@ histogram_quantile(0.50, sum(rate(src_deepsearch_question_processing_duration_se
 
 <br />
 
+### Deep Search: Question outcomes
+
+#### deepsearch: deepsearch_question_outcome_by_reason
+
+<p class="subtitle">Question outcomes by reason over 5m</p>
+
+Breakdown of deep search question outcomes by reason and whether the question was billable.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100100` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (outcome, billable) (rate(src_deepsearch_question_outcome_total[5m])) * 60
+```
+</details>
+
+<br />
+
+#### deepsearch: deepsearch_errored_but_billed_rate
+
+<p class="subtitle">Errored but billed rate over 5m</p>
+
+Percentage of billed deep search questions that completed with an error (token limit exceeded or response truncated).
+
+Refer to the [alerts reference](alerts#deepsearch-deepsearch_errored_but_billed_rate) for 2 alerts related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100101` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(src_deepsearch_question_outcome_total{billable="true",error="true"}[5m])) / (sum(rate(src_deepsearch_question_outcome_total{billable="true"}[5m])) > 0) * 100
+```
+</details>
+
+<br />
+
 ### Deep Search: LLM streaming
 
 #### deepsearch: deepsearch_llm_stream_fatal_errors
@@ -33683,7 +33733,7 @@ Number of fatal errors during LLM streaming in the last 5 minutes.
 
 Refer to the [alerts reference](alerts#deepsearch-deepsearch_llm_stream_fatal_errors) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100100` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100200` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -33707,7 +33757,7 @@ Number of non-fatal errors during LLM streaming.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100101` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100201` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
