@@ -6840,6 +6840,42 @@ Generated query for critical alert: `max((sum(rate(src_deepsearch_question_proce
 
 <br />
 
+## deepsearch: deepsearch_errored_but_billed_rate
+
+<p class="subtitle">errored but billed rate over 5m</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> deepsearch: 5%+ errored but billed rate over 5m for 10m0s
+- <span class="badge badge-critical">critical</span> deepsearch: 95%+ errored but billed rate over 5m for 10m0s
+
+**Next steps**
+
+- Check for upstream LLM provider issues causing token limit or truncation errors.
+- Review `deepsearch_question_outcome_by_reason` for outcome breakdown.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#deepsearch-deepsearch_errored_but_billed_rate).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_deepsearch_deepsearch_errored_but_billed_rate",
+  "critical_deepsearch_deepsearch_errored_but_billed_rate"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((sum(rate(src_deepsearch_question_outcome_total{billable="true",error="true"\}[5m])) / (sum(rate(src_deepsearch_question_outcome_total\{billable="true"}[5m])) &gt; 0) * 100) &gt; 5)`
+
+Generated query for critical alert: `max((sum(rate(src_deepsearch_question_outcome_total{billable="true",error="true"\}[5m])) / (sum(rate(src_deepsearch_question_outcome_total\{billable="true"}[5m])) &gt; 0) * 100) &gt; 95)`
+
+</details>
+
+<br />
+
 ## deepsearch: deepsearch_llm_stream_fatal_errors
 
 <p class="subtitle">fatal LLM stream errors over 5m</p>
