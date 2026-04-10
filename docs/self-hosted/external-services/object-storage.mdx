@@ -4,14 +4,24 @@ By default, Sourcegraph will use a `sourcegraph/blobstore` server bundled with t
 
 You can alternatively configure your instance to instead store this data in an S3 or GCS bucket. Doing so may decrease your hosting costs as persistent volumes are often more expensive than the same storage space in an object store service.
 
+<Callout type="info">
+	Starting in [Sourcegraph 7.2](https://sourcegraph.com/changelog/releases/7.2), new instances can configure only the
+	[`sourcegraph` bucket](#sourcegraph-bucket), and Sourcegraph will use that
+	single bucket for all features. If a separate bucket is needed for Code Graph
+	Indexes or Search Job Results, that can still be configured, but we recommend
+	using one bucket.
+</Callout>
+
+<a id="sourcegraph-bucket" />
+
 ## `sourcegraph` bucket
 
 <Callout type="warning">
-	Starting in Sourcegraph 7.2, self-hosted Sourcegraph instances using S3 or
+	Starting in [Sourcegraph 7.2](https://sourcegraph.com/changelog/releases/7.2), self-hosted Sourcegraph instances using S3 or
 	GCS object storage should now provision an additional bucket named
-	`sourcegraph`. Sourcegraph currently reports a warning when this bucket is
-	not present, and it will become required for new features in a future
-	release. No action is required if you are using the default
+	[`sourcegraph`](#sourcegraph-bucket). Sourcegraph currently reports a warning
+	when this bucket is not present, and it will become required for new features
+	in a future release. No action is required if you are using the default
 	`sourcegraph/blobstore`.
 </Callout>
 
@@ -57,6 +67,13 @@ If you would like to allow your Sourcegraph instance to manage the target bucket
 ## Code Graph Indexes
 
 To target a managed object storage service for storing [code graph index uploads](../../code-navigation/precise-code-navigation), you will need to set a handful of environment variables for configuration and authentication to the target service.
+
+<Callout type="info">
+	Starting in [Sourcegraph 7.2](https://sourcegraph.com/changelog/releases/7.2), new instances can configure only the
+	[`sourcegraph` bucket](#sourcegraph-bucket), and Sourcegraph will use that
+	single bucket for all features. If a separate bucket is needed for Code Graph
+	Indexes, that can still be configured, but we recommend using one bucket.
+</Callout>
 
 - If you are running a `sourcegraph/server` deployment, set the environment variables on the server container
 - If you are running via Docker-compose or Kubernetes, set the environment variables on the `frontend`, `worker`, and `precise-code-intel-worker` containers
@@ -118,6 +135,13 @@ If you would like to allow your Sourcegraph instance to control the creation and
 ## Search Job Results
 
 To target a third party managed object storage service for storing [search job results](../../code-search/types/search-jobs), you must set a handful of environment variables for configuration and authentication to the target service.
+
+<Callout type="info">
+	Starting in [Sourcegraph 7.2](https://sourcegraph.com/changelog/releases/7.2), new instances can configure only the
+	[`sourcegraph` bucket](#sourcegraph-bucket), and Sourcegraph will use that
+	single bucket for all features. If a separate bucket is needed for Search Job
+	Results, that can still be configured, but we recommend using one bucket.
+</Callout>
 
 - If you are running a `sourcegraph/server` deployment, set the environment variables on the server container
 - If you are running via Docker-compose or Kubernetes, set the environment variables on the `frontend` and `worker` containers
