@@ -25,35 +25,6 @@ function formatDate(dateString: string): string {
 	});
 }
 
-type LegacyRelease = {
-	name: string;
-	date: string;
-	anchor?: string;
-	url?: string;
-};
-
-const legacySupportedReleases: LegacyRelease[] = [
-	{name: '5.10 Patch 1', date: 'December 2024', url: 'https://sourcegraph.com/changelog/releases/5.10.1164'},
-	{name: '5.10 Patch 0', date: 'November 2024', url: 'https://sourcegraph.com/changelog/releases/5.10.0'},
-	{name: '5.9 Patch 3', date: 'November 2024', url: 'https://sourcegraph.com/changelog/releases/5.9.1590'},
-	{name: '5.9 Patch 2', date: 'November 2024', url: 'https://sourcegraph.com/changelog/releases/5.9.347'},
-	{name: '5.9 Patch 1', date: 'November 2024', url: 'https://sourcegraph.com/changelog/releases/5.9.45'},
-	{name: '5.9 Patch 0', date: 'October 2024', url: 'https://sourcegraph.com/changelog/releases/5.9.0'},
-	{name: '5.8 Patch 1', date: 'October 2024', url: 'https://sourcegraph.com/changelog/releases/5.8.1579'},
-	{name: '5.8 Patch 0', date: 'October 2024', url: 'https://sourcegraph.com/changelog/releases/5.8.0'},
-	{name: '5.7 Patch 1', date: 'September 2024', url: 'https://sourcegraph.com/changelog/releases/5.7.2474'},
-	{name: '5.7 Patch 0', date: 'September 2024', url: 'https://sourcegraph.com/changelog/releases/5.7.0'},
-	{name: '5.6 Patch 2', date: 'August 2024', anchor: 'v562535'},
-	{name: '5.6 Patch 1', date: 'August 2024', anchor: 'v56185'},
-	{name: '5.6', date: 'August 2024', anchor: 'v560'},
-	{name: '5.5', date: 'July 2024', anchor: 'v553956'},
-	{name: '5.4', date: 'May 2024', anchor: 'v547765'},
-	{name: '5.3', date: 'February 2024', anchor: 'v5312303'},
-	{name: '5.2', date: 'October 2023', anchor: 'v527'},
-	{name: '5.1', date: 'June 2023', anchor: 'v519'},
-	{name: '5.0', date: 'March 2023', anchor: 'v506'}
-];
-
 export function SupportedReleasesTable() {
 	const [releases, setReleases] = useState<Release[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -147,38 +118,6 @@ export function SupportedReleasesTable() {
 							</td>
 						</tr>
 					))}
-					{legacySupportedReleases.map(release => (
-						<tr key={release.name}>
-							<td className="px-4 py-2">{release.name}</td>
-							<td className="px-4 py-2">{release.date}</td>
-							<td className="px-4 py-2">✅</td>
-							<td className="px-4 py-2">
-								{release.url ? (
-									<a
-										href={release.url}
-										className="text-blue-600 hover:underline dark:text-blue-400"
-									>
-										Notes
-									</a>
-								) : (
-									<Link
-										href={`/technical-changelog#${release.anchor}`}
-										className="text-blue-600 hover:underline dark:text-blue-400"
-									>
-										Notes
-									</Link>
-								)}
-							</td>
-							<td className="px-4 py-2">
-								<Link
-									href="/admin/deploy"
-									className="text-blue-600 hover:underline dark:text-blue-400"
-								>
-									Install
-								</Link>
-							</td>
-						</tr>
-					))}
 				</tbody>
 			</table>
 		</div>
@@ -187,6 +126,65 @@ export function SupportedReleasesTable() {
 
 export function DeprecatedReleasesTable() {
 	const deprecatedReleases = [
+		{
+			version: '5.10 Patch 1',
+			date: 'December 2024',
+			url: 'https://sourcegraph.com/changelog/releases/5.10.1164'
+		},
+		{
+			version: '5.10 Patch 0',
+			date: 'November 2024',
+			url: 'https://sourcegraph.com/changelog/releases/5.10.0'
+		},
+		{
+			version: '5.9 Patch 3',
+			date: 'November 2024',
+			url: 'https://sourcegraph.com/changelog/releases/5.9.1590'
+		},
+		{
+			version: '5.9 Patch 2',
+			date: 'November 2024',
+			url: 'https://sourcegraph.com/changelog/releases/5.9.347'
+		},
+		{
+			version: '5.9 Patch 1',
+			date: 'November 2024',
+			url: 'https://sourcegraph.com/changelog/releases/5.9.45'
+		},
+		{
+			version: '5.9 Patch 0',
+			date: 'October 2024',
+			url: 'https://sourcegraph.com/changelog/releases/5.9.0'
+		},
+		{
+			version: '5.8 Patch 1',
+			date: 'October 2024',
+			url: 'https://sourcegraph.com/changelog/releases/5.8.1579'
+		},
+		{
+			version: '5.8 Patch 0',
+			date: 'October 2024',
+			url: 'https://sourcegraph.com/changelog/releases/5.8.0'
+		},
+		{
+			version: '5.7 Patch 1',
+			date: 'September 2024',
+			url: 'https://sourcegraph.com/changelog/releases/5.7.2474'
+		},
+		{
+			version: '5.7 Patch 0',
+			date: 'September 2024',
+			url: 'https://sourcegraph.com/changelog/releases/5.7.0'
+		},
+		{version: '5.6 Patch 2', date: 'August 2024', anchor: 'v562535'},
+		{version: '5.6 Patch 1', date: 'August 2024', anchor: 'v56185'},
+		{version: '5.6', date: 'August 2024', anchor: 'v560'},
+		{version: '5.5', date: 'July 2024', anchor: 'v553956'},
+		{version: '5.4', date: 'May 2024', anchor: 'v547765'},
+		{version: '5.3', date: 'February 2024', anchor: 'v5312303'},
+		{version: '5.2', date: 'October 2023', anchor: 'v527'},
+		{version: '5.1', date: 'June 2023', anchor: 'v519'},
+		{version: '5.0', date: 'March 2023', anchor: 'v506'},
 		{version: '4.5', date: 'February 2023', anchor: 'v451'},
 		{version: '4.4', date: 'January 2023', anchor: 'v442'},
 		{version: '4.3', date: 'December 2022', anchor: 'v431'},
