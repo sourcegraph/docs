@@ -23,9 +23,12 @@ OAuth Apps are in compliance with standards including [RFC 6749](https://tools.i
 	  a service account. They are the only clients that support
 	  `grant_type=client_credentials`.
 
-	If your OpenID Connect discovery document lists `client_credentials`, that
-	means the Sourcegraph OAuth server supports that grant overall. It does not
-	mean every OAuth client created in the UI can use it.
+	Sourcegraph's OpenID Connect discovery document lists
+	`client_credentials` in `grant_types_supported` for all instances because it
+	describes the OAuth server's overall capabilities. It does not mean every
+	OAuth client created in the UI can use it. Likewise, `scopes_supported`
+	lists the scopes the server can issue overall, not the scopes configured on a
+	specific OAuth App or M2M credential.
 </Callout>
 
 Consider using **M2M (client-credentials) service-account tokens** or traditional [access tokens](/cli/how-tos/creating-an-access-token) for server-to-server communication, automated scripts, CI/CD pipelines, or single-user applications that do not require per-user permission checks. See [service accounts](/admin/service-accounts#m2m-oauth-credentials-client-credentials-flow) for details.
@@ -91,6 +94,9 @@ Private clients:
 ## Available Scopes
 
 When creating an OAuth app, select the minimum scopes necessary for your application:
+
+The discovery document's `scopes_supported` value is server-wide metadata. Each
+OAuth App can request only the scopes selected on that client.
 
 | Scope            | Description                                              |
 | ---------------- | -------------------------------------------------------- |
