@@ -37,9 +37,8 @@ export default {
 				'01': '#200302',
 				'02': '#410604',
 				'07': '#F34E3F', // Hero color
-				'08': '#FF7867',
-				'11': '#FFF3F0'
-			},
+				'08': '#FF7867'
+				},
 			// Secondary Violet Colors
 			violet: {
 				'00': '#030106',
