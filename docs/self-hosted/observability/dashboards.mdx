@@ -6205,9 +6205,7 @@ sum(src_gitserver_clone_queue)
 
 <p class="subtitle">Number of concurrent requests running against gitserver client</p>
 
-This metric is only for informational purposes. It indicates the current number of concurrently running requests by process against gitserver gRPC.
-
-It does not indicate any problems with the instance, but can give a good indication of load spikes or request throttling.
+This metric is only for informational purposes. It indicates the current number of concurrently running requests by process against gitserver gRPC. It does not indicate any problems with the instance, but can give a good indication of load spikes or request throttling.
 
 This panel has no related alerts.
 
@@ -6222,6 +6220,30 @@ Query:
 
 ```
 sum by (job, instance) (src_gitserver_client_concurrent_requests)
+```
+</details>
+
+<br />
+
+#### gitserver: repos_not_on_primary
+
+<p class="subtitle">Cloned repos not on primary shard</p>
+
+The number of cloned repositories currently observed off-primary. For shard relocation operations this should trend towards zero.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100032` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max(src_repoupdater_repos_not_on_primary)
 ```
 </details>
 
@@ -33061,6 +33083,473 @@ sum(increase(src_telemetrygatewayexporter_usermetadata_exporter_errors_total{job
 
 <br />
 
+## Metering
+
+<p class="subtitle">Monitoring credit metering export services in Sourcegraph.</p>
+
+To see this dashboard, visit `/-/debug/grafana/d/metering/metering` on your Sourcegraph instance.
+
+### Metering: Metering exporter: events export and queue metrics
+
+#### metering: metering_exporter_queue_size
+
+<p class="subtitle">Credit metering events pending export</p>
+
+The number of credit metering events queued to be exported.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100000` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+(
+		sum(
+			src_meteringexporter_queue_size
+			and on(instance, job)
+			(
+		(
+			increase(src_meteringexporter_queue_metrics_reporter_total{job=~"^worker.*"}[15m]) > 0
+		)
+		or on(instance, job)
+		(
+			increase(src_meteringexporter_queue_metrics_reporter_errors_total{job=~"^worker.*"}[15m]) > 0
+		)
+	)
+		)
+	) or on() vector(0)
+```
+</details>
+
+<br />
+
+#### metering: metering_exporter_queue_growth
+
+<p class="subtitle">Rate of growth of metering export queue over 30m</p>
+
+A positive value indicates the metering export queue is growing.
+
+Refer to the [alerts reference](alerts#metering-metering_exporter_queue_growth) for 2 alerts related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100001` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+(
+		deriv((
+		sum(
+			src_meteringexporter_queue_size
+			and on(instance, job)
+			(
+		(
+			increase(src_meteringexporter_queue_metrics_reporter_total{job=~"^worker.*"}[15m]) > 0
+		)
+		or on(instance, job)
+		(
+			increase(src_meteringexporter_queue_metrics_reporter_errors_total{job=~"^worker.*"}[15m]) > 0
+		)
+	)
+		)
+	)[30m:])
+	) or on() vector(0)
+```
+</details>
+
+<br />
+
+#### metering: metering_exporter_oldest_unexported_event_age
+
+<p class="subtitle">Age of the oldest unexported metering event</p>
+
+The age in seconds of the oldest metering event still waiting in the export queue.
+
+Refer to the [alerts reference](alerts#metering-metering_exporter_oldest_unexported_event_age) for 2 alerts related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100010` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+(
+		max(
+			src_meteringexporter_oldest_unexported_event
+			and on(instance, job)
+			(
+		(
+			increase(src_meteringexporter_queue_metrics_reporter_total{job=~"^worker.*"}[15m]) > 0
+		)
+		or on(instance, job)
+		(
+			increase(src_meteringexporter_queue_metrics_reporter_errors_total{job=~"^worker.*"}[15m]) > 0
+		)
+	)
+		)
+	) or on() vector(0)
+```
+</details>
+
+<br />
+
+#### metering: metering_exporter_exported_events
+
+<p class="subtitle">Metering events exported from queue per hour</p>
+
+The number of metering events exported over the last hour.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100011` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_meteringexporter_exported_events[1h]))
+```
+</details>
+
+<br />
+
+#### metering: metering_exporter_batch_size
+
+<p class="subtitle">Number of metering events exported per batch over 30m</p>
+
+The number of metering events exported in each batch. The largest bucket is the maximum number of events exported per batch.
+If the distribution trends to the maximum bucket, then export throughput is at or approaching saturation - please contact customer support.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100020` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (le) (rate(src_meteringexporter_batch_size_bucket[30m]))
+```
+</details>
+
+<br />
+
+#### metering: metering_exporter_pruned_events
+
+<p class="subtitle">Metering events pruned from queue per hour</p>
+
+The number of already-exported metering events pruned from the queue over the last hour.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100021` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_meteringexporter_events_pruned[1h]))
+```
+</details>
+
+<br />
+
+### Metering: Metering Exporter: Events export job operations
+
+#### metering: meteringexporter_exporter_total
+
+<p class="subtitle">Events exporter operations every 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100100` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_meteringexporter_exporter_total{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: meteringexporter_exporter_99th_percentile_duration
+
+<p class="subtitle">Aggregate successful events exporter operation duration distribution over 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100101` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum  by (le)(rate(src_meteringexporter_exporter_duration_seconds_bucket{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: meteringexporter_exporter_errors_total
+
+<p class="subtitle">Events exporter operation errors every 30m</p>
+
+Refer to the [alerts reference](alerts#metering-meteringexporter_exporter_errors_total) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100102` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_meteringexporter_exporter_errors_total{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: meteringexporter_exporter_error_rate
+
+<p class="subtitle">Events exporter operation error rate over 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100103` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_meteringexporter_exporter_errors_total{job=~"^worker.*"}[30m])) / (sum(increase(src_meteringexporter_exporter_total{job=~"^worker.*"}[30m])) + sum(increase(src_meteringexporter_exporter_errors_total{job=~"^worker.*"}[30m]))) * 100
+```
+</details>
+
+<br />
+
+### Metering: Metering Exporter: Events export queue cleanup job operations
+
+#### metering: meteringexporter_queue_cleanup_total
+
+<p class="subtitle">Events export queue cleanup operations every 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100200` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_meteringexporter_queue_cleanup_total{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: meteringexporter_queue_cleanup_99th_percentile_duration
+
+<p class="subtitle">Aggregate successful events export queue cleanup operation duration distribution over 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100201` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum  by (le)(rate(src_meteringexporter_queue_cleanup_duration_seconds_bucket{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: meteringexporter_queue_cleanup_errors_total
+
+<p class="subtitle">Events export queue cleanup operation errors every 30m</p>
+
+Refer to the [alerts reference](alerts#metering-meteringexporter_queue_cleanup_errors_total) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100202` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_meteringexporter_queue_cleanup_errors_total{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: meteringexporter_queue_cleanup_error_rate
+
+<p class="subtitle">Events export queue cleanup operation error rate over 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100203` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_meteringexporter_queue_cleanup_errors_total{job=~"^worker.*"}[30m])) / (sum(increase(src_meteringexporter_queue_cleanup_total{job=~"^worker.*"}[30m])) + sum(increase(src_meteringexporter_queue_cleanup_errors_total{job=~"^worker.*"}[30m]))) * 100
+```
+</details>
+
+<br />
+
+### Metering: Metering Exporter: Events export queue metrics reporting job operations
+
+#### metering: meteringexporter_queue_metrics_reporter_total
+
+<p class="subtitle">Events export backlog metrics reporting operations every 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100300` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_meteringexporter_queue_metrics_reporter_total{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: meteringexporter_queue_metrics_reporter_99th_percentile_duration
+
+<p class="subtitle">Aggregate successful events export backlog metrics reporting operation duration distribution over 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100301` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum  by (le)(rate(src_meteringexporter_queue_metrics_reporter_duration_seconds_bucket{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: meteringexporter_queue_metrics_reporter_errors_total
+
+<p class="subtitle">Events export backlog metrics reporting operation errors every 30m</p>
+
+Refer to the [alerts reference](alerts#metering-meteringexporter_queue_metrics_reporter_errors_total) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100302` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_meteringexporter_queue_metrics_reporter_errors_total{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: meteringexporter_queue_metrics_reporter_error_rate
+
+<p class="subtitle">Events export backlog metrics reporting operation error rate over 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100303` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_meteringexporter_queue_metrics_reporter_errors_total{job=~"^worker.*"}[30m])) / (sum(increase(src_meteringexporter_queue_metrics_reporter_total{job=~"^worker.*"}[30m])) + sum(increase(src_meteringexporter_queue_metrics_reporter_errors_total{job=~"^worker.*"}[30m]))) * 100
+```
+</details>
+
+<br />
+
 ## OpenTelemetry Collector
 
 <p class="subtitle">The OpenTelemetry collector ingests OpenTelemetry data from Sourcegraph and exports it to the configured backends.</p>
@@ -33625,11 +34114,11 @@ sum(rate(src_deepsearch_question_processing_errors_total{operation="question"}[5
 
 <br />
 
-#### deepsearch: deepsearch_question_processing_p99_duration
+#### deepsearch: deepsearch_question_processing_p95_duration
 
-<p class="subtitle">99th percentile question processing duration</p>
+<p class="subtitle">95th percentile question processing duration</p>
 
-99th percentile time to process a deep search question.
+95th percentile time to process a deep search question.
 
 This panel has no related alerts.
 
@@ -33643,7 +34132,7 @@ To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100
 Query:
 
 ```
-histogram_quantile(0.99, sum(rate(src_deepsearch_question_processing_duration_seconds_bucket{operation="question"}[5m])) by (le))
+histogram_quantile(0.95, sum(rate(src_deepsearch_question_processing_duration_seconds_bucket{operation="question"}[5m])) by (le))
 ```
 </details>
 
@@ -33673,15 +34162,39 @@ histogram_quantile(0.50, sum(rate(src_deepsearch_question_processing_duration_se
 
 <br />
 
-### Deep Search: LLM streaming
+#### deepsearch: deepsearch_slow_questions
 
-#### deepsearch: deepsearch_llm_stream_fatal_errors
+<p class="subtitle">Questions taking longer than 5 minutes over 15m</p>
 
-<p class="subtitle">Fatal LLM stream errors over 5m</p>
+Number of deep search questions that took longer than 5 minutes in the last 15 minutes.
 
-Number of fatal errors during LLM streaming in the last 5 minutes.
+Refer to the [alerts reference](alerts#deepsearch-deepsearch_slow_questions) for 2 alerts related to this panel.
 
-Refer to the [alerts reference](alerts#deepsearch-deepsearch_llm_stream_fatal_errors) for 1 alert related to this panel.
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100030` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_deepsearch_question_processing_duration_seconds_count{operation="question"}[15m])) - sum(increase(src_deepsearch_question_processing_duration_seconds_bucket{le="300",operation="question"}[15m]))
+```
+</details>
+
+<br />
+
+### Deep Search: Turn processing
+
+#### deepsearch: deepsearch_turn_p95_duration
+
+<p class="subtitle">95th percentile turn duration</p>
+
+95th percentile duration of individual agent turns. A turn includes the LLM call and any tool execution. Useful for investigating when question-level alerts fire.
+
+This panel has no related alerts.
 
 To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100100` on your Sourcegraph instance.
 
@@ -33693,17 +34206,17 @@ To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100
 Query:
 
 ```
-sum(increase(src_deepsearch_question_processing_errors_total{operation="llm_stream_fatal"}[5m]))
+histogram_quantile(0.95, sum(rate(src_deepsearch_turn_duration_seconds_bucket[5m])) by (le))
 ```
 </details>
 
 <br />
 
-#### deepsearch: deepsearch_llm_stream_non_fatal_errors
+#### deepsearch: deepsearch_turn_p50_duration
 
-<p class="subtitle">Non-fatal LLM stream errors over 5m</p>
+<p class="subtitle">50th percentile turn duration</p>
 
-Number of non-fatal errors during LLM streaming.
+Median duration of individual agent turns.
 
 This panel has no related alerts.
 
@@ -33717,7 +34230,129 @@ To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100
 Query:
 
 ```
-sum(increase(src_deepsearch_question_processing_errors_total{operation="llm_stream_non_fatal"}[5m]))
+histogram_quantile(0.50, sum(rate(src_deepsearch_turn_duration_seconds_bucket[5m])) by (le))
+```
+</details>
+
+<br />
+
+### Deep Search: Question outcomes
+
+#### deepsearch: deepsearch_question_outcome_by_reason
+
+<p class="subtitle">Question outcomes by reason over 5m</p>
+
+Breakdown of deep search question outcomes by reason and whether the question was billable.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100200` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (outcome, billable) (rate(src_deepsearch_question_outcome_total[5m])) * 60
+```
+</details>
+
+<br />
+
+#### deepsearch: deepsearch_errored_but_billed_rate
+
+<p class="subtitle">Errored but billed rate over 5m</p>
+
+Percentage of billed deep search questions that completed with an error. Use alongside count-based panels for cross-referencing scale of issues.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100201` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(src_deepsearch_question_outcome_total{billable="true",error="true"}[5m])) / (sum(rate(src_deepsearch_question_outcome_total{billable="true"}[5m])) > 0) * 100
+```
+</details>
+
+<br />
+
+#### deepsearch: deepsearch_billable_failures
+
+<p class="subtitle">Billable failures over time</p>
+
+Number of billed deep search questions that completed with an error (token limit exceeded or response truncated) in the last 15 minutes.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100210` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (outcome) (increase(src_deepsearch_question_outcome_total{billable="true",error="true"}[15m]))
+```
+</details>
+
+<br />
+
+#### deepsearch: deepsearch_response_truncated
+
+<p class="subtitle">Response truncated questions over 15m</p>
+
+Number of deep search questions where the response was truncated due to hitting the output token limit in the last 15 minutes.
+
+Refer to the [alerts reference](alerts#deepsearch-deepsearch_response_truncated) for 2 alerts related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100220` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_deepsearch_question_outcome_total{outcome="response_truncated"}[15m]))
+```
+</details>
+
+<br />
+
+#### deepsearch: deepsearch_token_limit_exceeded
+
+<p class="subtitle">Token limit exceeded questions over 15m</p>
+
+Number of deep search questions that exceeded the conversation token limit in the last 15 minutes.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100221` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_deepsearch_question_outcome_total{outcome="token_limit_exceeded"}[15m]))
 ```
 </details>
 
