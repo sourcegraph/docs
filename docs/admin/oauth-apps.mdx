@@ -11,6 +11,26 @@ This makes OAuth the preferred choice for any multi-user integration like browse
 
 OAuth Apps are in compliance with standards including [RFC 6749](https://tools.ietf.org/html/rfc6749), [RFC 7636 (PKCE)](https://tools.ietf.org/html/rfc7636), and [RFC 8628 (Device Authorization Grant)](https://tools.ietf.org/html/rfc8628).
 
+<Callout type="note">
+	OAuth Apps and service-account M2M credentials both use Sourcegraph's OAuth
+	server, but they are different client types for different jobs:
+
+	- OAuth Apps created in **Site admin > OAuth clients** are for apps acting on
+	  behalf of a user. They support `authorization_code` and
+	  `refresh_token`, and public clients also support the device authorization
+	  flow.
+	- Service-account M2M credentials are separate OAuth clients that are bound to
+	  a service account. They are the only clients that support
+	  `grant_type=client_credentials`.
+
+	Sourcegraph's OpenID Connect discovery document lists
+	`client_credentials` in `grant_types_supported` for all instances because it
+	describes the OAuth server's overall capabilities. It does not mean every
+	OAuth client created in the UI can use it. Likewise, `scopes_supported`
+	lists the scopes the server can issue overall, not the scopes configured on a
+	specific OAuth App or M2M credential.
+</Callout>
+
 Consider using **M2M (client-credentials) service-account tokens** or traditional [access tokens](/cli/how-tos/creating-an-access-token) for server-to-server communication, automated scripts, CI/CD pipelines, or single-user applications that do not require per-user permission checks. See [service accounts](/admin/service-accounts#m2m-oauth-credentials-client-credentials-flow) for details.
 
 ## Creating an OAuth App
@@ -61,7 +81,7 @@ Public clients:
 Private clients can securely store client secrets:
 
 -   **Server-side web applications**
--   **Backend services**
+-   **Backend services that act on behalf of signed-in users**
 -   **Secure server environments**
 
 Private clients:
@@ -69,10 +89,14 @@ Private clients:
 -   Receive both client ID and client secret
 -   Can use the standard authorization code flow (PKCE strongly recommended)
 -   Allow client authentication with a secret and server-side code exchange
+-   Still act on behalf of a user, not as a standalone machine identity
 
 ## Available Scopes
 
 When creating an OAuth app, select the minimum scopes necessary for your application:
+
+The discovery document's `scopes_supported` value is server-wide metadata. Each
+OAuth App can request only the scopes selected on that client.
 
 | Scope            | Description                                              |
 | ---------------- | -------------------------------------------------------- |
@@ -102,6 +126,10 @@ When creating an OAuth app, select the minimum scopes necessary for your applica
 | User Info                   | `https://sourcegraph.example.com/.auth/idp/oauth/userinfo`    |
 
 ## OAuth Flow Examples
+
+The first three flows below are for OAuth Apps created in **Site admin > OAuth
+clients**. The `client_credentials` example is included for completeness, but
+it only works with M2M credentials created for a service account.
 
 <Accordion title="Authorization Code Flow (Private Clients)">
 
@@ -260,7 +288,7 @@ curl -X POST https://sourcegraph.example.com/.auth/idp/oauth/token \
 
 <Accordion title="Client Credentials Flow (Service Accounts)">
 
-The client credentials flow is designed for server-to-server authentication without user interaction. Service accounts can create M2M (machine-to-machine) credentials that use this flow. You can create M2M credentials in the service account settings under **Access tokens > M2M credentials**.
+The client credentials flow is designed for server-to-server authentication without user interaction. It is not available for OAuth Apps created in **Site admin > OAuth clients**. Instead, service accounts create separate M2M (machine-to-machine) credentials that use this flow. You can create M2M credentials in the service account settings under **Access tokens > M2M credentials**.
 
 1. **Token Request** (no user interaction required):
 
