@@ -126,7 +126,7 @@ export const navigation: NavigationItem[] = [
 						href: '/code-navigation/syntactic-code-navigation'
 					},
 					{
-						title: 'Smart Hover Summaries',
+						title: 'Smart hover summaries',
 						href: '/code-navigation/smart-hover'
 					},
 					{
