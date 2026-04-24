@@ -126,6 +126,10 @@ export const navigation: NavigationItem[] = [
 						href: '/code-navigation/syntactic-code-navigation'
 					},
 					{
+						title: 'Smart hover summaries',
+						href: '/code-navigation/smart-hover'
+					},
+					{
 						title: 'Auto-indexing',
 						href: '/code-navigation/auto-indexing'
 					},
