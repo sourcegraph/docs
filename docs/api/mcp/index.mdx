@@ -31,7 +31,7 @@ amp mcp add sg https://sourcegraph.example.com/.api/mcp
 claude mcp add --transport http sg https://sourcegraph.example.com/.api/mcp
 ```
 
-This works similarly for other MCP-compatible agents. See [Client Integration](#client-integration) for detailed setup instructions for each client.
+This works similarly for other MCP-compatible agents. See [Client Integrations](/api/mcp/client-integrations) for detailed setup instructions for each client.
 
 ## Server Endpoints
 
@@ -92,13 +92,16 @@ If your agent doesn't support Dynamic Client Registration, you can manually crea
 
 <Accordion title="Disabling Dynamic Client Registration">
 
-To disable DCR, set the following site configuration:
+To disable DCR while leaving MCP available, set the following site configuration:
 
 ```json
 {
 	"auth.idpDynamicClientRegistrationEnabled": false
 }
 ```
+
+If `mcp.enabled` is `false`, DCR is also unavailable and the registration
+endpoint returns `404`.
 
 </Accordion>
 
@@ -113,6 +116,66 @@ Authorization: token YOUR_ACCESS_TOKEN
 <Callout type="info">
 	Access tokens can use the `mcp` scope to restrict access to MCP endpoints
 	only.
+</Callout>
+
+## Availability and Access Control
+
+Admins can control MCP at three levels:
+
+- Site configuration: `mcp.enabled` enables or disables the MCP HTTP endpoints.
+- OAuth Dynamic Client Registration: `auth.idpDynamicClientRegistrationEnabled` controls whether OAuth clients can self-register; it is effectively disabled whenever `mcp.enabled` is `false`.
+- RBAC: users must have the `MCP#ACCESS` permission to use MCP.
+
+### Site-Level Enablement
+
+Use the `mcp.enabled` site configuration to turn the MCP server on or off for the entire instance:
+
+```json
+{
+	"mcp.enabled": true
+}
+```
+
+`mcp.enabled` defaults to `true`. When set to `false`, requests to `/.api/mcp`
+and its subpaths return `404 no route`.
+
+### OAuth Dynamic Client Registration
+
+Use `auth.idpDynamicClientRegistrationEnabled` to control whether compatible
+OAuth clients can self-register against the Sourcegraph identity provider:
+
+```json
+{
+	"auth.idpDynamicClientRegistrationEnabled": true
+}
+```
+
+`auth.idpDynamicClientRegistrationEnabled` defaults to `true`, but it is
+treated as `false` whenever `mcp.enabled` is `false`. When DCR is unavailable,
+requests to `/.auth/idp/oauth/register` return `404 not found`.
+
+### Restricting MCP with RBAC
+
+When MCP is enabled, Sourcegraph also checks the `MCP#ACCESS` permission before
+serving MCP requests. Users without that permission receive `403 forbidden`.
+
+By default, `MCP#ACCESS` is granted to the built-in `User` system role, so all
+signed-in users can access MCP unless an admin changes the default role
+permissions.
+
+To restrict MCP to a subset of users:
+
+1. Open **Site admin > Users & auth > Roles**.
+2. Edit the built-in **User** role and remove the `MCP > ACCESS` permission if you want MCP denied by default.
+3. Create a custom role that includes `MCP > ACCESS`.
+4. Assign that role to the users who should be allowed to use MCP.
+
+See [Access control](/admin/access-control) for more about managing roles and permissions.
+
+<Callout type="info">
+	MCP access control is separate from [repository permissions](/admin/permissions/).
+	Users can only read data from repositories they are already allowed to access
+	in Sourcegraph.
 </Callout>
 
 ## Available Tools

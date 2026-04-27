@@ -5466,8 +5466,18 @@ const redirectsData = [
 
 	//Pricing redirects
 	{
+		source: '/pricing',
+		destination: 'https://sourcegraph.com/pricing',
+		permanent: true
+	},
+	{
 		source: '/pricing/free',
-		destination: '/pricing/plans/free',
+		destination: 'https://sourcegraph.com/pricing',
+		permanent: true
+	},
+	{
+		source: '/pricing/plans/free',
+		destination: 'https://sourcegraph.com/pricing',
 		permanent: true
 	},
 	{
@@ -5481,6 +5491,11 @@ const redirectsData = [
 		permanent: true
 	},
 	{
+		source: '/pricing/plan-comparison',
+		destination: 'https://sourcegraph.com/pricing',
+		permanent: true
+	},
+	{
 		source: '/pricing/billing-faqs',
 		destination: '/pricing/faqs',
 		permanent: true
@@ -5489,7 +5504,12 @@ const redirectsData = [
 	// Admin pricing docs redirects
 	{
 		source: '/admin/pricing',
-		destination: '/pricing/plans',
+		destination: 'https://sourcegraph.com/pricing',
+		permanent: true
+	},
+	{
+		source: '/pricing/plans',
+		destination: 'https://sourcegraph.com/pricing',
 		permanent: true
 	},
 
@@ -6440,7 +6460,7 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/beta_and_experimental_features',
-		destination: '/admin/beta-and-experimental-features',
+		destination: '/beta-and-experimental',
 		permanent: true
 	},
 	{
@@ -7112,6 +7132,11 @@ const redirectsData = [
 	{
 		source: '/admin/repo/permissions',
 		destination: '/admin/permissions',
+		permanent: true
+	},
+	{
+		source: '/admin/beta-and-experimental-features',
+		destination: '/beta-and-experimental',
 		permanent: true
 	},
 	// RSS feed moved from /docs/technical-changelog.rss to /changelog/technical-changelog.rss

@@ -4993,7 +4993,7 @@ max by (name) (container_memory_working_set_bytes{name=~"^(frontend|sourcegraph-
 
 <p class="subtitle">Memory (RSS)</p>
 
-The total anonymous memory in use by the application, which includes Go stack and heap. This memory is is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS because to match the cadvisor name, but `anonymous` is more accurate."
+The total anonymous memory in use by the application, which includes Go stack and heap. This memory is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS to match the cadvisor name, but "anonymous" is more accurate.
 
 Refer to the [alerts reference](alerts#frontend-memory_rss) for 1 alert related to this panel.
 
@@ -5545,224 +5545,6 @@ sum by (email_source) (increase(src_email_send{success="true"}[30m]))
 
 <br />
 
-### Frontend: Sentinel queries (only on sourcegraph.com)
-
-#### frontend: mean_successful_sentinel_duration_by_query
-
-<p class="subtitle">Mean successful sentinel search duration by query</p>
-
-Mean search duration for successful sentinel queries, broken down by query. Useful for debugging whether a slowdown is limited to a specific type of query.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103800` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-sum(rate(src_search_response_latency_seconds_sum{source=~"searchblitz.*", status="success"}[$sentinel_sampling_duration])) by (source) / sum(rate(src_search_response_latency_seconds_count{source=~"searchblitz.*", status="success"}[$sentinel_sampling_duration])) by (source)
-```
-</details>
-
-<br />
-
-#### frontend: mean_sentinel_stream_latency_by_query
-
-<p class="subtitle">Mean successful sentinel stream latency by query</p>
-
-Mean time to first result for successful streaming sentinel queries, broken down by query. Useful for debugging whether a slowdown is limited to a specific type of query.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103801` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-sum(rate(src_search_streaming_latency_seconds_sum{source=~"searchblitz.*"}[$sentinel_sampling_duration])) by (source) / sum(rate(src_search_streaming_latency_seconds_count{source=~"searchblitz.*"}[$sentinel_sampling_duration])) by (source)
-```
-</details>
-
-<br />
-
-#### frontend: 90th_percentile_successful_sentinel_duration_by_query
-
-<p class="subtitle">90th percentile successful sentinel search duration by query</p>
-
-90th percentile search duration for successful sentinel queries, broken down by query. Useful for debugging whether a slowdown is limited to a specific type of query.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103810` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.90, sum(rate(src_search_response_latency_seconds_bucket{source=~"searchblitz.*", status="success"}[$sentinel_sampling_duration])) by (le, source))
-```
-</details>
-
-<br />
-
-#### frontend: 90th_percentile_successful_stream_latency_by_query
-
-<p class="subtitle">90th percentile successful sentinel stream latency by query</p>
-
-90th percentile time to first result for successful streaming sentinel queries, broken down by query. Useful for debugging whether a slowdown is limited to a specific type of query.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103811` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.90, sum(rate(src_search_streaming_latency_seconds_bucket{source=~"searchblitz.*"}[$sentinel_sampling_duration])) by (le, source))
-```
-</details>
-
-<br />
-
-#### frontend: 90th_percentile_unsuccessful_duration_by_query
-
-<p class="subtitle">90th percentile unsuccessful sentinel search duration by query</p>
-
-90th percentile search duration of _unsuccessful_ sentinel queries (by error or timeout), broken down by query. Useful for debugging how the performance of failed requests affect UX.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103820` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.90, sum(rate(src_search_response_latency_seconds_bucket{source=~`searchblitz.*`, status!=`success`}[$sentinel_sampling_duration])) by (le, source))
-```
-</details>
-
-<br />
-
-#### frontend: 75th_percentile_successful_sentinel_duration_by_query
-
-<p class="subtitle">75th percentile successful sentinel search duration by query</p>
-
-75th percentile search duration of successful sentinel queries, broken down by query. Useful for debugging whether a slowdown is limited to a specific type of query.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103830` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.75, sum(rate(src_search_response_latency_seconds_bucket{source=~"searchblitz.*", status="success"}[$sentinel_sampling_duration])) by (le, source))
-```
-</details>
-
-<br />
-
-#### frontend: 75th_percentile_successful_stream_latency_by_query
-
-<p class="subtitle">75th percentile successful sentinel stream latency by query</p>
-
-75th percentile time to first result for successful streaming sentinel queries, broken down by query. Useful for debugging whether a slowdown is limited to a specific type of query.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103831` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.75, sum(rate(src_search_streaming_latency_seconds_bucket{source=~"searchblitz.*"}[$sentinel_sampling_duration])) by (le, source))
-```
-</details>
-
-<br />
-
-#### frontend: 75th_percentile_unsuccessful_duration_by_query
-
-<p class="subtitle">75th percentile unsuccessful sentinel search duration by query</p>
-
-75th percentile search duration of _unsuccessful_ sentinel queries (by error or timeout), broken down by query. Useful for debugging how the performance of failed requests affect UX.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103840` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.75, sum(rate(src_search_response_latency_seconds_bucket{source=~`searchblitz.*`, status!=`success`}[$sentinel_sampling_duration])) by (le, source))
-```
-</details>
-
-<br />
-
-#### frontend: unsuccessful_status_rate
-
-<p class="subtitle">Unsuccessful status rate</p>
-
-The rate of unsuccessful sentinel queries, broken down by failure type.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103850` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-sum(rate(src_graphql_search_response{source=~"searchblitz.*", status!="success"}[$sentinel_sampling_duration])) by (status)
-```
-</details>
-
-<br />
-
 ### Frontend: Incoming webhooks
 
 #### frontend: p95_time_to_handle_incoming_webhooks
@@ -5777,7 +5559,7 @@ p95 response time to incoming webhook requests from code hosts.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103900` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103800` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -5801,7 +5583,7 @@ histogram_quantile(0.95, sum  (rate(src_http_request_duration_seconds_bucket{rou
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=104000` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103900` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -5823,7 +5605,7 @@ sum(increase(src_insights_aggregations_total{job=~"^(frontend|sourcegraph-fronte
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=104001` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103901` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -5845,7 +5627,7 @@ sum  by (le)(rate(src_insights_aggregations_duration_seconds_bucket{job=~"^(fron
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=104002` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103902` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -5867,7 +5649,7 @@ sum(increase(src_insights_aggregations_errors_total{job=~"^(frontend|sourcegraph
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=104003` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103903` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -5889,7 +5671,7 @@ sum(increase(src_insights_aggregations_errors_total{job=~"^(frontend|sourcegraph
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=104010` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103910` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -5911,7 +5693,7 @@ sum by (op,extended_mode)(increase(src_insights_aggregations_total{job=~"^(front
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=104011` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103911` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -5933,7 +5715,7 @@ histogram_quantile(0.99, sum  by (le,op,extended_mode)(rate(src_insights_aggrega
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=104012` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103912` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -5955,7 +5737,7 @@ sum by (op,extended_mode)(increase(src_insights_aggregations_errors_total{job=~"
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=104013` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103913` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -6025,81 +5807,6 @@ Query:
 
 <br />
 
-#### gitserver: cpu_throttling_time
-
-<p class="subtitle">Container CPU throttling time %</p>
-
-- A high value indicates that the container is spending too much time waiting for CPU cycles.
-
-Refer to the [alerts reference](alerts#gitserver-cpu_throttling_time) for 1 alert related to this panel.
-
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100010` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-sum by (container_label_io_kubernetes_pod_name) ((rate(container_cpu_cfs_throttled_periods_total{container_label_io_kubernetes_container_name="gitserver", container_label_io_kubernetes_pod_name=~`${shard:regex}`}[5m]) / rate(container_cpu_cfs_periods_total{container_label_io_kubernetes_container_name="gitserver", container_label_io_kubernetes_pod_name=~`${shard:regex}`}[5m])) * 100)
-```
-</details>
-
-<br />
-
-#### gitserver: cpu_usage_seconds
-
-<p class="subtitle">Cpu usage seconds</p>
-
-- This value should not exceed 75% of the CPU limit over a longer period of time.
-	- We cannot alert on this as we don`t know the resource allocation.
-
-	- If this value is high for a longer time, consider increasing the CPU limit for the container.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100011` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-sum by (container_label_io_kubernetes_pod_name) (rate(container_cpu_usage_seconds_total{container_label_io_kubernetes_container_name="gitserver", container_label_io_kubernetes_pod_name=~`${shard:regex}`}[5m]))
-```
-</details>
-
-<br />
-
-#### gitserver: memory_major_page_faults
-
-<p class="subtitle">Gitserver page faults</p>
-
-The number of major page faults in a 5 minute window for gitserver. If this number increases significantly, it indicates that more git API calls need to load data from disk. There may not be enough memory to efficiently support the amount of API requests served concurrently.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100020` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-rate(container_memory_failures_total{failure_type="pgmajfault", name=~"^gitserver.*"}[5m])
-```
-</details>
-
-<br />
-
 #### gitserver: high_memory_git_commands
 
 <p class="subtitle">Number of git commands that exceeded the threshold for high memory usage</p>
@@ -6115,7 +5822,7 @@ OOM killed and this graph shows spikes, increasing the memory might be useful.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100021` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100010` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6139,7 +5846,7 @@ A high value signals load.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100030` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100011` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6163,7 +5870,7 @@ per second rate per command
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100031` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100012` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6179,6 +5886,31 @@ sum by (cmd) (rate(src_gitserver_exec_duration_seconds_count{instance=~`${shard:
 
 <br />
 
+#### gitserver: git_command_cpu_usage_seconds_by_scope
+
+<p class="subtitle">Git command CPU usage seconds by requester scope</p>
+
+CPU time consumed by git subcommands, grouped by propagated requester scope and CPU kind.
+Use this to identify high-CPU callers and whether time is spent in user or system CPU.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100013` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+topk(20, sum by (scope, kind) (rate(src_gitserver_exec_cpu_seconds_total{instance=~`${shard:regex}`}[5m])))
+```
+</details>
+
+<br />
+
 #### gitserver: echo_command_duration_test
 
 <p class="subtitle">Echo test command duration</p>
@@ -6187,7 +5919,7 @@ sum by (cmd) (rate(src_gitserver_exec_duration_seconds_count{instance=~`${shard:
 
 Refer to the [alerts reference](alerts#gitserver-echo_command_duration_test) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100040` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100020` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6213,7 +5945,7 @@ by recloning repositories, but this may take a while depending on repo size.
 
 Refer to the [alerts reference](alerts#gitserver-repo_corrupted) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100041` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100021` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6235,7 +5967,7 @@ sum(rate(src_gitserver_repo_corrupted[5m]))
 
 Refer to the [alerts reference](alerts#gitserver-repository_clone_queue_size) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100050` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100030` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6255,13 +5987,11 @@ sum(src_gitserver_clone_queue)
 
 <p class="subtitle">Number of concurrent requests running against gitserver client</p>
 
-This metric is only for informational purposes. It indicates the current number of concurrently running requests by process against gitserver gRPC.
-
-It does not indicate any problems with the instance, but can give a good indication of load spikes or request throttling.
+This metric is only for informational purposes. It indicates the current number of concurrently running requests by process against gitserver gRPC. It does not indicate any problems with the instance, but can give a good indication of load spikes or request throttling.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100051` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100031` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6277,6 +6007,261 @@ sum by (job, instance) (src_gitserver_client_concurrent_requests)
 
 <br />
 
+#### gitserver: repos_not_on_primary
+
+<p class="subtitle">Cloned repos not on primary shard</p>
+
+The number of cloned repositories currently observed off-primary. For shard relocation operations this should trend towards zero.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100032` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max(src_repoupdater_repos_not_on_primary)
+```
+</details>
+
+<br />
+
+### Git Server: Gitserver (CPU, Memory)
+
+Gitserver leverages memory mapping to optimize file reads: it is generally expected to consume all the memory provided to it, if it can. When it finds data that is not available in memory yet, this causes a 'page fault', and the data is loaded into memory from disk.
+
+A trend to watch out for: when something in-application happens to take a lot of memory, and active file previously used nearly all remaining memory, then:
+
+1. 'Memory (RSS)' goes up, due to in-application usage
+2. 'Memory usage (Active file)' goes down, as file data held in memory is evicted
+3. 'Page faults' go up, as less data is held in memory (and with that, IOPS, disk read throughput, ...)
+
+This can also happen without 'Memory (RSS)' increasing, if the provisioned memory is insufficent to start with.
+A small degree of this is behaviour generally expected, but if it happens significantly or causes user-noticeable impact, it's likely gitserver could benefit from more memory. Look for more user-facing metrics to make a final determination on appropriate resource allocation.
+
+_See https://en.wikipedia.org/wiki/Memory-mapped_file and the related articles for more information about memory maps._
+
+#### gitserver: cpu_usage_percentage
+
+<p class="subtitle">CPU usage</p>
+
+Refer to the [alerts reference](alerts#gitserver-cpu_usage_percentage) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100100` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+cadvisor_container_cpu_usage_percentage_total{name=~"^gitserver.*"}
+```
+</details>
+
+<br />
+
+#### gitserver: memory_usage_percentage
+
+<p class="subtitle">Memory usage percentage (total)</p>
+
+An estimate for the active memory in use, which includes anonymous memory, file memory, and kernel memory. Some of this memory is reclaimable, so high usage does not necessarily indicate memory pressure.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100101` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+cadvisor_container_memory_usage_percentage_total{name=~"^gitserver.*"}
+```
+</details>
+
+<br />
+
+#### gitserver: memory_working_set_bytes
+
+<p class="subtitle">Memory usage bytes (total)</p>
+
+An estimate for the active memory in use in bytes, which includes anonymous memory, file memory, and kernel memory. Some of this memory is reclaimable, so high usage does not necessarily indicate memory pressure.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100102` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max by (name) (container_memory_working_set_bytes{name=~"^gitserver.*"})
+```
+</details>
+
+<br />
+
+#### gitserver: memory_rss
+
+<p class="subtitle">Memory (RSS)</p>
+
+The total anonymous memory in use by the application, which includes Go stack and heap. This memory is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS to match the cadvisor name, but "anonymous" is more accurate.
+
+Refer to the [alerts reference](alerts#gitserver-memory_rss) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100110` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max(container_memory_rss{name=~"^gitserver.*"} / container_spec_memory_limit_bytes{name=~"^gitserver.*"}) by (name) * 100.0 
+```
+</details>
+
+<br />
+
+#### gitserver: memory_total_active_file
+
+<p class="subtitle">Memory usage (active file)</p>
+
+This metric shows the total active file-backed memory currently in use by the application. Some of it may be reclaimable, so high usage does not necessarily indicate memory pressure.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100111` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max(container_memory_total_active_file_bytes{name=~"^gitserver.*"} / container_spec_memory_limit_bytes{name=~"^gitserver.*"}) by (name) * 100.0 
+```
+</details>
+
+<br />
+
+#### gitserver: memory_kernel_usage
+
+<p class="subtitle">Memory usage (kernel)</p>
+
+The kernel usage metric shows the amount of memory used by the kernel on behalf of the application. Some of it may be reclaimable, so high usage does not necessarily indicate memory pressure.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100112` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max(container_memory_kernel_usage{name=~"^gitserver.*"} / container_spec_memory_limit_bytes{name=~"^gitserver.*"}) by (name) * 100.0 
+```
+</details>
+
+<br />
+
+#### gitserver: memory_major_page_faults
+
+<p class="subtitle">Gitserver page faults</p>
+
+The number of major page faults in a 5 minute window for gitserver. If this number increases significantly, it indicates that more git API calls need to load data from disk. There may not be enough memory to efficiently support the amount of API requests served concurrently.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100120` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+rate(container_memory_failures_total{failure_type="pgmajfault", name=~"^gitserver.*"}[5m])
+```
+</details>
+
+<br />
+
+#### gitserver: cpu_throttling_time
+
+<p class="subtitle">Container CPU throttling time %</p>
+
+A high value indicates that the container is spending too much time waiting for CPU cycles.
+
+Refer to the [alerts reference](alerts#gitserver-cpu_throttling_time) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100130` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (container_label_io_kubernetes_pod_name) ((rate(container_cpu_cfs_throttled_periods_total{container_label_io_kubernetes_container_name="gitserver", container_label_io_kubernetes_pod_name=~`${shard:regex}`}[5m]) / rate(container_cpu_cfs_periods_total{container_label_io_kubernetes_container_name="gitserver", container_label_io_kubernetes_pod_name=~`${shard:regex}`}[5m])) * 100)
+```
+</details>
+
+<br />
+
+#### gitserver: cpu_usage_seconds
+
+<p class="subtitle">Cpu usage seconds</p>
+
+- This value should not exceed 75% of the CPU limit over a longer period of time.
+- We cannot alert on this as we don`t know the resource allocation.
+- If this value is high for a longer time, consider increasing the CPU limit for the container.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100131` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (container_label_io_kubernetes_pod_name) (rate(container_cpu_usage_seconds_total{container_label_io_kubernetes_container_name="gitserver", container_label_io_kubernetes_pod_name=~`${shard:regex}`}[5m]))
+```
+</details>
+
+<br />
+
 ### Git Server: Gitservice for internal cloning
 
 #### gitserver: gitservice_request_duration
@@ -6287,7 +6272,7 @@ A high value means any internal service trying to clone a repo from gitserver is
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100100` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100200` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6311,7 +6296,7 @@ Per shard gitservice request rate
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100101` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100201` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6335,7 +6320,7 @@ Per shard gitservice requests running
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100102` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100202` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6361,7 +6346,7 @@ The rate of housekeeping tasks performed in repositories, broken down by task ty
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100200` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100300` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6385,7 +6370,7 @@ The 90th percentile latency of successful housekeeping tasks, broken down by tas
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100210` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100310` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6409,7 +6394,7 @@ The 95th percentile latency of successful housekeeping tasks, broken down by tas
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100211` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100311` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6433,7 +6418,7 @@ The 99th percentile latency of successful housekeeping tasks, broken down by tas
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100212` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100312` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6457,7 +6442,7 @@ The 90th percentile latency of failed housekeeping tasks, broken down by task ty
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100220` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100320` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6481,7 +6466,7 @@ The 95th percentile latency of failed housekeeping tasks, broken down by task ty
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100221` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100321` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6505,7 +6490,7 @@ The 99th percentile latency of failed housekeeping tasks, broken down by task ty
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100222` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100322` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6529,7 +6514,7 @@ The rate of files pruned during cleanup, broken down by file type
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100230` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100330` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6553,7 +6538,7 @@ The count distribution of various Git data structures in repositories
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100240` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100340` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6577,7 +6562,7 @@ The size distribution of various Git data structures in repositories
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100250` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100350` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6601,7 +6586,7 @@ The time elapsed since last optimization of various Git data structures
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100260` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100360` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6625,7 +6610,7 @@ The rate at which data structures are reported to exist in repositories
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100270` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100370` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6653,7 +6638,7 @@ This metric helps track how often the retry mechanism is triggered.
 
 Refer to the [alerts reference](alerts#gitserver-git_command_retry_attempts_rate) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100300` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100400` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6678,7 +6663,7 @@ This indicates how effective the retry mechanism is at resolving transient corru
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100301` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100401` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6703,7 +6688,7 @@ These failures will result in repository corruption marking and potential reclon
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100310` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100410` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6729,7 +6714,7 @@ Common causes include network issues, permission changes, or concurrent reposito
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100311` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100411` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6755,7 +6740,7 @@ A low ratio may indicate persistent corruption issues requiring investigation.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100312` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100412` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6782,7 +6767,7 @@ A value of 0 indicates the routine isn`t running currently, it awaits it`s next 
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100400` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100500` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -6807,7 +6792,7 @@ A low or zero value could indicate that a routine is stalled or encountering err
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100401` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100501` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -6832,7 +6817,7 @@ A sustained high error rate may indicate a problem with the routine`s configurat
 
 Refer to the [alerts reference](alerts#gitserver-goroutine_error_rate) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100410` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100510` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6857,7 +6842,7 @@ A value above 5% indicates that a significant portion of routine executions are 
 
 Refer to the [alerts reference](alerts#gitserver-goroutine_error_percentage) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100411` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100511` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -6882,7 +6867,7 @@ Longer durations might indicate increased load or processing time.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100420` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100520` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -6907,7 +6892,7 @@ This represents how long a complete loop iteration takes before sleeping for the
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100421` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100521` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -6932,7 +6917,7 @@ Higher values indicate that tenant processing is taking longer and may affect ov
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100430` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100530` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -6957,7 +6942,7 @@ Consistently high values might indicate problematic tenants or inefficient proce
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100431` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100531` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -6982,7 +6967,7 @@ Unexpected changes can indicate tenant configuration issues or scaling events.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100440` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100540` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -7007,7 +6992,7 @@ A healthy routine should maintain a consistent processing rate.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100441` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100541` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -7032,7 +7017,7 @@ Consistent errors indicate problems with specific tenants.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100450` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100550` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -7057,7 +7042,7 @@ Values above 5% indicate significant tenant processing problems.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100451` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100551` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -7068,150 +7053,6 @@ Query:
 
 ```
 (sum by (name, job_name) (rate(src_periodic_goroutine_tenant_errors_total{job=~".*gitserver.*"}[5m])) / (sum by (name, job_name) (rate(src_periodic_goroutine_tenant_success_total{job=~".*gitserver.*"}[5m])) + sum by (name, job_name) (rate(src_periodic_goroutine_tenant_errors_total{job=~".*gitserver.*"}[5m])))) * 100
-```
-</details>
-
-<br />
-
-### Git Server: Gitserver (CPU, Memory)
-
-#### gitserver: cpu_usage_percentage
-
-<p class="subtitle">CPU usage</p>
-
-Refer to the [alerts reference](alerts#gitserver-cpu_usage_percentage) for 1 alert related to this panel.
-
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100500` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-cadvisor_container_cpu_usage_percentage_total{name=~"^gitserver.*"}
-```
-</details>
-
-<br />
-
-#### gitserver: memory_usage_percentage
-
-<p class="subtitle">Memory usage percentage (total)</p>
-
-An estimate for the active memory in use, which includes anonymous memory, file memory, and kernel memory. Some of this memory is reclaimable, so high usage does not necessarily indicate memory pressure.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100501` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-cadvisor_container_memory_usage_percentage_total{name=~"^gitserver.*"}
-```
-</details>
-
-<br />
-
-#### gitserver: memory_working_set_bytes
-
-<p class="subtitle">Memory usage bytes (total)</p>
-
-An estimate for the active memory in use in bytes, which includes anonymous memory, file memory, and kernel memory. Some of this memory is reclaimable, so high usage does not necessarily indicate memory pressure.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100502` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-max by (name) (container_memory_working_set_bytes{name=~"^gitserver.*"})
-```
-</details>
-
-<br />
-
-#### gitserver: memory_rss
-
-<p class="subtitle">Memory (RSS)</p>
-
-The total anonymous memory in use by the application, which includes Go stack and heap. This memory is is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS because to match the cadvisor name, but `anonymous` is more accurate."
-
-Refer to the [alerts reference](alerts#gitserver-memory_rss) for 1 alert related to this panel.
-
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100510` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-max(container_memory_rss{name=~"^gitserver.*"} / container_spec_memory_limit_bytes{name=~"^gitserver.*"}) by (name) * 100.0 
-```
-</details>
-
-<br />
-
-#### gitserver: memory_total_active_file
-
-<p class="subtitle">Memory usage (active file)</p>
-
-This metric shows the total active file-backed memory currently in use by the application. Some of it may be reclaimable, so high usage does not necessarily indicate memory pressure.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100511` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-max(container_memory_total_active_file_bytes{name=~"^gitserver.*"} / container_spec_memory_limit_bytes{name=~"^gitserver.*"}) by (name) * 100.0 
-```
-</details>
-
-<br />
-
-#### gitserver: memory_kernel_usage
-
-<p class="subtitle">Memory usage (kernel)</p>
-
-The kernel usage metric shows the amount of memory used by the kernel on behalf of the application. Some of it may be reclaimable, so high usage does not necessarily indicate memory pressure.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=100512` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-max(container_memory_kernel_usage{name=~"^gitserver.*"} / container_spec_memory_limit_bytes{name=~"^gitserver.*"}) by (name) * 100.0 
 ```
 </details>
 
@@ -17584,7 +17425,7 @@ max by (name) (container_memory_working_set_bytes{name=~"^worker.*"})
 
 <p class="subtitle">Memory (RSS)</p>
 
-The total anonymous memory in use by the application, which includes Go stack and heap. This memory is is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS because to match the cadvisor name, but `anonymous` is more accurate."
+The total anonymous memory in use by the application, which includes Go stack and heap. This memory is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS to match the cadvisor name, but "anonymous" is more accurate.
 
 Refer to the [alerts reference](alerts#worker-memory_rss) for 1 alert related to this panel.
 
@@ -21287,7 +21128,7 @@ max by (name) (container_memory_working_set_bytes{name=~"^searcher.*"})
 
 <p class="subtitle">Memory (RSS)</p>
 
-The total anonymous memory in use by the application, which includes Go stack and heap. This memory is is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS because to match the cadvisor name, but `anonymous` is more accurate."
+The total anonymous memory in use by the application, which includes Go stack and heap. This memory is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS to match the cadvisor name, but "anonymous" is more accurate.
 
 Refer to the [alerts reference](alerts#searcher-memory_rss) for 1 alert related to this panel.
 
@@ -21815,7 +21656,7 @@ max by (name) (container_memory_working_set_bytes{name=~"^syntect-server.*"})
 
 <p class="subtitle">Memory (RSS)</p>
 
-The total anonymous memory in use by the application, which includes Go stack and heap. This memory is is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS because to match the cadvisor name, but `anonymous` is more accurate."
+The total anonymous memory in use by the application, which includes Go stack and heap. This memory is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS to match the cadvisor name, but "anonymous" is more accurate.
 
 Refer to the [alerts reference](alerts#syntect-server-memory_rss) for 1 alert related to this panel.
 
@@ -22369,7 +22210,7 @@ max by (name) (container_memory_working_set_bytes{name=~"^zoekt-indexserver.*"})
 
 <p class="subtitle">Memory (RSS)</p>
 
-The total anonymous memory in use by the application, which includes Go stack and heap. This memory is is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS because to match the cadvisor name, but `anonymous` is more accurate."
+The total anonymous memory in use by the application, which includes Go stack and heap. This memory is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS to match the cadvisor name, but "anonymous" is more accurate.
 
 Refer to the [alerts reference](alerts#zoekt-memory_rss) for 1 alert related to this panel.
 
@@ -22438,6 +22279,19 @@ max(container_memory_kernel_usage{name=~"^zoekt-indexserver.*"} / container_spec
 <br />
 
 ### Zoekt: Zoekt-webserver (CPU, Memory)
+
+Zoekt web server leverages memory mapping to optimize file reads: it is generally expected to consume all the memory provided to it, if it can. When it finds data that is not available in memory yet, this causes a 'page fault', and the data is loaded into memory from disk.
+
+A trend to watch out for: when something in-application happens to take a lot of memory, and active file previously used nearly all remaining memory, then:
+
+1. 'Memory (RSS)' goes up, due to in-application usage
+2. 'Memory usage (Active file)' goes down, as file data held in memory is evicted
+3. 'Page faults' go up, as less data is held in memory (and with that, IOPS, disk read throughput, ...)
+
+This can also happen without 'Memory (RSS)' increasing, if the provisioned memory is insufficent to start with.
+A small degree of this is behaviour generally expected, but if it happens significantly or causes user-noticeable impact, it's likely zoekt web server could benefit from more memory. Look for more user-facing metrics to make a final determination on appropriate resource allocation.
+
+_See https://en.wikipedia.org/wiki/Memory-mapped_file and the related articles for more information about memory maps._
 
 #### zoekt: cpu_usage_percentage
 
@@ -22513,7 +22367,7 @@ max by (name) (container_memory_working_set_bytes{name=~"^zoekt-webserver.*"})
 
 <p class="subtitle">Memory (RSS)</p>
 
-The total anonymous memory in use by the application, which includes Go stack and heap. This memory is is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS because to match the cadvisor name, but `anonymous` is more accurate."
+The total anonymous memory in use by the application, which includes Go stack and heap. This memory is non-reclaimable, and high usage may trigger OOM kills. Note: the metric is named RSS to match the cadvisor name, but "anonymous" is more accurate.
 
 Refer to the [alerts reference](alerts#zoekt-memory_rss) for 1 alert related to this panel.
 
@@ -33011,6 +32865,473 @@ sum(increase(src_telemetrygatewayexporter_usermetadata_exporter_errors_total{job
 
 <br />
 
+## Metering
+
+<p class="subtitle">Monitoring credit metering export services in Sourcegraph.</p>
+
+To see this dashboard, visit `/-/debug/grafana/d/metering/metering` on your Sourcegraph instance.
+
+### Metering: Metering exporter: events export and queue metrics
+
+#### metering: metering_exporter_queue_size
+
+<p class="subtitle">Credit metering events pending export</p>
+
+The number of credit metering events queued to be exported.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100000` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+(
+		sum(
+			src_meteringexporter_queue_size
+			and on(instance, job)
+			(
+		(
+			increase(src_meteringexporter_queue_metrics_reporter_total{job=~"^worker.*"}[15m]) > 0
+		)
+		or on(instance, job)
+		(
+			increase(src_meteringexporter_queue_metrics_reporter_errors_total{job=~"^worker.*"}[15m]) > 0
+		)
+	)
+		)
+	) or on() vector(0)
+```
+</details>
+
+<br />
+
+#### metering: metering_exporter_queue_growth
+
+<p class="subtitle">Rate of growth of metering export queue over 30m</p>
+
+A positive value indicates the metering export queue is growing.
+
+Refer to the [alerts reference](alerts#metering-metering_exporter_queue_growth) for 2 alerts related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100001` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+(
+		deriv((
+		sum(
+			src_meteringexporter_queue_size
+			and on(instance, job)
+			(
+		(
+			increase(src_meteringexporter_queue_metrics_reporter_total{job=~"^worker.*"}[15m]) > 0
+		)
+		or on(instance, job)
+		(
+			increase(src_meteringexporter_queue_metrics_reporter_errors_total{job=~"^worker.*"}[15m]) > 0
+		)
+	)
+		)
+	)[30m:])
+	) or on() vector(0)
+```
+</details>
+
+<br />
+
+#### metering: metering_exporter_oldest_unexported_event_age
+
+<p class="subtitle">Age of the oldest unexported metering event</p>
+
+The age in seconds of the oldest metering event still waiting in the export queue.
+
+Refer to the [alerts reference](alerts#metering-metering_exporter_oldest_unexported_event_age) for 2 alerts related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100010` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+(
+		max(
+			src_meteringexporter_oldest_unexported_event
+			and on(instance, job)
+			(
+		(
+			increase(src_meteringexporter_queue_metrics_reporter_total{job=~"^worker.*"}[15m]) > 0
+		)
+		or on(instance, job)
+		(
+			increase(src_meteringexporter_queue_metrics_reporter_errors_total{job=~"^worker.*"}[15m]) > 0
+		)
+	)
+		)
+	) or on() vector(0)
+```
+</details>
+
+<br />
+
+#### metering: metering_exporter_exported_events
+
+<p class="subtitle">Metering events exported from queue per hour</p>
+
+The number of metering events exported over the last hour.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100011` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_meteringexporter_exported_events[1h]))
+```
+</details>
+
+<br />
+
+#### metering: metering_exporter_batch_size
+
+<p class="subtitle">Number of metering events exported per batch over 30m</p>
+
+The number of metering events exported in each batch. The largest bucket is the maximum number of events exported per batch.
+If the distribution trends to the maximum bucket, then export throughput is at or approaching saturation - please contact customer support.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100020` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (le) (rate(src_meteringexporter_batch_size_bucket[30m]))
+```
+</details>
+
+<br />
+
+#### metering: metering_exporter_pruned_events
+
+<p class="subtitle">Metering events pruned from queue per hour</p>
+
+The number of already-exported metering events pruned from the queue over the last hour.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100021` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_meteringexporter_events_pruned[1h]))
+```
+</details>
+
+<br />
+
+### Metering: Metering Exporter: Events export job operations
+
+#### metering: meteringexporter_exporter_total
+
+<p class="subtitle">Events exporter operations every 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100100` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_meteringexporter_exporter_total{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: meteringexporter_exporter_99th_percentile_duration
+
+<p class="subtitle">Aggregate successful events exporter operation duration distribution over 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100101` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum  by (le)(rate(src_meteringexporter_exporter_duration_seconds_bucket{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: meteringexporter_exporter_errors_total
+
+<p class="subtitle">Events exporter operation errors every 30m</p>
+
+Refer to the [alerts reference](alerts#metering-meteringexporter_exporter_errors_total) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100102` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_meteringexporter_exporter_errors_total{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: meteringexporter_exporter_error_rate
+
+<p class="subtitle">Events exporter operation error rate over 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100103` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_meteringexporter_exporter_errors_total{job=~"^worker.*"}[30m])) / (sum(increase(src_meteringexporter_exporter_total{job=~"^worker.*"}[30m])) + sum(increase(src_meteringexporter_exporter_errors_total{job=~"^worker.*"}[30m]))) * 100
+```
+</details>
+
+<br />
+
+### Metering: Metering Exporter: Events export queue cleanup job operations
+
+#### metering: meteringexporter_queue_cleanup_total
+
+<p class="subtitle">Events export queue cleanup operations every 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100200` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_meteringexporter_queue_cleanup_total{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: meteringexporter_queue_cleanup_99th_percentile_duration
+
+<p class="subtitle">Aggregate successful events export queue cleanup operation duration distribution over 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100201` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum  by (le)(rate(src_meteringexporter_queue_cleanup_duration_seconds_bucket{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: meteringexporter_queue_cleanup_errors_total
+
+<p class="subtitle">Events export queue cleanup operation errors every 30m</p>
+
+Refer to the [alerts reference](alerts#metering-meteringexporter_queue_cleanup_errors_total) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100202` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_meteringexporter_queue_cleanup_errors_total{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: meteringexporter_queue_cleanup_error_rate
+
+<p class="subtitle">Events export queue cleanup operation error rate over 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100203` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_meteringexporter_queue_cleanup_errors_total{job=~"^worker.*"}[30m])) / (sum(increase(src_meteringexporter_queue_cleanup_total{job=~"^worker.*"}[30m])) + sum(increase(src_meteringexporter_queue_cleanup_errors_total{job=~"^worker.*"}[30m]))) * 100
+```
+</details>
+
+<br />
+
+### Metering: Metering Exporter: Events export queue metrics reporting job operations
+
+#### metering: meteringexporter_queue_metrics_reporter_total
+
+<p class="subtitle">Events export backlog metrics reporting operations every 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100300` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_meteringexporter_queue_metrics_reporter_total{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: meteringexporter_queue_metrics_reporter_99th_percentile_duration
+
+<p class="subtitle">Aggregate successful events export backlog metrics reporting operation duration distribution over 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100301` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum  by (le)(rate(src_meteringexporter_queue_metrics_reporter_duration_seconds_bucket{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: meteringexporter_queue_metrics_reporter_errors_total
+
+<p class="subtitle">Events export backlog metrics reporting operation errors every 30m</p>
+
+Refer to the [alerts reference](alerts#metering-meteringexporter_queue_metrics_reporter_errors_total) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100302` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_meteringexporter_queue_metrics_reporter_errors_total{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: meteringexporter_queue_metrics_reporter_error_rate
+
+<p class="subtitle">Events export backlog metrics reporting operation error rate over 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100303` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_meteringexporter_queue_metrics_reporter_errors_total{job=~"^worker.*"}[30m])) / (sum(increase(src_meteringexporter_queue_metrics_reporter_total{job=~"^worker.*"}[30m])) + sum(increase(src_meteringexporter_queue_metrics_reporter_errors_total{job=~"^worker.*"}[30m]))) * 100
+```
+</details>
+
+<br />
+
 ## OpenTelemetry Collector
 
 <p class="subtitle">The OpenTelemetry collector ingests OpenTelemetry data from Sourcegraph and exports it to the configured backends.</p>
@@ -33471,1482 +33792,6 @@ sum by (code)(irate(src_http_request_duration_seconds_count{route=~"^cody.comple
 
 <br />
 
-### Completions: Chat completions
-
-#### completions: chat_completions_p99_stream_duration
-
-<p class="subtitle">Stream: total time (p99)</p>
-
-Time spent on the Stream() invocation, i.e. how long results take to connect, stream results, and finish streaming.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100100` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.99, sum(rate(src_completions_stream_duration_seconds_bucket{feature="chat_completions",model=~'${model}'}[$sampling_duration])) by (le, model))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p95_stream_duration
-
-<p class="subtitle">Stream: total time (p95)</p>
-
-Time spent on the Stream() invocation, i.e. how long results take to connect, stream results, and finish streaming.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100101` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.95, sum(rate(src_completions_stream_duration_seconds_bucket{feature="chat_completions",model=~'${model}'}[$sampling_duration])) by (le, model))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p75_stream_duration
-
-<p class="subtitle">Stream: total time (p75)</p>
-
-Time spent on the Stream() invocation, i.e. how long results take to connect, stream results, and finish streaming.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100102` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.75, sum(rate(src_completions_stream_duration_seconds_bucket{feature="chat_completions",model=~'${model}'}[$sampling_duration])) by (le, model))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p50_stream_duration
-
-<p class="subtitle">Stream: total time (p50)</p>
-
-Time spent on the Stream() invocation, i.e. how long results take to connect, stream results, and finish streaming.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100103` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.50, sum(rate(src_completions_stream_duration_seconds_bucket{feature="chat_completions",model=~'${model}'}[$sampling_duration])) by (le, model))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p99_non_stream_overhead_duration
-
-<p class="subtitle">Non-stream overhead (p99)</p>
-
-Time between Go HTTP handler invocation and Stream() invocation, overhead of e.g. request validation, routing to gateway/other, model resolution, error reporting/tracing, guardrails, etc.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100110` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.99, sum(rate(src_completions_handler_overhead_duration_seconds_bucket{feature="chat_completions",model=~'${model}'}[$sampling_duration])) by (le,model))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p95_non_stream_overhead_duration
-
-<p class="subtitle">Non-stream overhead (p95)</p>
-
-Time between Go HTTP handler invocation and Stream() invocation, overhead of e.g. request validation, routing to gateway/other, model resolution, error reporting/tracing, guardrails, etc.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100111` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.95, sum(rate(src_completions_handler_overhead_duration_seconds_bucket{feature="chat_completions",model=~'${model}'}[$sampling_duration])) by (le,model))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p75_non_stream_overhead_duration
-
-<p class="subtitle">Non-stream overhead (p75)</p>
-
-Time between Go HTTP handler invocation and Stream() invocation, overhead of e.g. request validation, routing to gateway/other, model resolution, error reporting/tracing, guardrails, etc.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100112` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.75, sum(rate(src_completions_handler_overhead_duration_seconds_bucket{feature="chat_completions",model=~'${model}'}[$sampling_duration])) by (le,model))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p50_non_stream_overhead_duration
-
-<p class="subtitle">Non-stream overhead (p50)</p>
-
-Time between Go HTTP handler invocation and Stream() invocation, overhead of e.g. request validation, routing to gateway/other, model resolution, error reporting/tracing, guardrails, etc.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100113` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.50, sum(rate(src_completions_handler_overhead_duration_seconds_bucket{feature="chat_completions",model=~'${model}'}[$sampling_duration])) by (le,model))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p99_stream_first_event_duration
-
-<p class="subtitle">Stream: time to first event (p99)</p>
-
-Time between calling Stream(), the client connecting to the server etc. and actually getting the first streaming event back.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100120` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.99, sum(rate(src_completions_stream_first_event_duration_seconds_bucket{feature="chat_completions",model=~'${model}'}[$sampling_duration])) by (le, model))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p95_stream_first_event_duration
-
-<p class="subtitle">Stream: time to first event (p95)</p>
-
-Time between calling Stream(), the client connecting to the server etc. and actually getting the first streaming event back.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100121` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.95, sum(rate(src_completions_stream_first_event_duration_seconds_bucket{feature="chat_completions",model=~'${model}'}[$sampling_duration])) by (le, model))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p75_stream_first_event_duration
-
-<p class="subtitle">Stream: time to first event (p75)</p>
-
-Time between calling Stream(), the client connecting to the server etc. and actually getting the first streaming event back.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100122` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.75, sum(rate(src_completions_stream_first_event_duration_seconds_bucket{feature="chat_completions",model=~'${model}'}[$sampling_duration])) by (le, model))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p50_stream_first_event_duration
-
-<p class="subtitle">Stream: time to first event (p50)</p>
-
-Time between calling Stream(), the client connecting to the server etc. and actually getting the first streaming event back.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100123` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.50, sum(rate(src_completions_stream_first_event_duration_seconds_bucket{feature="chat_completions",model=~'${model}'}[$sampling_duration])) by (le, model))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p99_upstream_roundtrip_duration
-
-<p class="subtitle">Stream: first byte sent -> received (p99)</p>
-
-Time between sending the first byte to the upstream, and then getting the first byte back from the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100130` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.99, sum(rate(src_completions_upstream_roundtrip_duration_seconds_bucket{feature="chat_completions",model=~'${model}'}[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p95_upstream_roundtrip_duration
-
-<p class="subtitle">Stream: first byte sent -> received (p95)</p>
-
-Time between sending the first byte to the upstream, and then getting the first byte back from the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100131` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.95, sum(rate(src_completions_upstream_roundtrip_duration_seconds_bucket{feature="chat_completions",model=~'${model}'}[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p75_upstream_roundtrip_duration
-
-<p class="subtitle">Stream: first byte sent -> received (p75)</p>
-
-Time between sending the first byte to the upstream, and then getting the first byte back from the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100132` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.75, sum(rate(src_completions_upstream_roundtrip_duration_seconds_bucket{feature="chat_completions",model=~'${model}'}[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p50_upstream_roundtrip_duration
-
-<p class="subtitle">Stream: first byte sent -> received (p50)</p>
-
-Time between sending the first byte to the upstream, and then getting the first byte back from the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100133` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.50, sum(rate(src_completions_upstream_roundtrip_duration_seconds_bucket{feature="chat_completions",model=~'${model}'}[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p99_http_connect_total
-
-<p class="subtitle">Stream: HTTP connect: total (p99)</p>
-
-Time spent acquiring an HTTP connection to the upstream, either from an existing pool OR by performing DNS resolution, TCP connection, etc.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100140` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.99, sum(rate(src_completions_upstream_connection_total_duration_seconds_bucket[$sampling_duration])) by (le, connection_type, provider))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p95_http_connect_total
-
-<p class="subtitle">Stream: HTTP connect: total (p95)</p>
-
-Time spent acquiring an HTTP connection to the upstream, either from an existing pool OR by performing DNS resolution, TCP connection, etc.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100141` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.95, sum(rate(src_completions_upstream_connection_total_duration_seconds_bucket[$sampling_duration])) by (le, connection_type, provider))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p75_http_connect_total
-
-<p class="subtitle">Stream: HTTP connect: total (p75)</p>
-
-Time spent acquiring an HTTP connection to the upstream, either from an existing pool OR by performing DNS resolution, TCP connection, etc.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100142` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.75, sum(rate(src_completions_upstream_connection_total_duration_seconds_bucket[$sampling_duration])) by (le, connection_type, provider))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p50_http_connect_total
-
-<p class="subtitle">Stream: HTTP connect: total (p50)</p>
-
-Time spent acquiring an HTTP connection to the upstream, either from an existing pool OR by performing DNS resolution, TCP connection, etc.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100143` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.50, sum(rate(src_completions_upstream_connection_total_duration_seconds_bucket[$sampling_duration])) by (le, connection_type, provider))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p99_http_connect_dns
-
-<p class="subtitle">Stream: HTTP connect: dns (p99)</p>
-
-Portion of time spent on DNS when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100150` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.99, sum(rate(src_completions_upstream_connection_dns_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p95_http_connect_dns
-
-<p class="subtitle">Stream: HTTP connect: dns (p95)</p>
-
-Portion of time spent on DNS when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100151` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.95, sum(rate(src_completions_upstream_connection_dns_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p75_http_connect_dns
-
-<p class="subtitle">Stream: HTTP connect: dns (p75)</p>
-
-Portion of time spent on DNS when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100152` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.75, sum(rate(src_completions_upstream_connection_dns_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p50_http_connect_dns
-
-<p class="subtitle">Stream: HTTP connect: dns (p50)</p>
-
-Portion of time spent on DNS when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100153` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.50, sum(rate(src_completions_upstream_connection_dns_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p99_http_connect_tls
-
-<p class="subtitle">Stream: HTTP connect: tls (p99)</p>
-
-Portion of time spent on TLS when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100160` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.99, sum(rate(src_completions_upstream_connection_tls_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p95_http_connect_tls
-
-<p class="subtitle">Stream: HTTP connect: tls (p95)</p>
-
-Portion of time spent on TLS when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100161` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.95, sum(rate(src_completions_upstream_connection_tls_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p75_http_connect_tls
-
-<p class="subtitle">Stream: HTTP connect: tls (p75)</p>
-
-Portion of time spent on TLS when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100162` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.75, sum(rate(src_completions_upstream_connection_tls_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p50_http_connect_tls
-
-<p class="subtitle">Stream: HTTP connect: tls (p50)</p>
-
-Portion of time spent on TLS when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100163` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.50, sum(rate(src_completions_upstream_connection_tls_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p99_http_connect_dial
-
-<p class="subtitle">Stream: HTTP connect: dial (p99)</p>
-
-Portion of time spent on golang Dial() when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100170` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.99, sum(rate(src_completions_upstream_connection_dial_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p95_http_connect_dial
-
-<p class="subtitle">Stream: HTTP connect: dial (p95)</p>
-
-Portion of time spent on golang Dial() when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100171` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.95, sum(rate(src_completions_upstream_connection_dial_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p75_http_connect_dial
-
-<p class="subtitle">Stream: HTTP connect: dial (p75)</p>
-
-Portion of time spent on golang Dial() when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100172` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.75, sum(rate(src_completions_upstream_connection_dial_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: chat_completions_p50_http_connect_dial
-
-<p class="subtitle">Stream: HTTP connect: dial (p50)</p>
-
-Portion of time spent on golang Dial() when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100173` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.50, sum(rate(src_completions_upstream_connection_dial_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-### Completions: Code completions
-
-#### completions: code_completions_p99_stream_duration
-
-<p class="subtitle">Stream: total time (p99)</p>
-
-Time spent on the Stream() invocation, i.e. how long results take to connect, stream results, and finish streaming.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100200` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.99, sum(rate(src_completions_stream_duration_seconds_bucket{feature="code_completions",model=~'${model}'}[$sampling_duration])) by (le, model))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p95_stream_duration
-
-<p class="subtitle">Stream: total time (p95)</p>
-
-Time spent on the Stream() invocation, i.e. how long results take to connect, stream results, and finish streaming.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100201` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.95, sum(rate(src_completions_stream_duration_seconds_bucket{feature="code_completions",model=~'${model}'}[$sampling_duration])) by (le, model))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p75_stream_duration
-
-<p class="subtitle">Stream: total time (p75)</p>
-
-Time spent on the Stream() invocation, i.e. how long results take to connect, stream results, and finish streaming.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100202` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.75, sum(rate(src_completions_stream_duration_seconds_bucket{feature="code_completions",model=~'${model}'}[$sampling_duration])) by (le, model))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p50_stream_duration
-
-<p class="subtitle">Stream: total time (p50)</p>
-
-Time spent on the Stream() invocation, i.e. how long results take to connect, stream results, and finish streaming.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100203` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.50, sum(rate(src_completions_stream_duration_seconds_bucket{feature="code_completions",model=~'${model}'}[$sampling_duration])) by (le, model))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p99_non_stream_overhead_duration
-
-<p class="subtitle">Non-stream overhead (p99)</p>
-
-Time between Go HTTP handler invocation and Stream() invocation, overhead of e.g. request validation, routing to gateway/other, model resolution, error reporting/tracing, guardrails, etc.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100210` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.99, sum(rate(src_completions_handler_overhead_duration_seconds_bucket{feature="code_completions",model=~'${model}'}[$sampling_duration])) by (le,model))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p95_non_stream_overhead_duration
-
-<p class="subtitle">Non-stream overhead (p95)</p>
-
-Time between Go HTTP handler invocation and Stream() invocation, overhead of e.g. request validation, routing to gateway/other, model resolution, error reporting/tracing, guardrails, etc.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100211` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.95, sum(rate(src_completions_handler_overhead_duration_seconds_bucket{feature="code_completions",model=~'${model}'}[$sampling_duration])) by (le,model))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p75_non_stream_overhead_duration
-
-<p class="subtitle">Non-stream overhead (p75)</p>
-
-Time between Go HTTP handler invocation and Stream() invocation, overhead of e.g. request validation, routing to gateway/other, model resolution, error reporting/tracing, guardrails, etc.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100212` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.75, sum(rate(src_completions_handler_overhead_duration_seconds_bucket{feature="code_completions",model=~'${model}'}[$sampling_duration])) by (le,model))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p50_non_stream_overhead_duration
-
-<p class="subtitle">Non-stream overhead (p50)</p>
-
-Time between Go HTTP handler invocation and Stream() invocation, overhead of e.g. request validation, routing to gateway/other, model resolution, error reporting/tracing, guardrails, etc.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100213` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.50, sum(rate(src_completions_handler_overhead_duration_seconds_bucket{feature="code_completions",model=~'${model}'}[$sampling_duration])) by (le,model))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p99_stream_first_event_duration
-
-<p class="subtitle">Stream: time to first event (p99)</p>
-
-Time between calling Stream(), the client connecting to the server etc. and actually getting the first streaming event back.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100220` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.99, sum(rate(src_completions_stream_first_event_duration_seconds_bucket{feature="code_completions",model=~'${model}'}[$sampling_duration])) by (le, model))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p95_stream_first_event_duration
-
-<p class="subtitle">Stream: time to first event (p95)</p>
-
-Time between calling Stream(), the client connecting to the server etc. and actually getting the first streaming event back.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100221` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.95, sum(rate(src_completions_stream_first_event_duration_seconds_bucket{feature="code_completions",model=~'${model}'}[$sampling_duration])) by (le, model))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p75_stream_first_event_duration
-
-<p class="subtitle">Stream: time to first event (p75)</p>
-
-Time between calling Stream(), the client connecting to the server etc. and actually getting the first streaming event back.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100222` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.75, sum(rate(src_completions_stream_first_event_duration_seconds_bucket{feature="code_completions",model=~'${model}'}[$sampling_duration])) by (le, model))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p50_stream_first_event_duration
-
-<p class="subtitle">Stream: time to first event (p50)</p>
-
-Time between calling Stream(), the client connecting to the server etc. and actually getting the first streaming event back.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100223` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.50, sum(rate(src_completions_stream_first_event_duration_seconds_bucket{feature="code_completions",model=~'${model}'}[$sampling_duration])) by (le, model))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p99_upstream_roundtrip_duration
-
-<p class="subtitle">Stream: first byte sent -> received (p99)</p>
-
-Time between sending the first byte to the upstream, and then getting the first byte back from the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100230` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.99, sum(rate(src_completions_upstream_roundtrip_duration_seconds_bucket{feature="code_completions",model=~'${model}'}[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p95_upstream_roundtrip_duration
-
-<p class="subtitle">Stream: first byte sent -> received (p95)</p>
-
-Time between sending the first byte to the upstream, and then getting the first byte back from the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100231` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.95, sum(rate(src_completions_upstream_roundtrip_duration_seconds_bucket{feature="code_completions",model=~'${model}'}[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p75_upstream_roundtrip_duration
-
-<p class="subtitle">Stream: first byte sent -> received (p75)</p>
-
-Time between sending the first byte to the upstream, and then getting the first byte back from the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100232` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.75, sum(rate(src_completions_upstream_roundtrip_duration_seconds_bucket{feature="code_completions",model=~'${model}'}[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p50_upstream_roundtrip_duration
-
-<p class="subtitle">Stream: first byte sent -> received (p50)</p>
-
-Time between sending the first byte to the upstream, and then getting the first byte back from the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100233` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.50, sum(rate(src_completions_upstream_roundtrip_duration_seconds_bucket{feature="code_completions",model=~'${model}'}[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p99_http_connect_total
-
-<p class="subtitle">Stream: HTTP connect: total (p99)</p>
-
-Time spent acquiring an HTTP connection to the upstream, either from an existing pool OR by performing DNS resolution, TCP connection, etc.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100240` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.99, sum(rate(src_completions_upstream_connection_total_duration_seconds_bucket[$sampling_duration])) by (le, connection_type, provider))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p95_http_connect_total
-
-<p class="subtitle">Stream: HTTP connect: total (p95)</p>
-
-Time spent acquiring an HTTP connection to the upstream, either from an existing pool OR by performing DNS resolution, TCP connection, etc.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100241` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.95, sum(rate(src_completions_upstream_connection_total_duration_seconds_bucket[$sampling_duration])) by (le, connection_type, provider))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p75_http_connect_total
-
-<p class="subtitle">Stream: HTTP connect: total (p75)</p>
-
-Time spent acquiring an HTTP connection to the upstream, either from an existing pool OR by performing DNS resolution, TCP connection, etc.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100242` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.75, sum(rate(src_completions_upstream_connection_total_duration_seconds_bucket[$sampling_duration])) by (le, connection_type, provider))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p50_http_connect_total
-
-<p class="subtitle">Stream: HTTP connect: total (p50)</p>
-
-Time spent acquiring an HTTP connection to the upstream, either from an existing pool OR by performing DNS resolution, TCP connection, etc.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100243` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.50, sum(rate(src_completions_upstream_connection_total_duration_seconds_bucket[$sampling_duration])) by (le, connection_type, provider))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p99_http_connect_dns
-
-<p class="subtitle">Stream: HTTP connect: dns (p99)</p>
-
-Portion of time spent on DNS when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100250` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.99, sum(rate(src_completions_upstream_connection_dns_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p95_http_connect_dns
-
-<p class="subtitle">Stream: HTTP connect: dns (p95)</p>
-
-Portion of time spent on DNS when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100251` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.95, sum(rate(src_completions_upstream_connection_dns_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p75_http_connect_dns
-
-<p class="subtitle">Stream: HTTP connect: dns (p75)</p>
-
-Portion of time spent on DNS when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100252` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.75, sum(rate(src_completions_upstream_connection_dns_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p50_http_connect_dns
-
-<p class="subtitle">Stream: HTTP connect: dns (p50)</p>
-
-Portion of time spent on DNS when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100253` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.50, sum(rate(src_completions_upstream_connection_dns_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p99_http_connect_tls
-
-<p class="subtitle">Stream: HTTP connect: tls (p99)</p>
-
-Portion of time spent on TLS when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100260` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.99, sum(rate(src_completions_upstream_connection_tls_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p95_http_connect_tls
-
-<p class="subtitle">Stream: HTTP connect: tls (p95)</p>
-
-Portion of time spent on TLS when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100261` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.95, sum(rate(src_completions_upstream_connection_tls_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p75_http_connect_tls
-
-<p class="subtitle">Stream: HTTP connect: tls (p75)</p>
-
-Portion of time spent on TLS when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100262` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.75, sum(rate(src_completions_upstream_connection_tls_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p50_http_connect_tls
-
-<p class="subtitle">Stream: HTTP connect: tls (p50)</p>
-
-Portion of time spent on TLS when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100263` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.50, sum(rate(src_completions_upstream_connection_tls_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p99_http_connect_dial
-
-<p class="subtitle">Stream: HTTP connect: dial (p99)</p>
-
-Portion of time spent on golang Dial() when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100270` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.99, sum(rate(src_completions_upstream_connection_dial_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p95_http_connect_dial
-
-<p class="subtitle">Stream: HTTP connect: dial (p95)</p>
-
-Portion of time spent on golang Dial() when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100271` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.95, sum(rate(src_completions_upstream_connection_dial_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p75_http_connect_dial
-
-<p class="subtitle">Stream: HTTP connect: dial (p75)</p>
-
-Portion of time spent on golang Dial() when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100272` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.75, sum(rate(src_completions_upstream_connection_dial_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
-#### completions: code_completions_p50_http_connect_dial
-
-<p class="subtitle">Stream: HTTP connect: dial (p50)</p>
-
-Portion of time spent on golang Dial() when acquiring an HTTP connection to the upstream.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/completions/completions?viewPanel=100273` on your Sourcegraph instance.
-
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.50, sum(rate(src_completions_upstream_connection_dial_duration_seconds_bucket[$sampling_duration])) by (le, provider))
-```
-</details>
-
-<br />
-
 ## Deep Search
 
 <p class="subtitle">Monitoring for Deep Search question processing.</p>
@@ -35051,11 +33896,11 @@ sum(rate(src_deepsearch_question_processing_errors_total{operation="question"}[5
 
 <br />
 
-#### deepsearch: deepsearch_question_processing_p99_duration
+#### deepsearch: deepsearch_question_processing_p95_duration
 
-<p class="subtitle">99th percentile question processing duration</p>
+<p class="subtitle">95th percentile question processing duration</p>
 
-99th percentile time to process a deep search question.
+95th percentile time to process a deep search question.
 
 This panel has no related alerts.
 
@@ -35069,7 +33914,7 @@ To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100
 Query:
 
 ```
-histogram_quantile(0.99, sum(rate(src_deepsearch_question_processing_duration_seconds_bucket{operation="question"}[5m])) by (le))
+histogram_quantile(0.95, sum(rate(src_deepsearch_question_processing_duration_seconds_bucket{operation="question"}[5m])) by (le))
 ```
 </details>
 
@@ -35099,15 +33944,39 @@ histogram_quantile(0.50, sum(rate(src_deepsearch_question_processing_duration_se
 
 <br />
 
-### Deep Search: LLM streaming
+#### deepsearch: deepsearch_slow_questions
 
-#### deepsearch: deepsearch_llm_stream_fatal_errors
+<p class="subtitle">Questions taking longer than 5 minutes over 15m</p>
 
-<p class="subtitle">Fatal LLM stream errors over 5m</p>
+Number of deep search questions that took longer than 5 minutes in the last 15 minutes.
 
-Number of fatal errors during LLM streaming in the last 5 minutes.
+Refer to the [alerts reference](alerts#deepsearch-deepsearch_slow_questions) for 2 alerts related to this panel.
 
-Refer to the [alerts reference](alerts#deepsearch-deepsearch_llm_stream_fatal_errors) for 1 alert related to this panel.
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100030` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_deepsearch_question_processing_duration_seconds_count{operation="question"}[15m])) - sum(increase(src_deepsearch_question_processing_duration_seconds_bucket{le="300",operation="question"}[15m]))
+```
+</details>
+
+<br />
+
+### Deep Search: Turn processing
+
+#### deepsearch: deepsearch_turn_p95_duration
+
+<p class="subtitle">95th percentile turn duration</p>
+
+95th percentile duration of individual agent turns. A turn includes the LLM call and any tool execution. Useful for investigating when question-level alerts fire.
+
+This panel has no related alerts.
 
 To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100100` on your Sourcegraph instance.
 
@@ -35119,17 +33988,17 @@ To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100
 Query:
 
 ```
-sum(increase(src_deepsearch_question_processing_errors_total{operation="llm_stream_fatal"}[5m]))
+histogram_quantile(0.95, sum(rate(src_deepsearch_turn_duration_seconds_bucket[5m])) by (le))
 ```
 </details>
 
 <br />
 
-#### deepsearch: deepsearch_llm_stream_non_fatal_errors
+#### deepsearch: deepsearch_turn_p50_duration
 
-<p class="subtitle">Non-fatal LLM stream errors over 5m</p>
+<p class="subtitle">50th percentile turn duration</p>
 
-Number of non-fatal errors during LLM streaming.
+Median duration of individual agent turns.
 
 This panel has no related alerts.
 
@@ -35143,7 +34012,129 @@ To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100
 Query:
 
 ```
-sum(increase(src_deepsearch_question_processing_errors_total{operation="llm_stream_non_fatal"}[5m]))
+histogram_quantile(0.50, sum(rate(src_deepsearch_turn_duration_seconds_bucket[5m])) by (le))
+```
+</details>
+
+<br />
+
+### Deep Search: Question outcomes
+
+#### deepsearch: deepsearch_question_outcome_by_reason
+
+<p class="subtitle">Question outcomes by reason over 5m</p>
+
+Breakdown of deep search question outcomes by reason and whether the question was billable.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100200` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (outcome, billable) (rate(src_deepsearch_question_outcome_total[5m])) * 60
+```
+</details>
+
+<br />
+
+#### deepsearch: deepsearch_errored_but_billed_rate
+
+<p class="subtitle">Errored but billed rate over 5m</p>
+
+Percentage of billed deep search questions that completed with an error. Use alongside count-based panels for cross-referencing scale of issues.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100201` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(src_deepsearch_question_outcome_total{billable="true",error="true"}[5m])) / (sum(rate(src_deepsearch_question_outcome_total{billable="true"}[5m])) > 0) * 100
+```
+</details>
+
+<br />
+
+#### deepsearch: deepsearch_billable_failures
+
+<p class="subtitle">Billable failures over time</p>
+
+Number of billed deep search questions that completed with an error (token limit exceeded or response truncated) in the last 15 minutes.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100210` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (outcome) (increase(src_deepsearch_question_outcome_total{billable="true",error="true"}[15m]))
+```
+</details>
+
+<br />
+
+#### deepsearch: deepsearch_response_truncated
+
+<p class="subtitle">Response truncated questions over 15m</p>
+
+Number of deep search questions where the response was truncated due to hitting the output token limit in the last 15 minutes.
+
+Refer to the [alerts reference](alerts#deepsearch-deepsearch_response_truncated) for 2 alerts related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100220` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_deepsearch_question_outcome_total{outcome="response_truncated"}[15m]))
+```
+</details>
+
+<br />
+
+#### deepsearch: deepsearch_token_limit_exceeded
+
+<p class="subtitle">Token limit exceeded questions over 15m</p>
+
+Number of deep search questions that exceeded the conversation token limit in the last 15 minutes.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100221` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_deepsearch_question_outcome_total{outcome="token_limit_exceeded"}[15m]))
 ```
 </details>
 
