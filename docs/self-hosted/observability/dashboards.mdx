@@ -5545,224 +5545,6 @@ sum by (email_source) (increase(src_email_send{success="true"}[30m]))
 
 <br />
 
-### Frontend: Sentinel queries (only on sourcegraph.com)
-
-#### frontend: mean_successful_sentinel_duration_by_query
-
-<p class="subtitle">Mean successful sentinel search duration by query</p>
-
-Mean search duration for successful sentinel queries, broken down by query. Useful for debugging whether a slowdown is limited to a specific type of query.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103800` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-sum(rate(src_search_response_latency_seconds_sum{source=~"searchblitz.*", status="success"}[$sentinel_sampling_duration])) by (source) / sum(rate(src_search_response_latency_seconds_count{source=~"searchblitz.*", status="success"}[$sentinel_sampling_duration])) by (source)
-```
-</details>
-
-<br />
-
-#### frontend: mean_sentinel_stream_latency_by_query
-
-<p class="subtitle">Mean successful sentinel stream latency by query</p>
-
-Mean time to first result for successful streaming sentinel queries, broken down by query. Useful for debugging whether a slowdown is limited to a specific type of query.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103801` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-sum(rate(src_search_streaming_latency_seconds_sum{source=~"searchblitz.*"}[$sentinel_sampling_duration])) by (source) / sum(rate(src_search_streaming_latency_seconds_count{source=~"searchblitz.*"}[$sentinel_sampling_duration])) by (source)
-```
-</details>
-
-<br />
-
-#### frontend: 90th_percentile_successful_sentinel_duration_by_query
-
-<p class="subtitle">90th percentile successful sentinel search duration by query</p>
-
-90th percentile search duration for successful sentinel queries, broken down by query. Useful for debugging whether a slowdown is limited to a specific type of query.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103810` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.90, sum(rate(src_search_response_latency_seconds_bucket{source=~"searchblitz.*", status="success"}[$sentinel_sampling_duration])) by (le, source))
-```
-</details>
-
-<br />
-
-#### frontend: 90th_percentile_successful_stream_latency_by_query
-
-<p class="subtitle">90th percentile successful sentinel stream latency by query</p>
-
-90th percentile time to first result for successful streaming sentinel queries, broken down by query. Useful for debugging whether a slowdown is limited to a specific type of query.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103811` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.90, sum(rate(src_search_streaming_latency_seconds_bucket{source=~"searchblitz.*"}[$sentinel_sampling_duration])) by (le, source))
-```
-</details>
-
-<br />
-
-#### frontend: 90th_percentile_unsuccessful_duration_by_query
-
-<p class="subtitle">90th percentile unsuccessful sentinel search duration by query</p>
-
-90th percentile search duration of _unsuccessful_ sentinel queries (by error or timeout), broken down by query. Useful for debugging how the performance of failed requests affect UX.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103820` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.90, sum(rate(src_search_response_latency_seconds_bucket{source=~`searchblitz.*`, status!=`success`}[$sentinel_sampling_duration])) by (le, source))
-```
-</details>
-
-<br />
-
-#### frontend: 75th_percentile_successful_sentinel_duration_by_query
-
-<p class="subtitle">75th percentile successful sentinel search duration by query</p>
-
-75th percentile search duration of successful sentinel queries, broken down by query. Useful for debugging whether a slowdown is limited to a specific type of query.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103830` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.75, sum(rate(src_search_response_latency_seconds_bucket{source=~"searchblitz.*", status="success"}[$sentinel_sampling_duration])) by (le, source))
-```
-</details>
-
-<br />
-
-#### frontend: 75th_percentile_successful_stream_latency_by_query
-
-<p class="subtitle">75th percentile successful sentinel stream latency by query</p>
-
-75th percentile time to first result for successful streaming sentinel queries, broken down by query. Useful for debugging whether a slowdown is limited to a specific type of query.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103831` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.75, sum(rate(src_search_streaming_latency_seconds_bucket{source=~"searchblitz.*"}[$sentinel_sampling_duration])) by (le, source))
-```
-</details>
-
-<br />
-
-#### frontend: 75th_percentile_unsuccessful_duration_by_query
-
-<p class="subtitle">75th percentile unsuccessful sentinel search duration by query</p>
-
-75th percentile search duration of _unsuccessful_ sentinel queries (by error or timeout), broken down by query. Useful for debugging how the performance of failed requests affect UX.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103840` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.75, sum(rate(src_search_response_latency_seconds_bucket{source=~`searchblitz.*`, status!=`success`}[$sentinel_sampling_duration])) by (le, source))
-```
-</details>
-
-<br />
-
-#### frontend: unsuccessful_status_rate
-
-<p class="subtitle">Unsuccessful status rate</p>
-
-The rate of unsuccessful sentinel queries, broken down by failure type.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103850` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-sum(rate(src_graphql_search_response{source=~"searchblitz.*", status!="success"}[$sentinel_sampling_duration])) by (status)
-```
-</details>
-
-<br />
-
 ### Frontend: Incoming webhooks
 
 #### frontend: p95_time_to_handle_incoming_webhooks
@@ -5777,7 +5559,7 @@ p95 response time to incoming webhook requests from code hosts.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103900` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103800` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -5801,7 +5583,7 @@ histogram_quantile(0.95, sum  (rate(src_http_request_duration_seconds_bucket{rou
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=104000` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103900` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -5823,7 +5605,7 @@ sum(increase(src_insights_aggregations_total{job=~"^(frontend|sourcegraph-fronte
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=104001` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103901` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -5845,7 +5627,7 @@ sum  by (le)(rate(src_insights_aggregations_duration_seconds_bucket{job=~"^(fron
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=104002` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103902` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -5867,7 +5649,7 @@ sum(increase(src_insights_aggregations_errors_total{job=~"^(frontend|sourcegraph
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=104003` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103903` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -5889,7 +5671,7 @@ sum(increase(src_insights_aggregations_errors_total{job=~"^(frontend|sourcegraph
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=104010` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103910` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -5911,7 +5693,7 @@ sum by (op,extended_mode)(increase(src_insights_aggregations_total{job=~"^(front
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=104011` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103911` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -5933,7 +5715,7 @@ histogram_quantile(0.99, sum  by (le,op,extended_mode)(rate(src_insights_aggrega
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=104012` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103912` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -5955,7 +5737,7 @@ sum by (op,extended_mode)(increase(src_insights_aggregations_errors_total{job=~"
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=104013` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/frontend/frontend?viewPanel=103913` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
