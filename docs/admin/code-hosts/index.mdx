@@ -63,16 +63,23 @@ For information on code host-related rate limits, see [rate limits](/admin/code-
 
 ## Temporarily disabling requests to code hosts
 
-It may be the case that you'd like to temporarily disable all `git` and API requests from Sourcegraph to a code host. Adding the following to your site configuration will stop Sourcegraph from sending requests to the configured code host connections:
+It may be the case that you'd like to temporarily reduce or pause the `git` and API requests Sourcegraph sends to a code host. Adding the following to your site configuration will stop Sourcegraph's periodic background traffic and rate-limit git operations to zero:
 
-> WARNING: disabling all git and API requests to codehosts will also disable permissions syncs, batch changes, discovery of new repos, and updates to currently synched repos. Synching with codehosts is a core functionality of Sourcegraph and many other features may also be affected.
+> WARNING: applying these settings will also disable permissions syncs, batch changes, discovery of new repos, and updates to currently synched repos. Syncing with codehosts is a core functionality of Sourcegraph and many other features may also be affected.
 
 ```json
 "disableAutoGitUpdates": true,
 "disableAutoCodeHostSyncs": true,
-"gitMaxCodehostRequestsPerSecond": 0,
-"gitMaxConcurrentClones": 0
+"gitMaxCodehostRequestsPerSecond": 0
 ```
+
+What each setting does:
+
+- `disableAutoGitUpdates` halts the periodic background `git fetch` scheduler. On-demand git fetches triggered by user actions (for example, browsing a commit Sourcegraph hasn't seen yet) are not stopped by this flag alone.
+- `disableAutoCodeHostSyncs` halts periodic syncs of repository metadata, permissions, and batch changes changesets. Operations explicitly initiated by users or admins (manual sync, batch change application, etc.) can still issue API requests.
+- `gitMaxCodehostRequestsPerSecond: 0` configures the **git** rate limiter to allow zero requests per second per gitserver, which blocks any remaining ad-hoc git operations. This setting does **not** affect HTTP/API requests to code hosts; those are governed by each code host connection's `rateLimit`.
+
+> NOTE: These settings do not guarantee zero outbound traffic. To also throttle API traffic, set the per-code-host `rateLimit` on each code host connection (see [Rate limits](/admin/code-hosts/rate-limits)). Inbound webhooks delivered _from_ the code host to Sourcegraph are not affected by any of these settings.
 
 ## Using Self-signed TLS Certificates
 
