@@ -54,9 +54,7 @@ You can @-mention:
 - **Repositories** — scope the search to specific repos
 - **Files** — point the agent to particular files
 
-For use cases where you're looking for exhaustive answers (for example, "Find all files with the `.XYZ` file extension in `foo' repo that contain the word`bar`), Code Search still excels, while Deep Search will only utilize a sample of the results. Deep Search will perform a Code Search query as a source, which you can use to continue an exhaustive search within the Code Search product.
-
-### Examples of prompts
+## Examples of prompts
 
 - Find examples of logger usage and show examples of the different types of logging we use.
 - I want to know when the indexing queue functionality was last changed in `@zoekt`. Show me the last few commit diffs touching this code and explain the changes.
@@ -64,6 +62,7 @@ For use cases where you're looking for exhaustive answers (for example, "Find al
 - Which tools do we use in our build processes defined in `BUILD.bazel` files?
 - Generate a request flow diagram for `src/backend`. Mark the auth and rate limit points.
 - Based on the findings in `https://sourcegraph.com/deepsearch/e3c0150a-b7ef-4955-bed4-d5820ca7a70d`, investigate whether the same logging patterns appear in our other microservices.
+- Which packages in `@myorg/repo` still import pkg/errors but haven’t migrated to `corp.pkg/logging/v2`?
 
 ## Conversation sharing
 
@@ -72,7 +71,7 @@ For use cases where you're looking for exhaustive answers (for example, "Find al
 	enabling it.{' '}
 </Callout>
 
-Starting from Sourcegraph version 6.5, you can share Deep Search conversations with other users in your Sourcegraph instance. To share a conversation, click the "Share" button in the top left, then copy the link. Once you share a conversation, any user on your instance can view it with the link. You can also reset the share link and generate a new one, invalidating the previous link.
+You can share Deep Search conversations with other users in your Sourcegraph instance. To share a conversation, simply copy the URL or click the "Share" button, then copy the link. Once you share a conversation, any user on your instance can view it with the link. You can also reset the share link and generate a new one, invalidating the previous link.
 
 We do not enforce [repository permissions](/admin/permissions) for viewing shared Deep Search conversations. This means that a user can view a conversation shared with them, regardless of which repositories they can access. We plan to revisit this in the future.
 
@@ -88,7 +87,7 @@ Deep Search uses a combination of frontier and specialized models selected by So
 
 ### Enabling conversation sharing
 
-Conversation sharing is disabled by default. To enable conversation sharing, ask your site administrator to enable the following setting in your site configuration:
+To enable conversation sharing, ask your site administrator to enable the following setting in your site configuration:
 
 ```json
 "deepSearch.enabled": true,
@@ -97,20 +96,13 @@ Conversation sharing is disabled by default. To enable conversation sharing, ask
 
 ### Custom model configuration and BYOK (Bring Your Own Key)
 
-Deep Search is only available to customers using the [Sourcegraph Model Provider](/model-provider). Customers who configure and access their own models via BYOK cannot use the Deep Search feature.
+Deep Search is only available to customers using the [Sourcegraph Model Provider](/model-provider). Customers who configure and access their own models via BYOK cannot use Deep Search.
 
 ## Self-hosted network requirements
 
 Deep Search streams its responses using [Server-Sent Events (SSE)](https://en.wikipedia.org/wiki/Server-sent_events). Responses are streamed progressively as the agent works, and a single Deep Search request can remain open for up to 5 minutes.
 
 If your Sourcegraph instance sits behind a reverse proxy, load balancer, or ingress controller, you must ensure the timeout for connections to Sourcegraph is set to at least **5 minutes**. The default timeout for many proxies (often 30–60 seconds) will cause in-progress Deep Search responses to be cut off prematurely.
-
-<Callout type="warning">
-	SSE streaming is the default and recommended transport for Deep Search. A polling
-	fallback is temporarily available but will be removed in a future release.
-	Ensure your ingress or proxy timeout is raised to at least 5 minutes before
-	enabling Deep Search for your users.
-</Callout>
 
 ## Managing usage
 
