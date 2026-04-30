@@ -1,11 +1,9 @@
 'use client';
 
-import mermaid from 'mermaid';
 import {useTheme} from 'next-themes';
 import {useEffect, useId, useRef, useState} from 'react';
 
 import {createPortal} from 'react-dom';
-import svgPanZoom from 'svg-pan-zoom';
 
 import * as logoPacks from '../images/logos/';
 
@@ -91,6 +89,11 @@ export function Mermaid({chart}: MermaidProps) {
 
 		(async () => {
 			try {
+				// mermaid touches `window`/`document` at module load, so we
+				// dynamic-import it to keep this component SSR-safe.
+				const {default: mermaid} = await import('mermaid');
+				if (cancelled) return;
+
 				mermaid.registerIconPacks(
 					Object.values(logoPacks).map(icons => ({
 						name: icons.prefix,
@@ -210,28 +213,39 @@ function DiagramCanvas({
 	const [zoom, setZoom] = useState(1);
 
 	useEffect(() => {
+		// svg-pan-zoom touches `window`/`document` at module load, so we
+		// dynamic-import it to keep this component SSR-safe.
 		const el = containerRef.current;
 		if (!el) return;
 
-		el.innerHTML = svg;
-		const svgEl = el.querySelector('svg');
-		if (!svgEl) return;
-		svgEl.style.maxWidth = 'none';
-		svgEl.style.width = '100%';
-		svgEl.style.height = '100%';
+		let cancelled = false;
+		let instance: SvgPanZoom.Instance | null = null;
 
-		const instance = svgPanZoom(svgEl, {
-			fit: true,
-			center: true,
-			minZoom: 0.5,
-			maxZoom: 10,
-			zoomScaleSensitivity: 0.3,
-			onZoom: setZoom
+		import('svg-pan-zoom').then(({default: svgPanZoom}) => {
+			if (cancelled || !el) return;
+
+			el.innerHTML = svg;
+			const svgEl = el.querySelector('svg');
+			if (!svgEl) return;
+			svgEl.style.maxWidth = 'none';
+			svgEl.style.width = '100%';
+			svgEl.style.height = '100%';
+
+			instance = svgPanZoom(svgEl, {
+				fit: true,
+				center: true,
+				minZoom: 0.5,
+				maxZoom: 10,
+				zoomScaleSensitivity: 0.3,
+				preventMouseEventsDefault: false,
+				onZoom: setZoom
+			});
+			panZoomRef.current = instance;
 		});
-		panZoomRef.current = instance;
 
 		return () => {
-			instance.destroy();
+			cancelled = true;
+			instance?.destroy();
 			panZoomRef.current = null;
 		};
 	}, [svg]);
