@@ -1,14 +1,11 @@
 'use client';
 
-import type mermaidAPI from 'mermaid';
 import {useTheme} from 'next-themes';
-import {useCallback, useEffect, useId, useRef, useState} from 'react';
+import {useEffect, useId, useRef, useState} from 'react';
 
 import {createPortal} from 'react-dom';
 
 import * as logoPacks from '../images/logos/';
-
-type MermaidType = typeof mermaidAPI;
 
 const LIGHT_THEME = {
 	primaryColor: '#FFF3F0',
@@ -82,123 +79,56 @@ export function Mermaid({chart}: MermaidProps) {
 	const id = useId().replace(/:/g, '-');
 	const [svg, setSvg] = useState<string>('');
 	const [error, setError] = useState<string | null>(null);
-	const [renderKey, setRenderKey] = useState(() =>
-		Math.random().toString(36).slice(2)
-	);
 	const [isExpanded, setIsExpanded] = useState(false);
-	const [mounted, setMounted] = useState(false);
-	const portalRef = useRef<HTMLDivElement | null>(null);
-	const mermaidRef = useRef<MermaidType | null>(null);
 	const {resolvedTheme} = useTheme();
 
 	useEffect(() => {
-		setMounted(true);
-		const div = document.createElement('div');
-		div.id = `mermaid-portal-${id}`;
-		document.body.appendChild(div);
-		portalRef.current = div;
-		return () => {
-			if (portalRef.current) {
-				document.body.removeChild(portalRef.current);
-			}
-		};
-	}, [id]);
+		if (!chart || !chart.trim() || !resolvedTheme) return;
 
-	useEffect(() => {
-		if (!mounted) return;
+		let cancelled = false;
 
-		const initMermaid = async () => {
-			const mermaidModule = await import('mermaid');
-			const mermaid = mermaidModule.default;
-			mermaidRef.current = mermaid;
-
-			mermaid.registerIconPacks(
-				Object.values(logoPacks).map(icons => ({
-					name: icons.prefix,
-					icons
-				}))
-			);
-
-			const isDark = resolvedTheme === 'dark';
-			mermaid.initialize({
-				startOnLoad: false,
-				theme: 'base',
-				themeVariables: isDark ? DARK_THEME : LIGHT_THEME,
-				themeCSS: isDark
-					? '.node-bkg { stroke: #F34E3F !important; }'
-					: ''
-			});
-
-			setRenderKey(Math.random().toString(36).slice(2));
-		};
-
-		initMermaid();
-	}, [resolvedTheme, mounted]);
-
-	useEffect(() => {
-		if (!chart || !chart.trim() || !mounted || !mermaidRef.current) {
-			return;
-		}
-
-		let isMounted = true;
-		const elementId = `mermaid-${id}-${renderKey}`;
-
-		const renderChart = async () => {
+		(async () => {
 			try {
-				const existing = document.getElementById(elementId);
-				if (existing) {
-					existing.remove();
-				}
+				// mermaid touches `window`/`document` at module load, so we
+				// dynamic-import it to keep this component SSR-safe.
+				const {default: mermaid} = await import('mermaid');
+				if (cancelled) return;
 
-				const {svg} = await mermaidRef.current!.render(
-					elementId,
-					chart
+				mermaid.registerIconPacks(
+					Object.values(logoPacks).map(icons => ({
+						name: icons.prefix,
+						icons
+					}))
 				);
-				if (isMounted) {
-					setSvg(svg);
-					setError(null);
-				}
+
+				const isDark = resolvedTheme === 'dark';
+				mermaid.initialize({
+					startOnLoad: false,
+					theme: 'base',
+					themeVariables: isDark ? DARK_THEME : LIGHT_THEME,
+					themeCSS: isDark
+						? '.node-bkg { stroke: #F34E3F !important; }'
+						: ''
+				});
+
+				const {svg} = await mermaid.render(`mermaid-${id}`, chart);
+				if (cancelled) return;
+				setSvg(svg);
+				setError(null);
 			} catch (err) {
-				if (isMounted) {
-					setError(
-						err instanceof Error
-							? err.message
-							: 'Failed to render diagram'
-					);
-				}
+				if (cancelled) return;
+				setError(
+					err instanceof Error
+						? err.message
+						: 'Failed to render diagram'
+				);
 			}
-		};
-
-		renderChart();
+		})();
 
 		return () => {
-			isMounted = false;
+			cancelled = true;
 		};
-	}, [chart, id, renderKey, mounted]);
-
-	const handleKeyDown = useCallback(
-		(e: KeyboardEvent) => {
-			if (e.key === 'Escape' && isExpanded) {
-				setIsExpanded(false);
-			}
-		},
-		[isExpanded]
-	);
-
-	useEffect(() => {
-		if (isExpanded) {
-			document.addEventListener('keydown', handleKeyDown);
-			document.body.style.overflow = 'hidden';
-		}
-		return () => {
-			document.removeEventListener('keydown', handleKeyDown);
-			document.body.style.overflow = '';
-		};
-	}, [isExpanded, handleKeyDown]);
-
-	if (!mounted) {
-		return null;
-	}
+	}, [chart, id, resolvedTheme]);
 
 	if (error) {
 		return (
@@ -248,66 +178,179 @@ export function Mermaid({chart}: MermaidProps) {
 						<path d="M15 3h6v6M14 10l6.1-6.1M9 21H3v-6M10 14l-6.1 6.1" />
 					</svg>
 				</button>
-				{!isExpanded && (
-					<div
-						className="[&_.clickable:hover]:opacity-80 [&_.clickable]:cursor-pointer [&_.clickable]:underline"
-						dangerouslySetInnerHTML={{__html: svg}}
-					/>
-				)}
+				<div
+					className="[&_.clickable:hover]:opacity-80 [&_.clickable]:cursor-pointer [&_.clickable]:underline"
+					dangerouslySetInnerHTML={{__html: svg}}
+				/>
 			</div>
 
-			{isExpanded &&
-				mounted &&
-				portalRef.current &&
-				createPortal(
-					<div
-						className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80"
-						onClick={() => setIsExpanded(false)}
-					>
-						<div
-							className="relative max-h-[95vh] max-w-[95vw] overflow-auto rounded-lg p-8 pt-16 shadow-2xl"
-							style={{backgroundColor: bgColor}}
-							onClick={e => {
-								// Close if clicking on a clickable element (link), otherwise prevent closing
-								if (
-									(e.target as HTMLElement).closest(
-										'.clickable'
-									)
-								) {
-									setIsExpanded(false);
-								} else {
-									e.stopPropagation();
-								}
-							}}
-						>
-							<button
-								type="button"
-								onClick={() => setIsExpanded(false)}
-								className="absolute right-4 top-4 z-10 rounded-md bg-black/20 p-2 text-slate-700 hover:bg-black/30 dark:bg-white/20 dark:text-white dark:hover:bg-white/30"
-								aria-label="Close expanded diagram"
-							>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="20"
-									height="20"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									strokeWidth="2"
-									strokeLinecap="round"
-									strokeLinejoin="round"
-								>
-									<path d="M18 6L6 18M6 6l12 12" />
-								</svg>
-							</button>
-							<div
-								className="flex items-center justify-center [&_.clickable:hover]:opacity-80 [&_.clickable]:cursor-pointer [&_.clickable]:underline [&_svg]:h-auto [&_svg]:max-h-[80vh] [&_svg]:w-auto [&_svg]:min-w-[80vw]"
-								dangerouslySetInnerHTML={{__html: svg}}
-							/>
-						</div>
-					</div>,
-					portalRef.current
-				)}
+			{isExpanded && (
+				<ExpandedDiagram
+					svg={svg}
+					bgColor={bgColor}
+					onClose={() => setIsExpanded(false)}
+				/>
+			)}
 		</>
+	);
+}
+
+interface DiagramCanvasProps {
+	svg: string;
+	bgColor: string;
+	className?: string;
+	toolbarExtra?: React.ReactNode;
+}
+
+function DiagramCanvas({
+	svg,
+	bgColor,
+	className,
+	toolbarExtra
+}: DiagramCanvasProps) {
+	const containerRef = useRef<HTMLDivElement>(null);
+	const panZoomRef = useRef<SvgPanZoom.Instance | null>(null);
+	const [zoom, setZoom] = useState(1);
+
+	useEffect(() => {
+		// svg-pan-zoom touches `window`/`document` at module load, so we
+		// dynamic-import it to keep this component SSR-safe.
+		const el = containerRef.current;
+		if (!el) return;
+
+		let cancelled = false;
+		let instance: SvgPanZoom.Instance | null = null;
+
+		import('svg-pan-zoom').then(({default: svgPanZoom}) => {
+			if (cancelled || !el) return;
+
+			el.innerHTML = svg;
+			const svgEl = el.querySelector('svg');
+			if (!svgEl) return;
+			svgEl.style.maxWidth = 'none';
+			svgEl.style.width = '100%';
+			svgEl.style.height = '100%';
+
+			instance = svgPanZoom(svgEl, {
+				fit: true,
+				center: true,
+				minZoom: 0.5,
+				maxZoom: 10,
+				zoomScaleSensitivity: 0.3,
+				preventMouseEventsDefault: false,
+				onZoom: setZoom
+			});
+			panZoomRef.current = instance;
+		});
+
+		return () => {
+			cancelled = true;
+			instance?.destroy();
+			panZoomRef.current = null;
+		};
+	}, [svg]);
+
+	return (
+		<div
+			className={`relative flex flex-col overflow-hidden rounded-lg [&_.clickable:hover]:opacity-80 [&_.clickable]:cursor-pointer [&_.clickable]:underline ${className ?? ''}`}
+			style={{backgroundColor: bgColor}}
+		>
+			<div className="absolute right-2 top-2 z-10 flex items-center gap-2">
+				<div className="flex items-center overflow-hidden rounded-md bg-black/20 dark:bg-white/20">
+					<button
+						type="button"
+						onClick={() => panZoomRef.current?.zoomOut()}
+						className="px-3 py-2 text-slate-700 hover:bg-black/30 dark:text-white dark:hover:bg-white/30"
+						aria-label="Zoom out"
+					>
+						−
+					</button>
+					<button
+						type="button"
+						onClick={() => panZoomRef.current?.reset()}
+						className="min-w-[3.5rem] px-2 py-2 text-xs text-slate-700 hover:bg-black/30 dark:text-white dark:hover:bg-white/30"
+						aria-label="Reset zoom"
+					>
+						{Math.round(zoom * 100)}%
+					</button>
+					<button
+						type="button"
+						onClick={() => panZoomRef.current?.zoomIn()}
+						className="px-3 py-2 text-slate-700 hover:bg-black/30 dark:text-white dark:hover:bg-white/30"
+						aria-label="Zoom in"
+					>
+						+
+					</button>
+				</div>
+				{toolbarExtra}
+			</div>
+			<div ref={containerRef} className="flex-1" />
+		</div>
+	);
+}
+
+interface ExpandedDiagramProps {
+	svg: string;
+	bgColor: string;
+	onClose: () => void;
+}
+
+function ExpandedDiagram({svg, bgColor, onClose}: ExpandedDiagramProps) {
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.key === 'Escape') onClose();
+		};
+		document.addEventListener('keydown', handleKeyDown);
+		document.body.style.overflow = 'hidden';
+		return () => {
+			document.removeEventListener('keydown', handleKeyDown);
+			document.body.style.overflow = '';
+		};
+	}, [onClose]);
+
+	return createPortal(
+		<div
+			className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80"
+			onClick={onClose}
+		>
+			<div
+				onClick={e => {
+					// Click on a link inside lets the modal close (and navigation proceed);
+					// other clicks inside keep it open.
+					if (!(e.target as HTMLElement).closest('.clickable')) {
+						e.stopPropagation();
+					}
+				}}
+			>
+				<DiagramCanvas
+					svg={svg}
+					bgColor={bgColor}
+					className="h-[95vh] w-[95vw] shadow-2xl"
+					toolbarExtra={
+						<button
+							type="button"
+							onClick={onClose}
+							className="rounded-md bg-black/20 p-2 text-slate-700 hover:bg-black/30 dark:bg-white/20 dark:text-white dark:hover:bg-white/30"
+							aria-label="Close expanded diagram"
+						>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="20"
+								height="20"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+							>
+								<path d="M18 6L6 18M6 6l12 12" />
+							</svg>
+						</button>
+					}
+				/>
+			</div>
+		</div>,
+		document.body
 	);
 }
