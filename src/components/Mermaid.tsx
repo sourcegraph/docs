@@ -1,6 +1,6 @@
 'use client';
 
-import type mermaidAPI from 'mermaid';
+import mermaid from 'mermaid';
 import {useTheme} from 'next-themes';
 import {useEffect, useId, useRef, useState} from 'react';
 
@@ -8,8 +8,6 @@ import {createPortal} from 'react-dom';
 import svgPanZoom from 'svg-pan-zoom';
 
 import * as logoPacks from '../images/logos/';
-
-type MermaidType = typeof mermaidAPI;
 
 const LIGHT_THEME = {
 	primaryColor: '#FFF3F0',
@@ -83,93 +81,51 @@ export function Mermaid({chart}: MermaidProps) {
 	const id = useId().replace(/:/g, '-');
 	const [svg, setSvg] = useState<string>('');
 	const [error, setError] = useState<string | null>(null);
-	const [renderKey, setRenderKey] = useState(() =>
-		Math.random().toString(36).slice(2)
-	);
 	const [isExpanded, setIsExpanded] = useState(false);
-	const [mounted, setMounted] = useState(false);
-	const mermaidRef = useRef<MermaidType | null>(null);
 	const {resolvedTheme} = useTheme();
 
 	useEffect(() => {
-		setMounted(true);
-	}, []);
+		if (!chart || !chart.trim() || !resolvedTheme) return;
 
-	useEffect(() => {
-		if (!mounted) return;
+		let cancelled = false;
 
-		const initMermaid = async () => {
-			const mermaidModule = await import('mermaid');
-			const mermaid = mermaidModule.default;
-			mermaidRef.current = mermaid;
-
-			mermaid.registerIconPacks(
-				Object.values(logoPacks).map(icons => ({
-					name: icons.prefix,
-					icons
-				}))
-			);
-
-			const isDark = resolvedTheme === 'dark';
-			mermaid.initialize({
-				startOnLoad: false,
-				theme: 'base',
-				themeVariables: isDark ? DARK_THEME : LIGHT_THEME,
-				themeCSS: isDark
-					? '.node-bkg { stroke: #F34E3F !important; }'
-					: ''
-			});
-
-			setRenderKey(Math.random().toString(36).slice(2));
-		};
-
-		initMermaid();
-	}, [resolvedTheme, mounted]);
-
-	useEffect(() => {
-		if (!chart || !chart.trim() || !mounted || !mermaidRef.current) {
-			return;
-		}
-
-		let isMounted = true;
-		const elementId = `mermaid-${id}-${renderKey}`;
-
-		const renderChart = async () => {
+		(async () => {
 			try {
-				const existing = document.getElementById(elementId);
-				if (existing) {
-					existing.remove();
-				}
-
-				const {svg} = await mermaidRef.current!.render(
-					elementId,
-					chart
+				mermaid.registerIconPacks(
+					Object.values(logoPacks).map(icons => ({
+						name: icons.prefix,
+						icons
+					}))
 				);
-				if (isMounted) {
-					setSvg(svg);
-					setError(null);
-				}
-			} catch (err) {
-				if (isMounted) {
-					setError(
-						err instanceof Error
-							? err.message
-							: 'Failed to render diagram'
-					);
-				}
-			}
-		};
 
-		renderChart();
+				const isDark = resolvedTheme === 'dark';
+				mermaid.initialize({
+					startOnLoad: false,
+					theme: 'base',
+					themeVariables: isDark ? DARK_THEME : LIGHT_THEME,
+					themeCSS: isDark
+						? '.node-bkg { stroke: #F34E3F !important; }'
+						: ''
+				});
+
+				const {svg} = await mermaid.render(`mermaid-${id}`, chart);
+				if (cancelled) return;
+				setSvg(svg);
+				setError(null);
+			} catch (err) {
+				if (cancelled) return;
+				setError(
+					err instanceof Error
+						? err.message
+						: 'Failed to render diagram'
+				);
+			}
+		})();
 
 		return () => {
-			isMounted = false;
+			cancelled = true;
 		};
-	}, [chart, id, renderKey, mounted]);
-
-	if (!mounted) {
-		return null;
-	}
+	}, [chart, id, resolvedTheme]);
 
 	if (error) {
 		return (
@@ -274,7 +230,10 @@ function DiagramCanvas({
 		});
 		panZoomRef.current = instance;
 
-		return () => instance.destroy();
+		return () => {
+			instance.destroy();
+			panZoomRef.current = null;
+		};
 	}, [svg]);
 
 	return (
