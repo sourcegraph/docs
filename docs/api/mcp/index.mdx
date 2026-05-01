@@ -173,10 +173,23 @@ To restrict MCP to a subset of users:
 See [Access control](/admin/access-control) for more about managing roles and permissions.
 
 <Callout type="info">
-	MCP access control is separate from [repository permissions](/admin/permissions/).
-	Users can only read data from repositories they are already allowed to access
-	in Sourcegraph.
+	MCP access control is separate from [repository
+	permissions](/admin/permissions/). Users can only read data from
+	repositories they are already allowed to access in Sourcegraph.
 </Callout>
+
+## Troubleshooting
+
+Most MCP connection issues come from OAuth or access-control configuration rather than the MCP endpoint itself.
+
+| If you see                                                                               | Likely cause                                                             | What to check                                                                                                                                                                                                                                                                               |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `invalid_scope` during OAuth sign-in                                                     | The client requested the wrong scope for MCP                             | MCP-only connections should use the `mcp` scope. If the integration also needs GraphQL or other APIs, create a separate [OAuth App](/admin/oauth-apps) with the broader scopes you need instead of reusing an MCP-only registration.                                                        |
+| `redirect_uri_mismatch` or a token exchange failure after browser auth                   | The OAuth client is missing the callback URL expected by the MCP client  | Register the exact redirect URI your client uses. For the `mcp-remote` fallback shown above, add `http://localhost:3334/oauth/callback` to the OAuth app.                                                                                                                                   |
+| `/.auth/idp/oauth/register` returns `404 not found`                                      | Dynamic Client Registration is disabled                                  | Confirm `mcp.enabled` is `true` and `auth.idpDynamicClientRegistrationEnabled` is `true`. If you want MCP available without DCR, use the manual OAuth setup instead.                                                                                                                        |
+| The browser opens for sign-in, but the connection never completes or loops back to login | Your Sourcegraph browser session expired before the OAuth flow completed | Sign in to Sourcegraph in the same browser profile first, then retry the MCP connection. This is especially common when the OAuth window opens in a browser profile that is not already signed in.                                                                                          |
+| Users must sign in again frequently even though the integration previously worked        | The client is not refreshing tokens correctly                            | OAuth access tokens are short-lived. Make sure the client stores the newest `refresh_token` returned on each refresh, because refresh tokens are one-time use. For service-account M2M flows, request a new access token when the current one expires because no refresh token is returned. |
+| `403 forbidden` from `/.api/mcp`                                                         | The user authenticated successfully but does not have MCP access         | Check that MCP is enabled, the user has the `MCP#ACCESS` permission, and the user already has access to the repositories they are trying to read.                                                                                                                                           |
 
 ## Available Tools
 
