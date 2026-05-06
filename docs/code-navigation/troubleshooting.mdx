@@ -11,17 +11,17 @@ Issues are related to Sourcegraph code navigation when the [indexer](/code-navig
 
 A customer issue should **definitely** be routed to code navigation if any of the following are true.
 
--   Precise code navigation queries are slow
--   Precise code navigation queries yield unexpected results
+- Precise code navigation queries are slow
+- Precise code navigation queries yield unexpected results
 
 A customer issue should **possibly** be routed to code navigation if any of the following are true.
 
--   Search-based code navigation queries are slow
--   Search-based code navigation queries yield unexpected results
+- Search-based code navigation queries are slow
+- Search-based code navigation queries yield unexpected results
 
 A customer issue should **not** be routed to code navigation if any of the following are true.
 
--   The indexer is listed in [LSIF.dev](https://lsif.dev/) and _it is not_ one that we maintain. Instead, flag the indexers status and maintainer of the relevant indexer with the customer, and suggest they reach out directly
+- The indexer is listed in [LSIF.dev](https://lsif.dev/) and _it is not_ one that we maintain. Instead, flag the indexers status and maintainer of the relevant indexer with the customer, and suggest they reach out directly
 
 ## Gathering evidence
 
@@ -31,24 +31,24 @@ Before bringing a code navigation issue to the engineering team, the site-admin 
 
 The following details should always be supplied.
 
--   The Sourcegraph instance version
--   The Sourcegraph instance deployment type (e.g. server, pure-docker, docker-compose, k8s)
--   The memory, cpu, and disk resources allocated to the following containers:
-    -   frontend
-    -   precise-code-intel-worker
-    -   codeintel-db
-    -   blobstore (or `minio` in versions of Sourcegraph before v3.4.2)
+- The Sourcegraph instance version
+- The Sourcegraph instance deployment type (e.g. server, pure-docker, docker-compose, k8s)
+- The memory, cpu, and disk resources allocated to the following containers:
+    - frontend
+    - precise-code-intel-worker
+    - codeintel-db
+    - blobstore (or `minio` in versions of Sourcegraph before v3.4.2)
 
 If the customer is running a custom patch or an insiders version, we need the docker image tags and SHAs of the following containers:
 
--   frontend
--   precise-code-intel-worker
+- frontend
+- precise-code-intel-worker
 
 ### Sourcegraph CLI details
 
 The following details should be supplied if there is an issue with _uploading_ LSIF indexes to their instance.
 
--   The Sourcegraph CLI version
+- The Sourcegraph CLI version
 
 ```bash
 $ src version
@@ -60,13 +60,13 @@ Recommended Version: 3.26.1
 
 The following user settings should be supplied if there is an issue with _displaying_ code navigation results. Only these settings should be necessary, but additional settings can be supplied after private settings such as passwords or secret keys have been removed.
 
--   `codeIntel.lsif`
--   `codeIntel.traceExtension`
--   `codeIntel.disableRangeQueries`
--   `basicCodeIntel.includeForks`
--   `basicCodeIntel.includeArchives`
--   `basicCodeIntel.indexOnly`
--   `basicCodeIntel.unindexedSearchTimeout`
+- `codeIntel.lsif`
+- `codeIntel.traceExtension`
+- `codeIntel.disableRangeQueries`
+- `basicCodeIntel.includeForks`
+- `basicCodeIntel.includeArchives`
+- `basicCodeIntel.indexOnly`
+- `basicCodeIntel.unindexedSearchTimeout`
 
 You can get your effective user settings (site-config + user settings override) with the following Sourcegraph CLI command.
 
@@ -96,3 +96,14 @@ Hovering over identifiers in the source file should fire off requests to the API
 
 ![Network waterfall](https://storage.googleapis.com/sourcegraph-assets/Docs/network-waterfall.png)
 ![Request headers](https://storage.googleapis.com/sourcegraph-assets/Docs/network-description.png)
+
+## Why are my results sometimes incorrect?
+
+If an index is not found for a particular file in a repository, Sourcegraph will fall back to search-based code navigation. You may occasionally see results from search-based code navigation even when you have uploaded an index. This can happen in the following scenarios:
+
+The line containing the symbol was created or edited between the nearest indexed commit and the commit being browsed.
+The Find references panel may include search-based results, but only after all of the precise results have been displayed. This ensures every symbol has useful code navigation.
+
+### Why does it sometimes time out?
+
+The [symbol search](/code-search/types/symbol) performance section describes query paths and performance. Consider using [Rockskip](/code-navigation/rockskip) if you're experiencing frequent timeouts.
