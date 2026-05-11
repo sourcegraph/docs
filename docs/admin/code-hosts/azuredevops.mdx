@@ -39,7 +39,11 @@ Next, configure the code host connection by following the next steps:
     	"username": "<admin username>",
     	"token": "<admin token>",
     	"projects": ["org1/project1"],
-    	"orgs": ["org2"]
+    	"orgs": ["org2"],
+		"repos": [
+		    "myorg/myproject/myrepo1", 
+		    "myorg/myproject/myrepo2"
+		  ]
     }
     ```
 
@@ -47,7 +51,7 @@ Next, configure the code host connection by following the next steps:
 
 ## Repository syncing
 
-Currently, all repositories belonging to the configured organizations/projects will be synced.
+All repositories within the configured organizations/projects are synced by default, but you can also choose to sync either all repositories or only specific repositories from those organizations/projects.
 
 In addition, you may exclude one or more repositories by setting the [`exclude`](/admin/code-hosts/azuredevops#configuration) field in the code host connection.
 
@@ -65,7 +69,7 @@ Azure DevOps connections support the following configuration options, which are 
 
 {/* SCHEMA_SYNC_START: admin/code_hosts/azuredevops.schema.json */}
 {/* WARNING: This section is auto-generated during releases. Do not edit manually. */}
-{/* Last updated: 2026-03-06T20:59:17Z */}
+{/* Last updated: 2026-04-27T11:17:39Z */}
 ```json
 	// Authentication alternatives: token OR windowsPassword
 
@@ -132,6 +136,17 @@ Azure DevOps connections support the following configuration options, which are 
 		"enabled": false,
 		"requestsPerHour": 0
 	},
+
+	// An array of repository "org/project/repo" strings specifying which Azure DevOps repositories to mirror on Sourcegraph. If both 'repos' and 'projects' or 'orgs' are specified, the union of both sets will be synced.
+	// Other example values:
+	// - [
+	//     "myorg/myproject/myrepo"
+	//   ]
+	// - [
+	//     "myorg/my project/myrepo",
+	//     "myorg/anotherproject/anotherrepo"
+	//   ]
+	"repos": null,
 
 	// The pattern used to generate the corresponding Sourcegraph repository name for a Azure DevOps repository.
 	// - "{host}" is replaced with the Azure DevOps URL's host (such as dev.azure.com)

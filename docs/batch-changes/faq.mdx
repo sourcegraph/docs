@@ -194,6 +194,12 @@ Sourcegraph search shows you results on any repositories that you have read acce
 
 This disparity most often stems from needing write access to one or more of the repositories where your search query returns results. Consider asking an admin to set up a [global service account token](/batch-changes/configuring-credentials#global-service-account-tokens) if your batch change must update all matching repositories.
 
+## Why does `repositoriesMatchingQuery` with `repo:...@branch` still run on the default branch?
+
+`on.repositoriesMatchingQuery` selects repositories to include in the batch change. For server-side batch changes, each matched repository runs on its default branch unless a more specific `on.repository` entry sets `branch` or `branches`.
+
+If you need to target non-default branches, add explicit `on.repository` entries with `branch` or `branches`.
+
 ## Why is my batch change preview hanging?
 
 When working with `src,` there are occurrences where applying your batch spec might get stuck on a particular step. More so in the `Determining workspace type` step. The `Determining workspace type` is a simple step that decides if bind or volume modes should be used based on the command line flags and the OS and architecture.

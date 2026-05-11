@@ -395,6 +395,37 @@ jaeger:
     enabled: true
 ```
 
+#### Customize Jaeger configuration
+
+Starting with Sourcegraph 7.1.0, the bundled Jaeger instance uses an [OpenTelemetry Collector-style YAML configuration](https://www.jaegertracing.io/docs/2.16/configuration/) instead of CLI flags. Common settings are exposed through the `jaeger.config` Helm value.
+
+You can override these settings in your Helm values override file. For example, to increase the maximum number of in-memory traces:
+
+```yaml
+jaeger:
+    enabled: true
+    config:
+        maxTraces: 50000
+```
+
+Or using `--set` on the command line:
+
+```bash
+helm upgrade sourcegraph sourcegraph/sourcegraph \
+    --set jaeger.config.maxTraces=50000
+```
+
+The available configuration options are:
+
+| Value | Default | Description |
+| --- | --- | --- |
+| `jaeger.config.maxTraces` | `20000` | Maximum number of traces stored in memory |
+| `jaeger.config.logLevel` | `info` | Log level (`debug`, `info`, `warn`, `error`) |
+| `jaeger.config.samplingDefaultProbability` | `1.0` | Default sampling probability (0.0–1.0) returned to services that query Jaeger for sampling config |
+| `jaeger.config.existingConfigMap` | `""` | Name of a pre-existing ConfigMap containing a `jaeger-config.yaml` key. When set, the chart skips creating its own ConfigMap and uses yours instead |
+
+For advanced customization beyond these options, set `jaeger.config.existingConfigMap` to the name of your own ConfigMap containing a full `jaeger-config.yaml` key. See the [Jaeger v2 configuration reference](https://www.jaegertracing.io/docs/2.16/configuration/) for all available options.
+
 #### Configure OpenTelemetry Collector to use an external tracing backend
 
 To configure the bundled otel-collector to export traces to an external OTEL-compatible backend, you you can customize the otel-collector's config file directly in your Helm values `override.yaml` file.
