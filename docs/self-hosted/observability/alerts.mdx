@@ -4340,6 +4340,11 @@ Generated query for critical alert: `max((max(max_over_time(src_conf_client_time
 
 **Next steps**
 
+- Treat sustained high searcher traffic as a sign that indexed search is not carrying enough of the search load. Searcher handles unindexed search, so high per-replica traffic usually means queries are not using Zoekt enough.
+- Check Zoekt availability, indexing backlog, and indexing errors to make sure repositories are being indexed and served by indexed search.
+- Inspect recent search traffic for broad or repeated unindexed queries, especially automated clients or queries against revisions that cannot use indexed search.
+- If users often search non-default branches, consider indexing more branches by configuring `search.index.branches` or `search.index.revisions` in site configuration.
+- If the traffic is expected and Zoekt indexing is healthy, consider scaling out searcher replicas to reduce per-replica load and search latency.
 - More help interpreting this metric is available in the [dashboards reference](dashboards#searcher-replica_traffic).
 - **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
 
@@ -6710,6 +6715,102 @@ Generated query for warning alert: `max((sum(increase(src_meteringexporter_queue
 <summary>Technical details</summary>
 
 Generated query for warning alert: `max((sum(increase(src_meteringexporter_queue_metrics_reporter_errors_total{job=~"^worker.*"}[30m]))) &gt; 0)`
+
+</details>
+
+<br />
+
+## metering: licensing_credit_usage_notifications_errors_total
+
+<p class="subtitle">credit usage notification routine operation errors every 30m</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> metering: 0+ credit usage notification routine operation errors every 30m
+
+**Next steps**
+
+- Failures indicate that site admin credit usage notifications are not being refreshed.
+- Check worker logs for credit usage notification monitor failures and Enterprise Portal connectivity issues.
+- Learn more about the related dashboard panel in the [dashboards reference](dashboards#metering-licensing_credit_usage_notifications_errors_total).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_metering_licensing_credit_usage_notifications_errors_total"
+]
+```
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((sum(increase(src_licensing_credit_usage_notifications_errors_total{job=~"^worker.*"}[30m]))) &gt; 0)`
+
+</details>
+
+<br />
+
+## metering: licensing_fast_quota_check_routine_99th_percentile_duration
+
+<p class="subtitle">aggregate successful fast quota check probe operation duration distribution over 30m</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> metering: 30+ aggregate successful fast quota check probe operation duration distribution over 30m for 5m0s
+
+**Next steps**
+
+- The 99th percentile probe duration has been above 30 seconds for at least 5 minutes; the probe should normally complete in well under its configured interval (default 1m).
+- Check Enterprise Portal latency and worker logs for the `licensing.fast-quota-check` routine.
+- Learn more about the related dashboard panel in the [dashboards reference](dashboards#metering-licensing_fast_quota_check_routine_99th_percentile_duration).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_metering_licensing_fast_quota_check_routine_99th_percentile_duration"
+]
+```
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Custom query for warning alert: `max((histogram_quantile(0.99, sum by (le) (rate(src_licensing_fast_quota_check_routine_duration_seconds_bucket{job=~"^worker.*"}[30m])))) &gt; 30)`
+
+</details>
+
+<br />
+
+## metering: licensing_fast_quota_check_routine_error_rate
+
+<p class="subtitle">fast quota check probe operation error rate over 30m</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> metering: 15%+ fast quota check probe operation error rate over 30m for 5m0s
+
+**Next steps**
+
+- The probe failure rate has been at or above 15% over the last 30 minutes for at least 5 consecutive minutes; FastCheckQuota is consistently failing open and quota enforcement is degraded.
+- Check worker logs for the `licensing.fast-quota-check` routine and Enterprise Portal connectivity.
+- Learn more about the related dashboard panel in the [dashboards reference](dashboards#metering-licensing_fast_quota_check_routine_error_rate).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_metering_licensing_fast_quota_check_routine_error_rate"
+]
+```
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((sum(increase(src_licensing_fast_quota_check_routine_errors_total{job=~"^worker.*"\}[30m])) / (sum(increase(src_licensing_fast_quota_check_routine_total\{job=~"^worker.*"\}[30m])) + sum(increase(src_licensing_fast_quota_check_routine_errors_total\{job=~"^worker.*"}[30m]))) * 100) &gt;= 15)`
 
 </details>
 
