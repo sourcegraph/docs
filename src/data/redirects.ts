@@ -6394,7 +6394,7 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/updates/pure_docker',
-		destination: '/self-hosted/updates/docker-compose',
+		destination: '/self-hosted/deploy/docker-compose/upgrade',
 		permanent: true
 	},
 	{
@@ -7115,8 +7115,8 @@ const redirectsData = [
 		permanent: true
 	},
 	{
-		source: '/self-hosted/updates/pure_docker',
-		destination: '/self-hosted/updates/docker-compose',
+		source: '/self-hosted/updates/pure-docker',
+		destination: '/self-hosted/deploy/docker-compose/upgrade',
 		permanent: true
 	},
 	{
