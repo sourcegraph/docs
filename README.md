@@ -183,3 +183,10 @@ Once you're satisfied with your changes, follow these steps:
 -   Create a pull request to the [Sourcegraph documentation repository](https://github.com/sourcegraph/docs), and tag the appropriate reviewers.
 
 Thank you for contributing to Sourcegraph documentation! Your efforts help us provide top-notch learning experiences for our users. If you have any questions or need assistance, feel free to reach out.
+
+---
+
+## Hello, World!
+
+Hello, World! 👋
+Hello, World! 👋
