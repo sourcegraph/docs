@@ -1,12 +1,9 @@
 # Deploying Sourcegraph Executors natively on Kubernetes
 
 <Callout type="warning">
-	Native Kubernetes executors are in beta and are not recommended for production use. This deployment
-	mode has known durability and reliability limitations, including job loss on node failure,
-	best-effort resource cleanup, and limited workspace isolation compared to the Firecracker runtime.
-	For production workloads, deploy using
+	Native Kubernetes executors are in beta. For production workloads, consider deploying using
 	[Terraform](/self-hosted/executors/deploy-executors-terraform) or the
-	[Linux binary](/self-hosted/executors/deploy-executors-binary) instead.
+	[Linux binary](/self-hosted/executors/deploy-executors-binary) for better long-term support.
 </Callout>
 
 The native Kubernetes Executors have a master Executor pod that schedules worker pods via the Kubernetes API. The master Executor pod manages the lifecycle of jobs, while the worker pods process the actual [batch change](/batch-changes/server-side) or [precise auto indexing](/code-navigation/auto-indexing) job specs. For more details, see [how it works](/admin/executors#native-kubernetes).
@@ -71,8 +68,8 @@ Native Kubernetes Executors can be deployed via either the `sourcegraph-executor
 
 1. If you are deploying Executors for processing Batch Changes, set `batchChanges.nativeServerSideExecution` to `true` in your [site configuration](/admin/config/site-config). Only enable this when using Executors on Kubernetes.
 
-    > **Note:** Batch Changes on native Kubernetes executors inherits all the durability and reliability
-    > limitations of the native Kubernetes runtime. See the warning at the top of this page.
+    > **Note:** Batch Changes on native Kubernetes executors inherits the beta limitations of
+    > the native Kubernetes runtime. See the warning at the top of this page.
 2. Configure the following environment variables on the Executor Deployment:
 
     1. `EXECUTOR_FRONTEND_URL` should match the URL of your Sourcegraph instance
