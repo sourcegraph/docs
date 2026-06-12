@@ -37,11 +37,11 @@ This works similarly for other MCP-compatible agents. See [Client Integrations](
 
 The MCP server provides different tool suites for various use cases:
 
-| Endpoint               | Description                         |
-| ---------------------- | ----------------------------------- |
-| `/.api/mcp`            | Core Sourcegraph search tools       |
-| `/.api/mcp/all`        | Full suite of Sourcegraph tools     |
-| `/.api/mcp/deepsearch` | Deep Search agent                   |
+| Endpoint               | Description                                                                 |
+| ---------------------- | --------------------------------------------------------------------------- |
+| `/.api/mcp`            | Core Sourcegraph search, repository, history, and Deep Search reading tools |
+| `/.api/mcp/all`        | Full suite of Sourcegraph tools                                             |
+| `/.api/mcp/deepsearch` | Deep Search agent tools only                                                |
 
 Example URL:
 
@@ -174,9 +174,9 @@ To restrict MCP to a subset of users:
 See [Access control](/admin/access-control) for more about managing roles and permissions.
 
 <Callout type="info">
-	MCP access control is separate from [repository permissions](/admin/permissions/).
-	Users can only read data from repositories they are already allowed to access
-	in Sourcegraph.
+	MCP access control is separate from [repository
+	permissions](/admin/permissions/). Users can only read data from
+	repositories they are already allowed to access in Sourcegraph.
 </Callout>
 
 ## Available Tools
@@ -275,7 +275,6 @@ Run sandboxed Lua scripts for aggregation, cross-referencing, and computation ov
 
 **Use cases:** Counting or aggregating many search matches, cross-referencing multiple searches, transforming or combining search output with custom logic
 
-
 ### Code Navigation
 
 #### `go_to_definition`
@@ -316,6 +315,7 @@ Search commits by message, author, content, files, and date ranges.
 - `contentTerms` - Search in actual code changes (optional)
 - `files` - Filter by file paths (optional)
 - `after`/`before` - Date range filters (optional)
+- `revisions` - Branches, tags, or ref globs to search (optional)
 
 #### `diff_search`
 
@@ -327,8 +327,9 @@ Search actual code changes for specific patterns across repositories.
 - `repos` - Array of repository names (required)
 - `added` - Search only added code (optional)
 - `removed` - Search only removed code (optional)
-- `author` - Filter by author (optional)
+- `authors` - Filter by authors (optional)
 - `after`/`before` - Date range filters (optional)
+- `revisions` - Branches, tags, or ref globs to search (optional)
 
 #### `compare_revisions`
 
@@ -355,11 +356,12 @@ Find repositories where a contributor has made commits.
 ### Deep Search
 
 <Callout type="info">
-	Admins can disable the `deepsearch` tool on the default and v1 MCP endpoints
-	by setting the environment variable `SRC_MCP_DISABLE_DEEPSEARCH_TOOL=true`
-	on the Sourcegraph instance. This does not affect `deepsearch_read` or the
-	dedicated `/deepsearch` endpoint. This is a temporary measure available in
-	7.0 and will be replaced by a proper tool allowlist in a future release.
+	Admins can disable the `deepsearch` tool on MCP endpoints where it is
+	exposed by setting the environment variable
+	`SRC_MCP_DISABLE_DEEPSEARCH_TOOL=true` on the Sourcegraph instance. This
+	does not affect `deepsearch_read` or the dedicated `/.api/mcp/deepsearch`
+	endpoint. This is a temporary measure available in 7.0 and will be replaced
+	by a proper tool allowlist in a future release.
 </Callout>
 
 ### `deepsearch`
@@ -383,6 +385,34 @@ Read a Deep Search conversation and return the markdown content of the questions
     - A read token (e.g., `abc123-def456-...`)
 
 **Use cases:** Reading or re-opening Deep Search results, summarizing existing answers, using past Deep Search as context for new questions
+
+## Tool Availability by Endpoint
+
+Use this matrix to choose the smallest endpoint that has the tools your MCP client needs.
+
+| Tool                    | `/.api/mcp` | `/.api/mcp/all` | `/.api/mcp/deepsearch` |
+| ----------------------- | :---------: | :-------------: | :--------------------: |
+| `read_file`             |      ✓      |        ✓        |                        |
+| `list_files`            |      ✓      |        ✓        |                        |
+| `list_repos`            |      ✓      |        ✓        |                        |
+| `keyword_search`        |      ✓      |        ✓        |                        |
+| `nls_search`            |      ✓      |        ✓        |                        |
+| `evaluator`             |      ✓      |        ✓        |                        |
+| `commit_search`         |      ✓      |        ✓        |                        |
+| `diff_search`           |      ✓      |        ✓        |                        |
+| `deepsearch_read`       |      ✓      |        ✓        |           ✓            |
+| `compare_revisions`     |             |        ✓        |                        |
+| `get_contributor_repos` |             |        ✓        |                        |
+| `go_to_definition`      |             |        ✓        |                        |
+| `find_references`       |             |        ✓        |                        |
+| `deepsearch`            |             |        ✓        |           ✓            |
+
+<Callout type="info">
+	The default `/.api/mcp` endpoint can read existing Deep Search conversations
+	with `deepsearch_read`, but it cannot create new Deep Search conversations.
+	Use `/.api/mcp/all` or `/.api/mcp/deepsearch` when your client needs the
+	`deepsearch` tool.
+</Callout>
 
 ## Best Practices
 
