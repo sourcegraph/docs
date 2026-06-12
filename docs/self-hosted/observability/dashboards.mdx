@@ -18257,6 +18257,11 @@ sum by (code) (rate(searcher_service_request_total{instance=~`${instance:regex}`
 This graph is the average number of requests per second searcher is
 experiencing over the last 10 minutes broken down per replica.
 
+Sustained high traffic here is undesirable because it indicates Sourcegraph is
+using unindexed searcher requests instead of Zoekt indexed search for a good amount
+of the search load. That can increase searcher and gitserver load and cause
+broader search reliability or latency problems downstream.
+
 The code is the HTTP Status code. 200 is success. We have a special code
 "canceled" which is common when doing a large search request and we find
 enough results before searching all possible repos.
@@ -25482,6 +25487,58 @@ multiqueue_executor_dequeue_cache_size{queue=~"$queue",job=~"^(executor|sourcegr
 
 <br />
 
+### Executor: Multi-MIG priority-cascade autoscaler
+
+#### executor: managed_instance_groups_autoscaler_unhealthy
+
+<p class="subtitle">Managed instance group(s) marked unhealthy by the cascade</p>
+
+1 when the cascade considered the named managed instance group unhealthy on the most recent cycle; 0 when healthy.
+A managed instance group is marked unhealthy when GCP cannot provision VMs for it — creation errors (ZONE_RESOURCE_POOL_EXHAUSTED, QUOTA_EXCEEDED, stockout), a sustained scaling gap past the configured wait timeout, or a sticky cooldown after a prior failure.
+While unhealthy, demand cascades to the next priority tier (typically the standard MIG behind the spot MIG).
+
+Refer to the [alerts reference](alerts#executor-managed_instance_groups_autoscaler_unhealthy) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100100` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max by (name, queue) (src_executors_managed_instance_groups_autoscaler_unhealthy)
+```
+</details>
+
+<br />
+
+#### executor: managed_instance_groups_autoscaler_assigned_demand
+
+<p class="subtitle">Demand assigned by the cascade per managed instance group</p>
+
+Demand (in task units) the cascade assigned to each managed instance group on the most recent cycle. Sums to the queue depth that the cascade saw. A non-zero value on a non-top-priority MIG means the higher-priority MIG was treated as unhealthy and demand spilled.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100101` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max by (name, queue) (src_executors_managed_instance_groups_autoscaler_assigned_demand)
+```
+</details>
+
+<br />
+
 ### Executor: Executor: Executor jobs
 
 #### executor: executor_handlers
@@ -25490,7 +25547,7 @@ multiqueue_executor_dequeue_cache_size{queue=~"$queue",job=~"^(executor|sourcegr
 
 Refer to the [alerts reference](alerts#executor-executor_handlers) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100100` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100200` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -25512,7 +25569,7 @@ sum(src_executor_processor_handlers{queue=~"${queue:regex}",sg_job=~"^sourcegrap
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100110` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100210` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -25534,7 +25591,7 @@ sum(increase(src_executor_processor_total{queue=~"${queue:regex}",sg_job=~"^sour
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100111` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100211` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -25556,7 +25613,7 @@ sum  by (le)(rate(src_executor_processor_duration_seconds_bucket{queue=~"${queue
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100112` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100212` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -25578,7 +25635,7 @@ sum(increase(src_executor_processor_errors_total{queue=~"${queue:regex}",sg_job=
 
 Refer to the [alerts reference](alerts#executor-executor_processor_error_rate) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100113` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100213` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -25602,7 +25659,7 @@ sum(increase(src_executor_processor_errors_total{queue=~"${queue:regex}",sg_job=
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100200` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100300` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -25624,7 +25681,7 @@ sum(increase(src_apiworker_apiclient_queue_total{sg_job=~"^sourcegraph-executors
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100201` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100301` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -25646,7 +25703,7 @@ sum  by (le)(rate(src_apiworker_apiclient_queue_duration_seconds_bucket{sg_job=~
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100202` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100302` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -25668,7 +25725,7 @@ sum(increase(src_apiworker_apiclient_queue_errors_total{sg_job=~"^sourcegraph-ex
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100203` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100303` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -25690,7 +25747,7 @@ sum(increase(src_apiworker_apiclient_queue_errors_total{sg_job=~"^sourcegraph-ex
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100210` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100310` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -25712,7 +25769,7 @@ sum by (op)(increase(src_apiworker_apiclient_queue_total{sg_job=~"^sourcegraph-e
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100211` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100311` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -25734,7 +25791,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_apiworker_apiclient_queue_dura
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100212` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100312` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -25756,7 +25813,7 @@ sum by (op)(increase(src_apiworker_apiclient_queue_errors_total{sg_job=~"^source
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100213` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100313` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -25780,7 +25837,7 @@ sum by (op)(increase(src_apiworker_apiclient_queue_errors_total{sg_job=~"^source
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100300` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100400` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -25802,7 +25859,7 @@ sum(increase(src_apiworker_apiclient_files_total{sg_job=~"^sourcegraph-executors
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100301` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100401` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -25824,7 +25881,7 @@ sum  by (le)(rate(src_apiworker_apiclient_files_duration_seconds_bucket{sg_job=~
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100302` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100402` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -25846,7 +25903,7 @@ sum(increase(src_apiworker_apiclient_files_errors_total{sg_job=~"^sourcegraph-ex
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100303` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100403` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -25868,7 +25925,7 @@ sum(increase(src_apiworker_apiclient_files_errors_total{sg_job=~"^sourcegraph-ex
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100310` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100410` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -25890,7 +25947,7 @@ sum by (op)(increase(src_apiworker_apiclient_files_total{sg_job=~"^sourcegraph-e
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100311` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100411` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -25912,7 +25969,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_apiworker_apiclient_files_dura
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100312` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100412` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -25934,7 +25991,7 @@ sum by (op)(increase(src_apiworker_apiclient_files_errors_total{sg_job=~"^source
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100313` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100413` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -25958,7 +26015,7 @@ sum by (op)(increase(src_apiworker_apiclient_files_errors_total{sg_job=~"^source
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100400` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100500` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -25980,7 +26037,7 @@ sum(increase(src_apiworker_command_total{op=~"setup.*",sg_job=~"^sourcegraph-exe
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100401` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100501` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -26002,7 +26059,7 @@ sum  by (le)(rate(src_apiworker_command_duration_seconds_bucket{op=~"setup.*",sg
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100402` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100502` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -26024,7 +26081,7 @@ sum(increase(src_apiworker_command_errors_total{op=~"setup.*",sg_job=~"^sourcegr
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100403` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100503` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -26046,7 +26103,7 @@ sum(increase(src_apiworker_command_errors_total{op=~"setup.*",sg_job=~"^sourcegr
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100410` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100510` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -26068,7 +26125,7 @@ sum by (op)(increase(src_apiworker_command_total{op=~"setup.*",sg_job=~"^sourceg
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100411` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100511` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -26090,7 +26147,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_apiworker_command_duration_sec
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100412` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100512` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -26112,7 +26169,7 @@ sum by (op)(increase(src_apiworker_command_errors_total{op=~"setup.*",sg_job=~"^
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100413` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100513` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -26136,7 +26193,7 @@ sum by (op)(increase(src_apiworker_command_errors_total{op=~"setup.*",sg_job=~"^
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100500` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100600` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -26158,7 +26215,7 @@ sum(increase(src_apiworker_command_total{op=~"exec.*",sg_job=~"^sourcegraph-exec
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100501` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100601` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -26180,7 +26237,7 @@ sum  by (le)(rate(src_apiworker_command_duration_seconds_bucket{op=~"exec.*",sg_
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100502` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100602` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -26202,7 +26259,7 @@ sum(increase(src_apiworker_command_errors_total{op=~"exec.*",sg_job=~"^sourcegra
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100503` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100603` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -26224,7 +26281,7 @@ sum(increase(src_apiworker_command_errors_total{op=~"exec.*",sg_job=~"^sourcegra
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100510` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100610` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -26246,7 +26303,7 @@ sum by (op)(increase(src_apiworker_command_total{op=~"exec.*",sg_job=~"^sourcegr
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100511` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100611` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -26268,7 +26325,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_apiworker_command_duration_sec
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100512` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100612` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -26290,7 +26347,7 @@ sum by (op)(increase(src_apiworker_command_errors_total{op=~"exec.*",sg_job=~"^s
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100513` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100613` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -26314,7 +26371,7 @@ sum by (op)(increase(src_apiworker_command_errors_total{op=~"exec.*",sg_job=~"^s
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100600` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100700` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -26336,7 +26393,7 @@ sum(increase(src_apiworker_command_total{op=~"teardown.*",sg_job=~"^sourcegraph-
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100601` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100701` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -26358,7 +26415,7 @@ sum  by (le)(rate(src_apiworker_command_duration_seconds_bucket{op=~"teardown.*"
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100602` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100702` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -26380,7 +26437,7 @@ sum(increase(src_apiworker_command_errors_total{op=~"teardown.*",sg_job=~"^sourc
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100603` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100703` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -26402,7 +26459,7 @@ sum(increase(src_apiworker_command_errors_total{op=~"teardown.*",sg_job=~"^sourc
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100610` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100710` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -26424,7 +26481,7 @@ sum by (op)(increase(src_apiworker_command_total{op=~"teardown.*",sg_job=~"^sour
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100611` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100711` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -26446,7 +26503,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_apiworker_command_duration_sec
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100612` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100712` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -26468,7 +26525,7 @@ sum by (op)(increase(src_apiworker_command_errors_total{op=~"teardown.*",sg_job=
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100613` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100713` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -26494,7 +26551,7 @@ Indicates the amount of CPU time excluding idle and iowait time, divided by the 
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100700` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100800` on your Sourcegraph instance.
 
 
 <details>
@@ -26517,7 +26574,7 @@ Indicates the average summed time a number of (but strictly not all) non-idle pr
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100701` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100801` on your Sourcegraph instance.
 
 
 <details>
@@ -26540,7 +26597,7 @@ Indicates the amount of available memory (including cache and buffers) as a perc
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100710` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100810` on your Sourcegraph instance.
 
 
 <details>
@@ -26563,7 +26620,7 @@ Indicates the efficiency of page reclaim, calculated as pgsteal/pgscan. Optimal 
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100711` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100811` on your Sourcegraph instance.
 
 
 <details>
@@ -26586,7 +26643,7 @@ Indicates the amount of time all non-idle processes were stalled waiting on memo
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100712` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100812` on your Sourcegraph instance.
 
 
 <details>
@@ -26609,7 +26666,7 @@ Indicates the percentage of time a disk was busy. If this is less than 100%, the
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100720` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100820` on your Sourcegraph instance.
 
 
 <details>
@@ -26632,7 +26689,7 @@ Indicates the number of outstanding/queued IO requests. High but short-lived que
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100721` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100821` on your Sourcegraph instance.
 
 
 <details>
@@ -26655,7 +26712,7 @@ Indicates the averaged amount of time for which all non-idle processes were stal
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100722` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100822` on your Sourcegraph instance.
 
 
 <details>
@@ -26678,7 +26735,7 @@ Indicates the average summed receiving throughput of all network interfaces. Thi
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100730` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100830` on your Sourcegraph instance.
 
 
 <details>
@@ -26701,7 +26758,7 @@ Number of dropped received packets. This can happen if the receive queues/buffer
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100731` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100831` on your Sourcegraph instance.
 
 
 <details>
@@ -26724,7 +26781,7 @@ Number of bad/malformed packets received. https://www.kernel.org/doc/html/latest
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100732` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100832` on your Sourcegraph instance.
 
 
 <details>
@@ -26747,7 +26804,7 @@ Indicates the average summed transmitted throughput of all network interfaces. T
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100740` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100840` on your Sourcegraph instance.
 
 
 <details>
@@ -26770,7 +26827,7 @@ Number of dropped transmitted packets. This can happen if the receiving side`s r
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100741` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100841` on your Sourcegraph instance.
 
 
 <details>
@@ -26793,7 +26850,7 @@ Number of packet transmission errors. This is distinct from tx packet dropping, 
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100742` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100842` on your Sourcegraph instance.
 
 
 <details>
@@ -26818,7 +26875,7 @@ Indicates the amount of CPU time excluding idle and iowait time, divided by the 
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100800` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100900` on your Sourcegraph instance.
 
 
 <details>
@@ -26841,7 +26898,7 @@ Indicates the average summed time a number of (but strictly not all) non-idle pr
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100801` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100901` on your Sourcegraph instance.
 
 
 <details>
@@ -26864,7 +26921,7 @@ Indicates the amount of available memory (including cache and buffers) as a perc
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100810` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100910` on your Sourcegraph instance.
 
 
 <details>
@@ -26887,7 +26944,7 @@ Indicates the efficiency of page reclaim, calculated as pgsteal/pgscan. Optimal 
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100811` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100911` on your Sourcegraph instance.
 
 
 <details>
@@ -26910,7 +26967,7 @@ Indicates the amount of time all non-idle processes were stalled waiting on memo
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100812` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100912` on your Sourcegraph instance.
 
 
 <details>
@@ -26933,7 +26990,7 @@ Indicates the percentage of time a disk was busy. If this is less than 100%, the
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100820` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100920` on your Sourcegraph instance.
 
 
 <details>
@@ -26956,7 +27013,7 @@ Indicates the number of outstanding/queued IO requests. High but short-lived que
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100821` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100921` on your Sourcegraph instance.
 
 
 <details>
@@ -26979,7 +27036,7 @@ Indicates the averaged amount of time for which all non-idle processes were stal
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100822` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100922` on your Sourcegraph instance.
 
 
 <details>
@@ -27002,7 +27059,7 @@ Indicates the average summed receiving throughput of all network interfaces. Thi
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100830` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100930` on your Sourcegraph instance.
 
 
 <details>
@@ -27025,7 +27082,7 @@ Number of dropped received packets. This can happen if the receive queues/buffer
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100831` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100931` on your Sourcegraph instance.
 
 
 <details>
@@ -27048,7 +27105,7 @@ Number of bad/malformed packets received. https://www.kernel.org/doc/html/latest
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100832` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100932` on your Sourcegraph instance.
 
 
 <details>
@@ -27071,7 +27128,7 @@ Indicates the average summed transmitted throughput of all network interfaces. T
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100840` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100940` on your Sourcegraph instance.
 
 
 <details>
@@ -27094,7 +27151,7 @@ Number of dropped transmitted packets. This can happen if the receiving side`s r
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100841` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100941` on your Sourcegraph instance.
 
 
 <details>
@@ -27117,7 +27174,7 @@ Number of packet transmission errors. This is distinct from tx packet dropping, 
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100842` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100942` on your Sourcegraph instance.
 
 
 <details>
@@ -27142,7 +27199,7 @@ A high value here indicates a possible goroutine leak.
 
 Refer to the [alerts reference](alerts#executor-go_goroutines) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100900` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=101000` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -27164,7 +27221,7 @@ max by(sg_instance) (go_goroutines{sg_job=~".*sourcegraph-executors"})
 
 Refer to the [alerts reference](alerts#executor-go_gc_duration_seconds) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100901` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=101001` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -30516,6 +30573,32 @@ sum by (op)(increase(src_codeintel_uploads_store_errors_total{job=~"^${source:re
 
 <br />
 
+### Code Intelligence &gt; Uploads: Codeintel: Uploads &gt; Supersession
+
+#### codeintel-uploads: codeintel_uploads_queued_superseded_total
+
+<p class="subtitle">Queued upload records superseded every 5m</p>
+
+Number of queued upload records superseded by newer queued uploads
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100200` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_codeintel_uploads_queued_superseded_total{job=~"^${source:regex}.*"}[5m]))
+```
+</details>
+
+<br />
+
 ### Code Intelligence &gt; Uploads: Codeintel: Uploads &gt; GQL Transport
 
 #### codeintel-uploads: codeintel_uploads_transport_graphql_total
@@ -30524,7 +30607,7 @@ sum by (op)(increase(src_codeintel_uploads_store_errors_total{job=~"^${source:re
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100200` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100300` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -30546,7 +30629,7 @@ sum(increase(src_codeintel_uploads_transport_graphql_total{job=~"^${source:regex
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100201` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100301` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -30568,7 +30651,7 @@ sum  by (le)(rate(src_codeintel_uploads_transport_graphql_duration_seconds_bucke
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100202` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100302` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -30590,7 +30673,7 @@ sum(increase(src_codeintel_uploads_transport_graphql_errors_total{job=~"^${sourc
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100203` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100303` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -30612,7 +30695,7 @@ sum(increase(src_codeintel_uploads_transport_graphql_errors_total{job=~"^${sourc
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100210` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100310` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -30634,7 +30717,7 @@ sum by (op)(increase(src_codeintel_uploads_transport_graphql_total{job=~"^${sour
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100211` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100311` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -30656,7 +30739,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_codeintel_uploads_transport_gr
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100212` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100312` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -30678,7 +30761,7 @@ sum by (op)(increase(src_codeintel_uploads_transport_graphql_errors_total{job=~"
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100213` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100313` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -30702,7 +30785,7 @@ sum by (op)(increase(src_codeintel_uploads_transport_graphql_errors_total{job=~"
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100300` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100400` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -30724,7 +30807,7 @@ sum(increase(src_codeintel_uploads_transport_http_total{job=~"^${source:regex}.*
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100301` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100401` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -30746,7 +30829,7 @@ sum  by (le)(rate(src_codeintel_uploads_transport_http_duration_seconds_bucket{j
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100302` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100402` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -30768,7 +30851,7 @@ sum(increase(src_codeintel_uploads_transport_http_errors_total{job=~"^${source:r
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100303` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100403` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -30790,7 +30873,7 @@ sum(increase(src_codeintel_uploads_transport_http_errors_total{job=~"^${source:r
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100310` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100410` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -30812,7 +30895,7 @@ sum by (op)(increase(src_codeintel_uploads_transport_http_total{job=~"^${source:
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100311` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100411` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -30834,7 +30917,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_codeintel_uploads_transport_ht
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100312` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100412` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -30856,7 +30939,7 @@ sum by (op)(increase(src_codeintel_uploads_transport_http_errors_total{job=~"^${
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100313` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100413` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -30882,7 +30965,7 @@ Number of repositories scanned for data retention
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100400` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100500` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -30906,7 +30989,7 @@ Number of codeintel upload records scanned for data retention
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100401` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100501` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -30930,7 +31013,7 @@ Number of commits reachable from a codeintel upload record scanned for data rete
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100402` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100502` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -30954,7 +31037,7 @@ Number of codeintel upload records marked as expired
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100403` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100503` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -30980,7 +31063,7 @@ The number of candidate records considered for cleanup.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100500` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100600` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31004,7 +31087,7 @@ The number of candidate records altered as part of cleanup.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100501` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100601` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31026,7 +31109,7 @@ sum(increase(src_codeintel_uploads_janitor_unknown_repository_records_altered_to
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100510` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100610` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31048,7 +31131,7 @@ sum by (op)(increase(src_codeintel_uploads_janitor_unknown_repository_total{job=
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100511` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100611` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31070,7 +31153,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_codeintel_uploads_janitor_unkn
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100512` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100612` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31092,7 +31175,7 @@ sum by (op)(increase(src_codeintel_uploads_janitor_unknown_repository_errors_tot
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100513` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100613` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31118,7 +31201,7 @@ The number of candidate records considered for cleanup.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100600` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100700` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31142,7 +31225,7 @@ The number of candidate records altered as part of cleanup.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100601` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100701` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31164,7 +31247,7 @@ sum(increase(src_codeintel_uploads_janitor_unknown_commit_records_altered_total{
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100610` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100710` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31186,7 +31269,7 @@ sum by (op)(increase(src_codeintel_uploads_janitor_unknown_commit_total{job=~"^$
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100611` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100711` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31208,7 +31291,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_codeintel_uploads_janitor_unkn
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100612` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100712` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31230,7 +31313,7 @@ sum by (op)(increase(src_codeintel_uploads_janitor_unknown_commit_errors_total{j
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100613` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100713` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31256,7 +31339,7 @@ The number of candidate records considered for cleanup.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100700` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100800` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31280,7 +31363,7 @@ The number of candidate records altered as part of cleanup.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100701` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100801` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31302,7 +31385,7 @@ sum(increase(src_codeintel_uploads_janitor_abandoned_records_altered_total{job=~
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100710` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100810` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31324,7 +31407,7 @@ sum by (op)(increase(src_codeintel_uploads_janitor_abandoned_total{job=~"^${sour
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100711` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100811` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31346,7 +31429,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_codeintel_uploads_janitor_aban
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100712` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100812` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31368,7 +31451,7 @@ sum by (op)(increase(src_codeintel_uploads_janitor_abandoned_errors_total{job=~"
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100713` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100813` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31394,7 +31477,7 @@ The number of candidate records considered for cleanup.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100800` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100900` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31418,7 +31501,7 @@ The number of candidate records altered as part of cleanup.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100801` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100901` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31440,7 +31523,7 @@ sum(increase(src_codeintel_uploads_expirer_unreferenced_records_altered_total{jo
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100810` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100910` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31462,7 +31545,7 @@ sum by (op)(increase(src_codeintel_uploads_expirer_unreferenced_total{job=~"^${s
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100811` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100911` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31484,7 +31567,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_codeintel_uploads_expirer_unre
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100812` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100912` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31506,7 +31589,7 @@ sum by (op)(increase(src_codeintel_uploads_expirer_unreferenced_errors_total{job
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100813` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100913` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31532,7 +31615,7 @@ The number of candidate records considered for cleanup.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100900` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101000` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31556,7 +31639,7 @@ The number of candidate records altered as part of cleanup.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100901` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101001` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31578,7 +31661,7 @@ sum(increase(src_codeintel_uploads_expirer_unreferenced_graph_records_altered_to
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100910` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101010` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31600,7 +31683,7 @@ sum by (op)(increase(src_codeintel_uploads_expirer_unreferenced_graph_total{job=
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100911` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101011` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31622,7 +31705,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_codeintel_uploads_expirer_unre
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100912` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101012` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31644,7 +31727,7 @@ sum by (op)(increase(src_codeintel_uploads_expirer_unreferenced_graph_errors_tot
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=100913` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101013` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31670,7 +31753,7 @@ The number of candidate records considered for cleanup.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101000` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101100` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31694,7 +31777,7 @@ The number of candidate records altered as part of cleanup.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101001` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101101` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31716,7 +31799,7 @@ sum(increase(src_codeintel_uploads_hard_deleter_records_altered_total{job=~"^${s
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101010` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101110` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31738,7 +31821,7 @@ sum by (op)(increase(src_codeintel_uploads_hard_deleter_total{job=~"^${source:re
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101011` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101111` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31760,7 +31843,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_codeintel_uploads_hard_deleter
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101012` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101112` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31782,7 +31865,7 @@ sum by (op)(increase(src_codeintel_uploads_hard_deleter_errors_total{job=~"^${so
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101013` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101113` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31808,7 +31891,7 @@ The number of candidate records considered for cleanup.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101100` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101200` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31832,7 +31915,7 @@ The number of candidate records altered as part of cleanup.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101101` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101201` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31854,7 +31937,7 @@ sum(increase(src_codeintel_uploads_janitor_audit_logs_records_altered_total{job=
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101110` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101210` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31876,7 +31959,7 @@ sum by (op)(increase(src_codeintel_uploads_janitor_audit_logs_total{job=~"^${sou
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101111` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101211` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31898,7 +31981,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_codeintel_uploads_janitor_audi
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101112` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101212` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31920,7 +32003,7 @@ sum by (op)(increase(src_codeintel_uploads_janitor_audit_logs_errors_total{job=~
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101113` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101213` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31946,7 +32029,7 @@ The number of candidate records considered for cleanup.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101200` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101300` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31970,7 +32053,7 @@ The number of candidate records altered as part of cleanup.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101201` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101301` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -31992,7 +32075,7 @@ sum(increase(src_codeintel_uploads_janitor_scip_documents_records_altered_total{
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101210` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101310` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -32014,7 +32097,7 @@ sum by (op)(increase(src_codeintel_uploads_janitor_scip_documents_total{job=~"^$
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101211` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101311` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -32036,7 +32119,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_codeintel_uploads_janitor_scip
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101212` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101312` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -32058,7 +32141,7 @@ sum by (op)(increase(src_codeintel_uploads_janitor_scip_documents_errors_total{j
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101213` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101313` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -32084,7 +32167,7 @@ The number of candidate records considered for cleanup.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101300` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101400` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -32108,7 +32191,7 @@ The number of candidate records altered as part of cleanup.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101301` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101401` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -32130,7 +32213,7 @@ sum(increase(src_codeintel_uploads_reconciler_scip_metadata_records_altered_tota
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101310` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101410` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -32152,7 +32235,7 @@ sum by (op)(increase(src_codeintel_uploads_reconciler_scip_metadata_total{job=~"
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101311` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101411` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -32174,7 +32257,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_codeintel_uploads_reconciler_s
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101312` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101412` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -32196,7 +32279,7 @@ sum by (op)(increase(src_codeintel_uploads_reconciler_scip_metadata_errors_total
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101313` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101413` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -32222,7 +32305,7 @@ The number of candidate records considered for cleanup.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101400` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101500` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -32246,7 +32329,7 @@ The number of candidate records altered as part of cleanup.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101401` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101501` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -32268,7 +32351,7 @@ sum(increase(src_codeintel_uploads_reconciler_scip_data_records_altered_total{jo
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101410` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101510` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -32290,7 +32373,7 @@ sum by (op)(increase(src_codeintel_uploads_reconciler_scip_data_total{job=~"^${s
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101411` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101511` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -32312,7 +32395,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_codeintel_uploads_reconciler_s
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101412` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101512` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -32334,7 +32417,7 @@ sum by (op)(increase(src_codeintel_uploads_reconciler_scip_data_errors_total{job
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101413` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/codeintel-uploads/codeintel-uploads?viewPanel=101513` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -33327,6 +33410,912 @@ Query:
 
 ```
 sum(increase(src_meteringexporter_queue_metrics_reporter_errors_total{job=~"^worker.*"}[30m])) / (sum(increase(src_meteringexporter_queue_metrics_reporter_total{job=~"^worker.*"}[30m])) + sum(increase(src_meteringexporter_queue_metrics_reporter_errors_total{job=~"^worker.*"}[30m]))) * 100
+```
+</details>
+
+<br />
+
+### Metering: Metering: Credit usage notification routine operations
+
+#### metering: licensing_credit_usage_notifications_total
+
+<p class="subtitle">Credit usage notification routine operations every 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100400` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_licensing_credit_usage_notifications_total{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: licensing_credit_usage_notifications_99th_percentile_duration
+
+<p class="subtitle">Aggregate successful credit usage notification routine operation duration distribution over 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100401` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum  by (le)(rate(src_licensing_credit_usage_notifications_duration_seconds_bucket{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: licensing_credit_usage_notifications_errors_total
+
+<p class="subtitle">Credit usage notification routine operation errors every 30m</p>
+
+Refer to the [alerts reference](alerts#metering-licensing_credit_usage_notifications_errors_total) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100402` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_licensing_credit_usage_notifications_errors_total{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: licensing_credit_usage_notifications_error_rate
+
+<p class="subtitle">Credit usage notification routine operation error rate over 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100403` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_licensing_credit_usage_notifications_errors_total{job=~"^worker.*"}[30m])) / (sum(increase(src_licensing_credit_usage_notifications_total{job=~"^worker.*"}[30m])) + sum(increase(src_licensing_credit_usage_notifications_errors_total{job=~"^worker.*"}[30m]))) * 100
+```
+</details>
+
+<br />
+
+### Metering: Fast quota check routine (cached, latency-sensitive)
+
+#### metering: licensing_fast_quota_check_routine_total
+
+<p class="subtitle">Fast quota check probe operations every 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100500` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_licensing_fast_quota_check_routine_total{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: licensing_fast_quota_check_routine_99th_percentile_duration
+
+<p class="subtitle">Aggregate successful fast quota check probe operation duration distribution over 30m</p>
+
+Refer to the [alerts reference](alerts#metering-licensing_fast_quota_check_routine_99th_percentile_duration) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100501` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum  by (le)(rate(src_licensing_fast_quota_check_routine_duration_seconds_bucket{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: licensing_fast_quota_check_routine_errors_total
+
+<p class="subtitle">Fast quota check probe operation errors every 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100502` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_licensing_fast_quota_check_routine_errors_total{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### metering: licensing_fast_quota_check_routine_error_rate
+
+<p class="subtitle">Fast quota check probe operation error rate over 30m</p>
+
+Refer to the [alerts reference](alerts#metering-licensing_fast_quota_check_routine_error_rate) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100503` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_licensing_fast_quota_check_routine_errors_total{job=~"^worker.*"}[30m])) / (sum(increase(src_licensing_fast_quota_check_routine_total{job=~"^worker.*"}[30m])) + sum(increase(src_licensing_fast_quota_check_routine_errors_total{job=~"^worker.*"}[30m]))) * 100
+```
+</details>
+
+<br />
+
+### Metering: Metering V2 Connect client metrics
+
+#### metering: metering_v2_success_p99_duration_per_method
+
+<p class="subtitle">99th percentile success connect client duration per method over 2m</p>
+
+99th percentile duration of success outbound Connect calls to enterpriseportal.metering.v2.MeteringService, per method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100600` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.99, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v2.MeteringService",rpc_method=~"${metering_v2_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code=""}[2m])))
+```
+</details>
+
+<br />
+
+#### metering: metering_v2_success_p95_duration_per_method
+
+<p class="subtitle">95th percentile success connect client duration per method over 2m</p>
+
+95th percentile duration of success outbound Connect calls to enterpriseportal.metering.v2.MeteringService, per method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100601` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.95, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v2.MeteringService",rpc_method=~"${metering_v2_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code=""}[2m])))
+```
+</details>
+
+<br />
+
+#### metering: metering_v2_success_p90_duration_per_method
+
+<p class="subtitle">90th percentile success connect client duration per method over 2m</p>
+
+90th percentile duration of success outbound Connect calls to enterpriseportal.metering.v2.MeteringService, per method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100602` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.90, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v2.MeteringService",rpc_method=~"${metering_v2_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code=""}[2m])))
+```
+</details>
+
+<br />
+
+#### metering: metering_v2_failure_p99_duration_per_method
+
+<p class="subtitle">99th percentile failure connect client duration per method over 2m</p>
+
+99th percentile duration of failure outbound Connect calls to enterpriseportal.metering.v2.MeteringService, per method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100610` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.99, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v2.MeteringService",rpc_method=~"${metering_v2_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])))
+```
+</details>
+
+<br />
+
+#### metering: metering_v2_failure_p95_duration_per_method
+
+<p class="subtitle">95th percentile failure connect client duration per method over 2m</p>
+
+95th percentile duration of failure outbound Connect calls to enterpriseportal.metering.v2.MeteringService, per method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100611` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.95, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v2.MeteringService",rpc_method=~"${metering_v2_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])))
+```
+</details>
+
+<br />
+
+#### metering: metering_v2_failure_p90_duration_per_method
+
+<p class="subtitle">90th percentile failure connect client duration per method over 2m</p>
+
+90th percentile duration of failure outbound Connect calls to enterpriseportal.metering.v2.MeteringService, per method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100612` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.90, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v2.MeteringService",rpc_method=~"${metering_v2_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])))
+```
+</details>
+
+<br />
+
+#### metering: metering_v2_connect_request_rate_per_method
+
+<p class="subtitle">Connect request rate per method over 5m</p>
+
+Rate of outbound Connect calls to enterpriseportal.metering.v2.MeteringService, per method, over a 5 minute window.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100620` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (rpc_method) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.metering.v2.MeteringService",rpc_method=~"${metering_v2_method:regex}",job=~"${caller:regex}"}[5m]))
+```
+</details>
+
+<br />
+
+#### metering: metering_v2_connect_error_rate_per_method
+
+<p class="subtitle">Connect error percentage per method over 2m</p>
+
+Percentage of outbound Connect calls to enterpriseportal.metering.v2.MeteringService that returned a non-OK code, per method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100630` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+(100 * sum by (rpc_method) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.metering.v2.MeteringService",rpc_method=~"${metering_v2_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m]))) / sum by (rpc_method) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.metering.v2.MeteringService",rpc_method=~"${metering_v2_method:regex}",job=~"${caller:regex}"}[2m]))
+```
+</details>
+
+<br />
+
+#### metering: metering_v2_connect_error_rate_per_method_by_code
+
+<p class="subtitle">Connect error request rate per method and code over 2m</p>
+
+Rate of failing outbound Connect calls to enterpriseportal.metering.v2.MeteringService, broken down by method and connect error code.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100631` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+label_replace(sum by (rpc_method, rpc_connect_rpc_error_code) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.metering.v2.MeteringService",rpc_method=~"${metering_v2_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])), "rpc_connect_rpc_error_code", "ok", "rpc_connect_rpc_error_code", "")
+```
+</details>
+
+<br />
+
+#### metering: metering_v2_connect_response_code_distribution
+
+<p class="subtitle">Connect response code distribution per method over 2m</p>
+
+Rate of outbound Connect calls to enterpriseportal.metering.v2.MeteringService per method, broken down by rpc_connect_rpc_error_code. Successful calls (which carry no error-code attribute) are normalized to "ok".
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100640` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+label_replace(sum by (rpc_method, rpc_connect_rpc_error_code) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.metering.v2.MeteringService",rpc_method=~"${metering_v2_method:regex}",job=~"${caller:regex}"}[2m])), "rpc_connect_rpc_error_code", "ok", "rpc_connect_rpc_error_code", "")
+```
+</details>
+
+<br />
+
+### Metering: Metering V1 Connect client metrics
+
+#### metering: metering_v1_success_p99_duration_per_method
+
+<p class="subtitle">99th percentile success connect client duration per method over 2m</p>
+
+99th percentile duration of success outbound Connect calls to enterpriseportal.metering.v1.MeteringService, per method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100700` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.99, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v1.MeteringService",rpc_method=~"${metering_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code=""}[2m])))
+```
+</details>
+
+<br />
+
+#### metering: metering_v1_success_p95_duration_per_method
+
+<p class="subtitle">95th percentile success connect client duration per method over 2m</p>
+
+95th percentile duration of success outbound Connect calls to enterpriseportal.metering.v1.MeteringService, per method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100701` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.95, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v1.MeteringService",rpc_method=~"${metering_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code=""}[2m])))
+```
+</details>
+
+<br />
+
+#### metering: metering_v1_success_p90_duration_per_method
+
+<p class="subtitle">90th percentile success connect client duration per method over 2m</p>
+
+90th percentile duration of success outbound Connect calls to enterpriseportal.metering.v1.MeteringService, per method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100702` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.90, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v1.MeteringService",rpc_method=~"${metering_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code=""}[2m])))
+```
+</details>
+
+<br />
+
+#### metering: metering_v1_failure_p99_duration_per_method
+
+<p class="subtitle">99th percentile failure connect client duration per method over 2m</p>
+
+99th percentile duration of failure outbound Connect calls to enterpriseportal.metering.v1.MeteringService, per method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100710` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.99, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v1.MeteringService",rpc_method=~"${metering_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])))
+```
+</details>
+
+<br />
+
+#### metering: metering_v1_failure_p95_duration_per_method
+
+<p class="subtitle">95th percentile failure connect client duration per method over 2m</p>
+
+95th percentile duration of failure outbound Connect calls to enterpriseportal.metering.v1.MeteringService, per method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100711` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.95, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v1.MeteringService",rpc_method=~"${metering_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])))
+```
+</details>
+
+<br />
+
+#### metering: metering_v1_failure_p90_duration_per_method
+
+<p class="subtitle">90th percentile failure connect client duration per method over 2m</p>
+
+90th percentile duration of failure outbound Connect calls to enterpriseportal.metering.v1.MeteringService, per method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100712` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.90, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v1.MeteringService",rpc_method=~"${metering_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])))
+```
+</details>
+
+<br />
+
+#### metering: metering_v1_connect_request_rate_per_method
+
+<p class="subtitle">Connect request rate per method over 5m</p>
+
+Rate of outbound Connect calls to enterpriseportal.metering.v1.MeteringService, per method, over a 5 minute window.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100720` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (rpc_method) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.metering.v1.MeteringService",rpc_method=~"${metering_v1_method:regex}",job=~"${caller:regex}"}[5m]))
+```
+</details>
+
+<br />
+
+#### metering: metering_v1_connect_error_rate_per_method
+
+<p class="subtitle">Connect error percentage per method over 2m</p>
+
+Percentage of outbound Connect calls to enterpriseportal.metering.v1.MeteringService that returned a non-OK code, per method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100730` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+(100 * sum by (rpc_method) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.metering.v1.MeteringService",rpc_method=~"${metering_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m]))) / sum by (rpc_method) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.metering.v1.MeteringService",rpc_method=~"${metering_v1_method:regex}",job=~"${caller:regex}"}[2m]))
+```
+</details>
+
+<br />
+
+#### metering: metering_v1_connect_error_rate_per_method_by_code
+
+<p class="subtitle">Connect error request rate per method and code over 2m</p>
+
+Rate of failing outbound Connect calls to enterpriseportal.metering.v1.MeteringService, broken down by method and connect error code.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100731` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+label_replace(sum by (rpc_method, rpc_connect_rpc_error_code) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.metering.v1.MeteringService",rpc_method=~"${metering_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])), "rpc_connect_rpc_error_code", "ok", "rpc_connect_rpc_error_code", "")
+```
+</details>
+
+<br />
+
+#### metering: metering_v1_connect_response_code_distribution
+
+<p class="subtitle">Connect response code distribution per method over 2m</p>
+
+Rate of outbound Connect calls to enterpriseportal.metering.v1.MeteringService per method, broken down by rpc_connect_rpc_error_code. Successful calls (which carry no error-code attribute) are normalized to "ok".
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100740` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+label_replace(sum by (rpc_method, rpc_connect_rpc_error_code) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.metering.v1.MeteringService",rpc_method=~"${metering_v1_method:regex}",job=~"${caller:regex}"}[2m])), "rpc_connect_rpc_error_code", "ok", "rpc_connect_rpc_error_code", "")
+```
+</details>
+
+<br />
+
+### Metering: Broadcast Messages V1 Connect client metrics
+
+#### metering: broadcast_messages_v1_success_p99_duration_per_method
+
+<p class="subtitle">99th percentile success connect client duration per method over 2m</p>
+
+99th percentile duration of success outbound Connect calls to enterpriseportal.broadcastmessages.v1.BroadcastMessagesService, per method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100800` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.99, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.broadcastmessages.v1.BroadcastMessagesService",rpc_method=~"${broadcast_messages_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code=""}[2m])))
+```
+</details>
+
+<br />
+
+#### metering: broadcast_messages_v1_success_p95_duration_per_method
+
+<p class="subtitle">95th percentile success connect client duration per method over 2m</p>
+
+95th percentile duration of success outbound Connect calls to enterpriseportal.broadcastmessages.v1.BroadcastMessagesService, per method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100801` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.95, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.broadcastmessages.v1.BroadcastMessagesService",rpc_method=~"${broadcast_messages_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code=""}[2m])))
+```
+</details>
+
+<br />
+
+#### metering: broadcast_messages_v1_success_p90_duration_per_method
+
+<p class="subtitle">90th percentile success connect client duration per method over 2m</p>
+
+90th percentile duration of success outbound Connect calls to enterpriseportal.broadcastmessages.v1.BroadcastMessagesService, per method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100802` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.90, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.broadcastmessages.v1.BroadcastMessagesService",rpc_method=~"${broadcast_messages_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code=""}[2m])))
+```
+</details>
+
+<br />
+
+#### metering: broadcast_messages_v1_failure_p99_duration_per_method
+
+<p class="subtitle">99th percentile failure connect client duration per method over 2m</p>
+
+99th percentile duration of failure outbound Connect calls to enterpriseportal.broadcastmessages.v1.BroadcastMessagesService, per method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100810` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.99, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.broadcastmessages.v1.BroadcastMessagesService",rpc_method=~"${broadcast_messages_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])))
+```
+</details>
+
+<br />
+
+#### metering: broadcast_messages_v1_failure_p95_duration_per_method
+
+<p class="subtitle">95th percentile failure connect client duration per method over 2m</p>
+
+95th percentile duration of failure outbound Connect calls to enterpriseportal.broadcastmessages.v1.BroadcastMessagesService, per method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100811` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.95, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.broadcastmessages.v1.BroadcastMessagesService",rpc_method=~"${broadcast_messages_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])))
+```
+</details>
+
+<br />
+
+#### metering: broadcast_messages_v1_failure_p90_duration_per_method
+
+<p class="subtitle">90th percentile failure connect client duration per method over 2m</p>
+
+90th percentile duration of failure outbound Connect calls to enterpriseportal.broadcastmessages.v1.BroadcastMessagesService, per method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100812` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.90, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.broadcastmessages.v1.BroadcastMessagesService",rpc_method=~"${broadcast_messages_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])))
+```
+</details>
+
+<br />
+
+#### metering: broadcast_messages_v1_connect_request_rate_per_method
+
+<p class="subtitle">Connect request rate per method over 5m</p>
+
+Rate of outbound Connect calls to enterpriseportal.broadcastmessages.v1.BroadcastMessagesService, per method, over a 5 minute window.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100820` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (rpc_method) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.broadcastmessages.v1.BroadcastMessagesService",rpc_method=~"${broadcast_messages_v1_method:regex}",job=~"${caller:regex}"}[5m]))
+```
+</details>
+
+<br />
+
+#### metering: broadcast_messages_v1_connect_error_rate_per_method
+
+<p class="subtitle">Connect error percentage per method over 2m</p>
+
+Percentage of outbound Connect calls to enterpriseportal.broadcastmessages.v1.BroadcastMessagesService that returned a non-OK code, per method.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100830` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+(100 * sum by (rpc_method) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.broadcastmessages.v1.BroadcastMessagesService",rpc_method=~"${broadcast_messages_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m]))) / sum by (rpc_method) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.broadcastmessages.v1.BroadcastMessagesService",rpc_method=~"${broadcast_messages_v1_method:regex}",job=~"${caller:regex}"}[2m]))
+```
+</details>
+
+<br />
+
+#### metering: broadcast_messages_v1_connect_error_rate_per_method_by_code
+
+<p class="subtitle">Connect error request rate per method and code over 2m</p>
+
+Rate of failing outbound Connect calls to enterpriseportal.broadcastmessages.v1.BroadcastMessagesService, broken down by method and connect error code.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100831` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+label_replace(sum by (rpc_method, rpc_connect_rpc_error_code) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.broadcastmessages.v1.BroadcastMessagesService",rpc_method=~"${broadcast_messages_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])), "rpc_connect_rpc_error_code", "ok", "rpc_connect_rpc_error_code", "")
+```
+</details>
+
+<br />
+
+#### metering: broadcast_messages_v1_connect_response_code_distribution
+
+<p class="subtitle">Connect response code distribution per method over 2m</p>
+
+Rate of outbound Connect calls to enterpriseportal.broadcastmessages.v1.BroadcastMessagesService per method, broken down by rpc_connect_rpc_error_code. Successful calls (which carry no error-code attribute) are normalized to "ok".
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100840` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+label_replace(sum by (rpc_method, rpc_connect_rpc_error_code) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.broadcastmessages.v1.BroadcastMessagesService",rpc_method=~"${broadcast_messages_v1_method:regex}",job=~"${caller:regex}"}[2m])), "rpc_connect_rpc_error_code", "ok", "rpc_connect_rpc_error_code", "")
 ```
 </details>
 
