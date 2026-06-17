@@ -377,7 +377,7 @@ More details on how to create and configure a subchart can be found in the [helm
 
 ### Tracing
 
-Sourcegraph supports HTTP tracing to help troubleshoot issues. See [Tracing](/self-hosted/observability/tracing) for details.
+Sourcegraph supports tracing to help troubleshoot issues. See [Tracing](/self-hosted/observability/tracing) for details.
 
 To enable tracing on your Helm instance, you'll need to either:
 
@@ -394,6 +394,37 @@ Sourcegraph bundles a Jaeger instance, but it is disabled by default. You can en
 jaeger:
     enabled: true
 ```
+
+#### Customize Jaeger configuration
+
+Starting with Sourcegraph 7.1.0, the bundled Jaeger instance uses an [OpenTelemetry Collector-style YAML configuration](https://www.jaegertracing.io/docs/2.16/configuration/) instead of CLI flags. Common settings are exposed through the `jaeger.config` Helm value.
+
+You can override these settings in your Helm values override file. For example, to increase the maximum number of in-memory traces:
+
+```yaml
+jaeger:
+    enabled: true
+    config:
+        maxTraces: 50000
+```
+
+Or using `--set` on the command line:
+
+```bash
+helm upgrade sourcegraph sourcegraph/sourcegraph \
+    --set jaeger.config.maxTraces=50000
+```
+
+The available configuration options are:
+
+| Value | Default | Description |
+| --- | --- | --- |
+| `jaeger.config.maxTraces` | `20000` | Maximum number of traces stored in memory |
+| `jaeger.config.logLevel` | `info` | Log level (`debug`, `info`, `warn`, `error`) |
+| `jaeger.config.samplingDefaultProbability` | `1.0` | Default sampling probability (0.0–1.0) returned to services that query Jaeger for sampling config |
+| `jaeger.config.existingConfigMap` | `""` | Name of a pre-existing ConfigMap containing a `jaeger-config.yaml` key. When set, the chart skips creating its own ConfigMap and uses yours instead |
+
+For advanced customization beyond these options, set `jaeger.config.existingConfigMap` to the name of your own ConfigMap containing a full `jaeger-config.yaml` key. See the [Jaeger v2 configuration reference](https://www.jaegertracing.io/docs/2.16/configuration/) for all available options.
 
 #### Configure OpenTelemetry Collector to use an external tracing backend
 
@@ -487,6 +518,16 @@ This section is aimed at providing high-level guidance on deploying Sourcegraph 
 - The ability to provision persistent volumes, e.g. have Block Storage [CSI storage driver](https://kubernetes-csi.github.io/docs/drivers.html) installed
 - An Ingress Controller installed, e.g. platform native ingress controller, [NGINX Ingress Controller].
 - The ability to create DNS records for Sourcegraph, e.g. `sourcegraph.company.com`
+
+<Callout type="warning">
+	Sourcegraph uses [Server-Sent Events (SSE)](https://en.wikipedia.org/wiki/Server-sent_events)
+	for streaming search results and [Deep Search](/deep-search) responses. Your ingress controller or
+	load balancer must be configured to allow connections to remain open for at least
+	**5 minutes**. The default timeout for many ingress controllers and cloud load
+	balancers is significantly lower and will cause streaming responses to be terminated
+	prematurely. Consult your ingress controller's documentation for the appropriate
+	timeout annotation or setting.
+</Callout>
 
 ### Configure Sourcegraph on Google Kubernetes Engine (GKE)
 

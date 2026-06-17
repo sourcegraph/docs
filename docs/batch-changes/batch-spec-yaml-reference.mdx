@@ -68,7 +68,9 @@ description: |
 
 ## `on`
 
-The set of repositories (and branches) on which the batch change would run. It's specified as a list of search queries (that match repositories) and specific repositories.
+The set of repositories on which the batch change would run. It's specified as a list of search queries (that match repositories) and specific repositories.
+
+Repositories matched by [`on.repositoriesMatchingQuery`](#onrepositoriesmatchingquery) run on each repository's default branch unless overridden by a more specific [`on.repository`](#onrepository) entry that sets `branch` or `branches`.
 
 ### Examples
 
@@ -80,7 +82,9 @@ on:
 
 ## `on.repositoriesMatchingQuery`
 
-A Sourcegraph search query that matches a set of repositories (and branches). Each matched repository branch is added to the list of repositories on which the batch change will run.
+A Sourcegraph search query that matches a set of repositories. Each matched repository is added to the list of repositories on which the batch change will run.
+
+Matched repositories run on their default branch. Branch selectors in the search query are used to find repositories, but do not set the target branch for the batch change. To target non-default branches, add explicit [`on.repository`](#onrepository) entries with `branch` or `branches`.
 
 Your search query should answer the question, "Where do I want to run this batch change?". Search result matches for things like commits, symbols, or file owners will be ignored.
 

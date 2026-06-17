@@ -21,7 +21,7 @@ All site configuration options and their default values are shown below.
 
 {/* SCHEMA_SYNC_START: admin/config/site.schema.json */}
 {/* WARNING: This section is auto-generated during releases. Do not edit manually. */}
-{/* Last updated: 2026-03-02T17:40:22Z */}
+{/* Last updated: 2026-06-16T23:55:06Z */}
 ```json
 {
 
@@ -75,6 +75,9 @@ All site configuration options and their default values are shown below.
 
 	// When enabled, all branches created by batch changes will be pushed to forks of the original repository.
 	"batchChanges.enforceForks": false,
+
+	// Enables/disables native server-side execution for Batch Changes workspaces. ONLY ENABLE THIS IF YOU ARE USING EXECUTORS ON KUBERNETES.
+	"batchChanges.nativeServerSideExecution": false,
 
 	// Reject unverified commits when creating a Batch Change
 	"batchChanges.rejectUnverifiedCommit": false,
@@ -177,9 +180,6 @@ All site configuration options and their default values are shown below.
 	// Enable/disable sharing of Deep Search conversations via read tokens
 	"deepSearch.sharing.enabled": false,
 
-	// Use database-backed worker for Deep Search question processing instead of in-memory worker pool. Enables persistence across frontend restarts.
-	"deepSearch.worker.enabled": true,
-
 	// The rate limit (in requests per hour) for the default rate limiter in the rate limiters registry. By default this is disabled and the default rate limit is infinity.
 	"defaultRateLimit": -1,
 
@@ -268,6 +268,7 @@ All site configuration options and their default values are shown below.
 
 	// Experimental features and settings.
 	"experimentalFeatures": {
+		"batchChanges.enableAgentWebSearch": false,
 		"batchChanges.enableForkNameSuffix": false,
 		"batchChanges.enablePerforce": false,
 		"codeintelSyntacticIndexing.enabled": false,
@@ -284,7 +285,7 @@ All site configuration options and their default values are shown below.
 			"extsvc.gitlab": false
 		},
 		"deepSearch.enabled": false,
-		"deepSearch.model": "anthropic::2024-10-22::claude-sonnet-4-latest",
+		"deepSearch.model": "anthropic::2024-10-22::claude-sonnet-4-6-latest",
 		"deepSearch.sharing.enabled": false,
 		"deepSearch.showCodyWeb": false,
 		"enableGithubInternalRepoVisibility": false,
@@ -311,7 +312,6 @@ All site configuration options and their default values are shown below.
 			"requireUpperandLowerCase": true
 		},
 		"perforceChangelistMapping": "enabled",
-		"preciseCodeNavFlow": "v2",
 		"pythonPackages": "disabled",
 		"ranking": {
 			"flushWallTimeMS": 500,
@@ -444,6 +444,9 @@ All site configuration options and their default values are shown below.
 	// ⚠️  DEPRECATED: DEPRECATED: Configure maxRepos in search.limits
 	// DEPRECATED: Configure maxRepos in search.limits
 	"maxReposToSearch": -1,
+
+	// Enable/disable MCP API endpoints under `/.api/mcp`. When disabled, MCP endpoints return 404.
+	"mcp.enabled": true,
 
 	"modelConfiguration": null,
 
@@ -645,7 +648,8 @@ All site configuration options and their default values are shown below.
 
 	"tls.external": null,
 
-	// The channel on which to automatically check for Sourcegraph updates.
+	// ⚠️  DEPRECATED: DEPRECATED: This setting has no effect.
+	// DEPRECATED: This setting has no effect.
 	// Valid options: "release", "none"
 	// Other example values:
 	// - "none"
@@ -673,9 +677,11 @@ All site configuration options and their default values are shown below.
 	//     "enabled": true
 	//   }
 	// - {
+	//     "disabledMessage": "Need an account? [Open a ticket](https://tickets.example.com/new) to request access.",
 	//     "enabled": false
 	//   }
 	"auth.accessRequest": {
+		"disabledMessage": null,
 		"enabled": true
 	},
 
@@ -718,6 +724,9 @@ All site configuration options and their default values are shown below.
 		]
 	},
 
+	// When enabled, the sign-in and sign-up pages can be loaded inside an iframe (e.g. for embedded applications). When disabled (the default), these pages reject framing requests using Sec-Fetch-Dest/Sec-Fetch-Site fetch metadata headers to prevent clickjacking attacks. Password reset endpoints are always protected regardless of this setting.
+	"auth.allowEmbeddedAuth": false,
+
 	// IP allowlist for access to the Sourcegraph instance. If set, only requests from these IP addresses will be allowed. By default client IP is inferred connected client IP address, and you may configure to use a request header to determine the user IP.
 	"auth.allowedIpAddress": {
 		"clientIpAddress": null,
@@ -734,7 +743,7 @@ All site configuration options and their default values are shown below.
 	// When enabled, users are required to connect at least one external account to their Sourcegraph account. Site admins are exempt from this requirement.
 	"auth.enforceExternalAccountConnection": false,
 
-	// Enables OAuth 2.0 Dynamic Client Registration (RFC 7591) for the Sourcegraph identity provider. When enabled, OAuth clients can self-register programmatically instead of requiring manual pre-configuration. Required for MCP clients and other applications that use dynamic registration for authorization.
+	// Enables OAuth 2.0 Dynamic Client Registration (RFC 7591) for the Sourcegraph identity provider. When enabled, OAuth clients can self-register programmatically instead of requiring manual pre-configuration. This is used for MCP clients; if `mcp.enabled` is `false`, this setting is treated as `false`.
 	"auth.idpDynamicClientRegistrationEnabled": true,
 
 	// The config options for account lockout
@@ -897,7 +906,7 @@ All site configuration options and their default values are shown below.
 
 	// The tag to use for the batcheshelper image in executors when using native execution. Use this value to use a custom tag. Sourcegraph by default uses the best match, so use this setting only if you really need to overwrite it and make sure to keep it updated.
 	// Other example values:
-	// - "4.1.0"
+	// - "7.2.0"
 	"executors.batcheshelperImageTag": null,
 
 	// The URL where Sourcegraph executors can reach the Sourcegraph instance. If not set, defaults to externalURL. URLs with a path (other than `/`) are not allowed. For Docker executors, the special hostname `host.docker.internal` can be used to refer to the Docker container's host.
@@ -913,10 +922,6 @@ All site configuration options and their default values are shown below.
 	// The configuration for multiqueue executors.
 	"executors.multiqueue": {
 		"dequeueCacheConfig": {
-			"agenticbatchchanges": {
-				"limit": 50,
-				"weight": 1
-			},
 			"batches": {
 				"limit": 50,
 				"weight": 4
@@ -933,7 +938,7 @@ All site configuration options and their default values are shown below.
 
 	// The tag to use for the src-cli image in executors. Use this value to use a custom tag. Sourcegraph by default uses the best match, so use this setting only if you really need to overwrite it and make sure to keep it updated.
 	// Other example values:
-	// - "4.1.0"
+	// - "7.2.0"
 	"executors.srcCLIImageTag": null,
 
 

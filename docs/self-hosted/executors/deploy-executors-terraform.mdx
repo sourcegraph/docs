@@ -1,8 +1,8 @@
 # Deploying Sourcegraph executors using Terraform on AWS or GCP
 
 [Terraform modules](https://learn.hashicorp.com/tutorials/terraform/module-use?in=terraform/modules) are provided to
-provision machines running executors on [AWS](https://sourcegraph.com/github.com/sourcegraph/terraform-aws-executors)
-and [Google Cloud](https://sourcegraph.com/github.com/sourcegraph/terraform-google-executors).
+provision machines running executors on [AWS](https://github.com/sourcegraph/terraform-aws-executors)
+and [Google Cloud](https://github.com/sourcegraph/terraform-google-executors).
 
 ## Basic Definition
 
@@ -50,14 +50,14 @@ module "executors" {
 
 See the Terraform Modules for additional configurations.
 
--   [AWS](https://sourcegraph.com/github.com/sourcegraph/terraform-aws-executors/-/blob/modules/executors/variables.tf)
--   [Google](https://sourcegraph.com/github.com/sourcegraph/terraform-google-executors/-/blob/modules/executors/variables.tf)
+-   [AWS](https://github.com/sourcegraph/terraform-aws-executors/blob/main/modules/executors/variables.tf)
+-   [Google](https://github.com/sourcegraph/terraform-google-executors/blob/main/modules/executors/variables.tf)
 
 ## Terraform Version
 
 Terraform modules `4.2.x` and above allow Terraform from `1.1.x` to `< 2.x` to be used.
 
-If using a Terraform module `4.1.x` or below, use [tfenv](https://sourcegraph.com/github.com/tfutils/tfenv) to install Terraform
+If using a Terraform module `4.1.x` or below, use [tfenv](https://github.com/tfutils/tfenv) to install Terraform
 1.1+.
 
 ```shell
@@ -158,16 +158,16 @@ All regions are supported.
 
 The following examples provision a single executor to pull from the `codeintel` queue.
 
--   [AWS example](https://sourcegraph.com/github.com/sourcegraph/terraform-aws-executors/-/tree/examples/single-executor)
--   [Google example](https://sourcegraph.com/github.com/sourcegraph/terraform-google-executors/-/tree/examples/single-executor)
+-   [AWS example](https://github.com/sourcegraph/terraform-aws-executors/tree/main/examples/single-executor)
+-   [Google example](https://github.com/sourcegraph/terraform-google-executors/tree/main/examples/single-executor)
 
 ### Multiple Executors
 
 The following examples provision two executors, one to pull from the `codeintel` queue and the other for the `batches`
 queue.
 
--   [AWS example](https://sourcegraph.com/github.com/sourcegraph/terraform-aws-executors/-/tree/examples/multiple-executors)
--   [Google example](https://sourcegraph.com/github.com/sourcegraph/terraform-google-executors/-/tree/examples/multiple-executors)
+-   [AWS example](https://github.com/sourcegraph/terraform-aws-executors/tree/main/examples/multiple-executors)
+-   [Google example](https://github.com/sourcegraph/terraform-google-executors/tree/main/examples/multiple-executors)
 
 ### Step-by-step Guide
 
@@ -192,7 +192,7 @@ The following is a step-by-step guide on provisioning a single `codeintel` execu
         - `"codeIntelAutoIndexing.enabled": true`
             - _This is only for `codeintel` executors._
 5. Download
-   the [example files](https://sourcegraph.com/github.com/sourcegraph/terraform-google-executors/-/blob/examples/single-executor)
+   the [example files](https://github.com/sourcegraph/terraform-google-executors/tree/main/examples/single-executor)
 6. Change the following in `providers.tf`
     - `project` to the GCP project to provision the executor in
     - `region` to the GCP region to provision the executor in
@@ -281,7 +281,7 @@ you@sourcegraph-executor-h0rv:~$ curl <your externalURL here>
     - Try setting a higher update frequency: `PRECISE_CODE_INTEL_AUTO_INDEXING_TASK_INTERVAL=10s`
     - Try setting a lower delay: `PRECISE_CODE_INTEL_AUTO_INDEXING_REPOSITORY_PROCESS_DELAY=10s`
 7. Once you have a completed indexing job, click **Uploads** and check to see that an index has been uploaded.
-8. Once the index has been uploaded, you should see the **`PRECISE`** badge in the hover popover! 🎉
+8. Once the index has been uploaded, you should see the **`PRECISE`** badge in the hover! 🎉
 
 ## Auto-scaling
 
@@ -291,11 +291,11 @@ you@sourcegraph-executor-h0rv:~$ curl <your externalURL here>
 
 Auto-scaling of executor instances can help to increase concurrency of jobs, without paying for unused resources. With auto-scaling, you can scale down to 0 instances when no workload exist and scale up as far as you like and your cloud provider can support. Auto-scaling needs to be configured separately.
 
-Auto-scaling makes use of the auto-scaling capabilities of the respective cloud provider (**AutoScalingGroups** on AWS and **Instance Groups** on GCP). Sourcegraph's `worker` service publishes a scaling metric (that is, the number of jobs in queue) to the cloud providers. Then, based on that reported value, the auto-scalers add and remove compute resources to match the required amount of compute. The autoscaler will attempt to hold 1 instance running per each [`executor_jobs_per_instance_scaling`](https://sourcegraph.com/search?q=context:global+repo:%5Egithub.com/sourcegraph/terraform-.*-executors%24+variable+%22executor_jobs_per_instance_scaling%22&patternType=literal) items in queue.
+Auto-scaling makes use of the auto-scaling capabilities of the respective cloud provider (**AutoScalingGroups** on AWS and **Instance Groups** on GCP). Sourcegraph's `worker` service publishes a scaling metric (that is, the number of jobs in queue) to the cloud providers. Then, based on that reported value, the auto-scalers add and remove compute resources to match the required amount of compute. The autoscaler will attempt to hold 1 instance running per each `executor_jobs_per_instance_scaling` items in queue.
 
-For example, if `executor_jobs_per_instance_scaling` is set to `20` and the queue size is currently `400`, then `20`instances would be determined as required to handle the load. You might want to tweak this number based on the [machine type](https://sourcegraph.com/search?q=context:global+repo:%5Egithub.com/sourcegraph/terraform-.*-executors%24+variable+%22machine_type%22+-f:docker-mirror&patternType=literal), [concurrency per machine](https://sourcegraph.com/search?q=context:global+repo:%5Egithub.com/sourcegraph/terraform-.*-executors%24+variable+%22maximum_num_jobs%22&patternType=literal) and desired processing speed.
+For example, if `executor_jobs_per_instance_scaling` is set to `20` and the queue size is currently `400`, then `20` instances would be determined as required to handle the load. You might want to tweak this number based on the `machine_type`, `maximum_num_jobs` (concurrency per machine), and desired processing speed. See the [AWS](https://github.com/sourcegraph/terraform-aws-executors/blob/main/modules/executors/variables.tf) and [Google](https://github.com/sourcegraph/terraform-google-executors/blob/main/modules/executors/variables.tf) variable definitions for details.
 
-With the Terraform variables [`executor_min_replicas`](https://sourcegraph.com/search?q=context:global+repo:%5Egithub.com/sourcegraph/terraform-.*-executors%24+variable+%22executor_min_replicas%22&patternType=literal) and [`executor_max_replicas`](https://sourcegraph.com/search?q=context:global+repo:%5Egithub.com/sourcegraph/terraform-.*-executors%24+variable+%22executor_max_replicas%22&patternType=literal) in the Terraform modules linked to above, you can configure the minimum and maximum number of compute machines to be run at a given time.
+With the Terraform variables `executor_min_replicas` and `executor_max_replicas` in the Terraform modules linked to above, you can configure the minimum and maximum number of compute machines to be run at a given time.
 
 For auto-scaling to work, two things must be true:
 
@@ -305,7 +305,7 @@ For auto-scaling to work, two things must be true:
 
 For the latter to work, the Sourcegraph instance needs to be configured with the correct credentials that allow it to access the cloud provider.
 
-The `credentials` submodule in both the [AWS](https://sourcegraph.com/github.com/sourcegraph/terraform-aws-executors/-/tree/modules/credentials) and [Google](https://sourcegraph.com/github.com/sourcegraph/terraform-google-executors/-/tree/modules/credentials) executor modules exists for that purpose. When used, the `credentials` module sets up the credentials on the cloud provider and returns them in the Terraform outputs.
+The `credentials` submodule in both the [AWS](https://github.com/sourcegraph/terraform-aws-executors/tree/main/modules/credentials) and [Google](https://github.com/sourcegraph/terraform-google-executors/tree/main/modules/credentials) executor modules exists for that purpose. When used, the `credentials` module sets up the credentials on the cloud provider and returns them in the Terraform outputs.
 
 Here's an example of how one would configure auto-scaling.
 

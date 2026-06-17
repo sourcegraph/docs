@@ -1386,74 +1386,6 @@ Generated query for critical alert: `min(((src_gitserver_disk_space_available / 
 
 <br />
 
-## gitserver: cpu_throttling_time
-
-<p class="subtitle">container CPU throttling time %</p>
-
-**Descriptions**
-
-- <span class="badge badge-warning">warning</span> gitserver: 75%+ container CPU throttling time % for 2m0s
-
-**Next steps**
-
-- 	- Consider increasing the CPU limit for the container.
-- More help interpreting this metric is available in the [dashboards reference](dashboards#gitserver-cpu_throttling_time).
-- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
-
-```json
-"observability.silenceAlerts": [
-  "warning_gitserver_cpu_throttling_time"
-]
-```
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Generated query for warning alert: `max((sum by (container_label_io_kubernetes_pod_name) ((rate(container_cpu_cfs_throttled_periods_total{container_label_io_kubernetes_container_name="gitserver"\}[5m]) / rate(container_cpu_cfs_periods_total\{container_label_io_kubernetes_container_name="gitserver"}[5m])) * 100)) &gt;= 75)`
-
-</details>
-
-<br />
-
-## gitserver: running_git_commands
-
-<p class="subtitle">git commands running on each gitserver instance</p>
-
-**Descriptions**
-
-- <span class="badge badge-warning">warning</span> gitserver: 50+ git commands running on each gitserver instance for 2m0s
-- <span class="badge badge-critical">critical</span> gitserver: 100+ git commands running on each gitserver instance for 5m0s
-
-**Next steps**
-
-- **Check if the problem may be an intermittent and temporary peak** using the "Container monitoring" section at the bottom of the Git Server dashboard.
-- **Single container deployments (removed in 7.0.0):** The single-container deployment mode has been sunset. [Migrate to Docker Compose](../deploy/docker-compose/migrate).
-- **Kubernetes and Docker Compose:** Check that you are running a similar number of git server replicas and that their CPU/memory limits are allocated according to what is shown in the [Sourcegraph resource estimator](https://sourcegraph.com/docs/self-hosted/deploy/resource-estimator).
-- More help interpreting this metric is available in the [dashboards reference](dashboards#gitserver-running_git_commands).
-- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
-
-```json
-"observability.silenceAlerts": [
-  "warning_gitserver_running_git_commands",
-  "critical_gitserver_running_git_commands"
-]
-```
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Generated query for warning alert: `max((sum by (instance, cmd) (src_gitserver_exec_running)) &gt;= 50)`
-
-Generated query for critical alert: `max((sum by (instance, cmd) (src_gitserver_exec_running)) &gt;= 100)`
-
-</details>
-
-<br />
-
 ## gitserver: echo_command_duration_test
 
 <p class="subtitle">echo test command duration</p>
@@ -1545,6 +1477,99 @@ Generated query for critical alert: `max((sum(rate(src_gitserver_repo_corrupted[
 <summary>Technical details</summary>
 
 Generated query for warning alert: `max((sum(src_gitserver_clone_queue)) &gt;= 25)`
+
+</details>
+
+<br />
+
+## gitserver: cpu_usage_percentage
+
+<p class="subtitle">CPU usage</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> gitserver: 95%+ CPU usage for 10m0s
+
+**Next steps**
+
+- Consider increasing CPU limits or scaling out.
+- Learn more about the related dashboard panel in the [dashboards reference](dashboards#gitserver-cpu_usage_percentage).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_gitserver_cpu_usage_percentage"
+]
+```
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((cadvisor_container_cpu_usage_percentage_total{name=~"^gitserver.*"}) &gt;= 95)`
+
+</details>
+
+<br />
+
+## gitserver: memory_rss
+
+<p class="subtitle">memory (RSS)</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> gitserver: 90%+ memory (RSS) for 10m0s
+
+**Next steps**
+
+- Consider increasing memory limits or scaling out.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#gitserver-memory_rss).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_gitserver_memory_rss"
+]
+```
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((max by (name) (container_memory_rss{name=~"^gitserver.*"\} / container_spec_memory_limit_bytes\{name=~"^gitserver.*"}) * 100) &gt;= 90)`
+
+</details>
+
+<br />
+
+## gitserver: cpu_throttling_time
+
+<p class="subtitle">container CPU throttling time %</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> gitserver: 75%+ container CPU throttling time % for 2m0s
+
+**Next steps**
+
+- Consider increasing the CPU limit for the container.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#gitserver-cpu_throttling_time).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_gitserver_cpu_throttling_time"
+]
+```
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((sum by (container_label_io_kubernetes_pod_name) ((rate(container_cpu_cfs_throttled_periods_total{container_label_io_kubernetes_container_name="gitserver"\}[5m]) / rate(container_cpu_cfs_periods_total\{container_label_io_kubernetes_container_name="gitserver"}[5m])) * 100)) &gt;= 75)`
 
 </details>
 
@@ -1645,68 +1670,6 @@ Generated query for warning alert: `max((sum by (name, job_name) (rate(src_perio
 <summary>Technical details</summary>
 
 Generated query for warning alert: `max((sum by (name, job_name) (rate(src_periodic_goroutine_errors_total{job=~".*gitserver.*"\}[5m])) / sum by (name, job_name) (rate(src_periodic_goroutine_total\{job=~".*gitserver.*"}[5m]) &gt; 0) * 100) &gt;= 5)`
-
-</details>
-
-<br />
-
-## gitserver: cpu_usage_percentage
-
-<p class="subtitle">CPU usage</p>
-
-**Descriptions**
-
-- <span class="badge badge-warning">warning</span> gitserver: 95%+ CPU usage for 10m0s
-
-**Next steps**
-
-- Consider increasing CPU limits or scaling out.
-- Learn more about the related dashboard panel in the [dashboards reference](dashboards#gitserver-cpu_usage_percentage).
-- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
-
-```json
-"observability.silenceAlerts": [
-  "warning_gitserver_cpu_usage_percentage"
-]
-```
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Generated query for warning alert: `max((cadvisor_container_cpu_usage_percentage_total{name=~"^gitserver.*"}) &gt;= 95)`
-
-</details>
-
-<br />
-
-## gitserver: memory_rss
-
-<p class="subtitle">memory (RSS)</p>
-
-**Descriptions**
-
-- <span class="badge badge-warning">warning</span> gitserver: 90%+ memory (RSS) for 10m0s
-
-**Next steps**
-
-- Consider increasing memory limits or scaling out.
-- More help interpreting this metric is available in the [dashboards reference](dashboards#gitserver-memory_rss).
-- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
-
-```json
-"observability.silenceAlerts": [
-  "warning_gitserver_memory_rss"
-]
-```
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Generated query for warning alert: `max((max by (name) (container_memory_rss{name=~"^gitserver.*"\} / container_spec_memory_limit_bytes\{name=~"^gitserver.*"}) * 100) &gt;= 90)`
 
 </details>
 
@@ -4377,6 +4340,11 @@ Generated query for critical alert: `max((max(max_over_time(src_conf_client_time
 
 **Next steps**
 
+- Treat sustained high searcher traffic as a sign that indexed search is not carrying enough of the search load. Searcher handles unindexed search, so high per-replica traffic usually means queries are not using Zoekt enough.
+- Check Zoekt availability, indexing backlog, and indexing errors to make sure repositories are being indexed and served by indexed search.
+- Inspect recent search traffic for broad or repeated unindexed queries, especially automated clients or queries against revisions that cannot use indexed search.
+- If users often search non-default branches, consider indexing more branches by configuring `search.index.branches` or `search.index.revisions` in site configuration.
+- If the traffic is expected and Zoekt indexing is healthy, consider scaling out searcher replicas to reduce per-replica load and search latency.
 - More help interpreting this metric is available in the [dashboards reference](dashboards#searcher-replica_traffic).
 - **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
 
@@ -5520,7 +5488,7 @@ Generated query for critical alert: `max(((proc_metrics_memory_map_current_count
 <details>
 <summary>Technical details</summary>
 
-Generated query for warning alert: `max((sum by (code) (increase(src_zoekt_request_duration_seconds_count{code!~"2.."}[5m])) / ignoring (code) group_left () sum(increase(src_zoekt_request_duration_seconds_count[5m])) * 100) &gt;= 5)`
+Custom query for warning alert: `max(((sum(increase(src_zoekt_request_duration_seconds_count{code="error"}[5m])) / sum(increase(src_zoekt_request_duration_seconds_count[5m])) * 100) and (sum(increase(src_zoekt_request_duration_seconds_count[5m])) &gt;= 50)) &gt;= 5)`
 
 </details>
 
@@ -6221,6 +6189,40 @@ Generated query for critical alert: `min((sum by (app) (up{app=~".*prometheus"\}
 
 <br />
 
+## executor: managed_instance_groups_autoscaler_unhealthy
+
+<p class="subtitle">managed instance group(s) marked unhealthy by the cascade</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> executor: 1+ managed instance group(s) marked unhealthy by the cascade for 10m0s
+
+**Next steps**
+
+- Inspect the affected managed instance group in the GCP console; check the autoscaler status and recent instance creation errors.
+- Check the worker logs filtered to InstrumentationScope "worker.executorqueue.gcp.autoscaler" for the "cascade decision" lines covering the affected (name, queue).
+- If unhealthy due to spot stockout in one region, the cascade is doing its job — verify the standard MIG (or next region`s spot MIG) absorbed the demand. Confirm by inspecting src_executors_managed_instance_groups_autoscaler_assigned_demand for the same queue.
+- If unhealthy due to quota, request a quota increase. If the sticky cooldown is keeping a recovered MIG in unhealthy state, no action needed — it will clear within 5 minutes.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#executor-managed_instance_groups_autoscaler_unhealthy).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_executor_managed_instance_groups_autoscaler_unhealthy"
+]
+```
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((max by (name, queue) (src_executors_managed_instance_groups_autoscaler_unhealthy)) &gt;= 1)`
+
+</details>
+
+<br />
+
 ## executor: executor_handlers
 
 <p class="subtitle">executor active handlers</p>
@@ -6583,6 +6585,271 @@ Generated query for warning alert: `max((sum(increase(src_telemetrygatewayexport
 
 <br />
 
+## metering: metering_exporter_queue_growth
+
+<p class="subtitle">rate of growth of metering export queue over 30m</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> metering: 1+ rate of growth of metering export queue over 30m for 1h0m0s
+- <span class="badge badge-critical">critical</span> metering: 1+ rate of growth of metering export queue over 30m for 36h0m0s
+
+**Next steps**
+
+- Check the "number of metering events exported per batch over 30m" dashboard panel to see if export throughput is at saturation.
+- Check worker logs for metering exporter failures and Enterprise Portal connectivity issues.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#metering-metering_exporter_queue_growth).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_metering_metering_exporter_queue_growth",
+  "critical_metering_metering_exporter_queue_growth"
+]
+```
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max(((deriv((sum(src_meteringexporter_queue_size and on (instance, job) ((increase(src_meteringexporter_queue_metrics_reporter_total{job=~"^worker.*"\}[15m]) &gt; 0) or on (instance, job) (increase(src_meteringexporter_queue_metrics_reporter_errors_total\{job=~"^worker.*"}[15m]) &gt; 0))))[30m:])) or on () vector(0)) &gt; 1)`
+
+Generated query for critical alert: `max(((deriv((sum(src_meteringexporter_queue_size and on (instance, job) ((increase(src_meteringexporter_queue_metrics_reporter_total{job=~"^worker.*"\}[15m]) &gt; 0) or on (instance, job) (increase(src_meteringexporter_queue_metrics_reporter_errors_total\{job=~"^worker.*"}[15m]) &gt; 0))))[30m:])) or on () vector(0)) &gt; 1)`
+
+</details>
+
+<br />
+
+## metering: metering_exporter_oldest_unexported_event_age
+
+<p class="subtitle">age of the oldest unexported metering event</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> metering: 1800s+ age of the oldest unexported metering event for 30m0s
+- <span class="badge badge-critical">critical</span> metering: 7200s+ age of the oldest unexported metering event for 2h0m0s
+
+**Next steps**
+
+- Check whether the metering export job is failing or making no forward progress.
+- Compare this panel with "rate of growth of metering export queue over 30m" and the exporter error panels below.
+- Check worker logs and verify the Enterprise Portal is reachable.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#metering-metering_exporter_oldest_unexported_event_age).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_metering_metering_exporter_oldest_unexported_event_age",
+  "critical_metering_metering_exporter_oldest_unexported_event_age"
+]
+```
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max(((max(src_meteringexporter_oldest_unexported_event and on (instance, job) ((increase(src_meteringexporter_queue_metrics_reporter_total{job=~"^worker.*"\}[15m]) &gt; 0) or on (instance, job) (increase(src_meteringexporter_queue_metrics_reporter_errors_total\{job=~"^worker.*"}[15m]) &gt; 0)))) or on () vector(0)) &gt; 1800)`
+
+Generated query for critical alert: `max(((max(src_meteringexporter_oldest_unexported_event and on (instance, job) ((increase(src_meteringexporter_queue_metrics_reporter_total{job=~"^worker.*"\}[15m]) &gt; 0) or on (instance, job) (increase(src_meteringexporter_queue_metrics_reporter_errors_total\{job=~"^worker.*"}[15m]) &gt; 0)))) or on () vector(0)) &gt; 7200)`
+
+</details>
+
+<br />
+
+## metering: meteringexporter_exporter_errors_total
+
+<p class="subtitle">events exporter operation errors every 30m</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> metering: 0+ events exporter operation errors every 30m
+
+**Next steps**
+
+- Failures indicate that exporting credit metering events from Sourcegraph are failing.
+- Check worker logs for metering exporter failures and Enterprise Portal connectivity issues.
+- Learn more about the related dashboard panel in the [dashboards reference](dashboards#metering-meteringexporter_exporter_errors_total).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_metering_meteringexporter_exporter_errors_total"
+]
+```
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((sum(increase(src_meteringexporter_exporter_errors_total{job=~"^worker.*"}[30m]))) &gt; 0)`
+
+</details>
+
+<br />
+
+## metering: meteringexporter_queue_cleanup_errors_total
+
+<p class="subtitle">events export queue cleanup operation errors every 30m</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> metering: 0+ events export queue cleanup operation errors every 30m
+
+**Next steps**
+
+- Failures indicate that pruning already-exported metering events from the queue is failing.
+- Check worker logs for metering exporter cleanup failures.
+- Learn more about the related dashboard panel in the [dashboards reference](dashboards#metering-meteringexporter_queue_cleanup_errors_total).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_metering_meteringexporter_queue_cleanup_errors_total"
+]
+```
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((sum(increase(src_meteringexporter_queue_cleanup_errors_total{job=~"^worker.*"}[30m]))) &gt; 0)`
+
+</details>
+
+<br />
+
+## metering: meteringexporter_queue_metrics_reporter_errors_total
+
+<p class="subtitle">events export backlog metrics reporting operation errors every 30m</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> metering: 0+ events export backlog metrics reporting operation errors every 30m
+
+**Next steps**
+
+- Failures indicate that metering export queue metrics are not being refreshed.
+- Check worker logs for metering exporter metrics reporter failures.
+- Learn more about the related dashboard panel in the [dashboards reference](dashboards#metering-meteringexporter_queue_metrics_reporter_errors_total).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_metering_meteringexporter_queue_metrics_reporter_errors_total"
+]
+```
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((sum(increase(src_meteringexporter_queue_metrics_reporter_errors_total{job=~"^worker.*"}[30m]))) &gt; 0)`
+
+</details>
+
+<br />
+
+## metering: licensing_credit_usage_notifications_errors_total
+
+<p class="subtitle">credit usage notification routine operation errors every 30m</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> metering: 0+ credit usage notification routine operation errors every 30m
+
+**Next steps**
+
+- Failures indicate that site admin credit usage notifications are not being refreshed.
+- Check worker logs for credit usage notification monitor failures and Enterprise Portal connectivity issues.
+- Learn more about the related dashboard panel in the [dashboards reference](dashboards#metering-licensing_credit_usage_notifications_errors_total).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_metering_licensing_credit_usage_notifications_errors_total"
+]
+```
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((sum(increase(src_licensing_credit_usage_notifications_errors_total{job=~"^worker.*"}[30m]))) &gt; 0)`
+
+</details>
+
+<br />
+
+## metering: licensing_fast_quota_check_routine_99th_percentile_duration
+
+<p class="subtitle">aggregate successful fast quota check probe operation duration distribution over 30m</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> metering: 30+ aggregate successful fast quota check probe operation duration distribution over 30m for 5m0s
+
+**Next steps**
+
+- The 99th percentile probe duration has been above 30 seconds for at least 5 minutes; the probe should normally complete in well under its configured interval (default 1m).
+- Check Enterprise Portal latency and worker logs for the `licensing.fast-quota-check` routine.
+- Learn more about the related dashboard panel in the [dashboards reference](dashboards#metering-licensing_fast_quota_check_routine_99th_percentile_duration).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_metering_licensing_fast_quota_check_routine_99th_percentile_duration"
+]
+```
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Custom query for warning alert: `max((histogram_quantile(0.99, sum by (le) (rate(src_licensing_fast_quota_check_routine_duration_seconds_bucket{job=~"^worker.*"}[30m])))) &gt; 30)`
+
+</details>
+
+<br />
+
+## metering: licensing_fast_quota_check_routine_error_rate
+
+<p class="subtitle">fast quota check probe operation error rate over 30m</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> metering: 15%+ fast quota check probe operation error rate over 30m for 5m0s
+
+**Next steps**
+
+- The probe failure rate has been at or above 15% over the last 30 minutes for at least 5 consecutive minutes; FastCheckQuota is consistently failing open and quota enforcement is degraded.
+- Check worker logs for the `licensing.fast-quota-check` routine and Enterprise Portal connectivity.
+- Learn more about the related dashboard panel in the [dashboards reference](dashboards#metering-licensing_fast_quota_check_routine_error_rate).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_metering_licensing_fast_quota_check_routine_error_rate"
+]
+```
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((sum(increase(src_licensing_fast_quota_check_routine_errors_total{job=~"^worker.*"\}[30m])) / (sum(increase(src_licensing_fast_quota_check_routine_total\{job=~"^worker.*"\}[30m])) + sum(increase(src_licensing_fast_quota_check_routine_errors_total\{job=~"^worker.*"}[30m]))) * 100) &gt;= 15)`
+
+</details>
+
+<br />
+
 ## otel-collector: otel_span_refused
 
 <p class="subtitle">spans refused per receiver</p>
@@ -6852,7 +7119,6 @@ Generated query for critical alert: `max((max(deriv(src_deepsearch_questions_in_
 **Next steps**
 
 - Check frontend logs for `Worker failed to process question` errors.
-- Review LLM stream errors in the `LLM streaming` panel below.
 - Check for upstream LLM provider issues.
 - More help interpreting this metric is available in the [dashboards reference](dashboards#deepsearch-deepsearch_question_processing_error_rate).
 - **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
@@ -6877,23 +7143,27 @@ Generated query for critical alert: `max((sum(rate(src_deepsearch_question_proce
 
 <br />
 
-## deepsearch: deepsearch_llm_stream_fatal_errors
+## deepsearch: deepsearch_slow_questions
 
-<p class="subtitle">fatal LLM stream errors over 5m</p>
+<p class="subtitle">questions taking longer than 5 minutes over 15m</p>
 
 **Descriptions**
 
-- <span class="badge badge-warning">warning</span> deepsearch: 20+ fatal LLM stream errors over 5m
+- <span class="badge badge-warning">warning</span> deepsearch: 3+ questions taking longer than 5 minutes over 15m
+- <span class="badge badge-critical">critical</span> deepsearch: 10+ questions taking longer than 5 minutes over 15m
 
 **Next steps**
 
-- Check frontend logs for `fatal error in LLM stream`.
-- More help interpreting this metric is available in the [dashboards reference](dashboards#deepsearch-deepsearch_llm_stream_fatal_errors).
+- Search frontend logs for questionIDs with long processing times.
+- Check `deepsearch_turn_p95_duration` to see if individual turns are slow.
+- Check `deepsearch_question_outcome_by_reason` for elevated truncation or error rates.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#deepsearch-deepsearch_slow_questions).
 - **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
 
 ```json
 "observability.silenceAlerts": [
-  "warning_deepsearch_deepsearch_llm_stream_fatal_errors"
+  "warning_deepsearch_deepsearch_slow_questions",
+  "critical_deepsearch_deepsearch_slow_questions"
 ]
 ```
 
@@ -6902,7 +7172,46 @@ Generated query for critical alert: `max((sum(rate(src_deepsearch_question_proce
 <details>
 <summary>Technical details</summary>
 
-Generated query for warning alert: `max((sum(increase(src_deepsearch_question_processing_errors_total{operation="llm_stream_fatal"}[5m]))) &gt; 20)`
+Generated query for warning alert: `max((sum(increase(src_deepsearch_question_processing_duration_seconds_count{operation="question"\}[15m])) - sum(increase(src_deepsearch_question_processing_duration_seconds_bucket\{le="300",operation="question"}[15m]))) &gt; 3)`
+
+Generated query for critical alert: `max((sum(increase(src_deepsearch_question_processing_duration_seconds_count{operation="question"\}[15m])) - sum(increase(src_deepsearch_question_processing_duration_seconds_bucket\{le="300",operation="question"}[15m]))) &gt; 10)`
+
+</details>
+
+<br />
+
+## deepsearch: deepsearch_response_truncated
+
+<p class="subtitle">response truncated questions over 15m</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> deepsearch: 3+ response truncated questions over 15m
+- <span class="badge badge-critical">critical</span> deepsearch: 10+ response truncated questions over 15m
+
+**Next steps**
+
+- Search frontend logs for: "answer truncated due to output token limit" to find affected questionIDs.
+- This usually indicates model overthinking and spending all output tokens on thinking with no useful answer, or the user requested an extremely large output.
+- Check if a recent model change may have caused increased thinking token usage.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#deepsearch-deepsearch_response_truncated).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_deepsearch_deepsearch_response_truncated",
+  "critical_deepsearch_deepsearch_response_truncated"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((sum(increase(src_deepsearch_question_outcome_total{outcome="response_truncated"}[15m]))) &gt; 3)`
+
+Generated query for critical alert: `max((sum(increase(src_deepsearch_question_outcome_total{outcome="response_truncated"}[15m]))) &gt; 10)`
 
 </details>
 

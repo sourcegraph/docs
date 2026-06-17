@@ -5466,8 +5466,18 @@ const redirectsData = [
 
 	//Pricing redirects
 	{
+		source: '/pricing',
+		destination: 'https://sourcegraph.com/pricing',
+		permanent: true
+	},
+	{
 		source: '/pricing/free',
-		destination: '/pricing/plans/free',
+		destination: 'https://sourcegraph.com/pricing',
+		permanent: true
+	},
+	{
+		source: '/pricing/plans/free',
+		destination: 'https://sourcegraph.com/pricing',
 		permanent: true
 	},
 	{
@@ -5481,6 +5491,11 @@ const redirectsData = [
 		permanent: true
 	},
 	{
+		source: '/pricing/plan-comparison',
+		destination: 'https://sourcegraph.com/pricing',
+		permanent: true
+	},
+	{
 		source: '/pricing/billing-faqs',
 		destination: '/pricing/faqs',
 		permanent: true
@@ -5489,7 +5504,12 @@ const redirectsData = [
 	// Admin pricing docs redirects
 	{
 		source: '/admin/pricing',
-		destination: '/pricing/plans',
+		destination: 'https://sourcegraph.com/pricing',
+		permanent: true
+	},
+	{
+		source: '/pricing/plans',
+		destination: 'https://sourcegraph.com/pricing',
 		permanent: true
 	},
 
@@ -6374,7 +6394,7 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/updates/pure_docker',
-		destination: '/self-hosted/updates/pure_docker',
+		destination: '/self-hosted/deploy/docker-compose/upgrade',
 		permanent: true
 	},
 	{
@@ -6440,7 +6460,7 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/beta_and_experimental_features',
-		destination: '/admin/beta-and-experimental-features',
+		destination: '/beta-and-experimental',
 		permanent: true
 	},
 	{
@@ -6454,6 +6474,11 @@ const redirectsData = [
 		permanent: true
 	},
 	{
+		source: '/admin/code_hosts/azuredevops',
+		destination: '/admin/code-hosts/azuredevops',
+		permanent: true
+	},
+	{
 		source: '/admin/code_hosts/bitbucket_cloud',
 		destination: '/admin/code-hosts/bitbucket-cloud',
 		permanent: true
@@ -6461,6 +6486,41 @@ const redirectsData = [
 	{
 		source: '/admin/code_hosts/bitbucket_server',
 		destination: '/admin/code-hosts/bitbucket-server',
+		permanent: true
+	},
+	{
+		source: '/admin/code_hosts/gerrit',
+		destination: '/admin/code-hosts/gerrit',
+		permanent: true
+	},
+	{
+		source: '/admin/code_hosts/github',
+		destination: '/admin/code-hosts/github',
+		permanent: true
+	},
+	{
+		source: '/admin/code_hosts/gitlab',
+		destination: '/admin/code-hosts/gitlab',
+		permanent: true
+	},
+	{
+		source: '/admin/code_hosts/gitolite',
+		destination: '/admin/code-hosts/gitolite',
+		permanent: true
+	},
+	{
+		source: '/admin/code_hosts/non-git',
+		destination: '/admin/code-hosts/non-git',
+		permanent: true
+	},
+	{
+		source: '/admin/code_hosts/other',
+		destination: '/admin/code-hosts/other',
+		permanent: true
+	},
+	{
+		source: '/admin/code_hosts/phabricator',
+		destination: '/admin/code-hosts/phabricator',
 		permanent: true
 	},
 	{
@@ -7055,8 +7115,8 @@ const redirectsData = [
 		permanent: true
 	},
 	{
-		source: '/self-hosted/updates/pure_docker',
-		destination: '/self-hosted/updates/pure-docker',
+		source: '/self-hosted/updates/pure-docker',
+		destination: '/self-hosted/deploy/docker-compose/upgrade',
 		permanent: true
 	},
 	{
@@ -7072,6 +7132,11 @@ const redirectsData = [
 	{
 		source: '/admin/repo/permissions',
 		destination: '/admin/permissions',
+		permanent: true
+	},
+	{
+		source: '/admin/beta-and-experimental-features',
+		destination: '/beta-and-experimental',
 		permanent: true
 	},
 	// RSS feed moved from /docs/technical-changelog.rss to /changelog/technical-changelog.rss
