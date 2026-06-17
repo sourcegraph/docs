@@ -18,6 +18,7 @@
     - [Antigravity](#antigravity)
     - [Windsurf](#windsurf)
 - [OpenCode](#opencode)
+- [Codex](#codex)
 
 ### Amp
 
@@ -281,3 +282,32 @@ You can add the Sourcegraph MCP server to OpenCode by configuring it in your MCP
 
 3. Save the configuration file.
 4. Restart OpenCode to apply the changes.
+
+### Codex
+
+You can add the Sourcegraph MCP server to [OpenAI Codex](https://github.com/openai/codex) by editing its `config.toml` file (default `~/.codex/config.toml`, or a project-scoped `.codex/config.toml`):
+
+1. Open or create the configuration file at `~/.codex/config.toml` (or `.codex/config.toml` in your project).
+2. Add the following configuration:
+
+    ```toml
+    [mcp_servers.sourcegraph]
+    url = "https://your-sourcegraph-instance.com/.api/mcp"
+    scopes = ["mcp"]
+    ```
+
+    <Callout type="info">
+    	Replace `your-sourcegraph-instance.com` with your Sourcegraph instance
+    	URL.
+    </Callout>
+
+    <Callout type="note">
+    	`scopes = ["mcp"]` is required. Without it, Codex's OAuth login fails
+    	with an `invalid_scope` error because Sourcegraph's MCP endpoints
+    	require the `mcp` scope. See [Troubleshooting:
+    	`invalid_scope` error during
+    	OAuth](/api/mcp#invalid_scope-error-during-oauth) for details.
+    </Callout>
+
+3. Save the configuration file.
+4. Restart Codex and complete the Codex OAuth login flow to sign in to your Sourcegraph instance.
