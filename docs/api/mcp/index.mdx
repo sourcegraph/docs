@@ -414,6 +414,22 @@ Use this matrix to choose the smallest endpoint that has the tools your MCP clie
 	`deepsearch` tool.
 </Callout>
 
+## Troubleshooting
+
+### `invalid_scope` error during OAuth
+
+If your MCP client's OAuth login fails with an `invalid_scope` error when connecting to `/.api/mcp`, the client requested a scope that the Sourcegraph identity provider does not allow for the MCP resource. MCP endpoints require the `mcp` scope.
+
+To fix this, pin `scopes = ["mcp"]` in your client's OAuth configuration so the client requests only the `mcp` scope during the OAuth flow.
+
+For OpenAI Codex specifically, set `scopes = ["mcp"]` in your `config.toml`. See the [Codex](/api/mcp/client-integrations#codex) section on the client integrations page for the full configuration.
+
+<Callout type="info">
+	Clients that use Dynamic Client Registration (for example, Claude Code with
+	`--transport http` and Amp CLI) are automatically registered with the `mcp`
+	scope and should not normally encounter this error.
+</Callout>
+
 ## Best Practices
 
 1. **Repository Scoping:** Use `list_repos` first to find relevant repositories for better performance
