@@ -35,7 +35,7 @@ To specifically deploy Executors,
     ```bash
     helm upgrade --install --values ./override.yaml --version <your Sourcegraph Version> sg-executor sourcegraph/sourcegraph-executor-dind
     ```
-3. Confirm executors are working by checking the _Executors_ page under **Site admin > Executors > Instances** .
+3. Confirm executors are working by checking the _Executors_ page under **Site admin > Executors > Instances**.
 
 ## Security considerations
 
@@ -45,12 +45,12 @@ Docker-in-docker executors require the Docker sidecar to run as a [privileged](h
 
 Every executor deployment method exists to run **arbitrary, untrusted code**. Auto-indexing invokes language indexers and package-manager hooks to resolve dependencies, and batch changes run user-defined tooling against the contents of a repository. See [Executors](/admin/executors/) and [Firecracker](/self-hosted/executors/firecracker) for the full sandboxing model.
 
-This means the risk of a malicious job attempting to break out of its sandbox, consume excessive compute, or exfiltrate code and credentialsis is inherent to running executors. It is not unique to Docker-in-Docker:
+This means the risk of a malicious job attempting to break out of its sandbox, consume excessive compute, or exfiltrate code and credentials is inherent to running executors. It is not unique to Docker-in-Docker:
 
 -   **Firecracker** provides the strongest per-job isolation (a MicroVM boundary), but it is not a complete security control on its own. Even with Firecracker, Sourcegraph additionally configures `iptables` to stop jobs from reaching [private IP ranges](/self-hosted/executors/firecracker#known-caveats) and the cloud metadata service.
 -   **Native Kubernetes** and **Docker-in-Docker** run jobs as containers without a MicroVM boundary, so they rely more heavily on the surrounding isolation and network controls.
 
-The runtime you choose changes the isolation boundary, but they do not negate the need for additional controls to furthur limit the blast radius.
+The runtime you choose changes the isolation boundary, but they do not negate the need for additional controls to further limit the blast radius.
 
 ### Security hardening and risk management
 
