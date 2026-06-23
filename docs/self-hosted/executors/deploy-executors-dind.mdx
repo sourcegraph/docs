@@ -7,13 +7,18 @@
 	[Linux binary](/self-hosted/executors/deploy-executors-binary).
 </Callout>
 
-[Kubernetes manifests](https://github.com/sourcegraph/deploy-sourcegraph-k8s) are provided to deploy Sourcegraph Executors on a running Kubernetes cluster. If you are deploying Sourcegraph with helm, charts are available [here](https://github.com/sourcegraph/deploy-sourcegraph-helm).
+[Kubernetes manifests](https://github.com/sourcegraph/deploy-sourcegraph-k8s/tree/main/components/executors/dind) are provided to deploy Sourcegraph Executors on a running Kubernetes cluster. If you are deploying Sourcegraph with Helm, charts are available [here](https://github.com/sourcegraph/deploy-sourcegraph-helm/tree/main/charts/sourcegraph-executor/dind).
 
 ## Deployment
 
 Executors on Kubernetes require privileged access to a container runtime daemon in order to operate correctly. To ensure maximum capability across Kubernetes versions and container runtimes, a [Docker in Docker](https://www.docker.com/blog/docker-can-now-run-within-docker/) sidecar is deployed with each executor pod so that the executor does not have to access the host container runtime directly.
 
 ### Step-by-step Guide
+
+<Callout type="note">
+  Before deploying, ensure your Sourcegraph instance is configured to accept executor connections.
+  See [Executor authentication](/self-hosted/executors/deploy-executors#executor-authentication) for instructions on setting the required `executors.accessToken` in your site configuration.
+</Callout>
 
 Ensure you have the following tools installed:
 
@@ -26,10 +31,25 @@ Please refer to the [Sourcegraph Helm docs](/self-hosted/deploy/kubernetes#quick
 
 To specifically deploy Executors,
 
-1. Create an overrides file, `override.yaml`, with any other customizations you may require.
+1. Create an overrides file, `override.yaml`, with any other customizations you may require. At a minimum, you must set the frontend URL and access token:
+
+    ```yaml
+    executor:
+      # The in-cluster frontend service endpoint.
+      # If the executor is deployed in a different namespace than Sourcegraph, use the FQDN form:
+      # "http://sourcegraph-frontend.sourcegraph.svc.cluster.local:30080"
+      frontendUrl: "http://sourcegraph-frontend:30080"
+      frontendPassword: "the-shared-access-token-from-site-config"
+      # Required. Valid values: batches, codeintel, or both.
+      queueNames: ["batches", "codeintel"]
+    ```
+
+    For additional configuration options:
 
     1. See [details on configurations](/self-hosted/deploy/kubernetes#configuration)
-    2. See [here](/self-hosted/executors/executors-config) for a full list of executor environment variables
+    2. See the [full values reference](https://github.com/sourcegraph/deploy-sourcegraph-helm/blob/main/charts/sourcegraph-executor/dind/README.md) for all available Helm fields
+    3. See [executor environment variables](/self-hosted/executors/executors-config) for the complete configuration reference
+    4. See the [GCP example override](https://github.com/sourcegraph/deploy-sourcegraph-helm/blob/main/charts/sourcegraph-executor/dind/examples/gcp/values.yaml) for a more complete example including storage, replica count, and gVisor configuration
 
 2. Run the following command:
     ```bash
