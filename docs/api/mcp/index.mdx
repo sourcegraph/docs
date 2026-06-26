@@ -209,7 +209,8 @@ The MCP server provides these tools for code exploration and analysis:
 **Use cases:** Reading specific files, examining code sections, reviewing different versions
 
 <Callout type="note">
-	File size limit is 128KB. Use line ranges for larger files.
+	Files over 128KB return the first 200 lines with a truncation notice. Use
+	`startLine` and `endLine` to read specific sections of larger files.
 </Callout>
 
 </details>
@@ -225,18 +226,26 @@ The MCP server provides these tools for code exploration and analysis:
 - `path` - Directory path (optional, defaults to root)
 - `revision` - Branch, tag, or commit hash (optional)
 
+<Callout type="note">
+	Results are limited to 1000 entries; narrow `path` to inspect
+	larger directories.
+</Callout>
+
 </details>
 
 #### `list_repos`
 
 <details>
-<summary>Search and list repositories by name patterns with pagination support.</summary>
+<summary>Search and list repositories by name substring.</summary>
 
 **Parameters:**
 
-- `query` - Search pattern for repository names (required)
-- `limit` - Maximum results per page (optional, default 50)
-- `after`/`before` - Pagination cursors (optional)
+- `query` - Substring to match against repository names (required)
+- `limit` - Maximum repositories to return (optional, default 50, maximum 10000)
+
+<Callout type="note">
+	Responses include `hasMoreResults` to indicate whether the result set was truncated; refine the query or increase `limit` to return more repositories.
+</Callout>
 
 </details>
 
@@ -245,7 +254,7 @@ The MCP server provides these tools for code exploration and analysis:
 #### `keyword_search`
 
 <details>
-<summary>Perform exact keyword searches with boolean operators and filters.</summary>
+<summary>Perform exact keyword code searches.</summary>
 
 **Parameters:**
 
@@ -256,8 +265,9 @@ The MCP server provides these tools for code exploration and analysis:
 - `repo:` - limit to specific repositories
 - `file:` - search specific file patterns
 - `rev:` - search specific revisions
+- `count:` - set the number of returned matches
 
-**Features:** Boolean AND/OR operators, regex patterns
+**Features:** Boolean AND/OR operators, exact keyword matching
 
 </details>
 
@@ -322,6 +332,7 @@ The MCP server provides these tools for code exploration and analysis:
 - `path` - File path containing symbol definition (required)
 - `symbol` - Symbol name to find references for (required)
 - `revision` - Branch, tag, or commit hash (optional)
+- `limit` - Maximum references to return (optional, default 10)
 
 </details>
 
@@ -341,6 +352,7 @@ The MCP server provides these tools for code exploration and analysis:
 - `files` - Filter by file paths (optional)
 - `after`/`before` - Date range filters (optional)
 - `revisions` - Branches, tags, or ref globs to search (optional)
+- `count` - Number of results to return (optional, default 50, maximum 100)
 
 </details>
 
@@ -358,6 +370,7 @@ The MCP server provides these tools for code exploration and analysis:
 - `authors` - Filter by authors (optional)
 - `after`/`before` - Date range filters (optional)
 - `revisions` - Branches, tags, or ref globs to search (optional)
+- `count` - Maximum results to return (optional, default 20, maximum 50)
 
 </details>
 
@@ -371,7 +384,7 @@ The MCP server provides these tools for code exploration and analysis:
 - `repo` - Repository name (required)
 - `base` - Base revision (older version) (required)
 - `head` - Head revision (newer version) (required)
-- `first` - Maximum file diffs to return (optional, default 50)
+- `first` - Maximum file diffs to return (optional, default 50, maximum 100)
 - `after` - Pagination cursor (optional)
 
 </details>
@@ -383,8 +396,8 @@ The MCP server provides these tools for code exploration and analysis:
 
 **Parameters:**
 
-- `author` - Author name or email (required)
-- `limit` - Maximum repositories to return (optional, default 20)
+- `authors` - Author names or email addresses (required, maximum 5)
+- `limit` - Maximum repositories to return (optional, default 20, maximum 100)
 - `minCommits` - Minimum commits required (optional, default 1)
 
 </details>
@@ -399,6 +412,7 @@ The MCP server provides these tools for code exploration and analysis:
 	endpoint. This is a temporary measure available in 7.0 and will be replaced
 	by a proper tool allowlist in a future release.
 </Callout>
+
 #### `deepsearch`
 
 <details>
