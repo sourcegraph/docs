@@ -34,8 +34,10 @@ export function Prose<T extends React.ElementType = 'div'>({
 				'prose-strong:text-vermilion-08 dark:prose-strong:text-vermilion-08',
 				// Inline code block
 				'prose-code:before:content-none prose-code:after:content-none',
-				// Details summary
+				// Details blocks
 				'[&_summary]:cursor-pointer',
+				// Tighten the first paragraph under <summary>
+				'[&_details>p:first-of-type]:mt-2',
 				// Video
 				'prose-video:rounded-xl',
 
