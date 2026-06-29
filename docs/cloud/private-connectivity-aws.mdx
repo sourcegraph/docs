@@ -37,6 +37,8 @@ When a customer has private resources inside the AWS VPC and needs to expose it 
 
 Sourcegraph will provide the Sourcegraph-managed AWS account ARN that needs to be allowlisted in your VPC endpoint service, e.g., `arn:aws:iam::$accountId:root`. It must be allowlisted by customer before the connection can be established. Note: The AWS account is created exclusively for individual Cloud customers and not shared with others.
 
+In addition to allowlisting the Sourcegraph-managed AWS account ARN on the VPC endpoint service, ensure that the network path behind the endpoint service allows inbound traffic from the Sourcegraph-provided source CIDR ranges to the private resource.
+
 The customer needs to share the following details with Sourcegraph:
 
 -   VPC endpoint service name in the format of `com.amazonaws.vpce.<REGION>.<VPC_ENDPOINT_SERVICE_ID>`.
@@ -71,6 +73,12 @@ Advantages of the site-to-site GCP to AWS VPN include:
 ### How can I restrict access to my private resource?
 
 The customer has full control over the exposed service and they may terminate the connection at any point.
+
+### The VPC endpoint is available, but Sourcegraph cannot reach the private resource. What should I check?
+
+If the endpoint connection is accepted and available but requests from Sourcegraph time out, verify that the private resource allows traffic from the Sourcegraph-provided source CIDR ranges. Check the Network Load Balancer listener, target security groups, network ACLs, and any host or application firewalls for the relevant port, usually `443`.
+
+DNS and endpoint health can be correct even when backend firewall rules block the traffic.
 
 ### What are the next steps when artifact registry connectivity is working?
 
