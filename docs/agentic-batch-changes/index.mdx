@@ -46,12 +46,47 @@ Each Agentic Batch Change starts with a prompt. Like any agent, specificity and 
 - "In our Go 1.16+ code, remove `ioutil` imports, replacing them with the appropriate modern methods in packages like `io` and `os`."
 - "Find repositories affected by CVE-2025-55182. Prioritize repositories that have execution paths to vulnerable code. If the application’s React code does not use a server, it is not affected by this vulnerability. If the app does not use a framework, bundler, or bundler plugin that supports React Server Components, the app is not affected by this vulnerability."
 
+We recommend encoding guidance that works for your organisation via [agent customisation](#customisation).
+
+## Capabilities
+
 ### Customisation
 
 Most organisations will also have specific conventions, technologies, and preferences. The agent may discover some of these conventions in its research, but you can also improve performance by customising the agent with skills and `AGENTS.md`-style guidance, available on a per-user, per-organisation, or global level in settings:
 
-- **Users → Settings → Batch Changes → Agent**
+- **User settings → Batch Changes → Agent**
 - **Administration → Batch Changes → Agent**
+
+### Changeset hooks
+
+Agentic Batch Changes introduces a new batch changes concept, "changeset hooks". These allow programmable responses to events like CI failures and merge conflicts. For example:
+
+- When CI fails, the agent can prepare a script to fetch CI logs for you. This data can be used to amend the agent's plan, or even be handed off to a coding agent to fix immediately.
+- When a merge conflict is encountered, the agent can ask a coding agent to address it.
+
+To get set up, just ask the agent for it in your agentic batch change. We recommend encoding processes that work for your organisation via [agent customisation](#customisation).
+
+### Coding agent steps
+
+The coding agent step is a new native step type for Agentic Batch Changes that allows the agent to delegate non-deterministic or context-dependent changes for another coding agent to handle. Coding agent steps are automatically pre-configured with the [Sourcegraph MCP](/api/mcp).
+
+We currently support [Claude Code](https://claude.com/product/claude-code) and [Codex](https://openai.com/codex) as native coding agent steps.
+
+Note that Agentic Batch Changes does not use coding agent steps for every task. For deterministic changes, the agent will opt to write a script - or even an entire program - to efficiently apply some, or all, of the target changes.
+
+### Building images for steps
+
+Just like any agent, Agentic Batch Changes and [its coding agents](#coding-agent-steps) benefits from having tools tailored for specific tasks. To support this, the agent can build a tailor-made image with all the tools it needs for a specific specific task that it can re-use across an agentic batch change. Custom-built images are hosted directly in Sourcegraph.
+
+If you prefer, you can guide the agent the an image of your choice instead, or encourage the agent to build on top of particular images. We recommend encoding processes that work for your organisation via [agent customisation](#customisation).
+
+Note that the agent's image-building capability is only available in [Sourcegraph Cloud](/cloud) by default.
+
+### Batch Changes capabilities
+
+All [batch changes capabilities](/batch-spec-yaml-reference) are available to the agent.
+
+For example, the agent can write conditional steps, template changeset titles and descriptions, and split changes in one repository into multiple changesets.
 
 ## Administration
 
@@ -63,6 +98,10 @@ Access to Agentic Batch Changes can be managed through [role-based access contro
 
 - Batch Changes permissions `Batch Changes: Read` or `Batch Changes: Write`
 - Agentic Batch Changes permissions `Batch Changes: Agent Read` or `Batch Changes: Agent Write`
+
+### Entitlements
+
+[Entitlements](/admin/entitlements/) are currently only available for [coding agent steps](#coding-agent-steps).
 
 ## Security
 
