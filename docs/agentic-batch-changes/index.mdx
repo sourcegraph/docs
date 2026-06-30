@@ -13,7 +13,7 @@ seoPriority: 1.0
 	to get started.**
 </Callout>
 
-Agentic Batch Changes is built on top of [Batch Changes](/batch-changes), our precision tool for applying code changes at scale. Paired with [Deep Search](/deep-search), our code understanding agent, these two tools form the foundation of an agent harness specialised for operating across your entire codebase: from thousands of repositories, to the largest monorepos.
+Agentic Batch Changes is built on top of [Batch Changes](/batch-changes), our precision tool for applying code changes at scale. Paired with [Deep Search](/deep-search), our code understanding agent, these two tools form the foundation of an agent harness specialized for operating across your entire codebase: from thousands of repositories, to the largest monorepos.
 
 <video autoPlay loop muted playsInline>
 	<source
@@ -46,12 +46,47 @@ Each Agentic Batch Change starts with a prompt. Like any agent, specificity and 
 - "In our Go 1.16+ code, remove `ioutil` imports, replacing them with the appropriate modern methods in packages like `io` and `os`."
 - "Find repositories affected by CVE-2025-55182. Prioritize repositories that have execution paths to vulnerable code. If the application’s React code does not use a server, it is not affected by this vulnerability. If the app does not use a framework, bundler, or bundler plugin that supports React Server Components, the app is not affected by this vulnerability."
 
-### Customisation
+We recommend encoding guidance that works for your organization via [agent customization](#customization).
 
-Most organisations will also have specific conventions, technologies, and preferences. The agent may discover some of these conventions in its research, but you can also improve performance by customising the agent with skills and `AGENTS.md`-style guidance, available on a per-user, per-organisation, or global level in settings:
+## Capabilities
 
-- **Users → Settings → Batch Changes → Agent**
+### Customization
+
+Most organizations will also have specific conventions, technologies, and preferences. The agent may discover some of these conventions in its research, but you can also improve performance by customizing the agent with skills and `AGENTS.md`-style guidance, available on a per-user, per-organization, or global level in settings:
+
+- **User settings → Batch Changes → Agent**
 - **Administration → Batch Changes → Agent**
+
+### Changeset hooks
+
+Agentic Batch Changes introduces a new batch changes concept, "changeset hooks". These allow programmable responses to events like CI failures and merge conflicts. For example:
+
+- When CI fails, the agent can prepare a script to fetch CI logs for you. This data can be used to amend the agent's plan, or even be handed off to a coding agent to fix immediately.
+- When a merge conflict is encountered, the agent can ask a coding agent to address it.
+
+To get set up, just ask the agent for it in your agentic batch change. We recommend encoding processes that work for your organization via [agent customization](#customization).
+
+### Coding agent steps
+
+The coding agent step is a new native step type for Agentic Batch Changes that allows the agent to delegate non-deterministic or context-dependent changes for another coding agent to handle. Coding agent steps are automatically pre-configured with the [Sourcegraph MCP](/api/mcp).
+
+We currently support [Claude Code](https://claude.com/product/claude-code) and [Codex](https://openai.com/codex) as native coding agent steps.
+
+Note that Agentic Batch Changes does not use coding agent steps for every task. For deterministic changes, the agent will opt to write a script - or even an entire program - to efficiently apply some, or all, of the target changes.
+
+### Building images for steps
+
+Just like any agent, Agentic Batch Changes and [its coding agents](#coding-agent-steps) benefits from having tools tailored for specific tasks. To support this, the agent can build a tailor-made image with all the tools it needs for a specific specific task that it can re-use across an agentic batch change. Custom-built images are hosted directly in Sourcegraph.
+
+If you prefer, you can guide the agent the an image of your choice instead, or encourage the agent to build on top of particular images. We recommend encoding processes that work for your organization via [agent customization](#customization).
+
+Note that the agent's image-building capability is only available in [Sourcegraph Cloud](/cloud) by default.
+
+### Batch Changes capabilities
+
+All [batch changes capabilities](/batch-changes/batch-spec-yaml-reference) are available to the agent.
+
+For example, the agent can write conditional steps, template changeset titles and descriptions, and split changes in one repository into multiple changesets.
 
 ## Administration
 
@@ -64,6 +99,10 @@ Access to Agentic Batch Changes can be managed through [role-based access contro
 - Batch Changes permissions `Batch Changes: Read` or `Batch Changes: Write`
 - Agentic Batch Changes permissions `Batch Changes: Agent Read` or `Batch Changes: Agent Write`
 
+### Entitlements
+
+[Entitlements](/admin/entitlements/) are currently only available for [coding agent steps](#coding-agent-steps).
+
 ## Security
 
 Agentic Batch Changes uses the same security model as Batch Changes, with additional safeguards for agent-generated work:
@@ -72,4 +111,4 @@ Agentic Batch Changes uses the same security model as Batch Changes, with additi
 - [Batch Changes credentials](/batch-changes/configuring-credentials) control which code host identity publishes pull requests or merge requests.
 - Code host protections, including CI checks, branch protections, and review requirements, continue to apply to pull requests or merge requests created by Agentic Batch Changes.
 - [Executors](/admin/executors/) run code-modification jobs in isolated workspaces. Executors do not access code host credentials directly.
-- [Executor secrets](/admin/executors/executor-secrets) are scoped by user, organisation, or globally, and are redacted in logs. Agentic Batch Changes will ask you for approval on any agent-generated actions that reference your secrets before those actions run.
+- [Executor secrets](/admin/executors/executor-secrets) are scoped by user, organization, or globally, and are redacted in logs. Agentic Batch Changes will ask you for approval on any agent-generated actions that reference your secrets before those actions run.
