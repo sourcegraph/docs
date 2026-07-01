@@ -271,6 +271,10 @@ export const navigation: NavigationItem[] = [
 		separator: 'Code management',
 		topics: [
 			{
+				title: 'Agentic Batch Changes',
+				href: '/agentic-batch-changes'
+			},
+			{
 				title: 'Batch Changes',
 				href: '/batch-changes',
 				sections: [
