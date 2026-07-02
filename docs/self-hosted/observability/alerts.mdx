@@ -1419,37 +1419,6 @@ Generated query for warning alert: `max((max(src_gitserver_echo_duration_seconds
 
 <br />
 
-## gitserver: repo_corrupted
-
-<p class="subtitle">number of times a repo corruption has been identified</p>
-
-**Descriptions**
-
-- <span class="badge badge-critical">critical</span> gitserver: 0+ number of times a repo corruption has been identified
-
-**Next steps**
-
-- Check the corruption logs for details. gitserver_repos.corruption_logs contains more information.
-- More help interpreting this metric is available in the [dashboards reference](dashboards#gitserver-repo_corrupted).
-- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
-
-```json
-"observability.silenceAlerts": [
-  "critical_gitserver_repo_corrupted"
-]
-```
-
-<sub>*Managed by the Sourcegraph Services team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Generated query for critical alert: `max((sum(rate(src_gitserver_repo_corrupted[5m]))) &gt; 0)`
-
-</details>
-
-<br />
-
 ## gitserver: repository_clone_queue_size
 
 <p class="subtitle">repository clone queue size</p>
@@ -3109,6 +3078,40 @@ Generated query for critical alert: `(min((sum(src_worker_jobs{job=~"^worker.*",
 Generated query for warning alert: `(min((sum(src_worker_jobs{job=~"^worker.*",job_name="codeintel-autoindexing-scheduler"\})) &lt; 1)) or (absent(sum(src_worker_jobs\{job=~"^worker.*",job_name="codeintel-autoindexing-scheduler"})) == 1)`
 
 Generated query for critical alert: `(min((sum(src_worker_jobs{job=~"^worker.*",job_name="codeintel-autoindexing-scheduler"\})) &lt; 1)) or (absent(sum(src_worker_jobs\{job=~"^worker.*",job_name="codeintel-autoindexing-scheduler"})) == 1)`
+
+</details>
+
+<br />
+
+## worker: codeintel_commit_graph_fast_path_oldest_missing_upload_age_seconds
+
+<p class="subtitle">oldest recent completed SCIP upload age missing from the commit graph fast path</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> worker: 21600s+ oldest recent completed SCIP upload age missing from the commit graph fast path for 15m0s
+
+**Next steps**
+
+- Completed, unexpired SCIP uploads finished 1-48h ago are not represented in the persisted commit graph fast path.
+- Check whether the codeintel commit graph updater worker is running and healthy.
+- Check worker logs for commit graph update failures.
+- Inspect codeintel commit graph freshness and upload processing panels for related backlog or errors.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#worker-codeintel_commit_graph_fast_path_oldest_missing_upload_age_seconds).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_worker_codeintel_commit_graph_fast_path_oldest_missing_upload_age_seconds"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((max(src_codeintel_commit_graph_fast_path_oldest_missing_upload_age_seconds{job=~"^worker.*"\} and on (instance, job) (increase(src_codeintel_commit_graph_fast_path_reporter_total\{job=~"^worker.*"}[15m]) &gt; 0)) or on () vector(0)) &gt; 21600)`
 
 </details>
 
@@ -7135,9 +7138,9 @@ Generated query for critical alert: `max((max(deriv(src_deepsearch_questions_in_
 <details>
 <summary>Technical details</summary>
 
-Generated query for warning alert: `max((sum(rate(src_deepsearch_question_processing_errors_total{operation="question"\}[5m])) / (sum(rate(src_deepsearch_question_processing_total\{operation="question"}[5m])) &gt; 0) * 100) &gt; 10)`
+Custom query for warning alert: `max(((sum(increase(src_deepsearch_question_processing_errors_total{operation="question"\}[5m])) / (sum(increase(src_deepsearch_question_processing_total\{operation="question"\}[5m])) + sum(increase(src_deepsearch_question_processing_errors_total\{operation="question"\}[5m]))) * 100) and (sum(increase(src_deepsearch_question_processing_total\{operation="question"\}[5m])) + sum(increase(src_deepsearch_question_processing_errors_total\{operation="question"}[5m])) &gt;= 10)) &gt; 10)`
 
-Generated query for critical alert: `max((sum(rate(src_deepsearch_question_processing_errors_total{operation="question"\}[5m])) / (sum(rate(src_deepsearch_question_processing_total\{operation="question"}[5m])) &gt; 0) * 100) &gt; 20)`
+Custom query for critical alert: `max(((sum(increase(src_deepsearch_question_processing_errors_total{operation="question"\}[5m])) / (sum(increase(src_deepsearch_question_processing_total\{operation="question"\}[5m])) + sum(increase(src_deepsearch_question_processing_errors_total\{operation="question"\}[5m]))) * 100) and (sum(increase(src_deepsearch_question_processing_total\{operation="question"\}[5m])) + sum(increase(src_deepsearch_question_processing_errors_total\{operation="question"}[5m])) &gt;= 10)) &gt; 20)`
 
 </details>
 
@@ -7212,6 +7215,147 @@ Generated query for critical alert: `max((sum(increase(src_deepsearch_question_p
 Generated query for warning alert: `max((sum(increase(src_deepsearch_question_outcome_total{outcome="response_truncated"}[15m]))) &gt; 3)`
 
 Generated query for critical alert: `max((sum(increase(src_deepsearch_question_outcome_total{outcome="response_truncated"}[15m]))) &gt; 10)`
+
+</details>
+
+<br />
+
+## batch-change-agents: batch_change_agent_message_error_rate
+
+<p class="subtitle">message processing error rate over 5m</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> batch-change-agents: 20%+ message processing error rate over 5m for 15m0s
+- <span class="badge badge-critical">critical</span> batch-change-agents: 50%+ message processing error rate over 5m for 15m0s
+
+**Next steps**
+
+- Check worker logs for "batch change agent message failed" to find the failing messageIDs and underlying errors.
+- Check for upstream LLM provider issues or timeouts (BCA_CONVERSATION_REQUEST_TIMEOUT).
+- A spike that correlates with resets in the "Stalled job resetters" group points at worker crashes rather than per-message failures.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#batch-change-agents-batch_change_agent_message_error_rate).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_batch-change-agents_batch_change_agent_message_error_rate",
+  "critical_batch-change-agents_batch_change_agent_message_error_rate"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Custom query for warning alert: `max(((sum(increase(src_batch_change_agent_message_errors_total{op="Handle"\}[5m])) / (sum(increase(src_batch_change_agent_message_total\{op="Handle"\}[5m])) + sum(increase(src_batch_change_agent_message_errors_total\{op="Handle"\}[5m]))) * 100) and ((sum(increase(src_batch_change_agent_message_total\{op="Handle"\}[5m])) + sum(increase(src_batch_change_agent_message_errors_total\{op="Handle"}[5m]))) &gt;= 5)) &gt; 20)`
+
+Custom query for critical alert: `max(((sum(increase(src_batch_change_agent_message_errors_total{op="Handle"\}[5m])) / (sum(increase(src_batch_change_agent_message_total\{op="Handle"\}[5m])) + sum(increase(src_batch_change_agent_message_errors_total\{op="Handle"\}[5m]))) * 100) and ((sum(increase(src_batch_change_agent_message_total\{op="Handle"\}[5m])) + sum(increase(src_batch_change_agent_message_errors_total\{op="Handle"}[5m]))) &gt;= 5)) &gt; 50)`
+
+</details>
+
+<br />
+
+## batch-change-agents: batch_change_agent_message_queue_wait
+
+<p class="subtitle">oldest queued message wait time</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> batch-change-agents: 300s+ oldest queued message wait time for 15m0s
+- <span class="badge badge-critical">critical</span> batch-change-agents: 900s+ oldest queued message wait time for 15m0s
+
+**Next steps**
+
+- This is the age of the oldest message still waiting for a free handler, i.e. the latency a user experiences before their agent starts responding.
+- Check "batch_change_agent_message_active_handlers": if it is pinned near 100, the pool is saturated and the worker is under-provisioned for current load.
+- Check the "Message worker" duration panels for individual messages running unusually long and holding handlers.
+- Confirm the worker is healthy and not crash-looping (see the "Stalled job resetters" group).
+- More help interpreting this metric is available in the [dashboards reference](dashboards#batch-change-agents-batch_change_agent_message_queue_wait).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_batch-change-agents_batch_change_agent_message_queue_wait",
+  "critical_batch-change-agents_batch_change_agent_message_queue_wait"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((max(src_workerutil_queue_duration_seconds{domain="batch_change_agent_message_worker"})) &gt; 300)`
+
+Generated query for critical alert: `max((max(src_workerutil_queue_duration_seconds{domain="batch_change_agent_message_worker"})) &gt; 900)`
+
+</details>
+
+<br />
+
+## batch-change-agents: batch_change_agent_records_reset
+
+<p class="subtitle">stalled jobs reset to queued over 1h by queue</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> batch-change-agents: 5+ stalled jobs reset to queued over 1h by queue for 15m0s
+
+**Next steps**
+
+- Resets happen when a worker holding a job stops sending heartbeats, i.e. the worker process crashed or was killed mid-job.
+- A small number around a deploy or restart is expected. Sustained resets indicate a crash loop or OOM-kills in the worker.
+- Cross-reference worker container restarts and memory usage, and check worker logs for panics.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#batch-change-agents-batch_change_agent_records_reset).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_batch-change-agents_batch_change_agent_records_reset"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((sum by (domain) (increase(src_dbworker_resetter_record_resets_total{domain=~"^batch_change_agent_.*_resetter$"}[1h]))) &gt; 5)`
+
+</details>
+
+<br />
+
+## batch-change-agents: batch_change_agent_message_stream_publish_errors
+
+<p class="subtitle">message stream publish errors per second</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> batch-change-agents: 0+ message stream publish errors per second for 5m0s
+
+**Next steps**
+
+- These are publish attempts that failed after retries were exhausted, so the corresponding live event was dropped and clients only recover it on reconnect/refetch.
+- Check Redis health and connectivity from the worker (the redispool.Store keyspace).
+- Confirm the message processing itself is healthy via the "Message worker" group; stream publish failures do not fail the underlying message.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#batch-change-agents-batch_change_agent_message_stream_publish_errors).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_batch-change-agents_batch_change_agent_message_stream_publish_errors"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((sum(rate(src_batch_change_agents_stream_publish_errors_total[5m]))) &gt; 0)`
 
 </details>
 
