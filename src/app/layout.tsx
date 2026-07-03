@@ -1,7 +1,6 @@
 import {Providers} from '@/app/providers';
 import {Layout} from '@/components/Layout';
 import {TECHNICAL_CHANGELOG_RSS_URL} from '@/data/constants';
-import {GoogleAnalytics} from '@next/third-parties/google';
 import clsx from 'clsx';
 import config from 'docs.config';
 import {type Metadata} from 'next';
@@ -94,9 +93,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
 						<Layout>{children}</Layout>
 					</Providers>
 				</Suspense>
-
 			</body>
-			<GoogleAnalytics gaId="GTM-TB4NLS7" />
 		</html>
 	);
 }
