@@ -6399,7 +6399,7 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/updates/server',
-		destination: 'https://sourcegraph.com/changelog/self-hosted/server',
+		destination: '/self-hosted/deploy/docker-single-container',
 		permanent: true
 	},
 	{
@@ -7160,7 +7160,7 @@ const redirectsData = [
 	},
 	{
 		source: '/self-hosted/updates/server',
-		destination: 'https://sourcegraph.com/changelog/self-hosted/server',
+		destination: '/self-hosted/deploy/docker-single-container',
 		permanent: true
 	},
 	// code ownership redirects
