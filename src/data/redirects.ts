@@ -1304,22 +1304,22 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/install/docker/aws',
-		destination: '/admin/deploy/docker-single-container/aws',
+		destination: '/self-hosted/deploy',
 		permanent: true
 	},
 	{
 		source: '/admin/install/docker/digitalocean',
-		destination: '/admin/deploy/docker-single-container/digitalocean',
+		destination: '/self-hosted/deploy',
 		permanent: true
 	},
 	{
 		source: '/admin/install/docker/google_cloud',
-		destination: '/admin/deploy/docker-single-container/google_cloud',
+		destination: '/self-hosted/deploy',
 		permanent: true
 	},
 	{
 		source: '/admin/install/docker',
-		destination: '/admin/deploy/docker-single-container',
+		destination: '/self-hosted/deploy',
 		permanent: true
 	},
 	{
@@ -1349,7 +1349,7 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/deploy/docker',
-		destination: '/admin/deploy/docker-single-container',
+		destination: '/self-hosted/deploy',
 		permanent: true
 	},
 	{
@@ -3866,22 +3866,22 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/install/docker/aws',
-		destination: '/admin/deploy/docker-single-container/aws',
+		destination: '/self-hosted/deploy',
 		permanent: true
 	},
 	{
 		source: '/admin/install/docker/digitalocean',
-		destination: '/admin/deploy/docker-single-container/digitalocean',
+		destination: '/self-hosted/deploy',
 		permanent: true
 	},
 	{
 		source: '/admin/install/docker/google_cloud',
-		destination: '/admin/deploy/docker-single-container/google_cloud',
+		destination: '/self-hosted/deploy',
 		permanent: true
 	},
 	{
 		source: '/admin/install/docker',
-		destination: '/admin/deploy/docker-single-container',
+		destination: '/self-hosted/deploy',
 		permanent: true
 	},
 	{
@@ -3911,7 +3911,7 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/deploy/docker',
-		destination: '/admin/deploy/docker-single-container',
+		destination: '/self-hosted/deploy',
 		permanent: true
 	},
 	{
@@ -5901,22 +5901,22 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/deploy/docker-single-container/aws',
-		destination: '/self-hosted/deploy/docker-single-container/aws',
+		destination: '/self-hosted/deploy',
 		permanent: true
 	},
 	{
 		source: '/admin/deploy/docker-single-container/digitalocean',
-		destination: '/self-hosted/deploy/docker-single-container/digitalocean',
+		destination: '/self-hosted/deploy',
 		permanent: true
 	},
 	{
 		source: '/admin/deploy/docker-single-container/google_cloud',
-		destination: '/self-hosted/deploy/docker-single-container/google_cloud',
+		destination: '/self-hosted/deploy',
 		permanent: true
 	},
 	{
 		source: '/admin/deploy/docker-single-container',
-		destination: '/self-hosted/deploy/docker-single-container',
+		destination: '/self-hosted/deploy',
 		permanent: true
 	},
 	{
@@ -6399,7 +6399,7 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/updates/server',
-		destination: '/self-hosted/deploy/docker-single-container',
+		destination: '/self-hosted/deploy',
 		permanent: true
 	},
 	{
@@ -6954,7 +6954,7 @@ const redirectsData = [
 	},
 	{
 		source: '/self-hosted/deploy/docker-single-container/google_cloud',
-		destination: '/self-hosted/deploy/docker-single-container/google-cloud',
+		destination: '/self-hosted/deploy',
 		permanent: true
 	},
 	{
@@ -7160,7 +7160,7 @@ const redirectsData = [
 	},
 	{
 		source: '/self-hosted/updates/server',
-		destination: '/self-hosted/deploy/docker-single-container',
+		destination: '/self-hosted/deploy',
 		permanent: true
 	},
 	// code ownership redirects
