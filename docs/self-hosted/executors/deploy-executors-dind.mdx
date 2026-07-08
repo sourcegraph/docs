@@ -57,6 +57,47 @@ To specifically deploy Executors,
     ```
 3. Confirm executors are working by checking the _Executors_ page under **Site admin > Executors > Instances**.
 
+#### Deployment via Kustomize
+
+If you are using Kustomize instead of Helm, apply the `executors/dind` [component](https://github.com/sourcegraph/deploy-sourcegraph-k8s/tree/main/components/executors/dind) from the `deploy-sourcegraph-k8s` repository. See the [Kustomize configuration docs](/self-hosted/deploy/kubernetes/configure#overview) for details.
+
+## Upgrading executors
+
+Upgrading Docker-in-Docker executors follows the same pattern as the initial deployment. Check the [changelog](https://sourcegraph.com/changelog) for any executor-related breaking changes or new features.
+
+### Helm
+
+1. Update your Helm repo to fetch the latest chart versions:
+
+    ```bash
+    helm repo update sourcegraph
+    ```
+
+2. Run `helm upgrade` with the target Sourcegraph version:
+
+    ```bash
+    helm upgrade --install --values ./override.yaml --version <target Sourcegraph version> sg-executor sourcegraph/sourcegraph-executor-dind
+    ```
+
+3. Verify the executor pod restarts with the new version:
+
+    ```bash
+    kubectl get pods -l app=executor
+    ```
+
+4. Confirm the executor is online and reporting the expected version under **Site admin > Executors > Instances**.
+
+### Kustomize
+
+1. Update the `deploy-sourcegraph-k8s` repository to the tag matching your target Sourcegraph version.
+2. Re-apply the Kustomize overlay:
+
+    ```bash
+    kubectl apply --prune -l deploy=sourcegraph -f <path to your overlay output>
+    ```
+
+3. Confirm the executor is online under **Site admin > Executors > Instances**.
+
 ## Security considerations
 
 Docker-in-docker executors require the Docker sidecar to run as a [privileged](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/) container. `privileged: true` understandably raises concerns, so it's worth understanding the threat model before evaluating it — and seeing why, with the right deployment practices, it is acceptable for the large majority of self-hosted Sourcegraph instances.
