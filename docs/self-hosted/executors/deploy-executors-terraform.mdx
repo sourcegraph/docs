@@ -49,6 +49,10 @@ module "executors" {
 | `executor_instance_tag`                        | A label tag to add to all the executors; can be used for filtering out the right instances in stackdriver monitoring                                                                                                       |
 | `executor_metrics_environment_label`           | The value for environment by which to filter the custom metrics.                                                                                                                                                           |
 | `executor_use_firecracker`                     | Whether to use [Firecracker](/self-hosted/executors/firecracker) sandboxing for job execution. Requires bare metal instances (AWS) or nested virtualization (GCP). Defaults to `false`.                                    |
+| `private_networking`                           | If `true`, the executors and Docker registry mirror will live in a private subnet and communicate with the internet through NAT (NAT Gateway on AWS, Cloud NAT on GCP). Defaults to `false`. See the [Private Single Executor](#private-single-executor) example. |
+| `randomize_resource_names`                     | Use randomized names for resources. Defaults to `false`. On GCP, enabling this on existing deployments will **recreate** executor resources. On AWS, existing resources are updated in-place.                              |
+| `permissions_boundary_arn`                     | (**AWS only**) The ARN of an IAM policy to use as the [permissions boundary](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html) for IAM roles and users created by the module. Optional.  |
+| `private_ca_cert_path`                         | Path to a private CA certificate file. Use this when executors need to communicate with a Sourcegraph instance that uses a certificate signed by a private/internal CA. Optional.                                          |
 
 See the Terraform Modules for additional configurations.
 
@@ -433,9 +437,15 @@ module "executors" {
 
   executor_sourcegraph_external_url            = "<external url>"
   executor_sourcegraph_executor_proxy_password = "<shared secret>"
+
+  # Either:
   executor_queue_name                          = "<codeintel | batches>"
+  # Or:
+  executor_queue_names                         = ["codeintel", "batches"]
+
   executor_instance_tag                        = "<tag to filter in stackdriver monitoring>"
   executor_metrics_environment_label           = "<label to filter custom metrics>"
+  executor_use_firecracker                     = true
 }
 ```
 
