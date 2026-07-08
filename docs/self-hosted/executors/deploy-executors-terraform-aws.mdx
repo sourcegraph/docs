@@ -163,22 +163,18 @@ $ aws ec2 describe-instances \
 +----------------------+-------------+---------+------------------+
 ```
 
-You can connect to the instance using [AWS Systems Manager Session Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html) (if the instance has the SSM agent and appropriate IAM role) or via SSH.
+You can connect to the instance using [AWS Systems Manager Session Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html). The module attaches the `AmazonSSMManagedInstanceCore` policy to the executor IAM role, so SSM works out of the box.
 
 ```shell
-# Using SSM (no SSH key required)
 aws ssm start-session --target i-0abc123def456789
-
-# Using SSH (requires the key pair configured in the module)
-ssh -i <key-pair>.pem ubuntu@<instance-public-ip>
 ```
 
 Then run the following command to check if the service is running.
 
 ```shell
 ubuntu@ip-10-0-1-42:~$ systemctl status executor
-🟢 executor.service - User code executor
-     Loaded: loaded (/etc/systemd/system/executor.service; enabled; vendor preset: enabled)
+● executor.service - User code executor
+     Loaded: loaded (/etc/systemd/system/executor.service; enabled; preset: enabled)
      Active: active (running) since Thu 2021-11-18 02:28:48 UTC; 19s ago
 ```
 
