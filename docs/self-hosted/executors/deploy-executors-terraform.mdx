@@ -33,6 +33,7 @@ module "executors" {
 
   executor_instance_tag                        = "<tag to filter in stackdriver monitoring>"
   executor_metrics_environment_label           = "<label to filter custom metrics>"
+  executor_use_firecracker                     = true
 }
 ```
 
@@ -47,6 +48,7 @@ module "executors" {
 | `executor_queue_names`                         | The multiple queues from which the executor should pull jobs - one or more of [`codeintel`](/code-navigation/auto-indexing) and [`batches`](/batch-changes/server-side). Either this or `executor_queue_name` must be set. |
 | `executor_instance_tag`                        | A label tag to add to all the executors; can be used for filtering out the right instances in stackdriver monitoring                                                                                                       |
 | `executor_metrics_environment_label`           | The value for environment by which to filter the custom metrics.                                                                                                                                                           |
+| `executor_use_firecracker`                     | Whether to use [Firecracker](/self-hosted/executors/firecracker) sandboxing for job execution. Requires bare metal instances (AWS) or nested virtualization (GCP). Defaults to `false`.                                    |
 
 See the Terraform Modules for additional configurations.
 
@@ -160,6 +162,13 @@ queue.
 
 -   [AWS example](https://github.com/sourcegraph/terraform-aws-executors/tree/main/examples/multiple-executors)
 -   [Google example](https://github.com/sourcegraph/terraform-google-executors/tree/main/examples/multiple-executors)
+
+### Private Single Executor
+
+The following examples provision a single executor in a private network (no public IP). On AWS, a NAT Gateway is used for outbound traffic. On GCP, Cloud NAT provides the same functionality.
+
+-   [AWS example](https://github.com/sourcegraph/terraform-aws-executors/tree/main/examples/private-single-executor)
+-   [Google example](https://github.com/sourcegraph/terraform-google-executors/tree/main/examples/private-single-executor)
 
 ### Step-by-step Guide
 
