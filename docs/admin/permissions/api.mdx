@@ -1,17 +1,21 @@
 # Explicit permissions API
 
-Sourcegraph's GraphQL API allows users to explicitly set repository permissions. This is an alternative to other mechanisms, which involve directly talking to the code host.
+Sourcegraph supports explicitly setting repository permissions via the [Sourcegraph API](/api). This is an alternative to other mechanisms, which involve directly talking to the code host.
+
+The Sourcegraph API is an external API introduced in Sourcegraph 7.0 for custom integrations. The authoritative schema for the operations described on this page — including request and response types — can be browsed at `/api-reference` on your instance (for example, `https://sourcegraph.example.com/api-reference`), where you can also download the OpenAPI schema.
+
+> NOTE: The explicit permissions API requires the **Explicit Permissions API** license feature. Calls made on an instance without this license feature fail with a `FailedPrecondition` error.
 
 ## Permissions mechanisms in parallel
 
-If you want to use explicit permissions managmeent alongside permissions synchronised from code hosts, read section [permission mechanisms in parallel here](/admin/permissions/#permissions-mechanisms-in-parallel).
+If you want to use explicit permissions management alongside permissions synchronised from code hosts, read section [permission mechanisms in parallel here](/admin/permissions/#permissions-mechanisms-in-parallel).
 
 ## Recommendations
 
-We only recommend to use explicit permissions API in cases, where the other methods are not possible or effective.
+We only recommend to use the explicit permissions API in cases, where the other methods are not possible or effective.
 E.g. if a code host does not support permission syncing/webhooks or if it would take an unreasonable amount of resources/time to sync permissions from the code host.
 
-It's also a good idea to use explicit permissions API if the source of truth for the codehost permissions is already defined in some external system, e.g. LDAP group membership.
+It's also a good idea to use the explicit permissions API if the source of truth for the codehost permissions is already defined in some external system, e.g. LDAP group membership.
 In that case, it might be less resource intensive to sync the permissions from external source of truth directly via a periodically running routine.
 
 ## SLA
@@ -22,7 +26,7 @@ Sourcegraph does not provide SLA for how fresh the permissions are, since the da
 
 ## Disadvantages
 
-It is important to note, that when using explicit permissions API, the permissions are written to the database as provided, without further verification that such permissions do exist on the code host side.
+It is important to note, that when using the explicit permissions API, the permissions are written to the database as provided, without further verification that such permissions do exist on the code host side.
 
 Keeping the permissions in sync and fresh is the responsibility of the site admins.
 
@@ -39,116 +43,279 @@ To enable the permissions API, add the following to the [site configuration](/ad
 
 The `bindID` value specifies how to uniquely identify users when setting permissions:
 
--   `username`: You can [set permissions](#setting-repository-permissions-for-users) for users by specifying their Sourcegraph usernames. Using usernames is **preferred**, as usernames are required to be unique for each user.
--   `email`: You can [set permissions](#setting-repository-permissions-for-users) for users by specifying their email addresses (which must be verified primary emails associated with their Sourcegraph user account). This method can lead to unexpected results if there are multiple Sourcegraph user accounts with the same verified email address. Also, the email address is case-sensitive, so it should be exactly the same as set on the sourcegraph UI.
+-   `username`: You can set permissions for users by specifying their Sourcegraph usernames. Using usernames is **preferred**, as usernames are required to be unique for each user.
+-   `email`: You can set permissions for users by specifying their email addresses (which must be verified primary emails associated with their Sourcegraph user account). This method can lead to unexpected results if there are multiple Sourcegraph user accounts with the same verified email address. Also, the email address is case-sensitive, so it should be exactly the same as set on the sourcegraph UI.
 
-After you enable the permissions API, you must [set permissions](#setting-repository-permissions-for-users) to allow users to view repositories (site admins bypass all permissions checks and can always view all repositories).
+After you enable the permissions API, you must set permissions to allow users to view repositories (site admins bypass all permissions checks and can always view all repositories).
 
 > NOTE: If you were previously using [permissions syncing](/admin/permissions/syncing), e.g. syncing permissions from Github, then those permissions are used as the initial state after enabling explicit permissions. Otherwise, the initial state is for all repositories to have an empty set of authorized users, so users will not be able to view any repositories.
 
 > NOTE: In some cases, in order for the repo permissions to be enforced, you must re-save the code host connection configuration with some modification to the JSON after enabling the permissions API.
 
-## Setting a repository as unrestricted
+## API surface
 
-Sometimes it can be useful to mark a repository as `unrestricted`, meaning that it is available to all Sourcegraph users. This can be done with the `setRepositoryPermissionsUnrestricted` mutation. Marking a repository as unrestricted will disregard any previously set explicit or synced permissions. Setting `unrestricted` back to `false` will restore the previous behaviour.
+Explicit repository permissions are managed through the following operations on the Sourcegraph API. Each operation is served at `/api/<fully-qualified-method>` on your instance, accepts a JSON request body via HTTP `POST`, and returns a JSON response. The authoritative schema is available at `/api-reference`.
 
-For example:
+| Operation | Description |
+| --- | --- |
+| `explicitrepopermissions.v1.Service/GetExplicitRepoPermission` | Look up a single explicit permission. |
+| `explicitrepopermissions.v1.Service/ListExplicitRepoPermissions` | List explicit permissions by repository or by user. |
+| `explicitrepopermissions.v1.Service/CreateExplicitRepoPermission` | Grant a user explicit access to a repository. |
+| `explicitrepopermissions.v1.Service/DeleteExplicitRepoPermission` | Revoke a user's explicit access to a repository. |
+
+### Resource names
+
+Resources are addressed using [Google AIP-122](https://google.aip.dev/122) style resource names:
+
+- **Repository**: `repositories/{numeric_id}` — for example, `repositories/123`.
+- **User**: `users/{numeric_id}`, `users/@{username}`, or `users/{email}` — for example, `users/456`, `users/@alice`, or `users/alice@example.com`.
+- **Permission**: `repositories/{repo_id}/explicitRepoPermissions/{user_id_or_identifier}` — for example, `repositories/123/explicitRepoPermissions/@alice` or `repositories/123/explicitRepoPermissions/456`.
+
+### Authentication
+
+Requests to the Sourcegraph API must authenticate with a token; browser session cookies are not accepted. Pass a Sourcegraph access token as a Bearer token in the `Authorization` header:
+
+```http
+Authorization: Bearer <token>
+```
+
+OAuth tokens and the standard Sourcegraph HTTP header authentication formats are also accepted.
+
+### Token scopes
+
+Tokens used with these operations must carry the appropriate scopes:
+
+- Read operations (`GetExplicitRepoPermission`, `ListExplicitRepoPermissions`) require the `externalapi:read` scope.
+- Write operations (`CreateExplicitRepoPermission`, `DeleteExplicitRepoPermission`) require the `externalapi:write` scope.
+
+Broadly-scoped `user:all` tokens continue to be accepted, but their use against the Sourcegraph API is audit-logged. We recommend issuing scoped tokens to integrations whenever possible.
+
+### RBAC permissions
+
+In addition to a valid token scope, the calling user must also hold the corresponding RBAC permission:
+
+- `REPO_PERMISSIONS#READ` for read operations.
+- `REPO_PERMISSIONS#WRITE` for write operations.
+
+Site admins bypass all permissions checks by default. See the [Site administrators](/admin/permissions/#site-administrators) section.
+
+## Operations
+
+### GetExplicitRepoPermission
+
+Look up a single explicit repository permission by name.
+
+**Request**
+
+```json
+{
+  "name": "repositories/123/explicitRepoPermissions/@alice"
+}
+```
+
+**Response**
+
+```json
+{
+  "name": "repositories/123/explicitRepoPermissions/456",
+  "user": "users/456",
+  "repository": "repositories/123"
+}
+```
+
+### ListExplicitRepoPermissions
+
+List the explicit permissions associated with a repository or with a user. The `parent` field selects the listing dimension and may be either a repository or a user resource name.
+
+**Request — by repository**
+
+```json
+{
+  "parent": "repositories/123",
+  "page_size": 50,
+  "page_token": ""
+}
+```
+
+**Request — by user**
+
+```json
+{
+  "parent": "users/@alice",
+  "page_size": 50
+}
+```
+
+**Response**
+
+```json
+{
+  "explicit_repo_permissions": [
+    {
+      "name": "repositories/123/explicitRepoPermissions/456",
+      "user": "users/456",
+      "repository": "repositories/123"
+    }
+  ],
+  "next_page_token": "..."
+}
+```
+
+Pass the returned `next_page_token` back in a subsequent request to fetch the next page. An empty `next_page_token` indicates that there are no more results.
+
+### CreateExplicitRepoPermission
+
+Grant a user explicit access to a repository. The `parent` may be either the repository or the user; the other side of the relationship is supplied in `explicit_repo_permission`.
+
+**Request — parent is a repository**
+
+```json
+{
+  "parent": "repositories/123",
+  "explicit_repo_permission": {
+    "user": "users/@alice"
+  }
+}
+```
+
+**Request — parent is a user**
+
+```json
+{
+  "parent": "users/@alice",
+  "explicit_repo_permission": {
+    "repository": "repositories/123"
+  }
+}
+```
+
+**Response**
+
+The created `ExplicitRepoPermission`:
+
+```json
+{
+  "name": "repositories/123/explicitRepoPermissions/456",
+  "user": "users/456",
+  "repository": "repositories/123"
+}
+```
+
+### DeleteExplicitRepoPermission
+
+Revoke a user's explicit access to a repository.
+
+**Request**
+
+```json
+{
+  "name": "repositories/123/explicitRepoPermissions/@alice"
+}
+```
+
+**Response**
+
+```json
+{}
+```
+
+## Examples
+
+The examples below use `https://sourcegraph.example.com` as a placeholder for your instance, and assume your access token is exported as `SRC_ACCESS_TOKEN`.
+
+### Grant alice access to repository 123
+
+```bash
+curl -X POST \
+  -H "Authorization: Bearer $SRC_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "parent": "repositories/123",
+    "explicit_repo_permission": { "user": "users/@alice" }
+  }' \
+  https://sourcegraph.example.com/api/explicitrepopermissions.v1.Service/CreateExplicitRepoPermission
+```
+
+### List all users with explicit access to repository 123
+
+```bash
+curl -X POST \
+  -H "Authorization: Bearer $SRC_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "parent": "repositories/123",
+    "page_size": 50
+  }' \
+  https://sourcegraph.example.com/api/explicitrepopermissions.v1.Service/ListExplicitRepoPermissions
+```
+
+### List all repositories alice has explicit access to
+
+```bash
+curl -X POST \
+  -H "Authorization: Bearer $SRC_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "parent": "users/@alice",
+    "page_size": 50
+  }' \
+  https://sourcegraph.example.com/api/explicitrepopermissions.v1.Service/ListExplicitRepoPermissions
+```
+
+### Revoke alice's access to repository 123
+
+```bash
+curl -X POST \
+  -H "Authorization: Bearer $SRC_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "repositories/123/explicitRepoPermissions/@alice"
+  }' \
+  https://sourcegraph.example.com/api/explicitrepopermissions.v1.Service/DeleteExplicitRepoPermission
+```
+
+## Capabilities not yet covered by the Sourcegraph API
+
+The capabilities below are not yet available on the Sourcegraph API and are currently only accessible through the [Sourcegraph GraphQL debug API](/api/graphql). They will be ported to the Sourcegraph API in a future release.
+
+### Marking a repository as unrestricted
+
+Sometimes it can be useful to mark a repository as `unrestricted`, meaning that it is available to all Sourcegraph users regardless of explicit or synced permissions. Setting `unrestricted` back to `false` restores the previous behaviour.
+
+This capability is currently only available via the [Sourcegraph GraphQL debug API](/api/graphql):
 
 ```graphql
 mutation {
-	setRepositoryPermissionsUnrestricted(
-		repositories: ["<repo ID>", "<repo ID>", "<repo ID>"]
-		unrestricted: true
-	)
+  setRepositoryPermissionsUnrestricted(
+    repositories: ["<repo ID>", "<repo ID>"]
+    unrestricted: true
+  )
 }
 ```
 
-## Setting repository permissions for users
+### Sub-repository permissions
 
-Setting the permissions for a user can be accomplished with 2 [GraphQL API](/api/graphql) calls.
-
-First, obtain the ID of the repository from its name:
-
-```graphql
-query {
-	repository(name: "github.com/owner/repo") {
-		id
-	}
-}
-```
-
-Next, set the list of users allowed to view the repository:
-
-```graphql
-mutation {
-	setRepositoryPermissionsForUsers(
-		repository: "<repo ID>"
-		userPermissions: [{bindID: "alice"}, {bindID: "bob"}]
-	) {
-		alwaysNil
-	}
-}
-```
-
-Now, only the users specified in the `userPermissions` parameter will be allowed to view the repository. Sourcegraph automatically enforces these permissions for all operations. (Site admins bypass all permissions checks by default. See the [Site administrators](/admin/permissions/#site-administrators) section)
-
-You can call `setRepositoryPermissionsForUsers` repeatedly to set permissions for each repository, and whenever you want to change the list of authorized users.
-
-## Setting sub-repository permissions for users
-
-> NOTE: If a user has no sub-repo permissions set for a specific repository (assuming that they have general access to the repository), they will have access to the entire repository contents.
-
-Sourcegraph supports permissions on a per-file/directory basis.
-
-To enable the sub-repo permissions API, add the following to the [site configuration](/admin/config/site-config):
+Sourcegraph supports experimental per-file/directory permissions within a repository. To enable this feature, add the following to the [site configuration](/admin/config/site-config):
 
 ```json
 "experimentalFeatures": {
-    "subRepoPermissions": {"enabled": true}
+    "subRepoPermissions": { "enabled": true }
 }
 ```
 
-Sub-repo permissions can be set for a repository via the following GraphQL API:
+Paths are specified in [glob syntax](<https://en.wikipedia.org/wiki/Glob_(programming)>). A `-` prefix denies a path, rules are applied in the order in which they are listed, and any path that does not match a rule defaults to deny. A user who has general access to a repository but has no sub-repo rules set retains access to the entire repository.
+
+This capability is currently only available via the [Sourcegraph GraphQL debug API](/api/graphql). For example, the following grants `alice` access to every file in the repository except `README.md`:
 
 ```graphql
 mutation {
-	setSubRepositoryPermissionsForUsers(
-		repository: "<repo ID>"
-		userPermissions: [{bindID: "alice", paths: ["-/**", "/README.md"]}]
-	) {
-		alwaysNil
-	}
+  setSubRepositoryPermissionsForUsers(
+    repository: "<repo ID>"
+    userPermissions: [{ bindID: "alice", paths: ["/**", "-/README.md"] }]
+  ) {
+    alwaysNil
+  }
 }
 ```
 
-This query denies the user `alice` access to all files in the repository, except for the file `README.md`.
-The paths are specified in the [glob syntax](<https://en.wikipedia.org/wiki/Glob_(programming)>), and a `-` prefix indicates that the path should be denied.
-Permissions are applied in the order they are specified. If we were to want to provide `alice` access to all files except for the `README.md` file, we could specify the following:
-
-```graphql
-mutation {
-	setSubRepositoryPermissionsForUsers(
-		repository: "<repo ID>"
-		userPermissions: [{bindID: "alice", paths: ["/**", "-/README.md"]}]
-	) {
-		alwaysNil
-	}
-}
-```
-
-The default permission if a path is not specified is to deny access.
-
-### Listing a user's authorized repositories
-
-You may query the set of repositories visible to a particular user with the `authorizedUserRepositories` [GraphQL API](/api/graphql) query, which accepts a `username` or `email` parameter to specify the user:
-
-```graphql
-query {
-	authorizedUserRepositories(username: "alice", first: 100) {
-		nodes {
-			name
-		}
-		totalCount
-	}
-}
-```
+> NOTE: The [Sourcegraph GraphQL debug API](/api/graphql) is intended for diagnostics and simple tooling and does not provide backwards-compatibility guarantees. Prefer the Sourcegraph API for production integrations.
