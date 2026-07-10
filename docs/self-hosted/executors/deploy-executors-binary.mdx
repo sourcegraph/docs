@@ -157,36 +157,70 @@ If you use the systemd service, simply run `systemctl start executor`, otherwise
 Upgrading executors is relatively uninvolved. Simply follow the instructions below.
 Also, check the [changelog](https://sourcegraph.com/changelog) for any Executors related breaking changes or new features that you might want to configure.
 
-### **Step 1:** First, grab the executor binary for the new target Sourcegraph version.
+### **Step 1:** Stop the running executor
+
+If you are running the executor as a systemd service, stop it before replacing the binary:
+
+```bash
+systemctl stop executor
+```
+
+If you are running `executor run` directly, stop the process (e.g. `Ctrl+C` or `kill`).
+
+### **Step 2:** Download the new executor binary
 
 > NOTE: Keep in mind that only minor version bumps of one are guaranteed to be disruption-free.
 
+The version must include the `v` prefix (e.g. `v7.5.0`). If the version string is incorrect, the download will silently fail due to the `-f` flag.
+
 ```bash
+# Plug in the version of your Sourcegraph instance, e.g. v7.5.0.
+export SOURCEGRAPH_VERSION=v<target version>
 curl -sfLo executor https://storage.googleapis.com/sourcegraph-artifacts/executor/${SOURCEGRAPH_VERSION}/linux-amd64/executor
 chmod +x executor
 # Assuming /usr/local/bin is in $PATH.
 mv executor /usr/local/bin
 ```
 
-### **Step 2:** Make sure all ambient dependencies and configurations are up-to-date:
+You can verify the download succeeded by checking the file size (the binary is approximately 60–70 MB):
 
-Ensure [env vars](#step-2-setup-environment-variables) has been configured.
+```bash
+ls -lh /usr/local/bin/executor
+```
+
+### **Step 3:** Update dependencies
+
+Ensure [env vars](#step-2-setup-environment-variables) are configured, then update ambient dependencies.
+
+If you are using Firecracker (requires KVM):
 
 ```bash
 executor install all
-# OR run the following, to see how to install/configure components separately.
-executor install --help
 ```
 
-### **Step 3:** Validate your machine is ready to receive workloads
+If you are **not** using Firecracker (Docker-only mode), install only `src-cli`:
 
-All set up! Before letting the executor start receiving workloads from your Sourcegraph instance, you might want to verify your setup. Run the following command:
+```bash
+executor install src-cli
+```
+
+You can run `executor install --help` to see all available install targets.
+
+### **Step 4:** Validate your machine is ready to receive workloads
+
+Before restarting, verify your setup:
 
 ```bash
 executor validate
 ```
 
-### **Step 4:** Restart your running executor / spin up a new machine
+### **Step 5:** Restart the executor
 
-Depending on how you set up executors, you might want to restart the systemd service, or restart/replace the machine running them, so the new binary is running.
-If you use the systemd service, simply run `systemctl start executor`, otherwise run `executor run`. Your executor should start listening for jobs now and be visible under the `Executors > Instances` section of the Site Configuration.
+If you use the systemd service:
+
+```bash
+systemctl start executor
+systemctl status executor
+```
+
+Otherwise, run `executor run` directly. Your executor should start listening for jobs and be visible under **Site admin > Executors > Instances**.
