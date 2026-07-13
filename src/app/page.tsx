@@ -1,6 +1,5 @@
 import MdxComponents from '@/components/MdxComponents';
 import {Prose} from '@/components/Prose';
-import {GoogleAnalytics} from '@next/third-parties/google';
 import {allPosts} from 'contentlayer/generated';
 import {getMDXComponent} from 'next-contentlayer/hooks';
 import {notFound} from 'next/navigation';
@@ -32,7 +31,6 @@ const PostLayout = () => {
 					</Prose>
 				</article>
 			</div>
-			<GoogleAnalytics gaId="GTM-TB4NLS7" />
 		</>
 	);
 };

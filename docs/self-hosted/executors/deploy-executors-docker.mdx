@@ -21,6 +21,49 @@ Privileged containers are required to run executors in docker-compose. This is b
 -   Edit the `deploy-sourcegraph-docker/docker-compose/executors/executor.docker-compose.yaml` and update the [environment variables](/self-hosted/executors/executors-config)
 -   Follow the instructions in the `README` for more specific deployment instructions.
 
+## Upgrading executors
+
+Upgrading Docker Compose executors requires updating the executor image tag in the compose file and recreating the container. Check the [changelog](https://sourcegraph.com/changelog/self-hosted/docker-compose) for any executor-related breaking changes or new features.
+
+1. Navigate to the `deploy-sourcegraph-docker` repository and pull the latest changes for the target version:
+
+    ```bash
+    cd deploy-sourcegraph-docker
+    git fetch
+    git checkout v<target version>
+    ```
+
+    If you are using a custom compose file rather than the one from the repository, update the `image` field for the `executor` service to the target version. For example, to upgrade to version 7.5.0:
+
+    ```yaml
+    services:
+      executor:
+        image: 'index.docker.io/sourcegraph/executor:7.5.0'
+    ```
+
+2. Recreate the executor container with the updated image:
+
+    ```bash
+    cd docker-compose
+    docker compose -f docker-compose.yaml -f executors/executor.docker-compose.yaml up -d executor
+    ```
+
+    If you are running executors on a standalone machine:
+
+    ```bash
+    docker compose -f executor.docker-compose.yaml up -d
+    ```
+
+    Docker Compose will pull the new image and recreate the executor container. The executor will briefly disconnect during the restart.
+
+3. Verify the new container is running with the expected image:
+
+    ```bash
+    docker ps --filter name=executor --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}'
+    ```
+
+4. Confirm the executor is online and reporting the expected version under **Site admin > Executors > Instances**.
+
 ## Note
 
 Executors deployed via docker-compose do not use [Firecracker](/admin/executors/#how-it-works), meaning they require [privileged access](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) to the docker daemon running on the host.

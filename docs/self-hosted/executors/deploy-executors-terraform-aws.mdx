@@ -1,0 +1,346 @@
+# Deploying Sourcegraph executors using Terraform on AWS
+
+A [Terraform module](https://github.com/sourcegraph/terraform-aws-executors) is provided to
+provision machines running executors on AWS.
+
+See also: [Deploying on Google Cloud](/self-hosted/executors/deploy-executors-terraform-gcp)
+
+## Basic Definition
+
+The following is the minimum required definition to deploy an executor on AWS.
+
+```terraform
+module "executors" {
+  source  = "sourcegraph/executors/aws"
+
+  # Find the latest version matching your Sourcegraph version here:
+  # https://github.com/sourcegraph/terraform-aws-executors/tags
+  version = "<version>"
+
+  availability_zone = "<availability zone to provision resources in>"
+
+  executor_sourcegraph_external_url            = "<external url>"
+  executor_sourcegraph_executor_proxy_password = "<shared secret>"
+
+  # Either:
+  executor_queue_name                          = "<codeintel | batches>"
+  # Or:
+  executor_queue_names                         = ["codeintel", "batches"]
+
+  executor_instance_tag                        = "<tag to filter in monitoring>"
+  executor_metrics_environment_label           = "<label to filter custom metrics>"
+  executor_use_firecracker                     = true
+}
+```
+
+| Variable                                       | Description                                                                                                                                                                                                                |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `availability_zone`                            | The AWS availability zone to create the instance in.                                                                                                                                                                       |
+| `executor_sourcegraph_external_url`            | The public URL of your Sourcegraph instance. This corresponds to the `externalURL` value in your Sourcegraph instance's site configuration and must be resolvable from the provisioned executor compute resources.         |
+| `executor_sourcegraph_executor_proxy_password` | The access token corresponding to the `executors.accessToken` in your Sourcegraph instance's site configuration.                                                                                                           |
+| `executor_queue_name`                          | The single queue from which the executor should pull jobs - [`codeintel`](/code-navigation/auto-indexing) or [`batches`](/batch-changes/server-side). Either this or `executor_queue_names` must be set.                   |
+| `executor_queue_names`                         | The multiple queues from which the executor should pull jobs - one or more of [`codeintel`](/code-navigation/auto-indexing) and [`batches`](/batch-changes/server-side). Either this or `executor_queue_name` must be set. |
+| `executor_instance_tag`                        | A label tag to add to all the executors; can be used for filtering out the right instances in monitoring.                                                                                                                  |
+| `executor_metrics_environment_label`           | The value for environment by which to filter the custom metrics.                                                                                                                                                           |
+| `executor_use_firecracker`                     | Whether to use [Firecracker](/self-hosted/executors/firecracker) sandboxing for job execution. Requires bare metal instances (e.g. `c5n.metal`). Defaults to `true`.                                                      |
+| `private_networking`                           | If `true`, the executors and Docker registry mirror will live in a private subnet and communicate with the internet through a NAT Gateway. Defaults to `false`. See the [Private Single Executor](#private-single-executor) example. |
+| `randomize_resource_names`                     | Use randomized names for resources. Defaults to `false`. Existing resources are updated in-place when enabled.                                                                                                             |
+| `permissions_boundary_arn`                     | The ARN of an IAM policy to use as the [permissions boundary](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html) for IAM roles and users created by the module. Optional.                 |
+| `private_ca_cert_path`                         | Path to a private CA certificate file. Use this when executors need to communicate with a Sourcegraph instance that uses a certificate signed by a private/internal CA. Optional.                                          |
+
+See the [AWS Terraform module variables](https://github.com/sourcegraph/terraform-aws-executors/blob/main/modules/executors/variables.tf) for additional configurations.
+
+## Terraform Version
+
+The executor Terraform modules require Terraform `>= 1.1.0, < 2.0.0`.
+
+## Permissions
+
+Access to get and create in the following resources.
+
+-   Auto Scaling
+-   CloudWatch Logs
+-   EBS (EC2)
+-   EC2 (Elastic Compute Cloud)
+-   IAM (Identity & Access Management)
+-   VPC (Virtual Private Cloud)
+
+## Supported Regions
+
+-   `us-east-1`
+-   `us-east-2`
+-   `us-west-1`
+-   `us-west-2`
+-   `eu-west-1`
+-   `eu-west-2`
+-   `eu-west-3`
+-   `eu-north-1`
+-   `eu-south-1`
+-   `eu-central-1`
+-   `ap-northeast-1`
+-   `ap-northeast-2`
+-   `ap-southeast-1`
+-   `ap-southeast-2`
+-   `ap-southeast-3`
+-   `ap-east-1`
+-   `ap-south-1`
+-   `sa-east-1`
+-   `me-south-1`
+-   `af-south-1`
+-   `ca-central-1`
+
+## Examples
+
+### Single Executor
+
+Provisions a single executor to pull from the `codeintel` queue.
+
+-   [AWS example](https://github.com/sourcegraph/terraform-aws-executors/tree/main/examples/single-executor)
+
+### Multiple Executors
+
+Provisions two executors, one to pull from the `codeintel` queue and the other for the `batches` queue.
+
+-   [AWS example](https://github.com/sourcegraph/terraform-aws-executors/tree/main/examples/multiple-executors)
+
+### Private Single Executor
+
+Provisions a single executor in a private subnet (no public IP). A NAT Gateway is used for outbound internet traffic.
+
+-   [AWS example](https://github.com/sourcegraph/terraform-aws-executors/tree/main/examples/private-single-executor)
+
+## Step-by-step Guide
+
+The following is a step-by-step guide on provisioning a single `codeintel` executor on AWS.
+
+### Provision
+
+1. [Install Terraform](#terraform-version).
+2. Install the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
+3. Run `aws configure` to set up your credentials and default region.
+4. Set up your Sourcegraph instance's Site configuration for executors
+    1. Click on your profile picture in the top right corner
+    2. Select **Site admin**
+    3. Expand the **Configuration** section
+    4. Select **Site configuration**
+    5. Set the following,
+        - `"externalURL": "<URL>"`
+            - A URL that is accessible from the EC2 instance (e.g. a public URL such as `https://sourcegraph.example.com`)
+        - `"executors.accessToken": "<new long secret>"`
+            - Can be generated by running `cat /dev/random | base64 | head -c 20`
+            - The secret will be displayed as `REDACTED` once it's saved.
+        - `"codeIntelAutoIndexing.enabled": true`
+            - _This is only for `codeintel` executors._
+5. Download the [example files](https://github.com/sourcegraph/terraform-aws-executors/tree/main/examples/single-executor).
+6. Change the following in `providers.tf`
+    - `region` to the AWS region to provision the executor in
+7. Change the following in `main.tf`
+    - `availability_zone` to an availability zone within your chosen region (e.g. `us-west-2a`)
+    - `executor_sourcegraph_external_url` to the URL configured in your instance's **Site configuration**
+    - `executor_sourcegraph_executor_proxy_password` to the access token configured in your instance's **Site configuration**
+8. Run `terraform init` to download the Sourcegraph executor modules.
+9. Run `terraform plan` to preview the changes that will occur to your AWS infrastructure.
+10. Run `terraform apply` and enter "yes" after reviewing the proposed changes to create the executor resources.
+    - Ensure `terraform apply` exited with code 0 and did not print any errors
+11. Go back to the site admin page, expand **Executors**, click **Instances**, and check to see if your executor shows up in the list with a green dot 🟢
+
+### Validation
+
+The following can be done to troubleshoot or double-check that the executor has been properly provisioned.
+
+Ensure the executor instance is running. Either go to **EC2 → Instances** in the AWS Console or run the following command.
+
+```shell
+$ aws ec2 describe-instances \
+    --filters "Name=tag:executor_tag,Values=<your executor_instance_tag>" \
+              "Name=instance-state-name,Values=running" \
+    --query "Reservations[].Instances[].[InstanceId,InstanceType,State.Name,PrivateIpAddress]" \
+    --output table
+-------------------------------------------------------------------
+|                       DescribeInstances                         |
++----------------------+-------------+---------+------------------+
+|  i-0abc123def456789  | c5n.metal   | running |  10.0.1.42       |
++----------------------+-------------+---------+------------------+
+```
+
+You can connect to the instance using [AWS Systems Manager Session Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html). The module attaches the `AmazonSSMManagedInstanceCore` policy to the executor IAM role, so SSM works out of the box.
+
+```shell
+aws ssm start-session --target i-0abc123def456789
+```
+
+Then run the following command to check if the service is running.
+
+```shell
+ubuntu@ip-10-0-1-42:~$ systemctl status executor
+● executor.service - User code executor
+     Loaded: loaded (/etc/systemd/system/executor.service; enabled; preset: enabled)
+     Active: active (running) since Thu 2021-11-18 02:28:48 UTC; 19s ago
+```
+
+To check the logs, you can either query **CloudWatch Logs** in the AWS Console or run the following command while connected to the instance.
+
+```shell
+ubuntu@ip-10-0-1-42:~$ journalctl -u executor | less
+```
+
+Ensure the `EXECUTOR_FRONTEND_URL` and `EXECUTOR_FRONTEND_PASSWORD` in `/etc/systemd/system/executor.env` are correct.
+
+```shell
+cat /etc/systemd/system/executor.env
+```
+
+Ensure the instance can reach your `externalURL`:
+
+```shell
+ubuntu@ip-10-0-1-42:~$ curl <your externalURL here>
+<a href="/sign-in?returnTo=%2F">Found</a>
+```
+
+### Configure Auto-indexing
+
+1. Go to the **Site admin** page
+2. Expand **Code graph**,
+3. Select **Configuration**
+4. Click **Create new policy**, and fill in:
+    - Name: `TEST`
+    - Click _add a repository pattern_
+    - Repository pattern #1: set this to an existing repository on your Sourcegraph instance (
+      e.g. `github.com/gorilla/mux`)
+    - Type: `HEAD`
+    - Retention: Disabled
+    - Auto-indexing: Enabled
+5. Expand **Code graph**
+6. Select **Auto-indexing**, and check to see if an indexing job has appeared. If nothing is there:
+    - Try clicking **Enqueue**
+    - Try setting a higher update frequency: `PRECISE_CODE_INTEL_AUTO_INDEXING_TASK_INTERVAL=10s`
+    - Try setting a lower delay: `PRECISE_CODE_INTEL_AUTO_INDEXING_REPOSITORY_PROCESS_DELAY=10s`
+7. Once you have a completed indexing job, click **Uploads** and check to see that an index has been uploaded.
+8. Once the index has been uploaded, you should see the **`PRECISE`** badge in the hover! 🎉
+
+## Auto-scaling
+
+> NOTE: Auto scaling is currently not supported
+> when [downloading and running executor binaries yourself](/self-hosted/executors/deploy-executors-binary),
+> and on managed instances when using self-hosted executors, since it requires deployment adjustments.
+
+Auto-scaling of executor instances can help to increase concurrency of jobs, without paying for unused resources. With auto-scaling, you can scale down to 0 instances when no workload exist and scale up as far as you like and your cloud provider can support. Auto-scaling needs to be configured separately.
+
+Auto-scaling makes use of **AutoScalingGroups** on AWS. Sourcegraph's `worker` service publishes a scaling metric (that is, the number of jobs in queue) to CloudWatch. Then, based on that reported value, the auto-scaler adds and removes compute resources to match the required amount of compute. The autoscaler will attempt to hold 1 instance running per each `executor_jobs_per_instance_scaling` items in queue.
+
+For example, if `executor_jobs_per_instance_scaling` is set to `20` and the queue size is currently `400`, then `20` instances would be determined as required to handle the load. You might want to tweak this number based on the `machine_type`, `maximum_num_jobs` (concurrency per machine), and desired processing speed. See the [AWS variable definitions](https://github.com/sourcegraph/terraform-aws-executors/blob/main/modules/executors/variables.tf) for details.
+
+With the Terraform variables `executor_min_replicas` and `executor_max_replicas`, you can configure the minimum and maximum number of compute machines to be run at a given time.
+
+For auto-scaling to work, two things must be true:
+
+1. `executor_min_replicas` must be `>= 0` and `executor_max_replicas` must be `> executor_min_replicas`.
+2. The Sourcegraph instance (its `worker` service, specifically) needs to publish scaling metrics to CloudWatch.
+
+For the latter to work, the Sourcegraph instance needs to be configured with the correct credentials that allow it to access AWS.
+
+The `credentials` submodule in the [AWS executor module](https://github.com/sourcegraph/terraform-aws-executors/tree/main/modules/credentials) exists for that purpose. When used, the `credentials` module sets up an IAM user with permission to write CloudWatch metrics and returns the access key in the Terraform outputs.
+
+Here's an example of how one would configure auto-scaling.
+
+```terraform
+module "executors" {
+  source  = "sourcegraph/executors/aws"
+  version = "<version>"
+
+  # Basic configuration...
+
+  # Auto-scaling
+  executor_min_replicas              = 0 # Spin down when not in use
+  executor_max_replicas              = 30
+  executor_jobs_per_instance_scaling = 20
+}
+
+module "my-credentials" {
+  source  = "sourcegraph/executors/aws//modules/credentials"
+  version = "<version>"
+
+  resource_prefix          = "<optional prefix to add to created resources>"
+  # permissions_boundary_arn = "<ARN of IAM permissions boundary policy>"
+}
+
+output "metric_writer_access_key_id" {
+  value = module.my-credentials.metric_writer_access_key_id
+}
+
+output "metric_writer_secret_key" {
+  value     = module.my-credentials.metric_writer_secret_key
+  sensitive = true
+}
+```
+
+After running `terraform apply`, retrieve the credentials by running the following commands.
+
+```shell
+$ terraform output metric_writer_access_key_id
+$ terraform output metric_writer_secret_key
+```
+
+### Configuring the Sourcegraph instance
+
+The AWS EC2 auto-scaling groups configured by the Sourcegraph Terraform module respond to changes in metric values written to **CloudWatch**. The target Sourcegraph instance is expected to continuously write these values.
+
+To write the scaling metric to **CloudWatch**, the `worker` service must have defined the following environment variables.
+
+| Environment Variable                    | Description                                              |
+| --------------------------------------- | -------------------------------------------------------- |
+| `EXECUTOR_METRIC_ENVIRONMENT_LABEL`     | Same value as `executor_metrics_environment_label`       |
+| `EXECUTOR_METRIC_AWS_NAMESPACE`         | Must be set to `sourcegraph-executor`                    |
+| `EXECUTOR_METRIC_AWS_REGION`            | The target AWS region                                    |
+| `EXECUTOR_METRIC_AWS_ACCESS_KEY_ID`     | The value of the output of `metric_writer_access_key_id` |
+| `EXECUTOR_METRIC_AWS_SECRET_ACCESS_KEY` | The value of the output of `metric_writer_secret_key`    |
+
+### Testing auto scaling
+
+Once the environment variables have been set and the worker service has been restarted, you should be able to find the scaling metrics in **CloudWatch**.
+
+To test if the metric is correctly reported: go to the **CloudWatch** metrics section. Under **All metrics**, select the namespace `sourcegraph-executor` and then the metric `environment`, `queueName`. Make sure there are entries returned.
+
+Next, you can test whether the number of executors rises and shrinks as load spikes occur. Keep in mind that auto-scaling is not a real-time operation and usually takes a short moment and can have some delays between the metric going down and the desired machine count adjusting.
+
+## Upgrading executors
+
+Upgrading executors is relatively uninvolved. Simply follow the instructions below.
+Also, check the [changelog](https://sourcegraph.com/changelog) for any Executors related breaking changes or new features or flags that you might want to configure. See [Executors maintenance](/self-hosted/executors/deploy-executors#Maintaining-and-upgrading-executors) for version compatibility.
+
+### **Step 1:** Update the source version of the terraform modules
+
+> NOTE: Keep in mind that only one minor version bumps are guaranteed to be disruption-free.
+
+```diff
+module "executors" {
+  source = "sourcegraph/executors/aws"
+
+  # Find the latest version matching your Sourcegraph version here:
+  # https://github.com/sourcegraph/terraform-aws-executors/tags
+-  version = "7.3.0"
++  version = "7.4.0"
+
+  availability_zone = "<availability zone>"
+
+  executor_sourcegraph_external_url            = "<external url>"
+  executor_sourcegraph_executor_proxy_password = "<shared secret>"
+
+  # Either:
+  executor_queue_name                          = "<codeintel | batches>"
+  # Or:
+  executor_queue_names                         = ["codeintel", "batches"]
+
+  executor_instance_tag                        = "<tag to filter in monitoring>"
+  executor_metrics_environment_label           = "<label to filter custom metrics>"
+  executor_use_firecracker                     = true
+}
+```
+
+### **Step 2:** Reapply the terraform configuration
+
+Simply reapply the terraform configuration and executors will be ready to go again.
+
+```bash
+terraform apply
+```
