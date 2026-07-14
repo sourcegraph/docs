@@ -499,6 +499,10 @@ export const navigation: NavigationItem[] = [
 				href: '/api/mcp',
 				sections: [
 					{
+						title: 'Authentication',
+						href: '/api/mcp/authentication'
+					},
+					{
 						title: 'Client integrations',
 						href: '/api/mcp/client-integrations'
 					}
