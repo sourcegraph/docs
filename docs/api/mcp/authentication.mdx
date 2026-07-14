@@ -1,0 +1,95 @@
+# MCP Authentication
+
+<p className="subtitle">
+	Authenticate MCP clients with OAuth or a Sourcegraph access token.
+</p>
+
+<TierCallout>
+	Supported on [Enterprise](/pricing/plans/enterprise) plans.
+</TierCallout>
+
+The Sourcegraph MCP server supports OAuth 2.0 and access token authentication.
+
+| Method                                 | When to use                                                                                   |
+| -------------------------------------- | --------------------------------------------------------------------------------------------- |
+| OAuth with Dynamic Client Registration | Your MCP client supports OAuth and your organization allows clients to register automatically |
+| OAuth with a pre-registered client     | Your organization requires administrators to approve OAuth clients in advance                 |
+| Access token                           | Your MCP client does not support OAuth                                                        |
+
+## OAuth with Dynamic Client Registration
+
+Sourcegraph implements Dynamic Client Registration (DCR) as defined by [RFC 7591](https://datatracker.ietf.org/doc/html/rfc7591). Compatible MCP clients can register automatically and authenticate through a browser without a pre-configured client ID.
+
+DCR is enabled by default. Applications created through DCR are restricted to the `mcp` scope, which limits access to MCP endpoints.
+
+## OAuth with a Pre-registered Client
+
+Organizations that require administrators to approve OAuth clients can use pre-registered OAuth clients, also called static OAuth clients. This method also works with MCP clients that do not support DCR.
+
+Configure and test pre-registered clients before disabling DCR to avoid interrupting users.
+
+### Create an OAuth Client
+
+1. In Sourcegraph, navigate to **Site admin > OAuth clients**.
+2. Click **Create OAuth client** and configure it with:
+    - A descriptive name and optional description.
+    - The redirect URI required by your MCP client. For `mcp-remote`, use `http://localhost:3334/oauth/callback`.
+    - **Public** as the client type.
+    - The `mcp` scope.
+3. Create the client and copy its client ID.
+
+See [OAuth Apps](/admin/oauth-apps#creating-an-oauth-app) for more information about creating and managing OAuth clients.
+
+### Configure the MCP Client
+
+If your MCP client supports a pre-configured OAuth client ID, add the client ID using the client's OAuth settings.
+
+If it does not, use [`mcp-remote`](https://www.npmjs.com/package/mcp-remote) as a local proxy and add the following configuration to your client's MCP server configuration:
+
+```json
+{
+	"sourcegraph": {
+		"type": "stdio",
+		"command": "npx",
+		"args": [
+			"mcp-remote",
+			"https://your-sourcegraph-instance.com/.api/mcp",
+			"3334",
+			"--static-oauth-client-info",
+			"{\"client_id\":\"YOUR_CLIENT_ID\"}",
+			"--static-oauth-client-metadata",
+			"{\"scope\":\"mcp\"}"
+		]
+	}
+}
+```
+
+Replace `your-sourcegraph-instance.com` with your Sourcegraph instance URL and `YOUR_CLIENT_ID` with the client ID you copied. Start the MCP client and complete authorization in your browser.
+
+## Disable Dynamic Client Registration
+
+After configuring and testing pre-registered clients, disable DCR while leaving MCP available by setting:
+
+```json
+{
+	"auth.idpDynamicClientRegistrationEnabled": false
+}
+```
+
+When DCR is disabled:
+
+- Requests to `/.auth/idp/oauth/register` return `404 not found`.
+- Existing DCR-registered clients and their tokens stop working.
+- Pre-registered OAuth clients and access tokens continue to work.
+
+If `mcp.enabled` is `false`, DCR is also unavailable and the MCP endpoints are disabled.
+
+## Access Tokens
+
+For clients that do not support OAuth, include a [Sourcegraph access token](/cli/how-tos/creating-an-access-token) in the `Authorization` header:
+
+```
+Authorization: token YOUR_ACCESS_TOKEN
+```
+
+Access tokens can use the `mcp` scope to restrict access to MCP endpoints only.

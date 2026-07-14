@@ -51,80 +51,16 @@ https://your-sourcegraph-instance.com/.api/mcp
 
 ## Authentication
 
-The MCP server supports OAuth 2.0 and access token authentication.
+The MCP server supports OAuth 2.0 through Dynamic Client Registration or pre-registered OAuth clients, as well as Sourcegraph access tokens. Organizations that require administrators to approve OAuth clients can configure static OAuth clients and disable Dynamic Client Registration.
 
-### OAuth 2.0
-
-Sourcegraph implements Dynamic Client Registration ([RFC 7591](https://datatracker.ietf.org/doc/html/rfc7591)), so compatible clients can authenticate automatically without pre-configured client IDs. DCR-registered applications are restricted to the `mcp` scope, which limits access to MCP endpoints only.
-
-<Accordion title="Manual OAuth Setup">
-
-If your agent doesn't support Dynamic Client Registration, you can manually create an OAuth application:
-
-1. Create an OAuth application in your Sourcegraph instance following the instructions [here](/admin/oauth-apps#creating-an-oauth-app). (Note: you can use the `mcp` scope for MCP-only access, or `user:all` for full access)
-2. Use `mcp-remote` as a fallback with the following configuration:
-
-```json
-{
-	"sourcegraph": {
-		"type": "stdio",
-		"command": "npx",
-		"args": [
-			"mcp-remote",
-			"https://your-sourcegraph-instance.com/.api/mcp",
-			"3334",
-			"--static-oauth-client-info",
-			"{\"client_id\":\"<your-client-id>\"}",
-			"--static-oauth-client-metadata",
-			"{\"scope\":\"mcp\"}"
-		]
-	}
-}
-```
-
-<Callout type="info">
-  <ul>
-    <li>Replace `your-sourcegraph-instance.com` with your Sourcegraph instance URL and `<your-client-id>` with the ID of the client you registered.</li>
-    <li>When using the `mcp-remote` fallback, ensure the OAuth client has one of its redirect URIs set to `http://localhost:3334/oauth/callback`.</li>
-  </ul>
-</Callout>
-
-</Accordion>
-
-<Accordion title="Disabling Dynamic Client Registration">
-
-To disable DCR while leaving MCP available, set the following site configuration:
-
-```json
-{
-	"auth.idpDynamicClientRegistrationEnabled": false
-}
-```
-
-If `mcp.enabled` is `false`, DCR is also unavailable and the registration
-endpoint returns `404`.
-
-</Accordion>
-
-### Access Tokens
-
-Alternatively, include a [Sourcegraph access token](/cli/how-tos/creating-an-access-token) in the Authorization header:
-
-```
-Authorization: token YOUR_ACCESS_TOKEN
-```
-
-<Callout type="info">
-	Access tokens can use the `mcp` scope to restrict access to MCP endpoints
-	only.
-</Callout>
+See [MCP Authentication](/api/mcp/authentication) to choose and configure an authentication method.
 
 ## Availability and Access Control
 
 Admins can control MCP at three levels:
 
 - Site configuration: `mcp.enabled` enables or disables the MCP HTTP endpoints.
-- OAuth Dynamic Client Registration: `auth.idpDynamicClientRegistrationEnabled` controls whether OAuth clients can self-register; it is effectively disabled whenever `mcp.enabled` is `false`.
+- OAuth Dynamic Client Registration: `auth.idpDynamicClientRegistrationEnabled` controls whether OAuth clients can self-register. See [MCP Authentication](/api/mcp/authentication#disable-dynamic-client-registration) to disable DCR and configure pre-registered clients.
 - RBAC: users must have the `MCP#ACCESS` permission to use MCP.
 
 ### Site-Level Enablement
@@ -139,21 +75,6 @@ Use the `mcp.enabled` site configuration to turn the MCP server on or off for th
 
 `mcp.enabled` defaults to `true`. When set to `false`, requests to `/.api/mcp`
 and its subpaths return `404 no route`.
-
-### OAuth Dynamic Client Registration
-
-Use `auth.idpDynamicClientRegistrationEnabled` to control whether compatible
-OAuth clients can self-register against the Sourcegraph identity provider:
-
-```json
-{
-	"auth.idpDynamicClientRegistrationEnabled": true
-}
-```
-
-`auth.idpDynamicClientRegistrationEnabled` defaults to `true`, but it is
-treated as `false` whenever `mcp.enabled` is `false`. When DCR is unavailable,
-requests to `/.auth/idp/oauth/register` return `404 not found`.
 
 ### Restricting MCP with RBAC
 
