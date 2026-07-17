@@ -6066,7 +6066,7 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/executors/deploy_executors',
-		destination: '/self-hosted/executors/deploy_executors',
+		destination: '/self-hosted/executors',
 		permanent: true
 	},
 	{
@@ -6974,7 +6974,12 @@ const redirectsData = [
 	},
 	{
 		source: '/self-hosted/executors/deploy_executors',
-		destination: '/self-hosted/executors/deploy-executors',
+		destination: '/self-hosted/executors',
+		permanent: true
+	},
+	{
+		source: '/self-hosted/executors/deploy-executors',
+		destination: '/self-hosted/executors',
 		permanent: true
 	},
 	{

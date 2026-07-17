@@ -1,0 +1,38 @@
+# Plan executor capacity
+
+Executor capacity depends on the number of jobs each executor processes concurrently and the resources allocated to each job. Workload size and the selected deployment method can increase the total infrastructure required.
+
+## Start with the default job resources
+
+The default executor configuration allocates the following resources to each job:
+
+| Resource | Default per job |
+| -------- | --------------: |
+| CPU      |         4 cores |
+| Memory   |           12 GB |
+| Disk     |           20 GB |
+
+Use these defaults as a starting point, then account for the executor host, container runtime, operating system, and any deployment-specific overhead. Monitor real workloads and adjust capacity when jobs are resource constrained or executor infrastructure is consistently underused.
+
+## Calculate capacity for concurrent jobs
+
+`EXECUTOR_MAXIMUM_NUM_JOBS` controls the maximum number of jobs an executor can process concurrently. As a starting estimate, multiply the per-job resources by this value.
+
+For example, an executor processing four jobs concurrently with the defaults needs approximately 16 CPU cores, 48 GB of memory, and 80 GB of job disk, plus resources for the host and runtime.
+
+You can adjust the calculation with these settings:
+
+- `EXECUTOR_JOB_NUM_CPUS` controls CPU allocated to each job.
+- `EXECUTOR_JOB_MEMORY` controls memory allocated to each job.
+- `EXECUTOR_FIRECRACKER_DISK_SPACE` controls disk allocated to each Firecracker virtual machine.
+
+See the [executor configuration reference](/self-hosted/executors/executors-config) for the defaults and behavior of each setting.
+
+## Account for the deployment method
+
+- **Firecracker:** The host must have enough capacity for each concurrent MicroVM in addition to host overhead. Infrastructure must also support KVM. See [Firecracker isolation](/self-hosted/executors/firecracker).
+- **Docker:** Job limits apply to containers, but the Docker daemon and executor also consume host resources.
+- **Kubernetes:** Include executor pods, sidecars, job pods, and cluster scheduling constraints when sizing nodes or node pools.
+- **Terraform:** Choose an instance type that supports the selected isolation method, then tune executor concurrency and autoscaling for the workload. See the [AWS](/self-hosted/executors/deploy-executors-terraform-aws#auto-scaling) or [Google Cloud](/self-hosted/executors/deploy-executors-terraform-gcp#auto-scaling) deployment guide.
+
+For AWS deployments, provision disk throughput and IOPS for the expected concurrent workload. The Terraform module defaults to 125 MiB/s throughput; increase it when workload measurements show that disk performance is a bottleneck.

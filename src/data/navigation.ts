@@ -536,28 +536,8 @@ export const navigation: NavigationItem[] = [
 						href: '/admin/executors',
 						subsections: [
 							{
-								title: 'Why use executors?',
-								href: '/admin/executors#why-use-executors'
-							},
-							{
-								title: 'How executors work',
-								href: '/admin/executors#how-executors-work'
-							},
-							{
-								title: 'Sandboxing model',
-								href: '/admin/executors#sandboxing-model'
-							},
-							{
 								title: 'Setting up executors',
 								href: '/admin/executors#setting-up-executors'
-							},
-							{
-								title: 'Monitor executor instances',
-								href: '/admin/executors#monitor-executor-instances'
-							},
-							{
-								title: 'Manage executor secrets',
-								href: '/admin/executors#manage-executor-secrets'
 							},
 							{
 								title: 'Executor secrets',
@@ -622,8 +602,16 @@ export const navigation: NavigationItem[] = [
 						href: '/self-hosted/executors',
 						subsections: [
 							{
-								title: 'Shared deployment configuration',
-								href: '/self-hosted/executors/deploy-executors'
+								title: 'Private container registries',
+								href: '/self-hosted/executors/private-registries'
+							},
+							{
+								title: 'Custom certificates',
+								href: '/self-hosted/executors/custom-certificates'
+							},
+							{
+								title: 'Plan executor capacity',
+								href: '/self-hosted/executors/resource-sizing'
 							},
 							{
 								title: 'Terraform on AWS',

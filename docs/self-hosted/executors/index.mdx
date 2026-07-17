@@ -4,41 +4,15 @@ Executors run resource-intensive or untrusted jobs for precise code navigation a
 
 For feature concepts, Sourcegraph configuration, connected instance management, and executor secrets, see [Administer executors](/admin/executors).
 
-## Before you deploy
+## Prepare to deploy executors
 
-All executor deployments require:
+Complete these prerequisites before deploying executor infrastructure:
 
-- A Sourcegraph Enterprise instance running the same major and minor version as the executor
-- Network connectivity from the executor to the Sourcegraph frontend
-- An executor authentication secret configured in Sourcegraph and on the executor
-- Linux AMD64 compute for the executor runtime
-- Sufficient CPU, memory, and disk for the number of concurrent jobs
-
-### Configure authentication
-
-<Callout type="note">
-	Every executor deployment requires a shared authentication secret. Before
-	provisioning or deploying an executor machine, complete [Setting up
-	executors](/admin/executors#setting-up-executors) to configure the secret on
-	your Sourcegraph instance. The guide for each deployment method explains how
-	to provide that secret to the executor.
-</Callout>
-
-### Size executor resources
-
-Plan for the following resources for each concurrent job:
-
-| Resource | Per concurrent job |
-| -------- | -----------------: |
-| CPU      |            4 cores |
-| Memory   |              12 GB |
-| Disk     |              20 GB |
-
-For example, an executor configured to process four jobs concurrently should have approximately 16 CPU cores, 48 GB of memory, and 80 GB of disk. Configure concurrency with `EXECUTOR_MAXIMUM_NUM_JOBS`, and adjust per-job CPU and memory with `EXECUTOR_JOB_NUM_CPUS` and `EXECUTOR_JOB_MEMORY`.
-
-On AWS, use 125 MiB/s disk throughput and provision IOPS appropriate for the disk size. The smallest AWS instance that supports Firecracker is currently `c5n.metal`, so increase concurrency when appropriate to make use of the available capacity.
-
-See the [executor configuration reference](/self-hosted/executors/executors-config) for all runtime settings.
+- **Confirm version compatibility.** Run the same major and minor version of the executor as your Sourcegraph Enterprise instance.
+- **Configure authentication to your Sourcegraph instance.** Complete [Setting up executors](/admin/executors#setting-up-executors) to create the shared authentication secret. The guide for your deployment method explains how to provide that secret to the executor.
+- **Confirm network connectivity.** Executor infrastructure must be able to reach the Sourcegraph frontend.
+- **Provide a supported runtime.** Current executor deployments require a Linux AMD64 (`x86_64`) environment.
+- **Plan executor capacity.** Size CPU, memory, and disk for the number and type of concurrent jobs. See [Plan executor capacity](/self-hosted/executors/resource-sizing).
 
 ## Choose a deployment method
 
