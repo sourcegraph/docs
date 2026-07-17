@@ -531,7 +531,16 @@ export const navigation: NavigationItem[] = [
 						href: '/admin/permissions'
 					},
 					{title: 'OAuth apps', href: '/admin/oauth-apps'},
-					{title: 'Executors', href: '/admin/executors'},
+					{
+						title: 'Executors',
+						href: '/admin/executors',
+						subsections: [
+							{
+								title: 'Executor secrets',
+								href: '/admin/executors/executor-secrets'
+							}
+						]
+					},
 					{title: 'FAQs', href: '/admin/faq'},
 					{title: 'How-to guides', href: '/admin/how-to'},
 					{
@@ -586,7 +595,49 @@ export const navigation: NavigationItem[] = [
 					},
 					{
 						title: 'Executors',
-						href: '/self-hosted/executors'
+						href: '/self-hosted/executors',
+						subsections: [
+							{
+								title: 'Shared deployment configuration',
+								href: '/self-hosted/executors/deploy-executors'
+							},
+							{
+								title: 'Terraform on AWS',
+								href: '/self-hosted/executors/deploy-executors-terraform-aws'
+							},
+							{
+								title: 'Terraform on Google Cloud',
+								href: '/self-hosted/executors/deploy-executors-terraform-gcp'
+							},
+							{
+								title: 'Linux binary',
+								href: '/self-hosted/executors/deploy-executors-binary'
+							},
+							{
+								title: 'Docker Compose',
+								href: '/self-hosted/executors/deploy-executors-docker'
+							},
+							{
+								title: 'Docker-in-Docker on Kubernetes',
+								href: '/self-hosted/executors/deploy-executors-dind'
+							},
+							{
+								title: 'Native Kubernetes',
+								href: '/self-hosted/executors/deploy-executors-kubernetes'
+							},
+							{
+								title: 'Configuration reference',
+								href: '/self-hosted/executors/executors-config'
+							},
+							{
+								title: 'Firecracker isolation',
+								href: '/self-hosted/executors/firecracker'
+							},
+							{
+								title: 'Troubleshooting',
+								href: '/self-hosted/executors/executors-troubleshooting'
+							}
+						]
 					},
 					{
 						title: 'Observability',
