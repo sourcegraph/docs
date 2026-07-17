@@ -6,6 +6,20 @@
 
 A [docker-compose file](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/master/docker-compose/executors/executor.docker-compose.yaml) is provided to deploy executors standlone, or alongside your existing Sourcegraph deployment.
 
+![Executor architecture when deployed with Docker](https://storage.googleapis.com/sourcegraph-assets/executor_docker_arch.png)
+
+## How it works
+
+The executor service itself runs in a Docker container and polls Sourcegraph for work. After dequeuing a job, it clones the target repository into a workspace and uses the Docker daemon to run each job step sequentially in another container. Batch Changes jobs that do not use native execution invoke `src`; code navigation and native Batch Changes jobs invoke Docker directly. Logs and the final job status are streamed back to Sourcegraph.
+
+**On this page**
+
+- [Requirements](#requirements)
+- [Deployment](#deployment)
+- [Upgrading executors](#upgrading-executors)
+- [Related configuration](#related-configuration)
+- [Security note](#note)
+
 ## Requirements
 
 Privileged containers are required to run executors in docker-compose. This is because executors require access to the docker daemon running on the host.
@@ -63,6 +77,11 @@ Upgrading Docker Compose executors requires updating the executor image tag in t
     ```
 
 4. Confirm the executor is online and reporting the expected version under **Site admin > Executors > Instances**.
+
+## Related configuration
+
+- [Add custom certificates to a Docker Compose deployment](/self-hosted/executors/custom-certificates#add-certificates-to-a-docker-compose-deployment)
+- [Use private container registries](/self-hosted/executors/private-registries)
 
 ## Note
 

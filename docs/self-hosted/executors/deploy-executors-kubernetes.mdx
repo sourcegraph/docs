@@ -8,6 +8,20 @@
 
 The native Kubernetes Executors have a master Executor pod that schedules worker pods via the Kubernetes API. The master Executor pod manages the lifecycle of jobs, while the worker pods process the actual [batch change](/batch-changes/server-side) or [precise auto indexing](/code-navigation/auto-indexing) job specs. Review the [deployment method comparison](/self-hosted/executors#choose-a-deployment-method) for its isolation and support status.
 
+![Native Kubernetes executor architecture](https://storage.googleapis.com/sourcegraph-assets/executor_kubernetes_native_arch.png)
+
+## How it works
+
+The executor runs as a pod and polls Sourcegraph for work. After dequeuing a job, it clones the target repository into a shared workspace and asks the Kubernetes API to create a job pod. Each step runs sequentially as an init container in that pod and shares the workspace through a volume. The executor streams the step logs and final job status back to Sourcegraph.
+
+**On this page**
+
+- [Requirements](#requirements)
+- [Deployment](#deployment)
+- [Upgrading executors](#upgrading-executors)
+- [Additional notes](#additional-notes)
+- [Related configuration](#related-configuration)
+
 ## Requirements
 
 Executors interact with the Kubernetes API to manage the lifecycle of individual executor jobs. The following are the RBAC Roles needed to run Executors natively on Kubernetes.
@@ -179,3 +193,9 @@ The Executor Docker image is available on Docker Hub at [`sourcegraph/executor-k
 ### Example Configuration YAML
 
 For an example of how to configure the Executor in Kubernetes, see the [`sourcegraph-executor-k8s` Helm chart values reference](https://github.com/sourcegraph/deploy-sourcegraph-helm/blob/main/charts/sourcegraph-executor/k8s/values.yaml).
+
+## Related configuration
+
+- [Add custom certificates using Kubernetes manifests](/self-hosted/executors/custom-certificates#add-certificates-to-a-kubernetes-deployment-using-manifests)
+- [Add custom certificates using Helm](/self-hosted/executors/custom-certificates#add-certificates-to-a-kubernetes-deployment-using-helm)
+- [Use private container registries](/self-hosted/executors/private-registries)

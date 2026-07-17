@@ -1,10 +1,22 @@
 # Deploying Sourcegraph executors on linux machines
 
+![Executor architecture when installed as a Linux binary](https://storage.googleapis.com/sourcegraph-assets/executor_binary_arch.png)
+
+## How it works
+
+The executor runs as a service on a Linux host and polls Sourcegraph for work. After dequeuing a job, it clones the target repository into a job workspace and runs each step sequentially in a Docker container. Batch Changes jobs that do not use native execution invoke `src`; code navigation and native Batch Changes jobs invoke Docker directly. The executor streams step logs and the final job status back to Sourcegraph.
+
+**On this page**
+
+- [Installation](#installation)
+- [Upgrading executors](#upgrading-executors)
+- [Related configuration](#related-configuration)
+
 ## Installation
 
 > Note: See [offline installation guide](/self-hosted/executors/deploy-executors-binary-offline) for instructions on how to install executors in an air-gapped environment.
 
-The following steps will guide you through the process of installing executors on a linux machine.
+The following steps will guide you through the process of installing executors on a Linux machine.
 
 ### Dependencies
 
@@ -226,3 +238,8 @@ systemctl status executor
 ```
 
 Otherwise, run `executor run` directly. Your executor should start listening for jobs and be visible under **Site admin > Executors > Instances**.
+
+## Related configuration
+
+- [Add custom certificates to a binary deployment](/self-hosted/executors/custom-certificates#add-certificates-to-a-binary-deployment)
+- [Use private container registries](/self-hosted/executors/private-registries)

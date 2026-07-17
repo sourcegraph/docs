@@ -16,9 +16,13 @@ All executor deployments require:
 
 ### Configure authentication
 
-Before starting an executor, generate a random secret containing at least 20 characters. Set the secret as `executors.accessToken` under **Site admin > Configuration > Advanced configuration**.
-
-Configure the same value on the executor as `EXECUTOR_FRONTEND_PASSWORD`, or through the equivalent input for its deployment method. See [Setting up executors](/admin/executors#setting-up-executors) for the complete administrator workflow.
+<Callout type="note">
+	Every executor deployment requires a shared authentication secret. Before
+	provisioning or deploying an executor machine, complete [Setting up
+	executors](/admin/executors#setting-up-executors) to configure the secret on
+	your Sourcegraph instance. The guide for each deployment method explains how
+	to provide that secret to the executor.
+</Callout>
 
 ### Size executor resources
 
@@ -42,7 +46,9 @@ The primary decision is whether jobs require a virtual-machine isolation boundar
 
 - **Use Firecracker for the strongest supported job isolation.** Choose a Terraform deployment on AWS or Google Cloud, or install the Linux binary on compatible infrastructure. Firecracker requires KVM: AWS uses bare-metal instances, while Google Cloud supports nested virtualization.
 - **Use Docker when KVM is unavailable and privileged container execution is acceptable.** Install the Linux binary in Docker mode or use Docker Compose.
-- **Use Kubernetes only when executor workloads must run in an existing cluster.** Docker-in-Docker and native Kubernetes executors are beta deployment methods with weaker isolation and known production reliability limitations. Native Kubernetes executors are being deprecated.
+- **For Kubernetes deployments, prefer Docker-in-Docker.** Docker-in-Docker is the preferred option when running executors in an existing Kubernetes cluster. It remains in beta and does not provide the same MicroVM isolation boundary as Firecracker. Native Kubernetes executors are being deprecated.
+
+![Flowchart for choosing an executor deployment method](https://storage.googleapis.com/sourcegraph-assets/executor_deployment_tree.png)
 
 <Callout type="warning">
 	Executors run untrusted repository code and build tooling. Deployment
@@ -104,13 +110,39 @@ The primary decision is whether jobs require a virtual-machine isolation boundar
 	/>
 </QuickLinks>
 
-## Configure and validate your deployment
+## Validating executor deployments
 
-After choosing a deployment method, follow its guide for installation and method-specific validation. Then confirm that the executor is active and reporting the expected version under **Site admin > Maintenance > Executor instances**.
+Follow the validation steps in the guide for your selected deployment method. After the executor starts, confirm that it is active and reporting the expected version under **Site admin > Maintenance > Executor instances**.
 
-Shared configuration that applies after deployment is documented separately:
+![Executor instances listed in the Sourcegraph site administration UI](https://storage.googleapis.com/sourcegraph-assets/docs/images/code-intelligence/sg-3.34/executor-ui-test.png)
 
-- [Configure private registries and custom certificates](/self-hosted/executors/deploy-executors)
-- [Executor configuration reference](/self-hosted/executors/executors-config)
-- [Troubleshoot executors](/self-hosted/executors/executors-troubleshooting)
-- [Firecracker isolation details and caveats](/self-hosted/executors/firecracker)
+## Configure and operate executors
+
+<QuickLinks>
+	<QuickLink
+		title="Private container registries"
+		icon="presets"
+		href="/self-hosted/executors/private-registries"
+		description="Configure authentication for images stored in private container registries."
+	/>
+	<QuickLink
+		title="Custom certificates"
+		icon="theming"
+		href="/self-hosted/executors/custom-certificates"
+		description="Configure executors to trust private certificate authorities."
+	/>
+	<QuickLink
+		title="Executor configuration reference"
+		icon="installation"
+		href="/self-hosted/executors/executors-config"
+		description="Review executor environment variables and runtime configuration."
+	/>
+	<QuickLink
+		title="Troubleshoot executors"
+		icon="lightbulb"
+		href="/self-hosted/executors/executors-troubleshooting"
+		description="Diagnose connectivity, runtime, scheduling, and isolation problems."
+	/>
+</QuickLinks>
+
+For details about the strongest supported job-isolation boundary, see [Firecracker isolation and caveats](/self-hosted/executors/firecracker).
