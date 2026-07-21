@@ -136,33 +136,14 @@ or [installing the binary](/self-hosted/executors/deploy-executors-binary) direc
 
 ### Job Scheduling
 
-> Note: Kubernetes has a max of 110 pods per node. If you run into this limit, you can lower the number of Job Pods running on a node by setting the environment variable `EXECUTOR_MAXIMUM_NUM_JOBS`.
-
-Executors deployed on Kubernetes require Jobs to be scheduled on the same Node as the Executor. This is to ensure that
-Jobs are able to access the same Persistence Volume as the Executor.
-
-To ensure that Jobs are scheduled on the same Node as the Executor, the following environment variables can be set,
+The following environment variables can be used to constrain which nodes Job Pods are scheduled on,
 
 -   `EXECUTOR_KUBERNETES_NODE_NAME`
 -   `EXECUTOR_KUBERNETES_NODE_SELECTOR`
 -   `EXECUTOR_KUBERNETES_NODE_REQUIRED_AFFINITY_MATCH_EXPRESSIONS`
 -   `EXECUTOR_KUBERNETES_NODE_REQUIRED_AFFINITY_MATCH_FIELDS`
 
-#### Node Name
-
-Using the [Downward API](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/#downwardapi-fieldRef), the
-property `spec.nodeName` can be used to set the `EXECUTOR_KUBERNETES_NODE_NAME` environment variable.
-
-```yaml
-- name: EXECUTOR_KUBERNETES_NODE_NAME
-  valueFrom:
-      fieldRef:
-          fieldPath: spec.nodeName
-```
-
-This ensures that the Job is scheduled on the same Node as the Executor.
-
-However, if the node does not have enough resources to run the Job, the Job will not be scheduled.
+For example, use `EXECUTOR_KUBERNETES_NODE_SELECTOR` to restrict Jobs to a dedicated node pool.
 
 ### Firewall Rules
 
