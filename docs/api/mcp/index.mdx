@@ -60,6 +60,7 @@ See [MCP Authentication](/api/mcp/authentication) to choose and configure an aut
 Admins can control MCP at three levels:
 
 - Site configuration: `mcp.enabled` enables or disables the MCP HTTP endpoints.
+- Tool-level configuration: `mcp.tools.disabled` disables individual MCP tools by name.
 - OAuth Dynamic Client Registration: `auth.idpDynamicClientRegistrationEnabled` controls whether OAuth clients can self-register. See [MCP Authentication](/api/mcp/authentication#disable-dynamic-client-registration) to disable DCR and configure pre-registered clients.
 - RBAC: users must have the `MCP#ACCESS` permission to use MCP.
 
@@ -75,6 +76,23 @@ Use the `mcp.enabled` site configuration to turn the MCP server on or off for th
 
 `mcp.enabled` defaults to `true`. When set to `false`, requests to `/.api/mcp`
 and its subpaths return `404 no route`.
+
+### Disabling Individual Tools
+
+Use the `mcp.tools.disabled` site configuration to remove specific tools from
+all MCP endpoints while keeping the rest of the server available. It takes an
+array of strings, where each string is the name of a tool to disable—for
+example, `code_finder` or `deepsearch`:
+
+```json
+{
+	"mcp.tools.disabled": ["code_finder", "deepsearch"]
+}
+```
+
+Tool names match the headings in [Available Tools](#available-tools) below.
+Disabled tools are omitted from the tool list that MCP clients see, and calls
+to them are rejected.
 
 ### Restricting MCP with RBAC
 
@@ -148,8 +166,8 @@ The MCP server provides these tools for code exploration and analysis:
 - `revision` - Branch, tag, or commit hash (optional)
 
 <Callout type="note">
-	Results are limited to 1000 entries; narrow `path` to inspect
-	larger directories.
+	Results are limited to 1000 entries; narrow `path` to inspect larger
+	directories.
 </Callout>
 
 </details>
@@ -165,7 +183,8 @@ The MCP server provides these tools for code exploration and analysis:
 - `limit` - Maximum repositories to return (optional, default 50, maximum 10000)
 
 <Callout type="note">
-	Responses include `hasMoreResults` to indicate whether the result set was truncated; refine the query or increase `limit` to return more repositories.
+	Responses include `hasMoreResults` to indicate whether the result set was
+	truncated; refine the query or increase `limit` to return more repositories.
 </Callout>
 
 </details>
@@ -323,15 +342,39 @@ The MCP server provides these tools for code exploration and analysis:
 
 </details>
 
+### Code Finder
+
+Code Finder is an agentic tool that sits between plain search and Deep Search: it runs its own internal search loop to locate the code relevant to a task, then returns the matching file paths and line ranges with a brief explanation. Unlike `deepsearch`, it runs synchronously and is designed for quickly finding relevant code in a repository you already know, rather than open-ended research across many repositories.
+
+Code Finder usage is metered against your instance's entitlement. When the quota is exhausted, the tool returns an error.
+
+#### `code_finder`
+
+<details>
+<summary>Find relevant code using a fast search agent.</summary>
+
+**Parameters:**
+
+- `task` - The task or query to research and answer (required)
+
+**Use cases:** Locating the files and line ranges relevant to a task before making changes, finding where a feature is implemented, gathering focused context for an AI agent
+
+**Best practices:**
+
+- Name the target repository. Code Finder searches a repository you already know and declines broad cross-repository discovery—identify the repository first (for example with `list_repos`), then call the tool.
+- Phrase the task as a precise engineering request: "In github.com/example/shop, find where we build HTTP error responses" rather than "shop error handling".
+- Include what you already know: relevant paths, symbols, APIs, configuration names, or error strings and mention findings from earlier searches so the tool skips re-surfacing them and spends its search budget on the unknown parts.
+- State explicit success criteria so the tool knows when to stop, such as "Return file paths and line numbers for JWT verification calls."
+
+**Output:** A one-to-two line summary followed by links to the relevant files and line ranges on your Sourcegraph instance.
+
+</details>
+
 ### Deep Search
 
 <Callout type="info">
-	Admins can disable the `deepsearch` tool on MCP endpoints where it is
-	exposed by setting the environment variable
-	`SRC_MCP_DISABLE_DEEPSEARCH_TOOL=true` on the Sourcegraph instance. This
-	does not affect `deepsearch_read` or the dedicated `/.api/mcp/deepsearch`
-	endpoint. This is a temporary measure available in 7.0 and will be replaced
-	by a proper tool allowlist in a future release.
+	Admins can disable the `deepsearch` tool with the [`mcp.tools.disabled` site
+	configuration](#disabling-individual-tools).
 </Callout>
 
 #### `deepsearch`
@@ -368,6 +411,7 @@ Use this matrix to choose the smallest endpoint that has the tools your MCP clie
 
 | Tool                    | `/.api/mcp` | `/.api/mcp/all` | `/.api/mcp/deepsearch` |
 | ----------------------- | :---------: | :-------------: | :--------------------: |
+| `code_finder`           |      ✓      |        ✓        |                        |
 | `commit_search`         |      ✓      |        ✓        |                        |
 | `compare_revisions`     |             |        ✓        |                        |
 | `deepsearch`            |             |        ✓        |           ✓            |
