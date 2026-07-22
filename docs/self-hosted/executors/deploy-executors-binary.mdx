@@ -1,10 +1,22 @@
 # Deploying Sourcegraph executors on linux machines
 
+![Executor architecture when installed as a Linux binary](https://storage.googleapis.com/sourcegraph-assets/executor_binary_arch.png)
+
+## How it works
+
+The executor runs as a service on a Linux host and polls Sourcegraph for work. After dequeuing a job, it clones the target repository into a job workspace and runs each step sequentially in a Docker container. Batch Changes jobs that do not use native execution invoke `src`; code navigation and native Batch Changes jobs invoke Docker directly. The executor streams step logs and the final job status back to Sourcegraph.
+
+**On this page**
+
+- [Installation](#installation)
+- [Upgrading executors](#upgrading-executors)
+- [Related configuration](#related-configuration)
+
 ## Installation
 
 > Note: See [offline installation guide](/self-hosted/executors/deploy-executors-binary-offline) for instructions on how to install executors in an air-gapped environment.
 
-The following steps will guide you through the process of installing executors on a linux machine.
+The following steps will guide you through the process of installing executors on a Linux machine.
 
 ### Dependencies
 
@@ -30,7 +42,7 @@ If [Firecracker isolation will be used](/self-hosted/executors/firecracker): _(r
 
 ### **Step 0:** Confirm that virtualization is enabled (if using Firecracker)
 
-KVM (virtualization) support is required for our [sandboxing model](/self-hosted/executors#sandboxing-model) with Firecracker. The following command checks whether virtualization is enabled on the machine (it should print something):
+KVM (virtualization) support is required for [Firecracker isolation](/self-hosted/executors/firecracker). The following command checks whether virtualization is enabled on the machine (it should print something):
 
 ```bash
 $ lscpu | grep Virtualization
@@ -109,7 +121,7 @@ executor validate
 
 If any issues are found, correct them before proceeding.
 
-If you use our [sandboxing model](/self-hosted/executors#sandboxing-model) with Firecracker _(recommended)_, you can also verify that the executor is able to spin up the isolation VMs properly. For that, use the following command:
+If you use [Firecracker isolation](/self-hosted/executors/firecracker) _(recommended)_, you can also verify that the executor is able to spin up the isolation VMs properly. For that, use the following command:
 
 ```bash
 # Optionally provide a repo to clone into the VMs workspace, to verify that cloning works properly as well.
@@ -226,3 +238,8 @@ systemctl status executor
 ```
 
 Otherwise, run `executor run` directly. Your executor should start listening for jobs and be visible under **Site admin > Executors > Instances**.
+
+## Related configuration
+
+- [Add custom certificates to a binary deployment](/self-hosted/executors/custom-certificates#add-certificates-to-a-binary-deployment)
+- [Use private container registries](/self-hosted/executors/private-registries)

@@ -13,11 +13,26 @@
 
 Executors on Kubernetes require privileged access to a container runtime daemon in order to operate correctly. To ensure maximum capability across Kubernetes versions and container runtimes, a [Docker in Docker](https://www.docker.com/blog/docker-can-now-run-within-docker/) sidecar is deployed with each executor pod so that the executor does not have to access the host container runtime directly.
 
+![Docker-in-Docker Kubernetes executor architecture](https://storage.googleapis.com/sourcegraph-assets/executor_kubernetes_dind_arch.png)
+
+### How it works
+
+The executor and a Docker-in-Docker daemon run as containers in the same Kubernetes pod. The executor polls Sourcegraph, dequeues a job, and clones its repository into a shared workspace. It then uses the sidecar Docker daemon to run each job step sequentially in a container. Logs and the final job status are streamed back to Sourcegraph.
+
+**On this page**
+
+- [Step-by-step guide](#step-by-step-guide)
+- [Upgrading executors](#upgrading-executors)
+- [Security considerations](#security-considerations)
+- [Related configuration](#related-configuration)
+
 ### Step-by-step Guide
 
 <Callout type="note">
-  Before deploying, ensure your Sourcegraph instance is configured to accept executor connections.
-  See [Executor authentication](/self-hosted/executors/deploy-executors#executor-authentication) for instructions on setting the required `executors.accessToken` in your site configuration.
+	Before deploying, ensure your Sourcegraph instance is configured to accept
+	executor connections. See [Setting up
+	executors](/admin/executors#setting-up-executors) for instructions on
+	setting the required `executors.accessToken` in your site configuration.
 </Callout>
 
 Ensure you have the following tools installed:
@@ -126,3 +141,9 @@ We strongly recommend applying the following controls when running docker-in-doc
 3. **Restrict network access.** Apply Kubernetes [NetworkPolicies](https://kubernetes.io/docs/concepts/services-networking/network-policies/) and/or cloud firewall rules to the executor node pool to:
     - Block access to internal and private resources and services.
     - Block access to the cloud instance metadata service at `169.254.169.254` (AWS / GCP).
+
+## Related configuration
+
+- [Add custom certificates using Kubernetes manifests](/self-hosted/executors/custom-certificates#add-certificates-to-a-kubernetes-deployment-using-manifests)
+- [Add custom certificates using Helm](/self-hosted/executors/custom-certificates#add-certificates-to-a-kubernetes-deployment-using-helm)
+- [Use private container registries](/self-hosted/executors/private-registries)

@@ -1,181 +1,122 @@
-# Executors
+# Deploy executors
 
-<TierCallout>
-	Supported on [Enterprise](/pricing/plans/enterprise) plans.
-	<user>Available via the Web app.</user>
-</TierCallout>
+Executors run resource-intensive or untrusted jobs for precise code navigation and Batch Changes. This guide helps self-hosted operators choose a deployment method and prepare the infrastructure that executors require.
 
-Executors are Sourcegraph's solution for running untrusted code in a secure and controllable way. Executors provide a sandbox that can run resource-intensive or untrusted tasks on behalf of the Sourcegraph instance, such as:
+For feature concepts, Sourcegraph configuration, connected instance management, and executor secrets, see [Administer executors](/admin/executors).
 
--   [Automatically indexing a repository for precise code navigation](/code-navigation/auto-indexing)
--   [Running batch changes](/batch-changes/server-side)
+## Prepare to deploy executors
 
-## Installation
+Complete these prerequisites before deploying executor infrastructure:
 
-To deploy executors for your Sourcegraph instance, follow our [executor deployment guide](executors/deploy-executors).
+- **Confirm version compatibility.** Run the same major and minor version of the executor as your Sourcegraph Enterprise instance.
+- **Configure authentication to your Sourcegraph instance.** Complete [Setting up executors](/admin/executors#setting-up-executors) to create the shared authentication secret. The guide for your deployment method explains how to provide that secret to the executor.
+- **Confirm network connectivity.** Executor infrastructure must be able to reach the Sourcegraph frontend.
+- **Provide a supported runtime.** Current executor deployments require a Linux AMD64 (`x86_64`) environment.
+- **Plan executor capacity.** Size CPU, memory, and disk for the number and type of concurrent jobs. See [Plan executor capacity](/self-hosted/executors/resource-sizing).
 
-## Why use executors?
+## Choose a deployment method
 
-Running untrusted code is a core requirement of features such as precise code navigation [auto-indexing](/code-navigation/auto-indexing), and [running batch changes server-side](/batch-changes/server-side).
+The primary decision is whether jobs require a virtual-machine isolation boundary.
 
-Auto-indexing jobs, in particular, require the invocation of arbitrary and untrusted code to support the resolution of project dependencies. Invocation of post-install hooks, use of insecure [package management tools](https://github.com/golang/go/issues/29230), and package manager proxy attacks can create opportunities in which an adversary can gain unlimited use of compute or exfiltrate data. The latter outcome is particularly dangerous for on-premise installations of Sourcegraph, which is the chosen option for companies wanting to maintain strict privacy of their code property.
+- **Use Firecracker for the strongest supported job isolation.** Choose a Terraform deployment on AWS or Google Cloud, or install the Linux binary on compatible infrastructure. Firecracker requires KVM: AWS uses bare-metal instances, while Google Cloud supports nested virtualization.
+- **Use Docker when KVM is unavailable and privileged container execution is acceptable.** Install the Linux binary in Docker mode or use Docker Compose.
+- **For Kubernetes deployments, prefer Docker-in-Docker.** Docker-in-Docker is the preferred option when running executors in an existing Kubernetes cluster. It remains in beta and does not provide the same MicroVM isolation boundary as Firecracker. Native Kubernetes executors are being deprecated.
 
-Instead of performing this work within the Sourcegraph instance, where code is available on disk and unprotected internal services are available over the local network, we move untrusted compute into a sandboxed environment, the _executor_, that has access only to the clone of a single repository on disk (its _workspace_) and to the public internet.
-
-## Sandboxing Model
-
-Executors can be deployed with [Firecracker](https://sourcegraph.com/github.com/firecracker-microvm/firecracker) isolation in accordance with our [sandboxing model](/admin/executors/#how-it-works) to isolate jobs from each other and the host.
-This requires executors to be run on machines capable of running Linux KVM extensions. On the most popular cloud providers, this either means running executors on bare-metal machines (AWS) or machines capable of nested virtualization (GCP).
-
-Optionally, executors can be run without using KVM-based isolation, which is less secure but might be easier to run on common machines.
-
-## Deciding which executor deployment method to use
-
-Deciding how to deploy the executor depends on your use case. For users that wish to process their untrusted compute in the most secure manner, we recommend leveraging the [Firecracker](./executors/firecracker) isolation method. For users that have constraints around running nested virtualization, the following flowchart can help you decide which deployment option is best for your environment:
-
-![Executor Deployment Flowchart](https://storage.googleapis.com/sourcegraph-assets/executor_deployment_tree.png)
-
-> **Note:** The flowchart above shows Kubernetes-based deployment options. Both Native Kubernetes
-> and Docker-in-Docker Kubernetes executors are currently in beta with known production reliability
-> limitations. For production workloads, Terraform or Linux binary deployments are recommended
-> even when nested virtualization is not available.
-
-## How it works
-
-Executor instances are capable of being deployed in a variety of ways. Each runtime varies in how jobs are executed.
-
-### Locally with src-cli
-
-![Executors architecture - local with src-cli](https://storage.googleapis.com/sourcegraph-assets/executor_src_local_arch.png)
-
-1.  User runs the `src` (e.g. `src batch`) command from the command line.
-2.  `src` calls the Sourcegraph API to clone a repository.
-    1.  The repositories are written to a directory.
-3.  A Docker Container is created for each "step."
-    1.  The directory containing the repository is mounted to the container.
-    2.  "Steps" are ran in sequential order.
-4.  The container run a defined command against the repository.
-5.  Logs from the container are sent back to `src`.
-6.  At the end of processing all repositories, the result is sent to a Sourcegraph API.
-    1.  e.g. Batch Changes sends a `git diff` to a Sourcegraph API (and invokes other APIs).
-
-### Binary
-
-![Executors architecture - binary](https://storage.googleapis.com/sourcegraph-assets/executor_binary_arch.png)
-
-1.  The executor binary is installed to a machine.
-    1.  Additional executables (e.g. Docker, `src`) are installed as well
-2.  The executor instances pulls for available Jobs from a Sourcegraph API
-3.  A user initiates a process that creates executor Jobs.
-4.  The executor instance "dequeues" a Job.
-5.  Executor calls the Sourcegraph API to clone a repository.
-    1. The repositories are written to a directory.
-6.  A Docker Container is created for each "step."
-    1.  If the Job is `batches` (non-native execution), `src` is invoked
-    2.  Docker is invoked directly for other Jobs (`codeintel` and native execution `batches`)
-    3.  The directory containing the repository is mounted to the container.
-    4.  "Steps" are ran in sequential order.
-7.  The container run a defined command against the repository.
-8.  Logs from the container are sent back to the executor.
-9.  Logs are streamed from the executor to a Sourcegraph API
-10. The executor calls a Sourcegraph API to that "complete" the Job.
-
-### Firecracker
-
-> NOTE: [What the heck is firecracker, anyway](/self-hosted/executors/firecracker)??
-
-![Executors architecture - firecracker](https://storage.googleapis.com/sourcegraph-assets/executor_firecracker_arch.png)
-
-1.  The executor binary is installed to a machine.
-    1.  Additional executables (e.g. Docker, `src`) are installed as well
-2.  The executor instances pulls for available Jobs from a Sourcegraph API
-3.  A user initiates a process that creates executor Jobs.
-4.  The executor instance "dequeues" a Job.
-5.  Executor calls the Sourcegraph API to clone a repository.
-    1.  The repositories are written to a directory.
-6.  `ignite` starts up a Docker container that spawns a single Firecracker VM within the Docker container.
-    1. The directory containing the repository is mounted to the VM.
-7.  Docker Container is created in the Firecracker VM for each "step."
-    1.  If the Job is `batches` (non-native execution), `src` is invoked
-    2.  Docker is invoked directly for other Jobs (`codeintel` and native execution `batches`)
-    3.  "Steps" are ran in sequential order.
-8.  Within each Firecracker VM a single Docker container is created
-9.  The container run a defined command against the repository.
-10. Logs from the container are sent back to the executor.
-11. Logs are streamed from the executor to a Sourcegraph API
-12. The executor calls a Sourcegraph API to that "complete" the Job.
-
-### Docker
-
-![Executors architecture - docker](https://storage.googleapis.com/sourcegraph-assets/executor_docker_arch.png)
-
-1.  The executor image is started as a Docker container on a machine
-2.  The executor pulls for available Jobs from a Sourcegraph API
-3.  A user initiates a process that creates executor Jobs.
-4.  The executor instance "dequeues" a Job.
-5.  Executor calls the Sourcegraph API to clone a repository.
-    1.  The repositories are written to a directory.
-6.  A Docker Container is created for each "step."
-    1.  If the Job is `batches` (non-native execution), `src` is invoked
-    2.  Docker is invoked directly for other Jobs (`codeintel` and native execution `batches`)
-    3.  The directory containing the repository is mounted to the container.
-    4.  "Steps" are ran in sequential order.
-7.  The container run a defined command against the repository.
-8.  Logs from the container are sent back to the executor.
-9.  Logs are streamed from the executor to a Sourcegraph API
-10. The executor calls a Sourcegraph API to that "complete" the Job.
-
-### Native Kubernetes
+![Flowchart for choosing an executor deployment method](https://storage.googleapis.com/sourcegraph-assets/executor_deployment_tree.png)
 
 <Callout type="warning">
-	Native Kubernetes executors are in beta and are not recommended for production use.
-	See the [deployment guide](/self-hosted/executors/deploy-executors-kubernetes) for details
-	on known limitations.
+	Executors run untrusted repository code and build tooling. Deployment
+	methods without Firecracker do not provide a MicroVM boundary. Isolate
+	executor hosts or nodes from sensitive workloads, restrict access to private
+	networks and cloud metadata services, and use disposable compute where
+	possible.
 </Callout>
 
-![Executors architecture - native kubernetes](https://storage.googleapis.com/sourcegraph-assets/executor_kubernetes_native_arch.png)
+### Recommended deployment methods
 
-1.  The executor image is started as a pod in a Kubernetes node
-2.  The executor pulls for available Jobs from a Sourcegraph API
-3.  A user initiates a process that creates executor Jobs.
-4.  The executor instance "dequeues" a Job.
-5.  Executor calls the Sourcegraph API to clone a repository.
-    1.  The repositories are written to a directory.
-6.  A Kubernetes Job is created for each "step."
-    1.  The directory containing the repository is mounted to the container.
-    2.  "Steps" are ran in sequential order.
-7.  The container run a defined command against the repository.
-8.  Logs from the container are sent back to the executor.
-9.  Logs are streamed from the executor to a Sourcegraph API
-10. The executor calls a Sourcegraph API to that "complete" the Job.
+<QuickLinks>
+	<QuickLink
+		title="Terraform on AWS"
+		icon="installation"
+		href="/self-hosted/executors/deploy-executors-terraform-aws"
+		description="Provision autoscaling, Firecracker-capable executors and supporting AWS infrastructure."
+	/>
+	<QuickLink
+		title="Terraform on Google Cloud"
+		icon="installation"
+		href="/self-hosted/executors/deploy-executors-terraform-gcp"
+		description="Provision autoscaling executors with nested virtualization on Google Cloud."
+	/>
+	<QuickLink
+		title="Linux binary"
+		icon="theming"
+		href="/self-hosted/executors/deploy-executors-binary"
+		description="Install an executor directly on a Linux host, with Firecracker or Docker isolation."
+	/>
+	<QuickLink
+		title="Offline Linux binary"
+		icon="theming"
+		href="/self-hosted/executors/deploy-executors-binary-offline"
+		description="Install the executor and its dependencies in an air-gapped environment."
+	/>
+	<QuickLink
+		title="Docker Compose"
+		icon="lightbulb"
+		href="/self-hosted/executors/deploy-executors-docker"
+		description="Run an executor as a privileged container without Firecracker isolation."
+	/>
+</QuickLinks>
 
-### Docker-in-Docker Kubernetes
+### Kubernetes deployment methods
 
-<Callout type="warning">
-	Docker-in-Docker Kubernetes executors are in beta and are not recommended for production use.
-	See the [deployment guide](/self-hosted/executors/deploy-executors-dind) for details on known
-	limitations.
-</Callout>
+<QuickLinks>
+	<QuickLink
+		title="Docker-in-Docker on Kubernetes (Beta)"
+		icon="presets"
+		href="/self-hosted/executors/deploy-executors-dind"
+		description="Run Docker jobs through a privileged sidecar in an isolated Kubernetes node pool."
+	/>
+	<QuickLink
+		title="Native Kubernetes (Beta)"
+		icon="presets"
+		href="/self-hosted/executors/deploy-executors-kubernetes"
+		description="Run each job step as a Kubernetes Job. This deployment method is being deprecated."
+	/>
+</QuickLinks>
 
-![Executors architecture - docker in docker kubernetes](https://storage.googleapis.com/sourcegraph-assets/executor_kubernetes_dind_arch.png)
+## Validating executor deployments
 
-1.  The executor image is started as a container in Kubernetes Pod
-    1. The dind image is started as a sidecar container in the same Kubernetes Pod
-2.  The executor pulls for available Jobs from a Sourcegraph API
-3.  A user initiates a process that creates executor Jobs.
-4.  The executor instance "dequeues" a Job.
-5.  Executor calls the Sourcegraph API to clone a repository.
-    1.  The repositories are written to a directory.
-6.  A Docker Container is created for each "step."
-    1.  If the Job is `batches` (non-native execution), `src` is invoked
-    2.  Docker is invoked directly for other Jobs (`codeintel` and native execution `batches`)
-    3.  The directory containing the repository is mounted to the container.
-    4.  "Steps" are ran in sequential order.
-7.  The container run a defined command against the repository.
-8.  Logs from the container are sent back to the executor.
-9.  Logs are streamed from the executor to a Sourcegraph API
-10. The executor calls a Sourcegraph API to that "complete" the Job.
+Follow the validation steps in the guide for your selected deployment method. After the executor starts, confirm that it is active and reporting the expected version under **Site admin > Maintenance > Executor instances**.
 
-## Troubleshooting
+![Executor instances listed in the Sourcegraph site administration UI](https://storage.googleapis.com/sourcegraph-assets/docs/images/code-intelligence/sg-3.34/executor-ui-test.png)
 
-Refer to the [Troubleshooting Executors](/self-hosted/executors/executors-troubleshooting) document for common debugging operations.
+## Configure and operate executors
+
+<QuickLinks>
+	<QuickLink
+		title="Private container registries"
+		icon="presets"
+		href="/self-hosted/executors/private-registries"
+		description="Configure authentication for images stored in private container registries."
+	/>
+	<QuickLink
+		title="Custom certificates"
+		icon="theming"
+		href="/self-hosted/executors/custom-certificates"
+		description="Configure executors to trust private certificate authorities."
+	/>
+	<QuickLink
+		title="Executor configuration reference"
+		icon="installation"
+		href="/self-hosted/executors/executors-config"
+		description="Review executor environment variables and runtime configuration."
+	/>
+	<QuickLink
+		title="Troubleshoot executors"
+		icon="lightbulb"
+		href="/self-hosted/executors/executors-troubleshooting"
+		description="Diagnose connectivity, runtime, scheduling, and isolation problems."
+	/>
+</QuickLinks>
+
+For details about the strongest supported job-isolation boundary, see [Firecracker isolation and caveats](/self-hosted/executors/firecracker).

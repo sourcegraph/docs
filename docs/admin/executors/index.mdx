@@ -5,26 +5,105 @@
 	<user>Available via the Web app.</user>
 </TierCallout>
 
-Executors are Sourcegraph's solution for isolating and running workloads in a secure and controllable way. Executors provide a sandbox that can run resource-intensive or untrusted tasks on behalf of the Sourcegraph instance, such as:
+Executors run resource-intensive or untrusted work on behalf of Sourcegraph. They are used to:
 
--   [Automatically indexing a repository for precise code navigation](/code-navigation/auto-indexing)
--   [Running batch changes](/batch-changes/server-side)
+- [Automatically index repositories for precise code navigation](/code-navigation/auto-indexing)
+- [Run batch changes server-side](/batch-changes/server-side), including [Agentic Batch Changes](/agentic-batch-changes)
+
+This page covers the Sourcegraph configuration and administrative tools that apply to every executor. If you operate a self-hosted Sourcegraph instance and need to deploy executor infrastructure, see [Deploy executors](/self-hosted/executors).
 
 ## Why use executors?
 
-Running untrusted code is a core requirement of features such as precise code navigation [auto-indexing](/code-navigation/auto-indexing), and [running batch changes server-side](/batch-changes/server-side).
+Running untrusted code is a core requirement of features such as precise code navigation [auto-indexing](/code-navigation/auto-indexing) and [running batch changes server-side](/batch-changes/server-side).
 
-Auto-indexing jobs, in particular, require the invocation of arbitrary and untrusted code to support the resolution of project dependencies. Invocation of post-install hooks, use of insecure [package management tools](https://github.com/golang/go/issues/29230), and package manager proxy attacks can create opportunities in which an adversary can gain unlimited use of compute or exfiltrate data. The latter outcome is particularly dangerous for on-premise installations of Sourcegraph, which is the chosen option for companies wanting to maintain strict privacy of their code property.
+Auto-indexing jobs, in particular, invoke project build tools to resolve dependencies. Post-install hooks, insecure [package management tools](https://github.com/golang/go/issues/29230), and package manager proxy attacks can allow malicious code to consume compute resources or exfiltrate data. This is especially dangerous when the work runs inside a Sourcegraph instance that has repository data on disk and unprotected services on its internal network.
 
-Instead of performing this work within the Sourcegraph instance, where code is available on disk and unprotected internal services are available over the local network, we move untrusted compute into a sandboxed environment, the _executor_, that has access only to the clone of a single repository on disk (its _workspace_) and to the public internet.
+Executors move this work outside the Sourcegraph instance. A job receives an isolated workspace containing a clone of only the repository it needs, limiting its access to other repository data and Sourcegraph services.
 
-## Sandboxing Model
+## How executors work
 
-Executors can be deployed with [Firecracker](https://sourcegraph.com/github.com/firecracker-microvm/firecracker) isolation in accordance with our [sandboxing model](/admin/executors/#how-it-works) to isolate jobs from each other and the host.
-This requires executors to be run on machines capable of running Linux KVM extensions. On the most popular cloud providers, this either means running executors on bare-metal machines (AWS) or machines capable of nested virtualization (GCP).
+Executors run jobs outside the Sourcegraph instance. Each executor connects to Sourcegraph, requests work from a queue, prepares an isolated workspace containing one repository, runs the job, and sends its progress and result back to Sourcegraph.
 
-Optionally, executors can be run without using KVM-based isolation, which is less secure but might be easier to run on common machines.
+Keeping this work outside the Sourcegraph instance limits the access that untrusted build tools, package managers, and user-defined commands have to Sourcegraph services and repository data. The exact isolation boundary depends on how the executor is deployed. Self-hosted administrators should review the [deployment and isolation options](/self-hosted/executors#choose-a-deployment-method) before deploying executors.
 
-## How it works
+## Sandboxing model
 
-Executor instances are capable of being deployed in a variety of ways. Each runtime varies in how jobs are executed.
+Executors can run each job inside a [Firecracker](https://sourcegraph.com/github.com/firecracker-microvm/firecracker) MicroVM to isolate the job from other jobs and the executor host. Firecracker provides the strongest supported isolation boundary and requires Linux KVM extensions. On cloud infrastructure, this generally requires a bare-metal instance on AWS or nested virtualization on Google Cloud.
+
+Executors can also run jobs in Docker containers or as Kubernetes Jobs without KVM-based isolation. These methods are easier to deploy on common infrastructure, but they provide a weaker isolation boundary and require additional host, node, and network controls.
+
+See [Firecracker isolation](/self-hosted/executors/firecracker) for architecture and caveats, or [choose a deployment method](/self-hosted/executors#choose-a-deployment-method) based on your infrastructure and security requirements.
+
+## Setting up executors
+
+The following steps configure a self-hosted Sourcegraph instance to accept connections from executors. They are separate from deploying the executor service onto infrastructure such as a Linux host, cloud virtual machine, or Kubernetes cluster.
+
+<Callout type="note">
+	Sourcegraph Cloud includes Sourcegraph-managed executor infrastructure by
+	default. Cloud customers using these managed executors do not need to
+	configure executor authentication or deploy their own executor
+	infrastructure.
+</Callout>
+
+If you operate a self-hosted Sourcegraph instance, complete the steps below and then follow the [self-hosted deployment guide](/self-hosted/executors) to choose a deployment method and install executors on your infrastructure.
+
+Self-hosted executors authenticate to Sourcegraph with a shared secret:
+
+1. Generate a random secret containing at least 20 characters. For example, use OpenSSL to generate a 64-character hexadecimal secret:
+
+    ```bash
+    openssl rand -hex 32
+    ```
+
+1. Open **Site admin > Configuration > Advanced configuration**.
+1. Set `executors.accessToken` to the generated secret and save the site configuration.
+
+    ```
+    { "executors.accessToken": "<generated-secret>" }
+    ```
+
+1. Configure the same secret on each executor as `EXECUTOR_FRONTEND_PASSWORD`, or through the equivalent setting for its deployment method.
+
+The executor authentication secret is not a Sourcegraph user access token and is not managed on the **Access tokens** page. See [Site configuration](/admin/config/site-config#view-and-edit-site-configuration) for more information about editing site configuration.
+
+## Monitor executor instances
+
+<Callout type="note">
+	The **Executor instances** page becomes available only after
+	`executors.accessToken` is configured in site configuration.
+</Callout>
+
+Open **Site admin > Maintenance > Executor instances** to see executors that have connected to Sourcegraph. The page shows whether each executor is active, its Sourcegraph compatibility, and details including its hostname and installed runtime versions.
+
+![Executor instances page showing active and inactive executors](https://storage.googleapis.com/sourcegraph-assets/docs/images/executors/executor-instances.png)
+
+Use this page to confirm that a new or upgraded executor is connected and reporting the expected version. For host, service, or runtime failures, see [Troubleshoot executors](/self-hosted/executors/executors-troubleshooting).
+
+## Manage executor secrets
+
+Executor secrets provide environment variables to jobs without placing secret values in a batch spec. Global secrets are available to every eligible job, while user and organization secrets apply only to jobs in their respective namespaces. Namespaced secrets override global secrets with the same name.
+
+Site administrators manage global secrets under **Site admin > Batch Changes > Secrets**. Users and organization administrators manage their scoped secrets from the corresponding user or organization settings.
+
+Learn how to create, rotate, and remove [executor secrets](/admin/executors/executor-secrets).
+
+<QuickLinks>
+	<QuickLink
+		title="Deploy executors"
+		icon="installation"
+		href="/self-hosted/executors"
+		description="Compare deployment methods and review infrastructure requirements for self-hosted executors."
+	/>
+	<QuickLink
+		title="Executor configuration reference"
+		icon="presets"
+		href="/self-hosted/executors/executors-config"
+		description="Review the environment variables supported by the executor service."
+	/>
+	<QuickLink
+		title="Troubleshoot executors"
+		icon="theming"
+		href="/self-hosted/executors/executors-troubleshooting"
+		description="Diagnose connectivity, runtime, scheduling, and isolation issues."
+	/>
+</QuickLinks>

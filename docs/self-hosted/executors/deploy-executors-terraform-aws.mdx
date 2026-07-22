@@ -5,6 +5,21 @@ provision machines running executors on AWS.
 
 See also: [Deploying on Google Cloud](/self-hosted/executors/deploy-executors-terraform-gcp)
 
+## How it works
+
+The Terraform module provisions the AWS networking, Docker registry mirror, launch template, and optional autoscaling resources needed by executor instances. Each instance runs the executor binary, polls Sourcegraph for jobs, and processes them using [Firecracker isolation](/self-hosted/executors/firecracker) by default. The underlying job flow is the same as a [Linux binary deployment](/self-hosted/executors/deploy-executors-binary).
+
+**On this page**
+
+- [Basic definition](#basic-definition)
+- [Terraform version](#terraform-version)
+- [Permissions](#permissions)
+- [Supported regions](#supported-regions)
+- [Examples](#examples)
+- [Step-by-step guide](#step-by-step-guide)
+- [Auto-scaling](#auto-scaling)
+- [Upgrading executors](#upgrading-executors)
+
 ## Basic Definition
 
 The following is the minimum required definition to deploy an executor on AWS.
@@ -46,7 +61,7 @@ module "executors" {
 | `private_networking`                           | If `true`, the executors and Docker registry mirror will live in a private subnet and communicate with the internet through a NAT Gateway. Defaults to `false`. See the [Private Single Executor](#private-single-executor) example. |
 | `randomize_resource_names`                     | Use randomized names for resources. Defaults to `false`. Existing resources are updated in-place when enabled.                                                                                                             |
 | `permissions_boundary_arn`                     | The ARN of an IAM policy to use as the [permissions boundary](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html) for IAM roles and users created by the module. Optional.                 |
-| `private_ca_cert_path`                         | Path to a private CA certificate file. Use this when executors need to communicate with a Sourcegraph instance that uses a certificate signed by a private/internal CA. Optional.                                          |
+| `private_ca_cert_path`                         | Path to a private CA certificate file. Use this when executors need to communicate with a Sourcegraph instance that uses a certificate signed by a private/internal CA. See [Use custom certificates with executors](/self-hosted/executors/custom-certificates). Optional. |
 
 See the [AWS Terraform module variables](https://github.com/sourcegraph/terraform-aws-executors/blob/main/modules/executors/variables.tf) for additional configurations.
 
@@ -222,7 +237,7 @@ ubuntu@ip-10-0-1-42:~$ curl <your externalURL here>
 
 > NOTE: Auto scaling is currently not supported
 > when [downloading and running executor binaries yourself](/self-hosted/executors/deploy-executors-binary),
-> and on managed instances when using self-hosted executors, since it requires deployment adjustments.
+> and on Sourcegraph Cloud when using customer-managed executors, since it requires deployment adjustments.
 
 Auto-scaling of executor instances can help to increase concurrency of jobs, without paying for unused resources. With auto-scaling, you can scale down to 0 instances when no workload exist and scale up as far as you like and your cloud provider can support. Auto-scaling needs to be configured separately.
 
@@ -306,7 +321,7 @@ Next, you can test whether the number of executors rises and shrinks as load spi
 ## Upgrading executors
 
 Upgrading executors is relatively uninvolved. Simply follow the instructions below.
-Also, check the [changelog](https://sourcegraph.com/changelog) for any Executors related breaking changes or new features or flags that you might want to configure. See [Executors maintenance](/self-hosted/executors/deploy-executors#Maintaining-and-upgrading-executors) for version compatibility.
+Also, check the [changelog](https://sourcegraph.com/changelog) for any executor-related breaking changes, features, or configuration flags before [upgrading executors](#upgrading-executors).
 
 ### **Step 1:** Update the source version of the terraform modules
 
