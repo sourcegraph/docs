@@ -226,15 +226,13 @@ Verify that the machine type in use is of type `.metal` (e.g. `M5.metal`).
 
 ## Kubernetes Job Scheduling
 
-There are a few environment variables available that can be used to determine which node an Executor Job Pod will be
-scheduled in. The Job Pods need to be scheduled in the same node as the Executor Pod (in order to mount the
-Persistence Volume Claim).
+By default, the Kubernetes scheduler can place executor Job Pods on any suitable node. Each job has its own workspace volume: an `emptyDir` by default, or a per-job PVC when `KUBERNETES_JOB_VOLUME_TYPE` is set to `pvc`. Job Pods do not need to run on the same node as the executor controller.
 
-The following environment variables can be used to determine where the Job Pods will be scheduled.
+The following optional environment variables constrain where Job Pods are scheduled.
 
 | Name                                                         | Default Value | Description                                                                                                                                                                                              |
 | ------------------------------------------------------------ | :------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| EXECUTOR_KUBERNETES_NODE_NAME                                | N/A           | The name of the Kubernetes Node to create Jobs in. If not specified, the Pods are created in the first available node.                                                                                   |
+| EXECUTOR_KUBERNETES_NODE_NAME                                | N/A           | The name of the Kubernetes node on which to create Job Pods. If unset, the Kubernetes scheduler selects a suitable node.                                                                                 |
 | EXECUTOR_KUBERNETES_NODE_SELECTOR                            | N/A           | A comma separated list of values to use as a node selector for Kubernetes Jobs. e.g. `foo=bar,app=my-app`                                                                                                |
 | EXECUTOR_KUBERNETES_NODE_REQUIRED_AFFINITY_MATCH_EXPRESSIONS | N/A           | The JSON encoded required affinity match expressions for Kubernetes Jobs. e.g. `[{"key": "foo", "operator": "In", "values": ["bar"]}]`                                                                   |
 | EXECUTOR_KUBERNETES_NODE_REQUIRED_AFFINITY_MATCH_FIELDS      | N/A           | The JSON encoded required affinity match fields for Kubernetes Jobs. e.g. `[{"key": "foo", "operator": "In", "values": ["bar"]}]`                                                                        |

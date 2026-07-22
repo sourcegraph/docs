@@ -148,14 +148,13 @@ Executors deployed on Kubernetes do not use [Firecracker](/self-hosted/executors
 If you have security concerns, consider deploying via [terraform](/self-hosted/executors/deploy-executors-terraform)
 or [installing the binary](/self-hosted/executors/deploy-executors-binary) directly.
 
-### Job Scheduling
+### Scale and schedule jobs
 
-> Note: Kubernetes has a max of 110 pods per node. If you run into this limit, you can lower the number of Job Pods running on a node by setting the environment variable `EXECUTOR_MAXIMUM_NUM_JOBS`.
+Run one native Kubernetes executor controller for each deployment. Do not scale the controller Deployment by adding replicas. To increase the number of jobs that the controller can run concurrently, set the Helm value `executor.maximumNumJobs` or the equivalent `EXECUTOR_MAXIMUM_NUM_JOBS` environment variable. The default Helm value is 10.
 
-Executors deployed on Kubernetes require Jobs to be scheduled on the same Node as the Executor. This is to ensure that
-Jobs are able to access the same Persistence Volume as the Executor.
+Each job runs in its own pod and has its own workspace volume. By default, the workspace uses an `emptyDir` volume, so job pods do not need to run on the same node as the executor controller. If `KUBERNETES_JOB_VOLUME_TYPE` is set to `pvc`, the executor creates a separate PVC for each job.
 
-To ensure that Jobs are scheduled on the same Node as the Executor, the following environment variables can be set,
+Without additional scheduling configuration, the Kubernetes scheduler can place job pods on any suitable node. Use the following optional environment variables to constrain their placement:
 
 -   `EXECUTOR_KUBERNETES_NODE_NAME`
 -   `EXECUTOR_KUBERNETES_NODE_SELECTOR`
@@ -174,7 +173,7 @@ property `spec.nodeName` can be used to set the `EXECUTOR_KUBERNETES_NODE_NAME` 
           fieldPath: spec.nodeName
 ```
 
-This ensures that the Job is scheduled on the same Node as the Executor.
+This pins every job pod created by the executor to the controller's node. Use it only when jobs must be co-located with the controller.
 
 However, if the node does not have enough resources to run the Job, the Job will not be scheduled.
 
