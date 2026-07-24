@@ -2385,6 +2385,105 @@ Generated query for critical alert: `min((sum by (app) (up{app=~".*(pgsql\\|code
 
 <br />
 
+## precise-code-intel-worker: codeintel_upload_queue_duration
+
+<p class="subtitle">maximum time a precise codeintel upload has been waiting to be processed</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> precise-code-intel-worker: 3600s+ maximum time a precise codeintel upload has been waiting to be processed for 15m0s
+
+**Next steps**
+
+- Check the precise-code-intel-worker logs for upload processing errors.
+- Check the codeintel-db and precise-code-intel-worker dashboards for e.g. CPU/memory/disk resource saturation.
+- If the queue is growing and workers are healthy, consider scaling up precise-code-intel-worker.
+- Learn more about the related dashboard panel in the [dashboards reference](dashboards#precise-code-intel-worker-codeintel_upload_queue_duration).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_precise-code-intel-worker_codeintel_upload_queue_duration"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((max(src_workerutil_queue_duration_seconds{domain="codeintel_upload"})) &gt;= 3600)`
+
+</details>
+
+<br />
+
+## precise-code-intel-worker: codeintel_upload_processor_runtime_limit_exceeded
+
+<p class="subtitle">SCIP uploads killed for exceeding the configured maximum job runtime every 30m</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> precise-code-intel-worker: 0+ SCIP uploads killed for exceeding the configured maximum job runtime every 30m
+
+**Next steps**
+
+- Check the precise-code-intel-worker logs for errors mentioning "job exceeded maximum execution time" to identify the affected upload IDs.
+- Check the precise-code-intel-worker dashboard for CPU, memory, and upload size saturation.
+- If the uploads are valid but consistently exceed the configured runtime, consider increasing PRECISE_CODE_INTEL_WORKER_MAXIMUM_RUNTIME_PER_JOB or scaling precise-code-intel-worker resources.
+- Learn more about the related dashboard panel in the [dashboards reference](dashboards#precise-code-intel-worker-codeintel_upload_processor_runtime_limit_exceeded).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_precise-code-intel-worker_codeintel_upload_processor_runtime_limit_exceeded"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((sum(increase(src_codeintel_upload_processor_maximum_runtime_exceeded_total{job="precise-code-intel-worker"}[30m]))) &gt; 0)`
+
+</details>
+
+<br />
+
+## precise-code-intel-worker: codeintel_upload_processor_runtime_over_limit
+
+<p class="subtitle">time the oldest active SCIP upload has continued running past the configured worker runtime limit</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> precise-code-intel-worker: 0s+ time the oldest active SCIP upload has continued running past the configured worker runtime limit for 10m0s
+
+**Next steps**
+
+- The worker cancels a job`s context when it hits the runtime limit, so a job still running this far past the limit indicates the handler is not responding to cancellation.
+- Check the precise-code-intel-worker logs for the active upload ID and processing errors, and check whether the instance is CPU-saturated or deadlocked.
+- If the job never terminates, restart the affected precise-code-intel-worker instance and report the stuck upload to the Code Understanding team.
+- Learn more about the related dashboard panel in the [dashboards reference](dashboards#precise-code-intel-worker-codeintel_upload_processor_runtime_over_limit).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_precise-code-intel-worker_codeintel_upload_processor_runtime_over_limit"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((max by (instance) (clamp_min(time() - src_codeintel_upload_processor_oldest_start_time_seconds{job="precise-code-intel-worker"\} - src_codeintel_upload_processor_maximum_runtime_per_job_seconds\{job="precise-code-intel-worker"\}, 0) and src_codeintel_upload_processor_oldest_start_time_seconds\{job="precise-code-intel-worker"\} &gt; 0 and src_codeintel_upload_processor_maximum_runtime_per_job_seconds\{job="precise-code-intel-worker"} &gt; 0)) &gt; 0)`
+
+</details>
+
+<br />
+
 ## precise-code-intel-worker: mean_blocked_seconds_per_conn_request
 
 <p class="subtitle">mean blocked seconds per conn request</p>
