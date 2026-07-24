@@ -10955,6 +10955,28 @@ sum by(instance) (src_codeintel_upload_processor_upload_size{job="precise-code-i
 
 <br />
 
+#### precise-code-intel-worker: codeintel_upload_queue_duration
+
+<p class="subtitle">Maximum time a precise codeintel upload has been waiting to be processed</p>
+
+Refer to the [alerts reference](alerts#precise-code-intel-worker-codeintel_upload_queue_duration) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/precise-code-intel-worker/precise-code-intel-worker?viewPanel=100002` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max(src_workerutil_queue_duration_seconds{domain="codeintel_upload"})
+```
+</details>
+
+<br />
+
 #### precise-code-intel-worker: codeintel_upload_processor_total
 
 <p class="subtitle">Handler operations every 5m</p>
@@ -11038,6 +11060,82 @@ Query:
 
 ```
 sum(increase(src_codeintel_upload_processor_errors_total{job=~"^precise-code-intel-worker.*"}[5m])) / (sum(increase(src_codeintel_upload_processor_total{job=~"^precise-code-intel-worker.*"}[5m])) + sum(increase(src_codeintel_upload_processor_errors_total{job=~"^precise-code-intel-worker.*"}[5m]))) * 100
+```
+</details>
+
+<br />
+
+#### precise-code-intel-worker: codeintel_upload_processor_active_upload_runtime
+
+<p class="subtitle">Runtime of the oldest SCIP upload actively being processed by each worker instance</p>
+
+Compare against the configured maximum runtime (exposed as src_codeintel_upload_processor_maximum_runtime_per_job_seconds)
+to see how much headroom uploads have before hitting PRECISE_CODE_INTEL_WORKER_MAXIMUM_RUNTIME_PER_JOB.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/precise-code-intel-worker/precise-code-intel-worker?viewPanel=100020` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max by(instance) ((time() - src_codeintel_upload_processor_oldest_start_time_seconds{job="precise-code-intel-worker"})
+			and src_codeintel_upload_processor_oldest_start_time_seconds{job="precise-code-intel-worker"} > 0)
+```
+</details>
+
+<br />
+
+#### precise-code-intel-worker: codeintel_upload_processor_runtime_limit_exceeded
+
+<p class="subtitle">SCIP uploads killed for exceeding the configured maximum job runtime every 30m</p>
+
+Refer to the [alerts reference](alerts#precise-code-intel-worker-codeintel_upload_processor_runtime_limit_exceeded) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/precise-code-intel-worker/precise-code-intel-worker?viewPanel=100021` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_codeintel_upload_processor_maximum_runtime_exceeded_total{job="precise-code-intel-worker"}[30m]))
+```
+</details>
+
+<br />
+
+#### precise-code-intel-worker: codeintel_upload_processor_runtime_over_limit
+
+<p class="subtitle">Time the oldest active SCIP upload has continued running past the configured worker runtime limit</p>
+
+Refer to the [alerts reference](alerts#precise-code-intel-worker-codeintel_upload_processor_runtime_over_limit) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/precise-code-intel-worker/precise-code-intel-worker?viewPanel=100022` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max by(instance) (clamp_min(
+			time() - src_codeintel_upload_processor_oldest_start_time_seconds{job="precise-code-intel-worker"}
+			- src_codeintel_upload_processor_maximum_runtime_per_job_seconds{job="precise-code-intel-worker"},
+			0
+		)
+			and src_codeintel_upload_processor_oldest_start_time_seconds{job="precise-code-intel-worker"} > 0
+			and src_codeintel_upload_processor_maximum_runtime_per_job_seconds{job="precise-code-intel-worker"} > 0)
 ```
 </details>
 
