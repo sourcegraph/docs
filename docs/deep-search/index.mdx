@@ -54,6 +54,41 @@ You can @-mention:
 - **Repositories** — scope the search to specific repos
 - **Files** — point the agent to particular files
 
+## Using Evaluator
+
+Evaluator lets Deep Search write and run Lua scripts over Sourcegraph search results. Deep Search decides when to use Evaluator and writes the script automatically; you do not need to write or run code yourself.
+
+Evaluator is useful when answering a question that requires more than reading a small set of search results. For example, a script can run several searches, inspect candidate files, join results by repository or path, deduplicate findings, calculate counts, and produce a structured report. The intermediate results are processed by the script rather than added to the LLM's context window. Deep Search receives the aggregated result, its supporting sources, and links to any generated files.
+
+### How it works
+
+Evaluator runs Lua in a sandboxed runtime within Sourcegraph:
+
+1. Deep Search generates a script based on your question.
+2. The script calls Sourcegraph's existing keyword, regular expression, repository, commit, and diff search APIs. 
+3. Results are streamed back to the sandbox so the script can filter and aggregate them without returning every match to the LLM.
+4. The script returns a compact result to Deep Search or it can write a durable CSV, JSON, or SVG file for larger outputs.
+5. Deep Search summarizes the findings and links to the generated files and supporting sources.
+
+The sandbox has no direct network, system, or general filesystem access. Scripts can only use the modules provided by Sourcegraph for search, source file reads, formatting, generated file outputs and limits
+
+### When Evaluator helps
+
+Evaluator provides the most value when a task requires exhaustive collection or programmatic comparison across many results:
+
+- **Inventories and audits** — map every API route to its owning service, inventory dependencies across repositories, or identify repositories using a vulnerable package version.
+- **Migration planning** — produce a CSV or JSON checklist of services that still use an old package, API, or configuration and have not adopted its replacement.
+- **Cross-referencing** — compare the results of multiple searches, such as files that match one implementation pattern but not another.
+- **Aggregation and reporting** — group findings by repository, language, team, or dependency and calculate totals without pasting every row into the answer.
+
+Evaluator enables larger, structured analyses when the result set or computation would otherwise be too large or complex to handle reliably in the model's context window.
+
+Example prompts that benefit from Evaluator include:
+
+- Create a CSV of every API route and the service that handles it. Include the repository, file, line number, route, and owning service.
+- Across all repositories, create a CSV of services still using Log4j versions earlier than 2.17. Group the results by repository and detected version.
+- Create a migration checklist of every service that imports `old/package` but does not yet import `new/package`.
+
 ## Examples of prompts
 
 - Find examples of logger usage and show examples of the different types of logging we use.
