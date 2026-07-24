@@ -19,19 +19,77 @@ The Sourcegraph Model Context Protocol (MCP) Server provides AI agents and appli
 
 MCP clients that support OAuth can connect directly—just point them at your Sourcegraph instance and authenticate through your browser:
 
-**[Amp](https://ampcode.com/)**
-
-```bash
-amp mcp add sg https://sourcegraph.example.com/.api/mcp
-```
-
-**[Claude Code](https://www.claude.com/product/claude-code)**
+**[Claude Code](https://docs.anthropic.com/en/docs/claude-code/mcp)**
 
 ```bash
 claude mcp add --transport http sg https://sourcegraph.example.com/.api/mcp
 ```
 
-This works similarly for other MCP-compatible agents. See [Client Integrations](/api/mcp/client-integrations) for detailed setup instructions for each client.
+Then run `/mcp` in Claude Code and follow the browser authentication flow.
+
+**[Codex](https://learn.chatgpt.com/docs/extend/mcp)**
+
+Add the following to `~/.codex/config.toml`, or to `.codex/config.toml` for a trusted project:
+
+```toml
+[mcp_servers.sg]
+url = "https://sourcegraph.example.com/.api/mcp"
+scopes = ["mcp"]
+```
+
+Then authenticate with `codex mcp login sg`.
+
+**[Cursor](https://cursor.com/docs/mcp)**
+
+Add the following to `~/.cursor/mcp.json`, or to `.cursor/mcp.json` for a project:
+
+```json
+{
+	"mcpServers": {
+		"sg": {
+			"url": "https://sourcegraph.example.com/.api/mcp"
+		}
+	}
+}
+```
+
+Enable the server from **Cursor Settings > Tools & MCP** and follow the OAuth prompt.
+
+**[Copilot](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-mcp-servers)**
+
+```bash
+copilot mcp add --transport http sg https://sourcegraph.example.com/.api/mcp
+```
+
+Then run `/mcp auth sg` and follow the authentication flow.
+
+**[OpenCode](https://opencode.ai/docs/mcp-servers/)**
+
+Add the following to your `opencode.json` configuration file:
+
+```json
+{
+	"$schema": "https://opencode.ai/config.json",
+	"mcp": {
+		"sg": {
+			"type": "remote",
+			"url": "https://sourcegraph.example.com/.api/mcp"
+		}
+	}
+}
+```
+
+Then authenticate: with `opencode mcp auth sg`.
+
+**[Amp](https://ampcode.com/manual#mcp)**
+
+```bash
+amp mcp add sg https://sourcegraph.example.com/.api/mcp
+```
+
+Amp starts the OAuth flow in your browser when it connects to the server.
+
+See [Client Integrations](/api/mcp/client-integrations) for detailed setup instructions for each client and access-token authentication alternatives.
 
 ## Server Endpoints
 
