@@ -52,10 +52,25 @@ We recommend encoding guidance that works for your organization via [agent custo
 
 ### Customization
 
-Most organizations will also have specific conventions, technologies, and preferences. The agent may discover some of these conventions in its research, but you can also improve performance by customizing the agent with skills and `AGENTS.md`-style guidance, available on a per-user, per-organization, or global level in settings:
+Most organizations have specific conventions, technologies, and workflows. The agent may discover some of these conventions in its research, but you can improve performance by providing durable `AGENTS.md` guidance and task-specific skills.
 
-- **User settings → Batch Changes → Agent**
-- **Administration → Batch Changes → Agent**
+<Callout type="note">
+	Agent customization is currently experimental. Guidance and skills are
+	loaded by the coordinating Agentic Batch Changes agent only. Coding agents
+	used by [coding agent steps](#coding-agent-steps), such as Claude Code and
+	Codex, do not receive this customization.
+</Callout>
+
+Customization is available globally, for an organization, or for an individual user:
+
+- **User settings → Batch Changes → Agents**
+- **Administration → Batch Changes → Agents**
+
+Organization administrators can configure the `batchChangeAgents.guidance` setting in organization settings. Settings are combined in this order: global, organization, then personal. If multiple skills have the same name (case-insensitive), the later setting wins.
+
+You can add customization directly in settings or load it from a repository source. A source can contain an `AGENTS.md` file and skills under `.agents/skills/<skill-name>/SKILL.md` or `skills/<skill-name>/SKILL.md`. `AGENTS.md` guidance is included in every agent run, while the agent loads a skill's full instructions only when its name and description indicate that the skill is relevant.
+
+Repository sources must be added explicitly; the agent does not automatically load guidance from every repository it plans to change. For the expected repository layout, `SKILL.md` format, source options, and precedence details, see [Customizing Deep Search with guidance and skills](/deep-search#customizing-deep-search-with-guidance-and-skills). Agentic Batch Changes uses the same guidance and skill format.
 
 ### Changeset hooks
 
