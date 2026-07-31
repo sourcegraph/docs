@@ -35,51 +35,12 @@ The answer is formatted in Markdown and can include links to relevant files, dir
 - Provide reasonably scoped questions. The agent will perform much better if it does not have to read the entire codebase at once.
 - Check the list of sources. This is extremely useful for debugging and understanding where the answer came from. Ask a follow-up question and mention the missing source if something is missing.
 
-## Customizing Deep Search with guidance and skills
+## Customization
 
-You can customize Deep Search with organization-specific conventions, architecture details, and workflows. Customization can be configured globally, for an organization, or for an individual user. Deep Search supports three kinds of customization:
+Most organizations will also have specific conventions, technologies, and preferences. Deep Search may discover some of these conventions in its research, but you can also improve performance by customizing it with skills and `AGENTS.md`-style guidance, available on a per-user, per-organization, or global level in settings:
 
-- **`AGENTS.md` guidance** provides durable instructions that are included in every Deep Search run. Use it for conventions that should always apply, such as which repositories are authoritative or how answers should cite internal systems.
-- **Skills** provide instructions for a particular task or workflow. Deep Search sees each skill's name and description, then loads the full instructions only when the skill is relevant. This avoids adding unrelated instructions to every search.
-- **Sources** load an `AGENTS.md` file and skills from a repository on Sourcegraph. A source can use the repository root or a specific path and branch.
-
-To configure personal customization, go to **User settings → Deep Search → Agents**. Site administrators can configure global customization under **Administration → Deep Search → Agents**. Organization administrators can configure the `deepSearch.guidance` setting in organization settings.
-
-Settings are combined in this order: global, organization, then personal. All `AGENTS.md` guidance is appended in that order. If multiple skills have the same name (case-insensitive), the later setting wins, so a personal skill can override an organization or global skill.
-
-### Loading guidance and skills from a repository
-
-Add a **Source** to reuse customization stored in a repository. Specify the repository name and, optionally, a path and branch. The default branch and repository root are used when those fields are omitted. The configured location can have this structure:
-
-```text
-AGENTS.md
-.agents/
-└── skills/
-    └── investigate-incident/
-        ├── SKILL.md
-        └── references/
-            └── services.md
-```
-
-The `AGENTS.md` file must be directly inside the configured location. Skills can be placed at either `.agents/skills/<skill-name>/SKILL.md` or `skills/<skill-name>/SKILL.md`. Only `SKILL.md` is loaded automatically; it can direct the agent to supporting files in the same skill directory when they are needed.
-
-A `SKILL.md` file can use [Agent Skills](https://agentskills.io/home) frontmatter to give the agent enough information to decide when to load it:
-
-```markdown
----
-name: investigate-incident
-description: Trace an incident from a service name or alert to the responsible code.
----
-
-# Investigate an incident
-
-Start with the service catalog in `references/services.md`, then identify the
-entry point, owners, and recent changes to the relevant code.
-```
-
-The directory name is used as the skill name when `name` is omitted. A concise, specific `description` helps Deep Search select the skill for the right questions.
-
-Repository sources are not discovered automatically from the repositories in a query or search context. Add each source explicitly in settings. The latest content at the configured branch or revision is loaded when a Deep Search run starts, so updates do not require changing the Sourcegraph setting.
+- **User settings → Deep Search → Agents**
+- **Administration → Deep Search → Agents**
 
 ## Using search contexts
 
