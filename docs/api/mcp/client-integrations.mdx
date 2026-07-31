@@ -10,107 +10,180 @@
 
 ## Supported Clients
 
-- [Amp](#amp)
 - [Claude Code](#claude-code)
+- [Codex](#codex)
+- [Cursor](#cursor)
+- [Copilot](#copilot)
+- [OpenCode](#opencode)
+- [Amp](#amp)
 - [Google Gemini Code Assist](#google-gemini-code-assist)
 - [VS Code](#vs-code)
-    - [Cursor](#cursor)
     - [Antigravity](#antigravity)
     - [Windsurf](#windsurf)
-- [OpenCode](#opencode)
-- [Codex](#codex)
-
-### Amp
-
-You can add the Sourcegraph MCP server to [Amp](https://ampcode.com) in two ways:
-
-#### Option 1: VSCode settings.json
-
-1. Open VSCode's `settings.json` file.
-2. Add the following configuration:
-
-    ```json
-    {
-    	"amp.mcpServers": {
-    		"sourcegraph": {
-    			"url": "https://your-sourcegraph-instance.com/.api/mcp",
-    			"headers": {
-    				"Authorization": "token YOUR_ACCESS_TOKEN"
-    			}
-    		}
-    	}
-    }
-    ```
-
-    <Callout type="info">
-    	Replace `your-sourcegraph-instance.com` with your Sourcegraph instance
-    	URL and `YOUR_ACCESS_TOKEN` with your access token.
-    </Callout>
-
-3. Save the configuration file.
-4. Restart VS Code to apply the new configuration.
-
-#### Option 2: Amp CLI
-
-Run the following command in your terminal:
-
-```bash
-amp mcp add sourcegraph --header "Authorization=token YOUR_ACCESS_TOKEN" https://sourcegraph.sourcegraph.com/.api/mcp
-```
-
-<Callout type="info">
-	Replace `sourcegraph.sourcegraph.com` with your Sourcegraph instance URL and
-	set `YOUR_ACCESS_TOKEN` environment variable to your access token.
-</Callout>
 
 ### Claude Code
 
-You can add the Sourcegraph MCP server to [Claude Code](https://claude.ai/code) in two ways:
+Add the Sourcegraph MCP server to [Claude Code](https://docs.anthropic.com/en/docs/claude-code/mcp):
 
-#### Option 1: Project-scoped server (via .mcp.json file)
+```bash
+claude mcp add --transport http sourcegraph https://sourcegraph.example.com/.api/mcp
+```
 
-1. Create a `.mcp.json` file in your project root if it doesn't exist.
-2. Add the following configuration:
+Then run `/mcp` in Claude Code and follow the browser authentication flow.
 
-    ```json
-    {
-    	"mcpServers": {
-    		"sourcegraph": {
-    			"type": "http",
-    			"url": "https://your-sourcegraph-instance.com/.api/mcp",
-    			"headers": {
-    				"Authorization": "token YOUR_ACCESS_TOKEN"
-    			}
-    		}
-    	}
-    }
-    ```
+To share an access-token configuration with a project, set `SOURCEGRAPH_ACCESS_TOKEN` in your environment and add the following to `.mcp.json` in the project root:
 
-    <Callout type="info">
-    	Replace `your-sourcegraph-instance.com` with your Sourcegraph instance
-    	URL and `YOUR_ACCESS_TOKEN` with your access token.
-    </Callout>
+```json
+{
+	"mcpServers": {
+		"sourcegraph": {
+			"type": "http",
+			"url": "https://sourcegraph.example.com/.api/mcp",
+			"headers": {
+				"Authorization": "token ${SOURCEGRAPH_ACCESS_TOKEN}"
+			}
+		}
+	}
+}
+```
 
-3. Save the configuration file.
-4. Restart Claude Code to apply the new configuration.
+You can also add an access-token configuration for the current project with the CLI:
 
-#### Option 2: Locally-scoped server (via CLI command)
+```bash
+claude mcp add --transport http sourcegraph https://sourcegraph.example.com/.api/mcp \
+  --header "Authorization: token $SOURCEGRAPH_ACCESS_TOKEN"
+```
 
-You can also add the Sourcegraph MCP server as a locally-scoped server, which is only available to you in the current project:
+Locally scoped servers take precedence over project-scoped servers with the same name.
 
-1. Run the following command in your terminal:
+### Codex
 
-    ```bash
-    claude mcp add --transport http sourcegraph https://your-sourcegraph-instance.com/.api/mcp \
-      --header "Authorization: token YOUR_ACCESS_TOKEN"
-    ```
+Add the Sourcegraph MCP server to [Codex](https://learn.chatgpt.com/docs/extend/mcp) by adding the following to `~/.codex/config.toml`, or to `.codex/config.toml` for a trusted project:
 
-    <Callout type="info">
-    	Replace `your-sourcegraph-instance.com` with your Sourcegraph instance
-    	URL and `YOUR_ACCESS_TOKEN` with your access token.
-    </Callout>
+```toml
+[mcp_servers.sourcegraph]
+url = "https://sourcegraph.example.com/.api/mcp"
+scopes = ["mcp"]
+```
 
-Locally-scoped servers take precedence over project-scoped servers with the same name and are stored in your project-specific user settings.
+Then authenticate with `codex mcp login sourcegraph`.
+
+<Callout type="note">
+	`scopes = ["mcp"]` is required. Without it, Codex's OAuth login fails with
+	an `invalid_scope` error because Sourcegraph's MCP endpoints require the
+	`mcp` scope. See [Troubleshooting: `invalid_scope` error during
+	OAuth](/api/mcp#invalid_scope-error-during-oauth) for details.
+</Callout>
+
+### Cursor
+
+Add the following to `~/.cursor/mcp.json`, or to `.cursor/mcp.json` for a project:
+
+```json
+{
+	"mcpServers": {
+		"sourcegraph": {
+			"url": "https://sourcegraph.example.com/.api/mcp"
+		}
+	}
+}
+```
+
+Enable the server from **Cursor Settings > Tools & MCP** and follow the OAuth prompt. See [Cursor's MCP documentation](https://cursor.com/docs/mcp) for more information.
+
+To authenticate with a Sourcegraph access token instead, set `SOURCEGRAPH_ACCESS_TOKEN` in Cursor's environment and add an authorization header:
+
+```json
+{
+	"mcpServers": {
+		"sourcegraph": {
+			"url": "https://sourcegraph.example.com/.api/mcp",
+			"headers": {
+				"Authorization": "token ${env:SOURCEGRAPH_ACCESS_TOKEN}"
+			}
+		}
+	}
+}
+```
+
+### Copilot
+
+Add the Sourcegraph MCP server to [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-mcp-servers):
+
+```bash
+copilot mcp add --transport http sourcegraph https://sourcegraph.example.com/.api/mcp
+```
+
+Then run `/mcp auth sourcegraph` and follow the authentication flow.
+
+### OpenCode
+
+Add the following to `~/.config/opencode/opencode.json` for a global configuration, or to `opencode.json` in a project root for a project-specific configuration:
+
+```json
+{
+	"$schema": "https://opencode.ai/config.json",
+	"mcp": {
+		"sourcegraph": {
+			"type": "remote",
+			"url": "https://sourcegraph.example.com/.api/mcp"
+		}
+	}
+}
+```
+
+Then authenticate with `opencode mcp auth sourcegraph`. See [OpenCode's MCP documentation](https://opencode.ai/docs/mcp-servers/) for more information.
+
+To authenticate with a Sourcegraph access token instead, disable OAuth and add an authorization header:
+
+```json
+{
+	"$schema": "https://opencode.ai/config.json",
+	"mcp": {
+		"sourcegraph": {
+			"type": "remote",
+			"url": "https://sourcegraph.example.com/.api/mcp",
+			"oauth": false,
+			"headers": {
+				"Authorization": "token {env:SOURCEGRAPH_ACCESS_TOKEN}"
+			}
+		}
+	}
+}
+```
+
+### Amp
+
+Add the Sourcegraph MCP server to [Amp](https://ampcode.com/manual#mcp):
+
+```bash
+amp mcp add sourcegraph https://sourcegraph.example.com/.api/mcp
+```
+
+Amp starts the OAuth flow in your browser when it connects to the server.
+
+To authenticate with a Sourcegraph access token instead, add an authorization header:
+
+```bash
+amp mcp add sourcegraph --header "Authorization=token $SOURCEGRAPH_ACCESS_TOKEN" https://sourcegraph.example.com/.api/mcp
+```
+
+You can also configure the access-token connection in VS Code's `settings.json`:
+
+```json
+{
+	"amp.mcpServers": {
+		"sourcegraph": {
+			"url": "https://sourcegraph.example.com/.api/mcp",
+			"headers": {
+				"Authorization": "token ${SOURCEGRAPH_ACCESS_TOKEN}"
+			}
+		}
+	}
+}
+```
+
+In all examples, replace `sourcegraph.example.com` with your Sourcegraph instance URL. For Claude Code, Cursor, OpenCode, and Amp access-token authentication, set `SOURCEGRAPH_ACCESS_TOKEN` in the client's environment. In other access-token examples, replace `YOUR_ACCESS_TOKEN` with a [Sourcegraph access token](/cli/how-tos/creating-an-access-token).
 
 ### Google Gemini Code Assist
 
@@ -174,33 +247,6 @@ code --add-mcp "{ \"name\": \"sourcegraph\", \"type\": \"remote\", \"url\": \"ht
 3. Save the configuration file.
 4. Restart VS Code to apply the new configuration.
 
-#### Cursor
-
-1. Open or create the MCP configuration file at `~/.cursor/mcp.json` (or the equivalent path on your system).
-2. Add the following:
-
-    ```json
-    {
-    	"mcpServers": {
-    		"sourcegraph": {
-    			"url": "https://your-sourcegraph-instance.com/.api/mcp",
-    			"type": "http",
-    			"headers": {
-    				"Authorization": "token YOUR_ACCESS_TOKEN"
-    			}
-    		}
-    	}
-    }
-    ```
-
-    <Callout type="info">
-    	Replace `your-sourcegraph-instance.com` with your Sourcegraph instance
-    	URL and `YOUR_ACCESS_TOKEN` with your access token.
-    </Callout>
-
-3. Save the configuration file.
-4. Restart Cursor to apply the new configuration.
-
 #### Antigravity
 
 1. Create ⁠`.vscode/mcp.json` (Antigravity uses `.vscode` for configs) in your project.
@@ -251,63 +297,3 @@ code --add-mcp "{ \"name\": \"sourcegraph\", \"type\": \"remote\", \"url\": \"ht
     </Callout>
 
 3. Save the configuration file.
-
-### OpenCode
-
-You can add the Sourcegraph MCP server to OpenCode by configuring it in your MCP settings file:
-
-1. Open or create the MCP configuration file at `~/.config/opencode/opencode.jsonc` (or the equivalent path on your system).
-2. Add the following configuration:
-
-    ```json
-    {
-    	"mcp": {
-    		"sourcegraph": {
-    			"type": "remote",
-    			"url": "https://your-sourcegraph-instance.com/.api/mcp",
-    			"oauth": false,
-    			"headers": {
-    				"Authorization": "token {env:YOUR_ACCESS_TOKEN}"
-    			}
-    		}
-    	},
-    	"$schema": "https://opencode.ai/config.json"
-    }
-    ```
-
-    <Callout type="info">
-    	Replace `your-sourcegraph-instance.com` with your Sourcegraph instance
-    	URL and `YOUR_ACCESS_TOKEN` with your access token.
-    </Callout>
-
-3. Save the configuration file.
-4. Restart OpenCode to apply the changes.
-
-### Codex
-
-You can add the Sourcegraph MCP server to [OpenAI Codex](https://github.com/openai/codex) by editing its `config.toml` file (default `~/.codex/config.toml`, or a project-scoped `.codex/config.toml`):
-
-1. Open or create the configuration file at `~/.codex/config.toml` (or `.codex/config.toml` in your project).
-2. Add the following configuration:
-
-    ```toml
-    [mcp_servers.sourcegraph]
-    url = "https://your-sourcegraph-instance.com/.api/mcp"
-    scopes = ["mcp"]
-    ```
-
-    <Callout type="info">
-    	Replace `your-sourcegraph-instance.com` with your Sourcegraph instance
-    	URL.
-    </Callout>
-
-    <Callout type="note">
-    	`scopes = ["mcp"]` is required. Without it, Codex's OAuth login fails
-    	with an `invalid_scope` error because Sourcegraph's MCP endpoints
-    	require the `mcp` scope. See [Troubleshooting:
-    	`invalid_scope` error during
-    	OAuth](/api/mcp#invalid_scope-error-during-oauth) for details.
-    </Callout>
-
-3. Save the configuration file.
-4. Restart Codex and complete the Codex OAuth login flow to sign in to your Sourcegraph instance.

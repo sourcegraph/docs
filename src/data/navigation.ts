@@ -712,6 +712,10 @@ export const navigation: NavigationItem[] = [
 				href: '/sla'
 			},
 			{
+				title: 'Supported countries',
+				href: '/supported-countries'
+			},
+			{
 				title: 'Tutorials',
 				href: '/tutorials'
 			}
