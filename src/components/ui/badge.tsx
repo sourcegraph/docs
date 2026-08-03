@@ -46,7 +46,7 @@ function Badge({
 	...props
 }: BadgeProps) {
 	return (
-		<div
+		<span
 			className={cn(
 				badgeVariants({variant}),
 				className,

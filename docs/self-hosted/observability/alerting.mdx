@@ -62,6 +62,25 @@ Once configured, Sourcegraph alerts will automatically be routed to the appropri
 
 > NOTE: Learn more about generating a [Slack incoming webhook URL](https://api.slack.com/messaging/webhooks)
 
+#### Microsoft Teams
+
+In a standard Microsoft Teams channel, create a Workflow using the [Send webhook alerts to a channel](https://support.microsoft.com/en-us/workflows/send-messages-in-teams-using-incoming-webhooks) template. Choose the generic template described as allowing anyone to send updates. Do not use variants restricted to users in your organization or specific people because they require OAuth authentication and aren't compatible with Alertmanager's unauthenticated webhook request. Save the Workflow, then copy its complete signed URL.
+
+```json
+"observability.alerts": [
+  {
+    "level": "critical",
+    "notifier": {
+      "type": "msteams",
+      // Complete signed Microsoft Teams Workflow URL
+      "url": "https://example.logic.azure.com/workflows/.../triggers/manual/paths/invoke?...&sig=..."
+    }
+  }
+]
+```
+
+> NOTE: This integration uses a Teams Workflow, not the legacy Microsoft 365 (formerly Office 365) Incoming Webhook connector. No separate token is required. Treat the signed Workflow URL as a secret.
+
 #### PagerDuty
 
 ```json
