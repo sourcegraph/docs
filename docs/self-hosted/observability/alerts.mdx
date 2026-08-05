@@ -2385,6 +2385,105 @@ Generated query for critical alert: `min((sum by (app) (up{app=~".*(pgsql\\|code
 
 <br />
 
+## precise-code-intel-worker: codeintel_upload_queue_duration
+
+<p class="subtitle">maximum time a precise codeintel upload has been waiting to be processed</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> precise-code-intel-worker: 3600s+ maximum time a precise codeintel upload has been waiting to be processed for 15m0s
+
+**Next steps**
+
+- Check the precise-code-intel-worker logs for upload processing errors.
+- Check the codeintel-db and precise-code-intel-worker dashboards for e.g. CPU/memory/disk resource saturation.
+- If the queue is growing and workers are healthy, consider scaling up precise-code-intel-worker.
+- Learn more about the related dashboard panel in the [dashboards reference](dashboards#precise-code-intel-worker-codeintel_upload_queue_duration).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_precise-code-intel-worker_codeintel_upload_queue_duration"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((max(src_workerutil_queue_duration_seconds{domain="codeintel_upload"})) &gt;= 3600)`
+
+</details>
+
+<br />
+
+## precise-code-intel-worker: codeintel_upload_processor_runtime_limit_exceeded
+
+<p class="subtitle">SCIP uploads killed for exceeding the configured maximum job runtime every 30m</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> precise-code-intel-worker: 0+ SCIP uploads killed for exceeding the configured maximum job runtime every 30m
+
+**Next steps**
+
+- Check the precise-code-intel-worker logs for errors mentioning "job exceeded maximum execution time" to identify the affected upload IDs.
+- Check the precise-code-intel-worker dashboard for CPU, memory, and upload size saturation.
+- If the uploads are valid but consistently exceed the configured runtime, consider increasing PRECISE_CODE_INTEL_WORKER_MAXIMUM_RUNTIME_PER_JOB or scaling precise-code-intel-worker resources.
+- Learn more about the related dashboard panel in the [dashboards reference](dashboards#precise-code-intel-worker-codeintel_upload_processor_runtime_limit_exceeded).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_precise-code-intel-worker_codeintel_upload_processor_runtime_limit_exceeded"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((sum(increase(src_codeintel_upload_processor_maximum_runtime_exceeded_total{job="precise-code-intel-worker"}[30m]))) &gt; 0)`
+
+</details>
+
+<br />
+
+## precise-code-intel-worker: codeintel_upload_processor_runtime_over_limit
+
+<p class="subtitle">time the oldest active SCIP upload has continued running past the configured worker runtime limit</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> precise-code-intel-worker: 0s+ time the oldest active SCIP upload has continued running past the configured worker runtime limit for 10m0s
+
+**Next steps**
+
+- The worker cancels a job`s context when it hits the runtime limit, so a job still running this far past the limit indicates the handler is not responding to cancellation.
+- Check the precise-code-intel-worker logs for the active upload ID and processing errors, and check whether the instance is CPU-saturated or deadlocked.
+- If the job never terminates, restart the affected precise-code-intel-worker instance and report the stuck upload to the Code Understanding team.
+- Learn more about the related dashboard panel in the [dashboards reference](dashboards#precise-code-intel-worker-codeintel_upload_processor_runtime_over_limit).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_precise-code-intel-worker_codeintel_upload_processor_runtime_over_limit"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((max by (instance) (clamp_min(time() - src_codeintel_upload_processor_oldest_start_time_seconds{job="precise-code-intel-worker"\} - src_codeintel_upload_processor_maximum_runtime_per_job_seconds\{job="precise-code-intel-worker"\}, 0) and src_codeintel_upload_processor_oldest_start_time_seconds\{job="precise-code-intel-worker"\} &gt; 0 and src_codeintel_upload_processor_maximum_runtime_per_job_seconds\{job="precise-code-intel-worker"} &gt; 0)) &gt; 0)`
+
+</details>
+
+<br />
+
 ## precise-code-intel-worker: mean_blocked_seconds_per_conn_request
 
 <p class="subtitle">mean blocked seconds per conn request</p>
@@ -4378,6 +4477,10 @@ Generated query for warning alert: `max((sum by (instance) (rate(searcher_servic
 
 **Next steps**
 
+- Check the error code breakdown. 503 responses usually indicate a temporary dependency failure, while 500 responses indicate an unexpected searcher failure.
+- Compare gRPC latency with the archive fetch queue and archive preparation duration. A growing fetch queue points to gitserver or cache pressure rather than local search execution.
+- Check hybrid search final states and Zoekt request errors to determine whether the indexed portion of hybrid search is failing.
+- Inspect searcher logs and traces for the affected time range, focusing on repository, commit, query, and the wrapped error.
 - Learn more about the related dashboard panel in the [dashboards reference](dashboards#searcher-unindexed_search_request_errors).
 - **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
 
@@ -6226,6 +6329,74 @@ Generated query for warning alert: `max((max by (name, queue) (src_executors_man
 
 <br />
 
+## executor: codeintel_queue_growing_but_not_processing
+
+<p class="subtitle">codeintel executor queue has a backlog that is not being processed</p>
+
+**Descriptions**
+
+- <span class="badge badge-critical">critical</span> executor: the codeintel executor queue has a backlog that is not being processed for 30m0s
+
+**Next steps**
+
+- Check the corresponding executors in Site Admin &gt; Executors — they may be failing to boot, failing to dequeue, or wedged mid-job.
+- Check src_executors_managed_instance_groups_autoscaler_unhealthy for the same queue: if a managed instance group is unhealthy, GCP cannot provision VMs (stockout/quota) and no executor is available to process the backlog.
+- Check the Grafana dashboard section for APIClient — executors should be making frequent Dequeue and Heartbeat requests that must not fail.
+- A queue whose jobs are all failing (rather than not being picked up) still counts as processing here; investigate that via the executor error-rate alerts and job logs instead.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#executor-codeintel_queue_growing_but_not_processing).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "critical_executor_codeintel_queue_growing_but_not_processing"
+]
+```
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Custom query for critical alert: `max(((max(src_workerutil_queue_depth{domain="executors_codeintel"\}) &gt; 0) and (sum(rate(src_workerutil_dbworker_store_total\{domain="codeintel_index",op=~"MarkComplete\\|MarkErrored\\|MarkFailed"}[30m])) == 0)) &gt; 0)`
+
+</details>
+
+<br />
+
+## executor: batches_queue_growing_but_not_processing
+
+<p class="subtitle">batches executor queue has a backlog that is not being processed</p>
+
+**Descriptions**
+
+- <span class="badge badge-critical">critical</span> executor: the batches executor queue has a backlog that is not being processed for 30m0s
+
+**Next steps**
+
+- Check the corresponding executors in Site Admin &gt; Executors — they may be failing to boot, failing to dequeue, or wedged mid-job.
+- Check src_executors_managed_instance_groups_autoscaler_unhealthy for the same queue: if a managed instance group is unhealthy, GCP cannot provision VMs (stockout/quota) and no executor is available to process the backlog.
+- Check the Grafana dashboard section for APIClient — executors should be making frequent Dequeue and Heartbeat requests that must not fail.
+- A queue whose jobs are all failing (rather than not being picked up) still counts as processing here; investigate that via the executor error-rate alerts and job logs instead.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#executor-batches_queue_growing_but_not_processing).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "critical_executor_batches_queue_growing_but_not_processing"
+]
+```
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Custom query for critical alert: `max(((max(src_workerutil_queue_depth{domain="executors_batches"\}) &gt; 0) and (sum(rate(src_workerutil_dbworker_store_total\{domain="batch_spec_workspace_execution_worker_store",op=~"MarkComplete\\|MarkErrored\\|MarkFailed"}[30m])) == 0)) &gt; 0)`
+
+</details>
+
+<br />
+
 ## executor: executor_handlers
 
 <p class="subtitle">executor active handlers</p>
@@ -7121,8 +7292,8 @@ Generated query for critical alert: `max((max(deriv(src_deepsearch_questions_in_
 
 **Next steps**
 
-- Check frontend logs for `Worker failed to process question` errors.
-- Check for upstream LLM provider issues.
+- Check frontend logs for `worker failed to process question` errors.
+- Common causes: upstream LLM provider failures (rate limiting or capacity, e.g. 429/503, and timeouts), database errors mid-processing, or worker panics (`worker panic while processing question`).
 - More help interpreting this metric is available in the [dashboards reference](dashboards#deepsearch-deepsearch_question_processing_error_rate).
 - **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
 
@@ -7356,6 +7527,39 @@ Generated query for warning alert: `max((sum by (domain) (increase(src_dbworker_
 <summary>Technical details</summary>
 
 Generated query for warning alert: `max((sum(rate(src_batch_change_agents_stream_publish_errors_total[5m]))) &gt; 0)`
+
+</details>
+
+<br />
+
+## batch-changes: batch_changes_records_reset
+
+<p class="subtitle">stalled jobs reset to queued over 1h by queue</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> batch-changes: 5+ stalled jobs reset to queued over 1h by queue for 15m0s
+
+**Next steps**
+
+- Resets happen when a worker holding a job stops sending heartbeats, i.e. the worker process crashed or was killed mid-job.
+- A small number around a deploy or restart is expected. Sustained resets indicate a crash loop or OOM-kills in the worker.
+- Cross-reference worker container restarts and memory usage, and check worker logs for panics.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#batch-changes-batch_changes_records_reset).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_batch-changes_batch_changes_records_reset"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((sum by (domain) (increase(src_dbworker_resetter_record_resets_total{domain=~"^(batches_reconciler_worker\\|batches_bulk_worker\\|batch_changes_batch_spec_resolution_worker\\|batch_spec_workspace_execution_worker)_resetter$"}[1h]))) &gt; 5)`
 
 </details>
 

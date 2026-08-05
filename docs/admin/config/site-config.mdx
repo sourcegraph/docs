@@ -21,7 +21,7 @@ All site configuration options and their default values are shown below.
 
 {/* SCHEMA_SYNC_START: admin/config/site.schema.json */}
 {/* WARNING: This section is auto-generated during releases. Do not edit manually. */}
-{/* Last updated: 2026-07-06T19:37:47Z */}
+{/* Last updated: 2026-08-05T21:41:22Z */}
 ```json
 {
 
@@ -64,13 +64,13 @@ All site configuration options and their default values are shown below.
 	// Configuration for out-of-the-box coding agent steps in Batch Changes. When an access token is configured for an agent, Sourcegraph routes that agent's LLM traffic directly to the corresponding provider from the frontend proxy. Access tokens remain server-side and are never sent to executors. Agents without an access token continue to use the Sourcegraph Model Provider.
 	"batchChanges.codingAgents": null,
 
-	// A list of permitted container registries for use in batch changes, e.g., docker.io. If empty, all container registries are allowed. It cannot be used together with 'batchChanges.containerRegistryDenylist'
+	// A list of permitted container registries for use in batch changes, e.g., docker.io. Applies to step 'container' images and 'buildImage' base images. If empty, all container registries are allowed. It cannot be used together with 'batchChanges.containerRegistryDenylist'
 	// Other example values:
 	// - "docker.io"
 	// - "artifactory.acme.com"
 	"batchChanges.containerRegistryAllowlist": null,
 
-	// A list of forbidden container registries for use in batch changes, e.g., docker.io. If empty, all container registries are allowed. It cannot be used together with 'batchChanges.containerRegistryAllowlist'
+	// A list of forbidden container registries for use in batch changes, e.g., docker.io. Applies to step 'container' images and 'buildImage' base images. If empty, all container registries are allowed. It cannot be used together with 'batchChanges.containerRegistryAllowlist'
 	// Other example values:
 	// - "docker.io"
 	// - "artifactory.acme.com"
@@ -187,6 +187,13 @@ All site configuration options and their default values are shown below.
 	// Enable/disable the Deep Search feature
 	"deepSearch.enabled": false,
 
+	// Resource limits for each Deep Search evaluator script execution.
+	"deepSearch.evaluator": {
+		"maxGeneratedFileSizeBytes": 10485760,
+		"maxSearchesPerExecution": 100,
+		"maxSourceReadsPerExecution": 1000
+	},
+
 	// Enable/disable sharing of Deep Search conversations via read tokens
 	"deepSearch.sharing.enabled": false,
 
@@ -293,6 +300,9 @@ All site configuration options and their default values are shown below.
 		"customGitFetch": null,
 		"debug.log": {
 			"extsvc.gitlab": false
+		},
+		"deepSearch.contextFilters": {
+			"exclude": null
 		},
 		"deepSearch.enabled": false,
 		"deepSearch.model": "anthropic::2024-10-22::claude-sonnet-4-6-latest",
@@ -450,6 +460,9 @@ All site configuration options and their default values are shown below.
 
 	// Enable/disable MCP API endpoints under `/.api/mcp`. When disabled, MCP endpoints return 404.
 	"mcp.enabled": true,
+
+	// MCP tools to disable across all MCP endpoints. Use canonical tool names (e.g. `deepsearch`, `code_finder`) without the legacy `sg_` prefix.
+	"mcp.tools.disabled": [],
 
 	"modelConfiguration": null,
 
@@ -987,13 +1000,13 @@ All site configuration options and their default values are shown below.
 	// Maximum number of seconds that a long Git command (e.g. clone or remote update) is allowed to execute. The default is 7200 seconds, or 2 hours.
 	"gitLongCommandTimeout": 7200,
 
-	// Maximum number of remote code host git operations (e.g. clone or ls-remote) to be run per second per gitserver. Default is -1, which is unlimited.
+	// Maximum number of git operations (e.g. clone or ls-remote) to be run against code hosts, per second. Fractional rates are rounded to the nearest hourly quota, with positive rates below that resolution enforced as one request per hour. Rate limit is shared across all instances of gitserver, and all code hosts. Default is -1, which is unlimited.
 	"gitMaxCodehostRequestsPerSecond": -1,
 
 	// Maximum number of git clone processes that will be run concurrently per gitserver to update repositories. <= 0 means disabled.
 	"gitMaxConcurrentCleanups": 5,
 
-	// Maximum number of git clone processes that will be run concurrently per gitserver to update repositories. Note: the global git update scheduler respects gitMaxConcurrentClones. However, we allow each gitserver to run up to gitMaxConcurrentClones to allow for urgent fetches. Urgent fetches are used when a user is browsing a PR and we do not have the commit yet.
+	// Maximum number of git clone processes that will be run concurrently per gitserver to update repositories. Note: the global git update scheduler respects gitMaxConcurrentClones. Changes to this setting require restarting the worker instance (the worker pod in Kubernetes) before the global scheduler uses the new value. However, we allow each gitserver to run up to gitMaxConcurrentClones to allow for urgent fetches. Urgent fetches are used when a user is browsing a PR and we do not have the commit yet.
 	"gitMaxConcurrentClones": 5,
 
 	// Record git operations that are executed on configured repositories.
