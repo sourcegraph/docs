@@ -26245,7 +26245,7 @@ max by (name, queue) (src_executors_managed_instance_groups_autoscaler_assigned_
 
 <p class="subtitle">Codeintel executor queue has a backlog that is not being processed</p>
 
-Fires when the codeintel executor queue has a non-empty backlog (src_workerutil_queue_depth{domain="executors_codeintel"\} &gt; 0) while zero jobs have reached a terminal state over the last 30 minutes (src_workerutil_dbworker_store_total\{domain="codeintel_index"}). With a backlog present, zero completions over 30m is already abnormal — the only benign zero-completion case (an empty queue) is excluded by the backlog guard.
+Fires when the codeintel executor queue has a non-empty backlog (`src_workerutil_queue_depth{domain="executors_codeintel"} &gt; 0`) while zero jobs have reached a terminal state over the last 30 minutes (`src_workerutil_dbworker_store_total{domain="codeintel_index"}`). With a backlog present, zero completions over 30m is already abnormal — the only benign zero-completion case (an empty queue) is excluded by the backlog guard.
 This is the true "executors not draining" signal: it distinguishes stuck/broken executors from executors that are simply under-provisioned. An under-provisioned queue (backlog present but jobs still completing) has a non-zero terminal-transition rate and will NOT trip this alert — that case is a capacity-review signal, not a stall.
 Both signals come from the worker/frontend (always scraped), not from the executor VMs, so this alert works on deployments where executors run outside the cluster (e.g. Sourcegraph Cloud).
 
@@ -26271,7 +26271,7 @@ sum(rate(src_workerutil_dbworker_store_total{domain="codeintel_index",op=~"MarkC
 
 <p class="subtitle">Batches executor queue has a backlog that is not being processed</p>
 
-Fires when the batches executor queue has a non-empty backlog (src_workerutil_queue_depth{domain="executors_batches"\} &gt; 0) while zero jobs have reached a terminal state over the last 30 minutes (src_workerutil_dbworker_store_total\{domain="batch_spec_workspace_execution_worker_store"}). With a backlog present, zero completions over 30m is already abnormal — the only benign zero-completion case (an empty queue) is excluded by the backlog guard.
+Fires when the batches executor queue has a non-empty backlog (`src_workerutil_queue_depth{domain="executors_batches"} &gt; 0`) while zero jobs have reached a terminal state over the last 30 minutes (`src_workerutil_dbworker_store_total{domain="batch_spec_workspace_execution_worker_store"}`). With a backlog present, zero completions over 30m is already abnormal — the only benign zero-completion case (an empty queue) is excluded by the backlog guard.
 This is the true "executors not draining" signal: it distinguishes stuck/broken executors from executors that are simply under-provisioned. An under-provisioned queue (backlog present but jobs still completing) has a non-zero terminal-transition rate and will NOT trip this alert — that case is a capacity-review signal, not a stall.
 Both signals come from the worker/frontend (always scraped), not from the executor VMs, so this alert works on deployments where executors run outside the cluster (e.g. Sourcegraph Cloud).
 
