@@ -10955,6 +10955,28 @@ sum by(instance) (src_codeintel_upload_processor_upload_size{job="precise-code-i
 
 <br />
 
+#### precise-code-intel-worker: codeintel_upload_queue_duration
+
+<p class="subtitle">Maximum time a precise codeintel upload has been waiting to be processed</p>
+
+Refer to the [alerts reference](alerts#precise-code-intel-worker-codeintel_upload_queue_duration) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/precise-code-intel-worker/precise-code-intel-worker?viewPanel=100002` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max(src_workerutil_queue_duration_seconds{domain="codeintel_upload"})
+```
+</details>
+
+<br />
+
 #### precise-code-intel-worker: codeintel_upload_processor_total
 
 <p class="subtitle">Handler operations every 5m</p>
@@ -11038,6 +11060,82 @@ Query:
 
 ```
 sum(increase(src_codeintel_upload_processor_errors_total{job=~"^precise-code-intel-worker.*"}[5m])) / (sum(increase(src_codeintel_upload_processor_total{job=~"^precise-code-intel-worker.*"}[5m])) + sum(increase(src_codeintel_upload_processor_errors_total{job=~"^precise-code-intel-worker.*"}[5m]))) * 100
+```
+</details>
+
+<br />
+
+#### precise-code-intel-worker: codeintel_upload_processor_active_upload_runtime
+
+<p class="subtitle">Runtime of the oldest SCIP upload actively being processed by each worker instance</p>
+
+Compare against the configured maximum runtime (exposed as src_codeintel_upload_processor_maximum_runtime_per_job_seconds)
+to see how much headroom uploads have before hitting PRECISE_CODE_INTEL_WORKER_MAXIMUM_RUNTIME_PER_JOB.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/precise-code-intel-worker/precise-code-intel-worker?viewPanel=100020` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max by(instance) ((time() - src_codeintel_upload_processor_oldest_start_time_seconds{job="precise-code-intel-worker"})
+			and src_codeintel_upload_processor_oldest_start_time_seconds{job="precise-code-intel-worker"} > 0)
+```
+</details>
+
+<br />
+
+#### precise-code-intel-worker: codeintel_upload_processor_runtime_limit_exceeded
+
+<p class="subtitle">SCIP uploads killed for exceeding the configured maximum job runtime every 30m</p>
+
+Refer to the [alerts reference](alerts#precise-code-intel-worker-codeintel_upload_processor_runtime_limit_exceeded) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/precise-code-intel-worker/precise-code-intel-worker?viewPanel=100021` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_codeintel_upload_processor_maximum_runtime_exceeded_total{job="precise-code-intel-worker"}[30m]))
+```
+</details>
+
+<br />
+
+#### precise-code-intel-worker: codeintel_upload_processor_runtime_over_limit
+
+<p class="subtitle">Time the oldest active SCIP upload has continued running past the configured worker runtime limit</p>
+
+Refer to the [alerts reference](alerts#precise-code-intel-worker-codeintel_upload_processor_runtime_over_limit) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/precise-code-intel-worker/precise-code-intel-worker?viewPanel=100022` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max by(instance) (clamp_min(
+			time() - src_codeintel_upload_processor_oldest_start_time_seconds{job="precise-code-intel-worker"}
+			- src_codeintel_upload_processor_maximum_runtime_per_job_seconds{job="precise-code-intel-worker"},
+			0
+		)
+			and src_codeintel_upload_processor_oldest_start_time_seconds{job="precise-code-intel-worker"} > 0
+			and src_codeintel_upload_processor_maximum_runtime_per_job_seconds{job="precise-code-intel-worker"} > 0)
 ```
 </details>
 
@@ -18505,7 +18603,34 @@ sum by (code)(increase(searcher_service_request_total{code!="200",code!="cancele
 
 <br />
 
-### Searcher: Cache store
+#### searcher: unindexed_search_request_duration
+
+<p class="subtitle">99th percentile unindexed search RPC duration over 5m</p>
+
+This graph measures the complete Search stream, including archive fetching,
+local or hybrid search execution, result serialization, and downstream
+backpressure. Compare it with the archive pipeline and hybrid Zoekt panels to
+locate which stage is responsible for a latency increase.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=100020` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.99, sum by (le) (rate(grpc_server_handling_seconds_bucket{grpc_service="searcher.v1.SearcherService",grpc_method="Search",instance=~`${instance:regex}`}[5m])))
+```
+</details>
+
+<br />
+
+### Searcher: Unindexed search archive pipeline
 
 #### searcher: store_fetching
 
@@ -18585,17 +18710,125 @@ To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=100102`
 Query:
 
 ```
-sum by (instance) (rate(searcher_store_fetch_failed{instance=~`${instance:regex}`}[10m]))
+sum by (instance) (increase(searcher_store_fetch_failed{instance=~`${instance:regex}`}[10m]))
 ```
 </details>
 
 <br />
 
-### Searcher: Index use
+#### searcher: store_cache_hit_percentage
+
+<p class="subtitle">Search archive cache hit percentage over 5m</p>
+
+This graph shows how often searcher can reuse a repository archive from its
+local disk cache. A falling hit percentage increases gitserver traffic and can
+cause the archive fetch queue and search latency to rise. Look for cache
+evictions, cache disk pressure, restarts, or traffic moving between replicas.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=100110` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+100 * sum(rate(src_diskcache_store_access_total{component="store",result="hit",instance=~`${instance:regex}`}[5m])) / sum(rate(src_diskcache_store_access_total{component="store",instance=~`${instance:regex}`}[5m]))
+```
+</details>
+
+<br />
+
+#### searcher: store_zip_prepare_duration
+
+<p class="subtitle">Average archive preparation duration by cache outcome over 5m</p>
+
+This graph measures the average time needed to make a repository archive
+available to a search. Cache misses include fetching code from gitserver and
+should be slower than hits. Compare this with the fetch queue to distinguish
+dependency or cache pressure from local search execution. The average is used
+because the current histogram`s highest finite bucket is 10 seconds, while a
+large archive fetch can take minutes.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=100111` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (cache_hit) (rate(searcher_store_zip_prepare_duration_sum{instance=~`${instance:regex}`}[5m])) / sum by (cache_hit) (rate(searcher_store_zip_prepare_duration_count{instance=~`${instance:regex}`}[5m]))
+```
+</details>
+
+<br />
+
+#### searcher: archive_size
+
+<p class="subtitle">95th percentile searched archive size over 5m</p>
+
+This graph shows the 95th percentile size of repository archives searched by
+searcher. A rise with otherwise flat traffic indicates that larger repositories
+or commits are increasing CPU, memory, and search latency.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=100120` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.95, sum by (le) (rate(searcher_service_archive_size_bytes_bucket{instance=~`${instance:regex}`}[5m])))
+```
+</details>
+
+<br />
+
+#### searcher: archive_files
+
+<p class="subtitle">95th percentile files per searched archive over 5m</p>
+
+This graph shows the 95th percentile number of files in archives searched by
+searcher. Use it with archive size to identify workload amplification that is
+not visible in request rate alone.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=100121` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.95, sum by (le) (rate(searcher_service_archive_files_bucket{instance=~`${instance:regex}`}[5m])))
+```
+</details>
+
+<br />
+
+### Searcher: Hybrid indexed search
 
 #### searcher: searcher_hybrid_final_state_total
 
-<p class="subtitle">Hybrid search final state over 10m</p>
+<p class="subtitle">Hybrid search final state percentage over 10m</p>
 
 This graph is about our interactions with the search index (zoekt) to help
 complete unindexed search requests. Searcher will use indexed search for the
@@ -18626,7 +18859,7 @@ To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=100200`
 Query:
 
 ```
-sum by (state)(increase(searcher_hybrid_final_state_total{instance=~`${instance:regex}`}[10m]))
+100 * sum by (state) (rate(searcher_hybrid_final_state_total{instance=~`${instance:regex}`}[10m])) / ignoring(state) group_left sum(rate(searcher_hybrid_final_state_total{instance=~`${instance:regex}`}[10m]))
 ```
 </details>
 
@@ -18653,7 +18886,113 @@ To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=100201`
 Query:
 
 ```
-sum by (reason)(increase(searcher_hybrid_retry_total{instance=~`${instance:regex}`}[10m]))
+sum by (reason)(rate(searcher_hybrid_retry_total{instance=~`${instance:regex}`}[10m]))
+```
+</details>
+
+<br />
+
+#### searcher: hybrid_zoekt_request_duration
+
+<p class="subtitle">95th percentile aggregate Zoekt request duration by result over 5m</p>
+
+This graph measures the aggregate Zoekt portion of a hybrid searcher request.
+If it rises with total gRPC latency, investigate Zoekt workload and capacity.
+If searcher gRPC latency rises while this remains stable, investigate archive
+fetching, local search execution, or response streaming instead. Values above
+10 seconds may appear as +Inf because of the metric`s current histogram buckets.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=100210` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.95, sum by (le, code) (rate(src_zoekt_request_duration_seconds_bucket{category="SearchAll",instance=~`${instance:regex}`}[5m])))
+```
+</details>
+
+<br />
+
+#### searcher: hybrid_zoekt_request_duration_by_host
+
+<p class="subtitle">95th percentile Zoekt endpoint request duration over 5m</p>
+
+This graph breaks the Zoekt portion of hybrid search down by endpoint. A
+single slow hostname suggests an endpoint or shard-placement issue; all
+hostnames worsening together suggests broader workload or capacity pressure.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=100211` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.95, sum by (le, hostname) (rate(src_zoekt_request_duration_seconds_bucket{category="Search",instance=~`${instance:regex}`}[5m])))
+```
+</details>
+
+<br />
+
+#### searcher: hybrid_zoekt_slow_requests
+
+<p class="subtitle">Aggregate Zoekt requests taking longer than 10 seconds over 5m</p>
+
+This graph preserves visibility into slow hybrid Zoekt requests beyond the
+highest finite histogram bucket. Use traces to understand whether Zoekt wait,
+match-tree search, result volume, or sending time dominates these requests.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=100220` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(src_zoekt_request_duration_seconds_count{category="SearchAll",instance=~`${instance:regex}`}[5m])) - sum(rate(src_zoekt_request_duration_seconds_bucket{category="SearchAll",le="10",instance=~`${instance:regex}`}[5m]))
+```
+</details>
+
+<br />
+
+#### searcher: hybrid_zoekt_aggregate_size
+
+<p class="subtitle">95th percentile initial aggregated Zoekt result size by flush reason over 5m</p>
+
+This graph shows how many file matches searcher buffers before the first
+aggregate Zoekt result is flushed. Large aggregates or MaxSize flushes can
+increase memory use and delay the first result sent upstream.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=100221` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.95, sum by (le, reason) (rate(src_zoekt_final_aggregate_size_bucket{instance=~`${instance:regex}`}[5m])))
 ```
 </details>
 
@@ -22721,11 +23060,11 @@ histogram_quantile(0.90, sum by (le, name)(rate(zoekt_search_duration_seconds_bu
 
 <br />
 
-#### zoekt: indexed_search_request_duration_p75_aggregate
+#### zoekt: indexed_search_request_duration_p50_aggregate
 
-<p class="subtitle">75th percentile indexed search duration over 1m (aggregate)</p>
+<p class="subtitle">50th percentile indexed search duration over 1m (aggregate)</p>
 
-This dashboard shows the 75th percentile of search request durations over the last minute (aggregated across all instances).
+This dashboard shows the 50th percentile of search request durations over the last minute (aggregated across all instances).
 
 Large duration spikes can be an indicator of saturation and / or a performance regression.
 
@@ -22741,7 +23080,31 @@ To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100402` on yo
 Query:
 
 ```
-histogram_quantile(0.75, sum by (le, name)(rate(zoekt_search_duration_seconds_bucket[1m])))
+histogram_quantile(0.50, sum by (le, name)(rate(zoekt_search_duration_seconds_bucket[1m])))
+```
+</details>
+
+<br />
+
+#### zoekt: indexed_search_grpc_request_duration_p50_aggregate
+
+<p class="subtitle">50th percentile gRPC request duration over 2m for the selected methods (aggregate)</p>
+
+This dashboard shows the median lifetime of each selected gRPC method, including scheduler waiting, search execution, serialization, result delivery, and client backpressure. Select StreamSearch to isolate streaming search traffic.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100410` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.50, sum by (le, grpc_method) (rate(grpc_server_handling_seconds_bucket{grpc_service="zoekt.webserver.v1.WebserverService",grpc_method=~`${zoekt_webserver_method:regex}`,instance=~`${webserver_instance:regex}`}[2m])))
 ```
 </details>
 
@@ -22757,7 +23120,7 @@ Large duration spikes can be an indicator of saturation and / or a performance r
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100410` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100420` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -22767,7 +23130,7 @@ To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100410` on yo
 Query:
 
 ```
-histogram_quantile(0.99, sum by (le, instance)(rate(zoekt_search_duration_seconds_bucket{instance=~`${instance:regex}`}[1m])))
+histogram_quantile(0.99, sum by (le, instance)(rate(zoekt_search_duration_seconds_bucket{instance=~`${webserver_instance:regex}`}[1m])))
 ```
 </details>
 
@@ -22783,88 +23146,6 @@ Large duration spikes can be an indicator of saturation and / or a performance r
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100411` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.90, sum by (le, instance)(rate(zoekt_search_duration_seconds_bucket{instance=~`${instance:regex}`}[1m])))
-```
-</details>
-
-<br />
-
-#### zoekt: indexed_search_request_duration_p75_by_instance
-
-<p class="subtitle">75th percentile indexed search duration over 1m (per instance)</p>
-
-This dashboard shows the 75th percentile of search request durations over the last minute (broken out per instance).
-
-Large duration spikes can be an indicator of saturation and / or a performance regression.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100412` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.75, sum by (le, instance)(rate(zoekt_search_duration_seconds_bucket{instance=~`${instance:regex}`}[1m])))
-```
-</details>
-
-<br />
-
-#### zoekt: indexed_search_num_concurrent_requests_aggregate
-
-<p class="subtitle">Amount of in-flight indexed search requests (aggregate)</p>
-
-This dashboard shows the current number of indexed search requests that are in-flight, aggregated across all instances.
-
-In-flight search requests include both running and queued requests.
-
-The number of in-flight requests can serve as a proxy for the general load that webserver instances are under.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100420` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-sum by (name) (zoekt_search_running)
-```
-</details>
-
-<br />
-
-#### zoekt: indexed_search_num_concurrent_requests_by_instance
-
-<p class="subtitle">Amount of in-flight indexed search requests (per instance)</p>
-
-This dashboard shows the current number of indexed search requests that are-flight, broken out per instance.
-
-In-flight search requests include both running and queued requests.
-
-The number of in-flight requests can serve as a proxy for the general load that webserver instances are under.
-
-This panel has no related alerts.
-
 To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100421` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
@@ -22875,7 +23156,85 @@ To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100421` on yo
 Query:
 
 ```
-sum by (instance, name) (zoekt_search_running{instance=~`${instance:regex}`})
+histogram_quantile(0.90, sum by (le, instance)(rate(zoekt_search_duration_seconds_bucket{instance=~`${webserver_instance:regex}`}[1m])))
+```
+</details>
+
+<br />
+
+#### zoekt: indexed_search_request_duration_p50_by_instance
+
+<p class="subtitle">50th percentile indexed search duration over 1m (per instance)</p>
+
+This dashboard shows the 50th percentile of search request durations over the last minute (broken out per instance).
+
+Large duration spikes can be an indicator of saturation and / or a performance regression.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100422` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.50, sum by (le, instance)(rate(zoekt_search_duration_seconds_bucket{instance=~`${webserver_instance:regex}`}[1m])))
+```
+</details>
+
+<br />
+
+#### zoekt: indexed_search_num_concurrent_requests_aggregate
+
+<p class="subtitle">Amount of running indexed searches and shard searches (aggregate)</p>
+
+This dashboard shows the current number of admitted searches executing and the individual shard searches they fan out to, aggregated across all instances.
+
+Compare these values with scheduler queue state to distinguish active backend work from requests waiting for admission.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100430` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (__name__) ({__name__=~"zoekt_search_running|zoekt_search_shard_running"})
+```
+</details>
+
+<br />
+
+#### zoekt: indexed_search_num_concurrent_requests_by_instance
+
+<p class="subtitle">Amount of running indexed searches and shard searches (per instance)</p>
+
+This dashboard shows the current number of admitted searches executing and the individual shard searches they fan out to, broken out per instance.
+
+Compare these values with scheduler queue state to identify overloaded or unevenly loaded instances.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100431` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (instance, __name__) ({__name__=~"zoekt_search_running|zoekt_search_shard_running",instance=~`${webserver_instance:regex}`})
 ```
 </details>
 
@@ -22895,7 +23254,7 @@ can indicate that the indexed-search backend is saturated.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100430` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100440` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -22925,7 +23284,7 @@ can indicate that the indexed-search backend is saturated.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100431` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100441` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -22947,7 +23306,7 @@ sum by (instance) (deriv(zoekt_search_running[1m]))
 
 Refer to the [alerts reference](alerts#zoekt-indexed_search_request_errors) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100440` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100450` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -22958,6 +23317,155 @@ Query:
 
 ```
 sum by (code)(increase(src_zoekt_request_duration_seconds_count{code!~"2.."}[5m])) / ignoring(code) group_left sum(increase(src_zoekt_request_duration_seconds_count[5m])) * 100
+```
+</details>
+
+<br />
+
+#### zoekt: indexed_search_index_bytes_loaded_per_request
+
+<p class="subtitle">Index bytes loaded per indexed search request over 5m</p>
+
+This dashboard shows how much index data Zoekt reads per search request. An increase without a corresponding traffic increase indicates that the average query is doing more index work.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100460` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(zoekt_search_index_loaded_bytes_total[5m])) / sum(rate(zoekt_search_requests_total[5m]))
+```
+</details>
+
+<br />
+
+#### zoekt: indexed_search_content_bytes_loaded_per_request
+
+<p class="subtitle">Content bytes loaded per indexed search request over 5m</p>
+
+This dashboard shows how much file content Zoekt loads to verify matches per search request. A rise can explain backend latency even when request volume is unchanged.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100461` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(zoekt_search_content_loaded_bytes_total[5m])) / sum(rate(zoekt_search_requests_total[5m]))
+```
+</details>
+
+<br />
+
+#### zoekt: indexed_search_files_considered_per_request
+
+<p class="subtitle">Files considered per indexed search request over 5m</p>
+
+This dashboard shows the average candidate files fully evaluated per search. Rising values indicate broader or less selective searches.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100470` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(zoekt_search_files_considered_total[5m])) / sum(rate(zoekt_search_requests_total[5m]))
+```
+</details>
+
+<br />
+
+#### zoekt: indexed_search_regexps_considered_per_request
+
+<p class="subtitle">Regular expressions considered per indexed search request over 5m</p>
+
+This dashboard shows the average number of regexp evaluations per search. Rising values indicate more expensive verification work.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100471` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(zoekt_search_regexps_considered_total[5m])) / sum(rate(zoekt_search_requests_total[5m]))
+```
+</details>
+
+<br />
+
+#### zoekt: indexed_search_backend_failures
+
+<p class="subtitle">Indexed search and shard failure rate over 5m</p>
+
+Search failures and crashes indicate failed or potentially incomplete searches. Shard-load and watchdog failures can make indexed data unavailable even when latency remains normal.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100480` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (failure) (
+								label_replace(rate(zoekt_search_failed_total[5m]), "failure", "search failures", "__name__", ".*")
+								or label_replace(rate(zoekt_search_crashes_total[5m]), "failure", "search crashes", "__name__", ".*")
+								or label_replace(rate(zoekt_shards_load_failed_total[5m]), "failure", "shard load failures", "__name__", ".*")
+								or label_replace(rate(zoekt_webserver_watchdog_errors_total[5m]), "failure", "watchdog errors", "__name__", ".*")
+							)
+```
+</details>
+
+<br />
+
+#### zoekt: indexed_search_shards_loaded
+
+<p class="subtitle">Number of shards currently loaded</p>
+
+Unexpected drops can indicate shard loading or availability problems. Correlate changes with shard-load failures and indexing activity.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100481` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(zoekt_shards_loaded)
 ```
 </details>
 
@@ -22978,7 +23486,7 @@ For a full explanation of the states see https://github.com/sourcegraph/zoekt/bl
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100450` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100490` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -23009,7 +23517,7 @@ For a full explanation of the states see https://github.com/sourcegraph/zoekt/bl
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100451` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100491` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -23019,7 +23527,31 @@ To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100451` on yo
 Query:
 
 ```
-sum by (type, state) (rate(zoekt_shards_sched[5m]))
+sum by (type, state) (rate(zoekt_shards_sched_total[5m]))
+```
+</details>
+
+<br />
+
+#### zoekt: zoekt_scheduler_timeout_rate
+
+<p class="subtitle">Rate of searches that time out waiting for scheduler admission over 5m</p>
+
+Scheduler timeouts mean searches expired before acquiring execution capacity. Correlate sustained timeouts with queued scheduler work, CPU saturation, and gRPC deadline-exceeded responses.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/zoekt/zoekt?viewPanel=100492` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (type) (rate(zoekt_shards_sched_total{state="timedout"}[5m]))
 ```
 </details>
 
@@ -25704,6 +26236,58 @@ Query:
 
 ```
 max by (name, queue) (src_executors_managed_instance_groups_autoscaler_assigned_demand)
+```
+</details>
+
+<br />
+
+#### executor: codeintel_queue_growing_but_not_processing
+
+<p class="subtitle">Codeintel executor queue has a backlog that is not being processed</p>
+
+Fires when the codeintel executor queue has a non-empty backlog (`src_workerutil_queue_depth{domain="executors_codeintel"} &gt; 0`) while zero jobs have reached a terminal state over the last 30 minutes (`src_workerutil_dbworker_store_total{domain="codeintel_index"}`). With a backlog present, zero completions over 30m is already abnormal — the only benign zero-completion case (an empty queue) is excluded by the backlog guard.
+This is the true "executors not draining" signal: it distinguishes stuck/broken executors from executors that are simply under-provisioned. An under-provisioned queue (backlog present but jobs still completing) has a non-zero terminal-transition rate and will NOT trip this alert — that case is a capacity-review signal, not a stall.
+Both signals come from the worker/frontend (always scraped), not from the executor VMs, so this alert works on deployments where executors run outside the cluster (e.g. Sourcegraph Cloud).
+
+Refer to the [alerts reference](alerts#executor-codeintel_queue_growing_but_not_processing) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100110` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(src_workerutil_dbworker_store_total{domain="codeintel_index",op=~"MarkComplete|MarkErrored|MarkFailed"}[5m]))
+```
+</details>
+
+<br />
+
+#### executor: batches_queue_growing_but_not_processing
+
+<p class="subtitle">Batches executor queue has a backlog that is not being processed</p>
+
+Fires when the batches executor queue has a non-empty backlog (`src_workerutil_queue_depth{domain="executors_batches"} &gt; 0`) while zero jobs have reached a terminal state over the last 30 minutes (`src_workerutil_dbworker_store_total{domain="batch_spec_workspace_execution_worker_store"}`). With a backlog present, zero completions over 30m is already abnormal — the only benign zero-completion case (an empty queue) is excluded by the backlog guard.
+This is the true "executors not draining" signal: it distinguishes stuck/broken executors from executors that are simply under-provisioned. An under-provisioned queue (backlog present but jobs still completing) has a non-zero terminal-transition rate and will NOT trip this alert — that case is a capacity-review signal, not a stall.
+Both signals come from the worker/frontend (always scraped), not from the executor VMs, so this alert works on deployments where executors run outside the cluster (e.g. Sourcegraph Cloud).
+
+Refer to the [alerts reference](alerts#executor-batches_queue_growing_but_not_processing) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100111` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(src_workerutil_dbworker_store_total{domain="batch_spec_workspace_execution_worker_store",op=~"MarkComplete|MarkErrored|MarkFailed"}[5m]))
 ```
 </details>
 
@@ -34491,6 +35075,163 @@ label_replace(sum by (rpc_method, rpc_connect_rpc_error_code) (rate(rpc_client_d
 
 <br />
 
+## Entitlements usage history telemetry
+
+<p class="subtitle">Monitoring entitlement usage history telemetry export and queue health in Sourcegraph.</p>
+
+To see this dashboard, visit `/-/debug/grafana/d/entitlements-usage-history/entitlements-usage-history` on your Sourcegraph instance.
+
+### Entitlements usage history telemetry: Entitlements usage history telemetry: events export and queue metrics
+
+#### entitlements-usage-history: entitlements_usage_history_telemetry_exported_events
+
+<p class="subtitle">Entitlement usage history events exported per hour</p>
+
+The number of entitlement usage history events exported as telemetry over the last hour.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/entitlements-usage-history/entitlements-usage-history?viewPanel=100000` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_entitlementstelemetry_usage_history_exported_events[1h]))
+```
+</details>
+
+<br />
+
+#### entitlements-usage-history: entitlements_usage_history_telemetry_batch_size
+
+<p class="subtitle">Number of entitlement usage history events exported per batch over 30m</p>
+
+The number of entitlement usage history events exported in each batch. The largest bucket is the maximum number of events exported per batch.
+If the distribution trends to the maximum bucket, export throughput is at or approaching saturation.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/entitlements-usage-history/entitlements-usage-history?viewPanel=100001` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (le) (rate(src_entitlementstelemetry_usage_history_batch_size_bucket[30m]))
+```
+</details>
+
+<br />
+
+#### entitlements-usage-history: entitlements_usage_history_telemetry_pruned_events
+
+<p class="subtitle">Entitlement usage history events pruned per hour</p>
+
+The number of already-exported entitlement usage history events pruned over the last hour.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/entitlements-usage-history/entitlements-usage-history?viewPanel=100010` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_entitlementstelemetry_usage_history_events_pruned[1h]))
+```
+</details>
+
+<br />
+
+#### entitlements-usage-history: entitlements_usage_history_telemetry_queue_size
+
+<p class="subtitle">Entitlement usage history events pending telemetry export</p>
+
+The number of entitlement usage history events waiting to be exported as telemetry.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/entitlements-usage-history/entitlements-usage-history?viewPanel=100011` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+(
+		sum(
+			src_entitlementstelemetry_usage_history_queue_size
+			and on(instance, job)
+			(
+		(
+			increase(src_entitlementstelemetry_usage_history_queue_metrics_total{job=~"^worker.*"}[15m]) > 0
+		)
+		or on(instance, job)
+		(
+			increase(src_entitlementstelemetry_usage_history_queue_metrics_errors_total{job=~"^worker.*"}[15m]) > 0
+		)
+	)
+		)
+	) or on() vector(0)
+```
+</details>
+
+<br />
+
+#### entitlements-usage-history: entitlements_usage_history_telemetry_queue_oldest_age
+
+<p class="subtitle">Age of the oldest unexported entitlement usage history event</p>
+
+The age in seconds of the oldest entitlement usage history event waiting to be exported as telemetry.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/entitlements-usage-history/entitlements-usage-history?viewPanel=100020` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+(
+		max(
+			src_entitlementstelemetry_usage_history_queue_oldest_age_seconds
+			and on(instance, job)
+			(
+		(
+			increase(src_entitlementstelemetry_usage_history_queue_metrics_total{job=~"^worker.*"}[15m]) > 0
+		)
+		or on(instance, job)
+		(
+			increase(src_entitlementstelemetry_usage_history_queue_metrics_errors_total{job=~"^worker.*"}[15m]) > 0
+		)
+	)
+		)
+	) or on() vector(0)
+```
+</details>
+
+<br />
+
 ## OpenTelemetry Collector
 
 <p class="subtitle">The OpenTelemetry collector ingests OpenTelemetry data from Sourcegraph and exports it to the configured backends.</p>
@@ -35035,7 +35776,7 @@ sum(rate(src_deepsearch_question_processing_total{operation="question"}[5m])) * 
 
 <p class="subtitle">Question processing error rate over 5m</p>
 
-Percentage of deep search questions that result in an error.
+Percentage of deep search questions that result in an error. Excludes entitlement usage limit rejections; see the `deepsearch_question_usage_limited` panel for those.
 
 Refer to the [alerts reference](alerts#deepsearch-deepsearch_question_processing_error_rate) for 2 alerts related to this panel.
 
@@ -35103,6 +35844,30 @@ histogram_quantile(0.50, sum(rate(src_deepsearch_question_processing_duration_se
 
 <br />
 
+#### deepsearch: deepsearch_question_usage_limited
+
+<p class="subtitle">Questions rejected by usage limits over 15m</p>
+
+Number of deep search questions rejected because the user hit their usage entitlement limit, by entitlement name. These are intentional quota rejections, not processing failures, and do not count towards the question processing error rate. Check frontend logs for `question rejected: usage limit exceeded` to identify affected users. Sustained rejections from an API client usually mean the client does not back off after hitting its limit.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100030` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (entitlement) (increase(src_deepsearch_question_usage_limited_total[15m]))
+```
+</details>
+
+<br />
+
 #### deepsearch: deepsearch_slow_questions
 
 <p class="subtitle">Questions taking longer than 5 minutes over 15m</p>
@@ -35111,7 +35876,7 @@ Number of deep search questions that took longer than 5 minutes in the last 15 m
 
 Refer to the [alerts reference](alerts#deepsearch-deepsearch_slow_questions) for 2 alerts related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100030` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100040` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -35986,6 +36751,720 @@ Query:
 
 ```
 sum(rate(src_batch_change_agents_thread_stream_transport_errors_total[5m]))
+```
+</details>
+
+<br />
+
+## Batch Changes
+
+<p class="subtitle">Server-side background processing for batch changes: the changeset reconciler, batch-spec resolution, bulk operations and workspace execution, with their worker-queue stores and stalled-job resetters.</p>
+
+To see this dashboard, visit `/-/debug/grafana/d/batch-changes/batch-changes` on your Sourcegraph instance.
+
+### Batch Changes: Changeset reconciler
+
+#### batch-changes: batch_changes_reconciler_queue_depth
+
+<p class="subtitle">Changesets waiting in the queue</p>
+
+Number of changesets enqueued but not yet picked up by a handler. Sustained growth means work is arriving faster than the handler pool (5 handlers) can process it. This is a lower bound: the reconciler_changesets view excludes changesets belonging to deleted repos or namespaces, so the true backlog can be higher.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100000` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max(src_workerutil_queue_depth{domain="batches_reconciler_worker"})
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_reconciler_queue_wait
+
+<p class="subtitle">Oldest queued changeset wait time</p>
+
+How long the oldest queued changeset has been waiting for a handler. Zero when the queue is empty.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100001` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max(src_workerutil_queue_duration_seconds{domain="batches_reconciler_worker"})
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_reconciler_active_handlers
+
+<p class="subtitle">Active handlers</p>
+
+Number of changesets being processed concurrently across all worker replicas. The worker is configured for up to 5 concurrent handlers; sustained values near that ceiling mean new work is waiting for a free slot.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100010` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(src_batch_changes_reconciler_handlers)
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_reconciler_processing_rate
+
+<p class="subtitle">Changesets processed per minute</p>
+
+Rate of successfully processed changesets. This counts only successful completions; failures appear in the error rate panel.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100011` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(src_batch_changes_reconciler_total{op="Handle"}[5m])) * 60
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_reconciler_p95_duration
+
+<p class="subtitle">95th percentile processing duration</p>
+
+95th percentile time to process a single changeset in the handler.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100020` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.95, sum(rate(src_batch_changes_reconciler_duration_seconds_bucket{op="Handle"}[15m])) by (le))
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_reconciler_error_rate
+
+<p class="subtitle">Processing error rate over 5m</p>
+
+Percentage of changeset handler invocations that ended in an error, computed as errors / (total + errors) because the workerutil total counter excludes failures. Client-side errors are excluded from both counters.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100021` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_batch_changes_reconciler_errors_total{op="Handle"}[5m])) / (sum(increase(src_batch_changes_reconciler_total{op="Handle"}[5m])) + sum(increase(src_batch_changes_reconciler_errors_total{op="Handle"}[5m]))) * 100
+```
+</details>
+
+<br />
+
+### Batch Changes: Batch spec resolution
+
+#### batch-changes: batch_changes_batch_spec_resolution_worker_queue_depth
+
+<p class="subtitle">Resolution jobs waiting in the queue</p>
+
+Number of resolution jobs enqueued but not yet picked up by a handler. Sustained growth means work is arriving faster than the handler pool (5 handlers) can process it.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100100` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max(src_workerutil_queue_depth{domain="batch_changes_batch_spec_resolution_worker"})
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_batch_spec_resolution_worker_queue_wait
+
+<p class="subtitle">Oldest queued resolution job wait time</p>
+
+How long the oldest queued resolution job has been waiting for a handler. Zero when the queue is empty.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100101` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max(src_workerutil_queue_duration_seconds{domain="batch_changes_batch_spec_resolution_worker"})
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_batch_spec_resolution_worker_active_handlers
+
+<p class="subtitle">Active handlers</p>
+
+Number of resolution jobs being processed concurrently across all worker replicas. The worker is configured for up to 5 concurrent handlers; sustained values near that ceiling mean new work is waiting for a free slot.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100110` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(src_batch_changes_batch_spec_resolution_worker_handlers)
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_batch_spec_resolution_worker_processing_rate
+
+<p class="subtitle">Resolution jobs processed per minute</p>
+
+Rate of successfully processed resolution jobs. This counts only successful completions; failures appear in the error rate panel.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100111` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(src_batch_changes_batch_spec_resolution_worker_total{op="Handle"}[5m])) * 60
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_batch_spec_resolution_worker_p95_duration
+
+<p class="subtitle">95th percentile processing duration</p>
+
+95th percentile time to process a single resolution job in the handler.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100120` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.95, sum(rate(src_batch_changes_batch_spec_resolution_worker_duration_seconds_bucket{op="Handle"}[15m])) by (le))
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_batch_spec_resolution_worker_error_rate
+
+<p class="subtitle">Processing error rate over 5m</p>
+
+Percentage of resolution job handler invocations that ended in an error, computed as errors / (total + errors) because the workerutil total counter excludes failures. Client-side errors are excluded from both counters.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100121` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_batch_changes_batch_spec_resolution_worker_errors_total{op="Handle"}[5m])) / (sum(increase(src_batch_changes_batch_spec_resolution_worker_total{op="Handle"}[5m])) + sum(increase(src_batch_changes_batch_spec_resolution_worker_errors_total{op="Handle"}[5m]))) * 100
+```
+</details>
+
+<br />
+
+### Batch Changes: Bulk operations
+
+#### batch-changes: batch_changes_bulk_processor_queue_depth
+
+<p class="subtitle">Changeset jobs waiting in the queue</p>
+
+Number of changeset jobs enqueued but not yet picked up by a handler. Sustained growth means work is arriving faster than the handler pool (5 handlers) can process it.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100200` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max(src_workerutil_queue_depth{domain="batches_bulk_processor"})
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_bulk_processor_queue_wait
+
+<p class="subtitle">Oldest queued changeset job wait time</p>
+
+How long the oldest queued changeset job has been waiting for a handler. Zero when the queue is empty.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100201` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max(src_workerutil_queue_duration_seconds{domain="batches_bulk_processor"})
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_bulk_processor_active_handlers
+
+<p class="subtitle">Active handlers</p>
+
+Number of changeset jobs being processed concurrently across all worker replicas. The worker is configured for up to 5 concurrent handlers; sustained values near that ceiling mean new work is waiting for a free slot.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100210` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(src_batch_changes_bulk_processor_handlers)
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_bulk_processor_processing_rate
+
+<p class="subtitle">Changeset jobs processed per minute</p>
+
+Rate of successfully processed changeset jobs. This counts only successful completions; failures appear in the error rate panel.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100211` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(src_batch_changes_bulk_processor_total{op="Handle"}[5m])) * 60
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_bulk_processor_p95_duration
+
+<p class="subtitle">95th percentile processing duration</p>
+
+95th percentile time to process a single changeset job in the handler.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100220` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.95, sum(rate(src_batch_changes_bulk_processor_duration_seconds_bucket{op="Handle"}[15m])) by (le))
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_bulk_processor_error_rate
+
+<p class="subtitle">Processing error rate over 5m</p>
+
+Percentage of changeset job handler invocations that ended in an error, computed as errors / (total + errors) because the workerutil total counter excludes failures. Client-side errors are excluded from both counters.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100221` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_batch_changes_bulk_processor_errors_total{op="Handle"}[5m])) / (sum(increase(src_batch_changes_bulk_processor_total{op="Handle"}[5m])) + sum(increase(src_batch_changes_bulk_processor_errors_total{op="Handle"}[5m]))) * 100
+```
+</details>
+
+<br />
+
+### Batch Changes: Workspace execution
+
+#### batch-changes: batch_changes_workspace_execution_queue_depth
+
+<p class="subtitle">Workspace execution jobs waiting in the queue</p>
+
+Number of batch-spec workspace-execution jobs enqueued but not yet dequeued by an executor. Executors dequeue via the executor queue API rather than dbworker.NewWorker, so there is no src_workerutil_queue_depth for this queue; this is the executor queue-size gauge (src_executor_total{queue="batches"}), the same metric the Executor dashboard uses.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100300` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max(src_executor_total{queue="batches"})
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_workspace_execution_active_handlers
+
+<p class="subtitle">Active executor handlers</p>
+
+Number of workspace-execution jobs being processed concurrently across all executors assigned to the batches queue.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100301` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(src_executor_processor_handlers{queue="batches"})
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_workspace_execution_processing_rate
+
+<p class="subtitle">Workspace execution jobs processed per minute</p>
+
+Rate of successfully processed workspace-execution jobs on the batches queue. This counts only successful completions; failures appear in the error rate panel.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100310` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(src_executor_processor_total{queue="batches",op="Handle"}[5m])) * 60
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_workspace_execution_p95_duration
+
+<p class="subtitle">95th percentile workspace execution duration</p>
+
+95th percentile end-to-end time an executor spends running a single workspace-execution job (the full batch-spec step execution), on the batches queue.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100311` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.95, sum(rate(src_executor_processor_duration_seconds_bucket{queue="batches",op="Handle"}[15m])) by (le))
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_workspace_execution_error_rate
+
+<p class="subtitle">Workspace execution error rate over 5m</p>
+
+Percentage of workspace-execution jobs that ended in an error, computed as errors / (total + errors) because the executor processor total counter excludes failures. Per-command (setup/exec/teardown) and executor resource usage breakdowns remain on the Executor dashboard`s "batches" queue.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100320` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_executor_processor_errors_total{queue="batches",op="Handle"}[5m])) / (sum(increase(src_executor_processor_total{queue="batches",op="Handle"}[5m])) + sum(increase(src_executor_processor_errors_total{queue="batches",op="Handle"}[5m]))) * 100
+```
+</details>
+
+<br />
+
+### Batch Changes: Job queue stores
+
+#### batch-changes: batch_changes_store_operation_rate
+
+<p class="subtitle">Worker store operations per second by queue</p>
+
+Rate of successful worker store operations (dequeue, heartbeat, mark-complete, etc.) for each batch changes queue. The batch_spec_workspace_execution_worker_store operations are emitted by the frontend executor queue handler rather than the worker, so their sg_job label differs from the other queues.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100400` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (domain) (rate(src_workerutil_dbworker_store_total{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker)_store$"}[5m]))
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_store_error_rate
+
+<p class="subtitle">Worker store error rate over 5m by queue</p>
+
+Percentage of worker store operations that errored, per queue. A sustained nonzero rate usually points at database problems (contention, connection exhaustion, migration drift) rather than the batch changes logic itself.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100401` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (domain) (increase(src_workerutil_dbworker_store_errors_total{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker)_store$"}[5m])) / (sum by (domain) (increase(src_workerutil_dbworker_store_total{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker)_store$"}[5m])) + sum by (domain) (increase(src_workerutil_dbworker_store_errors_total{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker)_store$"}[5m]))) * 100
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_store_p95_duration
+
+<p class="subtitle">95th percentile worker store operation duration by queue</p>
+
+95th percentile duration of worker store operations, per queue. Elevated values indicate database latency affecting how quickly jobs are dequeued and finalized.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100402` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.95, sum by (le, domain) (rate(src_workerutil_dbworker_store_duration_seconds_bucket{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker)_store$"}[5m])))
+```
+</details>
+
+<br />
+
+### Batch Changes: Stalled job resetters
+
+#### batch-changes: batch_changes_records_reset
+
+<p class="subtitle">Stalled jobs reset to queued over 1h by queue</p>
+
+Number of stalled batch changes jobs that the resetter moved back to the queued state, per queue.
+
+Refer to the [alerts reference](alerts#batch-changes-batch_changes_records_reset) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100500` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (domain) (increase(src_dbworker_resetter_record_resets_total{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker)_resetter$"}[1h]))
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_record_reset_failures
+
+<p class="subtitle">Stalled jobs marked failed over 1h by queue</p>
+
+Number of stalled jobs that exhausted their retries and were marked as failed, per queue. A nonzero value means some jobs were permanently dropped after repeated crashes.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100501` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (domain) (increase(src_dbworker_resetter_record_reset_failures_total{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker)_resetter$"}[1h]))
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_stall_duration
+
+<p class="subtitle">95th percentile job stall duration before reset</p>
+
+95th percentile time jobs spent stalled before the resetter recovered them, per queue.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100502` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.95, sum by (le, domain) (rate(src_dbworker_resetter_stall_duration_seconds_bucket{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker)_resetter$"}[1h])))
 ```
 </details>
 
