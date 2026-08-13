@@ -106,6 +106,10 @@ export const navigation: NavigationItem[] = [
 				]
 			},
 			{
+				title: 'Diff Tour',
+				href: '/diff-tour'
+			},
+			{
 				title: 'Code Navigation',
 				href: '/code-navigation',
 				sections: [
