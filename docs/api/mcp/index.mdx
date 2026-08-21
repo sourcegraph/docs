@@ -410,8 +410,10 @@ Use this matrix to choose the smallest endpoint that has the tools your MCP clie
 | `keyword_search`        |      ✓      |        ✓        |                        |
 | `list_files`            |      ✓      |        ✓        |                        |
 | `list_repos`            |      ✓      |        ✓        |                        |
-| `nls_search`            |      ✓      |        ✓        |                        |
+| `nls_search`            |             |        ✓        |                        |
 | `read_file`             |      ✓      |        ✓        |                        |
+
+On `/.api/mcp`, `nls_search` is available as a fallback when `code_finder` is unavailable or disabled.
 
 <Callout type="info">
 	The default `/.api/mcp` endpoint can read existing Deep Search conversations
@@ -439,7 +441,7 @@ For OpenAI Codex specifically, set `scopes = ["mcp"]` in your `config.toml`. See
 ## Best Practices
 
 1. **Repository Scoping:** Use `list_repos` first to find relevant repositories for better performance
-2. **Progressive Search:** Start with broad searches (`nls_search`) then narrow with specific tools
+2. **Progressive Search:** Use `code_finder` to locate code relevant to a task if available; otherwise, start with a broad `nls_search` and narrow with more specific tools like `keyword_search`
 3. **File Verification:** Use `list_files` before `read_file` to verify file existence
 4. **Pagination:** Use `after`/`before` cursors for large result sets
 5. **Tool Combinations:** Chain tools together (e.g., `list_repos` → `commit_search`)
