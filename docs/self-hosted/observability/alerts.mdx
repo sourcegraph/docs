@@ -3607,6 +3607,43 @@ Generated query for critical alert: `max((max(src_repoupdater_cleanup_failed_rep
 
 <br />
 
+## worker: entitlements_usage_history_telemetry_queue_oldest_age
+
+<p class="subtitle">age of the oldest unexported entitlement usage history event</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> worker: 1800s+ age of the oldest unexported entitlement usage history event for 30m0s
+- <span class="badge badge-critical">critical</span> worker: 7200s+ age of the oldest unexported entitlement usage history event for 2h0m0s
+
+**Next steps**
+
+- Check whether the entitlement usage history telemetry export job is failing or making no forward progress.
+- Compare this panel with the exported events and export batch size panels above.
+- Check worker logs for entitlements usage history telemetry exporter failures.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#worker-entitlements_usage_history_telemetry_queue_oldest_age).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_worker_entitlements_usage_history_telemetry_queue_oldest_age",
+  "critical_worker_entitlements_usage_history_telemetry_queue_oldest_age"
+]
+```
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max(((max(src_entitlementstelemetry_usage_history_queue_oldest_age_seconds and on (instance, job) ((increase(src_entitlementstelemetry_usage_history_queue_metrics_total{job=~"^worker.*"\}[15m]) &gt; 0) or on (instance, job) (increase(src_entitlementstelemetry_usage_history_queue_metrics_errors_total\{job=~"^worker.*"}[15m]) &gt; 0)))) or on () vector(0)) &gt; 1800)`
+
+Generated query for critical alert: `max(((max(src_entitlementstelemetry_usage_history_queue_oldest_age_seconds and on (instance, job) ((increase(src_entitlementstelemetry_usage_history_queue_metrics_total{job=~"^worker.*"\}[15m]) &gt; 0) or on (instance, job) (increase(src_entitlementstelemetry_usage_history_queue_metrics_errors_total\{job=~"^worker.*"}[15m]) &gt; 0)))) or on () vector(0)) &gt; 7200)`
+
+</details>
+
+<br />
+
 ## worker: src_repoupdater_external_services_total
 
 <p class="subtitle">the total number of external services</p>
@@ -6335,7 +6372,8 @@ Generated query for warning alert: `max((max by (name, queue) (src_executors_man
 
 **Descriptions**
 
-- <span class="badge badge-critical">critical</span> executor: the codeintel executor queue has a backlog that is not being processed for 30m0s
+- <span class="badge badge-warning">warning</span> executor: the codeintel executor queue has a backlog that is not being processed for 30m0s
+- <span class="badge badge-critical">critical</span> executor: the codeintel executor queue has an aging backlog (oldest job waiting > 1h) that is not being processed for 30m0s
 
 **Next steps**
 
@@ -6343,11 +6381,13 @@ Generated query for warning alert: `max((max by (name, queue) (src_executors_man
 - Check src_executors_managed_instance_groups_autoscaler_unhealthy for the same queue: if a managed instance group is unhealthy, GCP cannot provision VMs (stockout/quota) and no executor is available to process the backlog.
 - Check the Grafana dashboard section for APIClient — executors should be making frequent Dequeue and Heartbeat requests that must not fail.
 - A queue whose jobs are all failing (rather than not being picked up) still counts as processing here; investigate that via the executor error-rate alerts and job logs instead.
+- A Warning that never escalates to Critical is usually a transient, self-healing gap (e.g. one spot-VM preemption); no action is typically needed unless it recurs frequently for the same queue.
 - More help interpreting this metric is available in the [dashboards reference](dashboards#executor-codeintel_queue_growing_but_not_processing).
 - **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
 
 ```json
 "observability.silenceAlerts": [
+  "warning_executor_codeintel_queue_growing_but_not_processing",
   "critical_executor_codeintel_queue_growing_but_not_processing"
 ]
 ```
@@ -6357,7 +6397,9 @@ Generated query for warning alert: `max((max by (name, queue) (src_executors_man
 <details>
 <summary>Technical details</summary>
 
-Custom query for critical alert: `max(((max(src_workerutil_queue_depth{domain="executors_codeintel"\}) &gt; 0) and (sum(rate(src_workerutil_dbworker_store_total\{domain="codeintel_index",op=~"MarkComplete\\|MarkErrored\\|MarkFailed"}[30m])) == 0)) &gt; 0)`
+Custom query for warning alert: `max(((max(src_workerutil_queue_depth{domain="executors_codeintel"\}) &gt; 0) and (sum(rate(src_workerutil_dbworker_store_total\{domain="codeintel_index",op=~"MarkComplete\\|MarkErrored\\|MarkFailed"}[30m])) == 0)) &gt; 0)`
+
+Custom query for critical alert: `max((((max(src_workerutil_queue_depth{domain="executors_codeintel"\}) &gt; 0) and (sum(rate(src_workerutil_dbworker_store_total\{domain="codeintel_index",op=~"MarkComplete\\|MarkErrored\\|MarkFailed"\}[30m])) == 0)) and (max(src_workerutil_queue_duration_seconds\{domain="executors_codeintel"}) &gt; 3600)) &gt; 0)`
 
 </details>
 
@@ -6369,7 +6411,8 @@ Custom query for critical alert: `max(((max(src_workerutil_queue_depth{domain="e
 
 **Descriptions**
 
-- <span class="badge badge-critical">critical</span> executor: the batches executor queue has a backlog that is not being processed for 30m0s
+- <span class="badge badge-warning">warning</span> executor: the batches executor queue has a backlog that is not being processed for 30m0s
+- <span class="badge badge-critical">critical</span> executor: the batches executor queue has an aging backlog (oldest job waiting > 1h) that is not being processed for 30m0s
 
 **Next steps**
 
@@ -6377,11 +6420,13 @@ Custom query for critical alert: `max(((max(src_workerutil_queue_depth{domain="e
 - Check src_executors_managed_instance_groups_autoscaler_unhealthy for the same queue: if a managed instance group is unhealthy, GCP cannot provision VMs (stockout/quota) and no executor is available to process the backlog.
 - Check the Grafana dashboard section for APIClient — executors should be making frequent Dequeue and Heartbeat requests that must not fail.
 - A queue whose jobs are all failing (rather than not being picked up) still counts as processing here; investigate that via the executor error-rate alerts and job logs instead.
+- A Warning that never escalates to Critical is usually a transient, self-healing gap (e.g. one spot-VM preemption); no action is typically needed unless it recurs frequently for the same queue.
 - More help interpreting this metric is available in the [dashboards reference](dashboards#executor-batches_queue_growing_but_not_processing).
 - **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
 
 ```json
 "observability.silenceAlerts": [
+  "warning_executor_batches_queue_growing_but_not_processing",
   "critical_executor_batches_queue_growing_but_not_processing"
 ]
 ```
@@ -6391,7 +6436,9 @@ Custom query for critical alert: `max(((max(src_workerutil_queue_depth{domain="e
 <details>
 <summary>Technical details</summary>
 
-Custom query for critical alert: `max(((max(src_workerutil_queue_depth{domain="executors_batches"\}) &gt; 0) and (sum(rate(src_workerutil_dbworker_store_total\{domain="batch_spec_workspace_execution_worker_store",op=~"MarkComplete\\|MarkErrored\\|MarkFailed"}[30m])) == 0)) &gt; 0)`
+Custom query for warning alert: `max(((max(src_workerutil_queue_depth{domain="executors_batches"\}) &gt; 0) and (sum(rate(src_workerutil_dbworker_store_total\{domain="batch_spec_workspace_execution_worker_store",op=~"MarkComplete\\|MarkErrored\\|MarkFailed"}[30m])) == 0)) &gt; 0)`
+
+Custom query for critical alert: `max((((max(src_workerutil_queue_depth{domain="executors_batches"\}) &gt; 0) and (sum(rate(src_workerutil_dbworker_store_total\{domain="batch_spec_workspace_execution_worker_store",op=~"MarkComplete\\|MarkErrored\\|MarkFailed"\}[30m])) == 0)) and (max(src_workerutil_queue_duration_seconds\{domain="executors_batches"}) &gt; 3600)) &gt; 0)`
 
 </details>
 
@@ -6519,6 +6566,42 @@ Generated query for warning alert: `max((max by (sg_instance) (go_goroutines{sg_
 <summary>Technical details</summary>
 
 Generated query for warning alert: `max((max by (sg_instance) (go_gc_duration_seconds{sg_job=~".*sourcegraph-executors"})) &gt;= 2)`
+
+</details>
+
+<br />
+
+## codeintel-uploads: codeintel_uploads_janitor_scip_documents_oldest_dereference_log_age
+
+<p class="subtitle">approximate age of the oldest SCIP document dereference log record, based on the lowest-ID record</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> codeintel-uploads: 604800s+ approximate age of the oldest SCIP document dereference log record, based on the lowest-ID record for 15m0s
+
+**Next steps**
+
+- Check the SCIP documents janitor error rate and duration panels for failures or slow cleanup queries.
+- Check sum(rate(src_codeintel_uploads_janitor_scip_documents_records_scanned_total[5m])). A sustained non-zero rate means the janitor is processing eligible dereference logs.
+- Check sum(rate(src_codeintel_uploads_janitor_scip_documents_records_altered_total[5m])) for the document deletion rate. This may legitimately be lower than the scanned rate because referenced documents are retained.
+- Check codeintel-db CPU, I/O, locks, and table growth for codeintel_scip_documents_dereference_logs.
+- If cleanup is healthy but cannot keep up with the volume of generated logs, increase CODEINTEL_UPLOADS_UNREFERENCED_DOCUMENT_MAX_BATCHES.
+- If increasing the batch budget is insufficient and codeintel-db has capacity, increase CODEINTEL_UPLOADS_UNREFERENCED_DOCUMENT_MAX_CONCURRENT_BATCHES.
+- Learn more about the related dashboard panel in the [dashboards reference](dashboards#codeintel-uploads-codeintel_uploads_janitor_scip_documents_oldest_dereference_log_age).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_codeintel-uploads_codeintel_uploads_janitor_scip_documents_oldest_dereference_log_age"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max(((time() - max(src_codeintel_uploads_janitor_scip_documents_oldest_dereference_log_timestamp_seconds)) and max(src_codeintel_uploads_janitor_scip_documents_oldest_dereference_log_timestamp_seconds) &gt; 0) &gt; 604800)`
 
 </details>
 
@@ -7354,27 +7437,26 @@ Generated query for critical alert: `max((sum(increase(src_deepsearch_question_p
 
 <br />
 
-## deepsearch: deepsearch_response_truncated
+## deepsearch: deepsearch_response_truncated_no_answer
 
-<p class="subtitle">response truncated questions over 15m</p>
+<p class="subtitle">truncated questions with no answer produced over 15m</p>
 
 **Descriptions**
 
-- <span class="badge badge-warning">warning</span> deepsearch: 3+ response truncated questions over 15m
-- <span class="badge badge-critical">critical</span> deepsearch: 10+ response truncated questions over 15m
+- <span class="badge badge-critical">critical</span> deepsearch: 3+ truncated questions with no answer produced over 15m
 
 **Next steps**
 
-- Search frontend logs for: "answer truncated due to output token limit" to find affected questionIDs.
-- This usually indicates model overthinking and spending all output tokens on thinking with no useful answer, or the user requested an extremely large output.
-- Check if a recent model change may have caused increased thinking token usage.
-- More help interpreting this metric is available in the [dashboards reference](dashboards#deepsearch-deepsearch_response_truncated).
+- Search frontend logs for: "answer truncated due to output token limit with no response generated" to find affected questionIDs.
+- The output token budget was consumed before any answer text was produced, usually by reasoning tokens, so affected users got nothing back.
+- Check if a recent model change or reasoning effort change caused increased thinking token usage.
+- Compare against `deepsearch_response_truncated`: elevated truncations alone are usually users requesting very large outputs and are not a regression.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#deepsearch-deepsearch_response_truncated_no_answer).
 - **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
 
 ```json
 "observability.silenceAlerts": [
-  "warning_deepsearch_deepsearch_response_truncated",
-  "critical_deepsearch_deepsearch_response_truncated"
+  "critical_deepsearch_deepsearch_response_truncated_no_answer"
 ]
 ```
 
@@ -7383,9 +7465,7 @@ Generated query for critical alert: `max((sum(increase(src_deepsearch_question_p
 <details>
 <summary>Technical details</summary>
 
-Generated query for warning alert: `max((sum(increase(src_deepsearch_question_outcome_total{outcome="response_truncated"}[15m]))) &gt; 3)`
-
-Generated query for critical alert: `max((sum(increase(src_deepsearch_question_outcome_total{outcome="response_truncated"}[15m]))) &gt; 10)`
+Generated query for critical alert: `max((sum(increase(src_deepsearch_question_outcome_total{outcome="response_truncated_no_answer"}[15m]))) &gt; 3)`
 
 </details>
 
