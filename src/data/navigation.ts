@@ -100,8 +100,12 @@ export const navigation: NavigationItem[] = [
 				href: '/deep-search',
 				sections: [
 					{
-						title: 'Slack integration',
+						title: 'Slack Integration',
 						href: '/slack-integration'
+					},
+					{
+						title: 'Context Filters',
+						href: '/context-filters'
 					}
 				]
 			},

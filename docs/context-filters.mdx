@@ -1,0 +1,105 @@
+# Context Filters
+
+<TierCallout>
+	Supported on [Enterprise](/pricing/plans/enterprise) plans. Configuring
+	context filters requires site-admin access.
+</TierCallout>
+
+Context filters are an admin-defined exclusion list for [Deep Search](/deep-search). Anything matched by a filter is invisible to the agent: it never appears in an answer, and it cannot be read, searched, diffed, or resolved by any Deep Search tool.
+
+## Why use context filters
+
+- **Keep secrets out of the agent's context.** Excluded content never leaves your instance, so it cannot be quoted, summarized, or forwarded to a third-party model provider.
+- **Reduce noise.** Vendored dependencies, generated code, and archived repositories can be hidden so Deep Search spends its research on code that matters.
+
+## How context filters works
+
+Filtering happens before any content reaches the LLM. There is no instruction in the prompt for the model to reason its way around.
+
+Excluded content is also indistinguishable from content that was never there. It is simply absent, and a read of filtered content returns the same not-found error as a read of something that does not exist.
+
+## Configuring context filters
+
+A site admin configures filters under **Admin → Configuration → Advanced configuration**, inside the `experimentalFeatures` block of the site configuration. Each entry in `exclude` is an independent rule, and content is hidden if it matches any rule.
+
+```jsonc
+"experimentalFeatures": {
+  "deepSearch.contextFilters": {
+    "exclude": [
+      // Hide an entire repository.
+      { "repoNamePatterns": ["^github\\.com/acme/secrets$"] },
+      // Hide secret-bearing files in every repository.
+      { "filePathPatterns": ["\\.env$", "\\.pem$"] },
+      // Hide deployment config in certain repositories only.
+      {
+        "repoNamePatterns": ["^github\\.com/acme/backend$", "^github\\.com/acme/frontend$"],
+        "filePathPatterns": ["^deploy/", "^config/prod/"]
+      }
+    ]
+  }
+}
+```
+
+Config changes apply to the next Deep Search run, no restart is required. A rule must set at least one of the two fields.
+
+## Pattern syntax
+
+Both `repoNamePatterns` and `filePathPatterns` take a list of Go [RE2](https://github.com/google/re2/wiki/Syntax) regular expressions.
+
+- **Patterns are unanchored.** `internal` matches `github.com/acme/internal-tools`. Use `^...$` when you mean the whole string.
+- **`.` matches any character except a newline, including `/`.** Escape it as `github\.com`. The pattern `a.b` also matches the repository `a/b`.
+- **Backslashes must be doubled in JSON.** The regex `\.env$` is written `"\\.env$"`.
+- **Repository names and file paths match case-insensitively.** `README` also excludes `readme`.
+- **RE2 only.** No backreferences and no lookaround — a pattern like `(a)\1` is rejected.
+- **Multiple patterns in one list are OR'd.** `["^a$", "^b$"]` matches either.
+
+### What the patterns are matched against
+
+`repoNamePatterns` is matched against the full repository name, including the code host: `github.com/acme/backend`.
+
+`filePathPatterns` is matched against the repository-root-relative path, with no leading slash: `internal/auth/token.go`. Directories are matched with a trailing slash, so write directory rules as `^deploy/` rather than `^deploy$`. The trailing-slash form hides both the files inside `deploy/` and the `deploy/` entry itself in a parent listing.
+
+## Combining repoNamePatterns and filePathPatterns
+
+Within a single rule the two fields are AND'd, and an omitted field means "match anything".
+
+| Rule                    | What it hides                                        |
+| ----------------------- | ---------------------------------------------------- |
+| `repoNamePatterns` only | The whole repository                                 |
+| `filePathPatterns` only | Matching paths in **every** repository               |
+| Both fields             | Matching paths **only** inside matching repositories |
+
+### Repository only
+
+```jsonc
+{"repoNamePatterns": ["^github\\.com/acme/secrets$"]}
+```
+
+`github.com/acme/secrets` disappears completely: it is dropped from repository lists and search results, its refs and revisions cannot be resolved, and every tool reports it as nonexistent.
+
+Anchoring matters here. `^github\.com/acme/secrets$` leaves `github.com/acme/secrets-docs` visible, while the unanchored `acme/secrets` hides both.
+
+### Files only
+
+```jsonc
+{"filePathPatterns": ["\\.env$", "^secrets/"]}
+```
+
+Every `.env` file, and everything under a top-level `secrets/` directory, is hidden in all repositories. The repositories themselves stay searchable, only the matching files go missing. A files-only rule never hides a repository, so `github.com/acme/backend` still appears in repository lists even if all of its files are filtered.
+
+### Files within a repository
+
+```jsonc
+{
+	"repoNamePatterns": ["^github\\.com/acme/backend$"],
+	"filePathPatterns": ["^deploy/", "^config/prod/"]
+}
+```
+
+`deploy/` and `config/prod/` are hidden in `github.com/acme/backend` only. The same paths in `github.com/acme/frontend` stay visible, and the rest of `backend`, `src/main.go`, its refs, its commit history, is untouched.
+
+Rules never narrow one another. Each is evaluated on its own, and any match hides the content. In the [configuration example](#configuring-context-filters) above, `.env` files are hidden everywhere and `deploy/` is hidden in `backend`. The repository-scoped rule does not limit the reach of the instance-wide one.
+
+## Verifying a filter
+
+Ask Deep Search a question that would require the excluded content, and @-mention the repository or file directly. A working filter produces an answer that does not reference the content, and the [list of sources](/deep-search) contains none of it. If you @-mention filtered content, Deep Search reports it as not found rather than acknowledging that it was excluded.
