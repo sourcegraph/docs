@@ -19,13 +19,19 @@ Use this skill for the Sourcegraph docs repo release-version workflow: cutting l
   - `docs.config.js`
   - `src/data/versions.ts`
   - `docs/legacy.mdx`
+- `src/data/versions.ts` on `origin/main` is the canonical dropdown list. The
+  current site exposes it through `/docs/api/versions`, and legacy selectors
+  load that manifest at runtime.
+- A legacy branch's bundled `src/data/versions.ts` is only a fallback. Its first
+  entry identifies the archived site and must not have the `latest` label.
 
 ## Standard workflow for a new release
 
 For a new release `X.Y`:
 
 1. Archive the previous docs version `P.Q` in the `legacy` remote.
-2. Ensure the legacy branch’s own config says it is version `P.Q` and lists older versions only.
+2. Ensure the legacy branch’s own config says it is version `P.Q`, marks it as
+   selected rather than latest, and lists older fallback versions only.
 3. Update `origin` so `X.Y` is latest and `P.Q` appears as a previous version.
 
 Example: when 7.4 is released, archive 7.3 as `legacy/v7_3`, then update `origin` with `DOCS_LATEST_VERSION: '7.4'` and add 7.3 to previous-version lists.
@@ -63,12 +69,15 @@ git commit --allow-empty -m "Branch for docs version X.Y"
 git push -u legacy vX_Y
 ```
 
-Then update the legacy branch so it identifies itself as `X.Y` and lists only older versions.
+Then update the legacy branch so it identifies itself as `X.Y` and lists only
+older fallback versions. The runtime manifest supplies the current canonical
+list when the current docs site is available.
 
 For `v7_3`, for example:
 
 - `docs.config.js`: `DOCS_LATEST_VERSION: '7.3'`
-- `src/data/versions.ts`: first entry remains `latest`; previous entries should include `v7.2`, `v7.1`, `v7.0`, then 6.x.
+- `src/data/versions.ts`: first entry identifies `v7.3` without a `latest`
+  label; fallback entries should include `v7.2`, `v7.1`, `v7.0`, then 6.x.
 - `docs/legacy.mdx`: `Sourcegraph 7.X` should include `7.2`, `7.1`, `7.0` (not 7.3 itself).
 
 Commit and push:
@@ -125,6 +134,9 @@ git ls-remote --heads legacy 'v7_*'
 Confirm:
 
 - The legacy branch points to the pushed commit.
-- The legacy branch lists only older previous versions.
+- The legacy branch identifies itself without claiming to be latest and lists
+  only older fallback versions.
 - The origin PR branch sets the new latest version and includes the archived version in previous-version lists.
+- The current manifest lists the new latest version first, and its URL points to
+  `https://sourcegraph.com/docs`.
 - Return the local workspace to clean `main` unless the user asked to stay on a release branch.
