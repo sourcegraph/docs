@@ -14,7 +14,7 @@ import {Fragment, useEffect, useState} from 'react';
 
 const versionsUrl =
 	process.env.NEXT_PUBLIC_DOCS_VERSIONS_URL ??
-	'https://sourcegraph.com/docs/api/versions';
+	'https://sourcegraph-docs-git-main-sourcegraph-f8c71130.vercel.app/docs/api/versions';
 
 function isVersion(value: unknown): value is VersionI {
 	if (typeof value !== 'object' || value === null) return false;
@@ -25,6 +25,23 @@ function isVersion(value: unknown): value is VersionI {
 		typeof version.url === 'string' &&
 		(version.label === undefined || typeof version.label === 'string')
 	);
+}
+
+function versionsForSite(remoteVersions: VersionI[]): VersionI[] {
+	const selectedIndex = remoteVersions.findIndex(
+		version => version.name === versions[0].name
+	);
+
+	if (selectedIndex === 0) return remoteVersions;
+	if (selectedIndex > 0) {
+		return [remoteVersions[0], ...remoteVersions.slice(selectedIndex)];
+	}
+
+	return [
+		remoteVersions[0],
+		{...versions[0], label: undefined},
+		...versions.slice(1)
+	];
 }
 
 export default function VersionSelector() {
@@ -57,16 +74,7 @@ export default function VersionSelector() {
 					return;
 				}
 
-				setAvailableVersions(
-					remoteVersions.some(
-						version => version.name === versions[0].name
-					)
-						? remoteVersions
-						: [
-								...remoteVersions,
-								{...versions[0], label: undefined}
-							]
-				);
+				setAvailableVersions(versionsForSite(remoteVersions));
 			})
 			.catch(() => {
 				// Keep this build's version list if the current site is unavailable.
