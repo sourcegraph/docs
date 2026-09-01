@@ -14,7 +14,7 @@ import {Fragment, useEffect, useState} from 'react';
 
 const versionsUrl =
 	process.env.NEXT_PUBLIC_DOCS_VERSIONS_URL ??
-	'https://sourcegraph-docs-git-main-sourcegraph-f8c71130.vercel.app/docs/api/versions';
+	'https://sourcegraph.com/docs/api/versions';
 
 function isVersion(value: unknown): value is VersionI {
 	if (typeof value !== 'object' || value === null) return false;

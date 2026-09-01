@@ -20,9 +20,8 @@ Use this skill for the Sourcegraph docs repo release-version workflow: cutting l
   - `src/data/versions.ts`
   - `docs/legacy.mdx`
 - `src/data/versions.ts` on `origin/main` is the canonical dropdown list. The
-  current site exposes it through `/docs/api/versions`. Legacy selectors load
-  that manifest through the main branch's Vercel origin to avoid cross-subdomain
-  Cloudflare challenges.
+  current site exposes it through `https://sourcegraph.com/docs/api/versions`,
+  and legacy selectors load that manifest at runtime.
 - A legacy branch's bundled `src/data/versions.ts` is only a fallback. Its first
   entry identifies the archived site and must not have the `latest` label.
 - A legacy selector shows the current latest version, its selected archived
