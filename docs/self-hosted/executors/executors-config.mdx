@@ -2,14 +2,33 @@
 
 The following is a list of all of the configuration options for the executor service. The process for configuring your executor instance will vary depending on the executor deployment method selected, but are generally defined as environment variables either in the executor Docker container or directly on the host machine, depending on whether the service is running in Docker or as a native Linux binary.
 
+## Queues
+
+Each executor pulls jobs from one or more named queues. Set the queues with `EXECUTOR_QUEUE_NAMES` (comma-separated) or, for a single queue, `EXECUTOR_QUEUE_NAME`. Terraform and Helm deployments expose the same setting as `executor_queue_names` / `queueNames`.
+
+| Queue           | Jobs                                                                                                                             | Required for                                                                                         |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `batches`       | Batch spec workspace execution                                                                                                   | [Server-side Batch Changes](/batch-changes/server-side), [Agentic Batch Changes](/agentic-batch-changes) |
+| `batches-hooks` | Changeset hook automations that run in response to changeset events                                                              | [Agentic Batch Changes](/agentic-batch-changes)                                                      |
+| `codeintel`     | Precise code navigation indexing                                                                                                 | [Auto-indexing](/code-navigation/auto-indexing)                                                      |
+
+Executors that serve Batch Changes should serve both `batches` and `batches-hooks`. Without an executor on the `batches-hooks` queue, batch changes still execute and publish, but hook automations never run. If you have an existing deployment configured for `batches` only, extend it:
+
+```diff
+- EXECUTOR_QUEUE_NAME=batches
++ EXECUTOR_QUEUE_NAMES=batches,batches-hooks
+```
+
+An executor that should handle every job type uses `EXECUTOR_QUEUE_NAMES=batches,batches-hooks,codeintel`.
+
 ## General configuration
 
 | Configuration Key                        | Description                                                                                                                                                                                                                        | Example value                              |
 | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
 | `EXECUTOR_FRONTEND_URL`                  | The external URL of the Sourcegraph instance. **required**                                                                                                                                                                         | `http://sourcegraph.example.com`           |
 | `EXECUTOR_FRONTEND_PASSWORD`             | The shared secret configured in the Sourcegraph instance site config under `executors.accessToken`. **required**                                                                                                                   | `our-shared-secret`                        |
-| `EXECUTOR_QUEUE_NAME`                    | The name of a single queue to pull jobs from. Possible values: `batches` and `codeintel`. **required: either this or `EXECUTOR_QUEUE_NAMES`**                                                                                      | `batches`                                  |
-| `EXECUTOR_QUEUE_NAMES`                   | The names of multiple queues to pull jobs from, comma-separated. Possible values: `batches` and `codeintel`. **required: either this or `EXECUTOR_QUEUE_NAME`**                                                                    | `batches,codeintel`                        |
+| `EXECUTOR_QUEUE_NAME`                    | The name of a single queue to pull jobs from. See [Queues](#queues) for possible values. **required: either this or `EXECUTOR_QUEUE_NAMES`**                                                                                       | `codeintel`                                |
+| `EXECUTOR_QUEUE_NAMES`                   | The names of multiple queues to pull jobs from, comma-separated. See [Queues](#queues) for possible values. **required: either this or `EXECUTOR_QUEUE_NAME`**                                                                     | `batches,batches-hooks`                    |
 | `EXECUTOR_USE_FIRECRACKER`               | Whether to isolate jobs in virtual machines. Requires ignite and firecracker. Linux hosts only. Kubernetes is not supported. (default value: "true" when OS is Linux and not on Kubernetes)                                        | `true`                                     |
 | `EXECUTOR_MAXIMUM_NUM_JOBS`              | Number of virtual machines or containers that can be running at once. (default value: "1")                                                                                                                                         | `1`                                        |
 | `EXECUTOR_MAXIMUM_RUNTIME_PER_JOB`       | The maximum wall time that can be spent on a single job. (default value: "30m")                                                                                                                                                    | `30m`                                      |

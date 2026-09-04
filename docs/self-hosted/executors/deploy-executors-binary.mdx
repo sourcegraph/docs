@@ -88,13 +88,13 @@ mv executor /usr/local/bin
 
 The executor Linux binary is configured through environment variables which need to be passed to it when you run it (including for the `install`, `validate` and `test-vm` commands). You can add these to your shell profile, or an environment file. The `EXECUTOR_FRONTEND_URL`, `EXECUTOR_FRONTEND_PASSWORD` and `EXECUTOR_QUEUE_NAME` **or** `EXECUTOR_QUEUE_NAMES` are _required_ and will need to be set prior to running the executor service for the first time.
 
-See [Executor configuration](/self-hosted/executors/executors-config) for a full list of configuration options for the executor service.
+See [Executor configuration](/self-hosted/executors/executors-config) for a full list of configuration options for the executor service, and [Queues](/self-hosted/executors/executors-config#queues) for which queues each feature requires.
 
 ```bash
 # Example:
 export EXECUTOR_FRONTEND_URL=http://sourcegraph.yourcompany.com
 export EXECUTOR_FRONTEND_PASSWORD=SUPER_SECRET_SHARED_TOKEN
-export EXECUTOR_QUEUE_NAMES=batches,codeintel
+export EXECUTOR_QUEUE_NAMES=batches,batches-hooks,codeintel
 ```
 
 ### **Step 3:** Configure your machine
@@ -156,7 +156,7 @@ EOF
 cat <<EOF >/etc/systemd/system/executor.env
 EXECUTOR_FRONTEND_URL="https://sourcegraph.yourcompany.com"
 EXECUTOR_FRONTEND_PASSWORD="SUPER_SECRET_SHARED_TOKEN"
-EXECUTOR_QUEUE_NAMES="batches,codeintel"
+EXECUTOR_QUEUE_NAMES="batches,batches-hooks,codeintel"
 EOF
 
 systemctl enable executor
