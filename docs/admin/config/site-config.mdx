@@ -21,7 +21,7 @@ All site configuration options and their default values are shown below.
 
 {/* SCHEMA_SYNC_START: admin/config/site.schema.json */}
 {/* WARNING: This section is auto-generated during releases. Do not edit manually. */}
-{/* Last updated: 2026-08-25T23:40:39Z */}
+{/* Last updated: 2026-09-05T17:37:41Z */}
 ```json
 {
 
@@ -45,7 +45,7 @@ All site configuration options and their default values are shown below.
 	// Valid options: "permissive", "enforced"
 	"attribution.mode": "permissive",
 
-	// Enables/disables Agentic Batch Changes. Disabled by default. When explicitly set to true, Agentic Batch Changes are enabled only if Batch Changes is licensed and the license includes AI Terms 2025. When unset or false, Agentic Batch Changes are disabled.
+	// Enables/disables Agentic Batch Changes. Before September 14, 2026 at 12:00 UTC, the feature is disabled when unset. At and after that time, the feature is enabled when unset. An explicit value overrides the timed default. Agentic Batch Changes are enabled only if Batch Changes is licensed and the license includes AI Terms 2025.
 	"batchChanges.agenticBatchChanges.enabled": false,
 
 	// Automatically delete branches created for Batch Changes changesets when the changeset is merged or closed, for supported code hosts. Overrides any setting on the repository on the code host itself.
@@ -318,6 +318,7 @@ All site configuration options and their default values are shown below.
 		"languageDetection": {
 			"graphQL": "useFileContents"
 		},
+		"monorepos": null,
 		"pagure": "disabled",
 		"passwordPolicy": {
 			"enabled": true,
@@ -928,7 +929,7 @@ All site configuration options and their default values are shown below.
 	"executors.accessToken": null,
 
 	// The image to use for batch changes in executors when using native execution. Use this value to pull from a custom image registry.
-	"executors.batcheshelperImage": "sourcegraph/batcheshelper",
+	"executors.batcheshelperImage": "us-docker.pkg.dev/sourcegraph-images/external/batcheshelper",
 
 	// The tag to use for the batcheshelper image in executors when using native execution. Use this value to use a custom tag. Sourcegraph by default uses the best match, so use this setting only if you really need to overwrite it and make sure to keep it updated.
 	// Other example values:
@@ -949,6 +950,10 @@ All site configuration options and their default values are shown below.
 	"executors.multiqueue": {
 		"dequeueCacheConfig": {
 			"batches": {
+				"limit": 50,
+				"weight": 4
+			},
+			"batchesHooks": {
 				"limit": 50,
 				"weight": 4
 			},
