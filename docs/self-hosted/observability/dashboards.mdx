@@ -10971,7 +10971,7 @@ To see this panel, visit `/-/debug/grafana/d/precise-code-intel-worker/precise-c
 Query:
 
 ```
-max(src_workerutil_queue_duration_seconds{domain="codeintel_upload"})
+max(src_workerutil_queue_duration_seconds{domain="precise_code_intel_upload_worker"})
 ```
 </details>
 
@@ -26702,6 +26702,35 @@ sum(rate(src_workerutil_dbworker_store_total{domain="batch_spec_workspace_execut
 
 <br />
 
+#### executor: batches-hooks_queue_growing_but_not_processing
+
+<p class="subtitle">Batches-hooks executor queue has a backlog that is not being processed</p>
+
+Two severities on one signal: the batches-hooks executor queue has a non-empty backlog (`src_workerutil_queue_depth{domain="executors_batches-hooks"} &gt; 0`)
+while zero jobs have reached a terminal state over the last 30 minutes (`src_workerutil_dbworker_store_total{domain="changeset_hook_event_jobs_worker_store"}`). With a backlog present, zero completions over 30m is already abnormal — the only benign zero-completion case (an empty queue) is excluded by the backlog guard.
+Warning fires on any such 30m window. On a fleet of small, spot-backed queues most of these are transient (e.g. a single spot-VM preemption) and self-heal, so Warning is for visibility rather than paging.
+Critical additionally requires the oldest queued job to have been waiting more than 1h (`src_workerutil_queue_duration_seconds{domain="executors_batches-hooks"} &gt; 3600` — head-of-line wait time). Past the 60m maximum single-job runtime, zero completions can no longer be one long-running job and a transient preemption has had time to recover, so the queue is sustained-stuck. This is the paging tier.
+Both tiers distinguish a stuck queue from an under-provisioned one: an under-provisioned queue (backlog present but jobs still completing) has a non-zero terminal-transition rate and trips neither tier — that is a capacity-review signal, not a stall.
+All signals come from the worker/frontend (always scraped), not from the executor VMs, so this alert works on deployments where executors run outside the cluster (e.g. Sourcegraph Cloud).
+
+Refer to the [alerts reference](alerts#executor-batches-hooks_queue_growing_but_not_processing) for 2 alerts related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/executor/executor?viewPanel=100112` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(src_workerutil_dbworker_store_total{domain="changeset_hook_event_jobs_worker_store",op=~"MarkComplete|MarkErrored|MarkFailed"}[5m]))
+```
+</details>
+
+<br />
+
 ### Executor: Executor: Executor jobs
 
 #### executor: executor_handlers
@@ -36250,7 +36279,7 @@ histogram_quantile(0.50, sum(rate(src_deepsearch_question_processing_duration_se
 
 <p class="subtitle">Questions rejected by usage limits over 15m</p>
 
-Number of deep search questions rejected because the user hit their usage entitlement limit, by entitlement name. These are intentional quota rejections, not processing failures, and do not count towards the question processing error rate. Check frontend logs for `question rejected: usage limit exceeded` to identify affected users. Sustained rejections from an API client usually mean the client does not back off after hitting its limit.
+Number of deep search questions rejected because the user hit their usage entitlement limit, by entitlement name. These are intentional quota rejections, not processing failures, and do not count towards the question processing error rate. Check worker logs for `question rejected: usage limit exceeded` to identify affected users. Sustained rejections from an API client usually mean the client does not back off after hitting its limit.
 
 This panel has no related alerts.
 
@@ -37748,13 +37777,13 @@ sum(increase(src_executor_processor_errors_total{queue="batches",op="Handle"}[5m
 
 <br />
 
-### Batch Changes: Job queue stores
+### Batch Changes: Agentic hook execution
 
-#### batch-changes: batch_changes_store_operation_rate
+#### batch-changes: batch_changes_hook_execution_queue_depth
 
-<p class="subtitle">Worker store operations per second by queue</p>
+<p class="subtitle">Hook execution jobs waiting in the queue</p>
 
-Rate of successful worker store operations (dequeue, heartbeat, mark-complete, etc.) for each batch changes queue. The batch_spec_workspace_execution_worker_store operations are emitted by the frontend executor queue handler rather than the worker, so their sg_job label differs from the other queues.
+Number of Agentic Batch Changes hook jobs waiting for an executor on the exact batches-hooks queue.
 
 This panel has no related alerts.
 
@@ -37768,17 +37797,17 @@ To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPan
 Query:
 
 ```
-sum by (domain) (rate(src_workerutil_dbworker_store_total{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker)_store$"}[5m]))
+max(src_executor_total{queue="batches-hooks"})
 ```
 </details>
 
 <br />
 
-#### batch-changes: batch_changes_store_error_rate
+#### batch-changes: batch_changes_hook_execution_active_handlers
 
-<p class="subtitle">Worker store error rate over 5m by queue</p>
+<p class="subtitle">Active hook executor handlers</p>
 
-Percentage of worker store operations that errored, per queue. A sustained nonzero rate usually points at database problems (contention, connection exhaustion, migration drift) rather than the batch changes logic itself.
+Number of hook jobs currently being processed by executors assigned to batches-hooks.
 
 This panel has no related alerts.
 
@@ -37792,7 +37821,105 @@ To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPan
 Query:
 
 ```
-sum by (domain) (increase(src_workerutil_dbworker_store_errors_total{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker)_store$"}[5m])) / (sum by (domain) (increase(src_workerutil_dbworker_store_total{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker)_store$"}[5m])) + sum by (domain) (increase(src_workerutil_dbworker_store_errors_total{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker)_store$"}[5m]))) * 100
+sum(src_executor_processor_handlers{queue="batches-hooks"})
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_hook_execution_processing_rate
+
+<p class="subtitle">Hook jobs processed per minute</p>
+
+Rate of successfully completed hook jobs; failures are shown separately.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100410` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(src_executor_processor_total{queue="batches-hooks",op="Handle"}[5m])) * 60
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_hook_execution_error_rate
+
+<p class="subtitle">Hook execution error rate over 5m</p>
+
+Percentage of hook jobs ending in an error, computed as errors / (successful completions + errors).
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100411` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_executor_processor_errors_total{queue="batches-hooks",op="Handle"}[5m])) / (sum(increase(src_executor_processor_total{queue="batches-hooks",op="Handle"}[5m])) + sum(increase(src_executor_processor_errors_total{queue="batches-hooks",op="Handle"}[5m]))) * 100
+```
+</details>
+
+<br />
+
+### Batch Changes: Job queue stores
+
+#### batch-changes: batch_changes_store_operation_rate
+
+<p class="subtitle">Worker store operations per second by queue</p>
+
+Rate of successful worker store operations (dequeue, heartbeat, mark-complete, etc.) for each batch changes queue. The batch_spec_workspace_execution_worker_store operations are emitted by the frontend executor queue handler rather than the worker, so their sg_job label differs from the other queues.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100500` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (domain) (rate(src_workerutil_dbworker_store_total{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker|changeset_hook_event_jobs_worker)_store$"}[5m]))
+```
+</details>
+
+<br />
+
+#### batch-changes: batch_changes_store_error_rate
+
+<p class="subtitle">Worker store error rate over 5m by queue</p>
+
+Percentage of worker store operations that errored, per queue. A sustained nonzero rate usually points at database problems (contention, connection exhaustion, migration drift) rather than the batch changes logic itself.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100501` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (domain) (increase(src_workerutil_dbworker_store_errors_total{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker|changeset_hook_event_jobs_worker)_store$"}[5m])) / (sum by (domain) (increase(src_workerutil_dbworker_store_total{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker|changeset_hook_event_jobs_worker)_store$"}[5m])) + sum by (domain) (increase(src_workerutil_dbworker_store_errors_total{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker|changeset_hook_event_jobs_worker)_store$"}[5m]))) * 100
 ```
 </details>
 
@@ -37806,7 +37933,7 @@ sum by (domain) (increase(src_workerutil_dbworker_store_errors_total{domain=~"^(
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100402` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100502` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -37816,7 +37943,7 @@ To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPan
 Query:
 
 ```
-histogram_quantile(0.95, sum by (le, domain) (rate(src_workerutil_dbworker_store_duration_seconds_bucket{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker)_store$"}[5m])))
+histogram_quantile(0.95, sum by (le, domain) (rate(src_workerutil_dbworker_store_duration_seconds_bucket{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker|changeset_hook_event_jobs_worker)_store$"}[5m])))
 ```
 </details>
 
@@ -37832,7 +37959,7 @@ Number of stalled batch changes jobs that the resetter moved back to the queued 
 
 Refer to the [alerts reference](alerts#batch-changes-batch_changes_records_reset) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100500` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100600` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -37842,7 +37969,7 @@ To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPan
 Query:
 
 ```
-sum by (domain) (increase(src_dbworker_resetter_record_resets_total{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker)_resetter$"}[1h]))
+sum by (domain) (increase(src_dbworker_resetter_record_resets_total{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker|changeset_hook_event_job_worker)_resetter$"}[1h]))
 ```
 </details>
 
@@ -37856,7 +37983,7 @@ Number of stalled jobs that exhausted their retries and were marked as failed, p
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100501` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100601` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -37866,7 +37993,7 @@ To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPan
 Query:
 
 ```
-sum by (domain) (increase(src_dbworker_resetter_record_reset_failures_total{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker)_resetter$"}[1h]))
+sum by (domain) (increase(src_dbworker_resetter_record_reset_failures_total{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker|changeset_hook_event_job_worker)_resetter$"}[1h]))
 ```
 </details>
 
@@ -37880,7 +38007,7 @@ sum by (domain) (increase(src_dbworker_resetter_record_reset_failures_total{doma
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100502` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPanel=100602` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -37890,7 +38017,7 @@ To see this panel, visit `/-/debug/grafana/d/batch-changes/batch-changes?viewPan
 Query:
 
 ```
-histogram_quantile(0.95, sum by (le, domain) (rate(src_dbworker_resetter_stall_duration_seconds_bucket{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker)_resetter$"}[1h])))
+histogram_quantile(0.95, sum by (le, domain) (rate(src_dbworker_resetter_stall_duration_seconds_bucket{domain=~"^(batches_reconciler_worker|batches_bulk_worker|batch_changes_batch_spec_resolution_worker|batch_spec_workspace_execution_worker|changeset_hook_event_job_worker)_resetter$"}[1h])))
 ```
 </details>
 
