@@ -9,8 +9,6 @@ import {getMDXComponent} from 'next-contentlayer/hooks';
 import {notFound} from 'next/navigation';
 import {Suspense} from 'react';
 
-export const maxDuration = 300;
-
 // Every page is enumerated by generateStaticParams. Reject unknown slugs at the
 // router so the site returns a real HTTP 404. Without this, notFound() runs
 // inside the root layout's <Suspense> after the response has started streaming,
