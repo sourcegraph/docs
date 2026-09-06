@@ -70,15 +70,16 @@ jobs:
                   existing_comment=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
                       --paginate --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n 1)
 
-                  # A clean PR carries no comment: remove a stale report once fixed
-                  if [ "$BROKEN" != true ]; then
-                      if [ -n "$existing_comment" ]; then
-                          gh api --method DELETE "repos/$GITHUB_REPOSITORY/issues/comments/$existing_comment"
-                      fi
+                  # Comment only when there is something to report, or an earlier report to resolve
+                  if [ "$BROKEN" = true ]; then
+                      { echo "$marker"; cat "$RUNNER_TEMP/report.md"; } > "$RUNNER_TEMP/comment.md"
+                  elif [ -n "$existing_comment" ]; then
+                      printf '%s\n### ✅ The broken links an earlier revision of this PR introduced are fixed\n' \
+                          "$marker" > "$RUNNER_TEMP/comment.md"
+                  else
                       exit 0
                   fi
 
-                  { echo "$marker"; cat "$RUNNER_TEMP/report.md"; } > "$RUNNER_TEMP/comment.md"
                   if [ -n "$existing_comment" ]; then
                       gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$existing_comment" \
                           --field body=@"$RUNNER_TEMP/comment.md"
