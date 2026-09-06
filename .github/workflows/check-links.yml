@@ -70,8 +70,11 @@ jobs:
                   existing_comment=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
                       --paginate --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n 1)
 
-                  # Only comment when there is something to report, or a stale report to resolve
-                  if [ -z "$existing_comment" ] && [ "$BROKEN" != true ]; then
+                  # A clean PR carries no comment: remove a stale report once fixed
+                  if [ "$BROKEN" != true ]; then
+                      if [ -n "$existing_comment" ]; then
+                          gh api --method DELETE "repos/$GITHUB_REPOSITORY/issues/comments/$existing_comment"
+                      fi
                       exit 0
                   fi
 
