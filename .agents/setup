@@ -30,7 +30,9 @@ EOF
 fi
 
 step "Install dependencies"
-pnpm install --frozen-lockfile
+# CI=true: without a TTY, pnpm otherwise aborts if a stale snapshot's
+# node_modules was built by a different pnpm version and must be recreated.
+CI=true pnpm install --frozen-lockfile
 
 step "Write orb agent guidance"
 mkdir -p "$HOME/.config/amp"
