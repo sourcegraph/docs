@@ -1,18 +1,25 @@
 name: Spell check
 
+# Reports spelling errors on lines added by a pull request. Existing spelling
+# errors and errors on unchanged lines are not included.
+
 on:
     pull_request:
 
 permissions:
     contents: read
+    pull-requests: write
 
 jobs:
     spellcheck:
         name: CSpell (advisory)
         runs-on: ubuntu-latest
         steps:
-            - name: Check out repository
+            - name: Check out pull request head
               uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.event.pull_request.head.sha }}
+                  fetch-depth: 0
 
             - name: Install pnpm
               uses: pnpm/action-setup@v4
@@ -28,6 +35,50 @@ jobs:
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
 
-            - name: Check spelling (advisory)
-              continue-on-error: true
-              run: pnpm spellcheck
+            - name: Find spelling errors introduced by this PR
+              id: check
+              env:
+                  BASE_SHA: ${{ github.event.pull_request.base.sha }}
+              run: |
+                  base=$(git merge-base "$BASE_SHA" HEAD)
+                  if pnpm --silent spellcheck:diff -- --base "$base" --format markdown \
+                      > "$RUNNER_TEMP/spelling-report.md"; then
+                      echo "errors=false" >> "$GITHUB_OUTPUT"
+                  else
+                      status=$?
+                      if [ "$status" -ne 1 ]; then
+                          exit "$status"
+                      fi
+                      echo "errors=true" >> "$GITHUB_OUTPUT"
+                  fi
+                  cat "$RUNNER_TEMP/spelling-report.md"
+
+            - name: Comment on the pull request
+              # Fork PRs get a read-only token; the report is still in the job log
+              if: github.event.pull_request.head.repo.full_name == github.repository
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
+                  ERRORS: ${{ steps.check.outputs.errors }}
+              run: |
+                  marker='<!-- cspell-report -->'
+                  existing_comment=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
+                      --paginate --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n 1)
+
+                  # Comment only when there is something to report, or an earlier report to resolve
+                  if [ "$ERRORS" = true ]; then
+                      { echo "$marker"; cat "$RUNNER_TEMP/spelling-report.md"; } \
+                          > "$RUNNER_TEMP/comment.md"
+                  elif [ -n "$existing_comment" ]; then
+                      printf '%s\n### ✅ The spelling errors reported on an earlier revision are fixed\n' \
+                          "$marker" > "$RUNNER_TEMP/comment.md"
+                  else
+                      exit 0
+                  fi
+
+                  if [ -n "$existing_comment" ]; then
+                      gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$existing_comment" \
+                          --field body=@"$RUNNER_TEMP/comment.md"
+                  else
+                      gh pr comment "$PR_NUMBER" --body-file "$RUNNER_TEMP/comment.md"
+                  fi
