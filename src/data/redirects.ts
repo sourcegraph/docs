@@ -5457,7 +5457,7 @@ const redirectsData = [
 		permanent: true
 	},
 
-	//Eclispe redirects
+	//Eclipse redirects
 	{
 		source: '/cody/clients/install-eclipse',
 		destination: '/cody/clients',
@@ -5552,14 +5552,14 @@ const redirectsData = [
 		permanent: true
 	},
 
-	//Rmv embeddings permanentaly:https://sourcegraph.com/docs/cody/core-concepts/embeddings
+	//Rmv embeddings permanently:https://sourcegraph.com/docs/cody/core-concepts/embeddings
 	{
 		source: '/cody/core-concepts/embeddings',
 		destination: '/cody/',
 		permanent: true
 	},
 
-	//Rmv Query types permanentaly:https://sourcegraph.com/docs/cody/capabilities/query-types
+	//Rmv Query types permanently:https://sourcegraph.com/docs/cody/capabilities/query-types
 	{
 		source: '/cody/capabilities/query-types',
 		destination: '/cody/capabilities/chat',
@@ -7172,27 +7172,27 @@ const redirectsData = [
 	{
 		source: '/own',
 		destination: '/code-ownership',
-		permanant: true
+		permanent: true
 	},
 	{
 		source: '/own/assigned-ownership',
 		destination: '/code-ownership',
-		permanant: true
+		permanent: true
 	},
 	{
 		source: '/own/configuration-reference',
 		destination: '/code-ownership',
-		permanant: true
+		permanent: true
 	},
 	{
 		source: '/own/codeowners-ingestion',
 		destination: '/code-ownership',
-		permanant: true
+		permanent: true
 	},
 	{
 		source: '/own/codeowners-format',
 		destination: '/code-ownership/codeowners-format',
-		permanant: true
+		permanent: true
 	},
 	{
 		source: '/api/graphql/examples',
