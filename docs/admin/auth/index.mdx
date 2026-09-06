@@ -34,7 +34,7 @@ The following methods are supported for sign up and sign in:
 -   [HTTP authentication proxies](#http-authentication-proxies)
     -   [Username header prefixes](#username-header-prefixes)
 
-The authentication providers are configured in the [`auth.providers`](/admin/config/site-config#authentication-providers) site configuration option.
+The authentication providers are configured in the [`auth.providers`](/admin/config/site-config) site configuration option.
 
 ## Programmatic authentication
 
@@ -50,7 +50,7 @@ If you are unsure which auth provider is right for you, we recommend applying th
 order:
 
 -   If you have no external identity providers (i.e., not SSO) or are just trying to spin Sourcegraph
-    up as quickly as possible to try, use [`builtin`](#builtin-password-authentication) authentication. You can
+    up as quickly as possible to try, use [`builtin`](/admin/auth/builtin) authentication. You can
     always change the auth configuration later, and user identities from external providers will be
     linked automatically to existing Sourcegraph accounts using verified email addresses.
 -   If you are deploying Sourcegraph behind a HTTP authentication proxy service, use the
@@ -116,7 +116,7 @@ configuration.
 
 Leave the `url` field empty for GitHub.com.
 
-Once you've configured GitHub as a sign-on provider, you may also want to [add GitHub repositories to Sourcegraph](/admin/code-hosts/github#repository-syncing).
+Once you've configured GitHub as a sign-on provider, you may also want to [add GitHub repositories to Sourcegraph](/admin/code-hosts/github#selecting-repositories-to-sync).
 
 ### How to control user sign-up and sign-in with GitHub auth provider
 
@@ -405,7 +405,7 @@ Users can then add Gerrit credentials by visiting their **Settings** > **Account
 
 ## OpenID Connect
 
-The [`openidconnect` auth provider](/admin/config/site-config#openid-connect-including-google-workspace) authenticates users via OpenID Connect, which is supported by many external services, including:
+The [`openidconnect` auth provider](/admin/auth#openid-connect) authenticates users via OpenID Connect, which is supported by many external services, including:
 
 -   [Google Workspace (Google accounts)](#google-workspace-google-accounts)
 -   [Okta](https://developer.okta.com/docs/api/resources/oidc.html)
@@ -427,7 +427,7 @@ To configure Sourcegraph to authenticate users via OpenID Connect:
 1. Provide the OpenID Connect client's issuer, client ID, and client secret in the Sourcegraph site configuration shown below.
 1. (Optional) Require users to have a specific email domain name to authenticate (e.g., to limit users to only those from your organization).
 
-Example [`openidconnect` auth provider](/admin/config/site-config#openid-connect-including-google-workspace) configuration:
+Example [`openidconnect` auth provider](/admin/auth#openid-connect) configuration:
 
 ```json
 {
@@ -449,7 +449,7 @@ Example [`openidconnect` auth provider](/admin/config/site-config#openid-connect
 
 Sourcegraph supports the OpenID Connect Discovery standard for configuring the auth provider (using the values provided in the document at, e.g., `https://oidc.example.com/.well-known/openid-configuration`).
 
-See the [`openid` auth provider documentation](/admin/config/site-config#openid-connect-including-google-workspace) for the full set of configuration options.
+See the [`openid` auth provider documentation](/admin/auth#openid-connect) for the full set of configuration options.
 
 ### How to control user sign-up with OpenID auth provider
 
@@ -478,7 +478,7 @@ Google's Workspace (formerly known as G Suite) supports OpenID Connect, which is
 1. Use the **client ID** and **client secret** values in Sourcegraph site configuration (as shown in the example below).
 1. Set your Google Workspace domain in `requireEmailDomain` to prevent users outside your organization from signing in.
 
-Example [`openidconnect` auth provider](/admin/config/site-config#openid-connect-including-google-workspace) configuration for Google Workspace:
+Example [`openidconnect` auth provider](/admin/auth#openid-connect) configuration for Google Workspace:
 
 ```json
 {
@@ -547,7 +547,7 @@ Consequently, you can only sign in via an auth provider if your email on Sourceg
 Let's say the email field in your Sourcegraph account was kept blank when a site admin created the account for you, but the username matches your username on GitHub or GitLab. Will this work? If you try to sign in to SG with GitHub or GitLab, it won't work, and you will see an error informing you that a verified email is missing.
 
 Exceptions to this rule are [HTTP Proxies](#http-authentication-proxies), where there's an option to make the link via username only.
-For [Bitbucket](/admin/config/authorization-and-authentication#bitbucket-server-bitbucket-data-center-authorization), we don't support OAuth. Still, the match between the chosen auth provider used with Bitbucket and a user's Bitbucket account happens via username.
+For [Bitbucket](/admin/config/authorization-and-authentication#bitbucket-server--bitbucket-data-center-authorization), we don't support OAuth. Still, the match between the chosen auth provider used with Bitbucket and a user's Bitbucket account happens via username.
 
 Using only a username to match a Sourcegraph account to an auth provider account is not recommended, as you can see [here](/admin/code-hosts/gitlab#username), for example.
 Usernames in Sourcegraph are mutable, so a malicious user could change a username, elevating their privileges.
@@ -556,7 +556,7 @@ Usernames in Sourcegraph are mutable, so a malicious user could change a usernam
 
 Sourcegraph will automatically link accounts from multiple external auth providers, resulting in a single user account on Sourcegraph. That way a user can login with multiple auth methods and end up being logged in with the same Sourcegraph account. In general, to link accounts, the following condition needs to be met:
 
-At the time of signing in with the new account, any of the email addresses configured on the user account on the auth provider must match any of the **verified** email addresses on the user account on the Sourcegraph side. If there is a match, the accounts are linked, [otherwise a new user account is created if auth provider is configured to support user sign ups](#how-to-control-user-sign-up).
+At the time of signing in with the new account, any of the email addresses configured on the user account on the auth provider must match any of the **verified** email addresses on the user account on the Sourcegraph side. If there is a match, the accounts are linked, [otherwise a new user account is created if auth provider is configured to support user sign ups](#how-to-control-user-sign-up-and-sign-in-with-github-auth-provider).
 
 ## Username normalization
 

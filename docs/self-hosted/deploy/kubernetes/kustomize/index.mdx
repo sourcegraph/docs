@@ -9,7 +9,7 @@ An introduction to Kustomize created for Sourcegraph.
 <QuickLinks>
 
     <QuickLink title="Installation" icon='lightbulb' href="/self-hosted/deploy/kubernetes/" />
-    <QuickLink title="Introduction" icon='theming' href="#" />
+    <QuickLink title="Introduction" icon='theming' href="/self-hosted/deploy/kubernetes/kustomize" />
     <QuickLink title="Configuration" icon='installation' href="/self-hosted/deploy/kubernetes/configure" />
     <QuickLink title="Maintenance" icon='presets' href="/self-hosted/deploy/kubernetes/operations" />
 
@@ -99,7 +99,7 @@ In this section, we will take a quick look at the essential part that make up a 
 
 ### Template
 
-An overlay is a directory that contains various files used to configure a deployment for a specific scenario. These files include the [kustomization.yaml file](#kustomization-yaml), which is used to specify how the resources defined in the base manifests should be customized and configured, as well as other files such as environment variable files, configuration files, and patches.
+An overlay is a directory that contains various files used to configure a deployment for a specific scenario. These files include the [kustomization.yaml file](#kustomizationyaml), which is used to specify how the resources defined in the base manifests should be customized and configured, as well as other files such as environment variable files, configuration files, and patches.
 
 File structure:
 
@@ -116,23 +116,23 @@ File structure:
       └── kustomization.template.yaml
 ```
 
-All custom overlays built for a specific instance should be stored in the [instances directory](https://github.com/sourcegraph/deploy-sourcegraph-k8s/tree/master/instances), where you can find the [instances/template folder](https://github.com/sourcegraph/deploy-sourcegraph-k8s/tree/master/instances/template). This folder contains a [kustomization.template.yaml file](#kustomization-yaml) that is preconfigured to construct an overlay for deploying Sourcegraph, and a [buildConfig.template.yaml](#buildconfig-yaml).
+All custom overlays built for a specific instance should be stored in the [instances directory](https://github.com/sourcegraph/deploy-sourcegraph-k8s/tree/master/instances), where you can find the [instances/template folder](https://github.com/sourcegraph/deploy-sourcegraph-k8s/tree/master/instances/template). This folder contains a [kustomization.template.yaml file](#kustomizationyaml) that is preconfigured to construct an overlay for deploying Sourcegraph, and a [buildConfig.template.yaml](#buildconfigyaml).
 
 ### kustomization.yaml
 
-The [kustomization.yaml file](#kustomization-yaml) is a fundamental element of a Kustomize overlay. It is situated in the root directory of the overlay and serves as a means of customizing and configuring the resources defined in the base manifests, as outlined in our [configuration documentation](/self-hosted/deploy/kubernetes/configure).
+The [kustomization.yaml file](#kustomizationyaml) is a fundamental element of a Kustomize overlay. It is situated in the root directory of the overlay and serves as a means of customizing and configuring the resources defined in the base manifests, as outlined in our [configuration documentation](/self-hosted/deploy/kubernetes/configure).
 
-To correctly configure your Sourcegraph deployment, it is crucial to create an overlay using the `kustomization.template.yaml` file provided. This [kustomization.yaml file](#kustomization-yaml) is specifically designed for Sourcegraph deployments, making the configuration process more manageable. The file includes various options and sections, allowing for the creation of a Sourcegraph instance that is tailored to the specific environment.
+To correctly configure your Sourcegraph deployment, it is crucial to create an overlay using the `kustomization.template.yaml` file provided. This [kustomization.yaml file](#kustomizationyaml) is specifically designed for Sourcegraph deployments, making the configuration process more manageable. The file includes various options and sections, allowing for the creation of a Sourcegraph instance that is tailored to the specific environment.
 
 #### components-list
 
-The order of components in the [kustomization.template.yaml file](#kustomization-yaml) is important and should be maintained. The components are listed in a specific order to ensure proper dependency management and compatibility between components. Reordering components can introduce conflicts or prevent components from interacting as expected. Only modify the component order if explicitly instructed to do so by the documentation. Otherwise, leave the component order as-is to avoid issues.
+The order of components in the [kustomization.template.yaml file](#kustomizationyaml) is important and should be maintained. The components are listed in a specific order to ensure proper dependency management and compatibility between components. Reordering components can introduce conflicts or prevent components from interacting as expected. Only modify the component order if explicitly instructed to do so by the documentation. Otherwise, leave the component order as-is to avoid issues.
 
 ### buildConfig.yaml
 
 Some Kustomize components may require additional configuration. These inputs typically specify environment/use-case-specific settings. For example, the name of your private registry to update images.
 Only update the values inside the `buildConfig.yaml` file if a component's documentation explicitly instructs you to do so. Not all components need extra configuration, and some have suitable defaults.
-Modifying `buildConfig.yaml` unnecessarily can cause errors or unintended behavior. Always check the [configuration docs](/self-hosted/deploy/kubernetes/configure) or comments in [kustomization.yaml](#kustomization-yaml) before changing this file.
+Modifying `buildConfig.yaml` unnecessarily can cause errors or unintended behavior. Always check the [configuration docs](/self-hosted/deploy/kubernetes/configure) or comments in [kustomization.yaml](#kustomizationyaml) before changing this file.
 
 ### patches directory
 
@@ -174,7 +174,7 @@ Follow the steps listed below to set up the configuration files for your instanc
 
 #### kustomization.yaml
 
-Rename the [kustomization.template.yaml](#kustomization-yaml) file in `instances/$INSTANCE_NAME` to `kustomization.yaml`:
+Rename the [kustomization.template.yaml](#kustomizationyaml) file in `instances/$INSTANCE_NAME` to `kustomization.yaml`:
 
 ```bash
   $ mv instances/template/kustomization.template.yaml instances/$INSTANCE_NAME/kustomization.yaml
@@ -182,17 +182,17 @@ Rename the [kustomization.template.yaml](#kustomization-yaml) file in `instances
 
 #### buildConfig.yaml
 
-Rename the [buildConfig.template.yaml](#buildconfig-yaml) file in `instances/$INSTANCE_NAME` to `buildConfig.yaml`:
+Rename the [buildConfig.template.yaml](#buildconfigyaml) file in `instances/$INSTANCE_NAME` to `buildConfig.yaml`:
 
 ```bash
   $ mv instances/template/buildConfig.template.yaml instances/$INSTANCE_NAME/buildConfig.yaml
 ```
 
-**Step 3**: You can begin customizing your Sourcegraph deployment by updating the [kustomization.yaml file](#kustomization-yaml) inside your overlay, following our [configuration guides](/self-hosted/deploy/kubernetes/configure) for guidance.
+**Step 3**: You can begin customizing your Sourcegraph deployment by updating the [kustomization.yaml file](#kustomizationyaml) inside your overlay, following our [configuration guides](/self-hosted/deploy/kubernetes/configure) for guidance.
 
 ## Components
 
-An overlay in Kustomize is a set of configuration files that are used to customize the base resources. To understand an overlay, it's important to examine its components, which are listed under the components field inside the [kustomization.yaml file](#kustomization-yaml) of the overlay.
+An overlay in Kustomize is a set of configuration files that are used to customize the base resources. To understand an overlay, it's important to examine its components, which are listed under the components field inside the [kustomization.yaml file](#kustomizationyaml) of the overlay.
 
 Most of our components are designed to be reusable for different environments and use cases. They can be used to add common labels and annotations, apply common configurations, or even generate resources. By using these components, you can minimize the amount of duplicated code in your overlays and make them more maintainable.
 
