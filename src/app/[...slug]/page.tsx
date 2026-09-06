@@ -11,10 +11,17 @@ import {Suspense} from 'react';
 
 export const maxDuration = 300;
 
+// Every page is enumerated by generateStaticParams. Reject unknown slugs at the
+// router so the site returns a real HTTP 404. Without this, notFound() runs
+// inside the root layout's <Suspense> after the response has started streaming,
+// and the not-found page is served with status 200.
+export const dynamicParams = false;
+
 export const generateStaticParams = async () => {
-	return allPosts.map(post => ({
-		params: {slug: post._raw.flattenedPath.split('/')}
-	}));
+	return allPosts
+		// The root document is served by app/page.tsx, not this catch-all route.
+		.filter(post => post._raw.flattenedPath !== '')
+		.map(post => ({slug: post._raw.flattenedPath.split('/')}));
 };
 
 export const generateMetadata = ({params}: Props) => {
