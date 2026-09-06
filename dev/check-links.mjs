@@ -54,10 +54,12 @@ const MARKDOWN_LINK_REGEX = /\[([^\]]*)\]\(([^)]+)\)/g;
 const JSX_HREF_REGEX = /href=["']([^"']+)["']/g;
 const SRC_ATTR_REGEX = /src=["']([^"']+)["']/g;
 
-// Extract headings from MDX content to build anchor map
+// Extract anchor targets from MDX content: heading slugs, plus explicit
+// <a name="..."> and id="..." attributes
 function extractHeadings(content) {
 	const slugger = new GithubSlugger();
 	const headingRegex = /^#{1,6}\s+(.+)$/gm;
+	const explicitAnchorRegex = /<[a-zA-Z][^>]*\s(?:id|name)=["']([^"']+)["']/g;
 	const headings = new Set();
 	
 	// Remove code blocks to avoid false positives
@@ -71,6 +73,10 @@ function extractHeadings(content) {
 		headings.add(slugger.slug(title.trim()));
 	}
 	
+	while ((match = explicitAnchorRegex.exec(contentWithoutCode)) !== null) {
+		headings.add(match[1]);
+	}
+
 	return headings;
 }
 
