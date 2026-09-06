@@ -54,6 +54,36 @@ const MARKDOWN_LINK_REGEX = /\[([^\]]*)\]\(([^)]+)\)/g;
 const JSX_HREF_REGEX = /href=["']([^"']+)["']/g;
 const SRC_ATTR_REGEX = /src=["']([^"']+)["']/g;
 
+// A fence opener/closer is a run of 3+ backticks or tildes at the start of a line.
+const FENCE_LINE_REGEX = /^\s*(`{3,}|~{3,})/;
+
+// Blank out fenced code blocks, keeping line numbers intact, so `# comment`
+// lines and example links inside them are ignored. Walks line by line: a naive
+// /```[\s\S]*?```/ regex also matches inline backtick runs in prose (e.g.
+// `"true```), which flips every later fence pairing.
+function stripFencedCodeBlocks(content) {
+	let openFence;
+	return content.split('\n').map(line => {
+		const fence = line.match(FENCE_LINE_REGEX)?.[1];
+		if (openFence) {
+			const closesOpenFence =
+				fence !== undefined &&
+				fence[0] === openFence[0] &&
+				fence.length >= openFence.length &&
+				line.trim() === fence;
+			if (closesOpenFence) {
+				openFence = undefined;
+			}
+			return '';
+		}
+		if (fence) {
+			openFence = fence;
+			return '';
+		}
+		return line;
+	}).join('\n');
+}
+
 // Extract anchor targets from MDX content: heading slugs, plus explicit
 // <a name="..."> and id="..." attributes
 function extractHeadings(content) {
@@ -62,8 +92,7 @@ function extractHeadings(content) {
 	const explicitAnchorRegex = /<[a-zA-Z][^>]*\s(?:id|name)=["']([^"']+)["']/g;
 	const headings = new Set();
 	
-	// Remove code blocks to avoid false positives
-	const contentWithoutCode = content.replace(/```[\s\S]*?```/g, '');
+	const contentWithoutCode = stripFencedCodeBlocks(content);
 	
 	let match;
 	while ((match = headingRegex.exec(contentWithoutCode)) !== null) {
@@ -87,30 +116,33 @@ function routeFor(file) {
 
 // Get all MDX files and build a map of valid paths
 async function buildPathMap() {
-	const files = await glob(ROUTE_GLOB, { cwd: DOCS_DIR });
+	// Sorted so foo.mdx precedes foo/index.mdx; when both exist the site serves
+	// the first match (allPosts.find), so the first file owns the route here too.
+	const files = (await glob(ROUTE_GLOB, { cwd: DOCS_DIR })).sort();
 	const pathMap = new Map();
 	// Lowercased route -> real route, to detect case mismatches
 	const routesByLowerCase = new Map();
 	const headingsMap = new Map();
+	// Absolute file path -> headings, for same-page #anchor links
+	const headingsByFile = new Map();
 	
 	for (const file of files) {
 		const fullPath = path.join(DOCS_DIR, file);
-		const content = fs.readFileSync(fullPath, 'utf-8');
+		const headings = extractHeadings(fs.readFileSync(fullPath, 'utf-8'));
+		headingsByFile.set(fullPath, headings);
 		
 		const routePath = routeFor(file);
+		if (pathMap.has(routePath)) continue;
 		
 		// Also allow trailing slash variant
 		pathMap.set(routePath, fullPath);
 		pathMap.set(routePath + '/', fullPath);
 		routesByLowerCase.set(routePath.toLowerCase(), routePath);
-		
-		// Extract headings for anchor validation
-		const headings = extractHeadings(content);
 		headingsMap.set(routePath, headings);
 		headingsMap.set(routePath + '/', headings);
 	}
 	
-	return { pathMap, routesByLowerCase, headingsMap, assetsByLowerCase: await buildAssetMap() };
+	return { pathMap, routesByLowerCase, headingsMap, headingsByFile, assetsByLowerCase: await buildAssetMap() };
 }
 
 // Lowercased link path -> real link path, for files under public/ and docs/
@@ -132,11 +164,7 @@ async function buildAssetMap() {
 function extractLinks(content, filePath) {
 	const links = [];
 	
-	// Remove code blocks to avoid checking links in code examples
-	const contentWithoutCode = content.replace(/```[\s\S]*?```/g, (match) => {
-		// Replace with same number of newlines to preserve line numbers
-		return match.replace(/[^\n]/g, ' ');
-	});
+	const contentWithoutCode = stripFencedCodeBlocks(content);
 	
 	// Extract markdown links [text](url)
 	let match;
@@ -166,7 +194,7 @@ function extractLinks(content, filePath) {
 }
 
 // Check if a link is valid
-function validateLink(link, currentFile, { pathMap, routesByLowerCase, headingsMap, assetsByLowerCase }) {
+function validateLink(link, currentFile, { pathMap, routesByLowerCase, headingsMap, headingsByFile, assetsByLowerCase }) {
 	const { url } = link;
 	
 	// Skip external links, mailto, tel, javascript, etc.
@@ -193,7 +221,7 @@ function validateLink(link, currentFile, { pathMap, routesByLowerCase, headingsM
 			return null;
 		}
 		const anchor = url.substring(1);
-		const headings = headingsMap.get(routeFor(path.relative(DOCS_DIR, currentFile)));
+		const headings = headingsByFile.get(currentFile);
 		
 		if (headings && !headings.has(anchor)) {
 			return `Anchor "${anchor}" not found in current file`;
