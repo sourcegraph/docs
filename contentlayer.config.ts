@@ -9,6 +9,35 @@ import {searchMetadata} from './src/data/search';
 import GithubSlugger from 'github-slugger';
 import {visit} from 'unist-util-visit';
 
+// A fence opener/closer is a run of 3+ backticks or tildes at the start of a line.
+const regXFenceLine = /^\s*(`{3,}|~{3,})/;
+
+// Remove fenced code blocks so `# comment` lines inside them are not mistaken for
+// headings. Walks line by line: a naive /```[\s\S]*?```/ regex also matches inline
+// backtick runs in prose (e.g. `"true```), which flips every later fence pairing.
+function stripFencedCodeBlocks(markdown: string): string {
+	const keptLines: string[] = [];
+	let openFence: string | undefined;
+	for (const line of markdown.split('\n')) {
+		const fence = line.match(regXFenceLine)?.[1];
+		if (openFence) {
+			const closesOpenFence =
+				fence !== undefined &&
+				fence[0] === openFence[0] &&
+				fence.length >= openFence.length &&
+				line.trim() === fence;
+			if (closesOpenFence) {
+				openFence = undefined;
+			}
+		} else if (fence) {
+			openFence = fence;
+		} else {
+			keptLines.push(line);
+		}
+	}
+	return keptLines.join('\n');
+}
+
 export const Post = defineDocumentType(() => ({
 	name: 'Post',
 	filePathPattern: `**/*.mdx`,
@@ -28,17 +57,10 @@ export const Post = defineDocumentType(() => ({
 			type: 'json',
 			resolve: async doc => {
 				const regXHeader = /^ *(?<flag>#{1,6})\s+(?<content>.+)/gm;
-				const regXCodeBlock = /```[\s\S]*?```/g;
 				const slugger = new GithubSlugger();
 
-				// Ignore content within code blocks – No headings there
-				const bodyWithoutCodeBlocks = doc.body.raw.replace(
-					regXCodeBlock,
-					''
-				);
-
 				const headings = Array.from(
-					bodyWithoutCodeBlocks.matchAll(regXHeader)
+					stripFencedCodeBlocks(doc.body.raw).matchAll(regXHeader)
 				).map(({groups}) => {
 					const flag = groups?.flag;
 					// Handles headings with links eg:
