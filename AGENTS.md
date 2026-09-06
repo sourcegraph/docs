@@ -6,6 +6,7 @@
 -   **Build**: `npm run build`
 -   **Dev**: `npm run dev`
 -   **Lint**: `npm run lint`
+-   **Check links**: `npm run check-links -- --check-anchors` (CI comments on PRs that break links; see `dev/check-links.mjs`)
 
 ## AI Chat Integration
 
