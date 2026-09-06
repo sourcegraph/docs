@@ -80,6 +80,11 @@ function extractHeadings(content) {
 	return headings;
 }
 
+// Site route for a file under docs/: foo/bar.mdx -> /foo/bar, foo/index.mdx -> /foo, index.mdx -> /
+function routeFor(file) {
+	return '/' + file.replace(/\.mdx$/, '').replace(/(^|\/)index$/, '');
+}
+
 // Get all MDX files and build a map of valid paths
 async function buildPathMap() {
 	const files = await glob(ROUTE_GLOB, { cwd: DOCS_DIR });
@@ -92,20 +97,12 @@ async function buildPathMap() {
 		const fullPath = path.join(DOCS_DIR, file);
 		const content = fs.readFileSync(fullPath, 'utf-8');
 		
-		// Route path (without .mdx extension)
-		const routePath = '/' + file.replace(/\.mdx$/, '').replace(/\/index$/, '');
+		const routePath = routeFor(file);
 		
 		// Also allow trailing slash variant
 		pathMap.set(routePath, fullPath);
 		pathMap.set(routePath + '/', fullPath);
 		routesByLowerCase.set(routePath.toLowerCase(), routePath);
-		
-		// Handle index files
-		if (file.endsWith('index.mdx')) {
-			const dirPath = '/' + file.replace(/\/index\.mdx$/, '');
-			pathMap.set(dirPath, fullPath);
-			pathMap.set(dirPath + '/', fullPath);
-		}
 		
 		// Extract headings for anchor validation
 		const headings = extractHeadings(content);
@@ -113,19 +110,22 @@ async function buildPathMap() {
 		headingsMap.set(routePath + '/', headings);
 	}
 	
-	return { pathMap, routesByLowerCase, headingsMap };
+	return { pathMap, routesByLowerCase, headingsMap, assetsByLowerCase: await buildAssetMap() };
 }
 
-// Check if a path exists in public directory
-function checkPublicPath(linkPath) {
-	const publicPath = path.join(ROOT_DIR, 'public', linkPath);
-	return fs.existsSync(publicPath);
-}
-
-// Check if a path exists in docs directory (for images in docs/)
-function checkDocsPath(linkPath) {
-	const docsPath = path.join(DOCS_DIR, linkPath);
-	return fs.existsSync(docsPath);
+// Lowercased link path -> real link path, for files under public/ and docs/
+// (images, PDFs, ...). An enumerated map rather than fs.existsSync, which is
+// case-insensitive on macOS and would hide links that 404 on Linux.
+async function buildAssetMap() {
+	const assetsByLowerCase = new Map();
+	for (const dir of ['public', 'docs']) {
+		const files = await glob('**/*', { cwd: path.join(ROOT_DIR, dir), nodir: true });
+		for (const file of files) {
+			const linkPath = '/' + file;
+			assetsByLowerCase.set(linkPath.toLowerCase(), linkPath);
+		}
+	}
+	return assetsByLowerCase;
 }
 
 // Parse and validate links in a single file
@@ -166,7 +166,7 @@ function extractLinks(content, filePath) {
 }
 
 // Check if a link is valid
-function validateLink(link, currentFile, { pathMap, routesByLowerCase, headingsMap }) {
+function validateLink(link, currentFile, { pathMap, routesByLowerCase, headingsMap, assetsByLowerCase }) {
 	const { url } = link;
 	
 	// Skip external links, mailto, tel, javascript, etc.
@@ -193,10 +193,7 @@ function validateLink(link, currentFile, { pathMap, routesByLowerCase, headingsM
 			return null;
 		}
 		const anchor = url.substring(1);
-		const currentRoute = '/' + path.relative(DOCS_DIR, currentFile)
-			.replace(/\.mdx$/, '')
-			.replace(/\/index$/, '');
-		const headings = headingsMap.get(currentRoute);
+		const headings = headingsMap.get(routeFor(path.relative(DOCS_DIR, currentFile)));
 		
 		if (headings && !headings.has(anchor)) {
 			return `Anchor "${anchor}" not found in current file`;
@@ -240,25 +237,22 @@ function validateLink(link, currentFile, { pathMap, routesByLowerCase, headingsM
 		return null;
 	}
 	
-	// Same route with different case: resolves on macOS, 404s on the Linux build
-	const realRoute = routesByLowerCase.get(
+	// Check if it's an asset under public/ or docs/
+	const realAsset = assetsByLowerCase.get(resolvedPath.toLowerCase());
+	if (realAsset === resolvedPath) {
+		return null;
+	}
+	
+	// Same route or asset with different case: resolves on macOS, 404s on the Linux build
+	const realPath = realAsset ?? routesByLowerCase.get(
 		resolvedPath.replace(/\/$/, '').toLowerCase()
 	);
-	if (realRoute) {
-		return `Case mismatch: "${resolvedPath}" should be "${realRoute}"`;
-	}
-
-	// Check if it's a public asset
-	if (checkPublicPath(resolvedPath)) {
-		return null;
+	if (realPath) {
+		return `Case mismatch: "${resolvedPath}" should be "${realPath}"`;
 	}
 	
 	// Check if it's a file with extension (like .png, .pdf)
 	if (path.extname(resolvedPath)) {
-		// Could be an asset - check public folder or docs folder
-		if (checkPublicPath(resolvedPath) || checkDocsPath(resolvedPath)) {
-			return null;
-		}
 		return `File not found: "${resolvedPath}"`;
 	}
 	
