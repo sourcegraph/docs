@@ -8,10 +8,18 @@
  * 
  * Checks for:
  * - Broken internal links (markdown and JSX/HTML style)
+ * - Links whose case differs from the real path (work on macOS, 404 on Linux)
  * - Missing anchor/heading references
  * - Invalid file paths
  * 
- * Usage: node dev/check-links.mjs [--check-anchors]
+ * Usage: node dev/check-links.mjs [options]
+ *   --check-anchors        Also validate #anchors against headings
+ *   --root <dir>           Repository to check (default: this repository)
+ *   --format <name>        Output as text (default), json, or markdown
+ *   --baseline <file>      Only report findings absent from this JSON file
+ *                          (produced by --format json on another revision)
+ *
+ * Exits 1 when any finding is reported.
  */
 
 import fs from 'fs';
@@ -23,11 +31,23 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const DOCS_DIR = path.join(path.dirname(__dirname), 'docs');
-
 // Parse CLI flags
 const args = process.argv.slice(2);
 const CHECK_ANCHORS = args.includes('--check-anchors');
+const ROOT_DIR = path.resolve(flagValue('--root') ?? path.dirname(__dirname));
+const FORMAT = flagValue('--format') ?? 'text';
+const BASELINE_FILE = flagValue('--baseline');
+
+const DOCS_DIR = path.join(ROOT_DIR, 'docs');
+// Files whose links are checked. Only .mdx files become site routes; see
+// `filePathPattern` in contentlayer.config.ts.
+const SOURCE_GLOB = '**/*.{md,mdx}';
+const ROUTE_GLOB = '**/*.mdx';
+
+function flagValue(name) {
+	const index = args.indexOf(name);
+	return index === -1 ? undefined : args[index + 1];
+}
 
 // Regex patterns for extracting links
 const MARKDOWN_LINK_REGEX = /\[([^\]]*)\]\(([^)]+)\)/g;
@@ -56,8 +76,10 @@ function extractHeadings(content) {
 
 // Get all MDX files and build a map of valid paths
 async function buildPathMap() {
-	const files = await glob('**/*.mdx', { cwd: DOCS_DIR });
+	const files = await glob(ROUTE_GLOB, { cwd: DOCS_DIR });
 	const pathMap = new Map();
+	// Lowercased route -> real route, to detect case mismatches
+	const routesByLowerCase = new Map();
 	const headingsMap = new Map();
 	
 	for (const file of files) {
@@ -70,6 +92,7 @@ async function buildPathMap() {
 		// Also allow trailing slash variant
 		pathMap.set(routePath, fullPath);
 		pathMap.set(routePath + '/', fullPath);
+		routesByLowerCase.set(routePath.toLowerCase(), routePath);
 		
 		// Handle index files
 		if (file.endsWith('index.mdx')) {
@@ -84,12 +107,12 @@ async function buildPathMap() {
 		headingsMap.set(routePath + '/', headings);
 	}
 	
-	return { pathMap, headingsMap };
+	return { pathMap, routesByLowerCase, headingsMap };
 }
 
 // Check if a path exists in public directory
 function checkPublicPath(linkPath) {
-	const publicPath = path.join(path.dirname(__dirname), 'public', linkPath);
+	const publicPath = path.join(ROOT_DIR, 'public', linkPath);
 	return fs.existsSync(publicPath);
 }
 
@@ -137,7 +160,7 @@ function extractLinks(content, filePath) {
 }
 
 // Check if a link is valid
-function validateLink(link, currentFile, pathMap, headingsMap) {
+function validateLink(link, currentFile, { pathMap, routesByLowerCase, headingsMap }) {
 	const { url } = link;
 	
 	// Skip external links, mailto, tel, javascript, etc.
@@ -211,6 +234,14 @@ function validateLink(link, currentFile, pathMap, headingsMap) {
 		return null;
 	}
 	
+	// Same route with different case: resolves on macOS, 404s on the Linux build
+	const realRoute = routesByLowerCase.get(
+		resolvedPath.replace(/\/$/, '').toLowerCase()
+	);
+	if (realRoute) {
+		return `Case mismatch: "${resolvedPath}" should be "${realRoute}"`;
+	}
+
 	// Check if it's a public asset
 	if (checkPublicPath(resolvedPath)) {
 		return null;
@@ -228,60 +259,125 @@ function validateLink(link, currentFile, pathMap, headingsMap) {
 	return `Page not found: "${resolvedPath}"`;
 }
 
-async function main() {
-	console.log('🔍 Checking for dead links in MDX files...\n');
+// Find every broken link: [{ file, line, url, error }]
+async function findBrokenLinks() {
+	const maps = await buildPathMap();
+	const files = await glob(SOURCE_GLOB, { cwd: DOCS_DIR });
+	const findings = [];
 	
-	const { pathMap, headingsMap } = await buildPathMap();
-	const files = await glob('**/*.mdx', { cwd: DOCS_DIR });
-	
-	let totalErrors = 0;
-	const errors = [];
-	
-	for (const file of files) {
+	for (const file of files.sort()) {
 		const fullPath = path.join(DOCS_DIR, file);
 		const content = fs.readFileSync(fullPath, 'utf-8');
-		const links = extractLinks(content, fullPath);
 		
-		const fileErrors = [];
-		
-		for (const link of links) {
-			const error = validateLink(link, fullPath, pathMap, headingsMap);
+		for (const link of extractLinks(content, fullPath)) {
+			const error = validateLink(link, fullPath, maps);
 			if (error) {
-				fileErrors.push({
+				findings.push({
+					file: `docs/${file}`,
 					line: link.lineNumber,
 					url: link.url,
 					error
 				});
 			}
 		}
-		
-		if (fileErrors.length > 0) {
-			errors.push({
-				file: `docs/${file}`,
-				errors: fileErrors
-			});
-			totalErrors += fileErrors.length;
+	}
+	
+	return findings;
+}
+
+// Identity of a finding across revisions: line numbers shift, so ignore them
+function findingKey({ file, url, error }) {
+	return `${file}\n${url}\n${error}`;
+}
+
+function withoutBaseline(findings, baselineFile) {
+	const baseline = new Set(
+		JSON.parse(fs.readFileSync(baselineFile, 'utf-8')).map(findingKey)
+	);
+	return findings.filter(finding => !baseline.has(findingKey(finding)));
+}
+
+function groupByFile(findings) {
+	const byFile = new Map();
+	for (const finding of findings) {
+		if (!byFile.has(finding.file)) {
+			byFile.set(finding.file, []);
+		}
+		byFile.get(finding.file).push(finding);
+	}
+	return byFile;
+}
+
+function formatText(findings) {
+	const scope = BASELINE_FILE ? 'new ' : '';
+	if (findings.length === 0) {
+		return `✅ No ${scope}dead links found!\n`;
+	}
+	
+	const byFile = groupByFile(findings);
+	const lines = [
+		`❌ Found ${findings.length} ${scope}dead link(s) in ${byFile.size} file(s):\n`
+	];
+	for (const [file, fileFindings] of byFile) {
+		lines.push(`\n📄 ${file}`);
+		for (const { line, url, error } of fileFindings) {
+			lines.push(`   Line ${line}: ${url}`);
+			lines.push(`   └─ ${error}`);
 		}
 	}
-	
-	// Output results
-	if (errors.length === 0) {
-		console.log('✅ No dead links found!');
-		process.exit(0);
+	return lines.join('\n') + '\n';
+}
+
+// Body for a pull request comment
+function formatMarkdown(findings) {
+	if (findings.length === 0) {
+		return '### ✅ This PR introduces no broken links\n';
 	}
 	
-	console.log(`❌ Found ${totalErrors} dead link(s) in ${errors.length} file(s):\n`);
-	
-	for (const { file, errors: fileErrors } of errors) {
-		console.log(`\n📄 ${file}`);
-		for (const { line, url, error } of fileErrors) {
-			console.log(`   Line ${line}: ${url}`);
-			console.log(`   └─ ${error}`);
+	const lines = [
+		`### ❌ This PR introduces ${findings.length} broken link(s)`,
+		'',
+		'Findings in files this PR did not change mean the PR removed or ' +
+			'renamed a page or heading that those files link to.',
+		''
+	];
+	for (const [file, fileFindings] of groupByFile(findings)) {
+		lines.push(`**\`${file}\`**`);
+		for (const { line, url, error } of fileFindings) {
+			lines.push(`- line ${line}: \`${url}\` — ${error}`);
 		}
+		lines.push('');
+	}
+	lines.push(
+		'Reproduce locally with `pnpm check-links --check-anchors` ' +
+			'(see `dev/check-links.mjs`).'
+	);
+	return lines.join('\n') + '\n';
+}
+
+const FORMATTERS = {
+	text: formatText,
+	json: findings => JSON.stringify(findings, null, '\t') + '\n',
+	markdown: formatMarkdown
+};
+
+async function main() {
+	const format = FORMATTERS[FORMAT];
+	if (!format) {
+		throw new Error(`Unknown --format "${FORMAT}"; use text, json, or markdown`);
 	}
 	
-	console.log('\n');
-	process.exit(1);
+	if (FORMAT === 'text') {
+		console.log('🔍 Checking for dead links in MDX files...\n');
+	}
+
+	let findings = await findBrokenLinks();
+	if (BASELINE_FILE) {
+		findings = withoutBaseline(findings, BASELINE_FILE);
+	}
+
+	process.stdout.write(format(findings));
+	process.exit(findings.length === 0 ? 0 : 1);
 }
 
 main().catch(err => {

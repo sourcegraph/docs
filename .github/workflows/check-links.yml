@@ -1,0 +1,88 @@
+name: Check links
+
+# Reports internal links and #anchors that this PR breaks, compared with the
+# merge base. Pre-existing broken links on the base branch are ignored.
+
+on:
+    pull_request:
+
+permissions:
+    contents: read
+    pull-requests: write
+
+jobs:
+    check-links:
+        name: Broken links introduced by this PR
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out pull request head
+              uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.event.pull_request.head.sha }}
+                  fetch-depth: 0
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10.25.0
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20.19.6
+                  cache: pnpm
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Check out merge base
+              env:
+                  BASE_SHA: ${{ github.event.pull_request.base.sha }}
+              run: git worktree add "$RUNNER_TEMP/base" "$(git merge-base "$BASE_SHA" HEAD)"
+
+            - name: Record broken links already present on the base branch
+              # Exit 1 means findings, which is expected here
+              run: |
+                  node dev/check-links.mjs --check-anchors --format json \
+                      --root "$RUNNER_TEMP/base" > "$RUNNER_TEMP/base-links.json" \
+                      || [ $? -eq 1 ]
+
+            - name: Find broken links introduced by this PR
+              id: check
+              run: |
+                  if node dev/check-links.mjs --check-anchors --format markdown \
+                      --baseline "$RUNNER_TEMP/base-links.json" > "$RUNNER_TEMP/report.md"; then
+                      echo "broken=false" >> "$GITHUB_OUTPUT"
+                  else
+                      echo "broken=true" >> "$GITHUB_OUTPUT"
+                  fi
+                  cat "$RUNNER_TEMP/report.md"
+
+            - name: Comment on the pull request
+              # Fork PRs get a read-only token; the report is still in the job log
+              if: github.event.pull_request.head.repo.full_name == github.repository
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
+                  BROKEN: ${{ steps.check.outputs.broken }}
+              run: |
+                  marker='<!-- check-links-report -->'
+                  existing_comment=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
+                      --paginate --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n 1)
+
+                  # Only comment when there is something to report, or a stale report to resolve
+                  if [ -z "$existing_comment" ] && [ "$BROKEN" != true ]; then
+                      exit 0
+                  fi
+
+                  { echo "$marker"; cat "$RUNNER_TEMP/report.md"; } > "$RUNNER_TEMP/comment.md"
+                  if [ -n "$existing_comment" ]; then
+                      gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$existing_comment" \
+                          --field body=@"$RUNNER_TEMP/comment.md"
+                  else
+                      gh pr comment "$PR_NUMBER" --body-file "$RUNNER_TEMP/comment.md"
+                  fi
+
+            - name: Fail when this PR introduces broken links
+              if: steps.check.outputs.broken == 'true'
+              run: exit 1
