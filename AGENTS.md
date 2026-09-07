@@ -7,6 +7,7 @@
 -   **Dev**: `npm run dev`
 -   **Lint**: `npm run lint`
 -   **Check links**: `npm run check-links -- --check-anchors` (CI comments on PRs that break links; see `dev/check-links.mjs`)
+-   **Prove changed links resolve on a deploy**: `node dev/verify-links-live.mjs --site <vercel-preview-url>` prints a Markdown table for the PR description
 
 ## AI Chat Integration
 
