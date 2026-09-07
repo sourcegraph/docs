@@ -16,11 +16,11 @@ To enable Perforce code host connections, a site admin must:
 
 1. Configure which depots are mirrored/synchronized as Git repositories to Sourcegraph:
 
-    - [`depots`](/admin/repo/perforce#depots)
+    - [`depots`](/admin/repo/perforce#configuration)
 
         A list of depot paths that can be either a depot root or an arbitrary subdirectory. **Note**: Only `"local"` type depots are supported.
 
-    - [`p4.user`](/admin/repo/perforce#p4-user)
+    - [`p4.user`](/admin/repo/perforce#configuration)
 
         The user to be authenticated for `p4` CLI, and should be capable of performing:
 
@@ -35,7 +35,7 @@ To enable Perforce code host connections, a site admin must:
         - `p4 group`
         - `p4 users`
 
-    - [`p4.passwd`](/admin/repo/perforce#p4-passwd)
+    - [`p4.passwd`](/admin/repo/perforce#configuration)
 
         The ticket to be used for authenticating the `p4.user`. It is recommended to create tickets of users in a group that never expire. Use the command `p4 -u <p4.user> login -p -a` to obtain a ticket value.
 
@@ -62,7 +62,7 @@ It's worthwhile to note some limitations of this process:
 
 -   When syncing depots [p4-fusion](https://github.com/salesforce/p4-fusion) is used to convert Perforce depots into git repositories so that Sourcegraph can index them.
 -   Rename of a Perforce depot, including changing the depot on the Perforce server or the `repositoryPathPattern` config option, will cause a re-import of the depot.
--   Unless [permissions syncing](#repository-permissions) is enabled, Sourcegraph is not aware of the depot permissions, so it can't enforce access restrictions.
+-   Unless [permissions syncing](#repository-permissions-beta) is enabled, Sourcegraph is not aware of the depot permissions, so it can't enforce access restrictions.
 
 ## Perforce labels
 
@@ -77,7 +77,7 @@ This behaviour can be disabled by setting `noConvertLabels` to `true` in the fus
 
 ## Repository permissions (Beta)
 
-To enforce file-level permissions for Perforce depots using the [Perforce protects file](https://www.perforce.com/manuals/cmdref/Content/CmdRef/p4_protect.html), include the `authorization` field in the configuration of the Perforce code host connection you created [above](#add-a-perforce-code-host):
+To enforce file-level permissions for Perforce depots using the [Perforce protects file](https://www.perforce.com/manuals/cmdref/Content/CmdRef/p4_protect.html), include the `authorization` field in the configuration of the Perforce code host connection you created [above](#add-a-perforce-code-host-connection):
 
 ```json
 {
