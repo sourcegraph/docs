@@ -26,7 +26,7 @@ import fs from 'fs';
 import path from 'path';
 import { glob } from 'glob';
 import GithubSlugger from 'github-slugger';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -86,7 +86,7 @@ function stripFencedCodeBlocks(content) {
 
 // Extract anchor targets from MDX content: heading slugs, plus explicit
 // <a name="..."> and id="..." attributes
-function extractHeadings(content) {
+export function extractHeadings(content) {
 	const slugger = new GithubSlugger();
 	const headingRegex = /^#{1,6}\s+(.+)$/gm;
 	const explicitAnchorRegex = /<[a-zA-Z][^>]*\s(?:id|name)=["']([^"']+)["']/g;
@@ -408,7 +408,10 @@ async function main() {
 	process.exit(findings.length === 0 ? 0 : 1);
 }
 
-main().catch(err => {
-	console.error('Error running link checker:', err);
-	process.exit(1);
-});
+// Only run when executed directly; dev/verify-links-live.mjs imports extractHeadings.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+	main().catch(err => {
+		console.error('Error running link checker:', err);
+		process.exit(1);
+	});
+}
