@@ -121,7 +121,7 @@ To match a branch other than the default, `branch` or `branches` can be used to 
 
 <Callout type="warning">
 	If multiple branches are matched for the same repository, then
-	[`changesetTemplate.branch`](#changesettemplate-branch) will need to have a
+	[`changesetTemplate.branch`](#changesettemplatebranch) will need to have a
 	different value for each branch.
 </Callout>
 
@@ -299,7 +299,7 @@ steps:
 
 ## `steps.outputs`
 
-Output variables that are set after the [`steps.run`](#steps-run) command has been executed. These variables are available in the global `outputs` namespace as `outputs.<name>` [template variables](/batch-changes/batch-spec-templating) in the `run`, `env`, and `outputs` properties of subsequent steps, and the [`changesetTemplate`](#changesettemplate). Two steps with the same output variable name will overwrite the previous contents.
+Output variables that are set after the [`steps.run`](#stepsrun) command has been executed. These variables are available in the global `outputs` namespace as `outputs.<name>` [template variables](/batch-changes/batch-spec-templating) in the `run`, `env`, and `outputs` properties of subsequent steps, and the [`changesetTemplate`](#changesettemplate). Two steps with the same output variable name will overwrite the previous contents.
 
 ### Examples
 
@@ -596,7 +596,7 @@ The body (description) of the changeset on the code host. If the code supports M
 
 The name of the Git branch to create or update each repository with the changes.
 
-If multiple branches within the same repository are matched in [`on.repository`](#on-repository), then this value must be dynamic since creating multiple branches with the same name in the same repository is impossible. This is often most easily accomplished with the `repository.branch` template variable. For example, this will create `new-feature-3.34` and `new-feature-3.35` branches:
+If multiple branches within the same repository are matched in [`on.repository`](#onrepository), then this value must be dynamic since creating multiple branches with the same name in the same repository is impossible. This is often most easily accomplished with the `repository.branch` template variable. For example, this will create `new-feature-3.34` and `new-feature-3.35` branches:
 
 ```yaml
 on:
@@ -852,11 +852,11 @@ The name of the directory in which file diffs should be grouped together. The na
 
 ## `transformChanges.group.branch`
 
-The branch that should be used for this additional changeset. This **overwrites the [`changesetTemplate.branch`](#changesettemplate-branch)** when creating the additional changeset.
+The branch that should be used for this additional changeset. This **overwrites the [`changesetTemplate.branch`](#changesettemplatebranch)** when creating the additional changeset.
 
 <Callout type="info">
 	The branch cannot be nested under the
-	[`changesetTemplate.branch`](#changesettemplate-branch), i.e. if the
+	[`changesetTemplate.branch`](#changesettemplatebranch), i.e. if the
 	`changesetTemplate.branch` is `my-batch-change` then this can _not_ be
 	`my-batch-change/my-subdirectory` since [git doesn't allow
 	that](https://stackoverflow.com/a/22630664). Additionally, branch names must
@@ -865,9 +865,9 @@ The branch that should be used for this additional changeset. This **overwrites 
 
 ## `transformChanges.group.title`
 
-(Optional) The title that should be used for this additional changeset. This **overwrites the [`changesetTemplate.title`](#changesettemplate-title)** when creating the additional changeset.
+(Optional) The title that should be used for this additional changeset. This **overwrites the [`changesetTemplate.title`](#changesettemplatetitle)** when creating the additional changeset.
 
-The title supports the same template variables as [`changesetTemplate.title`](#changesettemplate-title). When rendering the group title, `${{ steps.path }}` is set to this group's [`directory`](#transformchangesgroupdirectory).
+The title supports the same template variables as [`changesetTemplate.title`](#changesettemplatetitle). When rendering the group title, `${{ steps.path }}` is set to this group's [`directory`](#transformchangesgroupdirectory).
 
 ## `transformChanges.group.repository`
 
@@ -877,12 +877,12 @@ The title supports the same template variables as [`changesetTemplate.title`](#c
 
 The optional `workspaces` property allows users to define where projects are located in repositories and cause the [`steps`](#steps) to be executed for each project instead of once per repository. That allows easier creation of multiple changesets in large repositories.
 
-For each repository yielded by [`on`](#on), a Sourcegraph search is used to get the locations of the `rootAtLocationOf` file. Each location serves as a workspace for executing the `steps` instead of the repository's root. Use the [`workspaces.in`](#workspaces-in) property to scope the definitions of workspaces. Omitting it is treated as `*`.
+For each repository yielded by [`on`](#on), a Sourcegraph search is used to get the locations of the `rootAtLocationOf` file. Each location serves as a workspace for executing the `steps` instead of the repository's root. Use the [`workspaces.in`](#workspacesin) property to scope the definitions of workspaces. Omitting it is treated as `*`.
 
 <Callout type="info">
 	Since multiple workspaces in the same repository can produce multiple
 	changesets, it's **required** to use templating to produce a unique
-	[`changesetTemplate.branch`](#changesettemplate-branch) for each produced
+	[`changesetTemplate.branch`](#changesettemplatebranch) for each produced
 	changeset. See the [examples](#workspaces-examples) below.
 </Callout>
 
@@ -947,7 +947,7 @@ changesetTemplate:
     branch: ${{ join_if "-" "my-multi-workspace-batch-change" (replace steps.path "/" "-") }}
 ```
 
-Using [`steps.outputs`](#steps-outputs) to dynamically create unique branch names:
+Using [`steps.outputs`](#stepsoutputs) to dynamically create unique branch names:
 
 ```yaml
 # [...]
