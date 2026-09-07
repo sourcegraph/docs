@@ -96,9 +96,9 @@ export function extractHeadings(content) {
 	
 	let match;
 	while ((match = headingRegex.exec(contentWithoutCode)) !== null) {
-		// Handle headings with links: [Text](/path) -> Text
-		const linkMatch = match[1].match(/\[([^\]]+)\]\([^)]+\)/);
-		const title = linkMatch ? linkMatch[1] : match[1];
+		// rehype-slug slugs the heading's full text, with links reduced to their text:
+		// "How can I use [GitHub expression syntax](url) literally" -> "How can I use GitHub expression syntax literally"
+		const title = match[1].replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
 		headings.add(slugger.slug(title.trim()));
 	}
 	
