@@ -4475,7 +4475,7 @@ const redirectsData = [
 		destination: '/cody/capabilities/prompts'
 	},
 
-	//Eclispe redirects
+	//Eclipse redirects
 	{
 		source: '/cody/clients/install-eclipse',
 		destination: '/cody/clients'
@@ -4554,13 +4554,13 @@ const redirectsData = [
 		destination: '/cody/capabilities/agentic-context-fetching'
 	},
 
-	//Rmv embeddings permanentaly:https://sourcegraph.com/docs/cody/core-concepts/embeddings
+	//Rmv embeddings permanently:https://sourcegraph.com/docs/cody/core-concepts/embeddings
 	{
 		source: '/cody/core-concepts/embeddings',
 		destination: '/cody/'
 	},
 
-	//Rmv Query types permanentaly:https://sourcegraph.com/docs/cody/capabilities/query-types
+	//Rmv Query types permanently:https://sourcegraph.com/docs/cody/capabilities/query-types
 	{
 		source: '/cody/capabilities/query-types',
 		destination: '/cody/capabilities/chat'
