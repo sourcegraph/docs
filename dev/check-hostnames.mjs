@@ -14,12 +14,12 @@
  * JSON schemas in sourcegraph/sourcegraph and must be fixed upstream.
  * The technical changelog is skipped as a historical record.
  *
- * Usage: node dev/check-hostnames.mjs
+ * Runs as a GitHub Actions PR check (.github/workflows/check-hostnames.yml)
+ * and locally via `pnpm run check-hostnames`. No dependencies required.
  */
 
 import fs from 'fs';
 import path from 'path';
-import {glob} from 'glob';
 import {fileURLToPath} from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -108,7 +108,10 @@ async function main() {
 		'🔍 Checking for non-canonical example hostnames in MDX files...\n'
 	);
 
-	const files = await glob('**/*.mdx', {cwd: DOCS_DIR});
+	const files = fs
+		.readdirSync(DOCS_DIR, {recursive: true})
+		.filter(f => f.endsWith('.mdx'))
+		.map(f => f.split(path.sep).join('/'));
 	const errors = [];
 
 	for (const file of files.sort()) {
