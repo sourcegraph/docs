@@ -8,7 +8,7 @@ import {ThemingIcon} from '@/components/icons/ThemingIcon';
 import {WarningIcon} from '@/components/icons/WarningIcon';
 import {CodyIcon} from '@/components/icons/CodyIcon';
 import {CodeSearchIcon} from './icons/CodeSearchIcon';
-import {PluginsIcon} from './icons/PuginsIcon';
+import {PluginsIcon} from './icons/PluginsIcon';
 import {CodeGraphIcon} from './icons/CodeGraphIcon';
 import {LanguageModelsIcon} from './icons/LanguageModels';
 import {SecurityIcon} from './icons/SecurityIcon';

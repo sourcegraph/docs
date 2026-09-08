@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Prepares a fresh Amp orb: the Node and pnpm versions pinned in .tool-versions,
+# then the pnpm dependencies. Idempotent: Amp reruns it on stale snapshots.
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$repo_root"
+
+step() { printf '\n==> %s (%s)\n' "$1" "$(date +%T)"; }
+
+mise_bin="$HOME/.local/bin/mise"
+step "Install mise"
+if [ ! -x "$mise_bin" ]; then
+	curl -fsSL https://mise.run | sh
+fi
+
+step "Install pinned toolchain from .tool-versions"
+"$mise_bin" install --yes
+# The installer cannot change this running script's environment.
+eval "$("$mise_bin" env -s bash)"
+
+step "Expose the toolchain to login shells"
+profile_marker="# sourcegraph/docs: pinned Node and pnpm from mise"
+if ! grep -Fqx "$profile_marker" "$HOME/.bash_profile" 2>/dev/null; then
+	cat >>"$HOME/.bash_profile" <<EOF
+
+$profile_marker
+[ -d "$repo_root" ] && eval "\$("$mise_bin" -C "$repo_root" env -s bash)"
+EOF
+fi
+
+step "Install dependencies"
+# CI=true: without a TTY, pnpm otherwise aborts if a stale snapshot's
+# node_modules was built by a different pnpm version and must be recreated.
+CI=true pnpm install --frozen-lockfile
+
+step "Write orb agent guidance"
+mkdir -p "$HOME/.config/amp"
+cat >"$HOME/.config/amp/AGENTS.md" <<'EOF'
+# Inside the Orb
+
+- Node and pnpm come from mise (`.tool-versions`); `.agents/setup` puts them on PATH for login shells. Use `pnpm`, not `npm`.
+- Dev server: `amp orb services ensure` starts `pnpm dev` from `.amp/services.yaml` and returns a portal link.
+EOF
+
+step "Done: node $(node --version), pnpm $(pnpm --version)"
