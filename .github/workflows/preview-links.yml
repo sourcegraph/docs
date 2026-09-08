@@ -47,6 +47,11 @@ jobs:
               .map(f => f.filename.slice('docs/'.length, -'.mdx'.length).replace(/^index$/, '').replace(/\/index$/, ''))
               .map(path => ({path, url: `${previewUrl}/${path}`}));
 
+            if (pages.length === 0) {
+              core.info(`PR #${pr.number} changes no docs pages; not commenting.`);
+              return;
+            }
+
             const marker = '<!-- preview-links-for-changed-pages -->';
             const max = 40;
             const lines = pages.slice(0, max).map(p => `- [/${p.path}](${p.url})`);
@@ -56,9 +61,9 @@ jobs:
               marker,
               `### Preview links for changed pages`,
               ``,
-              pages.length
-                ? `Deployed \`${sha.slice(0, 7)}\` to ${previewUrl}\n\n${lines.join('\n')}`
-                : `Deployed \`${sha.slice(0, 7)}\` to ${previewUrl} — this PR changes no pages under \`docs/\`.`
+              `Deployed \`${sha.slice(0, 7)}\` to ${previewUrl}`,
+              ``,
+              ...lines
             ].join('\n');
 
             // Update our previous comment instead of adding a new one per push.
