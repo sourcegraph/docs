@@ -96,6 +96,12 @@ const RULES = [
 		suggest: m =>
 			m.replace(/\.[a-z]+\.(?:com|net|io|org)$/i, '.example.com')
 	},
+	// Tenant placeholders on real SaaS domains: mycompany.onelogin.com -> example.onelogin.com
+	{
+		pattern:
+			/\b(?:mycompany|yourcompany|ourcompany|company|acme|myorg|yourorg)\.([a-z0-9-]+\.(?:com|net|io|org))\b/gi,
+		suggest: m => m.replace(/^[a-z]+\./i, 'example.')
+	},
 	// Internal Sourcegraph infrastructure must not leak into public docs
 	{
 		pattern: /\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.sgdev\.org\b/gi,
