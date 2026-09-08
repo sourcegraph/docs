@@ -1,0 +1,73 @@
+name: Preview links for changed pages
+
+# Vercel sends this event when a deployment finishes. We use it to comment on the
+# PR with direct links to the docs pages that PR changed, since the Vercel bot's
+# own comment only links to the root of the preview deployment.
+on:
+  repository_dispatch:
+    types: [vercel.deployment.success]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  comment:
+    if: github.event.client_payload.environment != 'production'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        env:
+          PREVIEW_URL: ${{ github.event.client_payload.url }}
+          COMMIT_SHA: ${{ github.event.client_payload.git.sha }}
+        with:
+          script: |
+            const previewUrl = process.env.PREVIEW_URL.replace(/\/$/, '');
+            const sha = process.env.COMMIT_SHA;
+            const {owner, repo} = context.repo;
+
+            // The dispatch payload has no PR number; look it up from the commit.
+            const {data: prs} = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner, repo, commit_sha: sha
+            });
+            const pr = prs.find(p => p.state === 'open' && p.head.sha === sha);
+            if (!pr) {
+              core.info(`No open PR with head ${sha}; nothing to do.`);
+              return;
+            }
+
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner, repo, pull_number: pr.number, per_page: 100
+            });
+
+            // Mirror contentlayer's flattenedPath: docs/<path>.mdx -> /<path>,
+            // with a trailing /index dropped. Preview deployments have no basePath.
+            const pages = files
+              .filter(f => f.filename.startsWith('docs/') && f.filename.endsWith('.mdx') && f.status !== 'removed')
+              .map(f => f.filename.slice('docs/'.length, -'.mdx'.length).replace(/^index$/, '').replace(/\/index$/, ''))
+              .map(path => ({path, url: `${previewUrl}/${path}`}));
+
+            const marker = '<!-- preview-links-for-changed-pages -->';
+            const max = 40;
+            const lines = pages.slice(0, max).map(p => `- [/${p.path}](${p.url})`);
+            if (pages.length > max) lines.push(`- …and ${pages.length - max} more`);
+
+            const body = [
+              marker,
+              `### Preview links for changed pages`,
+              ``,
+              pages.length
+                ? `Deployed \`${sha.slice(0, 7)}\` to ${previewUrl}\n\n${lines.join('\n')}`
+                : `Deployed \`${sha.slice(0, 7)}\` to ${previewUrl} — this PR changes no pages under \`docs/\`.`
+            ].join('\n');
+
+            // Update our previous comment instead of adding a new one per push.
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number: pr.number, per_page: 100
+            });
+            const existing = comments.find(c => c.body?.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({owner, repo, comment_id: existing.id, body});
+            } else {
+              await github.rest.issues.createComment({owner, repo, issue_number: pr.number, body});
+            }
