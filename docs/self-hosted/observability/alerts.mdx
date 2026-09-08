@@ -2412,7 +2412,7 @@ Generated query for critical alert: `min((sum by (app) (up{app=~".*(pgsql\\|code
 <details>
 <summary>Technical details</summary>
 
-Generated query for warning alert: `max((max(src_workerutil_queue_duration_seconds{domain="codeintel_upload"})) &gt;= 3600)`
+Generated query for warning alert: `max((max(src_workerutil_queue_duration_seconds{domain="precise_code_intel_upload_worker"})) &gt;= 3600)`
 
 </details>
 
@@ -6444,6 +6444,45 @@ Custom query for critical alert: `max((((max(src_workerutil_queue_depth{domain="
 
 <br />
 
+## executor: batches-hooks_queue_growing_but_not_processing
+
+<p class="subtitle">batches-hooks executor queue has a backlog that is not being processed</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> executor: the batches-hooks executor queue has a backlog that is not being processed for 30m0s
+- <span class="badge badge-critical">critical</span> executor: the batches-hooks executor queue has an aging backlog (oldest job waiting > 1h) that is not being processed for 30m0s
+
+**Next steps**
+
+- Check the corresponding executors in Site Admin &gt; Executors — they may be failing to boot, failing to dequeue, or wedged mid-job.
+- Check src_executors_managed_instance_groups_autoscaler_unhealthy for the same queue: if a managed instance group is unhealthy, GCP cannot provision VMs (stockout/quota) and no executor is available to process the backlog.
+- Check the Grafana dashboard section for APIClient — executors should be making frequent Dequeue and Heartbeat requests that must not fail.
+- A queue whose jobs are all failing (rather than not being picked up) still counts as processing here; investigate that via the executor error-rate alerts and job logs instead.
+- A Warning that never escalates to Critical is usually a transient, self-healing gap (e.g. one spot-VM preemption); no action is typically needed unless it recurs frequently for the same queue.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#executor-batches-hooks_queue_growing_but_not_processing).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_executor_batches-hooks_queue_growing_but_not_processing",
+  "critical_executor_batches-hooks_queue_growing_but_not_processing"
+]
+```
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Custom query for warning alert: `max(((max(src_workerutil_queue_depth{domain="executors_batches-hooks"\}) &gt; 0) and (sum(rate(src_workerutil_dbworker_store_total\{domain="changeset_hook_event_jobs_worker_store",op=~"MarkComplete\\|MarkErrored\\|MarkFailed"}[30m])) == 0)) &gt; 0)`
+
+Custom query for critical alert: `max((((max(src_workerutil_queue_depth{domain="executors_batches-hooks"\}) &gt; 0) and (sum(rate(src_workerutil_dbworker_store_total\{domain="changeset_hook_event_jobs_worker_store",op=~"MarkComplete\\|MarkErrored\\|MarkFailed"\}[30m])) == 0)) and (max(src_workerutil_queue_duration_seconds\{domain="executors_batches-hooks"}) &gt; 3600)) &gt; 0)`
+
+</details>
+
+<br />
+
 ## executor: executor_handlers
 
 <p class="subtitle">executor active handlers</p>
@@ -7375,7 +7414,7 @@ Generated query for critical alert: `max((max(deriv(src_deepsearch_questions_in_
 
 **Next steps**
 
-- Check frontend logs for `worker failed to process question` errors.
+- Check worker logs for `worker failed to process question` errors.
 - Common causes: upstream LLM provider failures (rate limiting or capacity, e.g. 429/503, and timeouts), database errors mid-processing, or worker panics (`worker panic while processing question`).
 - More help interpreting this metric is available in the [dashboards reference](dashboards#deepsearch-deepsearch_question_processing_error_rate).
 - **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
@@ -7411,7 +7450,7 @@ Custom query for critical alert: `max(((sum(increase(src_deepsearch_question_pro
 
 **Next steps**
 
-- Search frontend logs for questionIDs with long processing times.
+- Search worker logs for questionIDs with long processing times.
 - Check `deepsearch_turn_p95_duration` to see if individual turns are slow.
 - Check `deepsearch_question_outcome_by_reason` for elevated truncation or error rates.
 - More help interpreting this metric is available in the [dashboards reference](dashboards#deepsearch-deepsearch_slow_questions).
@@ -7447,7 +7486,7 @@ Generated query for critical alert: `max((sum(increase(src_deepsearch_question_p
 
 **Next steps**
 
-- Search frontend logs for: "answer truncated due to output token limit with no response generated" to find affected questionIDs.
+- Search worker logs for: "answer truncated due to output token limit with no response generated" to find affected questionIDs.
 - The output token budget was consumed before any answer text was produced, usually by reasoning tokens, so affected users got nothing back.
 - Check if a recent model change or reasoning effort change caused increased thinking token usage.
 - Compare against `deepsearch_response_truncated`: elevated truncations alone are usually users requesting very large outputs and are not a regression.
@@ -7639,7 +7678,7 @@ Generated query for warning alert: `max((sum(rate(src_batch_change_agents_stream
 <details>
 <summary>Technical details</summary>
 
-Generated query for warning alert: `max((sum by (domain) (increase(src_dbworker_resetter_record_resets_total{domain=~"^(batches_reconciler_worker\\|batches_bulk_worker\\|batch_changes_batch_spec_resolution_worker\\|batch_spec_workspace_execution_worker)_resetter$"}[1h]))) &gt; 5)`
+Generated query for warning alert: `max((sum by (domain) (increase(src_dbworker_resetter_record_resets_total{domain=~"^(batches_reconciler_worker\\|batches_bulk_worker\\|batch_changes_batch_spec_resolution_worker\\|batch_spec_workspace_execution_worker\\|changeset_hook_event_job_worker)_resetter$"}[1h]))) &gt; 5)`
 
 </details>
 
