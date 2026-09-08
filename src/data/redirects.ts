@@ -5056,8 +5056,7 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/how-to/precise-code-intel-worker-crashloopbackoff',
-		destination:
-			'/self-hosted/how-to/precise-code-intel-worker-crashloopbackoff'
+		destination: '/code-navigation/troubleshooting'
 	},
 	{
 		source: '/admin/how-to/privileged_migrations',
@@ -5368,7 +5367,7 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/how-to/lsif_scip_migration',
-		destination: '/admin/how-to/lsif-scip-migration'
+		destination: '/self-hosted/how-to/clear-codeintel-data'
 	},
 	{
 		source: '/admin/how-to/update_repo_failure',
@@ -5749,7 +5748,7 @@ const redirectsData = [
 	},
 	{
 		source: '/self-hosted/how-to/blobstore_update_notes',
-		destination: '/self-hosted/how-to/blobstore-update-notes'
+		destination: '/self-hosted/how-to/blobstore-debugging'
 	},
 	{
 		source: '/self-hosted/how-to/clear_codeintel_data',
@@ -5761,7 +5760,7 @@ const redirectsData = [
 	},
 	{
 		source: '/self-hosted/how-to/dirty_database_pre_3_37',
-		destination: '/self-hosted/how-to/dirty-database-pre-3-37'
+		destination: '/self-hosted/how-to/dirty-database'
 	},
 	{
 		source: '/self-hosted/how-to/postgres_12_to_16_drift',
@@ -5893,6 +5892,26 @@ const redirectsData = [
 	{
 		source: '/code-search/how-to/create-search-context-graphql',
 		destination: '/api'
+	},
+	{
+		source: '/self-hosted/how-to/blobstore-update-notes',
+		destination: '/self-hosted/how-to/blobstore-debugging'
+	},
+	{
+		source: '/self-hosted/how-to/precise-code-intel-worker-crashloopbackoff',
+		destination: '/code-navigation/troubleshooting'
+	},
+	{
+		source: '/self-hosted/how-to/dirty-database-pre-3-37',
+		destination: '/self-hosted/how-to/dirty-database'
+	},
+	{
+		source: '/admin/how-to/lsif-scip-migration',
+		destination: '/self-hosted/how-to/clear-codeintel-data'
+	},
+	{
+		source: '/admin/how-to/converting-version-contexts-to-search-contexts',
+		destination: '/code-search/working/search-contexts'
 	},
 ];
 

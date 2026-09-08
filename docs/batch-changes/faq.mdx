@@ -151,7 +151,7 @@ Commit author is determined when running `src batch [apply|preview]`. If no [aut
 
 ## Why is the checkbox on my changeset disabled when previewing a batch change?
 
-Since Sourcegraph 3.31, it is possible to publish many types of changesets when previewing a batch change by modifying the publication state for the changeset directly from the UI (see ["Publishing changesets"](/batch-changes/publishing-changesets#from-the-preview)). However, not every changeset can be published by Sourcegraph. By hovering over your changeset's disabled checkbox, you can see why that specific changeset is not currently publishable. The most common reasons include:
+It is possible to publish many types of changesets when previewing a batch change by modifying the publication state for the changeset directly from the UI (see ["Publishing changesets"](/batch-changes/publishing-changesets#from-the-preview)). However, not every changeset can be published by Sourcegraph. By hovering over your changeset's disabled checkbox, you can see why that specific changeset is not currently publishable. The most common reasons include:
 
 -   The changeset is already published (we cannot unpublish a changeset or convert it back to a draft)
 -   The changeset's publication state is being controlled from your batch spec file (i.e., you have the [`published` flag set in your batch spec](/batch-changes/batch-spec-yaml-reference#changesettemplatepublished)); the batch spec takes precedence over the UI
@@ -243,34 +243,3 @@ If the execution of a step on a given repository fails, that repository will be 
 ### How do executors interact with code hosts? Will they clone repos directly?
 
 Executors do not interact directly with code hosts. They behave in a way [similar to src CLI](/batch-changes/how-src-executes-a-batch-spec) today: executors interact with the Sourcegraph instance, the Sourcegraph instance interacts with the code host. In particular, executors download code from the Sourcegraph instance and executors do not need to access code hosts credentials directly.
-
-## From Campaigns to Batch Changes
-
-We are sunsetting the name **Campaigns** and renaming it to **Batch Changes** starting from Sourcegraph version 3.26 (released 2021-03-20). The name change happened so that it is more descriptive and approachable for new users.
-
-### What action should I take?
-
--   Campaigns is called **Batch Changes** from Sourcegraph v3.26
--   We recommend migrating and upgrading to the latest Sourcegraph version to benefit from the new functionalities
--   There are no breaking changes in **release 3.26 to 3.33**, and URLs, CLI commands, and API endpoints using the previous name (campaigns) will still work. **These will be removed in Sourcegraph 3.34.**
-
-### What changes with the name change?
-
--   **Campaigns** is replaced by **Batch Changes** in the GUI, docs, customer and internal material
--   `<sourcegraph-instance>/campaigns/*` URLs are changed to `<sourcegraph-instance>/batch-changes/*`
--   The CLI prompt `src campaigns` is replaced by `src batch`
--   Campaign specs are now called **batch specs**
-
-### What's the deprecation plan?
-
-From v3.26 to v3.33 (inclusive):
-
--   All `<sourcegraph-instance>/campaigns/*` URLs are deprecated. They will still work and will be removed in the future
--   The CLI prompt `src campaigns` and its alias `src campaign` are deprecated. They will still work and will be removed in the future
--   `campaigns` GraphQL API endpoints are deprecated. They are intended to work, so contact us if you are querying the GraphQL API to ensure we can support you. They will be removed in the future
-
-From v3.34:
-
--   All `<sourcegraph-instance>/campaigns/*` URLs are removed
--   The CLI prompt `src campaigns` and its alias `src campaign` are removed
--   `/campaigns` GraphQL API endpoints are removed

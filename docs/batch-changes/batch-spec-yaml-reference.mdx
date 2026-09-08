@@ -14,13 +14,12 @@ We recommend to always specify the version.
 
 ### Version 1
 
-The schema version before Sourcegraph version 5.5.
+The legacy schema version.
 For now, if no version is specified, batch changes will use this schema version.
 It is recommended to switch to version 2.
 
 ### Version 2 (recommended)
 
-Introduced in Sourcegraph version 5.5.
 Queries defined under [`on.repositoriesMatchingQuery`](#onrepositoriesmatchingquery) default to keyword search instead of standard search.
 Authors can override the default by specifying the pattern type explicitly.
 Refer to the [search syntax docs](/code-search/queries) for more information about pattern types.
@@ -109,13 +108,6 @@ on:
 ## `on.repository`
 
 A specific repository (and, optionally, one or more branches) that's added to the list of repositories on which the batch change will run.
-
-<Callout type="note">
-	For Sourcegraph version 3.35 or less, if multiple branches are specified,
-	then only the last-named branch will be used, and only a single `branch`
-	could be provided. For Sourcegraph version 3.35 or more, all branches are
-	used.
-</Callout>
 
 To match a branch other than the default, `branch` or `branches` can be used to specify one or multiple branches, respectively. Only one of `branch` or `branches` can be set.
 
@@ -443,15 +435,7 @@ steps:
 ## `steps.mount`
 
 <Callout type="note">
-	This feature is available only for{' '}
-	<a href="https://sourcegraph.com/github.com/sourcegraph/src-cli">
-		Sourcegraph CLI
-	</a>
-	. Using `mount` locally is supported in Sourcegraph v3.41 and [Sourcegraph
-	CLI 3.41](https://sourcegraph.com/github.com/sourcegraph/src-cli). Using
-	`mount` in batch changes server-side is supported in Sourcegraph v4.1 and
-	[Sourcegraph CLI
-	4.0.1](https://sourcegraph.com/github.com/sourcegraph/src-cli).
+	This feature is available only for the [Sourcegraph CLI](https://sourcegraph.com/github.com/sourcegraph/src-cli).
 </Callout>
 
 `steps.mount` functionality makes running custom scripts/binaries easier. It mounts a local `path` to a `path` in a Docker container. Mounted paths are accessible to the step's `run` command.
@@ -773,10 +757,6 @@ changesetTemplate:
 (Multiple changesets in a single repository can be produced, for example, [per project in a monorepo](/batch-changes/creating-changesets-per-project-in-monorepos) or by [transforming large changes into multiple changesets](/batch-changes/creating-multiple-changesets-in-large-repositories)).
 
 ## `changesetTemplate.fork`
-
-<Callout type="info">
-	It is supported on Sourcegraph versions 5.1 or more.
-</Callout>
 
 Whether or not each changeset should be created on a fork of the upstream repository in the namespace of the user publishing them (or the namespace of the service account if [global credentials](/batch-changes/configuring-credentials#global-service-account-tokens) are used).
 
