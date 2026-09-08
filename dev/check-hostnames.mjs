@@ -6,7 +6,8 @@
  * Ensures placeholder hostnames are consistent across the docs:
  * - "your Sourcegraph instance" is always `sourcegraph.example.com`
  * - code hosts and other services are `<service>.example.com`
- *   (e.g. `github.example.com`, `gitlab.example.com`, `bitbucket.example.com`)
+ *   (e.g. `github.example.com`, `gitlab.example.com`, `redis.example.com`),
+ *   never a fictional company domain like `*.mycompany.com` or `*.acme.com`
  * - internal Sourcegraph infrastructure (`*.sgdev.org`) never appears in docs
  *
  * Auto-generated SCHEMA_SYNC blocks are skipped: their text comes from the
@@ -87,11 +88,13 @@ const RULES = [
 		pattern: /\bsmtp-server\.example\.com\b/gi,
 		suggest: () => 'smtp.example.com'
 	},
-	// *.company.net / *.company.com style private hosts -> *.example.com
+	// Any host under a fictional company domain -> *.example.com
+	// e.g. grafana.mycompany.com, psql1.mycompany.org, github.internal.company.net, artifactory.acme.com
 	{
 		pattern:
-			/\b((?:github|gitlab|bitbucket|gerrit|perforce|artifactory)(?:\.internal)?)\.company\.(?:com|net|io)\b/gi,
-		suggest: m => m.replace(/\.company\.(?:com|net|io)$/i, '.example.com')
+			/\b(?:[a-z0-9-]+\.)+(?:mycompany|yourcompany|ourcompany|company|mycorp|corp|acme|mydomain|yourdomain)\.(?:com|net|io|org)\b/gi,
+		suggest: m =>
+			m.replace(/\.[a-z]+\.(?:com|net|io|org)$/i, '.example.com')
 	},
 	// Internal Sourcegraph infrastructure must not leak into public docs
 	{
