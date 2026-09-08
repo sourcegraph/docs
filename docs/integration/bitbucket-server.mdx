@@ -34,7 +34,7 @@ For the Bitbucket Server plugin to then communicate with the Sourcegraph instanc
 ```json
 {
 	// ...
-	"corsOrigin": "https://my-bitbucket.example.com"
+	"corsOrigin": "https://bitbucket.example.com"
 	// ...
 }
 ```
@@ -103,7 +103,7 @@ Sourcegraph's Bitbucket Server / Bitbucket Data Center adds support for webhooks
 
 The motivation behind this added functionality is to more efficiently react to updates to Bitbucket Server / Bitbucket Data Center pull requests when using [batch changes](/batch-changes/) by requiring only a single webhook to receive events for hundreds or thousands of pull requests across projects and repositories.
 
-The plugin adds a `/webhook` endpoint that accepts `GET`, `POST` and `DELETE` HTTP request to list, create and delete webhooks respectively. The full URL for this endpoint would be something like `https://your-bbs-instance.example.com/rest/sourcegraph-admin/1.0/webhook`. See the [webhooks README](https://github.com/sourcegraph/bitbucket-server-plugin/blob/master/src/main/java/com/sourcegraph/webhook/README) for detailed information on which payloads this endpoint accepts.
+The plugin adds a `/webhook` endpoint that accepts `GET`, `POST` and `DELETE` HTTP request to list, create and delete webhooks respectively. The full URL for this endpoint would be something like `https://bitbucket.example.com/rest/sourcegraph-admin/1.0/webhook`. See the [webhooks README](https://github.com/sourcegraph/bitbucket-server-plugin/blob/master/src/main/java/com/sourcegraph/webhook/README) for detailed information on which payloads this endpoint accepts.
 
 Once the plugin is installed it registers an asynchronous listener (see [`WebhookListener.java`](https://github.com/sourcegraph/bitbucket-server-plugin/blob/master/src/main/java/com/sourcegraph/webhook/WebhookListener.java)) that listens to `PullRequestEvent`s and `BuildStatusEvent`s. When an event is dispatched to the listener it checks whether a webhook has been registered for the scope and type of the event and if so, it enqueues the sending of a request to the webhook's endpoint in a thread pool. (See [`WebhookListener.handle`](https://github.com/sourcegraph/bitbucket-server-plugin/blob/master/src/main/java/com/sourcegraph/webhook/WebhookListener.java#L62-L76) and [`Dispatcher.java`](https://github.com/sourcegraph/bitbucket-server-plugin/blob/master/src/main/java/com/sourcegraph/webhook/Dispatcher.java).)
 
