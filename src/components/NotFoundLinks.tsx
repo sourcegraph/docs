@@ -3,7 +3,7 @@
 import {usePreviousPathname} from '@/components/PreviousPathname';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
-import {useEffect, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 
 const linkClassName =
 	'text-sm font-medium text-slate-900 hover:underline dark:text-white';
@@ -36,20 +36,27 @@ export function NotFoundLinks({pagePaths}: {pagePaths: string[]}) {
 	const previousPathname = usePreviousPathname();
 	const [ancestor, setAncestor] = useState<string | null>(null);
 	const [referrer, setReferrer] = useState<URL | null>(null);
+	const pagePathSet = useMemo(() => new Set(pagePaths), [pagePaths]);
 
 	// Both values depend on the browser URL, which the statically prerendered
 	// 404 page does not know, so resolve them after mount to avoid a hydration
 	// mismatch.
 	useEffect(() => {
-		setAncestor(nearestExistingAncestor(pathname, new Set(pagePaths)));
+		setAncestor(nearestExistingAncestor(pathname, pagePathSet));
 		setReferrer(sameOriginReferrer());
-	}, [pathname, pagePaths]);
+	}, [pathname, pagePathSet]);
+
+	// The previous pathname may itself have been a 404.
+	const previousPage =
+		previousPathname && pagePathSet.has(previousPathname)
+			? previousPathname
+			: null;
 
 	return (
 		<div className="mt-8 flex flex-col gap-3">
-			{previousPathname ? (
-				<Link href={previousPathname} className={linkClassName}>
-					Go back to {previousPathname}
+			{previousPage ? (
+				<Link href={previousPage} className={linkClassName}>
+					Go back to {previousPage}
 				</Link>
 			) : (
 				referrer && (
