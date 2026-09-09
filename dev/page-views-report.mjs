@@ -251,6 +251,28 @@ function reportHeader(title, start, end) {
 	];
 }
 
+// A destination the browser will request back through the middleware, or
+// null when it leaves the docs site. Browsers do not send fragments.
+function docsDestinationPath(destination) {
+	const relative = destination.replace(
+		/^https:\/\/sourcegraph\.com\/docs/,
+		''
+	);
+	return relative.startsWith('/') ? relative.replace(/[#?].*$/, '') : null;
+}
+
+// Follow a rule's destination through further rules, as a browser would.
+// Returns the rules hit after this one, and whether they loop back.
+function chainAfter(rule, liveRuleBySource) {
+	const hops = [];
+	let next = liveRuleBySource.get(docsDestinationPath(rule.destination));
+	while (next && next !== rule && !hops.includes(next)) {
+		hops.push(next);
+		next = liveRuleBySource.get(docsDestinationPath(next.destination));
+	}
+	return {hops, loop: Boolean(next)};
+}
+
 // Hits = redirects served on /docs<source>. Live rules sort by hits, then
 // shadowed duplicates; both keep file order within a tie.
 function formatRedirectRulesReport({title, start, end, rules, rowsByPath}) {
@@ -258,6 +280,16 @@ function formatRedirectRulesReport({title, start, end, rules, rowsByPath}) {
 		rowsByPath.get(`/docs${rule.source}`)?.redirects ?? 0;
 	const live = rules.filter(rule => !rule.shadowedBy);
 	const ruleHits = live.reduce((sum, rule) => sum + hitsOf(rule), 0);
+	const liveRuleBySource = new Map(live.map(rule => [rule.source, rule]));
+	const chainOf = rule =>
+		rule.shadowedBy
+			? {hops: [], loop: false}
+			: chainAfter(rule, liveRuleBySource);
+	const chained = live.filter(rule => chainOf(rule).hops.length > 0);
+	const longestChain = Math.max(
+		0,
+		...chained.map(rule => chainOf(rule).hops.length)
+	);
 	const docsRedirects = [...rowsByPath.entries()]
 		.filter(([pagePath]) => pagePath.startsWith('/docs'))
 		.reduce((sum, [, totals]) => sum + totals.redirects, 0);
@@ -277,14 +309,25 @@ function formatRedirectRulesReport({title, start, end, rules, rowsByPath}) {
 			'redirects on /docs paths (the rest are version and other redirects)',
 		'- Hits count 3xx responses on /docs<Source> with the same filters as ' +
 			'the page views reports; adaptive-sampled estimates.',
+		`- Chains: ${chained.length} live rules redirect to another rule's ` +
+			`source, so the browser follows more redirects (longest chain: ` +
+			`${longestChain} more). Chain shows the extra hops and where the ` +
+			'user ends up.',
 		'',
-		'| Line | Source | Destination | Hits |',
-		'| ---: | --- | --- | ---: |',
-		...sorted.map(
-			rule =>
-				`| ${rule.line} | ${rule.source} | ${rule.destination} | ` +
-				`${rule.shadowedBy ? `shadowed by line ${rule.shadowedBy}` : hitsOf(rule)} |`
-		),
+		'| Line | Source | Destination | Hits | Chain |',
+		'| ---: | --- | --- | ---: | --- |',
+		...sorted.map(rule => {
+			const {hops, loop} = chainOf(rule);
+			const hits = rule.shadowedBy
+				? `shadowed by line ${rule.shadowedBy}`
+				: hitsOf(rule);
+			const chain = loop
+				? `LOOP after ${hops.length} more`
+				: hops.length
+					? `${hops.length} more → ${hops.at(-1).destination}`
+					: '';
+			return `| ${rule.line} | ${rule.source} | ${rule.destination} | ${hits} | ${chain} |`;
+		}),
 		''
 	];
 	return lines.join('\n');
