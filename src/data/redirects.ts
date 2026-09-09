@@ -5833,6 +5833,13 @@ const redirectsData = [
 		source: '/admin/beta-and-experimental-features',
 		destination: '/beta-and-experimental'
 	},
+	// GitHub release notes for 5.4 through 5.6 link to /docs/CHANGELOG#<version>.
+	// The technical changelog page forwards version fragments to wherever that
+	// release's notes live now.
+	{
+		source: '/CHANGELOG',
+		destination: '/technical-changelog'
+	},
 	// RSS feed moved from /docs/technical-changelog.rss to /changelog/technical-changelog.rss
 	// This redirect preserves existing RSS subscriptions
 	{

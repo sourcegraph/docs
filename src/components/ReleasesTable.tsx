@@ -181,16 +181,56 @@ export function DeprecatedReleasesTable() {
 		{version: '5.6', date: 'August 2024', anchor: 'v560'},
 		{version: '5.5', date: 'July 2024', anchor: 'v553956'},
 		{version: '5.4', date: 'May 2024', anchor: 'v547765'},
-		{version: '5.3', date: 'February 2024', anchor: 'v5312303'},
-		{version: '5.2', date: 'October 2023', anchor: 'v527'},
-		{version: '5.1', date: 'June 2023', anchor: 'v519'},
-		{version: '5.0', date: 'March 2023', anchor: 'v506'},
-		{version: '4.5', date: 'February 2023', anchor: 'v451'},
-		{version: '4.4', date: 'January 2023', anchor: 'v442'},
-		{version: '4.3', date: 'December 2022', anchor: 'v431'},
-		{version: '4.2', date: 'November 2022', anchor: 'v421'},
-		{version: '4.1', date: 'October 2022', anchor: 'v413'},
-		{version: '4.0', date: 'September 2022', anchor: 'v401'},
+		{
+			version: '5.3',
+			date: 'February 2024',
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#5312303'
+		},
+		{
+			version: '5.2',
+			date: 'October 2023',
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#527'
+		},
+		{
+			version: '5.1',
+			date: 'June 2023',
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#519'
+		},
+		{
+			version: '5.0',
+			date: 'March 2023',
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#506'
+		},
+		{
+			version: '4.5',
+			date: 'February 2023',
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#451'
+		},
+		{
+			version: '4.4',
+			date: 'January 2023',
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#442'
+		},
+		{
+			version: '4.3',
+			date: 'December 2022',
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#431'
+		},
+		{
+			version: '4.2',
+			date: 'November 2022',
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#421'
+		},
+		{
+			version: '4.1',
+			date: 'October 2022',
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#413'
+		},
+		{
+			version: '4.0',
+			date: 'September 2022',
+			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#401'
+		},
 		{
 			version: '3.43',
 			date: 'August 2022',
