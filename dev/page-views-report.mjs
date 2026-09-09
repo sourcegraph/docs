@@ -6,7 +6,8 @@
  * Counts human page views (HTML 200s), redirects, 404s and 5xx errors on
  * sourcegraph.com for /docs, /changelog and /blog over the last 90 days
  * and writes Markdown reports to logs/ sorted by path, request count,
- * redirect count and error count.
+ * redirect count and error count, plus how often each redirect rule in
+ * src/data/redirects.ts was followed.
  *
  * Filters: Bot Management "likely_human", excluding Hetzner (a single
  * hosting provider that dwarfs real German traffic) and China.
@@ -56,10 +57,13 @@ const PAGE_SIZE = 10000;
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 
-const LOGS_DIR = path.join(
-	path.dirname(path.dirname(fileURLToPath(import.meta.url))),
-	'logs'
-);
+const REPO_ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
+const LOGS_DIR = path.join(REPO_ROOT, 'logs');
+const REDIRECTS_FILE = path.join(REPO_ROOT, 'src', 'data', 'redirects.ts');
+
+// One `{source: '...', destination: '...' | CONSTANT}` entry in redirects.ts.
+const REDIRECT_RULE_PATTERN =
+	/\{\s*source:\s*'([^']*)',\s*destination:\s*(?:'([^']*)'|(\w+))\s*,?\s*\}/g;
 
 const QUERY = `
 query PageViews($zoneTag: string!, $filter: ZoneHttpRequestsAdaptiveGroupsFilter_InputObject!) {
@@ -212,16 +216,84 @@ function isTrailingSlashRedirect(row) {
 	);
 }
 
-// Totals cover every path, so the header is identical across reports.
-function formatReport({title, start, end, total, rows}) {
-	const lines = [
+// src/middleware.ts matches rules by exact source path (relative to /docs)
+// and the first match wins, so a repeated source is a dead rule.
+function loadRedirectRules() {
+	const text = fs.readFileSync(REDIRECTS_FILE, 'utf8');
+	const firstLineBySource = new Map();
+	const rules = [];
+	let line = 1;
+	let cursor = 0;
+	for (const match of text.matchAll(REDIRECT_RULE_PATTERN)) {
+		const [, source, destination, constantName] = match;
+		line += text.slice(cursor, match.index).split('\n').length - 1;
+		cursor = match.index;
+		rules.push({
+			line,
+			source,
+			destination: destination ?? constantName,
+			shadowedBy: firstLineBySource.get(source)
+		});
+		if (!firstLineBySource.has(source)) firstLineBySource.set(source, line);
+	}
+	return rules;
+}
+
+function reportHeader(title, start, end) {
+	return [
 		`# ${title}`,
 		'',
 		`- Window: ${start.toISOString()} to ${end.toISOString()} (UTC)`,
 		`- Host: ${HOST}; paths: ${PATH_PREFIXES.join(', ')}`,
 		`- Filters: Bot Management likely_human; ` +
 			`excluding ASN ${EXCLUDED_ASN_DESCRIPTIONS.join(', ')}; ` +
-			`excluding countries ${EXCLUDED_COUNTRIES.join(', ')}`,
+			`excluding countries ${EXCLUDED_COUNTRIES.join(', ')}`
+	];
+}
+
+// Hits = redirects served on /docs<source>. Live rules sort by hits, then
+// shadowed duplicates; both keep file order within a tie.
+function formatRedirectRulesReport({title, start, end, rules, rowsByPath}) {
+	const hitsOf = rule =>
+		rowsByPath.get(`/docs${rule.source}`)?.redirects ?? 0;
+	const live = rules.filter(rule => !rule.shadowedBy);
+	const ruleHits = live.reduce((sum, rule) => sum + hitsOf(rule), 0);
+	const docsRedirects = [...rowsByPath.entries()]
+		.filter(([pagePath]) => pagePath.startsWith('/docs'))
+		.reduce((sum, [, totals]) => sum + totals.redirects, 0);
+	const sorted = [...rules].sort(
+		(a, b) =>
+			(a.shadowedBy ? 1 : 0) - (b.shadowedBy ? 1 : 0) ||
+			hitsOf(b) - hitsOf(a) ||
+			a.line - b.line
+	);
+	const lines = [
+		...reportHeader(title, start, end),
+		`- Rules: ${rules.length} in ${path.relative(REPO_ROOT, REDIRECTS_FILE)}; ` +
+			`${live.length} live, ${rules.length - live.length} shadowed by an ` +
+			`earlier rule with the same source (never match), ` +
+			`${live.filter(rule => hitsOf(rule) === 0).length} live with zero hits`,
+		`- Hits: ${ruleHits} redirects matched a rule, of ${docsRedirects} ` +
+			'redirects on /docs paths (the rest are version and other redirects)',
+		'- Hits count 3xx responses on /docs<Source> with the same filters as ' +
+			'the page views reports; adaptive-sampled estimates.',
+		'',
+		'| Line | Source | Destination | Hits |',
+		'| ---: | --- | --- | ---: |',
+		...sorted.map(
+			rule =>
+				`| ${rule.line} | ${rule.source} | ${rule.destination} | ` +
+				`${rule.shadowedBy ? `shadowed by line ${rule.shadowedBy}` : hitsOf(rule)} |`
+		),
+		''
+	];
+	return lines.join('\n');
+}
+
+// Totals cover every path, so the header is identical across reports.
+function formatReport({title, start, end, total, rows}) {
+	const lines = [
+		...reportHeader(title, start, end),
 		`- Totals: ${total.paths} paths, ${total.requests} requests, ` +
 			`${total.visits} visits, ${total.redirects} 3xx, ` +
 			`${total.notFound} 404s, ${total.serverErrors} 5xx`,
@@ -318,6 +390,19 @@ async function main() {
 		);
 		console.log(`✅ Wrote ${path.relative(process.cwd(), target)}`);
 	}
+
+	const rulesTarget = path.join(LOGS_DIR, 'redirect-rules.md');
+	fs.writeFileSync(
+		rulesTarget,
+		formatRedirectRulesReport({
+			title: `Redirect rules by hits (last ${days} days)`,
+			start,
+			end,
+			rules: loadRedirectRules(),
+			rowsByPath
+		})
+	);
+	console.log(`✅ Wrote ${path.relative(process.cwd(), rulesTarget)}`);
 	console.log(`\n${rows.length} paths total.`);
 }
 
