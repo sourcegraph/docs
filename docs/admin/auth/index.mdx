@@ -517,7 +517,7 @@ To use an authentication proxy to authenticate users to Sourcegraph, add the fol
 
 Replace `X-Forwarded-User` with the name of the HTTP header added by the authentication proxy that contains the user's username.
 
-Ensure that the HTTP proxy is not setting its own `Authorization` header on the request. Sourcegraph rejects requests with unrecognized `Authorization` headers and prints the error log `lvl=eror msg="Invalid Authorization header." err="unrecognized HTTP Authorization request header scheme (supported values: token, token-sudo)"`.
+Ensure that the HTTP proxy is not setting its own `Authorization` header on the request. Sourcegraph ignores `Authorization` headers with an unrecognized scheme (anything other than `token`, `token-sudo`, or `Bearer`), and records an [audit log](/admin/audit-log) entry for the `auth.accessToken` entity with `action: "failed"` and `reason: "invalid Authorization header"`.
 
 For pusher/oauth2_proxy, use the `-pass-basic-auth false` option to prevent it from sending the `Authorization` header.
 
