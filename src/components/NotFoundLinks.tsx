@@ -1,5 +1,6 @@
 'use client';
 
+import {usePreviousPathname} from '@/components/PreviousPathname';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 import {useEffect, useState} from 'react';
@@ -21,7 +22,9 @@ function nearestExistingAncestor(
 	return null;
 }
 
-// The page the user came from, only when it is on this site.
+// The page the user came from on a fresh page load, only when it is on this
+// site. document.referrer does not change on client-side navigations, so
+// those are covered by usePreviousPathname instead.
 function sameOriginReferrer(): URL | null {
 	if (!document.referrer) return null;
 	const referrer = new URL(document.referrer);
@@ -30,6 +33,7 @@ function sameOriginReferrer(): URL | null {
 
 export function NotFoundLinks({pagePaths}: {pagePaths: string[]}) {
 	const pathname = usePathname();
+	const previousPathname = usePreviousPathname();
 	const [ancestor, setAncestor] = useState<string | null>(null);
 	const [referrer, setReferrer] = useState<URL | null>(null);
 
@@ -43,10 +47,16 @@ export function NotFoundLinks({pagePaths}: {pagePaths: string[]}) {
 
 	return (
 		<div className="mt-8 flex flex-col gap-3">
-			{referrer && (
-				<a href={referrer.href} className={linkClassName}>
-					Go back to {referrer.pathname}
-				</a>
+			{previousPathname ? (
+				<Link href={previousPathname} className={linkClassName}>
+					Go back to {previousPathname}
+				</Link>
+			) : (
+				referrer && (
+					<a href={referrer.href} className={linkClassName}>
+						Go back to {referrer.pathname}
+					</a>
+				)
 			)}
 			{ancestor && (
 				<Link href={ancestor} className={linkClassName}>
