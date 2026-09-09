@@ -41,8 +41,9 @@ Rules are first-match-wins, like `src/middleware.ts`, so a rule whose source
 repeats an earlier one is flagged `shadowed`. The Chain column shows how
 many more redirects a browser follows when a rule's destination is itself
 another rule's source, and where the user finally lands. Its Sitemap column
-says whether that final page is in the sitemap, blank when the redirect
-leaves the site; `no` means the rule sends people to a soft 404.
+says whether the rule's destination is in the sitemap, blank when the
+redirect leaves the site. A `no` with an empty Chain means the rule sends
+people to a soft 404; a `no` with a Chain is an intermediate hop.
 
 ## Filters
 
@@ -92,10 +93,11 @@ From the first 90-day run, September 2026
   2 or 3 redirects.
 - **Shadowed and dead redirect rules.** 362 rules repeat an earlier rule's
   source and can never match; 689 live rules had zero hits.
-- **Redirects to soft 404s.** 175 live rules land on a `/docs` page that is
-  not in the sitemap (280 hits), and 71 more land on unlisted
-  `sourcegraph.com` paths such as `/handbook/...` and `/retrospectives/...`
-  (180 hits). Docs examples:
+- **Redirects to soft 404s.** 512 live rules have a destination that is not
+  in the sitemap (12,100 hits). 269 of those are chain hops into another
+  rule; the rest are dead ends: 172 point at a `/docs` page that does not
+  exist (280 hits) and 71 at unlisted `sourcegraph.com` paths such as
+  `/handbook/...` and `/retrospectives/...` (180 hits). Docs examples:
   `/admin/external_services/postgres → /self-hosted/external_services/postgres`
   and `/integration/google_gsuite → /integration/google_workspace`, which
   both return 200 with the generic "Sourcegraph docs" title and have no

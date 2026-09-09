@@ -329,15 +329,12 @@ function formatRedirectRulesReport({
 		0,
 		...chained.map(rule => chainOf(rule).hops.length)
 	);
-	// Where the browser ends up: yes/no for sitemap membership, blank off-site.
+	// Sitemap membership of the rule's own destination; blank when off-site.
 	const sitemapOf = rule => {
-		const {hops, loop} = chainOf(rule);
-		const landing = loop
-			? null
-			: landingPath((hops.at(-1) ?? rule).destination);
+		const landing = landingPath(rule.destination);
 		return landing === null ? '' : sitemapPaths.has(landing) ? 'yes' : 'no';
 	};
-	const landingUnlisted = live.filter(rule => sitemapOf(rule) === 'no');
+	const destinationUnlisted = live.filter(rule => sitemapOf(rule) === 'no');
 	const docsRedirects = [...rowsByPath.entries()]
 		.filter(([pagePath]) => pagePath.startsWith('/docs'))
 		.reduce((sum, [, totals]) => sum + totals.redirects, 0);
@@ -361,12 +358,13 @@ function formatRedirectRulesReport({
 			`source, so the browser follows more redirects (longest chain: ` +
 			`${longestChain} more). Chain shows the extra hops and where the ` +
 			'user ends up.',
-		`- Sitemap: whether the page the user ends up on is in ${SITEMAP_URL} ` +
-			`(blank when it leaves the site). ${landingUnlisted.length} live ` +
-			`rules land on an unlisted page, ${landingUnlisted.reduce(
+		`- Sitemap: whether the rule's destination is in ${SITEMAP_URL} ` +
+			`(blank when it leaves the site). ${destinationUnlisted.length} ` +
+			`live rules point at an unlisted page, ${destinationUnlisted.reduce(
 				(sum, rule) => sum + hitsOf(rule),
 				0
-			)} hits; on /docs that is likely a soft 404.`,
+			)} hits; unless Chain shows a further redirect, on /docs that is ` +
+			'likely a soft 404.',
 		'',
 		'| Line | Source | Destination | Hits | Chain | Sitemap |',
 		'| ---: | --- | --- | ---: | --- | --- |',
