@@ -34,7 +34,18 @@ const REDIRECT_STATUSES = [301, 302, 303, 307, 308];
 // Build output and static assets are not pages. Feeds (.xml, .rss, .atom)
 // are kept because their 404s and redirects are worth knowing about.
 const STATIC_ASSET_PATTERN =
-	/\/_next\/|\.(js|css|map|png|jpe?g|gif|svg|ico|webp|woff2?|ttf)$/i;
+	/\/_next(\/|$)|\.(js|css|map|png|jpe?g|gif|svg|ico|webp|woff2?|ttf)$/i;
+
+// Real page URLs only use these characters; anything else is a scanner
+// probe or injection payload, for example "(A(x))", "%3Cscript%3E", "..;/".
+const SCANNER_PATH_PATTERN = /[^\w/.~@'-]/;
+
+function isNoisePath(pagePath) {
+	return (
+		STATIC_ASSET_PATTERN.test(pagePath) ||
+		SCANNER_PATH_PATTERN.test(pagePath)
+	);
+}
 
 // Zone limits reported by the `settings` query: 32 days per query,
 // 90 days of history, 10,000 rows per page.
@@ -178,7 +189,7 @@ async function fetchWindow(token, start, end, rowsByPath) {
 	);
 	for (const row of rows) {
 		const pagePath = normalizePath(row.dimensions.clientRequestPath);
-		if (STATIC_ASSET_PATTERN.test(pagePath)) continue;
+		if (isNoisePath(pagePath)) continue;
 		const totals = rowsByPath.get(pagePath) ?? emptyTotals();
 		addRow(totals, row);
 		rowsByPath.set(pagePath, totals);
@@ -206,7 +217,8 @@ function formatReport({title, start, end, total, rows}) {
 		'- Requests and Visits count HTML 200 responses. Visits = requests ' +
 			"whose referrer is not sourcegraph.com (Cloudflare's page-view proxy).",
 		`- 3xx counts redirects (${REDIRECT_STATUSES.join(', ')}); 404 and ` +
-			'5xx count any content type. Static assets are skipped. ' +
+			'5xx count any content type. Static assets and scanner ' +
+			'probe paths are skipped. ' +
 			'All counts are adaptive-sampled estimates.',
 		'',
 		'| Path | Requests | Visits | 3xx | 404 | 5xx |',
