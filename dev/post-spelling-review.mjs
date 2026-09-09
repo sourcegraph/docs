@@ -7,7 +7,7 @@
  * Usage: node dev/post-spelling-review.mjs --findings <json-file> [--dry-run]
  *
  * Reads the JSON written by `dev/check-spelling.mjs --format json`.
- * Requires GH_TOKEN, GITHUB_REPOSITORY, PR_NUMBER and HEAD_SHA.
+ * Requires GH_TOKEN, GITHUB_REPOSITORY, PR_NUMBER, HEAD_SHA and HEAD_REF.
  */
 
 import {readFileSync} from 'fs';
@@ -21,6 +21,10 @@ const API_URL = process.env.GITHUB_API_URL ?? 'https://api.github.com';
 const REPOSITORY = process.env.GITHUB_REPOSITORY;
 const PR_NUMBER = process.env.PR_NUMBER;
 const HEAD_SHA = process.env.HEAD_SHA;
+const HEAD_REF = process.env.HEAD_REF;
+
+// Link to the PR branch, not the commit, so GitHub's edit button works from it
+const ALLOW_LIST_LINK = `[\`cspell-allow-list.txt\`](https://github.com/${REPOSITORY}/blob/${HEAD_REF}/cspell-allow-list.txt)`;
 
 const SUMMARY_MARKER = '<!-- cspell-report -->';
 const INLINE_MARKER = '<!-- cspell-finding:';
@@ -91,7 +95,11 @@ function summaryBody(findings) {
 		}
 		lines.push('');
 	}
-	lines.push("Run `npx cspell@10 --no-progress --dot '**/*'` locally to check the full repository.");
+	lines.push(
+		`Please correct the spelling, or add words which are correct to ${ALLOW_LIST_LINK}.`,
+		'',
+		"Run `npx cspell@10 --no-progress --dot '**/*'` locally to check the full repository."
+	);
 	return lines.join('\n') + '\n';
 }
 
@@ -174,12 +182,12 @@ function inlineBody(finding) {
 		`\`${word}\` is not in the dictionary.${suggestions.length > 0 ? ' Did you mean:' : ''}`,
 		'',
 		...suggestionBlocks(finding),
-		'Please correct the spelling, or add the word to `cspell-allow-list.txt` if it is correct.'
+		`Please correct the spelling, or add the word to ${ALLOW_LIST_LINK} if it is correct.`
 	].join('\n');
 }
 
 function reviewBody(shown, total) {
-	const summary = `CSpell found ${total} spelling error(s) on lines added by this PR. Please correct them, or add them to \`cspell-allow-list.txt\` if they are correct.`;
+	const summary = `CSpell found ${total} spelling error(s) on lines added by this PR. Please correct them, or add them to ${ALLOW_LIST_LINK} if they are correct.`;
 	return shown < total
 		? `${summary} The first ${shown} are commented inline; the summary comment lists them all.`
 		: summary;
@@ -235,7 +243,8 @@ async function main() {
 		'GH_TOKEN',
 		'GITHUB_REPOSITORY',
 		'PR_NUMBER',
-		'HEAD_SHA'
+		'HEAD_SHA',
+		'HEAD_REF'
 	]) {
 		if (!process.env[name]) {
 			throw new Error(`Missing required environment variable ${name}`);
