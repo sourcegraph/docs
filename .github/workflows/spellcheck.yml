@@ -22,19 +22,16 @@ jobs:
                   ref: ${{ github.event.pull_request.head.sha }}
                   fetch-depth: 0
 
-            - name: Install pnpm
-              uses: pnpm/action-setup@v4
-              with:
-                  version: 10.25.0
-
+            # CSpell is installed on its own, not as a project dependency, so it
+            # can use the latest Node.js without moving the site build off the
+            # version pinned in .tool-versions.
             - name: Set up Node.js
               uses: actions/setup-node@v4
               with:
-                  node-version: 20.19.6
-                  cache: pnpm
+                  node-version: latest
 
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
+            - name: Install CSpell
+              run: npm install --global cspell@10
 
             - name: Find spelling errors introduced by this PR
               env:
@@ -42,7 +39,7 @@ jobs:
               run: |
                   base=$(git merge-base "$BASE_SHA" HEAD)
                   # Exit 1 means findings; anything else is an operational error
-                  pnpm --silent spellcheck:diff -- --base "$base" --format json \
+                  node dev/check-spelling.mjs --base "$base" --format json \
                       > "$RUNNER_TEMP/spelling.json" || [ "$?" -eq 1 ]
                   cat "$RUNNER_TEMP/spelling.json"
 
