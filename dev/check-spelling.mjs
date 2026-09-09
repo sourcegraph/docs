@@ -87,6 +87,7 @@ function runCSpell(files) {
 		column: issue.col,
 		word: issue.text,
 		suggestions: issue.suggestions?.slice(0, 3) ?? [],
+		text: issue.line.text.replace(/\r?\n$/, ''),
 		context: issue.context?.text.trim() ?? issue.line.text.trim()
 	}));
 }
