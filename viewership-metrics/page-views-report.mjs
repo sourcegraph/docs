@@ -20,6 +20,8 @@ const ZONE_TAG =
 	process.env.CLOUDFLARE_ZONE_ID ?? 'a168cb2eefa87d19793824cd9bf83f3a';
 const HOST = 'sourcegraph.com';
 const PATH_PREFIXES = ['/docs', '/changelog', '/blog'];
+// An index pointing at sitemap-main.xml (blog, changelog) and docs/sitemap.xml.
+const SITEMAP_URL = `https://${HOST}/sitemap.xml`;
 const EXCLUDED_COUNTRIES = ['CN'];
 const EXCLUDED_ASN_DESCRIPTIONS = ['Hetzner Online GmbH'];
 
@@ -234,6 +236,41 @@ function loadRedirectRules() {
 	return rules;
 }
 
+// Paths listed in the sitemap, following <sitemapindex> entries. Any page
+// with traffic that is not here is deleted, unlisted or a probe.
+async function fetchSitemapPaths(url = SITEMAP_URL, paths = new Set()) {
+	const response = await fetch(url);
+	if (!response.ok) {
+		throw new Error(`${url}: HTTP ${response.status}`);
+	}
+	const xml = await response.text();
+	const locations = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match =>
+		match[1].trim()
+	);
+	if (xml.includes('<sitemapindex')) {
+		for (const location of locations) {
+			await fetchSitemapPaths(location, paths);
+		}
+	} else {
+		for (const location of locations) {
+			paths.add(normalizePath(new URL(location).pathname));
+		}
+	}
+	return paths;
+}
+
+// Where a redirect destination lands on sourcegraph.com, or null when it
+// leaves the site (or is a constant the regex could not resolve).
+function landingPath(destination) {
+	if (destination.startsWith('/')) {
+		return normalizePath(`/docs${destination}`.replace(/[#?].*$/, ''));
+	}
+	if (destination.startsWith(`https://${HOST}/`)) {
+		return normalizePath(new URL(destination).pathname);
+	}
+	return null;
+}
+
 function reportHeader(title, start, end) {
 	return [
 		`# ${title}`,
@@ -270,7 +307,14 @@ function chainAfter(rule, liveRuleBySource) {
 
 // Hits = redirects served on /docs<source>. Live rules sort by hits, then
 // shadowed duplicates; both keep file order within a tie.
-function formatRedirectRulesReport({title, start, end, rules, rowsByPath}) {
+function formatRedirectRulesReport({
+	title,
+	start,
+	end,
+	rules,
+	rowsByPath,
+	sitemapPaths
+}) {
 	const hitsOf = rule =>
 		rowsByPath.get(`/docs${rule.source}`)?.redirects ?? 0;
 	const live = rules.filter(rule => !rule.shadowedBy);
@@ -285,6 +329,15 @@ function formatRedirectRulesReport({title, start, end, rules, rowsByPath}) {
 		0,
 		...chained.map(rule => chainOf(rule).hops.length)
 	);
+	// Where the browser ends up: yes/no for sitemap membership, blank off-site.
+	const sitemapOf = rule => {
+		const {hops, loop} = chainOf(rule);
+		const landing = loop
+			? null
+			: landingPath((hops.at(-1) ?? rule).destination);
+		return landing === null ? '' : sitemapPaths.has(landing) ? 'yes' : 'no';
+	};
+	const landingUnlisted = live.filter(rule => sitemapOf(rule) === 'no');
 	const docsRedirects = [...rowsByPath.entries()]
 		.filter(([pagePath]) => pagePath.startsWith('/docs'))
 		.reduce((sum, [, totals]) => sum + totals.redirects, 0);
@@ -308,9 +361,15 @@ function formatRedirectRulesReport({title, start, end, rules, rowsByPath}) {
 			`source, so the browser follows more redirects (longest chain: ` +
 			`${longestChain} more). Chain shows the extra hops and where the ` +
 			'user ends up.',
+		`- Sitemap: whether the page the user ends up on is in ${SITEMAP_URL} ` +
+			`(blank when it leaves the site). ${landingUnlisted.length} live ` +
+			`rules land on an unlisted page, ${landingUnlisted.reduce(
+				(sum, rule) => sum + hitsOf(rule),
+				0
+			)} hits; on /docs that is likely a soft 404.`,
 		'',
-		'| Line | Source | Destination | Hits | Chain |',
-		'| ---: | --- | --- | ---: | --- |',
+		'| Line | Source | Destination | Hits | Chain | Sitemap |',
+		'| ---: | --- | --- | ---: | --- | --- |',
 		...sorted.map(rule => {
 			const {hops, loop} = chainOf(rule);
 			const hits = rule.shadowedBy
@@ -321,7 +380,7 @@ function formatRedirectRulesReport({title, start, end, rules, rowsByPath}) {
 				: hops.length
 					? `${hops.length} more → ${hops.at(-1).destination}`
 					: '';
-			return `| ${rule.line} | ${rule.source} | ${rule.destination} | ${hits} | ${chain} |`;
+			return `| ${rule.line} | ${rule.source} | ${rule.destination} | ${hits} | ${chain} | ${sitemapOf(rule)} |`;
 		}),
 		''
 	];
@@ -341,13 +400,18 @@ function formatReport({title, start, end, total, rows}) {
 			'5xx count any content type. Trailing-slash redirects, static ' +
 			'assets and scanner probe paths are skipped. ' +
 			'All counts are adaptive-sampled estimates.',
+		`- Sitemap: ${total.sitemapPaths} of ${total.paths} paths are in ` +
+			`${SITEMAP_URL}, with ${total.sitemapRequests} of ${total.requests} ` +
+			'requests. The rest are deleted, unlisted or probe paths; on /docs ' +
+			'they still return 200. The blog sitemap lists only recent posts.',
 		'',
-		'| Path | Requests | Visits | 3xx | 404 | 5xx |',
-		'| --- | ---: | ---: | ---: | ---: | ---: |',
+		'| Path | Requests | Visits | 3xx | 404 | 5xx | Sitemap |',
+		'| --- | ---: | ---: | ---: | ---: | ---: | --- |',
 		...rows.map(
 			row =>
 				`| ${row.path} | ${row.requests} | ${row.visits} | ` +
-				`${row.redirects} | ${row.notFound} | ${row.serverErrors} |`
+				`${row.redirects} | ${row.notFound} | ${row.serverErrors} | ` +
+				`${row.inSitemap ? 'yes' : 'no'} |`
 		),
 		''
 	];
@@ -379,13 +443,25 @@ async function main() {
 		windowStart = windowEnd;
 	}
 
+	console.log(`🗺️  Fetching ${SITEMAP_URL}...`);
+	const sitemapPaths = await fetchSitemapPaths();
 	const rows = [...rowsByPath.entries()].map(([pagePath, totals]) => ({
 		path: pagePath,
-		...totals
+		...totals,
+		inSitemap: sitemapPaths.has(pagePath)
 	}));
-	const total = {paths: rows.length, ...emptyTotals()};
+	const total = {
+		paths: rows.length,
+		...emptyTotals(),
+		sitemapPaths: 0,
+		sitemapRequests: 0
+	};
 	for (const row of rows) {
 		for (const key of Object.keys(emptyTotals())) total[key] += row[key];
+		if (row.inSitemap) {
+			total.sitemapPaths += 1;
+			total.sitemapRequests += row.requests;
+		}
 	}
 
 	// Every report has every row: sorted by a metric (descending), or by path.
@@ -437,7 +513,8 @@ async function main() {
 			start,
 			end,
 			rules: loadRedirectRules(),
-			rowsByPath
+			rowsByPath,
+			sitemapPaths
 		})
 	);
 	console.log(`✅ Wrote ${path.relative(process.cwd(), rulesTarget)}`);

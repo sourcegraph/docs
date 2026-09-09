@@ -30,13 +30,19 @@ sorted differently:
 
 Page report columns: Requests and Visits count HTML 200 responses; Visits
 is the subset whose referrer is not sourcegraph.com, Cloudflare's page-view
-proxy. 3xx, 404 and 5xx are response counts for the path.
+proxy. 3xx, 404 and 5xx are response counts for the path. Sitemap is `yes`
+when the path is listed in <https://sourcegraph.com/sitemap.xml> (an index
+over `sitemap-main.xml` for blog and changelog, and `docs/sitemap.xml`). A
+`no` on `/docs` is a deleted page or probe that still returns 200; the blog
+sitemap only lists recent posts, so `no` on `/blog` is normal for old posts.
 
 `redirect-rules.md` matches each rule's source against `/docs` 3xx counts.
 Rules are first-match-wins, like `src/middleware.ts`, so a rule whose source
 repeats an earlier one is flagged `shadowed`. The Chain column shows how
 many more redirects a browser follows when a rule's destination is itself
-another rule's source, and where the user finally lands.
+another rule's source, and where the user finally lands. Its Sitemap column
+says whether that final page is in the sitemap, blank when the redirect
+leaves the site; `no` means the rule sends people to a soft 404.
 
 ## Filters
 
@@ -75,8 +81,8 @@ From the first 90-day run, September 2026
   `/docs/code_intelligence/tutorials/indexing_go_repo` (830 requests) and
   probes such as `/docs/.zshrc` (660), `/docs/id_dsa` (480) and
   `/docs/__data.json` (990) count as page views and never surface as errors.
-  Hundreds of docs paths with traffic are in neither the sitemap nor the
-  repo, and the reports cannot tell them from real pages.
+  1,441 of 1,958 docs paths with traffic (40,690 of 277,670 docs requests)
+  are not in the docs sitemap.
 - **Redirect chains.** 269 of 962 live rules in `src/data/redirects.ts`
   redirect to another rule's source; the longest chain adds 5 hops. 11,640
   of 35,740 matched redirects landed on a chaining rule. Worst case is
@@ -86,6 +92,18 @@ From the first 90-day run, September 2026
   2 or 3 redirects.
 - **Shadowed and dead redirect rules.** 362 rules repeat an earlier rule's
   source and can never match; 689 live rules had zero hits.
+- **Redirects to soft 404s.** 175 live rules land on a `/docs` page that is
+  not in the sitemap (280 hits), and 71 more land on unlisted
+  `sourcegraph.com` paths such as `/handbook/...` and `/retrospectives/...`
+  (180 hits). Docs examples:
+  `/admin/external_services/postgres → /self-hosted/external_services/postgres`
+  and `/integration/google_gsuite → /integration/google_workspace`, which
+  both return 200 with the generic "Sourcegraph docs" title and have no
+  `.mdx` in the repo.
+- **Changelog pages missing from the sitemap.** `/changelog/releases/7.6`
+  (780 requests), `/changelog/releases/7.0` (750) and dated posts such as
+  `/changelog/2026-06-22` (330) serve real pages but are not in
+  `sitemap-main.xml`.
 - **Changelog API 5xx.**
   `/changelog/.api/changelog.v1.ChangelogService/ListReleasePosts` returned
   1,880 5xx responses. `/docs` itself returned 260.
