@@ -5,17 +5,11 @@
  *
  * Counts human page views (HTML 200s), redirects, 404s and 5xx errors on
  * sourcegraph.com for /docs, /changelog and /blog over the last 90 days
- * and writes Markdown reports to logs/ sorted by path, request count,
+ * and writes Markdown reports to reports/ sorted by path, request count,
  * redirect count and error count, plus how often each redirect rule in
- * src/data/redirects.ts was followed.
+ * src/data/redirects.ts was followed. See README.md.
  *
- * Filters: Bot Management "likely_human", excluding Hetzner (a single
- * hosting provider that dwarfs real German traffic) and China.
- *
- * Requires CLOUDFLARE_API_TOKEN with "Zone > Analytics > Read" on the
- * sourcegraph.com zone.
- *
- * Usage: CLOUDFLARE_API_TOKEN=... node dev/page-views-report.mjs [--days 90]
+ * Usage: CLOUDFLARE_API_TOKEN=... npm run page-views-report [-- --days 90]
  */
 
 import fs from 'fs';
@@ -57,8 +51,9 @@ const PAGE_SIZE = 10000;
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 
-const REPO_ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
-const LOGS_DIR = path.join(REPO_ROOT, 'logs');
+const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = path.dirname(SCRIPT_DIR);
+const REPORTS_DIR = path.join(SCRIPT_DIR, 'reports');
 const REDIRECTS_FILE = path.join(REPO_ROOT, 'src', 'data', 'redirects.ts');
 
 // One `{source: '...', destination: '...' | CONSTANT}` entry in redirects.ts.
@@ -413,14 +408,14 @@ async function main() {
 		}
 	];
 
-	fs.mkdirSync(LOGS_DIR, {recursive: true});
+	fs.mkdirSync(REPORTS_DIR, {recursive: true});
 	for (const {file, title, metric} of reports) {
 		const reportRows = [...rows].sort(
 			(a, b) =>
 				(metric ? metric(b) - metric(a) : 0) ||
 				a.path.localeCompare(b.path)
 		);
-		const target = path.join(LOGS_DIR, file);
+		const target = path.join(REPORTS_DIR, file);
 		fs.writeFileSync(
 			target,
 			formatReport({
@@ -434,7 +429,7 @@ async function main() {
 		console.log(`✅ Wrote ${path.relative(process.cwd(), target)}`);
 	}
 
-	const rulesTarget = path.join(LOGS_DIR, 'redirect-rules.md');
+	const rulesTarget = path.join(REPORTS_DIR, 'redirect-rules.md');
 	fs.writeFileSync(
 		rulesTarget,
 		formatRedirectRulesReport({
