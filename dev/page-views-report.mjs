@@ -188,6 +188,7 @@ async function fetchWindow(token, start, end, rowsByPath) {
 		`  ${start.toISOString()} – ${end.toISOString()}: ${rows.length} paths`
 	);
 	for (const row of rows) {
+		if (isTrailingSlashRedirect(row)) continue;
 		const pagePath = normalizePath(row.dimensions.clientRequestPath);
 		if (isNoisePath(pagePath)) continue;
 		const totals = rowsByPath.get(pagePath) ?? emptyTotals();
@@ -199,6 +200,16 @@ async function fetchWindow(token, start, end, rowsByPath) {
 // Merge trailing-slash variants of the same page.
 function normalizePath(pagePath) {
 	return pagePath.length > 1 ? pagePath.replace(/\/+$/, '') : pagePath;
+}
+
+// The site redirects "/page/" to "/page"; that redirect is not worth counting.
+function isTrailingSlashRedirect(row) {
+	const {clientRequestPath, edgeResponseStatus} = row.dimensions;
+	return (
+		clientRequestPath.length > 1 &&
+		clientRequestPath.endsWith('/') &&
+		REDIRECT_STATUSES.includes(edgeResponseStatus)
+	);
 }
 
 // Totals cover every path, so the header is identical across reports.
@@ -217,8 +228,8 @@ function formatReport({title, start, end, total, rows}) {
 		'- Requests and Visits count HTML 200 responses. Visits = requests ' +
 			"whose referrer is not sourcegraph.com (Cloudflare's page-view proxy).",
 		`- 3xx counts redirects (${REDIRECT_STATUSES.join(', ')}); 404 and ` +
-			'5xx count any content type. Static assets and scanner ' +
-			'probe paths are skipped. ' +
+			'5xx count any content type. Trailing-slash redirects, static ' +
+			'assets and scanner probe paths are skipped. ' +
 			'All counts are adaptive-sampled estimates.',
 		'',
 		'| Path | Requests | Visits | 3xx | 404 | 5xx |',
@@ -267,8 +278,7 @@ async function main() {
 		for (const key of Object.keys(emptyTotals())) total[key] += row[key];
 	}
 
-	// Each report sorts by a metric (descending) and drops rows where it
-	// is zero; the by-path report keeps every row in path order.
+	// Every report has every row: sorted by a metric (descending), or by path.
 	const reports = [
 		{file: 'page-views-by-path.md', title: 'Page views by path'},
 		{
@@ -290,15 +300,11 @@ async function main() {
 
 	fs.mkdirSync(LOGS_DIR, {recursive: true});
 	for (const {file, title, metric} of reports) {
-		const reportRows = metric
-			? rows
-					.filter(row => metric(row) > 0)
-					.sort(
-						(a, b) =>
-							metric(b) - metric(a) ||
-							a.path.localeCompare(b.path)
-					)
-			: [...rows].sort((a, b) => a.path.localeCompare(b.path));
+		const reportRows = [...rows].sort(
+			(a, b) =>
+				(metric ? metric(b) - metric(a) : 0) ||
+				a.path.localeCompare(b.path)
+		);
 		const target = path.join(LOGS_DIR, file);
 		fs.writeFileSync(
 			target,
