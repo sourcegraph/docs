@@ -56,4 +56,44 @@ another rule's source, and where the user finally lands.
   not exact totals.
 - Blog and changelog pages are served from `github.com/sourcegraph/sourcegraph`
   (`blog/`, `changelog/`, `cmd/docs/`), not this repo, so `redirect-rules.md`
-  only covers `/docs`.
+  only covers `/docs`. That site's only redirects are the `REDIRECTS` map in
+  `cmd/docs/src/hooks.server.ts` (30 exact-match 301s, mostly marketing
+  paths) plus a 302 in `changelog/pagination.ts` for out-of-range `?page=`.
+  Two rules touch our prefixes, and both show in the page reports as 3xx:
+  `/blog/rss.xml → /blog/feed.rss` (21,790 hits in 90 days, 94% of all
+  blog + changelog redirects) and
+  `/changelog/self-hosted/server → /changelog/self-hosted/kubernetes` (110).
+  Cloudflare's path dimension drops the query string, so pagination
+  redirects land on the bare `/changelog` and `/changelog/releases` rows.
+
+## Problems found
+
+From the first 90-day run, September 2026
+([thread](https://ampcode.com/threads/T-01a08479-a4c8-72ad-8f31-fe7ecc43bf34)):
+
+- **Docs soft-404s.** `/docs/<anything>` returns 200, so deleted pages such as
+  `/docs/code_intelligence/tutorials/indexing_go_repo` (830 requests) and
+  probes such as `/docs/.zshrc` (660), `/docs/id_dsa` (480) and
+  `/docs/__data.json` (990) count as page views and never surface as errors.
+  Hundreds of docs paths with traffic are in neither the sitemap nor the
+  repo, and the reports cannot tell them from real pages.
+- **Redirect chains.** 269 of 962 live rules in `src/data/redirects.ts`
+  redirect to another rule's source; the longest chain adds 5 hops. 11,640
+  of 35,740 matched redirects landed on a chaining rule. Worst case is
+  `/code_navigation/explanations/precise_code_navigation`, 3 redirects to
+  reach `/code-navigation/precise-code-navigation`; the three
+  `precise_code_navigation` rules alone send about 5,500 visitors through
+  2 or 3 redirects.
+- **Shadowed and dead redirect rules.** 362 rules repeat an earlier rule's
+  source and can never match; 689 live rules had zero hits.
+- **Changelog API 5xx.**
+  `/changelog/.api/changelog.v1.ChangelogService/ListReleasePosts` returned
+  1,880 5xx responses. `/docs` itself returned 260.
+- **Missing blog feed redirects.** `/blog/feed.atom` (3,410) and
+  `/blog/feed.xml` (1,000) 404, while `/blog/rss.xml` redirects 21,790
+  times. Feed readers are still polling the old URLs.
+- **Old versioned docs paths.** 75 `/docs/@vX.Y/...` paths still receive
+  traffic.
+- **Redirect rule added mid-window.** `/changelog/self-hosted/server` shows
+  150 requests served as 200 alongside 110 redirects, so the rule likely
+  landed partway through the 90 days.
