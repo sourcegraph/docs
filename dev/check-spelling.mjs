@@ -3,8 +3,9 @@
 /**
  * Reports CSpell findings on lines added by a Git diff.
  *
- * Usage: node dev/check-spelling.mjs --base <revision> [--format text|markdown]
+ * Usage: node dev/check-spelling.mjs --base <revision> [--format text|json]
  *
+ * The json format feeds dev/post-spelling-review.mjs.
  * Exits 1 when spelling issues are found and 2 for operational errors.
  */
 
@@ -62,6 +63,7 @@ function runCSpell(files) {
 		'cspell',
 		[
 			'--no-progress',
+			'--show-suggestions',
 			'--reporter',
 			'@cspell/cspell-json-reporter',
 			'--file',
@@ -84,6 +86,7 @@ function runCSpell(files) {
 		line: issue.row,
 		column: issue.col,
 		word: issue.text,
+		suggestions: issue.suggestions?.slice(0, 3) ?? [],
 		context: issue.context?.text.trim() ?? issue.line.text.trim()
 	}));
 }
@@ -94,17 +97,6 @@ function findingsOnAddedLines(ranges, issues) {
 			([start, end]) => issue.line >= start && issue.line <= end
 		)
 	);
-}
-
-function groupByFile(findings) {
-	const grouped = new Map();
-	for (const finding of findings) {
-		if (!grouped.has(finding.file)) {
-			grouped.set(finding.file, []);
-		}
-		grouped.get(finding.file).push(finding);
-	}
-	return grouped;
 }
 
 function formatText(findings) {
@@ -123,37 +115,12 @@ function formatText(findings) {
 	return lines.join('\n') + '\n';
 }
 
-function formatMarkdown(findings) {
-	if (findings.length === 0) {
-		return '### ✅ No spelling errors found in this PR\n';
-	}
-
-	const lines = [
-		`### ⚠️ CSpell found ${findings.length} spelling error(s) in this PR`,
-		'',
-		'Only findings on lines added by this PR are shown.',
-		''
-	];
-	for (const [file, fileFindings] of groupByFile(findings)) {
-		lines.push(`**\`${file}\`**`);
-		for (const {line, column, word, context} of fileFindings) {
-			const excerpt = context.replaceAll('`', "'").slice(0, 160);
-			lines.push(
-				`- line ${line}, column ${column}: \`${word}\` — \`${excerpt}\``
-			);
-		}
-		lines.push('');
-	}
-	lines.push('Run `pnpm spellcheck` locally to check the full repository.');
-	return lines.join('\n') + '\n';
-}
-
 async function main() {
 	if (!BASE) {
 		throw new Error('Missing required --base <revision>');
 	}
-	if (!['text', 'markdown'].includes(FORMAT)) {
-		throw new Error(`Unknown --format "${FORMAT}"; use text or markdown`);
+	if (!['text', 'json'].includes(FORMAT)) {
+		throw new Error(`Unknown --format "${FORMAT}"; use text or json`);
 	}
 
 	const ranges = addedLineRanges(BASE);
@@ -162,7 +129,9 @@ async function main() {
 		runCSpell([...ranges.keys()])
 	);
 	process.stdout.write(
-		FORMAT === 'markdown' ? formatMarkdown(findings) : formatText(findings)
+		FORMAT === 'json'
+			? JSON.stringify(findings, null, '\t') + '\n'
+			: formatText(findings)
 	);
 	process.exit(findings.length === 0 ? 0 : 1);
 }
