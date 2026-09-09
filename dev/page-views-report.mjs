@@ -3,7 +3,7 @@
 /**
  * Page views report from Cloudflare's GraphQL Analytics API.
  *
- * Counts human page views (HTML 200s), 404s and 5xx errors on
+ * Counts human page views (HTML 200s), redirects, 404s and 5xx errors on
  * sourcegraph.com for /docs, /changelog and /blog over the last 90 days
  * and writes two Markdown reports to logs/: one sorted by path, one
  * sorted by request count.
@@ -88,6 +88,7 @@ function buildFilter(start, end) {
 						edgeResponseStatus: 200,
 						edgeResponseContentTypeName: 'html'
 					},
+					{edgeResponseStatus_geq: 300, edgeResponseStatus_lt: 400},
 					{edgeResponseStatus: 404},
 					{edgeResponseStatus_geq: 500, edgeResponseStatus_lt: 600}
 				]
@@ -97,7 +98,13 @@ function buildFilter(start, end) {
 }
 
 function emptyTotals() {
-	return {requests: 0, visits: 0, notFound: 0, serverErrors: 0};
+	return {
+		requests: 0,
+		visits: 0,
+		redirects: 0,
+		notFound: 0,
+		serverErrors: 0
+	};
 }
 
 function addRow(totals, row) {
@@ -105,6 +112,8 @@ function addRow(totals, row) {
 	if (status === 200) {
 		totals.requests += row.count;
 		totals.visits += row.sum.visits;
+	} else if (status >= 300 && status < 400) {
+		totals.redirects += row.count;
 	} else if (status === 404) {
 		totals.notFound += row.count;
 	} else if (status >= 500) {
@@ -186,18 +195,19 @@ function formatReport({title, start, end, rows}) {
 			`excluding ASN ${EXCLUDED_ASN_DESCRIPTIONS.join(', ')}; ` +
 			`excluding countries ${EXCLUDED_COUNTRIES.join(', ')}`,
 		`- Totals: ${rows.length} paths, ${total.requests} requests, ` +
-			`${total.visits} visits, ${total.notFound} 404s, ${total.serverErrors} 5xx`,
+			`${total.visits} visits, ${total.redirects} 3xx, ` +
+			`${total.notFound} 404s, ${total.serverErrors} 5xx`,
 		'- Requests and Visits count HTML 200 responses. Visits = requests ' +
 			"whose referrer is not sourcegraph.com (Cloudflare's page-view proxy).",
-		'- 404 and 5xx count responses of any content type. ' +
+		'- 3xx, 404 and 5xx count responses of any content type. ' +
 			'All counts are adaptive-sampled estimates.',
 		'',
-		'| Path | Requests | Visits | 404 | 5xx |',
-		'| --- | ---: | ---: | ---: | ---: |',
+		'| Path | Requests | Visits | 3xx | 404 | 5xx |',
+		'| --- | ---: | ---: | ---: | ---: | ---: |',
 		...rows.map(
 			row =>
 				`| ${row.path} | ${row.requests} | ${row.visits} | ` +
-				`${row.notFound} | ${row.serverErrors} |`
+				`${row.redirects} | ${row.notFound} | ${row.serverErrors} |`
 		),
 		''
 	];
