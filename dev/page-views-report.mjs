@@ -5,8 +5,8 @@
  *
  * Counts human page views (HTML 200s), redirects, 404s and 5xx errors on
  * sourcegraph.com for /docs, /changelog and /blog over the last 90 days
- * and writes two Markdown reports to logs/: one sorted by path, one
- * sorted by request count.
+ * and writes Markdown reports to logs/ sorted by path, request count,
+ * redirect count and error count.
  *
  * Filters: Bot Management "likely_human", excluding Hetzner (a single
  * hosting provider that dwarfs real German traffic) and China.
@@ -27,6 +27,14 @@ const HOST = 'sourcegraph.com';
 const PATH_PREFIXES = ['/docs', '/changelog', '/blog'];
 const EXCLUDED_COUNTRIES = ['CN'];
 const EXCLUDED_ASN_DESCRIPTIONS = ['Hetzner Online GmbH'];
+
+// Real redirects only; 304 Not Modified is a cache revalidation.
+const REDIRECT_STATUSES = [301, 302, 303, 307, 308];
+
+// Build output and static assets are not pages. Feeds (.xml, .rss, .atom)
+// are kept because their 404s and redirects are worth knowing about.
+const STATIC_ASSET_PATTERN =
+	/\/_next\/|\.(js|css|map|png|jpe?g|gif|svg|ico|webp|woff2?|ttf)$/i;
 
 // Zone limits reported by the `settings` query: 32 days per query,
 // 90 days of history, 10,000 rows per page.
@@ -88,7 +96,7 @@ function buildFilter(start, end) {
 						edgeResponseStatus: 200,
 						edgeResponseContentTypeName: 'html'
 					},
-					{edgeResponseStatus_geq: 300, edgeResponseStatus_lt: 400},
+					{edgeResponseStatus_in: REDIRECT_STATUSES},
 					{edgeResponseStatus: 404},
 					{edgeResponseStatus_geq: 500, edgeResponseStatus_lt: 600}
 				]
@@ -112,7 +120,7 @@ function addRow(totals, row) {
 	if (status === 200) {
 		totals.requests += row.count;
 		totals.visits += row.sum.visits;
-	} else if (status >= 300 && status < 400) {
+	} else if (REDIRECT_STATUSES.includes(status)) {
 		totals.redirects += row.count;
 	} else if (status === 404) {
 		totals.notFound += row.count;
@@ -170,6 +178,7 @@ async function fetchWindow(token, start, end, rowsByPath) {
 	);
 	for (const row of rows) {
 		const pagePath = normalizePath(row.dimensions.clientRequestPath);
+		if (STATIC_ASSET_PATTERN.test(pagePath)) continue;
 		const totals = rowsByPath.get(pagePath) ?? emptyTotals();
 		addRow(totals, row);
 		rowsByPath.set(pagePath, totals);
@@ -181,11 +190,8 @@ function normalizePath(pagePath) {
 	return pagePath.length > 1 ? pagePath.replace(/\/+$/, '') : pagePath;
 }
 
-function formatReport({title, start, end, rows}) {
-	const total = rows.reduce((sum, row) => {
-		for (const key of Object.keys(sum)) sum[key] += row[key];
-		return sum;
-	}, emptyTotals());
+// Totals cover every path, so the header is identical across reports.
+function formatReport({title, start, end, total, rows}) {
 	const lines = [
 		`# ${title}`,
 		'',
@@ -194,12 +200,13 @@ function formatReport({title, start, end, rows}) {
 		`- Filters: Bot Management likely_human; ` +
 			`excluding ASN ${EXCLUDED_ASN_DESCRIPTIONS.join(', ')}; ` +
 			`excluding countries ${EXCLUDED_COUNTRIES.join(', ')}`,
-		`- Totals: ${rows.length} paths, ${total.requests} requests, ` +
+		`- Totals: ${total.paths} paths, ${total.requests} requests, ` +
 			`${total.visits} visits, ${total.redirects} 3xx, ` +
 			`${total.notFound} 404s, ${total.serverErrors} 5xx`,
 		'- Requests and Visits count HTML 200 responses. Visits = requests ' +
 			"whose referrer is not sourcegraph.com (Cloudflare's page-view proxy).",
-		'- 3xx, 404 and 5xx count responses of any content type. ' +
+		`- 3xx counts redirects (${REDIRECT_STATUSES.join(', ')}); 404 and ` +
+			'5xx count any content type. Static assets are skipped. ' +
 			'All counts are adaptive-sampled estimates.',
 		'',
 		'| Path | Requests | Visits | 3xx | 404 | 5xx |',
@@ -243,26 +250,54 @@ async function main() {
 		path: pagePath,
 		...totals
 	}));
+	const total = {paths: rows.length, ...emptyTotals()};
+	for (const row of rows) {
+		for (const key of Object.keys(emptyTotals())) total[key] += row[key];
+	}
 
-	fs.mkdirSync(LOGS_DIR, {recursive: true});
+	// Each report sorts by a metric (descending) and drops rows where it
+	// is zero; the by-path report keeps every row in path order.
 	const reports = [
-		{
-			file: 'page-views-by-path.md',
-			title: `Page views by path (last ${days} days)`,
-			rows: [...rows].sort((a, b) => a.path.localeCompare(b.path))
-		},
+		{file: 'page-views-by-path.md', title: 'Page views by path'},
 		{
 			file: 'page-views-by-count.md',
-			title: `Page views by request count (last ${days} days)`,
-			rows: [...rows].sort(
-				(a, b) =>
-					b.requests - a.requests || a.path.localeCompare(b.path)
-			)
+			title: 'Page views by request count',
+			metric: row => row.requests
+		},
+		{
+			file: 'page-views-by-redirects.md',
+			title: 'Page views by redirect count',
+			metric: row => row.redirects
+		},
+		{
+			file: 'page-views-by-errors.md',
+			title: 'Page views by error count (404 + 5xx)',
+			metric: row => row.notFound + row.serverErrors
 		}
 	];
-	for (const report of reports) {
-		const target = path.join(LOGS_DIR, report.file);
-		fs.writeFileSync(target, formatReport({...report, start, end}));
+
+	fs.mkdirSync(LOGS_DIR, {recursive: true});
+	for (const {file, title, metric} of reports) {
+		const reportRows = metric
+			? rows
+					.filter(row => metric(row) > 0)
+					.sort(
+						(a, b) =>
+							metric(b) - metric(a) ||
+							a.path.localeCompare(b.path)
+					)
+			: [...rows].sort((a, b) => a.path.localeCompare(b.path));
+		const target = path.join(LOGS_DIR, file);
+		fs.writeFileSync(
+			target,
+			formatReport({
+				title: `${title} (last ${days} days)`,
+				start,
+				end,
+				total,
+				rows: reportRows
+			})
+		);
 		console.log(`✅ Wrote ${path.relative(process.cwd(), target)}`);
 	}
 	console.log(`\n${rows.length} paths total.`);
