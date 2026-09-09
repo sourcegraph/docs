@@ -3,13 +3,13 @@
 /**
  * Page views report from Cloudflare's GraphQL Analytics API.
  *
- * Counts human page views on sourcegraph.com for /docs, /changelog and
- * /blog over the last 90 days and writes two Markdown reports to logs/:
- * one sorted by path, one sorted by request count.
+ * Counts human page views (HTML 200s), 404s and 5xx errors on
+ * sourcegraph.com for /docs, /changelog and /blog over the last 90 days
+ * and writes two Markdown reports to logs/: one sorted by path, one
+ * sorted by request count.
  *
- * Filters: HTML 200 responses, Bot Management "likely_human", excluding
- * Hetzner (a single hosting provider that dwarfs real German traffic)
- * and China.
+ * Filters: Bot Management "likely_human", excluding Hetzner (a single
+ * hosting provider that dwarfs real German traffic) and China.
  *
  * Requires CLOUDFLARE_API_TOKEN with "Zone > Analytics > Read" on the
  * sourcegraph.com zone.
@@ -49,7 +49,7 @@ query PageViews($zoneTag: string!, $filter: ZoneHttpRequestsAdaptiveGroupsFilter
 			httpRequestsAdaptiveGroups(limit: ${PAGE_SIZE}, filter: $filter, orderBy: [count_DESC]) {
 				count
 				sum { visits }
-				dimensions { clientRequestPath }
+				dimensions { clientRequestPath edgeResponseStatus }
 			}
 		}
 	}
@@ -72,16 +72,44 @@ function buildFilter(start, end) {
 		datetime_geq: start.toISOString(),
 		datetime_lt: end.toISOString(),
 		clientRequestHTTPHost: HOST,
-		edgeResponseStatus: 200,
-		edgeResponseContentTypeName: 'html',
 		botManagementDecision: 'likely_human',
 		clientASNDescription_notin: EXCLUDED_ASN_DESCRIPTIONS,
 		clientCountryName_notin: EXCLUDED_COUNTRIES,
-		OR: PATH_PREFIXES.flatMap(prefix => [
-			{clientRequestPath: prefix},
-			{clientRequestPath_like: `${prefix}/%`}
-		])
+		AND: [
+			{
+				OR: PATH_PREFIXES.flatMap(prefix => [
+					{clientRequestPath: prefix},
+					{clientRequestPath_like: `${prefix}/%`}
+				])
+			},
+			{
+				OR: [
+					{
+						edgeResponseStatus: 200,
+						edgeResponseContentTypeName: 'html'
+					},
+					{edgeResponseStatus: 404},
+					{edgeResponseStatus_geq: 500, edgeResponseStatus_lt: 600}
+				]
+			}
+		]
 	};
+}
+
+function emptyTotals() {
+	return {requests: 0, visits: 0, notFound: 0, serverErrors: 0};
+}
+
+function addRow(totals, row) {
+	const status = row.dimensions.edgeResponseStatus;
+	if (status === 200) {
+		totals.requests += row.count;
+		totals.visits += row.sum.visits;
+	} else if (status === 404) {
+		totals.notFound += row.count;
+	} else if (status >= 500) {
+		totals.serverErrors += row.count;
+	}
 }
 
 async function queryCloudflare(token, variables) {
@@ -133,9 +161,8 @@ async function fetchWindow(token, start, end, rowsByPath) {
 	);
 	for (const row of rows) {
 		const pagePath = normalizePath(row.dimensions.clientRequestPath);
-		const totals = rowsByPath.get(pagePath) ?? {requests: 0, visits: 0};
-		totals.requests += row.count;
-		totals.visits += row.sum.visits;
+		const totals = rowsByPath.get(pagePath) ?? emptyTotals();
+		addRow(totals, row);
 		rowsByPath.set(pagePath, totals);
 	}
 }
@@ -146,23 +173,32 @@ function normalizePath(pagePath) {
 }
 
 function formatReport({title, start, end, rows}) {
-	const totalRequests = rows.reduce((sum, row) => sum + row.requests, 0);
-	const totalVisits = rows.reduce((sum, row) => sum + row.visits, 0);
+	const total = rows.reduce((sum, row) => {
+		for (const key of Object.keys(sum)) sum[key] += row[key];
+		return sum;
+	}, emptyTotals());
 	const lines = [
 		`# ${title}`,
 		'',
 		`- Window: ${start.toISOString()} to ${end.toISOString()} (UTC)`,
 		`- Host: ${HOST}; paths: ${PATH_PREFIXES.join(', ')}`,
-		`- Filters: HTML 200 responses; Bot Management likely_human; ` +
+		`- Filters: Bot Management likely_human; ` +
 			`excluding ASN ${EXCLUDED_ASN_DESCRIPTIONS.join(', ')}; ` +
 			`excluding countries ${EXCLUDED_COUNTRIES.join(', ')}`,
-		`- Totals: ${rows.length} paths, ${totalRequests} requests, ${totalVisits} visits`,
-		'- Counts are adaptive-sampled estimates. Visits = requests whose ' +
-			"referrer is not sourcegraph.com (Cloudflare's page-view proxy).",
+		`- Totals: ${rows.length} paths, ${total.requests} requests, ` +
+			`${total.visits} visits, ${total.notFound} 404s, ${total.serverErrors} 5xx`,
+		'- Requests and Visits count HTML 200 responses. Visits = requests ' +
+			"whose referrer is not sourcegraph.com (Cloudflare's page-view proxy).",
+		'- 404 and 5xx count responses of any content type. ' +
+			'All counts are adaptive-sampled estimates.',
 		'',
-		'| Path | Requests | Visits |',
-		'| --- | ---: | ---: |',
-		...rows.map(row => `| ${row.path} | ${row.requests} | ${row.visits} |`),
+		'| Path | Requests | Visits | 404 | 5xx |',
+		'| --- | ---: | ---: | ---: | ---: |',
+		...rows.map(
+			row =>
+				`| ${row.path} | ${row.requests} | ${row.visits} | ` +
+				`${row.notFound} | ${row.serverErrors} |`
+		),
 		''
 	];
 	return lines.join('\n');
