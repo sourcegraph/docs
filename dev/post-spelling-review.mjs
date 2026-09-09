@@ -147,41 +147,42 @@ function existingCommentKey(comment) {
 	return word && findingKey({file: comment.path, line: comment.line, word});
 }
 
-// CSpell suggests case-insensitively, so list suggestions whose first letter
-// matches the case of the flagged word first.
-function orderedSuggestions({word, suggestions}) {
+// CSpell suggests case-insensitively, so prefer a suggestion whose first
+// letter matches the case of the flagged word.
+function bestSuggestion({word, suggestions}) {
 	const isUpper = letter => letter === letter.toUpperCase();
-	const matchesCase = suggestion =>
-		isUpper(suggestion[0]) === isUpper(word[0]);
-	return [
-		...suggestions.filter(matchesCase),
-		...suggestions.filter(suggestion => !matchesCase(suggestion))
-	];
-}
-
-// One GitHub suggestion block per candidate, each with its own apply button.
-// A four-backtick fence so lines containing ``` cannot break out of the block.
-function suggestionBlocks(finding) {
-	const {text, column, word} = finding;
-	const start = column - 1;
-	return orderedSuggestions(finding).map(suggestion =>
-		[
-			`\`${suggestion}\`:`,
-			'````suggestion',
-			text.slice(0, start) + suggestion + text.slice(start + word.length),
-			'````',
-			''
-		].join('\n')
+	return (
+		suggestions.find(
+			suggestion => isUpper(suggestion[0]) === isUpper(word[0])
+		) ?? suggestions[0]
 	);
 }
 
-function inlineBody(finding) {
-	const {word, suggestions} = finding;
+// One GitHub suggestion block with an apply button. A four-backtick fence so
+// lines containing ``` cannot break out of the block.
+function suggestionBlock(finding) {
+	const suggestion = bestSuggestion(finding);
+	if (!suggestion) {
+		return [];
+	}
+	const {text, column, word} = finding;
+	const start = column - 1;
 	return [
-		`${INLINE_MARKER} ${word} -->`,
-		`\`${word}\` is not in the dictionary.${suggestions.length > 0 ? ' Did you mean:' : ''}`,
+		`Did you mean \`${suggestion}\`?`,
 		'',
-		...suggestionBlocks(finding),
+		'````suggestion',
+		text.slice(0, start) + suggestion + text.slice(start + word.length),
+		'````',
+		''
+	];
+}
+
+function inlineBody(finding) {
+	return [
+		`${INLINE_MARKER} ${finding.word} -->`,
+		`\`${finding.word}\` is not in the dictionary.`,
+		'',
+		...suggestionBlock(finding),
 		`Please correct the spelling, or add the word to ${ALLOW_LIST_LINK} if it is correct.`
 	].join('\n');
 }
