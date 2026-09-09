@@ -10,8 +10,14 @@ import {ProductCard, ProductCards} from './mdx/ProductCards';
 import {QuickLink, QuickLinks} from './mdx/QuickLinks';
 
 import {Tab, Tabs} from './mdx/Tabs';
-import {PreCode, PreCodeBlock, CURRENT_VERSION_STRING, CURRENT_VERSION_STRING_NO_V} from './PreCodeBlock';
+import {
+	PreCode,
+	PreCodeBlock,
+	CURRENT_VERSION_STRING,
+	CURRENT_VERSION_STRING_NO_V
+} from './PreCodeBlock';
 import {SupportedReleasesTable, DeprecatedReleasesTable} from './ReleasesTable';
+import {TechnicalChangelogRedirect} from './TechnicalChangelogRedirect';
 import ResourceEstimator from './resource-estimator/ResourceEstimator';
 import {Badge} from './ui/badge';
 import {ZoomableImage} from './mdx/ZoomableImage';
@@ -75,6 +81,7 @@ const MdxComponents = (version?: string) => {
 		TierCallout,
 		SupportedReleasesTable,
 		DeprecatedReleasesTable,
+		TechnicalChangelogRedirect,
 		CURRENT_VERSION_STRING,
 		CURRENT_VERSION_STRING_NO_V
 	};
