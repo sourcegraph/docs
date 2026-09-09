@@ -36,7 +36,7 @@ Now that the base requirements of the project have been satisfied, we can instal
 pnpm install
 ```
 
-This also installs the CSpell development dependency. It has no special impact on normal local development and does not run automatically; run `pnpm spellcheck` explicitly when you want to check spelling.
+Spell checking is not part of the project dependencies. To run it locally: `npx cspell@10 --no-progress --dot '**/*'`
 
 Next, run the development server:
 

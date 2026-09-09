@@ -1670,6 +1670,7 @@ const redirectsData = [
 			'/cody/embeddings/usage-and-limits#configure-global-policy-match-limit'
 	},
 	{
+		// cspell:disable-next-line
 		source: '/cody/explanations/code_graph_context#limitting-the-number-of-embeddings-that-can-be-generated',
 		destination:
 			'/cody/embeddings/usage-and-limits#limit-the-number-of-embeddings-that-can-be-generated'
@@ -3771,6 +3772,7 @@ const redirectsData = [
 			'/cody/embeddings/usage-and-limits#configure-global-policy-match-limit'
 	},
 	{
+		// cspell:disable-next-line
 		source: '/cody/explanations/code_graph_context#limitting-the-number-of-embeddings-that-can-be-generated',
 		destination:
 			'/cody/embeddings/usage-and-limits#limit-the-number-of-embeddings-that-can-be-generated'

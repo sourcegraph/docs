@@ -91,7 +91,7 @@ function summaryBody(findings) {
 		}
 		lines.push('');
 	}
-	lines.push('Run `pnpm spellcheck` locally to check the full repository.');
+	lines.push("Run `npx cspell@10 --no-progress --dot '**/*'` locally to check the full repository.");
 	return lines.join('\n') + '\n';
 }
 
