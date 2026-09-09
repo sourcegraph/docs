@@ -6,7 +6,7 @@
 -   **Build**: `npm run build`
 -   **Dev**: `npm run dev`
 -   **Lint**: `npm run lint`
--   **Check links**: `npm run check-links -- --check-anchors` (CI comments on PRs that break links; see `dev/check-links.mjs`)
+-   **Check links**: `npm run check-links -- --check-anchors` (CI comments on PRs that break links; see `dev/check-links.mjs`). When moving a page or renaming a heading, update every link to it; a redirect in `src/data/redirects.ts` does not satisfy the check
 -   **Prove changed links resolve on a deploy**: `node dev/verify-links-live.mjs --site <vercel-preview-url>` prints a Markdown table for the PR description
 
 ## AI Chat Integration
