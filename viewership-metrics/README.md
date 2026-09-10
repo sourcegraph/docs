@@ -59,7 +59,7 @@ people to a soft 404; a `no` with a Chain is an intermediate hop.
   visitors who load a second page and undercounts single-page visits.
   Redirects and errors are mostly first requests from stale external
   links, so they keep the looser filter and still include some scrapers.
-- Skipped as noise: `/_next` and static assets, paths with characters
+- Skipped as noise: `/_next`, `__data.json` and static assets, paths with characters
   outside `[A-Za-z0-9/_.~@'-]` (scanner probes), and trailing-slash
   redirects. Trailing-slash variants of a page are merged.
 

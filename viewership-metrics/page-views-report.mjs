@@ -28,10 +28,11 @@ const EXCLUDED_ASN_DESCRIPTIONS = ['Hetzner Online GmbH'];
 // Real redirects only; 304 Not Modified is a cache revalidation.
 const REDIRECT_STATUSES = [301, 302, 303, 307, 308];
 
-// Build output and static assets are not pages. Feeds (.xml, .rss, .atom)
-// are kept because their 404s and redirects are worth knowing about.
+// Build output, static assets and SvelteKit __data.json fetches are not
+// pages. Feeds (.xml, .rss, .atom) are kept because their 404s and
+// redirects are worth knowing about.
 const STATIC_ASSET_PATTERN =
-	/\/_next(\/|$)|\.(js|css|map|png|jpe?g|gif|svg|ico|webp|woff2?|ttf)$/i;
+	/\/(_next|__data\.json)(\/|$)|\.(js|css|map|png|jpe?g|gif|svg|ico|webp|woff2?|ttf)$/i;
 
 // Real page URLs only use these characters; anything else is a scanner
 // probe or injection payload, for example "(A(x))", "%3Cscript%3E", "..;/".

@@ -1,28 +1,28 @@
 # Redirect rules by hits (last 90 days)
 
-- Window: 2026-06-11T09:00:00.000Z to 2026-09-09T08:00:00.000Z (UTC)
+- Window: 2026-06-12T06:00:00.000Z to 2026-09-10T05:00:00.000Z (UTC)
 - Host: sourcegraph.com; paths: /docs, /changelog, /blog
-- Filters: Bot Management likely_human; excluding ASN Hetzner Online GmbH; excluding countries CN
-- Rules: 1324 in src/data/redirects.ts; 962 live, 362 shadowed by an earlier rule with the same source (never match), 689 live with zero hits
-- Hits: 35740 redirects matched a rule, of 41820 redirects on /docs paths (the rest are version and other redirects)
+- Filters: Bot Management likely_human; GET; excluding ASN Hetzner Online GmbH; excluding countries CN. Requests and Visits also require JS detection passed, which excludes the first page of each visit.
+- Rules: 1324 in src/data/redirects.ts; 962 live, 362 shadowed by an earlier rule with the same source (never match), 691 live with zero hits
+- Hits: 35490 redirects matched a rule, of 41570 redirects on /docs paths (the rest are version and other redirects)
 - Hits count 3xx responses on /docs<Source> with the same filters as the page views reports; adaptive-sampled estimates.
 - Chains: 269 live rules redirect to another rule's source, so the browser follows more redirects (longest chain: 5 more). Chain shows the extra hops and where the user ends up.
-- Sitemap: whether the rule's destination is in https://sourcegraph.com/sitemap.xml (blank when it leaves the site). 512 live rules point at an unlisted page, 12100 hits; unless Chain shows a further redirect, on /docs that is likely a soft 404.
+- Sitemap: whether the rule's destination is in https://sourcegraph.com/sitemap.xml (blank when it leaves the site). 512 live rules point at an unlisted page, 12190 hits; unless Chain shows a further redirect, on /docs that is likely a soft 404.
 
 | Line | Source | Destination | Hits | Chain | Sitemap |
 | ---: | --- | --- | ---: | --- | --- |
 | 4745 | /code-search/code-navigation/precise_code_navigation | /code-navigation/precise_code_navigation | 2060 | 1 more → /code-navigation/precise-code-navigation | no |
-| 5585 | /code-navigation/precise_code_navigation | /code-navigation/precise-code-navigation | 1980 |  | yes |
-| 2193 | /code_navigation/explanations/precise_code_navigation | /code-search/code-navigation/precise_code_navigation | 1470 | 2 more → /code-navigation/precise-code-navigation | no |
+| 5585 | /code-navigation/precise_code_navigation | /code-navigation/precise-code-navigation | 1920 |  | yes |
+| 2193 | /code_navigation/explanations/precise_code_navigation | /code-search/code-navigation/precise_code_navigation | 1550 | 2 more → /code-navigation/precise-code-navigation | no |
 | 1952 | /code_search/reference/language | /code-search/queries/language | 1200 |  | yes |
-| 1942 | /code_search/reference/queries | /code-search/queries | 1120 |  | yes |
-| 4485 | /pricing | https://sourcegraph.com/pricing | 850 |  | yes |
+| 1942 | /code_search/reference/queries | /code-search/queries | 1020 |  | yes |
+| 4485 | /pricing | https://sourcegraph.com/pricing | 830 |  | yes |
 | 4873 | /admin/deploy/kubernetes | /self-hosted/deploy/kubernetes | 710 |  | yes |
-| 4769 | /code-search/code-navigation/writing_an_indexer | /code-navigation/writing_an_indexer | 630 | 1 more → /code-navigation/writing-an-indexer | no |
-| 5597 | /code-navigation/writing_an_indexer | /code-navigation/writing-an-indexer | 620 |  | yes |
-| 1290 | /code_intelligence | /code_navigation | 590 | 2 more → /code-navigation | no |
-| 1958 | /code_navigation | /code-search/code-navigation | 590 | 1 more → /code-navigation | no |
-| 4737 | /code-search/code-navigation | /code-navigation | 570 |  | yes |
+| 5597 | /code-navigation/writing_an_indexer | /code-navigation/writing-an-indexer | 590 |  | yes |
+| 1958 | /code_navigation | /code-search/code-navigation | 580 | 1 more → /code-navigation | no |
+| 4737 | /code-search/code-navigation | /code-navigation | 580 |  | yes |
+| 4769 | /code-search/code-navigation/writing_an_indexer | /code-navigation/writing_an_indexer | 580 | 1 more → /code-navigation/writing-an-indexer | no |
+| 1290 | /code_intelligence | /code_navigation | 550 | 2 more → /code-navigation | no |
 | 4473 | /cody/capabilities/commands | /cody/capabilities/prompts | 500 |  | yes |
 | 4519 | /pricing/plans | https://sourcegraph.com/pricing | 500 |  | yes |
 | 4682 | /code-search/code-navigation/auto_indexing | /code-navigation/auto_indexing | 490 | 1 more → /code-navigation/auto-indexing | no |
@@ -30,60 +30,60 @@
 | 2430 | /code_navigation/references/indexers | /code-search/code-navigation/writing_an_indexer#sourcegraph-recommended-indexers | 450 | 2 more → /code-navigation/writing-an-indexer | no |
 | 2496 | /batch_changes | /batch-changes | 440 |  | yes |
 | 5313 | /admin/code_hosts/github | /admin/code-hosts/github | 440 |  | yes |
-| 5824 | /admin/config | /admin | 440 |  | yes |
+| 5824 | /admin/config | /admin | 430 |  | yes |
 | 4609 | /code-search/types/deep-search | /deep-search | 410 |  | yes |
 | 1869 | /code_search | /code-search | 400 |  | yes |
-| 5542 | /code-navigation/auto_indexing | /code-navigation/auto-indexing | 400 |  | yes |
-| 5828 | /admin/repo/permissions | /admin/permissions | 370 |  | yes |
+| 5542 | /code-navigation/auto_indexing | /code-navigation/auto-indexing | 390 |  | yes |
+| 5828 | /admin/repo/permissions | /admin/permissions | 380 |  | yes |
 | 714 | /admin/analytics | /analytics | 360 |  | yes |
 | 1128 | /code_intelligence/explanations/precise_code_intelligence | /code_navigation/explanations/precise_code_navigation | 330 | 3 more → /code-navigation/precise-code-navigation | no |
 | 1376 | /cody/overview | /cody/ | 330 |  | yes |
 | 5200 | /admin/updates | /self-hosted/updates | 330 |  | yes |
-| 4853 | /admin/deploy | /self-hosted/deploy | 320 |  | yes |
+| 4853 | /admin/deploy | /self-hosted/deploy | 310 |  | yes |
 | 5150 | /admin/observability/troubleshooting | /self-hosted/observability/troubleshooting | 310 |  | yes |
 | 999 | /admin/install/kubernetes | /admin/deploy/kubernetes | 290 | 1 more → /self-hosted/deploy/kubernetes | no |
 | 1115 | /code_intelligence/explanations/auto_indexing | /code_navigation/explanations/auto_indexing | 290 | 3 more → /code-navigation/auto-indexing | no |
 | 4821 | /admin/deploy/docker-compose | /self-hosted/deploy/docker-compose | 290 |  | yes |
-| 4849 | /admin/deploy/docker-single-container | /self-hosted/deploy | 280 |  | yes |
+| 4719 | /code-search/code-navigation/how-to/index_a_go_repository | /code-navigation/how-to/index_a_go_repository | 270 | 1 more → /code-navigation/how-to/index-a-go-repository | no |
 | 1107 | /code_intelligence/explanations/writing_an_indexer | /code_navigation/explanations/writing_an_indexer | 260 | 3 more → /code-navigation/writing-an-indexer | no |
 | 1071 | /admin/install/docker | /self-hosted/deploy | 250 |  | yes |
 | 1862 | /cody/custom-commands | /cody/capabilities/commands#custom-commands | 250 | 1 more → /cody/capabilities/prompts | no |
 | 2360 | /code_navigation/explanations/auto_indexing | /code-search/code-navigation/auto_indexing | 250 | 2 more → /code-navigation/auto-indexing | no |
-| 4719 | /code-search/code-navigation/how-to/index_a_go_repository | /code-navigation/how-to/index_a_go_repository | 240 | 1 more → /code-navigation/how-to/index-a-go-repository | no |
+| 4849 | /admin/deploy/docker-single-container | /self-hosted/deploy | 240 |  | yes |
 | 5305 | /admin/code_hosts/bitbucket_server | /admin/code-hosts/bitbucket-server | 240 |  | yes |
 | 5758 | /self-hosted/how-to/dirty_database | /self-hosted/how-to/dirty-database | 230 |  | yes |
 | 2531 | /batch_changes/explanations/how_src_executes_a_batch_spec | /batch-changes/how-src-executes-a-batch-spec | 220 |  | yes |
 | 4552 | /cody/capabilities/agentic-chat | /cody/capabilities/agentic-context-fetching | 220 |  | yes |
 | 4658 | /admin/access_control/service_accounts | /admin/service_accounts | 200 | 1 more → /admin/service-accounts | no |
 | 4723 | /code-search/code-navigation/how-to/index_a_typescript_and_javascript_repository | /code-navigation/how-to/index_a_typescript_and_javascript_repository | 200 | 1 more → /code-navigation/how-to/index-a-typescript-and-javascript-repository | no |
-| 4865 | /admin/deploy/kubernetes/configure | /self-hosted/deploy/kubernetes/configure | 200 |  | yes |
 | 4937 | /admin/deploy/resource_estimator | /self-hosted/deploy/resource_estimator | 200 | 1 more → /self-hosted/deploy/resource-estimator | no |
 | 5409 | /cli/how-tos/creating_an_access_token | /cli/how-tos/creating-an-access-token | 200 |  | yes |
+| 5609 | /code-search/working/search_contexts | /code-search/working/search-contexts | 200 |  | yes |
+| 1195 | /code_intelligence/how-to/index_a_cpp_repository | https://sourcegraph.com/github.com/sourcegraph/scip-clang/-/blob/README.md#usage | 180 |  | no |
 | 2657 | /batch_changes/references/batch_spec_yaml_reference | /batch-changes/batch-spec-yaml-reference | 180 |  | yes |
 | 4702 | /code-search/code-navigation/features | /code-navigation/features | 180 |  | yes |
-| 5609 | /code-search/working/search_contexts | /code-search/working/search-contexts | 180 |  | yes |
+| 4865 | /admin/deploy/kubernetes/configure | /self-hosted/deploy/kubernetes/configure | 180 |  | yes |
 | 5122 | /admin/observability/dashboards | /self-hosted/observability/dashboards | 170 |  | yes |
 | 5353 | /admin/config/site_config | /admin/config/site-config | 170 |  | yes |
 | 5405 | /api/stream_api | /api/stream-api | 170 |  | yes |
 | 979 | /admin/install | /admin/deploy | 160 | 1 more → /self-hosted/deploy | no |
 | 5037 | /admin/how-to/dirty_database | /self-hosted/how-to/dirty_database | 160 | 1 more → /self-hosted/how-to/dirty-database | no |
 | 2011 | /code_navigation/how-to/index_a_typescript_and_javascript_repository | /code-search/code-navigation/how-to/index_a_typescript_and_javascript_repository | 150 | 2 more → /code-navigation/how-to/index-a-typescript-and-javascript-repository | no |
-| 5538 | /code_monitoring | /code-monitoring | 150 |  | yes |
 | 5873 | /own/codeowners-format | /code-ownership/codeowners-format | 150 |  | yes |
 | 2324 | /code_navigation/explanations/writing_an_indexer | /code-search/code-navigation/writing_an_indexer#writing-an-indexer | 140 | 2 more → /code-navigation/writing-an-indexer | no |
+| 5538 | /code_monitoring | /code-monitoring | 140 |  | yes |
 | 838 | /campaigns/references/campaign_spec_yaml_reference | /batch_changes/references/batch_spec_yaml_reference | 130 | 1 more → /batch-changes/batch-spec-yaml-reference | no |
+| 4467 | /cody/clients/model-configuration | /cody/enterprise/model-configuration | 130 |  | yes |
 | 5154 | /admin/config/postgres-conf | /self-hosted/postgres-conf | 130 |  | yes |
 | 5522 | /code_insights/references/common_use_cases | /code-insights/references/common-use-cases | 130 |  | yes |
-| 5877 | /api/graphql/examples | /api/graphql | 130 |  | yes |
 | 931 | /campaigns | /batch_changes | 120 | 1 more → /batch-changes | no |
-| 1195 | /code_intelligence/how-to/index_a_cpp_repository | https://sourcegraph.com/github.com/sourcegraph/scip-clang/-/blob/README.md#usage | 120 |  | no |
 | 2850 | /batch_changes/references/faq | /batch-changes/faq | 120 |  | yes |
-| 4467 | /cody/clients/model-configuration | /cody/enterprise/model-configuration | 120 |  | yes |
 | 4662 | /cody/core-concepts/cody-gateway | /model-provider | 120 |  | yes |
 | 5146 | /admin/observability/tracing | /self-hosted/observability/tracing | 120 |  | yes |
 | 5162 | /admin/postgres12_end_of_life_notice | /self-hosted/postgres12_end_of_life_notice | 120 | 1 more → /self-hosted/postgres12-end-of-life-notice | no |
 | 5484 | /code_insights/explanations/data_retention | /code-insights/explanations/data-retention | 120 |  | yes |
 | 5686 | /self-hosted/deploy/resource_estimator | /self-hosted/deploy/resource-estimator | 120 |  | yes |
+| 5877 | /api/graphql/examples | /api/graphql | 120 |  | yes |
 | 4825 | /admin/deploy/docker-compose/migrate | /self-hosted/deploy/docker-compose/migrate | 110 |  | yes |
 | 5130 | /admin/observability | /self-hosted/observability | 110 |  | yes |
 | 5369 | /admin/how-to/lsif_scip_migration | /admin/how-to/lsif-scip-migration | 110 |  | yes |
@@ -106,6 +106,7 @@
 | 5216 | /admin/updates/migrator/migrator-operations | /self-hosted/updates/migrator/migrator-operations | 90 |  | yes |
 | 5285 | /admin/beta_and_experimental_features | /beta-and-experimental | 90 |  | yes |
 | 5393 | /admin/service_accounts | /admin/service-accounts | 90 |  | yes |
+| 5453 | /code_insights | /code-insights | 90 |  | yes |
 | 5633 | /integration/bitbucket_server | /integration/bitbucket-server | 90 |  | yes |
 | 742 | /user | /getting-started | 80 |  | yes |
 | 1200 | /code_intelligence/how-to/index_a_go_repository | /code_navigation/how-to/index_a_go_repository | 80 | 3 more → /code-navigation/how-to/index-a-go-repository | no |
@@ -114,7 +115,6 @@
 | 5094 | /admin/how-to/upgrade-postgres-12-16-builtin-dbs | /self-hosted/how-to/upgrade-postgres-12-16-builtin-dbs | 80 |  | yes |
 | 5204 | /admin/updates/kubernetes | https://sourcegraph.com/changelog/self-hosted/kubernetes | 80 |  | yes |
 | 5385 | /admin/repo/update_frequency | /admin/repo/update-frequency | 80 |  | yes |
-| 5453 | /code_insights | /code-insights | 80 |  | yes |
 | 5662 | /own/codeowners_format | /own/codeowners-format | 80 | 1 more → /code-ownership/codeowners-format | no |
 | 5742 | /self-hosted/external_services/object_storage | /self-hosted/external-services/object-storage | 80 |  | yes |
 | 2539 | /batch_changes/explanations/server_side | /batch-changes/server-side | 70 |  | yes |
@@ -136,12 +136,12 @@
 | 5349 | /admin/config/batch_changes | /admin/config/batch-changes | 60 |  | yes |
 | 5641 | /integration/browser_extension/how-tos/browser_search_engine | /integration/browser-extension/how-tos/browser-search-engine | 60 |  | yes |
 | 5666 | /own/codeowners_ingestion | /own/codeowners-ingestion | 60 | 1 more → /code-ownership | no |
-| 5722 | /self-hosted/executors/deploy_executors_kubernetes | /self-hosted/executors/deploy-executors-kubernetes | 60 |  | yes |
 | 5798 | /self-hosted/postgres12_end_of_life_notice | /self-hosted/postgres12-end-of-life-notice | 60 |  | yes |
 | 5857 | /own | /code-ownership | 60 |  | yes |
 | 5881 | /api/graphql/search | /api/stream-api | 60 |  | yes |
 | 1204 | /code_intelligence/how-to/index_a_typescript_and_javascript_repository | /code_navigation/how-to/index_a_typescript_and_javascript_repository | 50 | 3 more → /code-navigation/how-to/index-a-typescript-and-javascript-repository | no |
 | 1892 | /code_search/how-to/saved_searches | /code-search/working/saved_searches | 50 | 1 more → /code-search/working/saved-searches | no |
+| 2508 | /batch_changes/explanations/introduction_to_batch_changes | /batch-changes/ | 50 |  | yes |
 | 2648 | /batch_changes/references/requirements | /batch-changes/requirements | 50 |  | yes |
 | 2828 | /batch_changes/references/batch_spec_templating | /batch-changes/batch-spec-templating | 50 |  | yes |
 | 4642 | /code_monitoring/how-tos/starting_points | /code_monitoring | 50 | 1 more → /code-monitoring | no |
@@ -152,7 +152,6 @@
 | 5317 | /admin/code_hosts/gitlab | /admin/code-hosts/gitlab | 50 |  | yes |
 | 5457 | /code_insights/quickstart | /code-insights/quickstart | 50 |  | yes |
 | 5479 | /code_insights/explanations/current_limitations_of_code_insights | /code-insights/explanations/current-limitations-of-code-insights | 50 |  | yes |
-| 5526 | /code_insights/references/incomplete_data_points | /code-insights/references/incomplete-data-points | 50 |  | yes |
 | 5738 | /self-hosted/external_services | /self-hosted/external-services | 50 |  | yes |
 | 5750 | /self-hosted/how-to/blobstore_update_notes | /self-hosted/how-to/blobstore-update-notes | 50 |  | yes |
 | 5762 | /self-hosted/how-to/dirty_database_pre_3_37 | /self-hosted/how-to/dirty-database-pre-3-37 | 50 |  | yes |
@@ -164,6 +163,7 @@
 | 4505 | /pricing/plan-comparison | https://sourcegraph.com/pricing | 40 |  | yes |
 | 4535 | /cody/embedded-repos | /cody | 40 |  | yes |
 | 4728 | /code-search/code-navigation/how-to/index_other_languages | /code-navigation/how-to/index_other_languages | 40 | 1 more → /code-navigation/how-to/index-other-languages | no |
+| 4732 | /code-search/code-navigation/how-to/policies_resource_usage_best_practices | /code-navigation/how-to/policies_resource_usage_best_practices | 40 | 1 more → /code-navigation/how-to/policies-resource-usage-best-practices | no |
 | 4753 | /code-search/code-navigation/rockskip | /code-navigation/rockskip | 40 |  | yes |
 | 4785 | /admin/config/webhooks/incoming | /admin/webhooks/incoming | 40 |  | yes |
 | 4929 | /admin/deploy/migrate-backup | /self-hosted/deploy/migrate-backup | 40 |  | yes |
@@ -183,9 +183,7 @@
 | 1907 | /code_search/how-to/exhaustive | /code-search/types/exhaustive | 30 |  | no |
 | 1932 | /code_search/explanations/search_details | /code-search/features | 30 |  | yes |
 | 2183 | /code_navigation/explanations/introduction_to_code_navigation | /code-search/code-navigation | 30 | 1 more → /code-navigation | no |
-| 2508 | /batch_changes/explanations/introduction_to_batch_changes | /batch-changes/ | 30 |  | yes |
 | 2543 | /batch_changes/tutorials | /batch-changes/examples | 30 |  | yes |
-| 2837 | /batch_changes/references/batch_spec_cheat_sheet | /batch-changes/batch-spec-cheat-sheet | 30 |  | yes |
 | 4515 | /admin/pricing | https://sourcegraph.com/pricing | 30 |  | yes |
 | 4670 | /how-to-videos | /tutorials | 30 |  | yes |
 | 4674 | /how-to-videos/code-search | /tutorials#code-search-how-to-videos | 30 |  | yes |
@@ -199,10 +197,12 @@
 | 5110 | /admin/observability/alerting | /self-hosted/observability/alerting | 30 |  | yes |
 | 5257 | /admin/access_control/batch_changes | /admin/access-control/batch-changes | 30 |  | yes |
 | 5475 | /code_insights/explanations/code_insights_filters | /code-insights/explanations/code-insights-filters | 30 |  | yes |
+| 5526 | /code_insights/references/incomplete_data_points | /code-insights/references/incomplete-data-points | 30 |  | yes |
 | 5554 | /code-navigation/how-to/adding_scip_to_workflows | /code-navigation/how-to/adding-scip-to-workflows | 30 |  | yes |
 | 5581 | /code-navigation/inference_configuration | /code-navigation/inference-configuration | 30 |  | yes |
 | 5605 | /code-search/working/saved_searches | /code-search/working/saved-searches | 30 |  | yes |
 | 5646 | /integration/browser_extension/how-tos/google_workspace | /integration/browser-extension/how-tos/google-workspace | 30 |  | yes |
+| 5722 | /self-hosted/executors/deploy_executors_kubernetes | /self-hosted/executors/deploy-executors-kubernetes | 30 |  | yes |
 | 5816 | /self-hosted/updates/pure-docker | /self-hosted/deploy/docker-compose/upgrade | 30 |  | yes |
 | 5843 | /self-hosted/updates/docker-compose | https://sourcegraph.com/changelog/self-hosted/docker-compose | 30 |  | yes |
 | 5861 | /own/assigned-ownership | /code-ownership | 30 |  | yes |
@@ -220,20 +220,18 @@
 | 1145 | /code_intelligence/explanations | /code_navigation/explanations | 20 |  | no |
 | 1209 | /code_intelligence/how-to/index_other_languages | /code_navigation/how-to/index_other_languages | 20 |  | no |
 | 1554 | /cody/core-concepts/embeddings/configure-embeddings | /cody/embeddings/configure-embeddings | 20 |  | no |
+| 1824 | /cody/explanations/cody_gateway | /cody/core-concepts/cody_gateway | 20 | 2 more → /model-provider | no |
 | 1873 | /code_search/tutorials | /code-search/working/saved_searches | 20 | 1 more → /code-search/working/saved-searches | no |
 | 1963 | /code_navigation/how-to/configure_data_retention | /code-search/code-navigation/auto_indexing#configure-auto-indexing-policies | 20 | 2 more → /code-navigation/auto-indexing | no |
 | 1975 | /code_navigation/how-to/index_a_go_repository | /code-search/code-navigation/how-to/index_a_go_repository | 20 | 2 more → /code-navigation/how-to/index-a-go-repository | no |
 | 2046 | /code_navigation/how-to/adding_lsif_to_workflows | /code-search/code-navigation/how-to/adding_lsif_to_workflows | 20 |  | no |
 | 2204 | /code_navigation/explanations/uploads | /code-search/code-navigation/explanations/uploads | 20 | 1 more → /code-navigation/explanations/uploads | no |
 | 2442 | /code_navigation/references/precise_examples | /code-search/code-navigation/precise_code_navigation#precise-navigation-examples | 20 | 2 more → /code-navigation/precise-code-navigation | no |
-| 2500 | /batch_changes/quickstart | /batch-changes/quickstart | 20 |  | yes |
 | 2567 | /batch_changes/how-tos/publishing_changesets | /batch-changes/publishing-changesets | 20 |  | yes |
 | 2846 | /batch_changes/references/troubleshooting | /batch-changes/troubleshooting | 20 |  | yes |
 | 4493 | /pricing/plans/free | https://sourcegraph.com/pricing | 20 |  | yes |
 | 4497 | /pricing/enterprise-starter | /pricing/plans/enterprise-starter | 20 |  | yes |
 | 4605 | /analytics/cloud | /analytics | 20 |  | yes |
-| 4622 | /code_monitoring/explanations/best_practices | /code_monitoring | 20 | 1 more → /code-monitoring | no |
-| 4732 | /code-search/code-navigation/how-to/policies_resource_usage_best_practices | /code-navigation/how-to/policies_resource_usage_best_practices | 20 | 1 more → /code-navigation/how-to/policies-resource-usage-best-practices | no |
 | 4801 | /admin/deploy/docker-compose/aws | /self-hosted/deploy/docker-compose/aws | 20 |  | yes |
 | 5013 | /admin/external_services/object_storage | /self-hosted/external_services/object_storage | 20 | 1 more → /self-hosted/external-services/object-storage | no |
 | 5041 | /admin/how-to/dirty_database_pre_3_37 | /self-hosted/how-to/dirty_database_pre_3_37 | 20 | 1 more → /self-hosted/how-to/dirty-database-pre-3-37 | no |
@@ -643,7 +641,6 @@
 | 1805 | /cody/core-concepts/embeddings/configure-embeddings#lifecycle-of-an-embeddings-policy | /cody/embeddings/configure-embeddings#lifecycle-of-an-embeddings-policy | 0 |  | no |
 | 1810 | /cody/explanations/schedule_one_off_embeddings_jobs | /cody/embeddings/configure-embeddings#schedule-embeddings-jobs | 0 |  | no |
 | 1815 | /cody/core-concepts/embeddings/configure-embeddings#schedule-embeddings-jobs | /cody/embeddings/configure-embeddings#schedule-embeddings-jobs | 0 |  | no |
-| 1824 | /cody/explanations/cody_gateway | /cody/core-concepts/cody_gateway | 0 | 2 more → /model-provider | no |
 | 1832 | /cody/core-concepts/cody_clients | /cody/clients | 0 |  | yes |
 | 1836 | /cody/overview#getting-started | /cody/clients | 0 |  | yes |
 | 1844 | /cody/core-concepts/cody_gateway#using-cody-gateway-in-sourcegraph-enterprise | /cody/core-concepts/cody-gateway#using-cody-gateway-in-sourcegraph-enterprise | 0 | 1 more → /model-provider | no |
@@ -739,6 +736,7 @@
 | 2480 | /code_navigation/references/auto_indexing_configuration#index-job-object | /code-search/code-navigation/auto_indexing_configuration#index-job-object | 0 | 2 more → /code-navigation/auto-indexing-configuration | no |
 | 2486 | /code_navigation/references/auto_indexing_configuration#docker-step-object | /code-search/code-navigation/auto_indexing_configuration#docker-step-object | 0 | 2 more → /code-navigation/auto-indexing-configuration | no |
 | 2492 | /code_navigation/references/inference_configuration | /code-search/code-navigation/inference_configuration | 0 | 2 more → /code-navigation/inference-configuration | no |
+| 2500 | /batch_changes/quickstart | /batch-changes/quickstart | 0 |  | yes |
 | 2504 | /batch_changes/explanations | /batch-changes/ | 0 |  | yes |
 | 2512 | /batch_changes/explanations/permissions_in_batch_changes#code-host-interactions-in-batch-changes | /batch-changes/permissions-in-batch-changes#code-host-interactions-in-batch-changes | 0 |  | yes |
 | 2517 | /batch_changes/explanations/permissions_in_batch_changes#repository-permissions-for-batch-changes | /batch-changes/permissions-in-batch-changes#repository-permissions-for-batch-changes | 0 |  | yes |
@@ -801,6 +799,7 @@
 | 2819 | /batch_changes/references/batch_spec_yaml_reference#workspacesin | /batch-changes/batch-spec-yaml-reference#workspacesin | 0 |  | yes |
 | 2823 | /batch_changes/references/batch_spec_yaml_reference#workspacesonlyfetchworkspace | /batch-changes/batch-spec-yaml-reference#workspacesonlyfetchworkspace | 0 |  | yes |
 | 2832 | /batch_changes/references/batch_spec_templating#fields-with-template-support | /batch-changes/batch-spec-templating#fields-with-template-support | 0 |  | yes |
+| 2837 | /batch_changes/references/batch_spec_cheat_sheet | /batch-changes/batch-spec-cheat-sheet | 0 |  | yes |
 | 2841 | /batch_changes/references/batch_spec_cheat_sheet#write-a-github-actions-workflow-that-includes-github-expression-syntax | /batch-changes/batch-spec-cheat-sheet#write-a-github-actions-workflow-that-includes-github-expression-syntax | 0 |  | yes |
 | 2862 | /admin/code_hosts/bitbucketserver | /integration/bitbucket_server | 0 | 1 more → /integration/bitbucket-server | no |
 | 3606 | /cody/clients/enable-cody-enterprise#using-a-third-party-llm-provider | /cody/clients/enable-cody-enterprise#supported-models-and-model-providers | 0 |  | yes |
@@ -821,6 +820,7 @@
 | 4593 | /analytics/cloud#token-revocation | /analytics/api#token-revocation | 0 |  | yes |
 | 4597 | /analytics/cloud#api-reference | /analytics/api#api-reference | 0 |  | yes |
 | 4601 | /analytics/cloud#csv-export | /analytics/api#csv-export | 0 |  | yes |
+| 4622 | /code_monitoring/explanations/best_practices | /code_monitoring | 0 | 1 more → /code-monitoring | no |
 | 4626 | /code_monitoring/explanations/core_concepts | /code_monitoring | 0 | 1 more → /code-monitoring | no |
 | 4630 | /code_monitoring/explanations | /code_monitoring | 0 | 1 more → /code-monitoring | no |
 | 4638 | /code_monitoring/how-tos/slack | /code_monitoring | 0 | 1 more → /code-monitoring | no |
@@ -976,8 +976,8 @@
 | 4164 | /code_navigation/explanations/precise_code_navigation | /code-search/code-navigation/precise_code_navigation | shadowed by line 2193 |  | no |
 | 4048 | /code_search/reference/language | /code-search/queries/language | shadowed by line 1952 |  | yes |
 | 4038 | /code_search/reference/queries | /code-search/queries | shadowed by line 1942 |  | yes |
-| 3396 | /code_intelligence | /code_navigation | shadowed by line 1290 |  | no |
 | 4054 | /code_navigation | /code-search/code-navigation | shadowed by line 1958 |  | no |
+| 3396 | /code_intelligence | /code_navigation | shadowed by line 1290 |  | no |
 | 4400 | /code_navigation/references/indexers | /code-search/code-navigation/writing_an_indexer#sourcegraph-recommended-indexers | shadowed by line 2430 |  | no |
 | 3970 | /code_search | /code-search | shadowed by line 1869 |  | yes |
 | 3234 | /code_intelligence/explanations/precise_code_intelligence | /code_navigation/explanations/precise_code_navigation | shadowed by line 1128 |  | no |
@@ -988,12 +988,12 @@
 | 3177 | /admin/install/docker | /self-hosted/deploy | shadowed by line 1071 |  | yes |
 | 3963 | /cody/custom-commands | /cody/capabilities/commands#custom-commands | shadowed by line 1862 |  | no |
 | 4330 | /code_navigation/explanations/auto_indexing | /code-search/code-navigation/auto_indexing | shadowed by line 2360 |  | no |
+| 3301 | /code_intelligence/how-to/index_a_cpp_repository | https://sourcegraph.com/github.com/sourcegraph/scip-clang/-/blob/README.md#usage | shadowed by line 1195 |  | no |
 | 3085 | /admin/install | /admin/deploy | shadowed by line 979 |  | no |
 | 4107 | /code_navigation/how-to/index_a_typescript_and_javascript_repository | /code-search/code-navigation/how-to/index_a_typescript_and_javascript_repository | shadowed by line 2011 |  | no |
 | 4294 | /code_navigation/explanations/writing_an_indexer | /code-search/code-navigation/writing_an_indexer#writing-an-indexer | shadowed by line 2324 |  | no |
 | 2944 | /campaigns/references/campaign_spec_yaml_reference | /batch_changes/references/batch_spec_yaml_reference | shadowed by line 838 |  | no |
 | 3037 | /campaigns | /batch_changes | shadowed by line 931 |  | no |
-| 3301 | /code_intelligence/how-to/index_a_cpp_repository | https://sourcegraph.com/github.com/sourcegraph/scip-clang/-/blob/README.md#usage | shadowed by line 1195 |  | no |
 | 3494 | /cody/overview/install-neovim | /cody/clients/install-neovim | shadowed by line 1388 |  | yes |
 | 3306 | /code_intelligence/how-to/index_a_go_repository | /code_navigation/how-to/index_a_go_repository | shadowed by line 1200 |  | no |
 | 3113 | /admin/install/kubernetes/operations | /admin/deploy/kubernetes/operations | shadowed by line 1007 |  | no |
@@ -1023,6 +1023,7 @@
 | 3251 | /code_intelligence/explanations | /code_navigation/explanations | shadowed by line 1145 |  | no |
 | 3315 | /code_intelligence/how-to/index_other_languages | /code_navigation/how-to/index_other_languages | shadowed by line 1209 |  | no |
 | 3655 | /cody/core-concepts/embeddings/configure-embeddings | /cody/embeddings/configure-embeddings | shadowed by line 1554 |  | no |
+| 3925 | /cody/explanations/cody_gateway | /cody/core-concepts/cody_gateway | shadowed by line 1824 |  | no |
 | 3974 | /code_search/tutorials | /code-search/working/saved_searches | shadowed by line 1873 |  | no |
 | 4059 | /code_navigation/how-to/configure_data_retention | /code-search/code-navigation/auto_indexing#configure-auto-indexing-policies | shadowed by line 1963 |  | no |
 | 4071 | /code_navigation/how-to/index_a_go_repository | /code-search/code-navigation/how-to/index_a_go_repository | shadowed by line 1975 |  | no |
@@ -1261,7 +1262,6 @@
 | 3906 | /cody/core-concepts/embeddings/configure-embeddings#lifecycle-of-an-embeddings-policy | /cody/embeddings/configure-embeddings#lifecycle-of-an-embeddings-policy | shadowed by line 1805 |  | no |
 | 3911 | /cody/explanations/schedule_one_off_embeddings_jobs | /cody/embeddings/configure-embeddings#schedule-embeddings-jobs | shadowed by line 1810 |  | no |
 | 3916 | /cody/core-concepts/embeddings/configure-embeddings#schedule-embeddings-jobs | /cody/embeddings/configure-embeddings#schedule-embeddings-jobs | shadowed by line 1815 |  | no |
-| 3925 | /cody/explanations/cody_gateway | /cody/core-concepts/cody_gateway | shadowed by line 1824 |  | no |
 | 3933 | /cody/core-concepts/cody_clients | /cody/clients | shadowed by line 1832 |  | yes |
 | 3937 | /cody/overview#getting-started | /cody/clients | shadowed by line 1836 |  | yes |
 | 3945 | /cody/core-concepts/cody_gateway#using-cody-gateway-in-sourcegraph-enterprise | /cody/core-concepts/cody-gateway#using-cody-gateway-in-sourcegraph-enterprise | shadowed by line 1844 |  | no |
