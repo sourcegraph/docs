@@ -6,7 +6,7 @@
 - Totals: 1079 paths, 7420 requests, 3310 visits, 64680 3xx, 16240 404s, 760 5xx
 - Requests and Visits count HTML 200 responses. Visits = requests whose referrer is not sourcegraph.com (Cloudflare's page-view proxy).
 - 3xx counts redirects (301, 302, 303, 307, 308); 404 and 5xx count any content type. Trailing-slash redirects, static assets and scanner probe paths are skipped. All counts are adaptive-sampled estimates.
-- Sitemap: 160 of 1079 paths are in https://sourcegraph.com/sitemap.xml, with 6310 of 7420 requests. The rest are deleted, unlisted or probe paths; on /docs they still return 200. The blog sitemap lists only recent posts.
+- Sitemap: 160 of 1079 paths are in https://sourcegraph.com/sitemap.xml, with 6310 of 7420 requests. The rest are deleted, unlisted or probe paths. The blog sitemap lists only recent posts.
 
 | Path | Requests | Visits | 3xx | 404 | 5xx | Sitemap |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
