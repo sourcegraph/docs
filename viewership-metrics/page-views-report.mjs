@@ -93,6 +93,7 @@ function buildFilter(start, end) {
 		datetime_lt: end.toISOString(),
 		clientRequestHTTPHost: HOST,
 		botManagementDecision: 'likely_human',
+		clientRequestHTTPMethodName: 'GET',
 		clientASNDescription_notin: EXCLUDED_ASN_DESCRIPTIONS,
 		clientCountryName_notin: EXCLUDED_COUNTRIES,
 		AND: [
@@ -106,7 +107,15 @@ function buildFilter(start, end) {
 				OR: [
 					{
 						edgeResponseStatus: 200,
-						edgeResponseContentTypeName: 'html'
+						edgeResponseContentTypeName: 'html',
+						// A browser that ran Cloudflare's JS detection.
+						// Scrapers with spoofed browser user agents and
+						// ASNs score `likely_human` but never pass it.
+						// The first response only sets the cookie, so this
+						// counts visitors who load a second page. Redirects
+						// and errors are mostly first requests from stale
+						// external links, so they are not filtered on it.
+						jsDetectionPassed: 'Passed'
 					},
 					{edgeResponseStatus_in: REDIRECT_STATUSES},
 					{edgeResponseStatus: 404},
@@ -277,9 +286,11 @@ function reportHeader(title, start, end) {
 		'',
 		`- Window: ${start.toISOString()} to ${end.toISOString()} (UTC)`,
 		`- Host: ${HOST}; paths: ${PATH_PREFIXES.join(', ')}`,
-		`- Filters: Bot Management likely_human; ` +
+		`- Filters: Bot Management likely_human; GET; ` +
 			`excluding ASN ${EXCLUDED_ASN_DESCRIPTIONS.join(', ')}; ` +
-			`excluding countries ${EXCLUDED_COUNTRIES.join(', ')}`
+			`excluding countries ${EXCLUDED_COUNTRIES.join(', ')}. ` +
+			'Requests and Visits also require JS detection passed, ' +
+			'which excludes the first page of each visit.'
 	];
 }
 

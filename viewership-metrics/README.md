@@ -47,9 +47,18 @@ people to a soft 404; a `no` with a Chain is an intermediate hop.
 
 ## Filters
 
-- Bot Management decision `likely_human`
+- Bot Management decision `likely_human`, GET requests only
 - Excluding ASN `Hetzner Online GmbH` (one hosting provider that dwarfs
   real German traffic) and country `CN`
+- Page views (Requests, Visits) also require `jsDetectionPassed: Passed`:
+  the browser ran Cloudflare's JS detection. `likely_human` alone lets
+  through scrapers with spoofed browser user agents and ASNs (one fleet
+  labelled Cox Communications, all with referer google.com and a single
+  Linux Chrome user agent, was 30% of `/docs` page views). The first
+  response of a visit only sets the detection cookie, so this counts
+  visitors who load a second page and undercounts single-page visits.
+  Redirects and errors are mostly first requests from stale external
+  links, so they keep the looser filter and still include some scrapers.
 - Skipped as noise: `/_next` and static assets, paths with characters
   outside `[A-Za-z0-9/_.~@'-]` (scanner probes), and trailing-slash
   redirects. Trailing-slash variants of a page are merged.
