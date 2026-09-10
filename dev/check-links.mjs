@@ -276,7 +276,8 @@ function extractLinks(content, filePath) {
 // Absolute links to this site, in every form the docs have used: http or https,
 // scheme-relative, www., the legacy docs.sourcegraph.com host, or sourcegraph.com/docs.
 // Links pinned to an old version (/@5.1/..., /v/5.1/...) are external: the
-// middleware sends them to that version's own site.
+// middleware sends them to that version's own site (5.1.sourcegraph.com), whose
+// pages are not in this repo, so only --check-external can validate them.
 const SELF_LINK_REGEX = /^(?:https?:)?\/\/(?:www\.)?(?:docs\.sourcegraph\.com|sourcegraph\.com\/docs)(?=[/#?]|$)(?!\/@|\/v\/)/i;
 
 export function isSelfLink(url) {
@@ -619,27 +620,32 @@ function formatMarkdown(findings) {
 }
 
 // Body for POST /repos/{owner}/{repo}/pulls/{n}/reviews: one suggested change per
-// added line that has fixes, so the author can apply them from the PR. Review
-// comments must sit on a line of the diff, hence the added-line restriction.
+// added line that has fixes, so the author can apply them from the PR. The comment
+// lists every finding on the line, so the ones the suggestion cannot fix are not
+// mistaken for accepted. Review comments must sit on a line of the diff, hence the
+// added-line restriction.
 function reviewRequest(findings) {
-	const fixesByLine = new Map();
+	const findingsByLine = new Map();
 	for (const finding of findings) {
-		if (!finding.fix || !isAddedLine(finding.file, finding.line)) continue;
+		if (!isAddedLine(finding.file, finding.line)) continue;
 		const key = `${finding.file}:${finding.line}`;
-		if (!fixesByLine.has(key)) fixesByLine.set(key, { file: finding.file, line: finding.line, fixes: [] });
-		fixesByLine.get(key).fixes.push(finding);
+		if (!findingsByLine.has(key)) findingsByLine.set(key, []);
+		findingsByLine.get(key).push(finding);
 	}
 
-	const comments = [...fixesByLine.values()].map(({ file, line, fixes }) => {
-		const source = fs.readFileSync(path.join(ROOT_DIR, file), 'utf-8').split('\n')[line - 1];
-		const fixed = fixes.reduce((text, { url, fix }) => text.split(url).join(fix), source);
-		return {
-			path: file,
-			line,
-			side: 'RIGHT',
-			body: [...fixes.map(({ error }) => `- ${error}`), '```suggestion', fixed, '```'].join('\n')
-		};
-	});
+	const comments = [...findingsByLine.values()]
+		.filter(lineFindings => lineFindings.some(finding => finding.fix))
+		.map(lineFindings => {
+			const { file, line } = lineFindings[0];
+			const source = fs.readFileSync(path.join(ROOT_DIR, file), 'utf-8').split('\n')[line - 1];
+			const fixed = lineFindings
+				.filter(finding => finding.fix)
+				.reduce((text, { url, fix }) => text.split(url).join(fix), source);
+			const notes = lineFindings.map(
+				({ url, error, fix }) => `- \`${url}\`: ${error}${fix ? '' : ' (not fixed by this suggestion)'}`
+			);
+			return { path: file, line, side: 'RIGHT', body: [...notes, '```suggestion', fixed, '```'].join('\n') };
+		});
 	return {
 		event: 'COMMENT',
 		body: 'Suggested fixes for the links this PR adds; details in the check-links comment.',
