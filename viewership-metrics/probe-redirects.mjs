@@ -280,14 +280,13 @@ function tally(items, valueOf) {
 // Cloudflare counts by response status, summed over distinct paths so rules
 // sharing a path count once.
 function trafficByStatus(results, urlOf, trafficOf) {
-	const byUrl = new Map(
-		results.map(result => [urlOf(result), trafficOf(result)])
-	);
+	const byUrl = new Map();
+	for (const result of results) {
+		const row = trafficOf(result);
+		if (row) byUrl.set(normalizePath(urlOf(result)), row);
+	}
 	const sum = key =>
-		[...byUrl.values()].reduce(
-			(total, row) => total + (row?.[key] ?? 0),
-			0
-		);
+		[...byUrl.values()].reduce((total, row) => total + row[key], 0);
 	return {
 		200: sum('requests'),
 		'3xx': sum('redirects'),
