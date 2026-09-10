@@ -26,7 +26,6 @@
 
 import fs from 'fs';
 import path from 'path';
-import { glob } from 'glob';
 import GithubSlugger from 'github-slugger';
 import { fileURLToPath, pathToFileURL } from 'url';
 
@@ -44,12 +43,24 @@ const LINK_BASE = flagValue('--link-base')?.replace(/\/$/, '');
 const DOCS_DIR = path.join(ROOT_DIR, 'docs');
 // Files whose links are checked. Only .mdx files become site routes; see
 // `filePathPattern` in contentlayer.config.ts.
-const SOURCE_GLOB = '**/*.{md,mdx}';
-const ROUTE_GLOB = '**/*.mdx';
+const SOURCE_EXTENSIONS = ['.md', '.mdx'];
+const ROUTE_EXTENSIONS = ['.mdx'];
 
 function flagValue(name) {
 	const index = args.indexOf(name);
 	return index === -1 ? undefined : args[index + 1];
+}
+
+// Sorted relative paths of every file under dir, optionally limited to some
+// extensions. Sorted so foo.mdx precedes foo/index.mdx; when both exist the
+// site serves the first match (allPosts.find), so the first file owns the route.
+function listFiles(dir, extensions) {
+	if (!fs.existsSync(dir)) return [];
+	return fs
+		.readdirSync(dir, { recursive: true, withFileTypes: true })
+		.filter(entry => entry.isFile() && (!extensions || extensions.includes(path.extname(entry.name))))
+		.map(entry => path.relative(dir, path.join(entry.parentPath, entry.name)))
+		.sort();
 }
 
 // Regex patterns for extracting links
@@ -118,10 +129,8 @@ function routeFor(file) {
 }
 
 // Get all MDX files and build a map of valid paths
-async function buildPathMap() {
-	// Sorted so foo.mdx precedes foo/index.mdx; when both exist the site serves
-	// the first match (allPosts.find), so the first file owns the route here too.
-	const files = (await glob(ROUTE_GLOB, { cwd: DOCS_DIR })).sort();
+function buildPathMap() {
+	const files = listFiles(DOCS_DIR, ROUTE_EXTENSIONS);
 	const pathMap = new Map();
 	// Lowercased route -> real route, to detect case mismatches
 	const routesByLowerCase = new Map();
@@ -145,17 +154,16 @@ async function buildPathMap() {
 		headingsMap.set(routePath + '/', headings);
 	}
 	
-	return { pathMap, routesByLowerCase, headingsMap, headingsByFile, assetsByLowerCase: await buildAssetMap() };
+	return { pathMap, routesByLowerCase, headingsMap, headingsByFile, assetsByLowerCase: buildAssetMap() };
 }
 
 // Lowercased link path -> real link path, for files under public/ and docs/
 // (images, PDFs, ...). An enumerated map rather than fs.existsSync, which is
 // case-insensitive on macOS and would hide links that 404 on Linux.
-async function buildAssetMap() {
+function buildAssetMap() {
 	const assetsByLowerCase = new Map();
 	for (const dir of ['public', 'docs']) {
-		const files = await glob('**/*', { cwd: path.join(ROOT_DIR, dir), nodir: true });
-		for (const file of files) {
+		for (const file of listFiles(path.join(ROOT_DIR, dir))) {
 			const linkPath = '/' + file;
 			assetsByLowerCase.set(linkPath.toLowerCase(), linkPath);
 		}
@@ -291,12 +299,11 @@ function validateLink(link, currentFile, { pathMap, routesByLowerCase, headingsM
 }
 
 // Find every broken link: [{ file, line, url, error }]
-async function findBrokenLinks() {
-	const maps = await buildPathMap();
-	const files = await glob(SOURCE_GLOB, { cwd: DOCS_DIR });
+function findBrokenLinks() {
+	const maps = buildPathMap();
 	const findings = [];
 	
-	for (const file of files.sort()) {
+	for (const file of listFiles(DOCS_DIR, SOURCE_EXTENSIONS)) {
 		const fullPath = path.join(DOCS_DIR, file);
 		const content = fs.readFileSync(fullPath, 'utf-8');
 		
@@ -359,6 +366,10 @@ function formatText(findings) {
 	return lines.join('\n') + '\n';
 }
 
+function linkTo(text, url) {
+	return url ? `[${text}](${url})` : text;
+}
+
 // Body for a pull request comment
 function formatMarkdown(findings) {
 	if (findings.length === 0) {
@@ -377,10 +388,12 @@ function formatMarkdown(findings) {
 		''
 	];
 	for (const [file, fileFindings] of groupByFile(findings)) {
-		const fileLabel = `**\`${file}\`**`;
-		lines.push(LINK_BASE ? `[${fileLabel}](${LINK_BASE}/${file})` : fileLabel);
+		// ?plain=1 opens GitHub's code view, where #L<n> anchors work; the rendered
+		// Markdown preview ignores them
+		const fileUrl = LINK_BASE && `${LINK_BASE}/${file}?plain=1`;
+		lines.push(linkTo(`**\`${file}\`**`, fileUrl));
 		for (const { line, url, error } of fileFindings) {
-			lines.push(`- line ${line}: \`${url}\` — ${error}`);
+			lines.push(`- ${linkTo(`line ${line}`, fileUrl && `${fileUrl}#L${line}`)}: \`${url}\` — ${error}`);
 		}
 		lines.push('');
 	}
@@ -397,7 +410,7 @@ const FORMATTERS = {
 	markdown: formatMarkdown
 };
 
-async function main() {
+function main() {
 	const format = FORMATTERS[FORMAT];
 	if (!format) {
 		throw new Error(`Unknown --format "${FORMAT}"; use text, json, or markdown`);
@@ -407,7 +420,7 @@ async function main() {
 		console.log('🔍 Checking for dead links in MDX files...\n');
 	}
 
-	let findings = await findBrokenLinks();
+	let findings = findBrokenLinks();
 	if (BASELINE_FILE) {
 		findings = withoutBaseline(findings, BASELINE_FILE);
 	}
@@ -418,8 +431,5 @@ async function main() {
 
 // Only run when executed directly; dev/verify-links-live.mjs imports extractHeadings.
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-	main().catch(err => {
-		console.error('Error running link checker:', err);
-		process.exit(1);
-	});
+	main();
 }
