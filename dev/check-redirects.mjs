@@ -5,13 +5,14 @@
  *
  * Redirects exist so external traffic to an old URL still reaches a page, so
  * each one must be correct. Checks, for every entry:
- * - the destination page exists under docs/ (or is a file under public/),
- *   following chains through other redirects
- * - when the destination has a #fragment, the heading exists on that page
  * - the source does not shadow an existing page (the middleware would redirect
  *   visitors away from a page that exists)
  * - the source has no #fragment: browsers never send fragments, so such an
  *   entry can never match
+ * - the source has no earlier entry: the middleware uses the first match only
+ * - the destination is a page, not another redirect
+ * - the destination page exists under docs/ (or is a file under public/)
+ * - when the destination has a #fragment, the heading exists on that page
  *
  * External (http) destinations are not checked.
  *
@@ -46,18 +47,39 @@ const REDIRECTS_FILE = path.join(ROOT_DIR, REDIRECTS_PATH);
 const CONSTANTS_FILE = path.join(ROOT_DIR, 'src/data/constants.ts');
 const DOCS_DIR = path.join(ROOT_DIR, 'docs');
 const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
-const MAX_CHAIN_HOPS = 10;
-
-// Report sections, most urgent first: a shadowed page is unreachable today
+// Report sections, most urgent first: a shadowed page is unreachable today.
+// `fix` teaches the author what a correct entry looks like, where it applies.
 const PROBLEM = {
-	shadowsPage: 'Source overshadows a docs page that already exists',
-	fragmentSource:
-		'Source has a #fragment, which browsers never send, so this redirect can never match',
-	missingPage: 'Destination page does not exist',
-	missingHeading: 'Destination heading does not exist',
-	loop: `Redirect loop or chain longer than ${MAX_CHAIN_HOPS} hops`
+	shadowsPage: {
+		heading: 'Source overshadows a docs page that already exists',
+		fix: 'Visitors to that page are redirected away from it. Remove the redirect, or rename the page.'
+	},
+	fragmentSource: {
+		heading: 'Source has a #fragment, so this redirect can never match',
+		fix:
+			'Browsers never send the #fragment to the server. Use the page path alone as the source; ' +
+			"when the destination has no #fragment, the browser keeps the visitor's own."
+	},
+	duplicateSource: {
+		heading:
+			'Source already has an earlier entry, so this one is never used',
+		fix: 'Only the first entry for a source matches. Update that entry instead of adding another.'
+	},
+	chained: {
+		heading: 'Destination is another redirect',
+		fix: 'Point straight at the final page (named after each line); every hop costs the visitor a round trip.'
+	},
+	missingPage: {
+		heading: 'Destination page does not exist',
+		fix:
+			'Point at the page that replaced it, or remove the entry if there is no replacement ' +
+			'(visitors then get the 404 page).'
+	},
+	missingHeading: {
+		heading: 'Destination heading does not exist',
+		fix: "Use the heading's current slug, or drop the #fragment to land at the top of the page."
+	}
 };
-const PROBLEM_ORDER = Object.values(PROBLEM);
 
 function flagValue(name) {
 	const index = args.indexOf(name);
@@ -131,62 +153,43 @@ function isExternal(url) {
 	return /^https?:\/\//.test(url);
 }
 
-// Every incorrect redirect: [{ source, destination, line, problem }]
+// Every incorrect redirect: [{ source, destination, line, problem, detail? }]
 function findBrokenRedirects(redirects, headingsByRoute) {
 	const findings = [];
-	// Only the first entry for a source is reachable; later duplicates are
-	// dead code and cannot break anything.
 	const firstBySource = new Map();
 	for (const redirect of redirects) {
 		if (!firstBySource.has(redirect.source))
 			firstBySource.set(redirect.source, redirect);
 	}
-	const report = (redirect, problem) => findings.push({...redirect, problem});
+	const report = (redirect, problem, detail) =>
+		findings.push({...redirect, problem: problem.heading, detail});
+	const isRedirect = pathname =>
+		firstBySource.has(pathname) && !headingsByRoute.has(pathname);
 
 	for (const redirect of redirects) {
-		if (firstBySource.get(redirect.source) !== redirect) continue;
-
+		if (firstBySource.get(redirect.source) !== redirect) {
+			report(redirect, PROBLEM.duplicateSource);
+			continue;
+		}
 		const source = splitUrl(redirect.source);
 		if (source.fragment) {
-			// Browsers strip #fragments before sending a request, so no server
-			// can ever match this source. Nothing else about the entry matters.
 			report(redirect, PROBLEM.fragmentSource);
 			continue;
 		}
 		if (headingsByRoute.has(source.pathname)) {
 			report(redirect, PROBLEM.shadowsPage);
 		}
-
 		if (isExternal(redirect.destination)) continue;
 
-		// Follow redirect chains to the page a visitor finally lands on
-		let destination = splitUrl(redirect.destination);
-		let hops = 0;
-		const visited = new Set([redirect.source]);
-		while (
-			firstBySource.has(destination.pathname) &&
-			!headingsByRoute.has(destination.pathname)
-		) {
-			if (visited.has(destination.pathname) || ++hops > MAX_CHAIN_HOPS) {
-				report(redirect, PROBLEM.loop);
-				destination = undefined;
-				break;
-			}
-			visited.add(destination.pathname);
-			const next = firstBySource.get(destination.pathname).destination;
-			if (isExternal(next)) {
-				destination = undefined;
-				break;
-			}
-			const nextUrl = splitUrl(next);
-			// A hop without its own fragment keeps the fragment we have
-			destination = {
-				pathname: nextUrl.pathname,
-				fragment: nextUrl.fragment || destination.fragment
-			};
+		const destination = splitUrl(redirect.destination);
+		if (isRedirect(destination.pathname)) {
+			report(
+				redirect,
+				PROBLEM.chained,
+				finalDestination(destination.pathname)
+			);
+			continue;
 		}
-		if (!destination) continue;
-
 		const headings = headingsByRoute.get(destination.pathname);
 		if (!headings) {
 			if (!isPublicFile(destination.pathname)) {
@@ -197,6 +200,18 @@ function findBrokenRedirects(redirects, headingsByRoute) {
 		if (destination.fragment && !headings.has(destination.fragment)) {
 			report(redirect, PROBLEM.missingHeading);
 		}
+	}
+
+	// Where a visitor to `pathname` finally lands, e.g. "ends at /new-page"
+	function finalDestination(pathname) {
+		const visited = new Set();
+		while (isRedirect(pathname) && !visited.has(pathname)) {
+			visited.add(pathname);
+			pathname = firstBySource.get(pathname).destination;
+			if (isExternal(pathname)) return `ends at ${pathname}`;
+			pathname = splitUrl(pathname).pathname;
+		}
+		return visited.has(pathname) ? 'redirect loop' : `ends at ${pathname}`;
 	}
 	return findings;
 }
@@ -219,11 +234,11 @@ function formatText(findings) {
 		return `✅ No redirects ${scope}\n`;
 	}
 	const lines = [`❌ ${findings.length} redirect(s) ${scope}:`, ''];
-	for (const {source, destination, line, problem} of findings) {
+	for (const {source, destination, line, problem, detail} of findings) {
 		lines.push(
 			`  ${REDIRECTS_PATH}${line ? `:${line}` : ''}`,
 			`    ${source} -> ${destination}`,
-			`    ${problem}`,
+			`    ${problem}${detail ? ` (${detail})` : ''}`,
 			''
 		);
 	}
@@ -234,9 +249,11 @@ function linkTo(text, url) {
 	return url ? `[${text}](${url})` : text;
 }
 
-// Map of problem -> its findings in line order, sections in PROBLEM_ORDER
+// Map of problem heading -> its findings in line order, sections in PROBLEM order
 function groupByProblem(findings) {
-	const groups = new Map(PROBLEM_ORDER.map(problem => [problem, []]));
+	const groups = new Map(
+		Object.values(PROBLEM).map(({heading}) => [heading, []])
+	);
 	for (const finding of findings) groups.get(finding.problem).push(finding);
 	for (const [problem, entries] of groups) {
 		if (entries.length === 0) groups.delete(problem);
@@ -259,17 +276,17 @@ function formatMarkdown(findings) {
 		'Redirects are used so external traffic (links inside old versions of our product, ' +
 			'bookmarks, search results, etc.) to old URLs still reaches a relevant page.',
 		'',
-		'Each redirect entry must have:',
+		'A correct entry maps the old page path, exactly as the browser requests it, ' +
+			'straight to a page that exists today, with an optional #heading that exists on that page:',
 		'',
-		'- A destination which points to a page that currently exists',
+		'```ts',
+		'{',
+		"\tsource: '/old/section/page',",
+		"\tdestination: '/new/section/page#heading-slug'",
+		'},',
+		'```',
 		'',
-		'- A source which does not overshadow a page that exists',
-		'',
-		'If this PR moved or renamed the redirect destination, then update the redirect ' +
-			'with the updated destination',
-		'',
-		'If this PR removed the destination, then either update the destination to the ' +
-			'next most relevant page, or remove it to leave the user with our 404 page',
+		'Each section below says how to fix the entries listed under it.',
 		'',
 		'Do not use redirects for broken internal links, internal links must be fixed ' +
 			'properly to tame the tech debt snowball no one wants to deal with; the ' +
@@ -277,13 +294,19 @@ function formatMarkdown(findings) {
 		'',
 		linkTo(`**\`${REDIRECTS_PATH}\`**`, fileUrl)
 	];
-	// One section per problem, in PROBLEM_ORDER. Each entry is shown as it
-	// appears in the redirects file, so it is easy to find there.
+	// One section per problem with its fix. Each entry is shown as it appears
+	// in the redirects file, so it is easy to find there.
+	const fixes = new Map(
+		Object.values(PROBLEM).map(({heading, fix}) => [heading, fix])
+	);
 	for (const [problem, entries] of groupByProblem(findings)) {
-		lines.push('', `#### ${problem}`);
-		for (const {source, destination, line} of entries) {
+		lines.push('', `#### ${problem}`, '', fixes.get(problem), '');
+		for (const {source, destination, line, detail} of entries) {
+			const where = line
+				? linkTo(`line ${line}`, fileUrl && `${fileUrl}#L${line}`)
+				: 'entry';
 			lines.push(
-				`- ${line ? linkTo(`line ${line}`, fileUrl && `${fileUrl}#L${line}`) : 'entry'}`,
+				`- ${where}${detail ? `: ${detail}` : ''}`,
 				'  ```ts',
 				`  source: '${source}',`,
 				`  destination: '${destination}'`,
