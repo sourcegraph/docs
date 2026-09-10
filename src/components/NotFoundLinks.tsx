@@ -52,22 +52,33 @@ export function NotFoundLinks({pagePaths}: {pagePaths: string[]}) {
 			? previousPathname
 			: null;
 
+	// Prefer the in-app history over document.referrer, which goes stale on
+	// client-side navigations.
+	const backLink = previousPage
+		? {href: previousPage, pathname: previousPage}
+		: referrer
+			? {
+					href: referrer.pathname + referrer.search + referrer.hash,
+					pathname: referrer.pathname
+				}
+			: null;
+
+	// Skip the up link when it would repeat the back link.
+	const upLink =
+		ancestor && ancestor !== backLink?.pathname.replace(/\/$/, '')
+			? ancestor
+			: null;
+
 	return (
 		<div className="mt-8 flex flex-col gap-3">
-			{previousPage ? (
-				<Link href={previousPage} className={linkClassName}>
-					Go back to {previousPage}
+			{backLink && (
+				<Link href={backLink.href} className={linkClassName}>
+					Go back to {backLink.pathname}
 				</Link>
-			) : (
-				referrer && (
-					<a href={referrer.href} className={linkClassName}>
-						Go back to {referrer.pathname}
-					</a>
-				)
 			)}
-			{ancestor && (
-				<Link href={ancestor} className={linkClassName}>
-					Go up to {ancestor}
+			{upLink && (
+				<Link href={upLink} className={linkClassName}>
+					Go up to {upLink}
 				</Link>
 			)}
 			<Link href="/" className={linkClassName}>
