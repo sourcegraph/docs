@@ -62,9 +62,9 @@ const PROBLEM = {
 		heading: 'Source has a #fragment, so this redirect can never match',
 		fix:
 			'Use the page path alone as the source. #fragments are processed in the browser, so browsers ' +
-			'never send them to web servers. If the redirect destination has a #fragment, it takes precedence, ' +
-			"otherwise if the customer clicked a link which has a #fragment, it'll be kept and tried on the " +
-			'destination page.'
+			'never send them to web servers.\n\n' +
+			'If the redirect destination has a #fragment, it takes precedence, otherwise if the customer ' +
+			"clicked a link which has a #fragment, it'll be kept and tried on the destination page."
 	},
 	docsPrefix: {
 		heading: 'Source or destination starts with /docs',
@@ -88,7 +88,7 @@ const PROBLEM = {
 	missingPage: {
 		heading: 'Destination page does not exist',
 		fix:
-			'Point at the page that replaced it, or remove the rule if there is no replacement page; ' +
+			'Set the redirect destination to the page that replaced it, or remove the rule if there is no replacement page; ' +
 			"visitors then get our fancy 404 page, with links they can click to find where they're trying " +
 			'to go, and the search bar.'
 	},
@@ -310,7 +310,7 @@ function formatMarkdown(findings) {
 		'},',
 		'```',
 		'',
-		'Each section below says how to fix the entries listed under it.',
+		'Each section below explains how to fix the entries listed under it.',
 		'',
 		'Do not use redirects for broken internal links, internal links must be fixed ' +
 			'properly to tame the tech debt snowball no one wants to deal with; the ' +
