@@ -32,7 +32,10 @@ jobs:
             - name: Check out merge base
               env:
                   BASE_SHA: ${{ github.event.pull_request.base.sha }}
-              run: git worktree add "$RUNNER_TEMP/base" "$(git merge-base "$BASE_SHA" HEAD)"
+              run: |
+                  merge_base=$(git merge-base "$BASE_SHA" HEAD)
+                  git worktree add "$RUNNER_TEMP/base" "$merge_base"
+                  git diff --name-only "$merge_base" HEAD > "$RUNNER_TEMP/changed-files.txt"
 
             - name: Record broken links already present on the base branch
               # Exit 1 means findings, which is expected here
@@ -49,6 +52,7 @@ jobs:
               run: |
                   if node dev/check-links.mjs --check-anchors --format markdown \
                       --baseline "$RUNNER_TEMP/base-links.json" \
+                      --changed-files "$RUNNER_TEMP/changed-files.txt" \
                       --link-base "$LINK_BASE" > "$RUNNER_TEMP/report.md"; then
                       echo "broken=false" >> "$GITHUB_OUTPUT"
                   else
