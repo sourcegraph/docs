@@ -288,7 +288,11 @@ function alignment(result) {
 	const hasTraffic = Boolean(
 		source && (source.requests || source.redirects || source.notFound)
 	);
-	const fires = result.outcome === 'redirects-as-expected';
+	// A source fragment never reaches the server, so even when the bare-path
+	// rule sends people to the same place, this rule is not the one firing.
+	const fires =
+		result.outcome === 'redirects-as-expected' &&
+		result.sourceFragment === null;
 	const works = fires && result.final.status === 200;
 	if (works) return hasTraffic ? 'works, has traffic' : 'works, no traffic';
 	if (fires) {
