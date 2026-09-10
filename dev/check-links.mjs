@@ -365,10 +365,12 @@ function formatMarkdown(findings) {
 	const lines = [
 		`### ❌ This PR introduces ${findings.length} broken link(s)`,
 		'',
-		'Any new broken links found on pages not changed in this PR indicate ' +
+		'Any broken links found here on pages not changed in this PR indicate ' +
 			'your PR has broken inbound links. Please fix the inbound links on ' +
-			'the other pages. Adding a redirect in `src/data/redirects.ts` does ' +
-			'not satisfy this check.',
+			'the other pages.',
+		'',
+		'Adding a redirect in `src/data/redirects.ts` does not satisfy this ' +
+			'check, because it’s a workaround instead of a fix.',
 		''
 	];
 	for (const [file, fileFindings] of groupByFile(findings)) {
