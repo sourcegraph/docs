@@ -13,7 +13,9 @@
  * as its bare path, which is what the middleware actually sees.
  *
  * Traffic comes from reports/page-views-by-path.md (run page-views-report
- * first). Writes reports/redirect-probe.json. See README.md.
+ * first) and is credited the way the middleware matches: a path's traffic
+ * belongs to the first rule with exactly that source. Writes
+ * reports/redirect-probe.json. See README.md.
  *
  * Usage: npm run probe-redirects
  */
@@ -23,10 +25,14 @@ import path from 'path';
 import {
 	HOST,
 	REPORTS_DIR,
+	SITEMAP_URL,
+	fetchSitemapPaths,
 	landingPath,
 	loadRedirectRules,
-	normalizePath
-} from './redirect-rules.mjs';
+	neverFiresReason,
+	normalizePath,
+	requestPath
+} from './shared.mjs';
 
 const ORIGIN = `https://${HOST}`;
 const USER_AGENT = 'sourcegraph-docs-redirect-probe';
@@ -69,12 +75,10 @@ function loadPageViews() {
 	return {window, rowsByPath};
 }
 
-function splitFragment(url) {
-	const [withoutFragment, ...rest] = url.split('#');
-	return {
-		withoutFragment,
-		fragment: rest.length ? rest.join('#') : null
-	};
+// The #fragment a user would have in the address bar for this source.
+function sourceFragmentOf(source) {
+	const hash = source.indexOf('#');
+	return hash === -1 ? null : source.slice(hash + 1);
 }
 
 // The Location src/middleware.ts sends for a rule (createRedirectUrl).
@@ -203,24 +207,33 @@ function trafficFor(rowsByPath, url) {
 	return rowsByPath.get(normalizePath(pathname)) ?? null;
 }
 
-async function probeRule(rule, context) {
-	const {rowsByPath, liveLineBySource} = context;
-	const source = splitFragment(rule.source);
-	const requestUrl = `${ORIGIN}/docs${source.withoutFragment}`;
+// Sitemap membership of a page on this site; null when off-site.
+function inSitemap(sitemapPaths, pagePath) {
+	return pagePath === null ? null : sitemapPaths.has(pagePath);
+}
+
+async function probeRule(rule, {rowsByPath, sitemapPaths}) {
+	const sourceFragment = sourceFragmentOf(rule.source);
+	const requestUrl = `${ORIGIN}/docs${requestPath(rule.source)}`;
 	const expected = expectedLocation(rule.destination);
-	const {hops, final} = await follow(requestUrl, source.fragment);
+	const {hops, final} = await follow(requestUrl, sourceFragment);
 	return {
 		line: rule.line,
 		source: rule.source,
 		destination: rule.destination,
-		shadowedBy: rule.shadowedBy ?? null,
-		sourceFragment: source.fragment,
-		// A source fragment never reaches the server; this is the rule the
-		// middleware matches for the bare path instead, if any.
-		bareSourceRuleLine:
-			source.fragment === null
-				? null
-				: (liveLineBySource.get(source.withoutFragment) ?? null),
+		// Whether the middleware picks this rule for its request path, else
+		// the line of the rule it picks (null: no rule, the page is served).
+		fires: rule.fires,
+		matchedRuleLine: rule.matchedRuleLine,
+		sitemap_source: inSitemap(
+			sitemapPaths,
+			normalizePath(new URL(requestUrl).pathname)
+		),
+		sitemap_destination: inSitemap(
+			sitemapPaths,
+			landingPath(rule.destination)
+		),
+		sourceFragment,
 		requestUrl,
 		expectedLocation: expected,
 		outcome: firstHopOutcome(hops, expected),
@@ -229,10 +242,11 @@ async function probeRule(rule, context) {
 			...final,
 			onDestinationPage: onDestinationPage(final.url, rule.destination)
 		},
+		// Source traffic is credited only to the rule that fires for the
+		// path; destination is where the user ends up after every redirect.
 		traffic: {
-			source: trafficFor(rowsByPath, requestUrl),
-			destination: trafficFor(rowsByPath, landingPath(rule.destination)),
-			final: trafficFor(rowsByPath, final.url)
+			source: rule.fires ? trafficFor(rowsByPath, requestUrl) : null,
+			destination: trafficFor(rowsByPath, final.url)
 		}
 	};
 }
@@ -282,48 +296,41 @@ function trafficByStatus(results, urlOf, trafficOf) {
 	};
 }
 
-// Does the rule do its job, and does anyone hit its source path?
+// Does the rule do its job, and did anyone trigger it? Traffic here means
+// redirects served on the source path, which only a firing rule can have.
 function alignment(result) {
-	const source = result.traffic.source;
-	const hasTraffic = Boolean(
-		source && (source.requests || source.redirects || source.notFound)
-	);
-	// A source fragment never reaches the server, so even when the bare-path
-	// rule sends people to the same place, this rule is not the one firing.
-	const fires =
-		result.outcome === 'redirects-as-expected' &&
-		result.sourceFragment === null;
-	const works = fires && result.final.status === 200;
-	if (works) return hasTraffic ? 'works, has traffic' : 'works, no traffic';
-	if (fires) {
-		return hasTraffic
-			? 'fires, lands on error, has traffic'
-			: 'fires, lands on error, no traffic';
+	if (!result.fires) return `never fires: ${neverFiresReason(result)}`;
+	if (result.outcome !== 'redirects-as-expected') {
+		return `fires, but the site ${result.outcome.replace(/-/g, ' ')}`;
 	}
-	return hasTraffic ? 'never fires, has traffic' : 'never fires, no traffic';
+	const hasTraffic = (result.traffic.source?.redirects ?? 0) > 0;
+	const works = result.final.status === 200;
+	if (works) return hasTraffic ? 'works, has traffic' : 'works, no traffic';
+	return hasTraffic
+		? 'fires, lands on error, has traffic'
+		: 'fires, lands on error, no traffic';
 }
 
 function summarizeCase(results) {
 	return {
 		rules: results.length,
+		fires: tally(results, result => result.fires),
 		sourceTraffic: trafficByStatus(
 			results,
 			result => result.requestUrl,
 			result => result.traffic.source
 		),
-		finalTraffic: trafficByStatus(
+		destinationTraffic: trafficByStatus(
 			results,
 			result => result.final.url,
-			result => result.traffic.final
+			result => result.traffic.destination
 		),
 		alignment: tally(results, alignment),
 		outcome: tally(results, result => result.outcome),
-		bareSourceRule: tally(results, result =>
-			result.sourceFragment === null
-				? 'n/a'
-				: result.bareSourceRuleLine
-					? 'exists'
-					: 'none'
+		sitemap_source: tally(results, result => result.sitemap_source),
+		sitemap_destination: tally(
+			results,
+			result => result.sitemap_destination
 		),
 		finalStatus: tally(results, result => result.final.status),
 		onDestinationPage: tally(
@@ -336,8 +343,7 @@ function summarizeCase(results) {
 }
 
 function summarize(results) {
-	const live = results.filter(result => result.shadowedBy === null);
-	const shadowed = results.filter(result => result.shadowedBy !== null);
+	const firing = results.filter(result => result.fires);
 	const hasFragment = text => text.includes('#');
 	const cases = {
 		'source and destination without #': (source, destination) =>
@@ -350,24 +356,14 @@ function summarize(results) {
 			hasFragment(source) && hasFragment(destination)
 	};
 	return {
-		rules: results.length,
-		// Traffic on a shadowed rule's path is served by the rule shadowing it.
-		shadowedByEarlierRule: {
-			rules: shadowed.length,
-			sourceTraffic: trafficByStatus(
-				shadowed,
-				result => result.requestUrl,
-				result => result.traffic.source
-			)
-		},
-		live: summarizeCase(live),
-		chains: live.filter(result => result.hops.length > 2).length,
-		longestChain: Math.max(...live.map(result => result.hops.length - 1)),
+		all: summarizeCase(results),
+		chains: firing.filter(result => result.hops.length > 2).length,
+		longestChain: Math.max(...firing.map(result => result.hops.length - 1)),
 		byFragmentCase: Object.fromEntries(
 			Object.entries(cases).map(([name, matches]) => [
 				name,
 				summarizeCase(
-					live.filter(result =>
+					results.filter(result =>
 						matches(result.source, result.destination)
 					)
 				)
@@ -379,17 +375,14 @@ function summarize(results) {
 async function main() {
 	const rules = loadRedirectRules();
 	const {window, rowsByPath} = loadPageViews();
-	const liveLineBySource = new Map(
-		rules
-			.filter(rule => rule.shadowedBy === undefined)
-			.map(rule => [rule.source, rule.line])
-	);
+	console.log(`🗺️  Fetching ${SITEMAP_URL}...`);
+	const sitemapPaths = await fetchSitemapPaths();
 
 	console.log(
 		`🔎 Probing ${rules.length} redirect rules against ${ORIGIN}...`
 	);
 	const results = await runPool(rules, rule =>
-		probeRule(rule, {rowsByPath, liveLineBySource})
+		probeRule(rule, {rowsByPath, sitemapPaths})
 	);
 	const summary = summarize(results);
 

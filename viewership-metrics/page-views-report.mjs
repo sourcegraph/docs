@@ -17,16 +17,18 @@ import path from 'path';
 import {
 	HOST,
 	REPORTS_DIR,
+	SITEMAP_URL,
+	fetchSitemapPaths,
 	landingPath,
 	loadRedirectRules,
-	normalizePath
-} from './redirect-rules.mjs';
+	neverFiresReason,
+	normalizePath,
+	requestPath
+} from './shared.mjs';
 
 const ZONE_TAG =
 	process.env.CLOUDFLARE_ZONE_ID ?? 'a168cb2eefa87d19793824cd9bf83f3a';
 const PATH_PREFIXES = ['/docs', '/changelog', '/blog'];
-// An index pointing at sitemap-main.xml (blog, changelog) and docs/sitemap.xml.
-const SITEMAP_URL = `https://${HOST}/sitemap.xml`;
 const EXCLUDED_COUNTRIES = ['CN'];
 const EXCLUDED_ASN_DESCRIPTIONS = ['Hetzner Online GmbH'];
 
@@ -214,29 +216,6 @@ function isTrailingSlashRedirect(row) {
 	);
 }
 
-// Paths listed in the sitemap, following <sitemapindex> entries. Any page
-// with traffic that is not here is deleted, unlisted or a probe.
-async function fetchSitemapPaths(url = SITEMAP_URL, paths = new Set()) {
-	const response = await fetch(url);
-	if (!response.ok) {
-		throw new Error(`${url}: HTTP ${response.status}`);
-	}
-	const xml = await response.text();
-	const locations = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match =>
-		match[1].trim()
-	);
-	if (xml.includes('<sitemapindex')) {
-		for (const location of locations) {
-			await fetchSitemapPaths(location, paths);
-		}
-	} else {
-		for (const location of locations) {
-			paths.add(normalizePath(new URL(location).pathname));
-		}
-	}
-	return paths;
-}
-
 function reportHeader(title, start, end) {
 	return [
 		`# ${title}`,
@@ -263,18 +242,19 @@ function docsDestinationPath(destination) {
 
 // Follow a rule's destination through further rules, as a browser would.
 // Returns the rules hit after this one, and whether they loop back.
-function chainAfter(rule, liveRuleBySource) {
+function chainAfter(rule, firingRuleBySource) {
 	const hops = [];
-	let next = liveRuleBySource.get(docsDestinationPath(rule.destination));
+	let next = firingRuleBySource.get(docsDestinationPath(rule.destination));
 	while (next && next !== rule && !hops.includes(next)) {
 		hops.push(next);
-		next = liveRuleBySource.get(docsDestinationPath(next.destination));
+		next = firingRuleBySource.get(docsDestinationPath(next.destination));
 	}
 	return {hops, loop: Boolean(next)};
 }
 
-// Hits = redirects served on /docs<source>. Live rules sort by hits, then
-// shadowed duplicates; both keep file order within a tie.
+// Hits = redirects served on /docs<source>, credited to the rule the
+// middleware matches (`fires`). Firing rules sort by hits, then the rules
+// that never fire; both keep file order within a tie.
 function formatRedirectRulesReport({
 	title,
 	start,
@@ -284,68 +264,79 @@ function formatRedirectRulesReport({
 	sitemapPaths
 }) {
 	const hitsOf = rule =>
-		rowsByPath.get(`/docs${rule.source}`)?.redirects ?? 0;
-	const live = rules.filter(rule => !rule.shadowedBy);
-	const ruleHits = live.reduce((sum, rule) => sum + hitsOf(rule), 0);
-	const liveRuleBySource = new Map(live.map(rule => [rule.source, rule]));
+		rule.fires
+			? (rowsByPath.get(`/docs${rule.source}`)?.redirects ?? 0)
+			: 0;
+	const firing = rules.filter(rule => rule.fires);
+	const ruleHits = firing.reduce((sum, rule) => sum + hitsOf(rule), 0);
+	const firingRuleBySource = new Map(firing.map(rule => [rule.source, rule]));
 	const chainOf = rule =>
-		rule.shadowedBy
-			? {hops: [], loop: false}
-			: chainAfter(rule, liveRuleBySource);
-	const chained = live.filter(rule => chainOf(rule).hops.length > 0);
+		rule.fires
+			? chainAfter(rule, firingRuleBySource)
+			: {hops: [], loop: false};
+	const chained = firing.filter(rule => chainOf(rule).hops.length > 0);
 	const longestChain = Math.max(
 		0,
 		...chained.map(rule => chainOf(rule).hops.length)
 	);
-	// Sitemap membership of the rule's own destination; blank when off-site.
-	const sitemapOf = rule => {
-		const landing = landingPath(rule.destination);
-		return landing === null ? '' : sitemapPaths.has(landing) ? 'yes' : 'no';
-	};
-	const destinationUnlisted = live.filter(rule => sitemapOf(rule) === 'no');
+	const sitemapCell = pagePath =>
+		pagePath === null ? '' : sitemapPaths.has(pagePath) ? 'yes' : 'no';
+	const sitemapSource = rule =>
+		sitemapCell(normalizePath(`/docs${requestPath(rule.source)}`));
+	// Blank when the destination leaves the site.
+	const sitemapDestination = rule =>
+		sitemapCell(landingPath(rule.destination));
+	const destinationUnlisted = firing.filter(
+		rule => sitemapDestination(rule) === 'no'
+	);
 	const docsRedirects = [...rowsByPath.entries()]
 		.filter(([pagePath]) => pagePath.startsWith('/docs'))
 		.reduce((sum, [, totals]) => sum + totals.redirects, 0);
 	const sorted = [...rules].sort(
 		(a, b) =>
-			(a.shadowedBy ? 1 : 0) - (b.shadowedBy ? 1 : 0) ||
+			(a.fires ? 0 : 1) - (b.fires ? 0 : 1) ||
 			hitsOf(b) - hitsOf(a) ||
 			a.line - b.line
 	);
 	const lines = [
 		...reportHeader(title, start, end),
-		`- Rules: ${rules.length} in src/data/redirects.ts; ` +
-			`${live.length} live, ${rules.length - live.length} shadowed by an ` +
-			`earlier rule with the same source (never match), ` +
-			`${live.filter(rule => hitsOf(rule) === 0).length} live with zero hits`,
+		`- Rules: ${rules.length} in src/data/redirects.ts; ${firing.length} ` +
+			`can fire, ${rules.length - firing.length} never do (Hits says why: ` +
+			'an earlier rule has the same source, browsers never send the ' +
+			`source's #fragment, or a .md path is rewritten first); ` +
+			`${firing.filter(rule => hitsOf(rule) === 0).length} can fire but ` +
+			'had zero hits',
 		`- Hits: ${ruleHits} redirects matched a rule, of ${docsRedirects} ` +
 			'redirects on /docs paths (the rest are version and other redirects)',
 		'- Hits count 3xx responses on /docs<Source> with the same filters as ' +
 			'the page views reports; adaptive-sampled estimates.',
-		`- Chains: ${chained.length} live rules redirect to another rule's ` +
+		`- Chains: ${chained.length} firing rules redirect to another rule's ` +
 			`source, so the browser follows more redirects (longest chain: ` +
 			`${longestChain} more). Chain shows the extra hops and where the ` +
 			'user ends up.',
-		`- Sitemap: whether the rule's destination is in ${SITEMAP_URL} ` +
-			`(blank when it leaves the site). ${destinationUnlisted.length} ` +
-			`live rules point at an unlisted page, ${destinationUnlisted.reduce(
+		`- Sitemap source / destination: whether /docs<Source> and the ` +
+			`destination page are in ${SITEMAP_URL} (destination blank when ` +
+			`it leaves the site). ${destinationUnlisted.length} firing rules ` +
+			`point at an unlisted page, ${destinationUnlisted.reduce(
 				(sum, rule) => sum + hitsOf(rule),
 				0
 			)} hits; unless Chain shows a further redirect, that is a 404.`,
 		'',
-		'| Line | Source | Destination | Hits | Chain | Sitemap |',
-		'| ---: | --- | --- | ---: | --- | --- |',
+		'| Line | Source | Destination | Hits | Chain | Sitemap source | Sitemap destination |',
+		'| ---: | --- | --- | ---: | --- | --- | --- |',
 		...sorted.map(rule => {
 			const {hops, loop} = chainOf(rule);
-			const hits = rule.shadowedBy
-				? `shadowed by line ${rule.shadowedBy}`
-				: hitsOf(rule);
+			const hits = rule.fires
+				? hitsOf(rule)
+				: rule.matchedRuleLine !== null
+					? `line ${rule.matchedRuleLine} matches first`
+					: neverFiresReason(rule);
 			const chain = loop
 				? `LOOP after ${hops.length} more`
 				: hops.length
 					? `${hops.length} more → ${hops.at(-1).destination}`
 					: '';
-			return `| ${rule.line} | ${rule.source} | ${rule.destination} | ${hits} | ${chain} | ${sitemapOf(rule)} |`;
+			return `| ${rule.line} | ${rule.source} | ${rule.destination} | ${hits} | ${chain} | ${sitemapSource(rule)} | ${sitemapDestination(rule)} |`;
 		}),
 		''
 	];

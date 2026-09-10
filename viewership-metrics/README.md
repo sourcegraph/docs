@@ -37,32 +37,41 @@ over `sitemap-main.xml` for blog and changelog, and `docs/sitemap.xml`). A
 `no` on `/docs` is a deleted page or probe path; the blog sitemap only lists
 recent posts, so `no` on `/blog` is normal for old posts.
 
-`redirect-rules.md` matches each rule's source against `/docs` 3xx counts.
-Rules are first-match-wins, like `src/middleware.ts`, so a rule whose source
-repeats an earlier one is flagged `shadowed`. The Chain column shows how
-many more redirects a browser follows when a rule's destination is itself
-another rule's source, and where the user finally lands. Its Sitemap column
-says whether the rule's destination is in the sitemap, blank when the
-redirect leaves the site. A `no` with an empty Chain means the rule sends
-people to a 404; a `no` with a Chain is an intermediate hop.
+`redirect-rules.md` credits `/docs` 3xx counts to rules the way
+`src/middleware.ts` matches them: the request path must equal a source
+exactly, and the first such rule wins. A rule that can never fire says why
+in its Hits column: an earlier rule has the same source, its source has a
+`#fragment` (browsers never send one, so the bare path is matched or the
+page is served), or its source ends in `.md` (rewritten before the lookup).
+The Chain column shows how many more redirects a browser follows when a
+rule's destination is itself another rule's source, and where the user
+finally lands. Sitemap source and Sitemap destination say whether
+`/docs<Source>` and the destination page are in the sitemap; destination is
+blank when the redirect leaves the site. A destination `no` with an empty
+Chain means the rule sends people to a 404; with a Chain it is an
+intermediate hop.
 
 ## Redirect probe
 
 `npm run probe-redirects` requests every rule's source on the live site,
 follows the redirects like a browser, and writes `reports/redirect-probe.json`
-with, per rule: every hop, the final URL and status, whether the first
-redirect is the one the rule promises (`outcome`), and the Cloudflare rows
-for the source, destination and final page from `page-views-by-path.md`
-(run `page-views-report` first). Needs no token; about a minute.
+with, per rule: whether it `fires` (else `matchedRuleLine`, the rule the
+middleware picks instead, or null when the page is served), `sitemap_source`
+and `sitemap_destination`, every hop, the final URL and status, whether the
+first redirect is the one the rule promises (`outcome`), and the Cloudflare
+rows from `page-views-by-path.md` (run `page-views-report` first) for the
+source, credited only to the firing rule, and for the destination, the page
+the user ends up on. Needs no token; about a minute.
 
 Fragments: browsers never send `#fragment`, so a rule whose source has one
-can only ever match as its bare path (`bareSourceRuleLine` is the rule that
-actually fires, if any). The browser keeps the user's fragment across
+is probed as its bare path. The browser keeps the user's fragment across
 redirects unless a `Location` header carries its own, so `final.fragment`
 is what the address bar shows, `final.fragmentFrom` says where it came from
 (`request` or `redirect`), and `final.anchorFound` whether the page has an
 element with that id. `summary.byFragmentCase` totals all of this for the
-four source/destination fragment combinations.
+four source/destination fragment combinations, and `summary.*.alignment`
+sorts rules into works / lands on error / never fires, with or without
+redirect traffic.
 
 ## Filters
 
@@ -146,4 +155,7 @@ From the first 90-day run, September 2026
   traffic.
 - **Redirect rule added mid-window.** `/changelog/self-hosted/server` shows
   150 requests served as 200 alongside 110 redirects, so the rule likely
-  landed partway through the 90 days.
+  landed partway through the 90 days. Same for
+  `/docs/self-hosted/executors/deploy-executors`: 80 page views before
+  [#1818](https://github.com/sourcegraph/docs/pull/1818) deleted the page
+  and added its rule on 2026-07-22.
