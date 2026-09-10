@@ -20,6 +20,8 @@
  *                          (produced by --format json on another revision)
  *   --link-base <url>      Markdown output links each file path to <url>/<path>,
  *                          e.g. https://github.com/sourcegraph/docs/blob/<branch>
+ *   --changed-files <file> Markdown output splits findings into outbound (in one
+ *                          of these files, one path per line) and inbound (elsewhere)
  *
  * Exits 1 when any finding is reported.
  */
@@ -39,6 +41,13 @@ const ROOT_DIR = path.resolve(flagValue('--root') ?? path.dirname(__dirname));
 const FORMAT = flagValue('--format') ?? 'text';
 const BASELINE_FILE = flagValue('--baseline');
 const LINK_BASE = flagValue('--link-base')?.replace(/\/$/, '');
+const CHANGED_FILES = readPathList(flagValue('--changed-files'));
+
+// Set of the non-empty lines of file, or undefined when no file is given
+function readPathList(file) {
+	if (!file) return undefined;
+	return new Set(fs.readFileSync(file, 'utf-8').split('\n').filter(Boolean));
+}
 
 const DOCS_DIR = path.join(ROOT_DIR, 'docs');
 // Files whose links are checked. Only .mdx files become site routes; see
@@ -370,23 +379,9 @@ function linkTo(text, url) {
 	return url ? `[${text}](${url})` : text;
 }
 
-// Body for a pull request comment
-function formatMarkdown(findings) {
-	if (findings.length === 0) {
-		return '### ✅ This PR introduces no broken links\n';
-	}
-	
-	const lines = [
-		`### ❌ This PR introduces ${findings.length} broken link(s)`,
-		'',
-		'Any broken links found here on pages not changed in this PR indicate ' +
-			'your PR has broken inbound links. Please fix the inbound links on ' +
-			'the other pages.',
-		'',
-		'Adding a redirect in `src/data/redirects.ts` does not satisfy this ' +
-			'check, because it’s a workaround instead of a fix.',
-		''
-	];
+// Markdown list of findings grouped by file, linked to the source when --link-base is set
+function markdownFindingList(findings) {
+	const lines = [];
 	for (const [file, fileFindings] of groupByFile(findings)) {
 		// ?plain=1 opens GitHub's code view, where #L<n> anchors work; the rendered
 		// Markdown preview ignores them
@@ -397,9 +392,49 @@ function formatMarkdown(findings) {
 		}
 		lines.push('');
 	}
+	return lines;
+}
+
+// Body for a pull request comment. With --changed-files, findings are split into
+// outbound (in a file this PR changed: the PR added or edited a bad link) and
+// inbound (in a file it did not: the PR renamed or removed a link target).
+function formatMarkdown(findings) {
+	if (findings.length === 0) {
+		return '### ✅ This PR introduces no broken links\n';
+	}
+	
+	const lines = [`### ❌ This PR introduces ${findings.length} broken link(s)`, ''];
+	if (CHANGED_FILES) {
+		const outbound = findings.filter(finding => CHANGED_FILES.has(finding.file));
+		const inbound = findings.filter(finding => !CHANGED_FILES.has(finding.file));
+		if (outbound.length > 0) {
+			lines.push(
+				'### Outbound',
+				'',
+				'Your PR includes links to pages or anchors that do not exist.',
+				'',
+				...markdownFindingList(outbound)
+			);
+		}
+		if (inbound.length > 0) {
+			lines.push(
+				'### Inbound',
+				'',
+				'A change your PR made broke inbound links from elsewhere. ' +
+					'Please fix the inbound links on the other pages.',
+				'',
+				...markdownFindingList(inbound)
+			);
+		}
+	} else {
+		lines.push(...markdownFindingList(findings));
+	}
 	lines.push(
 		'Reproduce locally with `pnpm check-links --check-anchors` ' +
-			'(see `dev/check-links.mjs`).'
+			'(see `dev/check-links.mjs`).',
+		'',
+		'Adding a redirect in `src/data/redirects.ts` does not satisfy this ' +
+			'check, because it’s a workaround instead of a fix.'
 	);
 	return lines.join('\n') + '\n';
 }
