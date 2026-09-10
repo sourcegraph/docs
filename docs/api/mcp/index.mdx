@@ -175,6 +175,44 @@ The MCP server provides these tools for code exploration and analysis:
 
 </details>
 
+#### `list_refs`
+
+<details>
+<summary>List a repository's Git branches and tags.</summary>
+
+**Parameters:**
+
+- `repo` - Repository name (required)
+- `tagsOnly` - Return only tags (optional, default false)
+- `headsOnly` - Return only branches (optional, default false)
+- `containsCommit` - Return only refs whose history contains this commit (optional)
+- `limit` - Maximum refs to return (optional, default 100, minimum 1, maximum 500)
+
+Omit `tagsOnly` and `headsOnly` to return both branches and tags. The filters can
+also be combined.
+
+**Examples:**
+
+```json
+{"repo": "github.com/sourcegraph/sourcegraph", "limit": 500}
+```
+
+```json
+{"repo": "github.com/sourcegraph/sourcegraph", "tagsOnly": true}
+```
+
+```json
+{
+	"repo": "github.com/sourcegraph/sourcegraph",
+	"tagsOnly": true,
+	"containsCommit": "abc123"
+}
+```
+
+**Use cases:** Listing repository branches and tags, finding release tags, identifying which releases contain a commit, and discovering a valid release tag before using tools that accept a revision such as `read_file` or `compare_revisions`
+
+</details>
+
 ### Code Search
 
 #### `keyword_search`
@@ -410,6 +448,7 @@ Use this matrix to choose the smallest endpoint that has the tools your MCP clie
 | `go_to_definition`      |             |        ✓        |                        |
 | `keyword_search`        |      ✓      |        ✓        |                        |
 | `list_files`            |      ✓      |        ✓        |                        |
+| `list_refs`             |             |        ✓        |                        |
 | `list_repos`            |      ✓      |        ✓        |                        |
 | `nls_search`            |             |        ✓        |                        |
 | `read_file`             |      ✓      |        ✓        |                        |
@@ -443,6 +482,7 @@ For OpenAI Codex specifically, set `scopes = ["mcp"]` in your `config.toml`. See
 
 1. **Repository Scoping:** Use `list_repos` first to find relevant repositories for better performance
 2. **Progressive Search:** Use `code_finder` to locate code relevant to a task if available; otherwise, start with a broad `nls_search` and narrow with more specific tools like `keyword_search`
-3. **File Verification:** Use `list_files` before `read_file` to verify file existence
-4. **Pagination:** Use `after`/`before` cursors for large result sets
-5. **Tool Combinations:** Chain tools together (e.g., `list_repos` → `commit_search`)
+3. **Revision Discovery:** Use `list_refs` to find a valid branch or tag before calling tools that accept revisions
+4. **File Verification:** Use `list_files` before `read_file` to verify file existence
+5. **Pagination:** Use `after`/`before` cursors for large result sets
+6. **Tool Combinations:** Chain tools together (e.g., `list_repos` → `list_refs` → `read_file`)
