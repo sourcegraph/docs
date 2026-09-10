@@ -225,11 +225,11 @@ async function probeRule(rule, {rowsByPath, sitemapPaths}) {
 		// the line of the rule it picks (null: no rule, the page is served).
 		fires: rule.fires,
 		matchedRuleLine: rule.matchedRuleLine,
-		sitemap_source: inSitemap(
+		sitemapSource: inSitemap(
 			sitemapPaths,
 			normalizePath(new URL(requestUrl).pathname)
 		),
-		sitemap_destination: inSitemap(
+		sitemapDestination: inSitemap(
 			sitemapPaths,
 			landingPath(rule.destination)
 		),
@@ -326,11 +326,8 @@ function summarizeCase(results) {
 		),
 		alignment: tally(results, alignment),
 		outcome: tally(results, result => result.outcome),
-		sitemap_source: tally(results, result => result.sitemap_source),
-		sitemap_destination: tally(
-			results,
-			result => result.sitemap_destination
-		),
+		sitemapSource: tally(results, result => result.sitemapSource),
+		sitemapDestination: tally(results, result => result.sitemapDestination),
 		finalStatus: tally(results, result => result.final.status),
 		onDestinationPage: tally(
 			results,

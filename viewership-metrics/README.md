@@ -56,8 +56,8 @@ intermediate hop.
 `npm run probe-redirects` requests every rule's source on the live site,
 follows the redirects like a browser, and writes `reports/redirect-probe.json`
 with, per rule: whether it `fires` (else `matchedRuleLine`, the rule the
-middleware picks instead, or null when the page is served), `sitemap_source`
-and `sitemap_destination`, every hop, the final URL and status, whether the
+middleware picks instead, or null when the page is served), `sitemapSource`
+and `sitemapDestination`, every hop, the final URL and status, whether the
 first redirect is the one the rule promises (`outcome`), and the Cloudflare
 rows from `page-views-by-path.md` (run `page-views-report` first) for the
 source, credited only to the firing rule, and for the destination, the page
