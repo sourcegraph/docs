@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Redirect check for src/data/redirects.ts.
+ * Checks redirects in src/data/redirects.ts.
  *
  * Redirects exist so external traffic to an old URL still reaches a page, so
  * each one must be correct. Checks, for every entry:

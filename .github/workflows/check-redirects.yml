@@ -1,4 +1,4 @@
-name: Redirect check
+name: Check redirects
 
 # Reports redirects in src/data/redirects.ts that this PR breaks, compared with
 # the merge base: destinations that no longer exist, #fragments whose heading
@@ -18,8 +18,8 @@ permissions:
     pull-requests: write
 
 jobs:
-    redirect-check:
-        name: Redirect check
+    check-redirects:
+        name: Broken redirects introduced by this PR
         runs-on: ubuntu-latest
         steps:
             - name: Check out pull request head
@@ -71,7 +71,7 @@ jobs:
                   PR_NUMBER: ${{ github.event.pull_request.number }}
                   BROKEN: ${{ steps.check.outputs.broken }}
               run: |
-                  marker='<!-- redirect-check-report -->'
+                  marker='<!-- check-redirects-report -->'
                   existing_comment=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
                       --paginate --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n 1)
 
