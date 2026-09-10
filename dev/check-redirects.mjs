@@ -224,12 +224,18 @@ function formatMarkdown(findings) {
 		'Redirects are not to be used for internal links (tech debt snowball), internal ' +
 			'links must be fixed; the "Check links" comment lists any this PR broke.',
 		'',
-		'| Line | Source | Destination | Problem |',
-		'| --- | --- | --- | --- |'
+		linkTo(`**\`${REDIRECTS_PATH}\`**`, fileUrl)
 	];
+	// Each entry is shown as it appears in the redirects file, so it is easy to find there
 	for (const { source, destination, line, problem } of findings) {
-		const lineCell = line ? linkTo(line, fileUrl && `${fileUrl}#L${line}`) : '';
-		lines.push(`| ${lineCell} | \`${source}\` | \`${destination}\` | ${problem} |`);
+		const where = line ? linkTo(`line ${line}`, fileUrl && `${fileUrl}#L${line}`) : 'entry';
+		lines.push(
+			`- ${where}: ${problem}`,
+			'  ```ts',
+			`  source: '${source}',`,
+			`  destination: '${destination}'`,
+			'  ```'
+		);
 	}
 	lines.push('', 'Reproduce locally with `pnpm check-redirects` (see `dev/check-redirects.mjs`).');
 	return lines.join('\n') + '\n';
