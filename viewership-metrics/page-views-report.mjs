@@ -14,11 +14,16 @@
 
 import fs from 'fs';
 import path from 'path';
-import {fileURLToPath} from 'url';
+import {
+	HOST,
+	REPORTS_DIR,
+	landingPath,
+	loadRedirectRules,
+	normalizePath
+} from './redirect-rules.mjs';
 
 const ZONE_TAG =
 	process.env.CLOUDFLARE_ZONE_ID ?? 'a168cb2eefa87d19793824cd9bf83f3a';
-const HOST = 'sourcegraph.com';
 const PATH_PREFIXES = ['/docs', '/changelog', '/blog'];
 // An index pointing at sitemap-main.xml (blog, changelog) and docs/sitemap.xml.
 const SITEMAP_URL = `https://${HOST}/sitemap.xml`;
@@ -53,15 +58,6 @@ const PAGE_SIZE = 10000;
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
-
-const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = path.dirname(SCRIPT_DIR);
-const REPORTS_DIR = path.join(SCRIPT_DIR, 'reports');
-const REDIRECTS_FILE = path.join(REPO_ROOT, 'src', 'data', 'redirects.ts');
-
-// One `{source: '...', destination: '...' | CONSTANT}` entry in redirects.ts.
-const REDIRECT_RULE_PATTERN =
-	/\{\s*source:\s*'([^']*)',\s*destination:\s*(?:'([^']*)'|(\w+))\s*,?\s*\}/g;
 
 const QUERY = `
 query PageViews($zoneTag: string!, $filter: ZoneHttpRequestsAdaptiveGroupsFilter_InputObject!) {
@@ -208,11 +204,6 @@ async function fetchWindow(token, start, end, rowsByPath) {
 	}
 }
 
-// Merge trailing-slash variants of the same page.
-function normalizePath(pagePath) {
-	return pagePath.length > 1 ? pagePath.replace(/\/+$/, '') : pagePath;
-}
-
 // The site redirects "/page/" to "/page"; that redirect is not worth counting.
 function isTrailingSlashRedirect(row) {
 	const {clientRequestPath, edgeResponseStatus} = row.dimensions;
@@ -221,29 +212,6 @@ function isTrailingSlashRedirect(row) {
 		clientRequestPath.endsWith('/') &&
 		REDIRECT_STATUSES.includes(edgeResponseStatus)
 	);
-}
-
-// src/middleware.ts matches rules by exact source path (relative to /docs)
-// and the first match wins, so a repeated source is a dead rule.
-function loadRedirectRules() {
-	const text = fs.readFileSync(REDIRECTS_FILE, 'utf8');
-	const firstLineBySource = new Map();
-	const rules = [];
-	let line = 1;
-	let cursor = 0;
-	for (const match of text.matchAll(REDIRECT_RULE_PATTERN)) {
-		const [, source, destination, constantName] = match;
-		line += text.slice(cursor, match.index).split('\n').length - 1;
-		cursor = match.index;
-		rules.push({
-			line,
-			source,
-			destination: destination ?? constantName,
-			shadowedBy: firstLineBySource.get(source)
-		});
-		if (!firstLineBySource.has(source)) firstLineBySource.set(source, line);
-	}
-	return rules;
 }
 
 // Paths listed in the sitemap, following <sitemapindex> entries. Any page
@@ -267,18 +235,6 @@ async function fetchSitemapPaths(url = SITEMAP_URL, paths = new Set()) {
 		}
 	}
 	return paths;
-}
-
-// Where a redirect destination lands on sourcegraph.com, or null when it
-// leaves the site (or is a constant the regex could not resolve).
-function landingPath(destination) {
-	if (destination.startsWith('/')) {
-		return normalizePath(`/docs${destination}`.replace(/[#?].*$/, ''));
-	}
-	if (destination.startsWith(`https://${HOST}/`)) {
-		return normalizePath(new URL(destination).pathname);
-	}
-	return null;
 }
 
 function reportHeader(title, start, end) {
@@ -358,7 +314,7 @@ function formatRedirectRulesReport({
 	);
 	const lines = [
 		...reportHeader(title, start, end),
-		`- Rules: ${rules.length} in ${path.relative(REPO_ROOT, REDIRECTS_FILE)}; ` +
+		`- Rules: ${rules.length} in src/data/redirects.ts; ` +
 			`${live.length} live, ${rules.length - live.length} shadowed by an ` +
 			`earlier rule with the same source (never match), ` +
 			`${live.filter(rule => hitsOf(rule) === 0).length} live with zero hits`,

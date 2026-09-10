@@ -45,6 +45,24 @@ says whether the rule's destination is in the sitemap, blank when the
 redirect leaves the site. A `no` with an empty Chain means the rule sends
 people to a soft 404; a `no` with a Chain is an intermediate hop.
 
+## Redirect probe
+
+`npm run probe-redirects` requests every rule's source on the live site,
+follows the redirects like a browser, and writes `reports/redirect-probe.json`
+with, per rule: every hop, the final URL and status, whether the first
+redirect is the one the rule promises (`outcome`), and the Cloudflare rows
+for the source, destination and final page from `page-views-by-path.md`
+(run `page-views-report` first). Needs no token; about a minute.
+
+Fragments: browsers never send `#fragment`, so a rule whose source has one
+can only ever match as its bare path (`bareSourceRuleLine` is the rule that
+actually fires, if any). The browser keeps the user's fragment across
+redirects unless a `Location` header carries its own, so `final.fragment`
+is what the address bar shows, `final.fragmentFrom` says where it came from
+(`request` or `redirect`), and `final.anchorFound` whether the page has an
+element with that id. `summary.byFragmentCase` totals all of this for the
+four source/destination fragment combinations.
+
 ## Filters
 
 - Bot Management decision `likely_human`, GET requests only
