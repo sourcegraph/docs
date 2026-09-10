@@ -48,6 +48,17 @@ const DOCS_DIR = path.join(ROOT_DIR, 'docs');
 const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
 const MAX_CHAIN_HOPS = 10;
 
+// Report sections, most urgent first: a shadowed page is unreachable today
+const PROBLEM = {
+	shadowsPage: 'Source overshadows a docs page that already exists',
+	fragmentSource:
+		'Source has a #fragment, which browsers never send, so this redirect can never match',
+	missingPage: 'Destination page does not exist',
+	missingHeading: 'Destination heading does not exist',
+	loop: `Redirect loop or chain longer than ${MAX_CHAIN_HOPS} hops`
+};
+const PROBLEM_ORDER = Object.values(PROBLEM);
+
 function flagValue(name) {
 	const index = args.indexOf(name);
 	return index === -1 ? undefined : args[index + 1];
@@ -139,14 +150,11 @@ function findBrokenRedirects(redirects, headingsByRoute) {
 		if (source.fragment) {
 			// Browsers strip #fragments before sending a request, so no server
 			// can ever match this source. Nothing else about the entry matters.
-			report(
-				redirect,
-				'Source has a #fragment, which browsers never send, so this redirect can never match'
-			);
+			report(redirect, PROBLEM.fragmentSource);
 			continue;
 		}
 		if (headingsByRoute.has(source.pathname)) {
-			report(redirect, 'Source overshadows a page that exists');
+			report(redirect, PROBLEM.shadowsPage);
 		}
 
 		if (isExternal(redirect.destination)) continue;
@@ -160,10 +168,7 @@ function findBrokenRedirects(redirects, headingsByRoute) {
 			!headingsByRoute.has(destination.pathname)
 		) {
 			if (visited.has(destination.pathname) || ++hops > MAX_CHAIN_HOPS) {
-				report(
-					redirect,
-					`Redirect loop or chain longer than ${MAX_CHAIN_HOPS} hops`
-				);
+				report(redirect, PROBLEM.loop);
 				destination = undefined;
 				break;
 			}
@@ -185,18 +190,12 @@ function findBrokenRedirects(redirects, headingsByRoute) {
 		const headings = headingsByRoute.get(destination.pathname);
 		if (!headings) {
 			if (!isPublicFile(destination.pathname)) {
-				report(
-					redirect,
-					`Destination page ${destination.pathname} does not exist`
-				);
+				report(redirect, PROBLEM.missingPage);
 			}
 			continue;
 		}
 		if (destination.fragment && !headings.has(destination.fragment)) {
-			report(
-				redirect,
-				`Heading #${destination.fragment} not found on page ${destination.pathname}`
-			);
+			report(redirect, PROBLEM.missingHeading);
 		}
 	}
 	return findings;
@@ -235,25 +234,15 @@ function linkTo(text, url) {
 	return url ? `[${text}](${url})` : text;
 }
 
-// Report sections, most urgent first: a shadowed page is unreachable today
-const PROBLEM_ORDER = [
-	'Source overshadows',
-	'Source has a #fragment',
-	'Destination page',
-	'Heading',
-	'Redirect loop'
-];
-
-// Map of problem -> findings with that problem, ordered by PROBLEM_ORDER
+// Map of problem -> its findings in line order, sections in PROBLEM_ORDER
 function groupByProblem(findings) {
-	const rank = problem =>
-		PROBLEM_ORDER.findIndex(prefix => problem.startsWith(prefix));
-	const groups = new Map();
-	for (const finding of findings) {
-		if (!groups.has(finding.problem)) groups.set(finding.problem, []);
-		groups.get(finding.problem).push(finding);
+	const groups = new Map(PROBLEM_ORDER.map(problem => [problem, []]));
+	for (const finding of findings) groups.get(finding.problem).push(finding);
+	for (const [problem, entries] of groups) {
+		if (entries.length === 0) groups.delete(problem);
+		else entries.sort((a, b) => (a.line ?? 0) - (b.line ?? 0));
 	}
-	return new Map([...groups].sort(([a], [b]) => rank(a) - rank(b)));
+	return groups;
 }
 
 // Body for a pull request comment
