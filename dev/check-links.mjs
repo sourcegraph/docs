@@ -18,6 +18,8 @@
  *   --format <name>        Output as text (default), json, or markdown
  *   --baseline <file>      Only report findings absent from this JSON file
  *                          (produced by --format json on another revision)
+ *   --link-base <url>      Markdown output links each file path to <url>/<path>,
+ *                          e.g. https://github.com/sourcegraph/docs/blob/<branch>
  *
  * Exits 1 when any finding is reported.
  */
@@ -37,6 +39,7 @@ const CHECK_ANCHORS = args.includes('--check-anchors');
 const ROOT_DIR = path.resolve(flagValue('--root') ?? path.dirname(__dirname));
 const FORMAT = flagValue('--format') ?? 'text';
 const BASELINE_FILE = flagValue('--baseline');
+const LINK_BASE = flagValue('--link-base')?.replace(/\/$/, '');
 
 const DOCS_DIR = path.join(ROOT_DIR, 'docs');
 // Files whose links are checked. Only .mdx files become site routes; see
@@ -374,7 +377,8 @@ function formatMarkdown(findings) {
 		''
 	];
 	for (const [file, fileFindings] of groupByFile(findings)) {
-		lines.push(`**\`${file}\`**`);
+		const fileLabel = `**\`${file}\`**`;
+		lines.push(LINK_BASE ? `[${fileLabel}](${LINK_BASE}/${file})` : fileLabel);
 		for (const { line, url, error } of fileFindings) {
 			lines.push(`- line ${line}: \`${url}\` — ${error}`);
 		}
