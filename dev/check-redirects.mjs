@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 /**
- * Broken redirect checker for src/data/redirects.ts.
+ * Redirect check for src/data/redirects.ts.
  *
- * A redirect is broken when a visitor who follows it does not end up on a real
- * page. Checks, for every entry:
+ * Redirects exist so external traffic to an old URL still reaches a page, so
+ * each one must be correct. Checks, for every entry:
  * - the destination page exists under docs/ (or is a file under public/),
  *   following chains through other redirects
  * - when the destination has a #fragment, the heading exists on that page
@@ -13,55 +13,58 @@
  *
  * External (http) destinations are not checked.
  *
- * Usage: node dev/check-redirects.mjs [--format text|json|markdown]
- *        [--root <repo dir>] [--baseline <json file>]
+ * Usage: node dev/check-redirects.mjs [options]
+ *   --root <dir>           Repository to check (default: this repository)
+ *   --format <name>        Output as text (default), json, or markdown
+ *   --baseline <file>      Only report findings absent from this JSON file
+ *                          (produced by --format json on another revision)
+ *   --link-base <url>      Markdown output links each line to
+ *                          <url>/src/data/redirects.ts, e.g.
+ *                          https://github.com/sourcegraph/docs/blob/<branch>
  *
- * --root      Check a different checkout (for example the merge base).
- * --baseline  Ignore findings also present in this JSON report, so only
- *             redirects broken by the current change are reported.
- *
- * Exit code 1 when there are findings, 0 otherwise.
+ * Exits 1 when any finding is reported.
  */
 
 import fs from 'fs';
 import path from 'path';
 import vm from 'vm';
-import {glob} from 'glob';
-import GithubSlugger from 'github-slugger';
-import {fileURLToPath} from 'url';
+import { fileURLToPath } from 'url';
+import { extractHeadings, listFiles, routeFor } from './check-links.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const args = process.argv.slice(2);
-function flag(name, fallback) {
-	const i = args.indexOf(name);
-	return i === -1 ? fallback : args[i + 1];
-}
-const ROOT = path.resolve(flag('--root', path.dirname(__dirname)));
-const FORMAT = flag('--format', 'text');
-const BASELINE = flag('--baseline');
+const ROOT_DIR = path.resolve(flagValue('--root') ?? path.dirname(__dirname));
+const FORMAT = flagValue('--format') ?? 'text';
+const BASELINE_FILE = flagValue('--baseline');
+const LINK_BASE = flagValue('--link-base')?.replace(/\/$/, '');
 
-const REDIRECTS_FILE = path.join(ROOT, 'src/data/redirects.ts');
-const CONSTANTS_FILE = path.join(ROOT, 'src/data/constants.ts');
-const DOCS_DIR = path.join(ROOT, 'docs');
-const PUBLIC_DIR = path.join(ROOT, 'public');
-const MAX_CHAIN = 10;
+const REDIRECTS_PATH = 'src/data/redirects.ts';
+const REDIRECTS_FILE = path.join(ROOT_DIR, REDIRECTS_PATH);
+const CONSTANTS_FILE = path.join(ROOT_DIR, 'src/data/constants.ts');
+const DOCS_DIR = path.join(ROOT_DIR, 'docs');
+const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
+const MAX_CHAIN_HOPS = 10;
+
+function flagValue(name) {
+	const index = args.indexOf(name);
+	return index === -1 ? undefined : args[index + 1];
+}
 
 // Load redirects.ts without a TypeScript toolchain. The file is plain data
 // plus one import, so strip the module syntax and evaluate it.
+// Returns [{ source, destination, line }].
 function loadRedirects() {
 	const source = fs.readFileSync(REDIRECTS_FILE, 'utf-8');
 	const constants = fs.readFileSync(CONSTANTS_FILE, 'utf-8');
-	const rss = constants.match(
-		/TECHNICAL_CHANGELOG_RSS_URL\s*=\s*['"]([^'"]+)['"]/
-	);
+	const rssUrl = constants.match(/TECHNICAL_CHANGELOG_RSS_URL\s*=\s*['"]([^'"]+)['"]/)?.[1] ?? '';
 
 	const script = source
 		.replace(/^import .*$/gm, '')
 		.replace(/^export const /gm, 'const ')
 		.replace(/module\.exports\s*=\s*\{[\s\S]*?\};?/g, '');
 
-	const sandbox = {TECHNICAL_CHANGELOG_RSS_URL: rss ? rss[1] : ''};
+	const sandbox = { TECHNICAL_CHANGELOG_RSS_URL: rssUrl };
 	vm.runInNewContext(`${script}\nresult = updatedRedirectsData;`, sandbox);
 
 	// Line number of each entry, for the report. Entries are written one
@@ -69,182 +72,188 @@ function loadRedirects() {
 	const lines = source.split('\n');
 	const arrayEnd = lines.findIndex(line => /^\];?\s*$/.test(line));
 	const sourceLines = [];
-	lines.slice(0, arrayEnd).forEach((line, i) => {
-		if (/^\s*source:/.test(line)) sourceLines.push(i + 1);
+	lines.slice(0, arrayEnd).forEach((line, index) => {
+		if (/^\s*source:/.test(line)) sourceLines.push(index + 1);
 	});
 	const haveLines = sourceLines.length === sandbox.result.length;
 
-	return sandbox.result.map((r, i) => ({
-		source: r.source,
-		destination: r.destination,
-		line: haveLines ? sourceLines[i] : undefined
+	return sandbox.result.map((redirect, index) => ({
+		source: redirect.source,
+		destination: redirect.destination,
+		line: haveLines ? sourceLines[index] : undefined
 	}));
 }
 
-// Same heading extraction as dev/check-links.mjs, so both checks agree on
-// which anchors exist.
-function extractHeadings(content) {
-	const slugger = new GithubSlugger();
-	const headings = new Set();
-	const contentWithoutCode = content.replace(/```[\s\S]*?```/g, '');
-	const headingRegex = /^#{1,6}\s+(.+)$/gm;
-	let match;
-	while ((match = headingRegex.exec(contentWithoutCode)) !== null) {
-		const linkMatch = match[1].match(/\[([^\]]+)\]\([^)]+\)/);
-		const title = linkMatch ? linkMatch[1] : match[1];
-		headings.add(slugger.slug(title.trim()));
-	}
-	return headings;
-}
-
-async function buildRoutes() {
-	const files = await glob('**/*.mdx', {cwd: DOCS_DIR});
+// Site route -> Set of anchors on that page. When foo.mdx and foo/index.mdx
+// both exist the first (sorted) file owns the route, as in check-links.mjs.
+function buildHeadingsByRoute() {
 	const headingsByRoute = new Map();
-	for (const file of files) {
-		const route =
-			'/' + file.replace(/\.mdx$/, '').replace(/(^|\/)index$/, '');
-		const content = fs.readFileSync(path.join(DOCS_DIR, file), 'utf-8');
-		headingsByRoute.set(
-			route === '' ? '/' : route,
-			extractHeadings(content)
-		);
+	for (const file of listFiles(DOCS_DIR, ['.mdx'])) {
+		const route = routeFor(file);
+		if (headingsByRoute.has(route)) continue;
+		headingsByRoute.set(route, extractHeadings(fs.readFileSync(path.join(DOCS_DIR, file), 'utf-8')));
 	}
 	return headingsByRoute;
 }
 
-function split(url) {
-	const [pathAndQuery, hash = ''] = url.split('#');
-	const p = pathAndQuery.split('?')[0].replace(/\/+$/, '') || '/';
-	return {path: p, hash: decodeURIComponent(hash)};
+// '/foo/bar/?x=1#baz' -> { pathname: '/foo/bar', fragment: 'baz' }
+function splitUrl(url) {
+	const [pathAndQuery, fragment = ''] = url.split('#');
+	const pathname = pathAndQuery.split('?')[0].replace(/\/+$/, '') || '/';
+	return { pathname, fragment: decodeURIComponent(fragment) };
 }
 
-function isPublicFile(p) {
-	const full = path.join(PUBLIC_DIR, p);
-	return full.startsWith(PUBLIC_DIR) && fs.existsSync(full);
+function isPublicFile(pathname) {
+	const fullPath = path.join(PUBLIC_DIR, pathname);
+	return fullPath.startsWith(PUBLIC_DIR) && fs.existsSync(fullPath);
 }
 
-function check(redirects, headingsByRoute) {
+function isExternal(url) {
+	return /^https?:\/\//.test(url);
+}
+
+// Every incorrect redirect: [{ source, destination, line, problem }]
+function findBrokenRedirects(redirects, headingsByRoute) {
 	const findings = [];
+	// Only the first entry for a source is reachable; later duplicates are
+	// dead code and cannot break anything.
 	const firstBySource = new Map();
-	for (const r of redirects) {
-		if (!firstBySource.has(r.source)) firstBySource.set(r.source, r);
+	for (const redirect of redirects) {
+		if (!firstBySource.has(redirect.source)) firstBySource.set(redirect.source, redirect);
 	}
-	const report = (r, problem) =>
-		findings.push({
-			source: r.source,
-			destination: r.destination,
-			line: r.line,
-			problem
-		});
+	const report = (redirect, problem) => findings.push({ ...redirect, problem });
 
-	for (const r of redirects) {
-		// Only the first entry for a source is reachable; later duplicates are
-		// dead code and cannot break anything.
-		if (firstBySource.get(r.source) !== r) continue;
+	for (const redirect of redirects) {
+		if (firstBySource.get(redirect.source) !== redirect) continue;
 
-		const src = split(r.source);
-		if (!src.hash && headingsByRoute.has(src.path)) {
-			report(
-				r,
-				`source is an existing page; visitors to it are redirected away`
-			);
+		const source = splitUrl(redirect.source);
+		if (!source.fragment && headingsByRoute.has(source.pathname)) {
+			report(redirect, 'source is an existing page; visitors to it are redirected away');
 		}
 
-		if (/^https?:\/\//.test(r.destination)) continue;
+		if (isExternal(redirect.destination)) continue;
 
-		// Follow redirect chains to the page a visitor finally lands on.
-		let dest = split(r.destination);
+		// Follow redirect chains to the page a visitor finally lands on
+		let destination = splitUrl(redirect.destination);
 		let hops = 0;
-		const seen = new Set([r.source]);
-		while (
-			firstBySource.has(dest.path) &&
-			!headingsByRoute.has(dest.path)
-		) {
-			if (seen.has(dest.path) || ++hops > MAX_CHAIN) {
-				report(
-					r,
-					`redirect loop or chain longer than ${MAX_CHAIN} hops`
-				);
-				dest = null;
+		const visited = new Set([redirect.source]);
+		while (firstBySource.has(destination.pathname) && !headingsByRoute.has(destination.pathname)) {
+			if (visited.has(destination.pathname) || ++hops > MAX_CHAIN_HOPS) {
+				report(redirect, `redirect loop or chain longer than ${MAX_CHAIN_HOPS} hops`);
+				destination = undefined;
 				break;
 			}
-			seen.add(dest.path);
-			const next = firstBySource.get(dest.path).destination;
-			if (/^https?:\/\//.test(next)) {
-				dest = null;
+			visited.add(destination.pathname);
+			const next = firstBySource.get(destination.pathname).destination;
+			if (isExternal(next)) {
+				destination = undefined;
 				break;
 			}
-			const nextSplit = split(next);
-			// A hop without its own fragment keeps the fragment we have.
-			dest = {path: nextSplit.path, hash: nextSplit.hash || dest.hash};
+			const nextUrl = splitUrl(next);
+			// A hop without its own fragment keeps the fragment we have
+			destination = { pathname: nextUrl.pathname, fragment: nextUrl.fragment || destination.fragment };
 		}
-		if (!dest) continue;
+		if (!destination) continue;
 
-		const headings = headingsByRoute.get(dest.path);
+		const headings = headingsByRoute.get(destination.pathname);
 		if (!headings) {
-			if (!isPublicFile(dest.path)) {
-				report(r, `destination page ${dest.path} does not exist`);
+			if (!isPublicFile(destination.pathname)) {
+				report(redirect, `destination page ${destination.pathname} does not exist`);
 			}
 			continue;
 		}
-		if (dest.hash && !headings.has(dest.hash)) {
-			report(r, `heading #${dest.hash} not found on ${dest.path}`);
+		if (destination.fragment && !headings.has(destination.fragment)) {
+			report(redirect, `heading #${destination.fragment} not found on ${destination.pathname}`);
 		}
 	}
 	return findings;
 }
 
-const key = f => `${f.source}\u0000${f.destination}\u0000${f.problem}`;
-
-function applyBaseline(findings) {
-	if (!BASELINE) return findings;
-	const baseline = new Set(
-		JSON.parse(fs.readFileSync(BASELINE, 'utf-8')).map(key)
-	);
-	return findings.filter(f => !baseline.has(key(f)));
+// Line numbers are left out so an entry that only moved is not a new finding
+function findingKey(finding) {
+	return `${finding.source}\u0000${finding.destination}\u0000${finding.problem}`;
 }
 
-function print(findings) {
-	if (FORMAT === 'json') {
-		console.log(JSON.stringify(findings, null, 2));
-		return;
-	}
-	const scope = BASELINE ? 'broken by this PR' : 'broken';
-	if (FORMAT === 'markdown') {
-		if (findings.length === 0) {
-			console.log(`### ✅ No redirects ${scope}`);
-			return;
-		}
-		console.log(
-			`### ❌ ${findings.length} redirect${findings.length === 1 ? '' : 's'} ${scope}\n`
-		);
-		console.log(
-			'Visitors following these redirects do not land on a real page. Fix the destination in `src/data/redirects.ts`, or add a redirect for a page this PR removed.\n'
-		);
-		console.log('| Line | Source | Destination | Problem |');
-		console.log('| --- | --- | --- | --- |');
-		for (const f of findings) {
-			console.log(
-				`| ${f.line ?? ''} | \`${f.source}\` | \`${f.destination}\` | ${f.problem} |`
-			);
-		}
-		return;
-	}
+function withoutBaseline(findings, baselineFile) {
+	const baseline = new Set(JSON.parse(fs.readFileSync(baselineFile, 'utf-8')).map(findingKey));
+	return findings.filter(finding => !baseline.has(findingKey(finding)));
+}
+
+function formatText(findings) {
+	const scope = BASELINE_FILE ? 'broken by this change' : 'broken';
 	if (findings.length === 0) {
-		console.log(`✅ No redirects ${scope}`);
-		return;
+		return `✅ No redirects ${scope}\n`;
 	}
-	console.log(`❌ ${findings.length} redirect(s) ${scope}:\n`);
-	for (const f of findings) {
-		const where = f.line
-			? `src/data/redirects.ts:${f.line}`
-			: 'src/data/redirects.ts';
-		console.log(
-			`  ${where}\n    ${f.source} -> ${f.destination}\n    ${f.problem}\n`
+	const lines = [`❌ ${findings.length} redirect(s) ${scope}:`, ''];
+	for (const { source, destination, line, problem } of findings) {
+		lines.push(
+			`  ${REDIRECTS_PATH}${line ? `:${line}` : ''}`,
+			`    ${source} -> ${destination}`,
+			`    ${problem}`,
+			''
 		);
 	}
+	return lines.join('\n');
 }
 
-const findings = applyBaseline(check(loadRedirects(), await buildRoutes()));
-print(findings);
-process.exit(findings.length > 0 ? 1 : 0);
+function linkTo(text, url) {
+	return url ? `[${text}](${url})` : text;
+}
+
+// Body for a pull request comment
+function formatMarkdown(findings) {
+	if (findings.length === 0) {
+		return '### ✅ This PR breaks no redirects\n';
+	}
+
+	// ?plain=1 opens GitHub's code view, where #L<n> anchors work
+	const fileUrl = LINK_BASE && `${LINK_BASE}/${REDIRECTS_PATH}?plain=1`;
+	const lines = [
+		`### ❌ This PR breaks ${findings.length} redirect(s)`,
+		'',
+		'Redirects exist so external traffic (search results, bookmarks) to an old URL ' +
+			'still reaches a page. Each one must point at a page and heading that exist, ' +
+			'and must not shadow a page that exists.',
+		'',
+		'- If this PR moved or renamed the redirect destination, then update the ' +
+			'redirect with the updated destination',
+		'',
+		'- If this PR removed the destination, then either update the destination to ' +
+			'the next most relevant page, or remove it to leave the user with our 404 page',
+		'',
+		'Redirects are not to be used for internal links (tech debt snowball), internal ' +
+			'links must be fixed; the "Check links" comment lists any this PR broke.',
+		'',
+		'| Line | Source | Destination | Problem |',
+		'| --- | --- | --- | --- |'
+	];
+	for (const { source, destination, line, problem } of findings) {
+		const lineCell = line ? linkTo(line, fileUrl && `${fileUrl}#L${line}`) : '';
+		lines.push(`| ${lineCell} | \`${source}\` | \`${destination}\` | ${problem} |`);
+	}
+	lines.push('', 'Reproduce locally with `pnpm check-redirects` (see `dev/check-redirects.mjs`).');
+	return lines.join('\n') + '\n';
+}
+
+const FORMATTERS = {
+	text: formatText,
+	json: findings => JSON.stringify(findings, null, '\t') + '\n',
+	markdown: formatMarkdown
+};
+
+function main() {
+	const format = FORMATTERS[FORMAT];
+	if (!format) {
+		throw new Error(`Unknown --format "${FORMAT}"; use text, json, or markdown`);
+	}
+
+	let findings = findBrokenRedirects(loadRedirects(), buildHeadingsByRoute());
+	if (BASELINE_FILE) {
+		findings = withoutBaseline(findings, BASELINE_FILE);
+	}
+
+	process.stdout.write(format(findings));
+	process.exit(findings.length === 0 ? 0 : 1);
+}
+
+main();

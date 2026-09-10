@@ -1,4 +1,4 @@
-name: Check redirects
+name: Redirect check
 
 # Reports redirects in src/data/redirects.ts that this PR breaks, compared with
 # the merge base: destinations that no longer exist, #fragments whose heading
@@ -8,13 +8,18 @@ name: Check redirects
 on:
     pull_request:
 
+# A new push supersedes the run for the previous one
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
+
 permissions:
     contents: read
     pull-requests: write
 
 jobs:
-    check-redirects:
-        name: Broken redirects introduced by this PR
+    redirect-check:
+        name: Redirect check
         runs-on: ubuntu-latest
         steps:
             - name: Check out pull request head
@@ -23,19 +28,13 @@ jobs:
                   ref: ${{ github.event.pull_request.head.sha }}
                   fetch-depth: 0
 
-            - name: Install pnpm
-              uses: pnpm/action-setup@v4
-              with:
-                  version: 10.25.0
-
-            - name: Set up Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 20.19.6
-                  cache: pnpm
-
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
+            - name: Install github-slugger, the only dependency of dev/check-redirects.mjs
+              # Into a scratch prefix, not the repo: `npm install <pkg>` next to
+              # package.json would install every dependency of the site
+              run: |
+                  npm install --prefix "$RUNNER_TEMP/deps" --no-package-lock --no-audit --no-fund \
+                      "github-slugger@$(node -p 'require("./package.json").dependencies["github-slugger"]')"
+                  ln -s "$RUNNER_TEMP/deps/node_modules" node_modules
 
             - name: Check out merge base
               env:
@@ -49,11 +48,15 @@ jobs:
                       --root "$RUNNER_TEMP/base" > "$RUNNER_TEMP/base-redirects.json" \
                       || [ $? -eq 1 ]
 
-            - name: Find broken redirects introduced by this PR
+            - name: Find redirects broken by this PR
               id: check
+              env:
+                  # Line links in the report open redirects.ts on the PR branch
+                  LINK_BASE: ${{ github.event.pull_request.head.repo.html_url }}/blob/${{ github.event.pull_request.head.ref }}
               run: |
                   if node dev/check-redirects.mjs --format markdown \
-                      --baseline "$RUNNER_TEMP/base-redirects.json" > "$RUNNER_TEMP/report.md"; then
+                      --baseline "$RUNNER_TEMP/base-redirects.json" \
+                      --link-base "$LINK_BASE" > "$RUNNER_TEMP/report.md"; then
                       echo "broken=false" >> "$GITHUB_OUTPUT"
                   else
                       echo "broken=true" >> "$GITHUB_OUTPUT"
@@ -68,7 +71,7 @@ jobs:
                   PR_NUMBER: ${{ github.event.pull_request.number }}
                   BROKEN: ${{ steps.check.outputs.broken }}
               run: |
-                  marker='<!-- check-redirects-report -->'
+                  marker='<!-- redirect-check-report -->'
                   existing_comment=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
                       --paginate --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n 1)
 
@@ -76,7 +79,7 @@ jobs:
                   if [ "$BROKEN" = true ]; then
                       { echo "$marker"; cat "$RUNNER_TEMP/report.md"; } > "$RUNNER_TEMP/comment.md"
                   elif [ -n "$existing_comment" ]; then
-                      printf '%s\n### ✅ The broken redirects an earlier revision of this PR introduced are fixed\n' \
+                      printf '%s\n### ✅ The redirects an earlier revision of this PR broke are fixed\n' \
                           "$marker" > "$RUNNER_TEMP/comment.md"
                   else
                       exit 0
@@ -89,6 +92,6 @@ jobs:
                       gh pr comment "$PR_NUMBER" --body-file "$RUNNER_TEMP/comment.md"
                   fi
 
-            - name: Fail when this PR introduces broken redirects
+            - name: Fail when this PR breaks redirects
               if: steps.check.outputs.broken == 'true'
               run: exit 1
