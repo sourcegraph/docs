@@ -10,6 +10,8 @@
  * - the source has no #fragment: browsers never send fragments, so such an
  *   entry can never match
  * - the source has no earlier entry: the middleware uses the first match only
+ * - neither path starts with /docs: the middleware strips that prefix from
+ *   requests and adds it to destinations
  * - the destination is a page, not another redirect
  * - the destination page exists under docs/ (or is a file under public/)
  * - when the destination has a #fragment, the heading exists on that page
@@ -51,14 +53,25 @@ const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
 // `fix` teaches the author what a correct entry looks like, where it applies.
 const PROBLEM = {
 	shadowsPage: {
-		heading: 'Source overshadows a docs page that already exists',
-		fix: 'Visitors to that page are redirected away from it. Remove the redirect, or rename the page.'
+		heading: 'Source overshadows a docs page that exists',
+		fix:
+			"Redirects take precedence over pages, so visitors to that page's URL are redirected away from it. " +
+			'Update or remove the redirect or the page to remove the conflict.'
 	},
 	fragmentSource: {
 		heading: 'Source has a #fragment, so this redirect can never match',
 		fix:
-			'Browsers never send the #fragment to the server. Use the page path alone as the source; ' +
-			"when the destination has no #fragment, the browser keeps the visitor's own."
+			'Use the page path alone as the source. #fragments are processed in the browser, so browsers ' +
+			'never send them to web servers. If the redirect destination has a #fragment, it takes precedence, ' +
+			"otherwise if the customer clicked a link which has a #fragment, it'll be kept and tried on the " +
+			'destination page.'
+	},
+	docsPrefix: {
+		heading: 'Source or destination starts with /docs',
+		fix:
+			'Write paths without the /docs prefix. The site removes /docs from the requested URL before ' +
+			'matching sources, and adds it back in front of the destination, so a /docs/... source never ' +
+			'matches and a /docs/... destination lands on /docs/docs/....'
 	},
 	duplicateSource: {
 		heading:
@@ -67,17 +80,21 @@ const PROBLEM = {
 	},
 	chained: {
 		heading: 'Destination is another redirect',
-		fix: 'Point straight at the final page (named after each line); every hop costs the visitor a round trip.'
+		fix:
+			"Chained redirects cost the customer's browser a round trip, slow down their page load time, " +
+			'and frustrate them. They also make the redirects file impossible to maintain, and make it too ' +
+			"easy to create redirect loops. Change the rule's destination to the final destination."
 	},
 	missingPage: {
 		heading: 'Destination page does not exist',
 		fix:
-			'Point at the page that replaced it, or remove the entry if there is no replacement ' +
-			'(visitors then get the 404 page).'
+			'Point at the page that replaced it, or remove the rule if there is no replacement page; ' +
+			"visitors then get our fancy 404 page, with links they can click to find where they're trying " +
+			'to go, and the search bar.'
 	},
 	missingHeading: {
 		heading: 'Destination heading does not exist',
-		fix: "Use the heading's current slug, or drop the #fragment to land at the top of the page."
+		fix: "Use the heading's correct anchor, or drop the #fragment to land the customer at the top of the page."
 	}
 };
 
@@ -179,6 +196,13 @@ function findBrokenRedirects(redirects, headingsByRoute) {
 		if (headingsByRoute.has(source.pathname)) {
 			report(redirect, PROBLEM.shadowsPage);
 		}
+		if (
+			source.pathname.startsWith('/docs/') ||
+			redirect.destination.startsWith('/docs/')
+		) {
+			report(redirect, PROBLEM.docsPrefix);
+			continue;
+		}
 		if (isExternal(redirect.destination)) continue;
 
 		const destination = splitUrl(redirect.destination);
@@ -202,16 +226,16 @@ function findBrokenRedirects(redirects, headingsByRoute) {
 		}
 	}
 
-	// Where a visitor to `pathname` finally lands, e.g. "ends at /new-page"
+	// Where a visitor to `pathname` finally lands
 	function finalDestination(pathname) {
 		const visited = new Set();
 		while (isRedirect(pathname) && !visited.has(pathname)) {
 			visited.add(pathname);
 			pathname = firstBySource.get(pathname).destination;
-			if (isExternal(pathname)) return `ends at ${pathname}`;
+			if (isExternal(pathname)) return pathname;
 			pathname = splitUrl(pathname).pathname;
 		}
-		return visited.has(pathname) ? 'redirect loop' : `ends at ${pathname}`;
+		return visited.has(pathname) ? 'none, redirect loop' : pathname;
 	}
 	return findings;
 }
@@ -238,7 +262,7 @@ function formatText(findings) {
 		lines.push(
 			`  ${REDIRECTS_PATH}${line ? `:${line}` : ''}`,
 			`    ${source} -> ${destination}`,
-			`    ${problem}${detail ? ` (${detail})` : ''}`,
+			`    ${problem}${detail ? ` (final destination: ${detail})` : ''}`,
 			''
 		);
 	}
@@ -306,10 +330,11 @@ function formatMarkdown(findings) {
 				? linkTo(`line ${line}`, fileUrl && `${fileUrl}#L${line}`)
 				: 'entry';
 			lines.push(
-				`- ${where}${detail ? `: ${detail}` : ''}`,
+				`- ${where}`,
 				'  ```ts',
 				`  source: '${source}',`,
 				`  destination: '${destination}'`,
+				...(detail ? [`  final destination: ${detail}`] : []),
 				'  ```'
 			);
 		}
