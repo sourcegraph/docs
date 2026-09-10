@@ -297,8 +297,8 @@ function formatMarkdown(findings) {
 	const lines = [
 		`### ❌ This PR breaks ${findings.length} redirect(s)`,
 		'',
-		'Redirects are used so external traffic (links inside old versions of our product, ' +
-			'bookmarks, search results, etc.) to old URLs still reaches a relevant page.',
+		'Redirects are used so inbound traffic from external sources (links inside old versions of ' +
+			'our product, bookmarks, search results, etc.) to old doc pages still reaches a relevant page.',
 		'',
 		'A correct entry maps the old page path, exactly as the browser requests it, ' +
 			'straight to a page that exists today, with an optional #heading that exists on that page:',
