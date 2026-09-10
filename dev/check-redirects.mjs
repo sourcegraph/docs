@@ -10,6 +10,8 @@
  * - when the destination has a #fragment, the heading exists on that page
  * - the source does not shadow an existing page (the middleware would redirect
  *   visitors away from a page that exists)
+ * - the source has no #fragment: browsers never send fragments, so such an
+ *   entry can never match
  *
  * External (http) destinations are not checked.
  *
@@ -28,8 +30,8 @@
 import fs from 'fs';
 import path from 'path';
 import vm from 'vm';
-import { fileURLToPath } from 'url';
-import { extractHeadings, listFiles, routeFor } from './check-links.mjs';
+import {fileURLToPath} from 'url';
+import {extractHeadings, listFiles, routeFor} from './check-links.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -57,14 +59,17 @@ function flagValue(name) {
 function loadRedirects() {
 	const source = fs.readFileSync(REDIRECTS_FILE, 'utf-8');
 	const constants = fs.readFileSync(CONSTANTS_FILE, 'utf-8');
-	const rssUrl = constants.match(/TECHNICAL_CHANGELOG_RSS_URL\s*=\s*['"]([^'"]+)['"]/)?.[1] ?? '';
+	const rssUrl =
+		constants.match(
+			/TECHNICAL_CHANGELOG_RSS_URL\s*=\s*['"]([^'"]+)['"]/
+		)?.[1] ?? '';
 
 	const script = source
 		.replace(/^import .*$/gm, '')
 		.replace(/^export const /gm, 'const ')
 		.replace(/module\.exports\s*=\s*\{[\s\S]*?\};?/g, '');
 
-	const sandbox = { TECHNICAL_CHANGELOG_RSS_URL: rssUrl };
+	const sandbox = {TECHNICAL_CHANGELOG_RSS_URL: rssUrl};
 	vm.runInNewContext(`${script}\nresult = updatedRedirectsData;`, sandbox);
 
 	// Line number of each entry, for the report. Entries are written one
@@ -91,7 +96,10 @@ function buildHeadingsByRoute() {
 	for (const file of listFiles(DOCS_DIR, ['.mdx'])) {
 		const route = routeFor(file);
 		if (headingsByRoute.has(route)) continue;
-		headingsByRoute.set(route, extractHeadings(fs.readFileSync(path.join(DOCS_DIR, file), 'utf-8')));
+		headingsByRoute.set(
+			route,
+			extractHeadings(fs.readFileSync(path.join(DOCS_DIR, file), 'utf-8'))
+		);
 	}
 	return headingsByRoute;
 }
@@ -100,7 +108,7 @@ function buildHeadingsByRoute() {
 function splitUrl(url) {
 	const [pathAndQuery, fragment = ''] = url.split('#');
 	const pathname = pathAndQuery.split('?')[0].replace(/\/+$/, '') || '/';
-	return { pathname, fragment: decodeURIComponent(fragment) };
+	return {pathname, fragment: decodeURIComponent(fragment)};
 }
 
 function isPublicFile(pathname) {
@@ -119,16 +127,26 @@ function findBrokenRedirects(redirects, headingsByRoute) {
 	// dead code and cannot break anything.
 	const firstBySource = new Map();
 	for (const redirect of redirects) {
-		if (!firstBySource.has(redirect.source)) firstBySource.set(redirect.source, redirect);
+		if (!firstBySource.has(redirect.source))
+			firstBySource.set(redirect.source, redirect);
 	}
-	const report = (redirect, problem) => findings.push({ ...redirect, problem });
+	const report = (redirect, problem) => findings.push({...redirect, problem});
 
 	for (const redirect of redirects) {
 		if (firstBySource.get(redirect.source) !== redirect) continue;
 
 		const source = splitUrl(redirect.source);
-		if (!source.fragment && headingsByRoute.has(source.pathname)) {
-			report(redirect, 'source is an existing page; visitors to it are redirected away');
+		if (source.fragment) {
+			// Browsers strip #fragments before sending a request, so no server
+			// can ever match this source. Nothing else about the entry matters.
+			report(
+				redirect,
+				'Source has a #fragment, which browsers never send, so this redirect can never match'
+			);
+			continue;
+		}
+		if (headingsByRoute.has(source.pathname)) {
+			report(redirect, 'Source overshadows a page that exists');
 		}
 
 		if (isExternal(redirect.destination)) continue;
@@ -137,9 +155,15 @@ function findBrokenRedirects(redirects, headingsByRoute) {
 		let destination = splitUrl(redirect.destination);
 		let hops = 0;
 		const visited = new Set([redirect.source]);
-		while (firstBySource.has(destination.pathname) && !headingsByRoute.has(destination.pathname)) {
+		while (
+			firstBySource.has(destination.pathname) &&
+			!headingsByRoute.has(destination.pathname)
+		) {
 			if (visited.has(destination.pathname) || ++hops > MAX_CHAIN_HOPS) {
-				report(redirect, `redirect loop or chain longer than ${MAX_CHAIN_HOPS} hops`);
+				report(
+					redirect,
+					`Redirect loop or chain longer than ${MAX_CHAIN_HOPS} hops`
+				);
 				destination = undefined;
 				break;
 			}
@@ -151,19 +175,28 @@ function findBrokenRedirects(redirects, headingsByRoute) {
 			}
 			const nextUrl = splitUrl(next);
 			// A hop without its own fragment keeps the fragment we have
-			destination = { pathname: nextUrl.pathname, fragment: nextUrl.fragment || destination.fragment };
+			destination = {
+				pathname: nextUrl.pathname,
+				fragment: nextUrl.fragment || destination.fragment
+			};
 		}
 		if (!destination) continue;
 
 		const headings = headingsByRoute.get(destination.pathname);
 		if (!headings) {
 			if (!isPublicFile(destination.pathname)) {
-				report(redirect, `destination page ${destination.pathname} does not exist`);
+				report(
+					redirect,
+					`Destination page ${destination.pathname} does not exist`
+				);
 			}
 			continue;
 		}
 		if (destination.fragment && !headings.has(destination.fragment)) {
-			report(redirect, `heading #${destination.fragment} not found on ${destination.pathname}`);
+			report(
+				redirect,
+				`Heading #${destination.fragment} not found on page ${destination.pathname}`
+			);
 		}
 	}
 	return findings;
@@ -175,7 +208,9 @@ function findingKey(finding) {
 }
 
 function withoutBaseline(findings, baselineFile) {
-	const baseline = new Set(JSON.parse(fs.readFileSync(baselineFile, 'utf-8')).map(findingKey));
+	const baseline = new Set(
+		JSON.parse(fs.readFileSync(baselineFile, 'utf-8')).map(findingKey)
+	);
 	return findings.filter(finding => !baseline.has(findingKey(finding)));
 }
 
@@ -185,7 +220,7 @@ function formatText(findings) {
 		return `✅ No redirects ${scope}\n`;
 	}
 	const lines = [`❌ ${findings.length} redirect(s) ${scope}:`, ''];
-	for (const { source, destination, line, problem } of findings) {
+	for (const {source, destination, line, problem} of findings) {
 		lines.push(
 			`  ${REDIRECTS_PATH}${line ? `:${line}` : ''}`,
 			`    ${source} -> ${destination}`,
@@ -200,6 +235,27 @@ function linkTo(text, url) {
 	return url ? `[${text}](${url})` : text;
 }
 
+// Report sections, most urgent first: a shadowed page is unreachable today
+const PROBLEM_ORDER = [
+	'Source overshadows',
+	'Source has a #fragment',
+	'Destination page',
+	'Heading',
+	'Redirect loop'
+];
+
+// Map of problem -> findings with that problem, ordered by PROBLEM_ORDER
+function groupByProblem(findings) {
+	const rank = problem =>
+		PROBLEM_ORDER.findIndex(prefix => problem.startsWith(prefix));
+	const groups = new Map();
+	for (const finding of findings) {
+		if (!groups.has(finding.problem)) groups.set(finding.problem, []);
+		groups.get(finding.problem).push(finding);
+	}
+	return new Map([...groups].sort(([a], [b]) => rank(a) - rank(b)));
+}
+
 // Body for a pull request comment
 function formatMarkdown(findings) {
 	if (findings.length === 0) {
@@ -211,33 +267,45 @@ function formatMarkdown(findings) {
 	const lines = [
 		`### ❌ This PR breaks ${findings.length} redirect(s)`,
 		'',
-		'Redirects exist so external traffic (search results, bookmarks) to an old URL ' +
-			'still reaches a page. Each one must point at a page and heading that exist, ' +
-			'and must not shadow a page that exists.',
+		'Redirects are used so external traffic (links inside old versions of our product, ' +
+			'bookmarks, search results, etc.) to old URLs still reaches a relevant page.',
 		'',
-		'- If this PR moved or renamed the redirect destination, then update the ' +
-			'redirect with the updated destination',
+		'Each redirect entry must have:',
 		'',
-		'- If this PR removed the destination, then either update the destination to ' +
-			'the next most relevant page, or remove it to leave the user with our 404 page',
+		'- A destination which points to a page that currently exists',
 		'',
-		'Redirects are not to be used for internal links (tech debt snowball), internal ' +
-			'links must be fixed; the "Check links" comment lists any this PR broke.',
+		'- A source which does not overshadow a page that exists',
+		'',
+		'If this PR moved or renamed the redirect destination, then update the redirect ' +
+			'with the updated destination',
+		'',
+		'If this PR removed the destination, then either update the destination to the ' +
+			'next most relevant page, or remove it to leave the user with our 404 page',
+		'',
+		'Do not use redirects for broken internal links, internal links must be fixed ' +
+			'properly to tame the tech debt snowball no one wants to deal with; the ' +
+			'"Check links" PR check comment lists the links this PR broke, if any.',
 		'',
 		linkTo(`**\`${REDIRECTS_PATH}\`**`, fileUrl)
 	];
-	// Each entry is shown as it appears in the redirects file, so it is easy to find there
-	for (const { source, destination, line, problem } of findings) {
-		const where = line ? linkTo(`line ${line}`, fileUrl && `${fileUrl}#L${line}`) : 'entry';
-		lines.push(
-			`- ${where}: ${problem}`,
-			'  ```ts',
-			`  source: '${source}',`,
-			`  destination: '${destination}'`,
-			'  ```'
-		);
+	// One section per problem, in PROBLEM_ORDER. Each entry is shown as it
+	// appears in the redirects file, so it is easy to find there.
+	for (const [problem, entries] of groupByProblem(findings)) {
+		lines.push('', `#### ${problem}`);
+		for (const {source, destination, line} of entries) {
+			lines.push(
+				`- ${line ? linkTo(`line ${line}`, fileUrl && `${fileUrl}#L${line}`) : 'entry'}`,
+				'  ```ts',
+				`  source: '${source}',`,
+				`  destination: '${destination}'`,
+				'  ```'
+			);
+		}
 	}
-	lines.push('', 'Reproduce locally with `pnpm check-redirects` (see `dev/check-redirects.mjs`).');
+	lines.push(
+		'',
+		'Reproduce locally with `pnpm check-redirects` (see `dev/check-redirects.mjs`)'
+	);
 	return lines.join('\n') + '\n';
 }
 
@@ -250,7 +318,9 @@ const FORMATTERS = {
 function main() {
 	const format = FORMATTERS[FORMAT];
 	if (!format) {
-		throw new Error(`Unknown --format "${FORMAT}"; use text, json, or markdown`);
+		throw new Error(
+			`Unknown --format "${FORMAT}"; use text, json, or markdown`
+		);
 	}
 
 	let findings = findBrokenRedirects(loadRedirects(), buildHeadingsByRoute());
