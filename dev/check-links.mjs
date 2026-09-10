@@ -11,6 +11,10 @@
  * - Links whose case differs from the real path (work on macOS, 404 on Linux)
  * - Missing anchor/heading references
  * - Invalid file paths
+ * - Absolute links to this site (https://sourcegraph.com/docs/..., the legacy
+ *   https://docs.sourcegraph.com/... host, http://, //, www.), which should be
+ *   relative links; the finding proposes one, following src/data/redirects.ts
+ * - With --check-external, external links on added lines that return 404 or 410
  * 
  * Usage: node dev/check-links.mjs [options]
  *   --check-anchors        Also validate #anchors against headings
@@ -20,8 +24,16 @@
  *                          (produced by --format json on another revision)
  *   --link-base <url>      Markdown output links each file path to <url>/<path>,
  *                          e.g. https://github.com/sourcegraph/docs/blob/<branch>
- *   --changed-files <file> Markdown output splits findings into outbound (in one
- *                          of these files, one path per line) and inbound (elsewhere)
+ *   --diff <file>          Unified diff of the change under review, e.g. from
+ *                          `git diff -U0 origin/main`. Markdown output splits
+ *                          findings into outbound (in a file the diff touches) and
+ *                          inbound (elsewhere); the added lines scope the two flags below
+ *   --check-external       Request every external link on an added line and report
+ *                          404s and 410s. Follows redirects; ignores #anchors, other
+ *                          statuses, and network errors. Requires --diff
+ *   --review <file>        Write a GitHub pull request review (JSON body for
+ *                          POST /repos/{owner}/{repo}/pulls/{n}/reviews) with one
+ *                          suggested-change comment per added line that has a fix
  *
  * Exits 1 when any finding is reported.
  */
@@ -41,12 +53,41 @@ const ROOT_DIR = path.resolve(flagValue('--root') ?? path.dirname(__dirname));
 const FORMAT = flagValue('--format') ?? 'text';
 const BASELINE_FILE = flagValue('--baseline');
 const LINK_BASE = flagValue('--link-base')?.replace(/\/$/, '');
-const CHANGED_FILES = readPathList(flagValue('--changed-files'));
+const DIFF = parseDiff(flagValue('--diff'));
+const CHECK_EXTERNAL = args.includes('--check-external');
+const REVIEW_FILE = flagValue('--review');
 
-// Set of the non-empty lines of file, or undefined when no file is given
-function readPathList(file) {
+if (CHECK_EXTERNAL && !DIFF) {
+	throw new Error('--check-external needs --diff, to know which lines were added');
+}
+
+// Files and added lines of a unified diff, with paths relative to the repository:
+// { files: Set<'docs/foo.mdx'>, addedLines: Map<'docs/foo.mdx', Set<lineNumber>> }.
+// Works with any amount of context, so `git diff` and `git diff -U0` both do.
+function parseDiff(file) {
 	if (!file) return undefined;
-	return new Set(fs.readFileSync(file, 'utf-8').split('\n').filter(Boolean));
+	const files = new Set();
+	const addedLines = new Map();
+	let currentFile;
+	let lineNumber;
+	for (const line of fs.readFileSync(file, 'utf-8').split('\n')) {
+		if (line.startsWith('diff --git ')) {
+			currentFile = undefined;
+		} else if (line.startsWith('+++ ') && !currentFile) {
+			// `+++ /dev/null` is a deleted file, which has no added lines
+			currentFile = line.slice(4).replace(/^b\//, '');
+			if (currentFile === '/dev/null') continue;
+			files.add(currentFile);
+			addedLines.set(currentFile, new Set());
+		} else if (line.startsWith('@@ ')) {
+			lineNumber = Number(line.match(/^@@ -\S+ \+(\d+)/)[1]);
+		} else if (line.startsWith('+') && currentFile) {
+			addedLines.get(currentFile).add(lineNumber++);
+		} else if (line.startsWith(' ')) {
+			lineNumber++;
+		}
+	}
+	return { files, addedLines };
 }
 
 const DOCS_DIR = path.join(ROOT_DIR, 'docs');
@@ -163,7 +204,26 @@ function buildPathMap() {
 		headingsMap.set(routePath + '/', headings);
 	}
 	
-	return { pathMap, routesByLowerCase, headingsMap, headingsByFile, assetsByLowerCase: buildAssetMap() };
+	return {
+		pathMap,
+		routesByLowerCase,
+		headingsMap,
+		headingsByFile,
+		assetsByLowerCase: buildAssetMap(),
+		redirects: loadRedirects()
+	};
+}
+
+// Source route -> destination of src/data/redirects.ts. The middleware uses the
+// first rule whose source equals the requested path, so first entry wins here too.
+function loadRedirects() {
+	const redirects = new Map();
+	const source = fs.readFileSync(path.join(ROOT_DIR, 'src/data/redirects.ts'), 'utf-8');
+	const ruleRegex = /source:\s*(['"])(.*?)\1,\s*destination:\s*(['"])(.*?)\3/gs;
+	for (const [, , from, , to] of source.matchAll(ruleRegex)) {
+		if (!redirects.has(from)) redirects.set(from, to);
+	}
+	return redirects;
 }
 
 // Lowercased link path -> real link path, for files under public/ and docs/
@@ -213,12 +273,63 @@ function extractLinks(content, filePath) {
 	return links;
 }
 
-// Check if a link is valid
-function validateLink(link, currentFile, { pathMap, routesByLowerCase, headingsMap, headingsByFile, assetsByLowerCase }) {
+// Absolute links to this site, in every form the docs have used: http or https,
+// scheme-relative, www., the legacy docs.sourcegraph.com host, or sourcegraph.com/docs.
+// Links pinned to an old version (/@5.1/..., /v/5.1/...) are external: the
+// middleware sends them to that version's own site.
+const SELF_LINK_REGEX = /^(?:https?:)?\/\/(?:www\.)?(?:docs\.sourcegraph\.com|sourcegraph\.com\/docs)(?=[/#?]|$)(?!\/@|\/v\/)/i;
+
+export function isSelfLink(url) {
+	return SELF_LINK_REGEX.test(url);
+}
+
+// The relative form of an absolute self-link: https://sourcegraph.com/docs/a/b/#c -> /a/b#c.
+// A ?query has no meaning on a docs page and is dropped.
+function relativeSelfLink(url) {
+	const [pathAndQuery, anchor] = url.replace(SELF_LINK_REGEX, '').split('#');
+	const route = pathAndQuery.split('?')[0].replace(/\/$/, '') || '/';
+	return anchor ? `${route}#${anchor}` : route;
+}
+
+// Absolute self-links break on preview deployments and local dev, and hide moved
+// pages behind redirects, so they are findings even when the target exists. The
+// fix is the relative link, following src/data/redirects.ts when the page moved.
+// The redirect destination's own #anchor wins over the link's, like the middleware.
+function validateSelfLink(url, currentFile, maps) {
+	const relative = relativeSelfLink(url);
+	const anchor = relative.split('#')[1];
+	const visited = new Set();
+	let candidate = relative;
+	while (true) {
+		const moved = candidate === relative ? '' : ' to a moved page';
+		const problem = validateLink({ url: candidate }, currentFile, maps);
+		if (!problem) {
+			return { error: `Absolute self-link${moved}; use "${candidate}" instead`, fix: candidate };
+		}
+		const destination = maps.redirects.get(candidate.split('#')[0]);
+		if (!destination || visited.has(destination)) {
+			const replaced = moved ? `; "${candidate}" replaced it, but` : ', and';
+			return { error: `Absolute self-link${moved}${replaced} ${problem[0].toLowerCase()}${problem.slice(1)}` };
+		}
+		visited.add(destination);
+		candidate = isSelfLink(destination) ? relativeSelfLink(destination) : destination;
+		if (anchor && !candidate.includes('#') && !/^https?:/.test(candidate)) {
+			candidate += `#${anchor}`;
+		}
+	}
+}
+
+// Check if a link is valid. Returns null, an error string, or { error, fix }.
+function validateLink(link, currentFile, maps) {
+	const { pathMap, routesByLowerCase, headingsMap, headingsByFile, assetsByLowerCase } = maps;
 	const { url } = link;
+
+	if (isSelfLink(url)) {
+		return validateSelfLink(url, currentFile, maps);
+	}
 	
 	// Skip external links, mailto, tel, javascript, etc.
-	if (url.startsWith('http://') || url.startsWith('https://') || 
+	if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//') ||
 		url.startsWith('mailto:') || url.startsWith('tel:') ||
 		url.startsWith('javascript:') || url.startsWith('data:') ||
 		url.startsWith('command:')) {
@@ -307,29 +418,88 @@ function validateLink(link, currentFile, { pathMap, routesByLowerCase, headingsM
 	return `Page not found: "${resolvedPath}"`;
 }
 
-// Find every broken link: [{ file, line, url, error }]
-function findBrokenLinks() {
+function isAddedLine(file, line) {
+	return DIFF?.addedLines.get(file)?.has(line) ?? false;
+}
+
+// Find every broken link: [{ file, line, url, error, fix? }]
+async function findBrokenLinks() {
 	const maps = buildPathMap();
 	const findings = [];
+	const externalLinks = [];
 	
 	for (const file of listFiles(DOCS_DIR, SOURCE_EXTENSIONS)) {
 		const fullPath = path.join(DOCS_DIR, file);
 		const content = fs.readFileSync(fullPath, 'utf-8');
 		
 		for (const link of extractLinks(content, fullPath)) {
-			const error = validateLink(link, fullPath, maps);
-			if (error) {
-				findings.push({
-					file: `docs/${file}`,
-					line: link.lineNumber,
-					url: link.url,
-					error
-				});
+			const location = { file: `docs/${file}`, line: link.lineNumber, url: link.url };
+			const problem = validateLink(link, fullPath, maps);
+			if (problem) {
+				findings.push({ ...location, ...(typeof problem === 'string' ? { error: problem } : problem) });
+			} else if (CHECK_EXTERNAL && isExternalLink(link.url) && isAddedLine(location.file, location.line)) {
+				externalLinks.push(location);
 			}
 		}
 	}
 	
-	return findings;
+	return [...findings, ...(await findDeadExternalLinks(externalLinks))];
+}
+
+// Hosts reserved for examples and documentation (RFC 2606, RFC 6761), never requested
+const PLACEHOLDER_HOST_REGEX = /(^|\.)(example\.(com|net|org)|example|test|invalid|localhost|local|internal)$/i;
+// Templated URLs like https://<your-host>/ or https://$HOST/, never requested
+const PLACEHOLDER_URL_REGEX = /[<>{}$*]/;
+
+function isExternalLink(url) {
+	if (!/^https?:\/\//i.test(url) || PLACEHOLDER_URL_REGEX.test(url)) return false;
+	try {
+		return !PLACEHOLDER_HOST_REGEX.test(new URL(url).hostname);
+	} catch {
+		return false;
+	}
+}
+
+// HTTP status of url after redirects, or undefined on a network error or timeout.
+// HEAD first; some servers refuse or misreport HEAD, so an error status is
+// confirmed with a GET whose body is not read.
+async function probeUrl(url) {
+	const request = method =>
+		fetch(url, {
+			method,
+			redirect: 'follow',
+			signal: AbortSignal.timeout(15_000),
+			headers: { 'user-agent': 'sourcegraph-docs-check-links (+https://github.com/sourcegraph/docs)' }
+		});
+	try {
+		let response = await request('HEAD');
+		if (response.status >= 400) {
+			response = await request('GET');
+			await response.body?.cancel();
+		}
+		return response.status;
+	} catch {
+		return undefined;
+	}
+}
+
+// Findings for external links whose target is gone. Only 404 and 410 count: rate
+// limits, bot blocks, server errors, and network failures are not the PR's fault.
+async function findDeadExternalLinks(links) {
+	const urls = [...new Set(links.map(link => link.url.split('#')[0]))];
+	const statusByUrl = new Map();
+	const queue = [...urls];
+	const worker = async () => {
+		for (let url = queue.shift(); url !== undefined; url = queue.shift()) {
+			statusByUrl.set(url, await probeUrl(url));
+		}
+	};
+	await Promise.all(Array.from({ length: 8 }, worker));
+
+	return links.flatMap(link => {
+		const status = statusByUrl.get(link.url.split('#')[0]);
+		return status === 404 || status === 410 ? [{ ...link, error: `External link returns HTTP ${status}` }] : [];
+	});
 }
 
 // Identity of a finding across revisions: line numbers shift, so ignore them
@@ -395,7 +565,7 @@ function markdownFindingList(findings) {
 	return lines;
 }
 
-// Body for a pull request comment. With --changed-files, findings are split into
+// Body for a pull request comment. With --diff, findings are split into
 // outbound (in a file this PR changed: the PR added or edited a bad link) and
 // inbound (in a file it did not: the PR renamed or removed a link target).
 function formatMarkdown(findings) {
@@ -404,14 +574,14 @@ function formatMarkdown(findings) {
 	}
 	
 	const lines = [`### ❌ This PR introduces ${findings.length} broken link(s)`, ''];
-	if (CHANGED_FILES) {
-		const outbound = findings.filter(finding => CHANGED_FILES.has(finding.file));
-		const inbound = findings.filter(finding => !CHANGED_FILES.has(finding.file));
+	if (DIFF) {
+		const outbound = findings.filter(finding => DIFF.files.has(finding.file));
+		const inbound = findings.filter(finding => !DIFF.files.has(finding.file));
 		if (outbound.length > 0) {
 			lines.push(
 				'### Outbound',
 				'',
-				'Your PR includes links to pages or anchors that do not exist.',
+				'Your PR includes links to pages or anchors that do not exist, or absolute links to this site.',
 				'',
 				...markdownFindingList(outbound)
 			);
@@ -429,6 +599,15 @@ function formatMarkdown(findings) {
 	} else {
 		lines.push(...markdownFindingList(findings));
 	}
+	if (findings.some(finding => isSelfLink(finding.url))) {
+		lines.push(
+			'Write links to this site as relative paths (`/admin/config/site-config`), ' +
+				'not `https://sourcegraph.com/docs/…` or `https://docs.sourcegraph.com/…`: ' +
+				'absolute links leave the preview deployment and local dev server, and ' +
+				'hide moved pages behind redirects.',
+			''
+		);
+	}
 	lines.push(
 		'Reproduce locally with `pnpm check-links --check-anchors` ' +
 			'(see `dev/check-links.mjs`).',
@@ -439,13 +618,42 @@ function formatMarkdown(findings) {
 	return lines.join('\n') + '\n';
 }
 
+// Body for POST /repos/{owner}/{repo}/pulls/{n}/reviews: one suggested change per
+// added line that has fixes, so the author can apply them from the PR. Review
+// comments must sit on a line of the diff, hence the added-line restriction.
+function reviewRequest(findings) {
+	const fixesByLine = new Map();
+	for (const finding of findings) {
+		if (!finding.fix || !isAddedLine(finding.file, finding.line)) continue;
+		const key = `${finding.file}:${finding.line}`;
+		if (!fixesByLine.has(key)) fixesByLine.set(key, { file: finding.file, line: finding.line, fixes: [] });
+		fixesByLine.get(key).fixes.push(finding);
+	}
+
+	const comments = [...fixesByLine.values()].map(({ file, line, fixes }) => {
+		const source = fs.readFileSync(path.join(ROOT_DIR, file), 'utf-8').split('\n')[line - 1];
+		const fixed = fixes.reduce((text, { url, fix }) => text.split(url).join(fix), source);
+		return {
+			path: file,
+			line,
+			side: 'RIGHT',
+			body: [...fixes.map(({ error }) => `- ${error}`), '```suggestion', fixed, '```'].join('\n')
+		};
+	});
+	return {
+		event: 'COMMENT',
+		body: 'Suggested fixes for the links this PR adds; details in the check-links comment.',
+		comments
+	};
+}
+
 const FORMATTERS = {
 	text: formatText,
 	json: findings => JSON.stringify(findings, null, '\t') + '\n',
 	markdown: formatMarkdown
 };
 
-function main() {
+async function main() {
 	const format = FORMATTERS[FORMAT];
 	if (!format) {
 		throw new Error(`Unknown --format "${FORMAT}"; use text, json, or markdown`);
@@ -455,11 +663,14 @@ function main() {
 		console.log('🔍 Checking for dead links in MDX files...\n');
 	}
 
-	let findings = findBrokenLinks();
+	let findings = await findBrokenLinks();
 	if (BASELINE_FILE) {
 		findings = withoutBaseline(findings, BASELINE_FILE);
 	}
 
+	if (REVIEW_FILE) {
+		fs.writeFileSync(REVIEW_FILE, JSON.stringify(reviewRequest(findings), null, '\t') + '\n');
+	}
 	process.stdout.write(format(findings));
 	process.exit(findings.length === 0 ? 0 : 1);
 }
