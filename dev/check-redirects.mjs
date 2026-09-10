@@ -301,7 +301,7 @@ function formatMarkdown(findings) {
 			'our product, bookmarks, search results, etc.) to old doc pages still reaches a relevant page.',
 		'',
 		'A correct entry maps the old page path, exactly as the browser requests it, ' +
-			'straight to a page that exists today, with an optional #heading that exists on that page:',
+			'straight to a page that exists today, with an optional #heading that exists on the destination page:',
 		'',
 		'```ts',
 		'{',
