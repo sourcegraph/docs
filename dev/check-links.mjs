@@ -11,13 +11,17 @@
  * - Links whose case differs from the real path (work on macOS, 404 on Linux)
  * - Missing anchor/heading references
  * - Invalid file paths
- * - Absolute links to this site (https://sourcegraph.com/docs/..., the legacy
- *   https://docs.sourcegraph.com/... host, http://, //, www.), which should be
- *   relative links; the finding proposes one, following src/data/redirects.ts
+ * - With --check-self-links, absolute links to this site (https://sourcegraph.com/docs/...,
+ *   the legacy https://docs.sourcegraph.com/... host, http://, //, www.), which
+ *   should be relative links; the finding proposes one, following src/data/redirects.ts
  * - With --check-external, external links on added lines that return 404 or 410
- * 
+ *
+ * next.config.js runs this with no flags on every build, so only dead page links
+ * can fail a deploy; the flags below are for the pull request workflow.
+ *
  * Usage: node dev/check-links.mjs [options]
  *   --check-anchors        Also validate #anchors against headings
+ *   --check-self-links     Also report absolute links to this site
  *   --root <dir>           Repository to check (default: this repository)
  *   --format <name>        Output as text (default), json, or markdown
  *   --baseline <file>      Only report findings absent from this JSON file
@@ -49,6 +53,7 @@ const __dirname = path.dirname(__filename);
 // Parse CLI flags
 const args = process.argv.slice(2);
 const CHECK_ANCHORS = args.includes('--check-anchors');
+const CHECK_SELF_LINKS = args.includes('--check-self-links');
 const ROOT_DIR = path.resolve(flagValue('--root') ?? path.dirname(__dirname));
 const FORMAT = flagValue('--format') ?? 'text';
 const BASELINE_FILE = flagValue('--baseline');
@@ -326,7 +331,7 @@ function validateLink(link, currentFile, maps) {
 	const { url } = link;
 
 	if (isSelfLink(url)) {
-		return validateSelfLink(url, currentFile, maps);
+		return CHECK_SELF_LINKS ? validateSelfLink(url, currentFile, maps) : null;
 	}
 	
 	// Skip external links, mailto, tel, javascript, etc.
