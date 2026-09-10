@@ -49,9 +49,13 @@ jobs:
 
             - name: Find broken links introduced by this PR
               id: check
+              env:
+                  # File links in the report open the file on the PR branch
+                  LINK_BASE: ${{ github.event.pull_request.head.repo.html_url }}/blob/${{ github.event.pull_request.head.ref }}
               run: |
                   if node dev/check-links.mjs --check-anchors --format markdown \
-                      --baseline "$RUNNER_TEMP/base-links.json" > "$RUNNER_TEMP/report.md"; then
+                      --baseline "$RUNNER_TEMP/base-links.json" \
+                      --link-base "$LINK_BASE" > "$RUNNER_TEMP/report.md"; then
                       echo "broken=false" >> "$GITHUB_OUTPUT"
                   else
                       echo "broken=true" >> "$GITHUB_OUTPUT"
