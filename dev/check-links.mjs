@@ -63,7 +63,7 @@ function flagValue(name) {
 // Sorted relative paths of every file under dir, optionally limited to some
 // extensions. Sorted so foo.mdx precedes foo/index.mdx; when both exist the
 // site serves the first match (allPosts.find), so the first file owns the route.
-function listFiles(dir, extensions) {
+export function listFiles(dir, extensions) {
 	if (!fs.existsSync(dir)) return [];
 	return fs
 		.readdirSync(dir, { recursive: true, withFileTypes: true })
@@ -133,7 +133,7 @@ export function extractHeadings(content) {
 }
 
 // Site route for a file under docs/: foo/bar.mdx -> /foo/bar, foo/index.mdx -> /foo, index.mdx -> /
-function routeFor(file) {
+export function routeFor(file) {
 	return '/' + file.replace(/\.mdx$/, '').replace(/(^|\/)index$/, '');
 }
 
@@ -464,7 +464,8 @@ function main() {
 	process.exit(findings.length === 0 ? 0 : 1);
 }
 
-// Only run when executed directly; dev/verify-links-live.mjs imports extractHeadings.
+// Only run when executed directly; dev/verify-links-live.mjs and dev/check-redirects.mjs
+// import the exported helpers.
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
 	main();
 }
