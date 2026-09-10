@@ -17,7 +17,8 @@ Cloudflare keeps 90 days of history, so `--days` maxes out at 90.
 
 ## Reports
 
-Written to `reports/` (gitignored). Every page report has the same rows,
+Written to `reports/`, committed so the numbers can be read without a
+token. Every page report has the same rows,
 sorted differently:
 
 | File                         | Sorted by                                |
@@ -33,8 +34,8 @@ is the subset whose referrer is not sourcegraph.com, Cloudflare's page-view
 proxy. 3xx, 404 and 5xx are response counts for the path. Sitemap is `yes`
 when the path is listed in <https://sourcegraph.com/sitemap.xml> (an index
 over `sitemap-main.xml` for blog and changelog, and `docs/sitemap.xml`). A
-`no` on `/docs` is a deleted page or probe that still returns 200; the blog
-sitemap only lists recent posts, so `no` on `/blog` is normal for old posts.
+`no` on `/docs` is a deleted page or probe path; the blog sitemap only lists
+recent posts, so `no` on `/blog` is normal for old posts.
 
 `redirect-rules.md` matches each rule's source against `/docs` 3xx counts.
 Rules are first-match-wins, like `src/middleware.ts`, so a rule whose source
@@ -43,7 +44,7 @@ many more redirects a browser follows when a rule's destination is itself
 another rule's source, and where the user finally lands. Its Sitemap column
 says whether the rule's destination is in the sitemap, blank when the
 redirect leaves the site. A `no` with an empty Chain means the rule sends
-people to a soft 404; a `no` with a Chain is an intermediate hop.
+people to a 404; a `no` with a Chain is an intermediate hop.
 
 ## Redirect probe
 
@@ -83,9 +84,10 @@ four source/destination fragment combinations.
 
 ## Known caveats
 
-- The docs site returns 200 for unknown paths, so deleted docs pages and
-  probe paths like `/docs/.zshrc` show up as page views. Blog and changelog
-  return real 404s.
+- Until 2026-09-09 ([#1860](https://github.com/sourcegraph/docs/pull/1860))
+  the docs site returned 200 for unknown paths, so in any window that
+  reaches back before then, deleted docs pages and probe paths like
+  `/docs/.zshrc` count as page views rather than 404s.
 - Counts are adaptive-sampled estimates from `httpRequestsAdaptiveGroups`,
   not exact totals.
 - Blog and changelog pages are served from `github.com/sourcegraph/sourcegraph`
@@ -105,7 +107,8 @@ four source/destination fragment combinations.
 From the first 90-day run, September 2026
 ([thread](https://ampcode.com/threads/T-01a08479-a4c8-72ad-8f31-fe7ecc43bf34)):
 
-- **Docs soft-404s.** `/docs/<anything>` returns 200, so deleted pages such as
+- **Docs soft-404s** (fixed in #1860). `/docs/<anything>` returned 200, so
+  deleted pages such as
   `/docs/code_intelligence/tutorials/indexing_go_repo` (830 requests) and
   probes such as `/docs/.zshrc` (660), `/docs/id_dsa` (480) and
   `/docs/__data.json` (990) count as page views and never surface as errors.

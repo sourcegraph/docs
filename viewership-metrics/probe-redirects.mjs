@@ -263,21 +263,56 @@ function tally(items, valueOf) {
 	return Object.fromEntries([...counts].sort());
 }
 
-// 3xx hits on the distinct source paths, so rules sharing a path count once.
-function sourceRedirectHits(results) {
-	const hitsByUrl = new Map(
-		results.map(result => [
-			result.requestUrl,
-			result.traffic.source?.redirects ?? 0
-		])
+// Cloudflare counts by response status, summed over distinct paths so rules
+// sharing a path count once.
+function trafficByStatus(results, urlOf, trafficOf) {
+	const byUrl = new Map(
+		results.map(result => [urlOf(result), trafficOf(result)])
 	);
-	return [...hitsByUrl.values()].reduce((sum, hits) => sum + hits, 0);
+	const sum = key =>
+		[...byUrl.values()].reduce(
+			(total, row) => total + (row?.[key] ?? 0),
+			0
+		);
+	return {
+		200: sum('requests'),
+		'3xx': sum('redirects'),
+		404: sum('notFound'),
+		'5xx': sum('serverErrors')
+	};
+}
+
+// Does the rule do its job, and does anyone hit its source path?
+function alignment(result) {
+	const source = result.traffic.source;
+	const hasTraffic = Boolean(
+		source && (source.requests || source.redirects || source.notFound)
+	);
+	const fires = result.outcome === 'redirects-as-expected';
+	const works = fires && result.final.status === 200;
+	if (works) return hasTraffic ? 'works, has traffic' : 'works, no traffic';
+	if (fires) {
+		return hasTraffic
+			? 'fires, lands on error, has traffic'
+			: 'fires, lands on error, no traffic';
+	}
+	return hasTraffic ? 'never fires, has traffic' : 'never fires, no traffic';
 }
 
 function summarizeCase(results) {
 	return {
 		rules: results.length,
-		sourceRedirectHits: sourceRedirectHits(results),
+		sourceTraffic: trafficByStatus(
+			results,
+			result => result.requestUrl,
+			result => result.traffic.source
+		),
+		finalTraffic: trafficByStatus(
+			results,
+			result => result.final.url,
+			result => result.traffic.final
+		),
+		alignment: tally(results, alignment),
 		outcome: tally(results, result => result.outcome),
 		bareSourceRule: tally(results, result =>
 			result.sourceFragment === null
@@ -298,6 +333,7 @@ function summarizeCase(results) {
 
 function summarize(results) {
 	const live = results.filter(result => result.shadowedBy === null);
+	const shadowed = results.filter(result => result.shadowedBy !== null);
 	const hasFragment = text => text.includes('#');
 	const cases = {
 		'source and destination without #': (source, destination) =>
@@ -311,7 +347,15 @@ function summarize(results) {
 	};
 	return {
 		rules: results.length,
-		shadowedByEarlierRule: results.length - live.length,
+		// Traffic on a shadowed rule's path is served by the rule shadowing it.
+		shadowedByEarlierRule: {
+			rules: shadowed.length,
+			sourceTraffic: trafficByStatus(
+				shadowed,
+				result => result.requestUrl,
+				result => result.traffic.source
+			)
+		},
 		live: summarizeCase(live),
 		chains: live.filter(result => result.hops.length > 2).length,
 		longestChain: Math.max(...live.map(result => result.hops.length - 1)),

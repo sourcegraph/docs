@@ -331,8 +331,7 @@ function formatRedirectRulesReport({
 			`live rules point at an unlisted page, ${destinationUnlisted.reduce(
 				(sum, rule) => sum + hitsOf(rule),
 				0
-			)} hits; unless Chain shows a further redirect, on /docs that is ` +
-			'likely a soft 404.',
+			)} hits; unless Chain shows a further redirect, that is a 404.`,
 		'',
 		'| Line | Source | Destination | Hits | Chain | Sitemap |',
 		'| ---: | --- | --- | ---: | --- | --- |',
@@ -368,8 +367,8 @@ function formatReport({title, start, end, total, rows}) {
 			'All counts are adaptive-sampled estimates.',
 		`- Sitemap: ${total.sitemapPaths} of ${total.paths} paths are in ` +
 			`${SITEMAP_URL}, with ${total.sitemapRequests} of ${total.requests} ` +
-			'requests. The rest are deleted, unlisted or probe paths; on /docs ' +
-			'they still return 200. The blog sitemap lists only recent posts.',
+			'requests. The rest are deleted, unlisted or probe paths. ' +
+			'The blog sitemap lists only recent posts.',
 		'',
 		'| Path | Requests | Visits | 3xx | 404 | 5xx | Sitemap |',
 		'| --- | ---: | ---: | ---: | ---: | ---: | --- |',
