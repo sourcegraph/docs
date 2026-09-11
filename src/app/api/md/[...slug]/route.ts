@@ -1,8 +1,19 @@
 import {allPosts} from 'contentlayer/generated';
-import {NextRequest, NextResponse} from 'next/server';
+import {NextResponse} from 'next/server';
+
+// Prerender every post's markdown at build time; unknown slugs 404 without
+// invoking a function.
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+	// The root index.mdx has an empty path; a catch-all needs at least one segment.
+	return allPosts
+		.filter(post => post._raw.flattenedPath !== '')
+		.map(post => ({slug: post._raw.flattenedPath.split('/')}));
+}
 
 export async function GET(
-	_: NextRequest,
+	_: Request,
 	{params}: {params: {slug: string[]}}
 ) {
 	const docPath = params.slug.join('/');
