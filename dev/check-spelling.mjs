@@ -102,27 +102,33 @@ const collator = new Intl.Collator('en', {sensitivity: 'base'});
 function unsortedDictionaryEntries(files) {
 	const findings = [];
 	for (const file of files.filter(file => DICTIONARY_FILES.includes(file))) {
-		let previous;
+		let run = []; // [{word, line}] of the current sorted run
 		readFileSync(file, 'utf8')
 			.split('\n')
 			.forEach((text, index) => {
 				if (/^\s*(#|$)/.test(text)) {
-					previous = undefined;
+					run = [];
 					return;
 				}
 				const word = text.replace(/\s*#.*/, '').trim();
-				if (previous && collator.compare(word, previous) < 0) {
+				const line = index + 1;
+				const belongsBefore = run.find(
+					entry => collator.compare(word, entry.word) < 0
+				);
+				if (belongsBefore) {
 					findings.push({
 						file,
-						line: index + 1,
+						line,
 						column: 1,
 						word,
 						suggestions: [],
 						text,
-						message: `\`${word}\` is out of alphabetical order: it belongs before \`${previous}\`, the entry above it.`
+						message: `\`${word}\` is out of alphabetical order: move it above \`${belongsBefore.word}\``,
+						relatedLine: belongsBefore.line // rendered as a link after the message
 					});
+				} else {
+					run.push({word, line});
 				}
-				previous = word;
 			});
 	}
 	return findings;
@@ -144,10 +150,11 @@ function formatText(findings) {
 	const lines = [
 		`Found ${findings.length} issue(s) in added lines:`
 	];
-	for (const finding of findings) {
-		lines.push(
-			`${finding.file}:${finding.line}:${finding.column} - ${finding.message ?? `Unknown word (${finding.word})`}`
-		);
+	for (const {file, line, column, word, message, relatedLine} of findings) {
+		const detail = message
+			? `${message}${relatedLine ? ` on line ${relatedLine}` : ''}`
+			: `Unknown word (${word})`;
+		lines.push(`${file}:${line}:${column} - ${detail}`);
 	}
 	return lines.join('\n') + '\n';
 }
