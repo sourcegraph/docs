@@ -65,12 +65,14 @@ pre-redirect host, so they come back as `docs.sourcegraph.com/docs/_next/...`
 → 302 → `sourcegraph.com/docs/docs/_next/...` → 404.
 
 Fix (Cloudflare, not this repo):
+
 - Make the `docs.sourcegraph.com` redirect a **301** so Bing drops the old
   URLs from its index and stops crawling them.
 - Add a rule so `docs.sourcegraph.com/docs/*` redirects to
   `sourcegraph.com/docs/$1` without doubling the prefix.
 
 Fix (this repo):
+
 - Every page sets `<link rel="canonical" href="https://sourcegraph.com/docs">`
   (`src/app/layout.tsx` `alternates.canonical: '/docs'`, never
   overridden). Set a per-page canonical in `src/app/[...slug]/page.tsx`
