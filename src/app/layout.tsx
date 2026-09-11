@@ -1,4 +1,5 @@
 import {Providers} from '@/app/providers';
+import {FragmentRedirect} from '@/components/FragmentRedirect';
 import {Layout} from '@/components/Layout';
 import {TECHNICAL_CHANGELOG_RSS_URL} from '@/data/constants';
 import clsx from 'clsx';
@@ -89,6 +90,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
 				className="flex min-h-full bg-light-bg dark:bg-dark-bg"
 			>
 				<Suspense fallback={null}>
+					<FragmentRedirect />
 					<Providers>
 						<Layout>{children}</Layout>
 					</Providers>
