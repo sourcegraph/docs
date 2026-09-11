@@ -68,6 +68,7 @@ const PostLayout = ({params}: Props) => {
 			<TableOfContents
 				headings={post.headings}
 				rawMarkdown={post.body.raw}
+				editPath={post._id}
 			/>
 		</>
 	);
