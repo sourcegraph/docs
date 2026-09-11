@@ -64,10 +64,10 @@ You can easily update existing docs pages using [GitHub's file editor](https://d
 
 ### (Advanced) Local dev environment
 
-To add new or update existing docs content. Create a new branch and checkout by via:
+To add new or update existing docs content, create a new branch and check it out. Prefix the branch with a name that identifies you (first name, username, or nickname), so it's clear who owns each branch:
 
 ```sh
-git switch -c BRANCH_NAME_HERE
+git switch -c YOUR_NAME/BRANCH_NAME_HERE
 ```
 
 ### Folder structure
