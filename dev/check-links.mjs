@@ -606,7 +606,7 @@ function formatMarkdown(findings) {
 		section('Absolute links', ABSOLUTE_LINKS_ADVICE, absolute);
 		section(
 			'Inbound',
-			'A change your PR made broke inbound links from elsewhere. Please fix the inbound links on these other pages.',
+			'A change your PR made broke inbound links from these other files. Please fix the inbound links in these other files.',
 			inbound
 		);
 	} else {
