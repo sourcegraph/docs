@@ -1,5 +1,3 @@
-import {TECHNICAL_CHANGELOG_RSS_URL} from './constants';
-
 const redirectsData = [
 	{
 		source: '/integration/img/disable_extension.png',
@@ -5839,7 +5837,7 @@ const redirectsData = [
 	// This redirect preserves existing RSS subscriptions
 	{
 		source: '/technical-changelog.rss',
-		destination: TECHNICAL_CHANGELOG_RSS_URL
+		destination: 'https://sourcegraph.com/changelog/technical-changelog.rss'
 	},
 	// Self-hosted update pages moved to /changelog/self-hosted/
 	{

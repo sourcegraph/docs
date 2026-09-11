@@ -4,7 +4,7 @@ import docsConfig from '../docs.config.js';
 
 import {TECHNICAL_CHANGELOG_RSS_URL} from './data/constants';
 
-const {updatedRedirectsData} = require('./data/redirects.ts');
+const {updatedRedirectsData} = require('./data/redirects.js');
 
 function createRedirectUrl(
 	request: NextRequest,
@@ -58,24 +58,6 @@ function createRedirectUrl(
 export function middleware(request: NextRequest) {
 	const path = request.nextUrl.pathname;
 	const pathWithoutBase = path.replace('/docs', '');
-
-	// Handle .md suffix - return raw markdown
-	if (pathWithoutBase.endsWith('.md')) {
-		const docPath = pathWithoutBase.replace(/\.md$/, '');
-		const url = request.nextUrl.clone();
-		url.pathname = `/api/md${docPath}`;
-		return NextResponse.rewrite(url);
-	}
-
-	// Handle base redirects from redirects.ts
-	const redirect = updatedRedirectsData.find(
-		(r: any) => r.source === pathWithoutBase
-	);
-	if (redirect) {
-		return NextResponse.redirect(
-			createRedirectUrl(request, redirect.destination, path)
-		);
-	}
 
 	// Handle latest version without path - redirect to main docs
 	const latestVersionOnlyMatch = pathWithoutBase.match(
@@ -146,5 +128,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-	matcher: ['/((?!api/md|_next/static|_next/image|assets|favicon.ico|sw.js).*)']
+	matcher: ['/v/:path*', '/@:path*', '/changelog.rss']
 };

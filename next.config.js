@@ -1,6 +1,30 @@
 const {withContentlayer} = require('next-contentlayer');
 const {execSync} = require('child_process');
+const {updatedRedirectsData} = require('./src/data/redirects.js');
 /** @type {import('next').NextConfig} */
+
+function createStaticRedirects() {
+	const seenSources = new Set();
+	const redirects = [];
+
+	for (const redirect of updatedRedirectsData) {
+		if (
+			redirect.source.includes('#') ||
+			redirect.source.includes('?') ||
+			seenSources.has(redirect.source)
+		) {
+			continue;
+		}
+
+		seenSources.add(redirect.source);
+		redirects.push({...redirect, permanent: false});
+	}
+
+	return redirects;
+}
+
+const staticRedirects = createStaticRedirects();
+console.log(`Configured ${staticRedirects.length} static redirects`);
 
 const nextConfig = {
 	reactStrictMode: true,
@@ -15,7 +39,11 @@ const nextConfig = {
 	env: {
 		NEXT_PUBLIC_DOCS_BASE_PATH:
 			process.env.VERCEL_ENV === 'production' ? '/docs' : ''
-	}
+	},
+	redirects: async () => staticRedirects,
+	rewrites: async () => ({
+		beforeFiles: [{source: '/:path*.md', destination: '/api/md/:path*'}]
+	})
 };
 
 module.exports = async () => {

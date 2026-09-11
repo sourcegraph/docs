@@ -219,11 +219,11 @@ function buildPathMap() {
 	};
 }
 
-// Source route -> destination of src/data/redirects.ts. The middleware uses the
-// first rule whose source equals the requested path, so first entry wins here too.
+// Source route -> destination of src/data/redirects.js. The first rule whose
+// source equals the requested path wins here too.
 function loadRedirects() {
 	const redirects = new Map();
-	const source = fs.readFileSync(path.join(ROOT_DIR, 'src/data/redirects.ts'), 'utf-8');
+	const source = fs.readFileSync(path.join(ROOT_DIR, 'src/data/redirects.js'), 'utf-8');
 	const ruleRegex = /source:\s*(['"])(.*?)\1,\s*destination:\s*(['"])(.*?)\3/gs;
 	for (const [, , from, , to] of source.matchAll(ruleRegex)) {
 		if (!redirects.has(from)) redirects.set(from, to);
