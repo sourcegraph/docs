@@ -9,12 +9,14 @@
  *   node dev/report-vercel-build.mjs fetch-log <file>
  *   node dev/report-vercel-build.mjs comment <file> [--dry-run]
  *
- * fetch-log writes the build log to <file>, and `truncated` to GITHUB_OUTPUT,
+ * fetch-log writes the build log to <file>, and to GITHUB_OUTPUT `truncated`,
  * so the workflow can upload the full log as an artifact when the comment
- * cannot hold all of it. It needs VERCEL_TOKEN, and VERCEL_TEAM_ID unless the
- * token is scoped to the project.
+ * cannot hold all of it, and `pull_request`, the PR Vercel built the
+ * deployment for. It needs VERCEL_TOKEN, and VERCEL_TEAM_ID unless the token
+ * is scoped to the project.
  *
- * comment posts the tail of <file>, linking the artifact from ARTIFACT_ID and
+ * comment posts the tail of <file> on PR_NUMBER, or on the open PRs at
+ * COMMIT_SHA when unset, linking the artifact from ARTIFACT_ID and
  * ARTIFACT_URL when set, and deletes the artifact an earlier comment linked.
  * With --dry-run the comment is printed instead, and nothing is deleted.
  *
@@ -80,16 +82,38 @@ async function githubList(route) {
 	}
 }
 
-// The dispatch payload has no PR number; look up the PRs from the commit. A
-// deployment belongs to a commit, so every open PR at that head gets the
-// report. A stale event for a commit a PR has moved past is ignored. Fork PRs
-// are ignored too, so the Vercel token is only ever used for commits by
-// people who can already push to this repository.
-async function findPullRequests() {
-	const pulls = await github(
-		'GET',
-		`/repos/${REPOSITORY}/commits/${COMMIT_SHA}/pulls`
+// Vercel records which PR a deployment was built for. Empty when the branch
+// was deployed before its PR was opened.
+async function fetchDeploymentPullRequestNumber() {
+	const url = new URL(
+		`https://api.vercel.com/v13/deployments/${DEPLOYMENT_ID}`
 	);
+	if (process.env.VERCEL_TEAM_ID) {
+		url.searchParams.set('teamId', process.env.VERCEL_TEAM_ID);
+	}
+	const deployment = await fetchJson(url, {
+		authorization: `Bearer ${process.env.VERCEL_TOKEN}`
+	});
+	return deployment.meta?.githubPrId;
+}
+
+// The dispatch payload has no PR number. The failure path gets it from the
+// deployment; the success path only knows the commit, so it looks up the PRs
+// at that head. Either way a stale event for a commit a PR has moved past is
+// ignored, and so are fork PRs, so the Vercel token is only ever used for
+// commits by people who can already push to this repository.
+async function findPullRequests(pullRequestNumber) {
+	const pulls = pullRequestNumber
+		? [
+				await github(
+					'GET',
+					`/repos/${REPOSITORY}/pulls/${pullRequestNumber}`
+				)
+			]
+		: await github(
+				'GET',
+				`/repos/${REPOSITORY}/commits/${COMMIT_SHA}/pulls`
+			);
 	const open = pulls.filter(pull => {
 		if (pull.state !== 'open' || pull.head.sha !== COMMIT_SHA) {
 			return false;
@@ -140,7 +164,8 @@ async function fetchLog() {
 	if (!process.env.VERCEL_TOKEN) {
 		throw new Error('VERCEL_TOKEN is required to read the build log');
 	}
-	if ((await findPullRequests()).length === 0) {
+	const pullRequestNumber = await fetchDeploymentPullRequestNumber();
+	if ((await findPullRequests(pullRequestNumber)).length === 0) {
 		return;
 	}
 	const logLines = await fetchBuildLog();
@@ -150,7 +175,10 @@ async function fetchLog() {
 		`Wrote ${logLines.length} log lines to ${logFile}${truncated ? '; the comment will show the tail' : ''}`
 	);
 	if (process.env.GITHUB_OUTPUT) {
-		appendFileSync(process.env.GITHUB_OUTPUT, `truncated=${truncated}\n`);
+		appendFileSync(
+			process.env.GITHUB_OUTPUT,
+			`truncated=${truncated}\npull_request=${pullRequestNumber ?? ''}\n`
+		);
 	}
 }
 
@@ -196,7 +224,7 @@ async function deleteArtifact(id) {
 }
 
 async function comment() {
-	const pulls = await findPullRequests();
+	const pulls = await findPullRequests(process.env.PR_NUMBER);
 	if (pulls.length === 0) {
 		return;
 	}
