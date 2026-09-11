@@ -1,4 +1,8 @@
-import Link from 'next/link';
+import {NotFoundLinks} from '@/components/NotFoundLinks';
+import {allPosts} from 'contentlayer/generated';
+
+// Preview pages 404 without ?preview, so they are not valid targets.
+const pagePaths = allPosts.filter(post => !post.preview).map(post => post.url);
 
 export default function NotFound() {
 	return (
@@ -13,12 +17,7 @@ export default function NotFound() {
 				<p className="mt-2 text-sm text-slate-500 dark:text-dark-paragraph-text">
 					Sorry, we couldn’t find the page you’re looking for.
 				</p>
-				<Link
-					href="/"
-					className="mt-8 text-sm font-medium text-slate-900 dark:text-white"
-				>
-					Go back home
-				</Link>
+				<NotFoundLinks pagePaths={pagePaths} />
 			</div>
 		</div>
 	);
