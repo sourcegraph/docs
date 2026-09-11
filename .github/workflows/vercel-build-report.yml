@@ -4,10 +4,11 @@ name: Vercel build report
 # build fails, this comments the end of the build log on the PR; when a later
 # revision builds, the comment is updated to say so.
 #
-# GitHub only delivers repository_dispatch to the workflow file on the default
-# branch, so workflow_dispatch takes the same payload fields as inputs for
-# testing before merge and for re-running on a PR by hand:
-#   gh workflow run vercel-build-report.yml --ref <branch> \
+# GitHub only delivers repository_dispatch (and finds workflow_dispatch
+# workflows) once the workflow file is on the default branch, so before merge
+# run dev/report-vercel-build.mjs locally instead. After merge, re-run on a PR
+# by hand with the same payload fields as inputs:
+#   gh workflow run vercel-build-report.yml \
 #       -f id=dpl_... -f state=error -f sha=<pr head sha>
 on:
     repository_dispatch:
