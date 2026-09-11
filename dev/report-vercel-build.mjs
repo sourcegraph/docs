@@ -157,14 +157,16 @@ async function fetchLog() {
 // A four-backtick fence so lines containing ``` cannot break out of the block
 function failureBody(logLines, artifact) {
 	const tail = tailOf(logLines);
-	const fullLog = artifact
-		? `The full log is ${logLines.length} lines, attached as a [workflow artifact](${artifact.url}); downloading it needs a GitHub login, and it expires in ${ARTIFACT_RETENTION_DAYS} days.`
-		: `The full log is ${logLines.length} lines.`;
+	const intro =
+		'Vercel paywalls build logs to authorized users in its web UI, so';
+	const message = artifact
+		? `${intro} we tailed the last ${tail.length} lines of the build log for you here. The full log is ${logLines.length} lines, attached as a [workflow artifact](${artifact.url}); downloading it needs a GitHub login, and it expires in ${ARTIFACT_RETENTION_DAYS} days.`
+		: `${intro} here is the build log.`;
 	return [
 		`${MARKER}${artifact ? ` artifact=${artifact.id}` : ''} -->`,
 		'### ❌ The Vercel build failed for this PR',
 		'',
-		`Vercel paywalls build logs to authorized users in its web UI, so we tailed the last ${MAX_LOG_LINES} lines of the build log for you here. ${fullLog}`,
+		message,
 		'',
 		'<details>',
 		'<summary>Build log</summary>',
