@@ -98,35 +98,13 @@ jobs:
                   fi
 
             - name: Suggest fixes as review comments
-              # One suggested change per fixable entry this PR added. Suggestions
-              # already on the PR (same lines and entry) are not posted again;
-              # suggestions for findings that are gone are deleted. GitHub sets line
-              # to null on comments it could not carry to the new revision, so those
-              # are deleted too.
+              # One suggested change per fixable entry this PR added, kept in sync
+              # with the findings; see dev/sync-review-comments.sh
               if: github.event.pull_request.head.repo.full_name == github.repository
               env:
                   GH_TOKEN: ${{ github.token }}
                   PR_NUMBER: ${{ github.event.pull_request.number }}
-              run: |
-                  key='(.path + ":" + (.line | tostring) + ":" + (.body | split("\n")[0]))'
-                  gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/comments" --paginate \
-                      --jq ".[] | select(.body | startswith(\"<!-- check-redirects-finding:\")) | {id, key: $key}" \
-                      | jq -s . > "$RUNNER_TEMP/posted.json"
-                  jq --slurpfile posted "$RUNNER_TEMP/posted.json" \
-                      ".comments |= map(select($key as \$key | \$posted[0] | any(.key == \$key) | not))" \
-                      "$RUNNER_TEMP/review.json" > "$RUNNER_TEMP/review-new.json"
-
-                  jq -r --slurpfile review "$RUNNER_TEMP/review.json" \
-                      ".[] | select(.key as \$key | \$review[0].comments | any($key == \$key) | not) | .id" \
-                      "$RUNNER_TEMP/posted.json" | while read -r comment_id; do
-                      gh api --method DELETE "repos/$GITHUB_REPOSITORY/pulls/comments/$comment_id"
-                  done
-
-                  if [ "$(jq '.comments | length' "$RUNNER_TEMP/review-new.json")" -gt 0 ]; then
-                      gh api --method POST "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews" \
-                          --input "$RUNNER_TEMP/review-new.json" > /dev/null \
-                          || echo "::warning::Could not post the suggested fixes; they are in the report above"
-                  fi
+              run: dev/sync-review-comments.sh '<!-- check-redirects-finding:' "$RUNNER_TEMP/review.json"
 
             - name: Fail when this PR breaks redirects
               if: steps.check.outputs.broken == 'true'
