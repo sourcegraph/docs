@@ -414,7 +414,7 @@ function validateLink(link, currentFile, maps) {
 		resolvedPath.replace(/\/$/, '').toLowerCase()
 	);
 	if (realPath) {
-		return { error: `Case mismatch: "${resolvedPath}" should be "${realPath}"`, fix: anchor ? `${realPath}#${anchor}` : realPath };
+		return { error: 'Path case mismatch: works on macOS, 404s on the Linux build', fix: anchor ? `${realPath}#${anchor}` : realPath };
 	}
 	
 	// Check if it's a file with extension (like .png, .pdf)
