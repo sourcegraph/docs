@@ -2,19 +2,15 @@ import {TECHNICAL_CHANGELOG_RSS_URL} from './constants';
 
 const redirectsData = [
 	{
-		source: "/docs/old-prefixed",
-		destination: "/code-ownership"
+		source: '/old-prefixed',
+		destination: '/code-ownership'
 	},
 	{
-		source: "/old-chain",
-		destination: "/admin/http_https_configuration"
+		source: '/old-chain',
+		destination: '/self-hosted/http-https-configuration'
 	},
 	{
 		source: "/old-ownership",
-		destination: "/code-ownershp"
-	},
-	{
-		source: "/old-ownership#anchor",
 		destination: "/code-ownership"
 	},
 	{
@@ -5912,10 +5908,6 @@ const redirectsData = [
 		source: '/code-search/how-to/create-search-context-graphql',
 		destination: '/api'
 	},
-	{
-		source: "/admin/http_https_configuration",
-		destination: "/self-hosted/http-https-configuration"
-	}
 ];
 
 const updatedRedirectsData = redirectsData.map(redirect => {
