@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * Reports CSpell findings on lines added by a Git diff.
+ * Reports CSpell findings on lines added by a Git diff, and dictionary entries
+ * added out of alphabetical order.
  *
  * Usage: node dev/check-spelling.mjs --base <revision> [--format text|json]
  *
@@ -10,6 +11,7 @@
  */
 
 import {execFileSync, spawnSync} from 'child_process';
+import {readFileSync} from 'fs';
 import path from 'path';
 import {fileURLToPath} from 'url';
 
@@ -87,9 +89,43 @@ function runCSpell(files) {
 		column: issue.col,
 		word: issue.text,
 		suggestions: issue.suggestions?.slice(0, 3) ?? [],
-		text: issue.line.text.replace(/\r?\n$/, ''),
-		context: issue.context?.text.trim() ?? issue.line.text.trim()
+		text: issue.line.text.replace(/\r?\n$/, '')
 	}));
+}
+
+// Entries in the dictionary files must be sorted, so duplicates stand out and
+// merges are clean. Sorted the way CSpell matches: case- and accent-insensitive.
+// Blank lines and comments start a new sorted run, so the lists can be sectioned.
+const DICTIONARY_FILES = ['cspell-allow-list.txt', 'cspell-block-list.txt'];
+const collator = new Intl.Collator('en', {sensitivity: 'base'});
+
+function unsortedDictionaryEntries(files) {
+	const findings = [];
+	for (const file of files.filter(file => DICTIONARY_FILES.includes(file))) {
+		let previous;
+		readFileSync(file, 'utf8')
+			.split('\n')
+			.forEach((text, index) => {
+				if (/^\s*(#|$)/.test(text)) {
+					previous = undefined;
+					return;
+				}
+				const word = text.replace(/\s*#.*/, '').trim();
+				if (previous && collator.compare(word, previous) < 0) {
+					findings.push({
+						file,
+						line: index + 1,
+						column: 1,
+						word,
+						suggestions: [],
+						text,
+						message: `\`${word}\` is out of alphabetical order: it belongs before \`${previous}\`, the entry above it.`
+					});
+				}
+				previous = word;
+			});
+	}
+	return findings;
 }
 
 function findingsOnAddedLines(ranges, issues) {
@@ -102,15 +138,15 @@ function findingsOnAddedLines(ranges, issues) {
 
 function formatText(findings) {
 	if (findings.length === 0) {
-		return 'No spelling errors found in added lines.\n';
+		return 'No issues found in added lines.\n';
 	}
 
 	const lines = [
-		`Found ${findings.length} spelling error(s) in added lines:`
+		`Found ${findings.length} issue(s) in added lines:`
 	];
 	for (const finding of findings) {
 		lines.push(
-			`${finding.file}:${finding.line}:${finding.column} - Unknown word (${finding.word})`
+			`${finding.file}:${finding.line}:${finding.column} - ${finding.message ?? `Unknown word (${finding.word})`}`
 		);
 	}
 	return lines.join('\n') + '\n';
@@ -125,10 +161,11 @@ async function main() {
 	}
 
 	const ranges = addedLineRanges(BASE);
-	const findings = findingsOnAddedLines(
-		ranges,
-		runCSpell([...ranges.keys()])
-	);
+	const files = [...ranges.keys()];
+	const findings = findingsOnAddedLines(ranges, [
+		...runCSpell(files),
+		...unsortedDictionaryEntries(files)
+	]);
 	process.stdout.write(
 		FORMAT === 'json'
 			? JSON.stringify(findings, null, '\t') + '\n'
