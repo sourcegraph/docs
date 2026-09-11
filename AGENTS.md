@@ -10,6 +10,10 @@
 -   **Check links**: `npm run check -- links --check-anchors --check-self-links` (CI comments on PRs that break links; see `dev/check-links.mjs`; the build runs it without flags, so only dead page links fail a deploy). When moving a page or renaming a heading, update every link to it; a redirect in `src/data/redirects.ts` does not satisfy the check. Link to this site with relative paths (`/admin/config/site-config`), never `https://sourcegraph.com/docs/…` or `https://docs.sourcegraph.com/…`. To also probe the external links you added: `npm run check -- links --check-anchors --check-self-links --check-external --diff <(git diff -U0 origin/main)`
 -   **Prove changed links resolve on a deploy**: `node dev/verify-links-live.mjs --site <vercel-preview-url>` prints a Markdown table for the PR description
 
+## Branches
+
+-   Prefix every branch with a name that identifies the human it belongs to (first name, username, or nickname), then a slash: `marc/fix-moved-page-links`. Agents use the name of the human they are working for, never their own
+
 ## AI Chat Integration
 
 This site uses **runLLM** for the AI chat widget. The integration is implemented via:
