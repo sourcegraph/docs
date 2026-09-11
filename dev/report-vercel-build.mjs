@@ -8,6 +8,7 @@
  * Usage:
  *   node dev/report-vercel-build.mjs fetch-log <file>
  *   node dev/report-vercel-build.mjs comment <file> [--dry-run]
+ *   node dev/report-vercel-build.mjs slack <file> [--dry-run]
  *
  * fetch-log writes the build log to <file>, and to GITHUB_OUTPUT `truncated`,
  * so the workflow can upload the full log as an artifact when the comment
@@ -22,7 +23,14 @@
  * artifact an earlier comment linked. With --dry-run the comment is printed
  * instead, and nothing is deleted.
  *
- * Both need DEPLOYMENT_ID, DEPLOYMENT_STATE (error or success), COMMIT_SHA,
+ * slack uploads <file> into the thread of the Vercel Slack app's "failed to
+ * deploy" post for the commit in SLACK_CHANNEL_ID, looking back 30 minutes
+ * and waiting up to 5 more for the post to appear. It needs SLACK_BOT_TOKEN
+ * (see dev/slack-app-vercel-build-report.json) and does nothing when that or
+ * SLACK_CHANNEL_ID is unset. With --dry-run the post is found but nothing is
+ * uploaded.
+ *
+ * All need DEPLOYMENT_ID, DEPLOYMENT_STATE (error or success), COMMIT_SHA,
  * GH_TOKEN and GITHUB_REPOSITORY.
  */
 
@@ -35,10 +43,14 @@ const DRY_RUN = process.argv.includes('--dry-run');
 const MAX_LOG_LINES = 100;
 const MAX_LOG_CHARS = 30_000;
 const ARTIFACT_RETENTION_DAYS = 30;
+const SLACK_LOOKBACK_MINUTES = 30;
+const SLACK_WAIT_MINUTES = 5;
+const SLACK_POLL_SECONDS = 15;
 
 const API_URL = process.env.GITHUB_API_URL ?? 'https://api.github.com';
 const REPOSITORY = process.env.GITHUB_REPOSITORY;
-const {DEPLOYMENT_ID, DEPLOYMENT_STATE, COMMIT_SHA} = process.env;
+const {DEPLOYMENT_ID, DEPLOYMENT_STATE, COMMIT_SHA, SLACK_CHANNEL_ID} =
+	process.env;
 
 // The artifact ID rides along in the marker so a later run can delete it
 const MARKER = '<!-- vercel-build-report';
@@ -328,6 +340,124 @@ async function report(pull, logLines) {
 	}
 }
 
+// Every method used here takes form encoding, including the file one
+async function slackApi(method, parameters) {
+	const response = await fetch(`https://slack.com/api/${method}`, {
+		method: 'POST',
+		headers: {
+			authorization: `Bearer ${process.env.SLACK_BOT_TOKEN}`,
+			'content-type': 'application/x-www-form-urlencoded'
+		},
+		body: new URLSearchParams(parameters)
+	});
+	const result = await response.json();
+	if (!result.ok) {
+		throw new Error(`Slack ${method} failed: ${result.error}`);
+	}
+	return result;
+}
+
+// The Vercel Slack app posts "<commit title> failed to deploy … <short sha> |
+// <project>" for each failed deployment. It and this workflow are triggered
+// by the same event, so its post can land after this runs; keep looking for a
+// while before giving up.
+async function findVercelFailurePost() {
+	const shortSha = COMMIT_SHA.slice(0, 7);
+	const oldest = Date.now() / 1000 - SLACK_LOOKBACK_MINUTES * 60;
+	const deadline = Date.now() + SLACK_WAIT_MINUTES * 60_000;
+	for (;;) {
+		const {messages} = await slackApi('conversations.history', {
+			channel: SLACK_CHANNEL_ID,
+			oldest,
+			limit: 200
+		});
+		const post = messages.find(
+			message =>
+				message.bot_id &&
+				message.text?.includes('failed to deploy') &&
+				message.text.includes(shortSha)
+		);
+		if (post) {
+			return post;
+		}
+		if (Date.now() >= deadline) {
+			console.log(
+				`No Vercel "failed to deploy" post for ${shortSha} in the last ${SLACK_LOOKBACK_MINUTES} minutes; giving up`
+			);
+			return undefined;
+		}
+		console.log(
+			`No Vercel post for ${shortSha} yet; checking again in ${SLACK_POLL_SECONDS}s`
+		);
+		await new Promise(resolve =>
+			setTimeout(resolve, SLACK_POLL_SECONDS * 1000)
+		);
+	}
+}
+
+// Slack takes files in three steps: ask for an upload URL, POST the bytes to
+// it, then say which channel and thread to share the file in
+async function uploadLogToThread(post, pulls) {
+	const log = readFileSync(logFile);
+	const shortSha = COMMIT_SHA.slice(0, 7);
+	const filename = `vercel-build-${shortSha}.log`;
+	const links = pulls
+		.map(pull => `<${pull.html_url}|#${pull.number}>`)
+		.join(', ');
+	const initialComment = `Build log attached; its tail is also commented on PR ${links}.`;
+
+	if (DRY_RUN) {
+		console.log(
+			`[dry-run] would upload ${filename} (${log.length} bytes) to thread ${post.ts} in ${SLACK_CHANNEL_ID}:\n${initialComment}`
+		);
+		return;
+	}
+	const {upload_url: uploadUrl, file_id: fileId} = await slackApi(
+		'files.getUploadURLExternal',
+		{filename, length: log.length}
+	);
+	const upload = await fetch(uploadUrl, {method: 'POST', body: log});
+	if (!upload.ok) {
+		throw new Error(
+			`Uploading ${filename} to Slack failed: ${upload.status} ${await upload.text()}`
+		);
+	}
+	await slackApi('files.completeUploadExternal', {
+		files: JSON.stringify([
+			{id: fileId, title: `Vercel build log for ${shortSha}`}
+		]),
+		channel_id: SLACK_CHANNEL_ID,
+		thread_ts: post.ts,
+		initial_comment: initialComment
+	});
+	console.log(
+		`Uploaded ${filename} to thread ${post.ts} in ${SLACK_CHANNEL_ID}`
+	);
+}
+
+async function slack() {
+	if (!process.env.SLACK_BOT_TOKEN || !SLACK_CHANNEL_ID) {
+		console.log(
+			'SLACK_BOT_TOKEN or SLACK_CHANNEL_ID unset; not posting to Slack'
+		);
+		return;
+	}
+	if (DEPLOYMENT_STATE !== 'error') {
+		console.log('The build passed; Vercel already posts that to Slack');
+		return;
+	}
+	// The same guard as fetch-log and comment, so Slack only ever gets logs
+	// the PR comment also shows
+	const pulls = await findPullRequests(process.env.PR_NUMBER);
+	if (pulls.length === 0) {
+		return;
+	}
+	const post = await findVercelFailurePost();
+	if (post) {
+		await uploadLogToThread(post, pulls);
+	}
+}
+
 async function main() {
 	for (const name of [
 		'DEPLOYMENT_ID',
@@ -345,7 +475,7 @@ async function main() {
 	}
 	if (!logFile) {
 		throw new Error(
-			'Usage: node dev/report-vercel-build.mjs fetch-log|comment <file>'
+			'Usage: node dev/report-vercel-build.mjs fetch-log|comment|slack <file>'
 		);
 	}
 
@@ -353,8 +483,12 @@ async function main() {
 		await fetchLog();
 	} else if (command === 'comment') {
 		await comment();
+	} else if (command === 'slack') {
+		await slack();
 	} else {
-		throw new Error(`Unknown command ${command}; use fetch-log or comment`);
+		throw new Error(
+			`Unknown command ${command}; use fetch-log, comment or slack`
+		);
 	}
 }
 
