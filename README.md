@@ -21,7 +21,7 @@ cd docs
 
 Before the dependencies are installed make sure your local machine has the following versions of `node` and `pnpm` installed:
 
--   node: `v20.19.6`
+-   node: `v24.21.0`
 -   pnpm: `10.25.0`
 
 **Note**: If you have `mise` available you can install the above versions for only this repository by running the following command from your terminal in the root folder:

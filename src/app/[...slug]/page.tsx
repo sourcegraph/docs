@@ -5,7 +5,7 @@ import {PrevNextLinks} from '@/components/PrevNextLinks';
 import {Prose} from '@/components/Prose';
 import {TableOfContents} from '@/components/Toc';
 import {allPosts} from 'contentlayer/generated';
-import {getMDXComponent} from 'next-contentlayer/hooks';
+import {getMDXComponent} from 'next-contentlayer2/hooks';
 import {notFound} from 'next/navigation';
 import {Suspense} from 'react';
 
