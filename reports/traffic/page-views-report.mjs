@@ -5,7 +5,7 @@
  *
  * Counts human page views (HTML 200s), redirects, 404s and 5xx errors on
  * sourcegraph.com for /docs, /changelog and /blog over the last 90 days
- * and writes Markdown reports to reports/ sorted by path, request count,
+ * and writes Markdown reports next to this script sorted by path, request count,
  * redirect count and error count, plus how often each redirect rule in
  * src/data/redirects.ts was followed. See README.md.
  *
@@ -55,8 +55,8 @@ const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = path.dirname(SCRIPT_DIR);
-const REPORTS_DIR = path.join(SCRIPT_DIR, 'reports');
+const REPO_ROOT = path.resolve(SCRIPT_DIR, '..', '..');
+const REPORTS_DIR = SCRIPT_DIR;
 const REDIRECTS_FILE = path.join(REPO_ROOT, 'src', 'data', 'redirects.ts');
 
 // One `{source: '...', destination: '...' | CONSTANT}` entry in redirects.ts.

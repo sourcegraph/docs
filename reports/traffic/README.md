@@ -1,4 +1,4 @@
-# Viewership metrics
+# Traffic reports
 
 Page view, redirect and error counts for `/docs`, `/changelog` and `/blog` on
 sourcegraph.com, from Cloudflare's GraphQL Analytics API.
@@ -17,7 +17,7 @@ Cloudflare keeps 90 days of history, so `--days` maxes out at 90.
 
 ## Reports
 
-Written to `reports/` (gitignored). Every page report has the same rows,
+Written to this directory and committed. Every page report has the same rows,
 sorted differently:
 
 | File                         | Sorted by                                |
