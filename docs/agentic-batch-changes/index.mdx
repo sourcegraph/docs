@@ -4,120 +4,303 @@ seoPriority: 1.0
 
 # Agentic Batch Changes
 
-[Agentic Batch Changes](http://sourcegraph.com/agentic-batch-changes) lets you describe a change in plain language: then, the agent scopes it, applies it across every repo, and tracks it through to merge.
+Agentic Batch Changes turns a description of a change into changesets across your codebase. You tell the agent what should be different. It researches your repositories with [Deep Search](/deep-search), proposes a plan, previews the change on one repository, and rolls it out in stages you control. After it opens pull requests, it can keep watching them: when CI fails or a merge conflict appears, it can loop to fix the problem and report back.
 
-<Callout type="warning">
-	Agentic Batch Changes is currently a [Beta feature](/beta-and-experimental).
-	The Beta is currently only available upon request: **[schedule a
-	demo](https://sourcegraph.com/contact) or reach out to your account manager
-	to get started.**
-</Callout>
+You can use it for:
 
-Agentic Batch Changes is built on top of [Batch Changes](/batch-changes), our precision tool for applying code changes at scale. Paired with [Deep Search](/deep-search), our code understanding agent, these two tools form the foundation of an agent harness specialized for operating across your entire codebase: from thousands of repositories, to the largest monorepos.
+- Dependency upgrades and CVE remediation, including upgrades with breaking changes, transitive dependencies, and lockfiles.
+- Language and framework migrations, such as replacing deprecated APIs across every service.
+- Generating or refreshing repository documentation and `AGENTS.md` guidance for coding agents.
+- Splitting one large change in a monorepo into a separate pull request per team.
 
-<video autoPlay loop muted playsInline>
-	<source
-		src="https://storage.googleapis.com/changelog-static-assets-prod/20260630_agentic-batch-changes-beta_agentic-batch-changes-beta-demo-1.mp4"
-		type="video/mp4"
-	/>
-</video>
+The agent also handles changes that need judgment in each repository, reading the surrounding code before it edits rather than applying one pattern everywhere.
+
+Some terms used in this documentation:
+
+- A **code host** is the service that hosts your repositories and reviews: GitHub, GitLab, Bitbucket, or Azure DevOps.
+- A **changeset** is one proposed change on a code host: a pull request on GitHub, a merge request on GitLab. One agentic batch change can span several code hosts, so this documentation uses the neutral word.
+- The **plan** is what the agent proposes before it runs: the repositories in scope, what will change in each one, and the branch, title, and commit message for the resulting changesets.
 
 ## Getting started
 
-Agentic Batch Changes is currently a [Beta feature](/beta-and-experimental). The Beta is currently only available upon request: **[schedule a demo](https://sourcegraph.com/contact) or reach out to your account manager to get started.**
+### Before you start
 
-Once Agentic Batch Changes is enabled, you can find it in the Sourcegraph navigation bar.
+Agentic Batch Changes should be on by default. If it isn't available, contact your Sourcegraph administrator; see [Administration](#administration) for access and setup requirements.
 
-### Setup
+As a user, you need:
 
-Before creating an Agentic Batch Change, make sure your Sourcegraph instance can access the repositories and publish changes back to your code host:
+- A [Batch Changes credential](/batch-changes/configuring-credentials) for each code host where the agent should publish, added under **Code hosts** in your Batch Changes settings.
+- If you want the agent to react to CI, a token that can read your CI logs, stored under **Secrets** in the same settings area. See [Security and secrets](#security-and-secrets).
 
-- [Configure code host connections](/admin/code-hosts) for the repositories you want the agent to search and modify.
-- [Configure Batch Changes credentials](/batch-changes/configuring-credentials) for each code host where the agent should publish pull requests or merge requests.
-- Ensure [Sourcegraph executors](/admin/executors) are set up so Agentic Batch Changes can run code-modification jobs in isolated workspaces. [Sourcegraph Cloud](/cloud) includes Sourcegraph-managed executors by default, so Cloud customers using them do not need to deploy executor infrastructure. Otherwise, you will need to [deploy Sourcegraph executors](/self-hosted/executors) that serve both the `batches` and `batches-hooks` [queues](/self-hosted/executors/executors-config#queues).
+### Write the prompt
 
-### Prompting
+Open **Agentic Batch Changes** from the navigation and describe the change: the outcome you want and where to look.
 
-Each Agentic Batch Change starts with a prompt. Like any agent, specificity and a clear success criteria can dramatically improve results. The agent works particularly well with detailed migration plans, which you can upload for the agent to consume. However, you can also start with some fairly simple requests to see how the agent responds:
+For example, for a Go codebase:
 
-- "Generate documentation for these repositories to describe the purpose of the repository."
-- "Generate `AGENTS.md` guidance for these repositories to help coding agents."
-- "Identify usage of primitive wrapper constructors in Java projects, like `new Boolean(true)`, and replace them with the recommended `.valueOf()` factory method `Boolean.valueOf(true)`."
-- "In our Go 1.16+ code, remove `ioutil` imports, replacing them with the appropriate modern methods in packages like `io` and `os`."
-- "Find repositories affected by CVE-2025-55182. Prioritize repositories that have execution paths to vulnerable code. If the application’s React code does not use a server, it is not affected by this vulnerability. If the app does not use a framework, bundler, or bundler plugin that supports React Server Components, the app is not affected by this vulnerability."
+> Across the repositories in our acme-platform organization, replace calls to `ioutil.ReadFile` with `os.ReadFile` and remove imports that become unused. Run `gofmt` afterwards. Don't touch anything under `vendor/`. Publish drafts so I can see CI.
 
-We recommend encoding guidance that works for your organization via [agent customization](#customization).
+See [Writing prompts](#writing-prompts) for more examples.
 
-## Capabilities
+### Review the plan
 
-### Customization
+The agent researches your codebase and comes back with a plan: the repositories in scope, what will change in each one, the branch and title for the changesets, and which repository it wants to test on first (also called a **canary**). The agent might ask clarifying questions when the scope is ambiguous.
 
-Most organizations will also have specific conventions, technologies, and preferences. The agent may discover some of these conventions in its research, but you can also improve performance by customizing the agent with skills and `AGENTS.md`-style guidance, available on a per-user, per-organization, or global level in settings:
+At any time, you can ask the agent to show you the plan or adjust it in plain language.
 
-- **User settings → Batch Changes → Agent**
-- **Administration → Batch Changes → Agent**
+### Watch the test run
+
+After you approve, the agent runs the change in one repository and shows you the diff. Review the proposed changes and assess the agent's suggested solution. If the diff has a problem, tell the agent. You can also highlight and comment on lines in the diff itself. The agent will then revise the plan and adjust the next changes as well.
+
+### Publish a draft
+
+Tell the agent to publish the test result as a draft changeset to get CI, code owner checks, and reviewer comments on one changeset before the rollout goes any wider. If the agent needs a secret to read CI logs, it might ask you to configure one.
+
+### Expand the rollout
+
+If everything goes well, the agent might ask if it can continue. The agent runs the next stage and pauses again when it's done. Each pause is a checkpoint where you can inspect a diff, skip a repository, or adjust a title. When you trust the change, "run everything else" fans out the remainder.
+
+### Let the agent finish
+
+When configured to handle CI failures, the agent fetches the logs, takes another loop to fix the problem, and updates the changeset. You can step away and ask "what happened while I was away?" when you return for a summary of everything that changed. When reviewers approve and CI is green, the changesets can be merged the way any other pull request is.
+
+## Writing prompts
+
+The agent starts every batch change from your first message. It reads the message, researches the codebase with Deep Search, and comes back with a plan: which repositories are in scope, what will change, and which repository it wants to test on first. You can correct the plan before anything runs, so a prompt doesn't have to be perfect. It does have to be clear about the outcome you want.
+
+### What the agent needs from you
+
+Prompts can be flexible, but these principles help:
+
+- **State the outcome clearly.** For example, "Every service should read its database URL from the `DATABASE_URL` environment variable instead of the `config/db.yaml` file" gives the agent a success condition it can check.
+- **Give the scope, or explain how to find it.** Name the repositories, an organization, a language, or a signal the agent can search for: "every repository with a `go.mod` that imports `github.com/pkg/errors`". The agent uses Deep Search to turn that into a list and ranks the results, then confirms the list with you. If you don't know the scope, say so and describe the symptom instead. The agent will investigate and propose one.
+- **Set the boundaries.** Specify anything the agent must not touch, any change that needs a human, and any verification you expect before a changeset is published: "don't modify anything under `vendor/`", "run `make test` and skip repositories where it fails".
+
+### Attach the plan you already have
+
+If you have a migration guide, an upgrade runbook, an advisory, or a design doc, upload it with your message. The agent reads uploaded files before planning, and a written plan with steps, gotchas, and examples produces a better result. This is the single most effective way to improve results for a complex migration.
+
+### Say how you want it rolled out
+
+The agent runs a test repository, then expands in stages, pausing after each. You can shape that in the prompt:
+
+- Name the test repository: "start with billing-api, it has the best test coverage".
+- Set the publication strategy: "publish drafts so I can see CI before we go wider", or "don't touch the code host until I've reviewed the diffs".
+- Say what should happen on CI failure or merge conflict: "if CI fails on a changeset, fetch the logs and try to fix it", or "rebase on merge conflicts". The agent sets itself up to read CI logs before it first publishes, but you should specify whether you want it to fix failures automatically or rebase on conflicts. Name the CI system and the secret that holds its token.
+- Ask for ready-for-review changesets rather than drafts when you want the final stage to be ready for review.
+
+### Tell it which tools to use
+
+The agent decides between scripts and coding agents based on how deterministic the change is, and picks container images to match. When you have a preference, state it:
+
+- "Use ast-grep for the rewrite; here's the pattern."
+- "Use a coding agent for the call-site changes, the transformation is too context-dependent for a script."
+- "Use our internal `tools/migrator` image from `registry.example.com`."
+- "Don't build images; use stock images only."
+
+If you need the coding agent to follow conventions, put them in the prompt too, or point at a file in the repository. Coding agents working inside a repository don't receive the direct guidance configured in settings, but the coordinating agent usually transfers what is relevant.
+
+### Encode what repeats
+
+If you find yourself writing the same instructions in every prompt, they belong in guidance or a skill rather than in the prompt. Branch naming, changeset description format, which CI system you use and how to read its logs, image policy, and verification commands are all better set once; see [Customizing the agent](#customizing-the-agent). Prompts should then contain only what's specific to this change.
+
+### Examples
+
+Each example below is a complete first message. They range from simple to complex.
+
+#### Documentation for repositories without any
+
+> For every repository in the acme-platform GitHub organization that has no `README.md` or whose README is under 20 lines, write a README describing what the service does, how to run it locally, and who owns it (from CODEOWNERS). Use a coding agent for the writing. Publish as drafts.
+
+#### A mechanical language cleanup
+
+> Across our Go repositories, remove imports of `io/ioutil` and replace each call with its modern equivalent: `ioutil.ReadFile` → `os.ReadFile`, `ioutil.WriteFile` → `os.WriteFile`, `ioutil.ReadAll` → `io.ReadAll`, `ioutil.NopCloser` → `io.NopCloser`, `ioutil.TempDir` → `os.MkdirTemp`, `ioutil.TempFile` → `os.CreateTemp`. Replace `ioutil.Discard` with `io.Discard`. Run `gofmt` and `go build ./...` afterwards. Skip repositories still on Go 1.15 or earlier per their `go.mod`.
+
+#### A dependency upgrade with verification
+
+> Upgrade lodash to at least 4.17.21 in every JavaScript and TypeScript repository we have, including where it's a transitive dependency. Update lockfiles with the repository's own package manager. Run the repository's test command if one is defined in `package.json` and don't publish changesets where tests fail; list them for me instead. Start with web-dashboard as the canary and publish drafts so I can see CI.
+
+#### A vulnerability triage with a conditional scope
+
+> Find repositories affected by CVE-2025-55182. Prioritize repositories with an execution path to the vulnerable code. A React application that doesn't render on a server is not affected. An application that doesn't use a framework, bundler, or bundler plugin supporting React Server Components is not affected. Produce a report of affected repositories with the evidence for each before proposing any change, then wait for me.
+
+#### A monorepo change split by owner
+
+> In acme/monorepo, replace `LegacyLogger` with `slog` under every directory in `services/`. Create one changeset per top-level directory under `services/` so each team reviews its own. Title each changeset `services/<name>: migrate to slog`. Follow the logging conventions in `docs/logging.md`. Run the canary on `services/auth`.
+
+#### A multi-step migration with an uploaded plan
+
+> Attached is our Spring Boot 2 → 3 migration runbook. Apply it to every Java repository on Spring Boot 2.x. Use the OpenRewrite recipe from section 2 as a script step, then a coding agent step to fix what the recipe leaves behind following sections 3 and 4. Run `./mvnw -q verify` and fix compile errors before finishing each workspace. If CI fails on a published changeset, fetch the logs and attempt a fix. Publish drafts and pause after each stage.
+
+### During the conversation
+
+The agent asks questions while it plans, pauses after each stage, and reports CI results as they arrive.
+
+You can also ask it to change course or explain what's happening:
+
+- "Show me the plan" to read the current plan before confirming.
+- "Skip legacy-gateway" to remove a repository from scope without stopping the rollout.
+- "Change the commit message to ..." to update titles, descriptions, or commit messages. This republishes without re-running the work.
+- "Also add this ..." to extend the plan. The agent prefers additions over edits to existing steps, so finished work stays valid.
+- "Continue" to run the next stage, or "run everything else" to fan out the remainder.
+- "What happened while I was away?" after CI has run, to get a summary.
+
+The agent has an overview of the change and the procedures behind it. If something is unclear or you need to proceed in a specific way, ask in plain language.
+
+## Customizing the agent
+
+The agent discovers a lot on its own through Deep Search: which package manager a repository uses, how CI is wired, and where similar migrations have been done before. But internal policies may not be written in the code: which base images you allow, how you name branches, which approvals a dependency bump needs, or what a good commit message looks like in your organization.
+
+You can add guidance on the **Agents** page of your Batch Changes settings, at `<instance_url>/users/<username>/settings/batch-changes/agents`. Site administrators add instance-wide guidance at `<instance_url>/admin/batch-changes/agents`, and organizations can carry shared guidance in their settings. Entries from all three levels combine.
+
+### Guidance and skills
+
+**Guidance** is `AGENTS.md`-style text the agent sees on every run, before it reads your first message. Use it for rules that should always apply: house style, forbidden actions, default tools, and how to phrase changeset descriptions. Keep it short. Everything in guidance competes for the agent's attention on every turn, and the combined guidance is truncated at 32 KiB.
+
+A **skill** is a named document the agent loads on demand when a task matches its description. Skills suit procedures that only matter some of the time: how to run your internal CI, how to upgrade a particular framework, or how your monorepo is laid out. A skill's content only uses context when it is loaded.
+
+### Loading guidance from a repository
+
+The agent also considers guidance and skill files inside the target repositories.
+
+Keeping guidance in a repository has two advantages over inline entries. Changes go through code review, and the same guidance can be shared by teams that don't share settings. Because the agent reads the repository at the start of each run, a merged change takes effect on the next agent turn.
+
+### Precedence
+
+Guidance loads in settings order: site, then organization, then user, so your own guidance appears after your administrator's. When two skills share a name, the last one loaded wins: your skill overrides an organization's, which overrides the site's, and any of them can override a Sourcegraph default.
+
+### What guidance does not reach
+
+Guidance and skills shape the coordinating agent: the one you talk to, which researches your codebase, writes the plan, and manages the rollout. Coding agents working inside a repository don't receive them. They see their instructions from the plan, the repository itself, and any `AGENTS.md` files already committed to it.
+
+If the in-repository work needs your conventions, ask the coordinating agent to pass them along. You can make that a standing rule in guidance: "When you hand work in a Java repository to a coding agent, tell it to follow the style guide in `docs/STYLE.md`."
+
+### What to put in guidance
+
+Write guidance the way you'd brief a new colleague who is very capable and knows nothing about your organization. The most useful entries are the ones the agent can't infer from code:
+
+- **Image policy.** Which base images to prefer, whether the agent may build images or should stick to stock ones.
+- **Publication conventions.** Branch name patterns, changeset title format, required labels or reviewers, and whether to open drafts or ready-for-review changesets by default.
+- **Verification.** Which commands count as "tests pass" for each ecosystem, and which are too slow to run before publishing.
+- **CI.** How to fetch logs for a failed build and what to try first. This is what the agent uses when it sets up CI handling for you.
+- **Boundaries.** Repositories or directories the agent should never modify, and changes that always need a human to sign off.
+
+Avoid restating the agent's own defaults. It already researches before planning, tests on one repository before expanding, and asks before publishing, so guidance that repeats those rules adds length without changing behavior.
 
 ### Changeset hooks
 
-Agentic Batch Changes introduces a new batch changes concept, "changeset hooks". These allow programmable responses to events like CI failures and merge conflicts. For example:
+Agentic Batch Changes introduces **changeset hooks**, which allow programmable responses to events like CI failures and merge conflicts. For example:
 
-- When CI fails, the agent can prepare a script to fetch CI logs for you. This data can be used to amend the agent's plan, or even be handed off to a coding agent to fix immediately.
+- When CI fails, the agent can prepare a script to fetch CI logs for you. This data can be used to amend the agent's plan, or be handed off to a coding agent to fix immediately.
 - When a merge conflict is encountered, the agent can ask a coding agent to address it.
 
-To get set up, just ask the agent for it in your agentic batch change. We recommend encoding processes that work for your organization via [agent customization](#customization).
+To get set up, ask the agent for it in your agentic batch change. Encode processes that work for your organization in guidance or skills.
 
 ### Coding agent steps
 
-The coding agent step is a new native step type for Agentic Batch Changes that allows the agent to delegate non-deterministic or context-dependent changes for another coding agent to handle. Coding agent steps are automatically pre-configured with the [Sourcegraph MCP](/api/mcp).
+The coding agent step is a native step type for Agentic Batch Changes that lets the agent delegate non-deterministic or context-dependent changes to another coding agent. Coding agent steps are automatically pre-configured with the [Sourcegraph MCP](/api/mcp).
 
 Within a coding agent step, the agent has:
 
-- **Full MCP access under your actor** — the [Sourcegraph MCP](/api/mcp) tools are available and authenticated as you, so the agent operates with your permissions.
-- **Access to the code being worked on** — the workspace's repository checkout is available to the agent as it makes changes.
+- **Full MCP access under your identity.** The Sourcegraph MCP tools are available and authenticated as you, so the agent operates with your permissions.
+- **Access to the code being worked on.** The workspace's repository checkout is available to the agent as it makes changes.
 
 We currently support [Claude Code](https://claude.com/product/claude-code) and [Codex](https://openai.com/codex) as native coding agent steps.
 
 By default, coding agent LLM traffic is routed through the [Sourcegraph Model Provider](/model-provider).
 
-Note that Agentic Batch Changes does not use coding agent steps for every task. For deterministic changes, the agent will opt to write a script - or even an entire program - to efficiently apply some, or all, of the target changes.
+Agentic Batch Changes does not use coding agent steps for every task. For deterministic changes, the agent will opt to write a script, or even an entire program, to efficiently apply some or all of the target changes.
 
-### Building images for steps
+## Security and secrets
 
-Just like any agent, Agentic Batch Changes and [its coding agents](#coding-agent-steps) benefits from having tools tailored for specific tasks. To support this, the agent can build a tailor-made image with all the tools it needs for a specific task that it can reuse across an agentic batch change. Custom-built images are hosted directly in Sourcegraph.
+The agent acts as you. Everything it reads, it reads with your [repository permissions](/admin/permissions), so it can't scope a change to a repository you can't see. Everything it publishes, it publishes with your [Batch Changes credential](/batch-changes/configuring-credentials), or the global credential your administrator configured. Your code host's branch protection, required checks, and review rules apply unchanged.
 
-If you prefer, you can guide the agent to an image of your choice instead, or encourage the agent to build on top of particular images. We recommend encoding processes that work for your organization via [agent customization](#customization).
+### Approvals
 
-Note that the agent's image-building capability is only available in [Sourcegraph Cloud](/cloud) by default.
+The agent researches, plans, and revises freely without publishing changes to your code host. Running the plan for the first time usually takes an explicit yes or instructions from you. Publishing, expanding the rollout, and fanning out to everything that remains may each need a reply, unless you authorized them up front in your prompt.
 
-### Batch Changes capabilities
+When a new or changed step uses a secret, the agent shows you that step and waits for your approval before running it with your credential. You choose how far the approval extends: this run only, this agent, or all of your agents.
 
-All [batch changes capabilities](/batch-changes/batch-spec-yaml-reference) are available to the agent.
+### Secrets
 
-For example, the agent can write conditional steps, template changeset titles and descriptions, and split changes in one repository into multiple changesets.
+Some steps need credentials: a package registry token for private dependencies or an API key for reading CI logs. These are managed on two settings pages:
 
-Administration options like rollout windows and commit signing also carry over. See [Administration](#administration) for details.
+- Your own secrets live under **Secrets** in your Batch Changes settings, at `/users/<username>/settings/batch-changes/secrets`.
+- Site administrators manage global secrets, available to every user, at `/admin/batch-changes/secrets`.
+
+Your own secret takes precedence over a global one with the same name. Organization-level secrets aren't available to agents.
+
+A step references a secret by name. Sourcegraph injects the value when the step runs and redacts it from logs; the value never appears in the plan, in the conversation, or in anything the agent reads. The agent never asks you to paste a secret into the conversation: when a step needs a credential that doesn't exist yet, it points you to the settings page and the least-privilege scope the token needs, then waits until you confirm it's there.
+
+### Isolation
+
+All code-modifying work runs in isolated containers on [Sourcegraph executors](/admin/executors), one per repository. A container sees the repository and the secrets its steps reference. It has no direct access to code host credentials, other users' secrets, or other repository checkouts. [Coding agent steps](#coding-agent-steps) can still use Sourcegraph MCP to access code with your permissions. Containers can't publish. Publication happens inside Sourcegraph.
+
+### Sharing
+
+An agentic batch change has one owner. Only the owner can send messages, approve actions, and publish. Others can follow along through a read link, which lets any user on the instance read the conversation, the plan, and the results without changing anything.
+
+### Audit log
+
+Agent activity is recorded in the Sourcegraph audit log under the `batchChangeAgents` entity, with identifiers and no URLs, links, or tokens. On self-hosted instances, route it as you route the rest of the audit log.
 
 ## Administration
 
-Most Batch Changes configuration options, such as rollout windows and commit signing, still apply in Agentic Batch Changes unless otherwise noted. To learn more, refer to [Batch Changes configuration](/admin/config/batch-changes).
+### Access
 
-### Access control
+Users need two permission pairs from the Batch Changes namespace in [role-based access control](/admin/access-control):
 
-Access to Agentic Batch Changes can be managed through [role-based access control](/admin/access-control). Users will need both of:
+- `Batch Changes: Read` together with `Batch Changes: Agent Read` to view agents and their conversations.
+- `Batch Changes: Write` together with `Batch Changes: Agent Write` to create and run them.
 
-- Batch Changes permissions `Batch Changes: Read` or `Batch Changes: Write`
-- Agentic Batch Changes permissions `Batch Changes: Agent Read` or `Batch Changes: Agent Write`
+Both halves of a pair are required. All four are part of the built-in User role, so every user has access once the feature is enabled. To roll it out gradually, remove the agent permissions from the User role and grant them through a role of your own.
 
-### Entitlements
+### Executors
 
-[Entitlements](/admin/entitlements/) are currently only available for [coding agent steps](#coding-agent-steps).
+Make sure [code host connections](/admin/code-hosts) are configured for the repositories users want the agent to search and modify.
 
-## Security
+All code-modifying work runs on executors. [Sourcegraph Cloud](/cloud) usually includes managed executors with no setup. Self-hosted instances need [executors deployed](/self-hosted/executors) and registered against both the `batches` and `batches-hooks` [queues](/self-hosted/executors/executors-config#queues), running a version that matches the instance. Without an executor on `batches-hooks`, batch changes can execute and publish, but CI and merge-conflict hook automations never run.
 
-Agentic Batch Changes uses the same security model as Batch Changes, with additional safeguards for agent-generated work:
+Plan for agent workloads: coding agent runs often take several minutes per repository, and executors need network access to the Sourcegraph frontend URL for the agent's search and model traffic.
 
-- [Repository permissions](/admin/permissions/) are enforced when users view, create, update, or publish changes, so users can only act on repositories they are allowed to access.
-- [Batch Changes credentials](/batch-changes/configuring-credentials) control which code host identity publishes pull requests or merge requests.
-- Code host protections, including CI checks, branch protections, and review requirements, continue to apply to pull requests or merge requests created by Agentic Batch Changes.
-- [Executors](/admin/executors/) run code-modification jobs in isolated workspaces. Executors do not access code host credentials directly.
-- [Executor secrets](/admin/executors/executor-secrets) are scoped by user, organization, or globally, and are redacted in logs. Agentic Batch Changes will ask you for approval on any agent-generated actions that reference your secrets before those actions run.
+### Usage limits
+
+Coding agent runs are metered per user through the `batch_changes_coding_agent` [entitlement](/admin/entitlements), managed in the Administration area. Each coding agent run in a repository consumes one unit. A default entitlement applies to every user, and an explicit grant replaces the default for a specific user:
+
+- Users without an entitlement have unlimited usage.
+- A positive limit blocks further runs once reached until its window resets.
+- A limit of zero blocks coding agent runs entirely.
+
+Blocked runs tell the user which limit was hit and when it resets.
+
+Model usage, for both the agent's own conversation and its coding agent runs, draws on your instance's [Sourcegraph Model Provider](/model-provider) credits.
+
+### Web search
+
+The agent and its coding agents can search the web. It's on by default. You can turn it off in [site configuration](/admin/config/site-config) if your policy doesn't allow outbound web access.
+
+### Images
+
+Steps run in container images the agent picks, preferring small public images that already carry the needed tools. You can restrict where images come from with `batchChanges.containerRegistryAllowlist` or `batchChanges.containerRegistryDenylist` in site configuration; the two are mutually exclusive, and an empty list allows every registry.
+
+When no public image fits, the agent can build one on the fly and reuse it across the batch change. Custom-built images are hosted directly in Sourcegraph. Image building is available on Sourcegraph Cloud by default and requires additional setup on self-hosted instances.
+
+### Agent-managed batch changes
+
+A batch change created by an agent is **agent-managed**: it's listed under Agentic Batch Changes, links to the conversation that drives it, and rejects the classic operations that would compete with the agent's rollout, such as applying or re-executing a batch spec and detaching changesets, for everyone including site administrators. Bulk changeset operations like commenting and merging still work. [Publication settings configured for Batch Changes](/admin/config/batch-changes), such as rollout windows, forks, and commit signing, apply unchanged.
+
+## Compatibility
+
+### Code hosts
+
+The agent publishes through the same machinery as [Batch Changes](/batch-changes), so it supports the same code hosts and the same credentials. Fork enforcement, rollout windows, commit signing, and branch auto-deletion apply unchanged. Reacting to CI failures and merge conflicts depends on what the code host reports back to Sourcegraph.
+
+The agent can also use [batch spec capabilities](/batch-changes/batch-spec-yaml-reference), including conditional steps, templated changeset titles and descriptions, and multiple changesets in one repository.
+
+### Ownership
+
+Each agentic batch change has one owner, the user who created it, and only the owner can send messages, approve actions, and publish. Others follow along through a shared read link. There is no co-ownership and no transfer. If the owner is unavailable, start a new agentic batch change to continue the work. Because the agent acts as its owner, the owner's repository permissions bound what it can touch.
+
+### Scope of a single agent
+
+An agentic batch change carries one mission. It suits one coherent change across many repositories, not a queue of unrelated tasks. Start a new agentic batch change for each independent change, so each has its own plan, rollout, and changesets.
