@@ -27,8 +27,3 @@
 npm run check -- links --check-anchors --check-self-links \
   --check-external --diff <(git diff -U0 origin/main)
 ```
-
-## AI Chat
-
-There is no AI chat widget. Langbase (#1339) and its runLLM replacement
-(#1536) were both removed; do not reintroduce either.
