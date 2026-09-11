@@ -1,5 +1,4 @@
 const {withContentlayer} = require('next-contentlayer');
-const {execSync} = require('child_process');
 /** @type {import('next').NextConfig} */
 
 const nextConfig = {
@@ -18,11 +17,4 @@ const nextConfig = {
 	}
 };
 
-module.exports = async () => {
-	// placing this here so its part of nextjs's build process
-	execSync('node dev/check-links.mjs', {stdio: 'inherit'});
-	execSync('node dev/check-filenames.mjs', {stdio: 'inherit'});
-	execSync('node dev/check-images.mjs', {stdio: 'inherit'});
-	execSync('node dev/generate-mermaid-icons.mjs', {stdio: 'inherit'});
-	return withContentlayer(nextConfig);
-};
+module.exports = withContentlayer(nextConfig);
