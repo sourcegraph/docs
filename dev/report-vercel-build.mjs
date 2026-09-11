@@ -149,7 +149,31 @@ async function fetchBuildLog() {
 	return events
 		.map(event => event.payload?.text ?? event.text)
 		.filter(text => typeof text === 'string')
-		.flatMap(text => text.replace(/\n$/, '').split('\n'));
+		.flatMap(text => text.replace(/\n$/, '').split('\n'))
+		.map(redact);
+}
+
+// Credential shapes a build might print. The comment and artifact are public,
+// and the build gets VERCEL_OIDC_TOKEN and friends, so a left-in
+// `console.log(process.env)` must not publish them. Not a complete list.
+const REDACTIONS = [
+	[/\beyJ[\w-]{10,}\.[\w-]{10,}\.[\w-]+/g, '[redacted-jwt]'],
+	[
+		/\b(?:vcp_|gh[pousr]_|github_pat_|sk-|xox[abpr]-)[\w-]{16,}|\bAKIA[0-9A-Z]{16}\b/g,
+		'[redacted-token]'
+	],
+	[/(\bBearer\s+)\S+/gi, '$1[redacted]'],
+	[
+		/(\w*(?:TOKEN|SECRET|PASSW(?:OR)?D|CREDENTIALS?|API_?KEY|PRIVATE_KEY|ENC_KEY|DEPLOYMENT_KEY)\w*["']?\s*[=:]\s*["']?)\S+/gi,
+		'$1[redacted]'
+	]
+];
+
+function redact(line) {
+	return REDACTIONS.reduce(
+		(text, [pattern, replacement]) => text.replace(pattern, replacement),
+		line
+	);
 }
 
 // The failure is at the end of the log; keep the tail within GitHub's
@@ -187,9 +211,21 @@ async function fetchLog() {
 	}
 }
 
-// A four-backtick fence so lines containing ``` cannot break out of the block
+// A fence longer than any run of backticks in the log, so no log line can
+// close it and inject Markdown into the comment
+function fenceFor(lines) {
+	const longestRun = Math.max(
+		2,
+		...lines.flatMap(line =>
+			(line.match(/`+/g) ?? []).map(run => run.length)
+		)
+	);
+	return '`'.repeat(longestRun + 1);
+}
+
 function failureBody(logLines, artifact) {
 	const tail = tailOf(logLines);
+	const fence = fenceFor(tail);
 	const intro =
 		'Vercel paywalls build logs to authorized users in its web UI, so';
 	const message = artifact
@@ -204,9 +240,9 @@ function failureBody(logLines, artifact) {
 		'<details>',
 		'<summary>Build log</summary>',
 		'',
-		'````',
+		fence,
 		...tail,
-		'````',
+		fence,
 		'',
 		'</details>',
 		''
