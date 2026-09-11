@@ -2,7 +2,10 @@
 
 /**
  * Reports CSpell findings on a pull request: one summary comment in the
- * discussion, plus an inline review comment on each flagged line.
+ * discussion, plus an inline review comment on each flagged line. Once the
+ * findings are fixed, the summary is minimized as resolved and the inline
+ * comments are deleted; the review that carried them has no body, so nothing
+ * of it remains visible.
  *
  * Usage: node dev/post-spelling-review.mjs --findings <json-file> [--dry-run]
  *
@@ -66,6 +69,26 @@ async function githubWrite(method, route, body) {
 	}
 }
 
+// Minimizing a comment is GraphQL-only. Both mutations are idempotent.
+async function setCommentMinimized(nodeId, minimized) {
+	const mutation = minimized
+		? 'minimizeComment(input: {subjectId: $id, classifier: RESOLVED}) { clientMutationId }'
+		: 'unminimizeComment(input: {subjectId: $id}) { clientMutationId }';
+	console.log(
+		`${DRY_RUN ? '[dry-run] ' : ''}${minimized ? 'minimize' : 'unminimize'} comment ${nodeId}`
+	);
+	if (DRY_RUN) {
+		return;
+	}
+	const result = await github('POST', '/graphql', {
+		query: `mutation ($id: ID!) { ${mutation} }`,
+		variables: {id: nodeId}
+	});
+	if (result.errors) {
+		throw new Error(`GraphQL failed: ${JSON.stringify(result.errors)}`);
+	}
+}
+
 function groupByFile(findings) {
 	const grouped = new Map();
 	for (const finding of findings) {
@@ -83,6 +106,11 @@ function summaryBody(findings) {
 		`### ⚠️ CSpell found ${findings.length} spelling error(s) in this PR`,
 		'',
 		'Only findings on lines added by this PR are shown.',
+		...(findings.length > MAX_INLINE_COMMENTS
+			? [
+					`Up to ${MAX_INLINE_COMMENTS} of them are also commented inline.`
+				]
+			: []),
 		''
 	];
 	for (const [file, fileFindings] of groupByFile(findings)) {
@@ -111,29 +139,30 @@ async function upsertSummaryComment(findings) {
 		comment.body.startsWith(SUMMARY_MARKER)
 	);
 
-	// Comment only when there is something to report, or an earlier report to resolve
-	let body;
-	if (findings.length > 0) {
-		body = summaryBody(findings);
-	} else if (existing) {
-		body = `${SUMMARY_MARKER}\n### ✅ The spelling errors reported on an earlier revision are fixed\n`;
-	} else {
+	if (!existing) {
+		if (findings.length > 0) {
+			await githubWrite(
+				'POST',
+				`/repos/${REPOSITORY}/issues/${PR_NUMBER}/comments`,
+				{body: summaryBody(findings)}
+			);
+		}
 		return;
 	}
 
-	if (existing) {
-		await githubWrite(
-			'PATCH',
-			`/repos/${REPOSITORY}/issues/comments/${existing.id}`,
-			{body}
-		);
-	} else {
-		await githubWrite(
-			'POST',
-			`/repos/${REPOSITORY}/issues/${PR_NUMBER}/comments`,
-			{body}
-		);
-	}
+	// Keep the earlier report, collapsed as resolved, so the discussion still
+	// shows what was flagged and fixed. Reopen it when new findings appear.
+	const resolved = findings.length === 0;
+	await githubWrite(
+		'PATCH',
+		`/repos/${REPOSITORY}/issues/comments/${existing.id}`,
+		{
+			body: resolved
+				? `${SUMMARY_MARKER}\n### ✅ The spelling errors reported on an earlier revision are fixed\n`
+				: summaryBody(findings)
+		}
+	);
+	await setCommentMinimized(existing.node_id, resolved);
 }
 
 function findingKey({file, line, word}) {
@@ -187,13 +216,6 @@ function inlineBody(finding) {
 	].join('\n');
 }
 
-function reviewBody(shown, total) {
-	const summary = `CSpell found ${total} spelling error(s) on lines added by this PR. Please correct them, or add them to ${ALLOW_LIST_LINK} if they are correct.`;
-	return shown < total
-		? `${summary} The first ${shown} are commented inline; the summary comment lists them all.`
-		: summary;
-}
-
 async function syncInlineComments(findings) {
 	const wanted = new Map(
 		findings.map(finding => [findingKey(finding), finding])
@@ -221,15 +243,16 @@ async function syncInlineComments(findings) {
 	if (fresh.length === 0) {
 		return;
 	}
-	const shown = fresh.slice(0, MAX_INLINE_COMMENTS);
+	// No review body: the inline comments say it all, and a submitted review
+	// cannot be deleted, so a body would outlive the comments once fixed.
 	await githubWrite(
 		'POST',
 		`/repos/${REPOSITORY}/pulls/${PR_NUMBER}/reviews`,
 		{
 			commit_id: HEAD_SHA,
 			event: 'COMMENT',
-			body: reviewBody(shown.length, fresh.length),
-			comments: shown.map(finding => ({
+			body: '',
+			comments: fresh.slice(0, MAX_INLINE_COMMENTS).map(finding => ({
 				path: finding.file,
 				line: finding.line,
 				side: 'RIGHT',
