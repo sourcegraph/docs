@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * Reports CSpell findings on lines added by a Git diff.
+ * Reports CSpell findings on lines added by a Git diff, and dictionary entries
+ * added out of alphabetical order.
  *
  * Usage: node dev/check-spelling.mjs --base <revision> [--format text|json]
  *
@@ -10,6 +11,7 @@
  */
 
 import {execFileSync, spawnSync} from 'child_process';
+import {readFileSync} from 'fs';
 import path from 'path';
 import {fileURLToPath} from 'url';
 
@@ -87,9 +89,49 @@ function runCSpell(files) {
 		column: issue.col,
 		word: issue.text,
 		suggestions: issue.suggestions?.slice(0, 3) ?? [],
-		text: issue.line.text.replace(/\r?\n$/, ''),
-		context: issue.context?.text.trim() ?? issue.line.text.trim()
+		text: issue.line.text.replace(/\r?\n$/, '')
 	}));
+}
+
+// Entries in the dictionary files must be sorted, so duplicates stand out and
+// merges are clean. Sorted the way CSpell matches: case- and accent-insensitive.
+// Blank lines and comments start a new sorted run, so the lists can be sectioned.
+const DICTIONARY_FILES = ['cspell-allow-list.txt', 'cspell-block-list.txt'];
+const collator = new Intl.Collator('en', {sensitivity: 'base'});
+
+function unsortedDictionaryEntries(files) {
+	const findings = [];
+	for (const file of files.filter(file => DICTIONARY_FILES.includes(file))) {
+		let run = []; // [{word, line}] of the current sorted run
+		readFileSync(file, 'utf8')
+			.split('\n')
+			.forEach((text, index) => {
+				if (/^\s*(#|$)/.test(text)) {
+					run = [];
+					return;
+				}
+				const word = text.replace(/\s*#.*/, '').trim();
+				const line = index + 1;
+				const belongsBefore = run.find(
+					entry => collator.compare(word, entry.word) < 0
+				);
+				if (belongsBefore) {
+					findings.push({
+						file,
+						line,
+						column: 1,
+						word,
+						suggestions: [],
+						text,
+						message: `\`${word}\` is out of alphabetical order: move it above \`${belongsBefore.word}\``,
+						relatedLine: belongsBefore.line // rendered as a link after the message
+					});
+				} else {
+					run.push({word, line});
+				}
+			});
+	}
+	return findings;
 }
 
 function findingsOnAddedLines(ranges, issues) {
@@ -102,16 +144,17 @@ function findingsOnAddedLines(ranges, issues) {
 
 function formatText(findings) {
 	if (findings.length === 0) {
-		return 'No spelling errors found in added lines.\n';
+		return 'No issues found in added lines.\n';
 	}
 
 	const lines = [
-		`Found ${findings.length} spelling error(s) in added lines:`
+		`Found ${findings.length} issue(s) in added lines:`
 	];
-	for (const finding of findings) {
-		lines.push(
-			`${finding.file}:${finding.line}:${finding.column} - Unknown word (${finding.word})`
-		);
+	for (const {file, line, column, word, message, relatedLine} of findings) {
+		const detail = message
+			? `${message}${relatedLine ? ` on line ${relatedLine}` : ''}`
+			: `Unknown word (${word})`;
+		lines.push(`${file}:${line}:${column} - ${detail}`);
 	}
 	return lines.join('\n') + '\n';
 }
@@ -125,10 +168,11 @@ async function main() {
 	}
 
 	const ranges = addedLineRanges(BASE);
-	const findings = findingsOnAddedLines(
-		ranges,
-		runCSpell([...ranges.keys()])
-	);
+	const files = [...ranges.keys()];
+	const findings = findingsOnAddedLines(ranges, [
+		...runCSpell(files),
+		...unsortedDictionaryEntries(files)
+	]);
 	process.stdout.write(
 		FORMAT === 'json'
 			? JSON.stringify(findings, null, '\t') + '\n'
