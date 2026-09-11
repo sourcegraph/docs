@@ -5,23 +5,40 @@
  * build logs to members of the Vercel team. When a later revision builds, the
  * same comment is updated to say so.
  *
- * Usage: node dev/report-vercel-build.mjs [--dry-run]
+ * Usage:
+ *   node dev/report-vercel-build.mjs fetch-log <file>
+ *   node dev/report-vercel-build.mjs comment <file> [--dry-run]
  *
- * Requires DEPLOYMENT_ID, DEPLOYMENT_STATE (error or success), COMMIT_SHA,
- * GH_TOKEN and GITHUB_REPOSITORY. A failed build also needs VERCEL_TOKEN, and
- * VERCEL_TEAM_ID unless the token is scoped to the project.
- * With --dry-run the comment is printed instead of posted.
+ * fetch-log writes the build log to <file>, and `truncated` to GITHUB_OUTPUT,
+ * so the workflow can upload the full log as an artifact when the comment
+ * cannot hold all of it. It needs VERCEL_TOKEN, and VERCEL_TEAM_ID unless the
+ * token is scoped to the project.
+ *
+ * comment posts the tail of <file>, linking the artifact from ARTIFACT_ID and
+ * ARTIFACT_URL when set, and deletes the artifact an earlier comment linked.
+ * With --dry-run the comment is printed instead, and nothing is deleted.
+ *
+ * Both need DEPLOYMENT_ID, DEPLOYMENT_STATE (error or success), COMMIT_SHA,
+ * GH_TOKEN and GITHUB_REPOSITORY.
  */
 
+import {appendFileSync, readFileSync, writeFileSync} from 'fs';
+
+const [command, logFile] = process.argv
+	.slice(2)
+	.filter(argument => !argument.startsWith('--'));
 const DRY_RUN = process.argv.includes('--dry-run');
 const MAX_LOG_LINES = 100;
 const MAX_LOG_CHARS = 30_000;
+const ARTIFACT_RETENTION_DAYS = 30;
 
 const API_URL = process.env.GITHUB_API_URL ?? 'https://api.github.com';
 const REPOSITORY = process.env.GITHUB_REPOSITORY;
 const {DEPLOYMENT_ID, DEPLOYMENT_STATE, COMMIT_SHA} = process.env;
 
-const MARKER = '<!-- vercel-build-report -->';
+// The artifact ID rides along in the marker so a later run can delete it
+const MARKER = '<!-- vercel-build-report';
+const MARKER_PATTERN = /^<!-- vercel-build-report(?: artifact=(\d+))? -->/;
 
 async function fetchJson(url, headers) {
 	const response = await fetch(url, {headers});
@@ -49,7 +66,7 @@ async function github(method, route, body) {
 			`${method} ${route} failed: ${response.status} ${await response.text()}`
 		);
 	}
-	return response.json();
+	return response.status === 204 ? undefined : response.json();
 }
 
 async function githubList(route) {
@@ -73,7 +90,7 @@ async function findPullRequests() {
 		'GET',
 		`/repos/${REPOSITORY}/commits/${COMMIT_SHA}/pulls`
 	);
-	return pulls.filter(pull => {
+	const open = pulls.filter(pull => {
 		if (pull.state !== 'open' || pull.head.sha !== COMMIT_SHA) {
 			return false;
 		}
@@ -83,6 +100,10 @@ async function findPullRequests() {
 		}
 		return true;
 	});
+	if (open.length === 0) {
+		console.log(`No open PR with head ${COMMIT_SHA}; nothing to do`);
+	}
+	return open;
 }
 
 // Build log lines, oldest first. Vercel keeps them as events; only the ones
@@ -105,22 +126,48 @@ async function fetchBuildLog() {
 		.flatMap(text => text.replace(/\n$/, '').split('\n'));
 }
 
-// The failure is at the end of the log; keep the tail within GitHub's comment
-// size limit. A four-backtick fence so lines containing ``` cannot break out.
-function failureBody(logLines) {
+// The failure is at the end of the log; keep the tail within GitHub's
+// comment size limit
+function tailOf(logLines) {
 	let tail = logLines.slice(-MAX_LOG_LINES);
 	while (tail.length > 1 && tail.join('\n').length > MAX_LOG_CHARS) {
 		tail = tail.slice(1);
 	}
-	const omitted = logLines.length - tail.length;
+	return tail;
+}
+
+async function fetchLog() {
+	if (!process.env.VERCEL_TOKEN) {
+		throw new Error('VERCEL_TOKEN is required to read the build log');
+	}
+	if ((await findPullRequests()).length === 0) {
+		return;
+	}
+	const logLines = await fetchBuildLog();
+	writeFileSync(logFile, logLines.join('\n') + '\n');
+	const truncated = tailOf(logLines).length < logLines.length;
+	console.log(
+		`Wrote ${logLines.length} log lines to ${logFile}${truncated ? '; the comment will show the tail' : ''}`
+	);
+	if (process.env.GITHUB_OUTPUT) {
+		appendFileSync(process.env.GITHUB_OUTPUT, `truncated=${truncated}\n`);
+	}
+}
+
+// A four-backtick fence so lines containing ``` cannot break out of the block
+function failureBody(logLines, artifact) {
+	const tail = tailOf(logLines);
+	const fullLog = artifact
+		? `The full log is ${logLines.length} lines, attached as a [workflow artifact](${artifact.url}); downloading it needs a GitHub login, and it expires in ${ARTIFACT_RETENTION_DAYS} days.`
+		: `The full log is ${logLines.length} lines.`;
 	return [
-		MARKER,
+		`${MARKER}${artifact ? ` artifact=${artifact.id}` : ''} -->`,
 		'### ❌ The Vercel build failed for this PR',
 		'',
-		`Vercel paywalls build logs to authorized users in its web UI, so we tailed the last ${tail.length} lines of the build log for you here.`,
+		`Vercel paywalls build logs to authorized users in its web UI, so we tailed the last ${MAX_LOG_LINES} lines of the build log for you here. ${fullLog}`,
 		'',
 		'<details>',
-		`<summary>Build log${omitted > 0 ? ` (${omitted} earlier lines omitted)` : ''}</summary>`,
+		'<summary>Build log</summary>',
 		'',
 		'````',
 		...tail,
@@ -131,34 +178,29 @@ function failureBody(logLines) {
 	].join('\n');
 }
 
-async function main() {
-	for (const name of [
-		'DEPLOYMENT_ID',
-		'DEPLOYMENT_STATE',
-		'COMMIT_SHA',
-		'GH_TOKEN',
-		'GITHUB_REPOSITORY'
-	]) {
-		if (!process.env[name]) {
-			throw new Error(`Missing required environment variable ${name}`);
-		}
-	}
-	if (!['error', 'success'].includes(DEPLOYMENT_STATE)) {
-		throw new Error(`Unexpected DEPLOYMENT_STATE ${DEPLOYMENT_STATE}`);
-	}
-
-	const pulls = await findPullRequests();
-	if (pulls.length === 0) {
-		console.log(`No open PR with head ${COMMIT_SHA}; nothing to do`);
+async function deleteArtifact(id) {
+	console.log(`${DRY_RUN ? '[dry-run] ' : ''}Deleting artifact ${id}`);
+	if (DRY_RUN) {
 		return;
 	}
+	try {
+		await github('DELETE', `/repos/${REPOSITORY}/actions/artifacts/${id}`);
+	} catch (error) {
+		// Already expired or deleted
+		if (!error.message.includes(' 404 ')) {
+			throw error;
+		}
+	}
+}
 
+async function comment() {
+	const pulls = await findPullRequests();
+	if (pulls.length === 0) {
+		return;
+	}
 	let logLines;
 	if (DEPLOYMENT_STATE === 'error') {
-		if (!process.env.VERCEL_TOKEN) {
-			throw new Error('VERCEL_TOKEN is required to read the build log');
-		}
-		logLines = await fetchBuildLog();
+		logLines = readFileSync(logFile, 'utf8').replace(/\n$/, '').split('\n');
 	}
 	for (const pull of pulls) {
 		await report(pull, logLines);
@@ -170,16 +212,27 @@ async function report(pull, logLines) {
 	const comments = await githubList(
 		`/repos/${REPOSITORY}/issues/${pull.number}/comments`
 	);
-	const existing = comments.find(comment => comment.body.startsWith(MARKER));
+	const existing = comments.find(comment =>
+		MARKER_PATTERN.test(comment.body)
+	);
+	const previousArtifact = existing?.body.match(MARKER_PATTERN)[1];
 
 	let body;
 	if (logLines) {
-		body = failureBody(logLines);
+		const {ARTIFACT_ID, ARTIFACT_URL} = process.env;
+		body = failureBody(
+			logLines,
+			ARTIFACT_ID && {id: ARTIFACT_ID, url: ARTIFACT_URL}
+		);
 	} else if (existing) {
-		body = `${MARKER}\n### ✅ The Vercel build that failed on an earlier revision of this PR passes\n`;
+		body = `${MARKER} -->\n### ✅ The Vercel build that failed on an earlier revision of this PR passes\n`;
 	} else {
 		console.log(`PR #${pull.number} has no failed build to resolve`);
 		return;
+	}
+
+	if (previousArtifact) {
+		await deleteArtifact(previousArtifact);
 	}
 
 	if (DRY_RUN) {
@@ -201,6 +254,36 @@ async function report(pull, logLines) {
 			`/repos/${REPOSITORY}/issues/${pull.number}/comments`,
 			{body}
 		);
+	}
+}
+
+async function main() {
+	for (const name of [
+		'DEPLOYMENT_ID',
+		'DEPLOYMENT_STATE',
+		'COMMIT_SHA',
+		'GH_TOKEN',
+		'GITHUB_REPOSITORY'
+	]) {
+		if (!process.env[name]) {
+			throw new Error(`Missing required environment variable ${name}`);
+		}
+	}
+	if (!['error', 'success'].includes(DEPLOYMENT_STATE)) {
+		throw new Error(`Unexpected DEPLOYMENT_STATE ${DEPLOYMENT_STATE}`);
+	}
+	if (!logFile) {
+		throw new Error(
+			'Usage: node dev/report-vercel-build.mjs fetch-log|comment <file>'
+		);
+	}
+
+	if (command === 'fetch-log') {
+		await fetchLog();
+	} else if (command === 'comment') {
+		await comment();
+	} else {
+		throw new Error(`Unknown command ${command}; use fetch-log or comment`);
 	}
 }
 

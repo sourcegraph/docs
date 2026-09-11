@@ -1,8 +1,10 @@
 name: Vercel build report
 
 # Vercel only shows build logs to members of its team. When a PR's Vercel
-# build fails, this comments the end of the build log on the PR; when a later
-# revision builds, the comment is updated to say so.
+# build fails, this comments the end of the build log on the PR, with the
+# full log as a workflow artifact when the comment cannot hold it all; when a
+# later revision builds, the comment is updated to say so and the artifact
+# is deleted.
 #
 # GitHub only delivers repository_dispatch (and finds workflow_dispatch
 # workflows) once the workflow file is on the default branch, so before merge
@@ -30,6 +32,15 @@ on:
 permissions:
     contents: read
     pull-requests: write
+    # To delete the full-log artifact once the build passes
+    actions: write
+
+env:
+    DEPLOYMENT_ID: ${{ github.event.client_payload.id || inputs.id }}
+    DEPLOYMENT_STATE: ${{ github.event.client_payload.state.type || inputs.state }}
+    COMMIT_SHA: ${{ github.event.client_payload.git.sha || inputs.sha }}
+    GH_TOKEN: ${{ github.token }}
+    LOG_FILE: ${{ github.workspace }}/vercel-build.log
 
 jobs:
     report:
@@ -42,12 +53,26 @@ jobs:
                   sparse-checkout: dev/report-vercel-build.mjs
                   sparse-checkout-cone-mode: false
 
-            - name: Comment on the pull request
+            - name: Fetch the build log from Vercel
+              # Vercel is only contacted when the build failed
+              if: env.DEPLOYMENT_STATE == 'error'
+              id: log
               env:
-                  GH_TOKEN: ${{ github.token }}
-                  DEPLOYMENT_ID: ${{ github.event.client_payload.id || inputs.id }}
-                  DEPLOYMENT_STATE: ${{ github.event.client_payload.state.type || inputs.state }}
-                  COMMIT_SHA: ${{ github.event.client_payload.git.sha || inputs.sha }}
                   # Scoped to the sourcegraph-docs project, so it needs no team ID
                   VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-              run: node dev/report-vercel-build.mjs
+              run: node dev/report-vercel-build.mjs fetch-log "$LOG_FILE"
+
+            - name: Attach the full log when the comment cannot hold it all
+              if: steps.log.outputs.truncated == 'true'
+              id: artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: vercel-build-log-${{ env.COMMIT_SHA }}
+                  path: ${{ env.LOG_FILE }}
+                  retention-days: 30
+
+            - name: Comment on the pull request
+              env:
+                  ARTIFACT_ID: ${{ steps.artifact.outputs.artifact-id }}
+                  ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+              run: node dev/report-vercel-build.mjs comment "$LOG_FILE"
