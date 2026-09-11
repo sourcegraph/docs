@@ -232,11 +232,15 @@ function findBrokenRedirects(redirects, headingsByRoute) {
 
 		const destination = splitUrl(redirect.destination);
 		if (isRedirect(destination.pathname)) {
+			// The fix names the final destination; only a loop needs `detail`
 			const final = finalDestination(destination.pathname);
-			report(redirect, PROBLEM.chained, {
-				detail: final ?? 'none, redirect loop',
-				fix: final && {source: redirect.source, destination: final}
-			});
+			report(
+				redirect,
+				PROBLEM.chained,
+				final
+					? {fix: {source: redirect.source, destination: final}}
+					: {detail: 'none, redirect loop'}
+			);
 			continue;
 		}
 		const headings = headingsByRoute.get(destination.pathname);
