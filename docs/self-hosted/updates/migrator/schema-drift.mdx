@@ -5,9 +5,9 @@
 During an upgrade you may run into the following message.
 
 ```
-* Sourcegraph migrator v4.1.3
-❌ Schema drift detected for frontend
-💡 Before continuing with this operation, run the migrator's drift command and follow instructions to repair the schema to the expected current state.
+✱ Sourcegraph migrator 7.7.359
+ ⨯ Schema drift detected for frontend
+💡 Before continuing with this operation, run the migrator's drift command and follow instructions to repair the schema to the expected current state. See https://sourcegraph.com/docs/admin/updates/migrator/schema-drift for additional instructions.
 ```
 
 This error indicates that `migrator` has detected some difference between the state of the schema in your database and the expected schema for the database in the `-from` or current version of your Sourcegraph instance.
@@ -15,32 +15,15 @@ This error indicates that `migrator` has detected some difference between the st
 When the schema [drift](/self-hosted/updates/migrator/migrator-operations#drift) command is run you'll see a set of diffs representing the areas where your instance schema has diverged from the expected state as well as the SQL operations to fix these examples of drift. For example:
 
 ```
-❌ Missing index "external_service_repos"."external_service_repos_repo_id_external_service_id_unique"
+ ⨯ Drift detected!
+
+ ⨯ Missing index "external_service_repos"."external_service_repos_repo_id_external_service_id_unique"
 💡 Suggested action: define the index.
+ALTER TABLE external_service_repos ADD CONSTRAINT external_service_repos_repo_id_external_service_id_unique UNIQUE (repo_id, external_service_id);
 
-ALTER TABLE external_service_repos ADD CONSTRAINT
-external_service_repos_repo_id_external_service_id_unique UNIQUE
-(repo_id, external_service_id);
-```
-
-```
-❌ Unexpected properties of column "batch_spec_resolution_jobs"."batch_spec_id"
-
-schemas.ColumnDescription{
-  	Name:                   "batch_spec_id",
-  	Index:                  -1,
-  	TypeName:               "integer",
-- 	IsNullable:             false,
-+ 	IsNullable:             true,
-  	Default:                "",
-  	CharacterMaximumLength: 0,
-  	... // 5 identical fields
-  }
-
-💡 Suggested action: change the column nullability constraint.
-
-ALTER TABLE batch_spec_resolution_jobs ALTER COLUMN
-batch_spec_id SET NOT NULL;
+ ⨯ Unexpected properties of column batch_spec_resolution_jobs."batch_spec_id"
+💡 Suggested action: alter the column.
+ALTER TABLE batch_spec_resolution_jobs ALTER COLUMN batch_spec_id SET NOT NULL;
 ```
 
 To correct these errors in the database run the suggested SQL queries via `psql` in internal databases, or via the tools provided by your cloud database provider.
@@ -58,35 +41,5 @@ kubectl -n ns-sourcegraph exec -it pgsql -- psql -U sg -c 'ALTER TABLE external_
 ```
 
 Then check the database again with the `drift` command and proceed with your multiversion upgrade.
-
-> Note: It is possible for the drift command to detect diffs which will not prevent upgrades. For example the following drift output picked up formatting differences `\n` vs `""`:
-
-```
-❌ Unexpected definition of function "lsif_data_docs_search_private_delete"
-strings.Join({
-    "CREATE OR REPLACE FUNCTION
-public.lsif_data_docs_search_private_",
-    "delete()\n RETURNS trigger\n LANGUAGE plpgsql\nAS
-$function$\nBEGIN\n",
-    "UPDATE lsif_data_apidocs_num_search_results_private SET
-count =",
--   " ",
-+   "\n",
-    "count - (select count(*) from oldtbl);\nRETURN NULL;\nEND
-$functio",
-    "n$\n",
-  }, "")
-💡 Suggested action: replace the function definition.
-CREATE OR REPLACE FUNCTION
-public.lsif_data_docs_search_private_delete()
- RETURNS trigger
- LANGUAGE plpgsql
-AS $function$
-BEGIN
-UPDATE lsif_data_apidocs_num_search_results_private SET count =
-count - (select count(*) from oldtbl);
-RETURN NULL;
-END $function$;
-```
 
 If migrator drift suggests SQL queries which don't make sense please report to support@sourcegraph.com. You may proceed with a migrator `upgrade` command using the `-skip-drift-check=true` flag.
