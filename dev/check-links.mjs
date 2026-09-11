@@ -307,15 +307,16 @@ function validateSelfLink(url, currentFile, maps) {
 	const visited = new Set();
 	let candidate = relative;
 	while (true) {
-		const moved = candidate === relative ? '' : ' to a moved page';
+		const error = candidate === relative ? 'Absolute link to this site' : 'Absolute link to a moved page';
 		const problem = validateLink({ url: candidate }, currentFile, maps);
 		if (!problem) {
-			return { error: `Absolute self-link${moved}; use "${candidate}" instead`, fix: candidate };
+			return { error, fix: candidate };
 		}
 		const destination = maps.redirects.get(candidate.split('#')[0]);
 		if (!destination || visited.has(destination)) {
-			const replaced = moved ? `; "${candidate}" replaced it, but` : ', and';
-			return { error: `Absolute self-link${moved}${replaced} ${problem[0].toLowerCase()}${problem.slice(1)}` };
+			const message = problem.error ?? problem;
+			const replaced = candidate === relative ? ', and' : `; "${candidate}" replaced it, but`;
+			return { error: `${error}${replaced} ${message[0].toLowerCase()}${message.slice(1)}` };
 		}
 		visited.add(destination);
 		candidate = isSelfLink(destination) ? relativeSelfLink(destination) : destination;
@@ -413,7 +414,7 @@ function validateLink(link, currentFile, maps) {
 		resolvedPath.replace(/\/$/, '').toLowerCase()
 	);
 	if (realPath) {
-		return `Case mismatch: "${resolvedPath}" should be "${realPath}"`;
+		return { error: 'Path case mismatch: works on macOS, 404s on the Linux build', fix: anchor ? `${realPath}#${anchor}` : realPath };
 	}
 	
 	// Check if it's a file with extension (like .png, .pdf)
@@ -543,9 +544,9 @@ function formatText(findings) {
 	];
 	for (const [file, fileFindings] of byFile) {
 		lines.push(`\n📄 ${file}`);
-		for (const { line, url, error } of fileFindings) {
+		for (const { line, url, error, fix } of fileFindings) {
 			lines.push(`   Line ${line}: ${url}`);
-			lines.push(`   └─ ${error}`);
+			lines.push(`   └─ ${error}${fix ? `; use ${fix}` : ''}`);
 		}
 	}
 	return lines.join('\n') + '\n';
@@ -555,7 +556,8 @@ function linkTo(text, url) {
 	return url ? `[${text}](${url})` : text;
 }
 
-// Markdown list of findings grouped by file, linked to the source when --link-base is set
+// Markdown list of findings grouped by file, one line per fact, linked to the
+// source when --link-base is set
 function markdownFindingList(findings) {
 	const lines = [];
 	for (const [file, fileFindings] of groupByFile(findings)) {
@@ -563,59 +565,58 @@ function markdownFindingList(findings) {
 		// Markdown preview ignores them
 		const fileUrl = LINK_BASE && `${LINK_BASE}/${file}?plain=1`;
 		lines.push(linkTo(`**\`${file}\`**`, fileUrl));
-		for (const { line, url, error } of fileFindings) {
-			lines.push(`- ${linkTo(`line ${line}`, fileUrl && `${fileUrl}#L${line}`)}: \`${url}\` — ${error}`);
+		for (const { line, url, error, fix } of fileFindings) {
+			lines.push(
+				`- ${linkTo(`line ${line}`, fileUrl && `${fileUrl}#L${line}`)}`,
+				`  - Link: \`${url}\``,
+				`  - Problem: ${error}`,
+				...(fix ? [`  - Fix: \`${fix}\``] : [])
+			);
 		}
 		lines.push('');
 	}
 	return lines;
 }
 
+const ABSOLUTE_LINKS_ADVICE =
+	'Write links on this site as relative paths (`/admin/config/site-config`), ' +
+	'not `https://sourcegraph.com/docs/…`: absolute links leave the preview ' +
+	'deployment and local dev server, and hide moved pages behind redirects.';
+
 // Body for a pull request comment. With --diff, findings are split into
-// outbound (in a file this PR changed: the PR added or edited a bad link) and
-// inbound (in a file it did not: the PR renamed or removed a link target).
+// outbound (in a file this PR changed: the PR added or edited a bad link),
+// absolute links to this site, and inbound (in a file the PR did not change:
+// the PR renamed or removed a link target).
 function formatMarkdown(findings) {
 	if (findings.length === 0) {
 		return '### ✅ This PR introduces no broken links\n';
 	}
 	
 	const lines = [`### ❌ This PR introduces ${findings.length} broken link(s)`, ''];
+	const section = (heading, intro, sectionFindings) => {
+		if (sectionFindings.length > 0) {
+			lines.push(`### ${heading}`, '', intro, '', ...markdownFindingList(sectionFindings));
+		}
+	};
 	if (DIFF) {
-		const outbound = findings.filter(finding => DIFF.files.has(finding.file));
-		const inbound = findings.filter(finding => !DIFF.files.has(finding.file));
-		if (outbound.length > 0) {
-			lines.push(
-				'### Outbound',
-				'',
-				'Your PR includes links to pages or anchors that do not exist, or absolute links to this site.',
-				'',
-				...markdownFindingList(outbound)
-			);
-		}
-		if (inbound.length > 0) {
-			lines.push(
-				'### Inbound',
-				'',
-				'A change your PR made broke inbound links from elsewhere. ' +
-					'Please fix the inbound links on the other pages.',
-				'',
-				...markdownFindingList(inbound)
-			);
-		}
+		const absolute = findings.filter(finding => isSelfLink(finding.url));
+		const outbound = findings.filter(finding => !isSelfLink(finding.url) && DIFF.files.has(finding.file));
+		const inbound = findings.filter(finding => !isSelfLink(finding.url) && !DIFF.files.has(finding.file));
+		section('Outbound', 'Your PR includes links to pages or anchors that do not exist.', outbound);
+		section('Absolute links', ABSOLUTE_LINKS_ADVICE, absolute);
+		section(
+			'Inbound',
+			'A change your PR made broke inbound links from these other files. Please fix the inbound links in these other files.',
+			inbound
+		);
 	} else {
 		lines.push(...markdownFindingList(findings));
-	}
-	if (findings.some(finding => isSelfLink(finding.url))) {
-		lines.push(
-			'Write links to this site as relative paths (`/admin/config/site-config`), ' +
-				'not `https://sourcegraph.com/docs/…` or `https://docs.sourcegraph.com/…`: ' +
-				'absolute links leave the preview deployment and local dev server, and ' +
-				'hide moved pages behind redirects.',
-			''
-		);
+		if (findings.some(finding => isSelfLink(finding.url))) {
+			lines.push(ABSOLUTE_LINKS_ADVICE, '');
+		}
 	}
 	lines.push(
-		'Reproduce locally with `pnpm check-links --check-anchors` ' +
+		'Reproduce locally with `pnpm check links --check-anchors --check-self-links` ' +
 			'(see `dev/check-links.mjs`).',
 		'',
 		'Adding a redirect in `src/data/redirects.ts` does not satisfy this ' +
@@ -624,38 +625,32 @@ function formatMarkdown(findings) {
 	return lines.join('\n') + '\n';
 }
 
-// Body for POST /repos/{owner}/{repo}/pulls/{n}/reviews: one suggested change per
-// added line that has fixes, so the author can apply them from the PR. The comment
-// lists every finding on the line, so the ones the suggestion cannot fix are not
-// mistaken for accepted. Review comments must sit on a line of the diff, hence the
-// added-line restriction.
-function reviewRequest(findings) {
-	const findingsByLine = new Map();
-	for (const finding of findings) {
-		if (!isAddedLine(finding.file, finding.line)) continue;
-		const key = `${finding.file}:${finding.line}`;
-		if (!findingsByLine.has(key)) findingsByLine.set(key, []);
-		findingsByLine.get(key).push(finding);
-	}
+// First line of a review comment, so the workflow can match the comments it
+// posted earlier to the findings still present and delete the rest
+const REVIEW_MARKER = '<!-- check-links-finding:';
 
-	const comments = [...findingsByLine.values()]
-		.filter(lineFindings => lineFindings.some(finding => finding.fix))
-		.map(lineFindings => {
-			const { file, line } = lineFindings[0];
+// Body for POST /repos/{owner}/{repo}/pulls/{n}/reviews: one suggested change per
+// finding that has a fix, so the author can apply each from the PR. Review comments
+// must sit on a line of the diff, hence the added-line restriction. No review body:
+// a submitted review cannot be deleted, so a body would outlive the comments once
+// the links are fixed.
+function reviewRequest(findings) {
+	const comments = findings
+		.filter(({ file, line, fix }) => fix && isAddedLine(file, line))
+		.map(({ file, line, url, error, fix }) => {
 			const source = fs.readFileSync(path.join(ROOT_DIR, file), 'utf-8').split('\n')[line - 1];
-			const fixed = lineFindings
-				.filter(finding => finding.fix)
-				.reduce((text, { url, fix }) => text.split(url).join(fix), source);
-			const notes = lineFindings.map(
-				({ url, error, fix }) => `- \`${url}\`: ${error}${fix ? '' : ' (not fixed by this suggestion)'}`
-			);
-			return { path: file, line, side: 'RIGHT', body: [...notes, '```suggestion', fixed, '```'].join('\n') };
+			const body = [
+				`${REVIEW_MARKER} ${url} -->`,
+				`Link: \`${url}\``,
+				`Problem: ${error}`,
+				`Fix: \`${fix}\``,
+				'````suggestion',
+				source.split(url).join(fix),
+				'````'
+			];
+			return { path: file, line, side: 'RIGHT', body: body.join('\n') };
 		});
-	return {
-		event: 'COMMENT',
-		body: 'Suggested fixes for the links this PR adds; details in the check-links comment.',
-		comments
-	};
+	return { event: 'COMMENT', body: '', comments };
 }
 
 const FORMATTERS = {
