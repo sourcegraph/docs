@@ -107,11 +107,19 @@ function sourceLink(finding) {
 	return `https://github.com/${REPOSITORY}/blob/${HEAD_REF}/${file}?plain=1#L${line}C${column}-L${line}C${end}`;
 }
 
-// `word` → `suggestion`, or the finding's own message for non-spelling
-// findings such as an unsorted dictionary entry
+// A non-spelling finding's own message, e.g. an unsorted dictionary entry,
+// pointing at its `relatedLine` when it has one
+function messageText(finding) {
+	const {file, message, relatedLine} = finding;
+	if (!relatedLine) return `${message}.`;
+	const url = `https://github.com/${REPOSITORY}/blob/${HEAD_REF}/${file}?plain=1#L${relatedLine}`;
+	return `${message} on [line ${relatedLine}](${url}).`;
+}
+
+// `word` → `suggestion`, or the finding's own message
 function summaryItem(finding) {
 	if (finding.message) {
-		return finding.message;
+		return messageText(finding);
 	}
 	const suggestion = bestSuggestion(finding);
 	return `\`${finding.word}\`${suggestion ? ` → \`${suggestion}\`` : ''}`;
@@ -135,7 +143,8 @@ function summaryBody(findings) {
 		for (const finding of fileFindings) {
 			const {line, column} = finding;
 			lines.push(
-				`- [line ${line}, column ${column}](${sourceLink(finding)}): ${summaryItem(finding)}`
+				`- [line ${line}, column ${column}](${sourceLink(finding)})`,
+				`  - ${summaryItem(finding)}`
 			);
 		}
 		lines.push('');
@@ -225,7 +234,7 @@ function suggestionBlock(finding) {
 
 function inlineBody(finding) {
 	const explanation = finding.message
-		? [finding.message]
+		? [messageText(finding)]
 		: [
 				`\`${finding.word}\` is not in the dictionary.`,
 				'',
