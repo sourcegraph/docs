@@ -1,0 +1,54 @@
+name: Spell check
+
+# Reports spelling errors on lines added by a pull request, as a summary comment
+# plus inline review comments on the flagged lines. Existing spelling errors and
+# errors on unchanged lines are not included.
+
+on:
+    pull_request:
+
+permissions:
+    contents: read
+    pull-requests: write
+
+jobs:
+    spellcheck:
+        name: CSpell (advisory)
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out pull request head
+              uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.event.pull_request.head.sha }}
+                  fetch-depth: 0
+
+            # Node 24 is pre-cached on ubuntu-latest, avoiding the download
+            # incurred by node-version: latest.
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+
+            # Install only CSpell instead of the site's full dependency tree.
+            - name: Install CSpell
+              run: npm install --global cspell@10
+
+            - name: Find spelling errors introduced by this PR
+              env:
+                  BASE_SHA: ${{ github.event.pull_request.base.sha }}
+              run: |
+                  base=$(git merge-base "$BASE_SHA" HEAD)
+                  # Exit 1 means findings; anything else is an operational error
+                  node dev/check-spelling.mjs --base "$base" --format json \
+                      > "$RUNNER_TEMP/spelling.json" || [ "$?" -eq 1 ]
+                  cat "$RUNNER_TEMP/spelling.json"
+
+            - name: Report on the pull request
+              # Fork PRs get a read-only token; the findings are still in the job log
+              if: github.event.pull_request.head.repo.full_name == github.repository
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
+                  HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+                  HEAD_REF: ${{ github.event.pull_request.head.ref }}
+              run: node dev/post-spelling-review.mjs --findings "$RUNNER_TEMP/spelling.json"

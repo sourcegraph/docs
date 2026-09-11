@@ -36,6 +36,8 @@ Now that the base requirements of the project have been satisfied, we can instal
 pnpm install
 ```
 
+Spell checking is not part of the project dependencies. To run it locally: `npx cspell@10 --no-progress --dot '**/*'`
+
 Next, run the development server:
 
 ```sh
