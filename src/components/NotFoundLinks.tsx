@@ -33,7 +33,7 @@ interface PageLink {
 // The docs page the user came from on a fresh page load. document.referrer
 // keeps the basePath, which next/link adds again, so strip it here; pages on
 // the same origin outside the docs (sourcegraph.com/pricing) do not count.
-// document.referrer does not change on client-side navigations, so those are
+// document.referrer does not change on client-side navigation, so those are
 // covered by usePreviousPathname instead.
 function docsReferrer(): PageLink | null {
 	if (!document.referrer) return null;
