@@ -1,0 +1,82 @@
+# Writing prompts
+
+The agent starts every batch change from your first message. It reads the message, researches the codebase with Deep Search, and comes back with a plan: which repositories are in scope, what will change, and which repository it wants to test on first. You can correct the plan before anything runs, so a prompt doesn't have to be perfect. It does have to be clear about the outcome you want.
+
+## What the agent needs from you
+
+Prompts can be flexible, but these principles help:
+
+- **State the outcome clearly.** For example, "Every service should read its database URL from the `DATABASE_URL` environment variable instead of the `config/db.yaml` file" gives the agent a success condition it can check.
+- **Give the scope, or explain how to find it.** Name the repositories, an organization, a language, or a signal the agent can search for: "every repository with a `go.mod` that imports `github.com/pkg/errors`". The agent uses Deep Search to turn that into a list and ranks the results, then confirms the list with you. If you don't know the scope, say so and describe the symptom instead. The agent will investigate and propose one.
+- **Set the boundaries.** Specify anything the agent must not touch, any change that needs a human, and any verification you expect before a changeset is published: "don't modify anything under `vendor/`", "run `make test` and skip repositories where it fails".
+
+## Attach the plan you already have
+
+If you have a migration guide, an upgrade runbook, an advisory, or a design doc, upload it with your message. The agent reads uploaded files before planning, and a written plan with steps, gotchas, and examples produces a better result. This is the single most effective way to improve results for a complex migration.
+
+## Say how you want it rolled out
+
+The agent runs a test repository, then expands in stages, pausing after each. You can shape that in the prompt:
+
+- Name the test repository: "start with billing-api, it has the best test coverage".
+- Set the publication strategy: "publish drafts so I can see CI before we go wider", or "don't touch the code host until I've reviewed the diffs".
+- Say what should happen on CI failure or merge conflict: "if CI fails on a changeset, fetch the logs and try to fix it", or "rebase on merge conflicts". The agent sets itself up to read CI logs before it first publishes, but you should specify whether you want it to fix failures automatically or rebase on conflicts. Name the CI system and the secret that holds its token.
+- Ask for ready-for-review changesets rather than drafts when you want the final stage to be ready for review.
+
+## Tell it which tools to use
+
+The agent decides between scripts and coding agents based on how deterministic the change is, and picks container images to match. When you have a preference, state it:
+
+- "Use ast-grep for the rewrite; here's the pattern."
+- "Use a coding agent for the call-site changes, the transformation is too context-dependent for a script."
+- "Use our internal `tools/migrator` image from `registry.example.com`."
+- "Don't build images; use stock images only."
+
+If you need the coding agent to follow conventions, put them in the prompt too, or point at a file in the repository. Coding agents working inside a repository don't receive the direct guidance configured in settings, but the coordinating agent usually transfers what is relevant.
+
+## Encode what repeats
+
+If you find yourself writing the same instructions in every prompt, they belong in guidance or a skill rather than in the prompt. Branch naming, changeset description format, which CI system you use and how to read its logs, image policy, and verification commands are all better set once; see [Customizing the agent](/agentic-batch-changes/configuration#customizing-the-agent). Prompts should then contain only what's specific to this change.
+
+## Examples
+
+Each example below is a complete first message. They range from simple to complex.
+
+### Documentation for repositories without any
+
+> For every repository in the acme-platform GitHub organization that has no `README.md` or whose README is under 20 lines, write a README describing what the service does, how to run it locally, and who owns it (from CODEOWNERS). Use a coding agent for the writing. Publish as drafts.
+
+### A mechanical language cleanup
+
+> Across our Go repositories, remove imports of `io/ioutil` and replace each call with its modern equivalent: `ioutil.ReadFile` → `os.ReadFile`, `ioutil.WriteFile` → `os.WriteFile`, `ioutil.ReadAll` → `io.ReadAll`, `ioutil.NopCloser` → `io.NopCloser`, `ioutil.TempDir` → `os.MkdirTemp`, `ioutil.TempFile` → `os.CreateTemp`. Replace `ioutil.Discard` with `io.Discard`. Run `gofmt` and `go build ./...` afterwards. Skip repositories still on Go 1.15 or earlier per their `go.mod`.
+
+### A dependency upgrade with verification
+
+> Upgrade lodash to at least 4.17.21 in every JavaScript and TypeScript repository we have, including where it's a transitive dependency. Update lockfiles with the repository's own package manager. Run the repository's test command if one is defined in `package.json` and don't publish changesets where tests fail; list them for me instead. Start with web-dashboard as the canary and publish drafts so I can see CI.
+
+### A vulnerability triage with a conditional scope
+
+> Find repositories affected by CVE-2025-55182. Prioritize repositories with an execution path to the vulnerable code. A React application that doesn't render on a server is not affected. An application that doesn't use a framework, bundler, or bundler plugin supporting React Server Components is not affected. Produce a report of affected repositories with the evidence for each before proposing any change, then wait for me.
+
+### A monorepo change split by owner
+
+> In acme/monorepo, replace `LegacyLogger` with `slog` under every directory in `services/`. Create one changeset per top-level directory under `services/` so each team reviews its own. Title each changeset `services/<name>: migrate to slog`. Follow the logging conventions in `docs/logging.md`. Run the canary on `services/auth`.
+
+### A multi-step migration with an uploaded plan
+
+> Attached is our Spring Boot 2 → 3 migration runbook. Apply it to every Java repository on Spring Boot 2.x. Use the OpenRewrite recipe from section 2 as a script step, then a coding agent step to fix what the recipe leaves behind following sections 3 and 4. Run `./mvnw -q verify` and fix compile errors before finishing each workspace. If CI fails on a published changeset, fetch the logs and attempt a fix. Publish drafts and pause after each stage.
+
+## During the conversation
+
+The agent asks questions while it plans, pauses after each stage, and reports CI results as they arrive.
+
+You can also ask it to change course or explain what's happening:
+
+- "Show me the plan" to read the current plan before confirming.
+- "Skip legacy-gateway" to remove a repository from scope without stopping the rollout.
+- "Change the commit message to ..." to update titles, descriptions, or commit messages. This republishes without re-running the work.
+- "Also add this ..." to extend the plan. The agent prefers additions over edits to existing steps, so finished work stays valid.
+- "Continue" to run the next stage, or "run everything else" to fan out the remainder.
+- "What happened while I was away?" after CI has run, to get a summary.
+
+The agent has an overview of the change and the procedures behind it. If something is unclear or you need to proceed in a specific way, ask in plain language.
