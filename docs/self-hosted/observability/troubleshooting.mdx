@@ -41,13 +41,7 @@ environment.
 
 Observed state: Sourcegraph instance does not react to any updates to code hosts and no cloning is happening.
 The cause of this state could be worker queries that are too large for the limits of the running Postgres DB.
-One symptom is seeing a line like the one below in the worker logs:
-
-```text
-t=2020-05-28T18:41:02+0000 lvl=eror msg=Syncer error="syncer.sync.store.upsert-repos: delete: driver: bad connection
-```
-
-or seeing the same error in the "Code host status panel" (Clicking the cloud icon).
+One symptom is seeing repo syncer errors ending in `driver: bad connection` in the worker logs, or the same error in the "Code host status panel" (Clicking the cloud icon).
 
 The fix is to increase the memory on Postgres DB which will increase certain Postgres-internal limits and will allow
 the queries from worker to go through.
