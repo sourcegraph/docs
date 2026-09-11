@@ -1,5 +1,4 @@
 import AWSOneClickLaunchForm from './AWSOneClickLaunchForm';
-import {ContentTab, ContentTabs} from './ContentTabs';
 import FeatureParity from './FeatureParity';
 import Accordion from './mdx/Accordion';
 import {Callout} from './mdx/Callout';
@@ -23,8 +22,6 @@ const MdxComponents = (version?: string) => {
 		ResourceEstimator,
 		AWSOneClickLaunchForm,
 		Accordion,
-		ContentTabs: (props: any) => <ContentTabs {...props} />,
-		ContentTab: (props: any) => <ContentTab {...props} />,
 		Tabs: (props: any) => <Tabs {...props} />,
 		Tab: (props: any) => <Tab {...props} />,
 		QuickLinks,
