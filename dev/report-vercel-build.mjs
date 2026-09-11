@@ -15,10 +15,12 @@
  * deployment for. It needs VERCEL_TOKEN, and VERCEL_TEAM_ID unless the token
  * is scoped to the project.
  *
- * comment posts the tail of <file> on PR_NUMBER, or on the open PRs at
- * COMMIT_SHA when unset, linking the artifact from ARTIFACT_ID and
- * ARTIFACT_URL when set, and deletes the artifact an earlier comment linked.
- * With --dry-run the comment is printed instead, and nothing is deleted.
+ * comment posts the tail of <file> on PR_NUMBER, the PR Vercel built the
+ * deployment for. When unset (the success path, or a deployment Vercel
+ * recorded no PR for) it falls back to every open PR at COMMIT_SHA. It links
+ * the artifact from ARTIFACT_ID and ARTIFACT_URL when set, and deletes the
+ * artifact an earlier comment linked. With --dry-run the comment is printed
+ * instead, and nothing is deleted.
  *
  * Both need DEPLOYMENT_ID, DEPLOYMENT_STATE (error or success), COMMIT_SHA,
  * GH_TOKEN and GITHUB_REPOSITORY.
@@ -100,8 +102,7 @@ async function fetchDeploymentPullRequestNumber() {
 // The dispatch payload has no PR number. The failure path gets it from the
 // deployment; the success path only knows the commit, so it looks up the PRs
 // at that head. Either way a stale event for a commit a PR has moved past is
-// ignored, and so are fork PRs, so the Vercel token is only ever used for
-// commits by people who can already push to this repository.
+// ignored, and so are fork PRs.
 async function findPullRequests(pullRequestNumber) {
 	const pulls = pullRequestNumber
 		? [
@@ -118,7 +119,8 @@ async function findPullRequests(pullRequestNumber) {
 		if (pull.state !== 'open' || pull.head.sha !== COMMIT_SHA) {
 			return false;
 		}
-		if (pull.head.repo.full_name !== REPOSITORY) {
+		// head.repo is null when the fork was deleted
+		if (pull.head.repo?.full_name !== REPOSITORY) {
 			console.log(`PR #${pull.number} is from a fork; not reporting`);
 			return false;
 		}
@@ -164,10 +166,13 @@ async function fetchLog() {
 	if (!process.env.VERCEL_TOKEN) {
 		throw new Error('VERCEL_TOKEN is required to read the build log');
 	}
-	const pullRequestNumber = await fetchDeploymentPullRequestNumber();
-	if ((await findPullRequests(pullRequestNumber)).length === 0) {
+	// Ask GitHub before Vercel, so the Vercel token is only ever used for a
+	// commit that an open PR from this repository is at, i.e. pushed by
+	// someone who can already push here
+	if ((await findPullRequests()).length === 0) {
 		return;
 	}
+	const pullRequestNumber = await fetchDeploymentPullRequestNumber();
 	const logLines = await fetchBuildLog();
 	writeFileSync(logFile, logLines.join('\n') + '\n');
 	const truncated = tailOf(logLines).length < logLines.length;
