@@ -15,11 +15,6 @@ export function ContentTabs({ children, name }) {
   const [postContent, setPostContent] = useState(null);
 
   useEffect(() => {
-    updateTabFromURL();
-  }, []);
-
-  const updateTabFromURL = () => {
-
     const path = `/${params.slug.join('/')}`;
     const allPaths = children.map(child => child.props.href)
 
@@ -38,7 +33,7 @@ export function ContentTabs({ children, name }) {
         console.log('allPaths__', allPaths[0])
       }
     } else setSelectedTab(path)
-  };
+  }, [children, name, params.slug]);
 
   if (!onTab) return <div>{postContent}</div>
 
