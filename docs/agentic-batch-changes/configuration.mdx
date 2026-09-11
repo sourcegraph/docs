@@ -8,9 +8,9 @@ You can add guidance on the **Agents** page of your Batch Changes settings, at `
 
 ### Guidance and skills
 
-**Guidance** is `AGENTS.md`-style text the agent sees on every run, before it reads your first message. Use it for rules that should always apply: house style, forbidden actions, default tools, and how to phrase changeset descriptions. Keep it short. Everything in guidance competes for the agent's attention on every turn, and the combined guidance is truncated at 32 KiB.
+**Guidance** is [`AGENTS.md`](https://agents.md)-style text the agent sees on every run, before it reads your first message. Use it for rules that should always apply: house style, forbidden actions, default tools, and how to phrase changeset descriptions. Keep it short. Everything in guidance competes for the agent's attention on every turn, and the combined guidance is truncated at 32 KiB.
 
-A **skill** is a named document the agent loads on demand when a task matches its description. Skills suit procedures that only matter some of the time: how to run your internal CI, how to upgrade a particular framework, or how your monorepo is laid out. A skill's content only uses context when it is loaded.
+A [**skill**](https://agentskills.io) is a named document the agent loads on demand when a task matches its description. Skills suit procedures that only matter some of the time: how to run your internal CI, how to upgrade a particular framework, or how your monorepo is laid out. A skill's content only uses context when it is loaded.
 
 ### Loading guidance from a repository
 
@@ -38,7 +38,7 @@ Write guidance the way you'd brief a new colleague who is very capable and knows
 - **CI.** How to fetch logs for a failed build and what to try first. This is what the agent uses when it sets up CI handling for you.
 - **Boundaries.** Repositories or directories the agent should never modify, and changes that always need a human to sign off.
 
-Avoid restating the agent's own defaults. It already researches before planning, tests on one repository before expanding, and asks before publishing, so guidance that repeats those rules adds length without changing behavior.
+**Avoid restating the agent's own defaults.** It already researches before planning, tests on one repository before expanding, and asks before publishing, so guidance that repeats those rules adds length without changing behavior.
 
 ### Changeset hooks
 
@@ -47,7 +47,7 @@ Agentic Batch Changes introduces **changeset hooks**, which allow programmable r
 - When CI fails, the agent can prepare a script to fetch CI logs for you. This data can be used to amend the agent's plan, or be handed off to a coding agent to fix immediately.
 - When a merge conflict is encountered, the agent can ask a coding agent to address it.
 
-To get set up, ask the agent for it in your agentic batch change. Encode processes that work for your organization in guidance or skills.
+To get set up, ask the agent for it in your agentic batch change. Encode processes that work for your organization in [guidance or skills](#guidance-and-skills).
 
 ### Coding agent steps
 
@@ -118,7 +118,7 @@ Plan for agent workloads: coding agent runs often take several minutes per repos
 
 ### Usage limits
 
-Coding agent runs are metered per user through the `batch_changes_coding_agent` [entitlement](/admin/entitlements), managed in the Administration area. Each coding agent run in a repository consumes one unit. A default entitlement applies to every user, and an explicit grant replaces the default for a specific user:
+Coding agent runs are metered per user through the **Batch Changes coding agent step runs** [entitlement](/admin/entitlements), managed under **Site admin → Users & auth → Entitlements**. Each coding agent run in a repository consumes one unit. A default entitlement applies to every user, and an explicit grant replaces the default for a specific user:
 
 - Users without an entitlement have unlimited usage.
 - A positive limit blocks further runs once reached until its window resets.
@@ -146,7 +146,9 @@ A batch change created by an agent is **agent-managed**: it's listed under Agent
 
 ### Code hosts
 
-The agent publishes through the same machinery as [Batch Changes](/batch-changes), so it supports the same code hosts and the same credentials. Fork enforcement, rollout windows, commit signing, and branch auto-deletion apply unchanged. Reacting to CI failures and merge conflicts depends on what the code host reports back to Sourcegraph.
+The agent publishes through [Batch Changes](/batch-changes) using your configured Batch Changes credentials. Reacting to CI failures and merge conflicts depends on what the code host reports back to Sourcegraph.
+
+Fork enforcement, rollout windows, commit signing, and branch auto-deletion apply unchanged.
 
 The agent can also use [batch spec capabilities](/batch-changes/batch-spec-yaml-reference), including conditional steps, templated changeset titles and descriptions, and multiple changesets in one repository.
 
