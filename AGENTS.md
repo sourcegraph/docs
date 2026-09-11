@@ -41,14 +41,7 @@ To update the runLLM assistant ID or other settings, modify the Script component
 />
 ```
 
-### Previous Integration
-
-Previously used **Langbase** with custom React components. This has been completely removed:
-
--   Removed `@langbase/components` and `langbase` packages
--   Removed custom chat components (`src/app/chat.tsx`, `src/components/ChatBot/`)
--   Removed API routes (`src/app/api/chat/`)
--   Removed memory creation scripts
+The previous **Langbase** / `baseai` chatbot integration has been fully removed (packages, components, API routes, `baseai/` memory config, and the `pnpm sync` script).
 
 ## Important Notes
 
