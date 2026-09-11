@@ -22,20 +22,35 @@ function nearestExistingAncestor(
 	return null;
 }
 
-// The page the user came from on a fresh page load, only when it is on this
-// site. document.referrer does not change on client-side navigations, so
-// those are covered by usePreviousPathname instead.
-function sameOriginReferrer(): URL | null {
+// Production serves the docs under /docs (basePath in next.config.js).
+const basePath = process.env.NEXT_PUBLIC_DOCS_BASE_PATH || '';
+
+interface PageLink {
+	href: string;
+	pathname: string;
+}
+
+// The docs page the user came from on a fresh page load. document.referrer
+// keeps the basePath, which next/link adds again, so strip it here; pages on
+// the same origin outside the docs (sourcegraph.com/pricing) do not count.
+// document.referrer does not change on client-side navigations, so those are
+// covered by usePreviousPathname instead.
+function docsReferrer(): PageLink | null {
 	if (!document.referrer) return null;
 	const referrer = new URL(document.referrer);
-	return referrer.origin === window.location.origin ? referrer : null;
+	if (referrer.origin !== window.location.origin) return null;
+	if (!referrer.pathname.startsWith(`${basePath}/`)) return null;
+	const pathname = referrer.pathname.slice(basePath.length);
+	// The home link already covers the root.
+	if (pathname === '/') return null;
+	return {href: pathname + referrer.search + referrer.hash, pathname};
 }
 
 export function NotFoundLinks({pagePaths}: {pagePaths: string[]}) {
 	const pathname = usePathname();
 	const previousPathname = usePreviousPathname();
 	const [ancestor, setAncestor] = useState<string | null>(null);
-	const [referrer, setReferrer] = useState<URL | null>(null);
+	const [referrer, setReferrer] = useState<PageLink | null>(null);
 	const pagePathSet = useMemo(() => new Set(pagePaths), [pagePaths]);
 
 	// Both values depend on the browser URL, which the statically prerendered
@@ -43,7 +58,7 @@ export function NotFoundLinks({pagePaths}: {pagePaths: string[]}) {
 	// mismatch.
 	useEffect(() => {
 		setAncestor(nearestExistingAncestor(pathname, pagePathSet));
-		setReferrer(sameOriginReferrer());
+		setReferrer(docsReferrer());
 	}, [pathname, pagePathSet]);
 
 	// The previous pathname may itself have been a 404.
@@ -54,14 +69,9 @@ export function NotFoundLinks({pagePaths}: {pagePaths: string[]}) {
 
 	// Prefer the in-app history over document.referrer, which goes stale on
 	// client-side navigations.
-	const backLink = previousPage
+	const backLink: PageLink | null = previousPage
 		? {href: previousPage, pathname: previousPage}
-		: referrer
-			? {
-					href: referrer.pathname + referrer.search + referrer.hash,
-					pathname: referrer.pathname
-				}
-			: null;
+		: referrer;
 
 	// Skip the up link when it would repeat the back link.
 	const upLink =
