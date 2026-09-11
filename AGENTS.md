@@ -56,8 +56,3 @@ npm run check -- links --check-anchors --check-self-links \
   <https://api.slack.com/apps?new_app=1> (From a manifest), install it, copy its
   Bot User OAuth Token into the secret, and `/invite @Vercel build log` to the
   channel.
-
-## AI Chat
-
-There is no AI chat widget. Langbase (#1339) and its runLLM replacement
-(#1536) were both removed; do not reintroduce either.
