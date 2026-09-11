@@ -1,0 +1,52 @@
+name: Vercel build report
+
+# Vercel only shows build logs to members of its team. When a PR's Vercel
+# build fails, this comments the end of the build log on the PR; when a later
+# revision builds, the comment is updated to say so.
+#
+# GitHub only delivers repository_dispatch to the workflow file on the default
+# branch, so workflow_dispatch takes the same payload fields as inputs for
+# testing before merge and for re-running on a PR by hand:
+#   gh workflow run vercel-build-report.yml --ref <branch> \
+#       -f id=dpl_... -f state=error -f sha=<pr head sha>
+on:
+    repository_dispatch:
+        types: [vercel.deployment.error, vercel.deployment.success]
+    workflow_dispatch:
+        inputs:
+            id:
+                description: Vercel deployment ID (client_payload.id)
+                required: true
+            state:
+                description: Deployment state (client_payload.state.type)
+                required: true
+                type: choice
+                options: [error, success]
+            sha:
+                description: Full commit SHA of the PR head (client_payload.git.sha)
+                required: true
+
+permissions:
+    contents: read
+    pull-requests: write
+
+jobs:
+    report:
+        if: github.event.client_payload.environment != 'production'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out dev/report-vercel-build.mjs
+              uses: actions/checkout@v4
+              with:
+                  sparse-checkout: dev/report-vercel-build.mjs
+                  sparse-checkout-cone-mode: false
+
+            - name: Comment on the pull request
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  DEPLOYMENT_ID: ${{ github.event.client_payload.id || inputs.id }}
+                  DEPLOYMENT_STATE: ${{ github.event.client_payload.state.type || inputs.state }}
+                  COMMIT_SHA: ${{ github.event.client_payload.git.sha || inputs.sha }}
+                  # Scoped to the sourcegraph-docs project, so it needs no team ID
+                  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+              run: node dev/report-vercel-build.mjs

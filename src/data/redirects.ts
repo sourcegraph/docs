@@ -2,6 +2,18 @@ import {TECHNICAL_CHANGELOG_RSS_URL} from './constants';
 
 const redirectsData = [
 	{
+		source: '/old-prefixed',
+		destination: '/code-ownership'
+	},
+	{
+		source: '/old-chain',
+		destination: '/self-hosted/http-https-configuration'
+	},
+	{
+		source: "/old-ownership",
+		destination: "/code-ownership"
+	},
+	{
 		source: '/integration/img/disable_extension.png',
 		destination: '/integration/img/disable-extension.png'
 	},

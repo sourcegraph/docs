@@ -1,8 +1,9 @@
-name: Check links
+name: Check redirects
 
-# Reports internal links and #anchors that this PR breaks, compared with the
-# merge base, absolute links to this site, and external links on added lines
-# that 404. Pre-existing broken links on the base branch are ignored.
+# Reports redirects in src/data/redirects.ts that this PR breaks, compared with
+# the merge base: destinations that no longer exist, #fragments whose heading
+# was renamed, and new redirects that shadow an existing page. Pre-existing
+# broken redirects on the base branch are ignored.
 
 on:
     pull_request:
@@ -17,8 +18,8 @@ permissions:
     pull-requests: write
 
 jobs:
-    check-links:
-        name: Broken links introduced by this PR
+    check-redirects:
+        name: Broken redirects introduced by this PR
         runs-on: ubuntu-latest
         steps:
             - name: Check out pull request head
@@ -27,7 +28,7 @@ jobs:
                   ref: ${{ github.event.pull_request.head.sha }}
                   fetch-depth: 0
 
-            - name: Install github-slugger, the only dependency of dev/check-links.mjs
+            - name: Install github-slugger, the only dependency of dev/check-redirects.mjs
               # Into a scratch prefix, not the repo: `npm install <pkg>` next to
               # package.json would install every dependency of the site
               run: |
@@ -41,23 +42,23 @@ jobs:
               run: |
                   merge_base=$(git merge-base "$BASE_SHA" HEAD)
                   git worktree add "$RUNNER_TEMP/base" "$merge_base"
-                  git diff -U0 "$merge_base" HEAD > "$RUNNER_TEMP/changes.diff"
+                  git diff -U0 "$merge_base" HEAD -- src/data/redirects.ts > "$RUNNER_TEMP/changes.diff"
 
-            - name: Record broken links already present on the base branch
+            - name: Record broken redirects already present on the base branch
               # Exit 1 means findings, which is expected here
               run: |
-                  node dev/check-links.mjs --check-anchors --check-self-links --format json \
-                      --root "$RUNNER_TEMP/base" > "$RUNNER_TEMP/base-links.json" \
+                  node dev/check-redirects.mjs --format json \
+                      --root "$RUNNER_TEMP/base" > "$RUNNER_TEMP/base-redirects.json" \
                       || [ $? -eq 1 ]
 
-            - name: Find broken links introduced by this PR
+            - name: Find redirects broken by this PR
               id: check
               env:
-                  # File links in the report open the file on the PR branch
+                  # Line links in the report open redirects.ts on the PR branch
                   LINK_BASE: ${{ github.event.pull_request.head.repo.html_url }}/blob/${{ github.event.pull_request.head.ref }}
               run: |
-                  if node dev/check-links.mjs --check-anchors --check-self-links --check-external --format markdown \
-                      --baseline "$RUNNER_TEMP/base-links.json" \
+                  if node dev/check-redirects.mjs --format markdown \
+                      --baseline "$RUNNER_TEMP/base-redirects.json" \
                       --diff "$RUNNER_TEMP/changes.diff" \
                       --review "$RUNNER_TEMP/review.json" \
                       --link-base "$LINK_BASE" > "$RUNNER_TEMP/report.md"; then
@@ -75,7 +76,7 @@ jobs:
                   PR_NUMBER: ${{ github.event.pull_request.number }}
                   BROKEN: ${{ steps.check.outputs.broken }}
               run: |
-                  marker='<!-- check-links-report -->'
+                  marker='<!-- check-redirects-report -->'
                   existing_comment=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
                       --paginate --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n 1)
 
@@ -83,7 +84,7 @@ jobs:
                   if [ "$BROKEN" = true ]; then
                       { echo "$marker"; cat "$RUNNER_TEMP/report.md"; } > "$RUNNER_TEMP/comment.md"
                   elif [ -n "$existing_comment" ]; then
-                      printf '%s\n### ✅ The broken links an earlier revision of this PR introduced are fixed\n' \
+                      printf '%s\n### ✅ The redirects an earlier revision of this PR broke are fixed\n' \
                           "$marker" > "$RUNNER_TEMP/comment.md"
                   else
                       exit 0
@@ -97,14 +98,14 @@ jobs:
                   fi
 
             - name: Suggest fixes as review comments
-              # One suggested change per finding with a fix, kept in sync with the
-              # findings; see dev/sync-review-comments.sh
+              # One suggested change per fixable entry this PR added, kept in sync
+              # with the findings; see dev/sync-review-comments.sh
               if: github.event.pull_request.head.repo.full_name == github.repository
               env:
                   GH_TOKEN: ${{ github.token }}
                   PR_NUMBER: ${{ github.event.pull_request.number }}
-              run: dev/sync-review-comments.sh '<!-- check-links-finding:' "$RUNNER_TEMP/review.json"
+              run: dev/sync-review-comments.sh '<!-- check-redirects-finding:' "$RUNNER_TEMP/review.json"
 
-            - name: Fail when this PR introduces broken links
+            - name: Fail when this PR breaks redirects
               if: steps.check.outputs.broken == 'true'
               run: exit 1
