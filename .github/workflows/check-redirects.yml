@@ -1,0 +1,133 @@
+name: Check redirects
+
+# Reports redirects in src/data/redirects.ts that this PR breaks, compared with
+# the merge base: destinations that no longer exist, #fragments whose heading
+# was renamed, and new redirects that shadow an existing page. Pre-existing
+# broken redirects on the base branch are ignored.
+
+on:
+    pull_request:
+
+# A new push supersedes the run for the previous one
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+    pull-requests: write
+
+jobs:
+    check-redirects:
+        name: Broken redirects introduced by this PR
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out pull request head
+              uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.event.pull_request.head.sha }}
+                  fetch-depth: 0
+
+            - name: Install github-slugger, the only dependency of dev/check-redirects.mjs
+              # Into a scratch prefix, not the repo: `npm install <pkg>` next to
+              # package.json would install every dependency of the site
+              run: |
+                  npm install --prefix "$RUNNER_TEMP/deps" --no-package-lock --no-audit --no-fund \
+                      "github-slugger@$(node -p 'require("./package.json").dependencies["github-slugger"]')"
+                  ln -s "$RUNNER_TEMP/deps/node_modules" node_modules
+
+            - name: Check out merge base
+              env:
+                  BASE_SHA: ${{ github.event.pull_request.base.sha }}
+              run: |
+                  merge_base=$(git merge-base "$BASE_SHA" HEAD)
+                  git worktree add "$RUNNER_TEMP/base" "$merge_base"
+                  git diff -U0 "$merge_base" HEAD -- src/data/redirects.ts > "$RUNNER_TEMP/changes.diff"
+
+            - name: Record broken redirects already present on the base branch
+              # Exit 1 means findings, which is expected here
+              run: |
+                  node dev/check-redirects.mjs --format json \
+                      --root "$RUNNER_TEMP/base" > "$RUNNER_TEMP/base-redirects.json" \
+                      || [ $? -eq 1 ]
+
+            - name: Find redirects broken by this PR
+              id: check
+              env:
+                  # Line links in the report open redirects.ts on the PR branch
+                  LINK_BASE: ${{ github.event.pull_request.head.repo.html_url }}/blob/${{ github.event.pull_request.head.ref }}
+              run: |
+                  if node dev/check-redirects.mjs --format markdown \
+                      --baseline "$RUNNER_TEMP/base-redirects.json" \
+                      --diff "$RUNNER_TEMP/changes.diff" \
+                      --review "$RUNNER_TEMP/review.json" \
+                      --link-base "$LINK_BASE" > "$RUNNER_TEMP/report.md"; then
+                      echo "broken=false" >> "$GITHUB_OUTPUT"
+                  else
+                      echo "broken=true" >> "$GITHUB_OUTPUT"
+                  fi
+                  cat "$RUNNER_TEMP/report.md"
+
+            - name: Comment on the pull request
+              # Fork PRs get a read-only token; the report is still in the job log
+              if: github.event.pull_request.head.repo.full_name == github.repository
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
+                  BROKEN: ${{ steps.check.outputs.broken }}
+              run: |
+                  marker='<!-- check-redirects-report -->'
+                  existing_comment=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
+                      --paginate --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n 1)
+
+                  # Comment only when there is something to report, or an earlier report to resolve
+                  if [ "$BROKEN" = true ]; then
+                      { echo "$marker"; cat "$RUNNER_TEMP/report.md"; } > "$RUNNER_TEMP/comment.md"
+                  elif [ -n "$existing_comment" ]; then
+                      printf '%s\n### ✅ The redirects an earlier revision of this PR broke are fixed\n' \
+                          "$marker" > "$RUNNER_TEMP/comment.md"
+                  else
+                      exit 0
+                  fi
+
+                  if [ -n "$existing_comment" ]; then
+                      gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$existing_comment" \
+                          --field body=@"$RUNNER_TEMP/comment.md"
+                  else
+                      gh pr comment "$PR_NUMBER" --body-file "$RUNNER_TEMP/comment.md"
+                  fi
+
+            - name: Suggest fixes as review comments
+              # One suggested change per fixable entry this PR added. Suggestions
+              # already on the PR (same lines and entry) are not posted again;
+              # suggestions for findings that are gone are deleted. GitHub sets line
+              # to null on comments it could not carry to the new revision, so those
+              # are deleted too.
+              if: github.event.pull_request.head.repo.full_name == github.repository
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
+              run: |
+                  key='(.path + ":" + (.line | tostring) + ":" + (.body | split("\n")[0]))'
+                  gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/comments" --paginate \
+                      --jq ".[] | select(.body | startswith(\"<!-- check-redirects-finding:\")) | {id, key: $key}" \
+                      | jq -s . > "$RUNNER_TEMP/posted.json"
+                  jq --slurpfile posted "$RUNNER_TEMP/posted.json" \
+                      ".comments |= map(select($key as \$key | \$posted[0] | any(.key == \$key) | not))" \
+                      "$RUNNER_TEMP/review.json" > "$RUNNER_TEMP/review-new.json"
+
+                  jq -r --slurpfile review "$RUNNER_TEMP/review.json" \
+                      ".[] | select(.key as \$key | \$review[0].comments | any($key == \$key) | not) | .id" \
+                      "$RUNNER_TEMP/posted.json" | while read -r comment_id; do
+                      gh api --method DELETE "repos/$GITHUB_REPOSITORY/pulls/comments/$comment_id"
+                  done
+
+                  if [ "$(jq '.comments | length' "$RUNNER_TEMP/review-new.json")" -gt 0 ]; then
+                      gh api --method POST "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews" \
+                          --input "$RUNNER_TEMP/review-new.json" > /dev/null \
+                          || echo "::warning::Could not post the suggested fixes; they are in the report above"
+                  fi
+
+            - name: Fail when this PR breaks redirects
+              if: steps.check.outputs.broken == 'true'
+              run: exit 1
