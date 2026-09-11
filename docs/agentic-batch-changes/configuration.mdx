@@ -12,15 +12,21 @@ You can add guidance on the **Agents** page of your Batch Changes settings, at `
 
 A [**skill**](https://agentskills.io) is a named document the agent loads on demand when a task matches its description. Skills suit procedures that only matter some of the time: how to run your internal CI, how to upgrade a particular framework, or how your monorepo is laid out. A skill's content only uses context when it is loaded.
 
+Repository-backed skills can include supporting files, such as references, assets, or scripts. The coordinating agent can read these files when their source is accessible, but it does not execute bundled scripts directly. To run code, it must put that work in an execution step.
+
 ### Loading guidance from a repository
 
-The agent also considers guidance and skill files inside the target repositories.
+To load repository-backed guidance or skills, configure a repository source in your **Agents** settings. The coordinating agent reads these configured sources; it does not automatically load guidance from every repository in the batch change.
 
-Keeping guidance in a repository has two advantages over inline entries. Changes go through code review, and the same guidance can be shared by teams that don't share settings. Because the agent reads the repository at the start of each run, a merged change takes effect on the next agent turn.
+The source repository must be available through Sourcegraph, but it does not need to be search-indexed. The agent reads the configured source path on the selected branch. If no branch is specified, it uses the repository's default branch.
+
+Keeping guidance in a repository lets changes go through code review and lets teams share guidance without sharing settings. The agent reloads configured sources when it processes a message, so changes on the configured branch take effect on the next turn. It does not reload them between individual tool calls within that turn.
 
 ### Precedence
 
-Guidance loads in settings order: site, then organization, then user, so your own guidance appears after your administrator's. When two skills share a name, the last one loaded wins: your skill overrides an organization's, which overrides the site's, and any of them can override a Sourcegraph default.
+Guidance loads in settings order: site, then organization, then user, so your own guidance appears after your administrator's. If you belong to multiple organizations, their settings load in organization ID order.
+
+Skills with distinct names are combined. Skill names are case-insensitive. When two skills share a name, the last one loaded wins: your skill overrides an organization's, which overrides the site's, and any of them can override a Sourcegraph default.
 
 ### What guidance does not reach
 
@@ -47,7 +53,7 @@ Agentic Batch Changes introduces **changeset hooks**, which allow programmable r
 - When CI fails, the agent can prepare a script to fetch CI logs for you. This data can be used to amend the agent's plan, or be handed off to a coding agent to fix immediately.
 - When a merge conflict is encountered, the agent can ask a coding agent to address it.
 
-To get set up, ask the agent for it in your agentic batch change. Encode processes that work for your organization in [guidance or skills](#guidance-and-skills).
+To get set up, ask the agent for it in your agentic batch change. Fetching CI logs requires a hook step that uses your CI credential; attempting fixes automatically also requires a coding agent step in that hook. Detecting a failed check does not configure either action automatically. Encode processes that work for your organization in [guidance or skills](#guidance-and-skills).
 
 ### Coding agent steps
 
@@ -59,6 +65,8 @@ Within a coding agent step, the agent has:
 - **Access to the code being worked on.** The workspace's repository checkout is available to the agent as it makes changes.
 
 We currently support [Claude Code](https://claude.com/product/claude-code) and [Codex](https://openai.com/codex) as native coding agent steps.
+
+Codex is the default. If your administrator has configured customer-provided credentials for Claude Code but not Codex, Claude Code is preferred instead. You can request either agent in your prompt or [guidance](#guidance-and-skills); the coordinating agent selects it in the plan. This preference does not prevent the other agent from being used.
 
 By default, coding agent LLM traffic is routed through the [Sourcegraph Model Provider](/model-provider).
 
@@ -81,7 +89,12 @@ Some steps need credentials: a package registry token for private dependencies o
 - Your own secrets live under **Secrets** in your Batch Changes settings, at `/users/<username>/settings/batch-changes/secrets`.
 - Site administrators manage global secrets, available to every user, at `/admin/batch-changes/secrets`.
 
-Your own secret takes precedence over a global one with the same name. Organization-level secrets aren't available to agents.
+Your own secret takes precedence over a global one with the same name.
+
+<Callout type="note">
+	Organization-level secrets aren't available to Agentic Batch Changes. Use a
+	user or global secret instead.
+</Callout>
 
 A step references a secret by name. Sourcegraph injects the value when the step runs and redacts it from logs; the value never appears in the plan, in the conversation, or in anything the agent reads. The agent never asks you to paste a secret into the conversation: when a step needs a credential that doesn't exist yet, it points you to the settings page and the least-privilege scope the token needs, then waits until you confirm it's there.
 
@@ -130,7 +143,9 @@ Model usage, for both the agent's own conversation and its coding agent runs, dr
 
 ### Web search
 
-The agent and its coding agents can search the web. It's on by default. You can turn it off in [site configuration](/admin/config/site-config) if your policy doesn't allow outbound web access.
+Web search is enabled by default for the coordinating agent and its coding agents. To disable it for both, set `batchChanges.disableAgentWebSearch` to `true` in [site configuration](/admin/config/site-config).
+
+This setting disables web search tools. It does not block outbound network access from executor containers, including commands run by scripts or coding agents. Restrict that access separately through your executor network policy.
 
 ### Images
 

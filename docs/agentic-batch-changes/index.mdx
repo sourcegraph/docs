@@ -17,7 +17,7 @@ The agent also handles changes that need judgment in each repository, reading th
 
 Some terms used in this documentation:
 
-- A **code host** is the service that hosts your repositories and reviews: GitHub, GitLab, Bitbucket, or Azure DevOps.
+- A **code host** is the service that hosts your repositories and reviews, such as GitHub, GitLab, Bitbucket, or Azure DevOps.
 - A **changeset** is one proposed change on a code host: a pull request on GitHub, a merge request on GitLab. One agentic batch change can span several code hosts, so this documentation uses the neutral word.
 - The **plan** is what the agent proposes before it runs: the repositories in scope, what will change in each one, and the branch, title, and commit message for the resulting changesets.
 
@@ -30,7 +30,7 @@ Agentic Batch Changes should be on by default. If it isn't available, contact yo
 As a user, you need:
 
 - A [Batch Changes credential](/batch-changes/configuring-credentials) for each code host where the agent should publish, added under **Code hosts** in your Batch Changes settings.
-- If you want the agent to react to CI, a token that can read your CI logs, stored under [**Secrets**](/admin/executors/executor-secrets#creating-a-new-secret) in the same settings area. See [Security and secrets](/agentic-batch-changes/configuration#security-and-secrets).
+- If you want the agent to react to CI failures, CI must report check results to your code host so Sourcegraph can detect them. Fetching CI logs also requires a token that can read them, stored under [**Secrets**](/admin/executors/executor-secrets#creating-a-new-secret) in the same settings area. See [Security and secrets](/agentic-batch-changes/configuration#security-and-secrets).
 
 ### Write the prompt
 
@@ -46,7 +46,7 @@ See [Writing prompts](/agentic-batch-changes/writing-prompts) for more examples.
 
 The agent researches your codebase and comes back with a plan: the repositories in scope, what will change in each one, the branch and title for the changesets, and which repository it wants to test on first (also called a **canary**). The agent might ask clarifying questions when the scope is ambiguous.
 
-At any time, you can ask the agent to show you the plan or adjust it in plain language.
+At any time, you can ask the agent to show you the plan or adjust it in plain language, including after publication. You can ask for corrective code changes to existing changesets; see [During the conversation](/agentic-batch-changes/writing-prompts#during-the-conversation) for how revisions affect completed work.
 
 ### Watch the test run
 
@@ -54,12 +54,12 @@ After you approve, the agent runs the change in one repository and shows you the
 
 ### Publish a draft
 
-Tell the agent to publish the test result as a draft changeset to get CI, code owner checks, and reviewer comments on one changeset before the rollout goes any wider. If the agent needs a secret to read CI logs, it might ask you to [configure one](/agentic-batch-changes/configuration#security-and-secrets).
+Where your code host supports drafts, tell the agent to publish the test result as a draft changeset to get CI, code owner checks, and reviewer comments on one changeset before the rollout goes any wider. If the agent needs a secret to read CI logs, it might ask you to [configure one](/agentic-batch-changes/configuration#security-and-secrets).
 
 ### Expand the rollout
 
-If everything goes well, the agent might ask if it can continue. The agent runs the next stage and pauses again when it's done. Each pause is a checkpoint where you can inspect a diff, skip a repository, or adjust a title. When you trust the change, "run everything else" fans out the remainder.
+If everything goes well, the agent might ask if it can continue. By default, the agent runs the next stage and pauses again when it's done. Each pause is a checkpoint where you can inspect a diff, skip a repository, or adjust a title. When you trust the change, "run everything else" fans out the remainder.
 
 ### Let the agent finish
 
-When configured to handle CI failures, the agent fetches the logs, iterates to fix the problem, and updates the changeset. You can step away and ask "what happened while I was away?" when you return for a summary of everything that changed. When reviewers approve and CI is green, the changesets can be merged the way any other pull request is.
+When configured to handle CI failures, the agent fetches the logs, iterates to fix the problem, and updates the changeset. You can step away and ask "what happened while I was away?" when you return for a summary of everything that changed. When reviewers approve and CI is green, merge on the code host or use **Merge** in Sourcegraph's changeset view, where available. The agent cannot merge changesets from the conversation.

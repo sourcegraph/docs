@@ -16,11 +16,11 @@ If you have a migration guide, an upgrade runbook, an advisory, or a design doc,
 
 ## Say how you want it rolled out
 
-The agent runs a test repository, then expands in stages, pausing after each. You can shape that in the prompt:
+By default, the agent starts with one test repository, then expands in stages, pausing after each. These pauses are part of the agent's instructions, not a server-enforced approval gate. You can shape the rollout in the prompt:
 
 - Name the test repository: "start with billing-api, it has the best test coverage".
 - Set the publication strategy: "publish drafts so I can see CI before we go wider", or "don't touch the code host until I've reviewed the diffs".
-- Say what should happen on CI failure or merge conflict: "if CI fails on a changeset, fetch the logs and try to fix it", or "rebase on merge conflicts". The agent sets itself up to read CI logs before it first publishes, but you should specify whether you want it to fix failures automatically or rebase on conflicts. Name the CI system and the secret that holds its token.
+- Say whether the agent should fetch CI logs, attempt fixes automatically, or handle merge conflicts: "if CI fails on a changeset, fetch the logs and try to fix it", or "rebase on merge conflicts". Name the CI system and the secret that holds its token. The agent must configure [changeset hooks](/agentic-batch-changes/configuration#changeset-hooks) for these actions; detecting a failed check does not enable them automatically.
 - Ask for ready-for-review changesets rather than drafts when you want the final stage to be ready for review.
 
 ## Tell it which tools to use
@@ -68,7 +68,7 @@ Each example below is a complete first message. They range from simple to comple
 
 ## During the conversation
 
-The agent asks questions while it plans, pauses after each stage, and reports CI results as they arrive.
+The agent asks questions while it plans, pauses between stages by default, and reports CI results as they arrive.
 
 You can also ask it to change course or explain what's happening:
 
@@ -78,5 +78,9 @@ You can also ask it to change course or explain what's happening:
 - "Also add this ..." to extend the plan. The agent prefers additions over edits to existing steps, so finished work stays valid.
 - "Continue" to run the next stage, or "run everything else" to fan out the remainder.
 - "What happened while I was away?" after CI has run, to get a summary.
+
+You can revise the plan after publication and ask the agent to push corrective changes to existing changesets. Changing an execution step invalidates cached results for that step and later steps; unchanged earlier steps can reuse their cached results. Changes to titles, descriptions, or hooks do not by themselves require execution steps to run again.
+
+Changing a branch is different from editing a title or description. Changesets are matched by repository and branch, so a branch change can create a new changeset and close or detach the old one, even when execution results are reused.
 
 The agent has an overview of the change and the procedures behind it. If something is unclear or you need to proceed in a specific way, ask in plain language.
