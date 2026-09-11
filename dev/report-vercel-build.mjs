@@ -43,7 +43,7 @@ const DRY_RUN = process.argv.includes('--dry-run');
 const MAX_LOG_LINES = 100;
 const MAX_LOG_CHARS = 30_000;
 const ARTIFACT_RETENTION_DAYS = 30;
-const SLACK_LOOKBACK_MINUTES = 30;
+const SLACK_HISTORY_MINUTES = 30;
 const SLACK_WAIT_MINUTES = 5;
 const SLACK_POLL_SECONDS = 15;
 
@@ -168,7 +168,8 @@ async function fetchBuildLog() {
 // Credential shapes a build might print. The comment and artifact are public,
 // and the build gets VERCEL_OIDC_TOKEN and friends, so a left-in
 // `console.log(process.env)` must not publish them. Not a complete list.
-const REDACTIONS = [
+// cspell:disable -- token prefixes, not words
+const REDACTION_PATTERNS = [
 	[/\beyJ[\w-]{10,}\.[\w-]{10,}\.[\w-]+/g, '[redacted-jwt]'],
 	[
 		/\b(?:vcp_|gh[pousr]_|github_pat_|sk-|xox[abpr]-)[\w-]{16,}|\bAKIA[0-9A-Z]{16}\b/g,
@@ -180,9 +181,10 @@ const REDACTIONS = [
 		'$1[redacted]'
 	]
 ];
+// cspell:enable
 
 function redact(line) {
-	return REDACTIONS.reduce(
+	return REDACTION_PATTERNS.reduce(
 		(text, [pattern, replacement]) => text.replace(pattern, replacement),
 		line
 	);
@@ -363,7 +365,7 @@ async function slackApi(method, parameters) {
 // while before giving up.
 async function findVercelFailurePost() {
 	const shortSha = COMMIT_SHA.slice(0, 7);
-	const oldest = Date.now() / 1000 - SLACK_LOOKBACK_MINUTES * 60;
+	const oldest = Date.now() / 1000 - SLACK_HISTORY_MINUTES * 60;
 	const deadline = Date.now() + SLACK_WAIT_MINUTES * 60_000;
 	for (;;) {
 		const {messages} = await slackApi('conversations.history', {
@@ -382,7 +384,7 @@ async function findVercelFailurePost() {
 		}
 		if (Date.now() >= deadline) {
 			console.log(
-				`No Vercel "failed to deploy" post for ${shortSha} in the last ${SLACK_LOOKBACK_MINUTES} minutes; giving up`
+				`No Vercel "failed to deploy" post for ${shortSha} in the last ${SLACK_HISTORY_MINUTES} minutes; giving up`
 			);
 			return undefined;
 		}
