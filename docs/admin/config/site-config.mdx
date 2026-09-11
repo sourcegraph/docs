@@ -21,7 +21,7 @@ All site configuration options and their default values are shown below.
 
 {/* SCHEMA_SYNC_START: admin/config/site.schema.json */}
 {/* WARNING: This section is auto-generated during releases. Do not edit manually. */}
-{/* Last updated: 2026-09-08T17:20:44Z */}
+{/* Last updated: 2026-09-11T16:59:01Z */}
 ```json
 {
 
@@ -45,8 +45,8 @@ All site configuration options and their default values are shown below.
 	// Valid options: "permissive", "enforced"
 	"attribution.mode": "permissive",
 
-	// Enables/disables Agentic Batch Changes. Before September 14, 2026 at 12:00 UTC, the feature is disabled when unset. At and after that time, the feature is enabled when unset. An explicit value overrides the timed default. Agentic Batch Changes are enabled only if Batch Changes is licensed and the license includes AI Terms 2025.
-	"batchChanges.agenticBatchChanges.enabled": false,
+	// Enables/disables Agentic Batch Changes. Enabled by default. Agentic Batch Changes are enabled only if Batch Changes is licensed and the license includes AI Terms 2025.
+	"batchChanges.agenticBatchChanges.enabled": true,
 
 	// Automatically delete branches created for Batch Changes changesets when the changeset is merged or closed, for supported code hosts. Overrides any setting on the repository on the code host itself.
 	"batchChanges.autoDeleteBranch": false,
@@ -419,7 +419,7 @@ All site configuration options and their default values are shown below.
 	// Number of concurrent executions of a code insight query on a worker node
 	// Other example values:
 	// - 10
-	"insights.query.worker.concurrency": 1,
+	"insights.query.worker.concurrency": 5,
 
 	// Maximum number of Code Insights queries initiated per second on a worker node.
 	// Other example values:
@@ -530,7 +530,7 @@ All site configuration options and their default values are shown below.
 	// Don't sync a repo's permissions if it has synced within the last n seconds.
 	"permissions.syncReposBackoffSeconds": 900,
 
-	// The maximum number of repo-centric permissions syncing jobs that can be spawned concurrently. Service restart is required to take effect for changes.
+	// The maximum number of repo-centric permissions syncing jobs that can be spawned concurrently.
 	"permissions.syncReposMaxConcurrency": 5,
 
 	// Time interval (in seconds) of how often each component picks up authorization changes in external services.
@@ -539,7 +539,7 @@ All site configuration options and their default values are shown below.
 	// Don't sync a user's permissions if they have synced within the last n seconds.
 	"permissions.syncUsersBackoffSeconds": 900,
 
-	// The maximum number of user-centric permissions syncing jobs that can be spawned concurrently. Service restart is required to take effect for changes.
+	// The maximum number of user-centric permissions syncing jobs that can be spawned concurrently.
 	"permissions.syncUsersMaxConcurrency": 5,
 
 	// Settings for Sourcegraph explicit permissions, which allow the site admin to explicitly manage repository permissions via the GraphQL API. This will mark repositories as restricted by default.
@@ -1016,10 +1016,10 @@ All site configuration options and their default values are shown below.
 	// Maximum number of git operations (e.g. clone or ls-remote) to be run against code hosts, per second. Fractional rates are rounded to the nearest hourly quota, with positive rates below that resolution enforced as one request per hour. Rate limit is shared across all instances of gitserver, and all code hosts. Default is -1, which is unlimited.
 	"gitMaxCodehostRequestsPerSecond": -1,
 
-	// Maximum number of git clone processes that will be run concurrently per gitserver to update repositories. <= 0 means disabled.
+	// Maximum number of repository cleanup jobs that can run concurrently. Values less than or equal to 0 disable cleanup without interrupting jobs that are already running.
 	"gitMaxConcurrentCleanups": 5,
 
-	// Maximum number of git clone processes that will be run concurrently per gitserver to update repositories. Note: the global git update scheduler respects gitMaxConcurrentClones. Changes to this setting require restarting the worker instance (the worker pod in Kubernetes) before the global scheduler uses the new value. However, we allow each gitserver to run up to gitMaxConcurrentClones to allow for urgent fetches. Urgent fetches are used when a user is browsing a PR and we do not have the commit yet.
+	// Maximum number of git clone processes that will be run concurrently per gitserver to update repositories. Note: the global git update scheduler respects gitMaxConcurrentClones. We allow each gitserver to run up to gitMaxConcurrentClones to allow for urgent fetches. Urgent fetches are used when a user is browsing a PR and we do not have the commit yet.
 	"gitMaxConcurrentClones": 5,
 
 	// Record git operations that are executed on configured repositories.
