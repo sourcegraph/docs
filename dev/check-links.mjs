@@ -13,7 +13,8 @@
  * - Invalid file paths
  * - With --check-self-links, absolute links to this site (https://sourcegraph.com/docs/...,
  *   the legacy https://docs.sourcegraph.com/... host, http://, //, www.), which
- *   should be relative links; the finding proposes one, following src/data/redirects.ts
+ *   should be relative links; the finding proposes one, following src/data/redirects.ts.
+ *   Files that sourcegraph/sourcegraph generates are exempt unless the target is missing
  * - With --check-external, external links on added lines that return 404 or 410
  *
  * next.config.js runs this with no flags on every build, so only dead page links
@@ -297,6 +298,16 @@ function relativeSelfLink(url) {
 	return anchor ? `${route}#${anchor}` : route;
 }
 
+// Files that doc/_generated.push.sh in sourcegraph/sourcegraph overwrites on every
+// sync, so a fix here is undone by the next sync PR. Their absolute self-links are
+// findings only when the target is missing; the repository that owns them is named.
+const UPSTREAM_GENERATED_REGEX =
+	/^(?:self-hosted\/observability\/(?:alerts|dashboards)\.mdx|cli\/references\/|cody\/capabilities\/supported-models\.mdx|admin\/telemetry\/(?:protocol|private-metadata-allowlist)\.mdx)/;
+
+function isUpstreamGenerated(currentFile) {
+	return UPSTREAM_GENERATED_REGEX.test(path.relative(DOCS_DIR, currentFile).replace(/\\/g, '/'));
+}
+
 // Absolute self-links break on preview deployments and local dev, and hide moved
 // pages behind redirects, so they are findings even when the target exists. The
 // fix is the relative link, following src/data/redirects.ts when the page moved.
@@ -304,18 +315,20 @@ function relativeSelfLink(url) {
 function validateSelfLink(url, currentFile, maps) {
 	const relative = relativeSelfLink(url);
 	const anchor = relative.split('#')[1];
+	const generated = isUpstreamGenerated(currentFile);
 	const visited = new Set();
 	let candidate = relative;
 	while (true) {
 		const moved = candidate === relative ? '' : ' to a moved page';
 		const problem = validateLink({ url: candidate }, currentFile, maps);
 		if (!problem) {
-			return { error: `Absolute self-link${moved}; use "${candidate}" instead`, fix: candidate };
+			return generated ? null : { error: `Absolute self-link${moved}; use "${candidate}" instead`, fix: candidate };
 		}
 		const destination = maps.redirects.get(candidate.split('#')[0]);
 		if (!destination || visited.has(destination)) {
 			const replaced = moved ? `; "${candidate}" replaced it, but` : ', and';
-			return { error: `Absolute self-link${moved}${replaced} ${problem[0].toLowerCase()}${problem.slice(1)}` };
+			const owner = generated ? ' (generated in sourcegraph/sourcegraph; fix it there)' : '';
+			return { error: `Absolute self-link${moved}${replaced} ${problem[0].toLowerCase()}${problem.slice(1)}${owner}` };
 		}
 		visited.add(destination);
 		candidate = isSelfLink(destination) ? relativeSelfLink(destination) : destination;
