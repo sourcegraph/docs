@@ -24,7 +24,7 @@ tab), then drop the `allPosts` imports.
 
 - Skip builds for non-site changes: #1901.
 - Prerender `/api/md/[...slug]`, enable Fluid compute: #1912 (stacked on
-  #1901; retarget to `main` after it merges).
+  #1901; change its base to `main` after it merges).
 - Static redirects out of middleware: draft #1907 (rebase on `main` now
   that #1908 merged).
 
@@ -44,3 +44,21 @@ page's `/docs/_next/...` asset URLs against the old host.
 - Repo: every page emits `<link rel="canonical" href="https://sourcegraph.com/docs">`
   (`src/app/layout.tsx` `alternates.canonical: '/docs'`). Set a per-page
   canonical in `src/app/[...slug]/page.tsx#generateMetadata`.
+
+## 8. GitHub repo settings (needs an org admin)
+
+Already on: delete branch on merge, squash-only merges, auto-merge,
+squash title/body from PR, `main` ruleset blocks deletion and force-push
+and requires a PR with 1 approval.
+
+- Add required status checks to the `main` ruleset: the link check and
+  the Vercel build. Today "Broken links introduced by this PR" and
+  "CSpell (advisory)" can be red and the PR still merges.
+- Add a "Require signed commits" rule to the `main` ruleset.
+- Turn off `allow_update_branch` ("Always suggest updating PR branches");
+  the button rewrites commits unsigned.
+- Turn on `dismiss_stale_reviews_on_push`; consider
+  `require_last_push_approval` and `required_review_thread_resolution`.
+- Turn off Projects (`has_projects`); Issues are already off.
+- Add `CODEOWNERS` and `.github/dependabot.yml`; confirm Actions
+  permissions and Dependabot alerts are on (not readable without admin).
