@@ -63,23 +63,26 @@ async function githubList(route) {
 	}
 }
 
-// The dispatch payload has no PR number; look it up from the commit. A stale
-// event for a commit the PR has moved past is ignored. Fork PRs are ignored
-// too, so the Vercel token is only ever used for commits by people who can
-// already push to this repository.
-async function findPullRequest() {
+// The dispatch payload has no PR number; look up the PRs from the commit. A
+// deployment belongs to a commit, so every open PR at that head gets the
+// report. A stale event for a commit a PR has moved past is ignored. Fork PRs
+// are ignored too, so the Vercel token is only ever used for commits by
+// people who can already push to this repository.
+async function findPullRequests() {
 	const pulls = await github(
 		'GET',
 		`/repos/${REPOSITORY}/commits/${COMMIT_SHA}/pulls`
 	);
-	const pull = pulls.find(
-		pull => pull.state === 'open' && pull.head.sha === COMMIT_SHA
-	);
-	if (pull && pull.head.repo.full_name !== REPOSITORY) {
-		console.log(`PR #${pull.number} is from a fork; not reporting`);
-		return undefined;
-	}
-	return pull;
+	return pulls.filter(pull => {
+		if (pull.state !== 'open' || pull.head.sha !== COMMIT_SHA) {
+			return false;
+		}
+		if (pull.head.repo.full_name !== REPOSITORY) {
+			console.log(`PR #${pull.number} is from a fork; not reporting`);
+			return false;
+		}
+		return true;
+	});
 }
 
 // Build log lines, oldest first. Vercel keeps them as events; only the ones
@@ -145,24 +148,34 @@ async function main() {
 		throw new Error(`Unexpected DEPLOYMENT_STATE ${DEPLOYMENT_STATE}`);
 	}
 
-	const pull = await findPullRequest();
-	if (!pull) {
+	const pulls = await findPullRequests();
+	if (pulls.length === 0) {
 		console.log(`No open PR with head ${COMMIT_SHA}; nothing to do`);
 		return;
 	}
 
+	let logLines;
+	if (DEPLOYMENT_STATE === 'error') {
+		if (!process.env.VERCEL_TOKEN) {
+			throw new Error('VERCEL_TOKEN is required to read the build log');
+		}
+		logLines = await fetchBuildLog();
+	}
+	for (const pull of pulls) {
+		await report(pull, logLines);
+	}
+}
+
+// Comment only when the build failed, or an earlier failure is resolved
+async function report(pull, logLines) {
 	const comments = await githubList(
 		`/repos/${REPOSITORY}/issues/${pull.number}/comments`
 	);
 	const existing = comments.find(comment => comment.body.startsWith(MARKER));
 
-	// Comment only when the build failed, or an earlier failure is resolved
 	let body;
-	if (DEPLOYMENT_STATE === 'error') {
-		if (!process.env.VERCEL_TOKEN) {
-			throw new Error('VERCEL_TOKEN is required to read the build log');
-		}
-		body = failureBody(await fetchBuildLog());
+	if (logLines) {
+		body = failureBody(logLines);
 	} else if (existing) {
 		body = `${MARKER}\n### ✅ The Vercel build that failed on an earlier revision of this PR passes\n`;
 	} else {
