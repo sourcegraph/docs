@@ -92,3 +92,10 @@ next run.
   <https://api.slack.com/apps?new_app=1> (From a manifest), install it, copy its
   Bot User OAuth Token into the secret, and `/invite @Vercel build log` to the
   channel.
+
+## Branches
+
+- Prefix every branch with a name that identifies the human it belongs to
+  (first name, username, or nickname), then a slash:
+  `marc/fix-moved-page-links`. Agents use the name of the human they are
+  working for, never their own
