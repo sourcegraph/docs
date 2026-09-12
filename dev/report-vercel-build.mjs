@@ -2,34 +2,33 @@
 
 /**
  * Reports a failed Vercel build on its pull request, since Vercel only shows
- * build logs to members of the Vercel team. When a later revision builds, the
- * same comment is updated to say so.
+ * build logs to members of the Vercel team. The log itself goes to Slack, so
+ * anything sensitive a build prints stays inside the workspace instead of a
+ * public PR; the PR comment only links to it. When a later revision builds,
+ * the same comment is updated to say so.
  *
  * Usage:
  *   node dev/report-vercel-build.mjs fetch-log <file>
- *   node dev/report-vercel-build.mjs comment <file> [--dry-run]
  *   node dev/report-vercel-build.mjs slack <file> [--dry-run]
+ *   node dev/report-vercel-build.mjs comment [--dry-run]
  *
- * fetch-log writes the build log to <file>, and to GITHUB_OUTPUT `truncated`,
- * so the workflow can upload the full log as an artifact when the comment
- * cannot hold all of it, and `pull_request`, the PR Vercel built the
- * deployment for. It needs VERCEL_TOKEN, and VERCEL_TEAM_ID unless the token
- * is scoped to the project.
- *
- * comment posts the tail of <file> on PR_NUMBER, the PR Vercel built the
- * deployment for. When unset (the success path, or a deployment Vercel
- * recorded no PR for) it falls back to every open PR at COMMIT_SHA. It links
- * the artifact from ARTIFACT_ID and ARTIFACT_URL when set, and deletes the
- * artifact an earlier comment linked. With --dry-run the comment is printed
- * instead, and nothing is deleted.
+ * fetch-log writes the build log to <file>, and `pull_request`, the PR Vercel
+ * built the deployment for, to GITHUB_OUTPUT. It needs VERCEL_TOKEN, and
+ * VERCEL_TEAM_ID unless the token is scoped to the project.
  *
  * slack uploads <file> into the thread of the Vercel Slack app's "failed to
  * deploy" post for the deployment in SLACK_CHANNEL_ID, looking back a week (so
  * a re-run by hand still finds it) and waiting up to 5 minutes for the post
- * to appear. It needs SLACK_BOT_TOKEN (see
- * dev/slack-app-vercel-build-report.json) and does nothing when that or
- * SLACK_CHANNEL_ID is unset. With --dry-run the post is found but nothing is
- * uploaded.
+ * to appear, then writes the reply's `permalink` to GITHUB_OUTPUT. It needs
+ * SLACK_BOT_TOKEN (see dev/slack-app-vercel-build-report.json) and does
+ * nothing when that or SLACK_CHANNEL_ID is unset. With --dry-run the post is
+ * found but nothing is uploaded.
+ *
+ * comment posts on PR_NUMBER, the PR Vercel built the deployment for. When
+ * unset (the success path, or a deployment Vercel recorded no PR for) it falls
+ * back to every open PR at COMMIT_SHA. A failure comment links
+ * SLACK_PERMALINK, or the channel when the upload did not happen. With
+ * --dry-run the comment is printed instead.
  *
  * All need DEPLOYMENT_ID, DEPLOYMENT_STATE (failed or success), COMMIT_SHA,
  * GH_TOKEN and GITHUB_REPOSITORY.
@@ -41,9 +40,6 @@ const [command, logFile] = process.argv
 	.slice(2)
 	.filter(argument => !argument.startsWith('--'));
 const DRY_RUN = process.argv.includes('--dry-run');
-const MAX_LOG_LINES = 100;
-const MAX_LOG_CHARS = 30_000;
-const ARTIFACT_RETENTION_DAYS = 30;
 // A week, so a re-run by hand finds the post; the deployment ID match is
 // exact, so the wider window cannot pick a wrong post
 const SLACK_HISTORY_DAYS = 7;
@@ -55,9 +51,9 @@ const REPOSITORY = process.env.GITHUB_REPOSITORY;
 const {DEPLOYMENT_ID, DEPLOYMENT_STATE, COMMIT_SHA, SLACK_CHANNEL_ID} =
 	process.env;
 
-// The artifact ID rides along in the marker so a later run can delete it
-const MARKER = '<!-- vercel-build-report';
-const MARKER_PATTERN = /^<!-- vercel-build-report(?: artifact=(\d+))? -->/;
+// Comments from before the log moved to Slack carry an artifact ID here
+const MARKER = '<!-- vercel-build-report -->';
+const MARKER_PATTERN = /^<!-- vercel-build-report(?: artifact=\d+)? -->/;
 
 async function fetchJson(url, headers) {
 	const response = await fetch(url, {headers});
@@ -177,9 +173,10 @@ async function fetchBuildLog() {
 		.map(redact);
 }
 
-// Credential shapes a build might print. The comment and artifact are public,
-// and the build gets VERCEL_OIDC_TOKEN and friends, so a left-in
-// `console.log(process.env)` must not publish them. Not a complete list.
+// Credential shapes a build might print. The log only goes to Slack, but the
+// build gets VERCEL_OIDC_TOKEN and friends, so a left-in
+// `console.log(process.env)` should still not hand them to the whole channel.
+// Not a complete list.
 // cspell:disable -- token prefixes, not words
 const REDACTION_PATTERNS = [
 	[/\beyJ[\w-]{10,}\.[\w-]{10,}\.[\w-]+/g, '[redacted-jwt]'],
@@ -202,14 +199,10 @@ function redact(line) {
 	);
 }
 
-// The failure is at the end of the log; keep the tail within GitHub's
-// comment size limit
-function tailOf(logLines) {
-	let tail = logLines.slice(-MAX_LOG_LINES);
-	while (tail.length > 1 && tail.join('\n').length > MAX_LOG_CHARS) {
-		tail = tail.slice(1);
+function writeOutput(name, value) {
+	if (process.env.GITHUB_OUTPUT) {
+		appendFileSync(process.env.GITHUB_OUTPUT, `${name}=${value}\n`);
 	}
-	return tail;
 }
 
 async function fetchLog() {
@@ -225,111 +218,50 @@ async function fetchLog() {
 	const pullRequestNumber = await fetchDeploymentPullRequestNumber();
 	const logLines = await fetchBuildLog();
 	writeFileSync(logFile, logLines.join('\n') + '\n');
-	const truncated = tailOf(logLines).length < logLines.length;
-	console.log(
-		`Wrote ${logLines.length} log lines to ${logFile}${truncated ? '; the comment will show the tail' : ''}`
-	);
-	if (process.env.GITHUB_OUTPUT) {
-		appendFileSync(
-			process.env.GITHUB_OUTPUT,
-			`truncated=${truncated}\npull_request=${pullRequestNumber ?? ''}\n`
-		);
-	}
+	console.log(`Wrote ${logLines.length} log lines to ${logFile}`);
+	writeOutput('pull_request', pullRequestNumber ?? '');
 }
 
-// A fence longer than any run of backticks in the log, so no log line can
-// close it and inject Markdown into the comment
-function fenceFor(lines) {
-	const longestRun = Math.max(
-		2,
-		...lines.flatMap(line =>
-			(line.match(/`+/g) ?? []).map(run => run.length)
-		)
-	);
-	return '`'.repeat(longestRun + 1);
-}
-
-function failureBody(logLines, artifact) {
-	const tail = tailOf(logLines);
-	const fence = fenceFor(tail);
-	const intro =
-		'Vercel paywalls build logs to authorized users in its web UI, so';
-	const message = artifact
-		? `${intro} we tailed the last ${tail.length} lines of the build log for you here. The full log is ${logLines.length} lines, attached as a [workflow artifact](${artifact.url}); downloading it needs a GitHub login, and it expires in ${ARTIFACT_RETENTION_DAYS} days.`
-		: `${intro} here is the build log.`;
+// The log stays in Slack, where only the workspace can read it; the public
+// comment says where to look
+function failureBody() {
+	const {SLACK_PERMALINK} = process.env;
+	const where = SLACK_PERMALINK
+		? `[attached to its Slack post](${SLACK_PERMALINK})`
+		: 'in Slack';
 	return [
-		`${MARKER}${artifact ? ` artifact=${artifact.id}` : ''} -->`,
+		MARKER,
 		'### ❌ The Vercel build failed for this PR',
 		'',
-		message,
-		'',
-		'<details>',
-		'<summary>Build log</summary>',
-		'',
-		fence,
-		...tail,
-		fence,
-		'',
-		'</details>',
+		`Vercel only shows build logs to members of its team, so the build log is ${where} in #alerts-vercel-doc-site.`,
 		''
 	].join('\n');
 }
 
-async function deleteArtifact(id) {
-	console.log(`${DRY_RUN ? '[dry-run] ' : ''}Deleting artifact ${id}`);
-	if (DRY_RUN) {
-		return;
-	}
-	try {
-		await github('DELETE', `/repos/${REPOSITORY}/actions/artifacts/${id}`);
-	} catch (error) {
-		// Already expired or deleted
-		if (!error.message.includes(' 404 ')) {
-			throw error;
-		}
-	}
-}
-
 async function comment() {
 	const pulls = await findPullRequests(process.env.PR_NUMBER);
-	if (pulls.length === 0) {
-		return;
-	}
-	let logLines;
-	if (DEPLOYMENT_STATE === 'failed') {
-		logLines = readFileSync(logFile, 'utf8').replace(/\n$/, '').split('\n');
-	}
 	for (const pull of pulls) {
-		await report(pull, logLines);
+		await report(pull);
 	}
 }
 
 // Comment only when the build failed, or an earlier failure is resolved
-async function report(pull, logLines) {
+async function report(pull) {
 	const comments = await githubList(
 		`/repos/${REPOSITORY}/issues/${pull.number}/comments`
 	);
 	const existing = comments.find(comment =>
 		MARKER_PATTERN.test(comment.body)
 	);
-	const previousArtifact = existing?.body.match(MARKER_PATTERN)[1];
 
 	let body;
-	if (logLines) {
-		const {ARTIFACT_ID, ARTIFACT_URL} = process.env;
-		body = failureBody(
-			logLines,
-			ARTIFACT_ID && {id: ARTIFACT_ID, url: ARTIFACT_URL}
-		);
+	if (DEPLOYMENT_STATE === 'failed') {
+		body = failureBody();
 	} else if (existing) {
-		body = `${MARKER} -->\n### ✅ The Vercel build that failed on an earlier revision of this PR passes\n`;
+		body = `${MARKER}\n### ✅ The Vercel build that failed on an earlier revision of this PR passes\n`;
 	} else {
 		console.log(`PR #${pull.number} has no failed build to resolve`);
 		return;
-	}
-
-	if (previousArtifact) {
-		await deleteArtifact(previousArtifact);
 	}
 
 	if (DRY_RUN) {
@@ -448,21 +380,23 @@ async function findVercelFailurePost() {
 }
 
 // Slack takes files in three steps: ask for an upload URL, POST the bytes to
-// it, then say which channel and thread to share the file in
+// it, then say which channel and thread to share the file in. Returns the
+// permalink of the reply carrying the file, for the PR comment.
 async function uploadLogToThread(post, pulls) {
 	const log = readFileSync(logFile);
 	const shortSha = COMMIT_SHA.slice(0, 7);
-	const filename = `vercel-build-${shortSha}.log`;
+	// .txt, so Slack shows it inline instead of offering a download
+	const filename = `vercel-build-${shortSha}.txt`;
 	const links = pulls
 		.map(pull => `<${pull.html_url}|#${pull.number}>`)
 		.join(', ');
-	const initialComment = `Build log attached; its tail is also commented on PR ${links}.`;
+	const initialComment = `Build log attached; PR ${links} links here.`;
 
 	if (DRY_RUN) {
 		console.log(
 			`[dry-run] would upload ${filename} (${log.length} bytes) to thread ${post.ts} in ${SLACK_CHANNEL_ID}:\n${initialComment}`
 		);
-		return;
+		return undefined;
 	}
 	const {upload_url: uploadUrl, file_id: fileId} = await slackApi(
 		'files.getUploadURLExternal',
@@ -485,6 +419,21 @@ async function uploadLogToThread(post, pulls) {
 	console.log(
 		`Uploaded ${filename} to thread ${post.ts} in ${SLACK_CHANNEL_ID}`
 	);
+
+	// The upload response names only the file, so find the reply it made;
+	// fall back to the post itself rather than leave the PR without a link
+	const {messages} = await slackApi('conversations.replies', {
+		channel: SLACK_CHANNEL_ID,
+		ts: post.ts
+	});
+	const reply = messages.find(message =>
+		message.files?.some(file => file.id === fileId)
+	);
+	const {permalink} = await slackApi('chat.getPermalink', {
+		channel: SLACK_CHANNEL_ID,
+		message_ts: reply?.ts ?? post.ts
+	});
+	return permalink;
 }
 
 async function slack() {
@@ -499,14 +448,17 @@ async function slack() {
 		return;
 	}
 	// The same guard as fetch-log and comment, so Slack only ever gets logs
-	// the PR comment also shows
+	// for commits an open PR from this repository is at
 	const pulls = await findPullRequests(process.env.PR_NUMBER);
 	if (pulls.length === 0) {
 		return;
 	}
 	const post = await findVercelFailurePost();
 	if (post) {
-		await uploadLogToThread(post, pulls);
+		const permalink = await uploadLogToThread(post, pulls);
+		if (permalink) {
+			writeOutput('permalink', permalink);
+		}
 	}
 }
 
@@ -525,22 +477,18 @@ async function main() {
 	if (!['failed', 'success'].includes(DEPLOYMENT_STATE)) {
 		throw new Error(`Unexpected DEPLOYMENT_STATE ${DEPLOYMENT_STATE}`);
 	}
-	if (!logFile) {
-		throw new Error(
-			'Usage: node dev/report-vercel-build.mjs fetch-log|comment|slack <file>'
-		);
-	}
-
-	if (command === 'fetch-log') {
-		await fetchLog();
-	} else if (command === 'comment') {
+	const usage =
+		'Usage: node dev/report-vercel-build.mjs fetch-log|slack <file>, or comment';
+	if (command === 'comment') {
 		await comment();
+	} else if (!logFile) {
+		throw new Error(usage);
+	} else if (command === 'fetch-log') {
+		await fetchLog();
 	} else if (command === 'slack') {
 		await slack();
 	} else {
-		throw new Error(
-			`Unknown command ${command}; use fetch-log, comment or slack`
-		);
+		throw new Error(usage);
 	}
 }
 
