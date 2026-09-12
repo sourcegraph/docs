@@ -24,9 +24,10 @@
  * instead, and nothing is deleted.
  *
  * slack uploads <file> into the thread of the Vercel Slack app's "failed to
- * deploy" post for the commit in SLACK_CHANNEL_ID, looking back 30 minutes
- * and waiting up to 5 more for the post to appear. It needs SLACK_BOT_TOKEN
- * (see dev/slack-app-vercel-build-report.json) and does nothing when that or
+ * deploy" post for the deployment in SLACK_CHANNEL_ID, looking back a week (so
+ * a re-run by hand still finds it) and waiting up to 5 minutes for the post
+ * to appear. It needs SLACK_BOT_TOKEN (see
+ * dev/slack-app-vercel-build-report.json) and does nothing when that or
  * SLACK_CHANNEL_ID is unset. With --dry-run the post is found but nothing is
  * uploaded.
  *
@@ -43,7 +44,9 @@ const DRY_RUN = process.argv.includes('--dry-run');
 const MAX_LOG_LINES = 100;
 const MAX_LOG_CHARS = 30_000;
 const ARTIFACT_RETENTION_DAYS = 30;
-const SLACK_HISTORY_MINUTES = 30;
+// A week, so a re-run by hand finds the post; the deployment ID match is
+// exact, so the wider window cannot pick a wrong post
+const SLACK_HISTORY_DAYS = 7;
 const SLACK_WAIT_MINUTES = 5;
 const SLACK_POLL_SECONDS = 15;
 
@@ -393,28 +396,42 @@ function slackMessageText(message) {
 // runs; keep looking for a while before giving up.
 async function findVercelFailurePost() {
 	const deploymentId = DEPLOYMENT_ID.replace(/^dpl_/, '');
-	const oldest = Date.now() / 1000 - SLACK_HISTORY_MINUTES * 60;
+	const oldest = Date.now() / 1000 - SLACK_HISTORY_DAYS * 24 * 60 * 60;
 	const deadline = Date.now() + SLACK_WAIT_MINUTES * 60_000;
 	for (;;) {
-		const {messages} = await slackApi('conversations.history', {
-			channel: SLACK_CHANNEL_ID,
-			oldest,
-			limit: 200
-		});
-		const post = messages.find(message => {
-			const text = slackMessageText(message);
-			return (
-				text.includes('failed to deploy') && text.includes(deploymentId)
+		// Newest first, a page at a time
+		const seen = [];
+		for (let cursor; ; ) {
+			const {messages, response_metadata: metadata} = await slackApi(
+				'conversations.history',
+				{
+					channel: SLACK_CHANNEL_ID,
+					oldest,
+					limit: 200,
+					...(cursor && {cursor})
+				}
 			);
-		});
-		if (post) {
-			return post;
+			const post = messages.find(message => {
+				const text = slackMessageText(message);
+				return (
+					text.includes('failed to deploy') &&
+					text.includes(deploymentId)
+				);
+			});
+			if (post) {
+				return post;
+			}
+			seen.push(...messages);
+			cursor = metadata?.next_cursor;
+			if (!cursor) {
+				break;
+			}
 		}
 		if (Date.now() >= deadline) {
 			console.log(
-				`No Vercel "failed to deploy" post for ${DEPLOYMENT_ID} in the last ${SLACK_HISTORY_MINUTES} minutes; giving up. Messages seen:`
+				`No Vercel "failed to deploy" post for ${DEPLOYMENT_ID} in the last ${SLACK_HISTORY_DAYS} days; giving up. Newest messages seen:`
 			);
-			for (const message of messages) {
+			for (const message of seen.slice(0, 20)) {
 				console.log(
 					`  ${message.ts} bot_id=${message.bot_id ?? '-'} user=${message.user ?? '-'} subtype=${message.subtype ?? '-'} ${JSON.stringify(slackMessageText(message).slice(0, 120))}`
 				);
