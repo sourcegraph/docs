@@ -30,7 +30,7 @@
  * SLACK_CHANNEL_ID is unset. With --dry-run the post is found but nothing is
  * uploaded.
  *
- * All need DEPLOYMENT_ID, DEPLOYMENT_STATE (error or success), COMMIT_SHA,
+ * All need DEPLOYMENT_ID, DEPLOYMENT_STATE (failed or success), COMMIT_SHA,
  * GH_TOKEN and GITHUB_REPOSITORY.
  */
 
@@ -108,6 +108,15 @@ async function fetchDeploymentPullRequestNumber() {
 	const deployment = await fetchJson(url, {
 		authorization: `Bearer ${process.env.VERCEL_TOKEN}`
 	});
+	// The deployment ID and commit arrive as separate inputs; only publish
+	// the log of the deployment Vercel built from that commit
+	const builtSha =
+		deployment.meta?.githubCommitSha ?? deployment.gitSource?.sha;
+	if (builtSha !== COMMIT_SHA) {
+		throw new Error(
+			`Deployment ${DEPLOYMENT_ID} was built from ${builtSha}, not ${COMMIT_SHA}`
+		);
+	}
 	return deployment.meta?.githubPrId;
 }
 
@@ -284,7 +293,7 @@ async function comment() {
 		return;
 	}
 	let logLines;
-	if (DEPLOYMENT_STATE === 'error') {
+	if (DEPLOYMENT_STATE === 'failed') {
 		logLines = readFileSync(logFile, 'utf8').replace(/\n$/, '').split('\n');
 	}
 	for (const pull of pulls) {
@@ -359,6 +368,23 @@ async function slackApi(method, parameters) {
 	return result;
 }
 
+// Every string in a Slack message: the top-level text, plus legacy
+// attachments and Block Kit blocks, where apps often put the real content
+function slackMessageText(message) {
+	const strings = [];
+	const collect = value => {
+		if (typeof value === 'string') {
+			strings.push(value);
+		} else if (Array.isArray(value)) {
+			value.forEach(collect);
+		} else if (value && typeof value === 'object') {
+			Object.values(value).forEach(collect);
+		}
+	};
+	collect([message.text, message.attachments, message.blocks]);
+	return strings.join('\n');
+}
+
 // The Vercel Slack app posts "<commit title> failed to deploy … <short sha> |
 // <project>" for each failed deployment. It and this workflow are triggered
 // by the same event, so its post can land after this runs; keep looking for a
@@ -373,19 +399,22 @@ async function findVercelFailurePost() {
 			oldest,
 			limit: 200
 		});
-		const post = messages.find(
-			message =>
-				message.bot_id &&
-				message.text?.includes('failed to deploy') &&
-				message.text.includes(shortSha)
-		);
+		const post = messages.find(message => {
+			const text = slackMessageText(message);
+			return text.includes('failed to deploy') && text.includes(shortSha);
+		});
 		if (post) {
 			return post;
 		}
 		if (Date.now() >= deadline) {
 			console.log(
-				`No Vercel "failed to deploy" post for ${shortSha} in the last ${SLACK_HISTORY_MINUTES} minutes; giving up`
+				`No Vercel "failed to deploy" post for ${shortSha} in the last ${SLACK_HISTORY_MINUTES} minutes; giving up. Messages seen:`
 			);
+			for (const message of messages) {
+				console.log(
+					`  ${message.ts} bot_id=${message.bot_id ?? '-'} user=${message.user ?? '-'} subtype=${message.subtype ?? '-'} ${JSON.stringify(slackMessageText(message).slice(0, 120))}`
+				);
+			}
 			return undefined;
 		}
 		console.log(
@@ -444,7 +473,7 @@ async function slack() {
 		);
 		return;
 	}
-	if (DEPLOYMENT_STATE !== 'error') {
+	if (DEPLOYMENT_STATE !== 'failed') {
 		console.log('The build passed; Vercel already posts that to Slack');
 		return;
 	}
@@ -472,7 +501,7 @@ async function main() {
 			throw new Error(`Missing required environment variable ${name}`);
 		}
 	}
-	if (!['error', 'success'].includes(DEPLOYMENT_STATE)) {
+	if (!['failed', 'success'].includes(DEPLOYMENT_STATE)) {
 		throw new Error(`Unexpected DEPLOYMENT_STATE ${DEPLOYMENT_STATE}`);
 	}
 	if (!logFile) {
