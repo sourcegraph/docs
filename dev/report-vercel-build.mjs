@@ -385,12 +385,14 @@ function slackMessageText(message) {
 	return strings.join('\n');
 }
 
-// The Vercel Slack app posts "<commit title> failed to deploy … <short sha> |
-// <project>" for each failed deployment. It and this workflow are triggered
-// by the same event, so its post can land after this runs; keep looking for a
-// while before giving up.
+// The Vercel Slack app posts "<commit title> failed to deploy" for each
+// failed deployment, with the short SHA in a context block and an Inspect
+// button whose URL ends in the deployment ID. The ID is matched, since two
+// PRs at one commit get two deployments and two posts. The app and this
+// workflow are triggered by the same event, so its post can land after this
+// runs; keep looking for a while before giving up.
 async function findVercelFailurePost() {
-	const shortSha = COMMIT_SHA.slice(0, 7);
+	const deploymentId = DEPLOYMENT_ID.replace(/^dpl_/, '');
 	const oldest = Date.now() / 1000 - SLACK_HISTORY_MINUTES * 60;
 	const deadline = Date.now() + SLACK_WAIT_MINUTES * 60_000;
 	for (;;) {
@@ -401,14 +403,16 @@ async function findVercelFailurePost() {
 		});
 		const post = messages.find(message => {
 			const text = slackMessageText(message);
-			return text.includes('failed to deploy') && text.includes(shortSha);
+			return (
+				text.includes('failed to deploy') && text.includes(deploymentId)
+			);
 		});
 		if (post) {
 			return post;
 		}
 		if (Date.now() >= deadline) {
 			console.log(
-				`No Vercel "failed to deploy" post for ${shortSha} in the last ${SLACK_HISTORY_MINUTES} minutes; giving up. Messages seen:`
+				`No Vercel "failed to deploy" post for ${DEPLOYMENT_ID} in the last ${SLACK_HISTORY_MINUTES} minutes; giving up. Messages seen:`
 			);
 			for (const message of messages) {
 				console.log(
@@ -418,7 +422,7 @@ async function findVercelFailurePost() {
 			return undefined;
 		}
 		console.log(
-			`No Vercel post for ${shortSha} yet; checking again in ${SLACK_POLL_SECONDS}s`
+			`No Vercel post for ${DEPLOYMENT_ID} yet; checking again in ${SLACK_POLL_SECONDS}s`
 		);
 		await new Promise(resolve =>
 			setTimeout(resolve, SLACK_POLL_SECONDS * 1000)
