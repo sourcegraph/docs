@@ -1,5 +1,14 @@
 import {TECHNICAL_CHANGELOG_RSS_URL} from './constants';
 
+// Path redirects (`/old-page` -> `/new-page`) are applied server-side by
+// src/middleware.ts.
+//
+// Heading redirects, where the source has a `#fragment`
+// (`/page#old-heading` -> `/page#new-heading`), are applied in the browser by
+// src/components/FragmentRedirect.tsx, because browsers never send the
+// fragment to the server.
+//
+// For a given source, the first matching entry wins.
 const redirectsData = [
 	{
 		source: '/integration/img/disable_extension.png',
@@ -5898,7 +5907,7 @@ const redirectsData = [
 	},
 ];
 
-const updatedRedirectsData = redirectsData.map(redirect => {
+export const updatedRedirectsData = redirectsData.map(redirect => {
 	return {
 		source: String(redirect.source).replace(
 			'http://localhost:3000/docs',
@@ -5910,7 +5919,3 @@ const updatedRedirectsData = redirectsData.map(redirect => {
 		)
 	};
 });
-
-module.exports = {
-	updatedRedirectsData
-};
