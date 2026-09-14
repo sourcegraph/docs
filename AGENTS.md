@@ -11,6 +11,10 @@
 -   **Prove changed links resolve on a deploy**: `node dev/verify-links-live.mjs --site <vercel-preview-url>` prints a Markdown table for the PR description
 -   **Vercel build failures**: Vercel shows build logs only to its team members, so `.github/workflows/vercel-build-report.yml` comments the log tail on the PR (see `dev/report-vercel-build.mjs`). It reads Vercel with the `VERCEL_TOKEN` repo secret, a token scoped to the `sourcegraph-docs` project that expires 2026-12-10; mint a new one with `POST /v3/user/tokens?teamId=<team>` and `projectId` in the body. It also attaches the full log to the Vercel Slack app's "failed to deploy" post in `#alerts-vercel-doc-site`, using the `SLACK_BOT_TOKEN` repo secret and `SLACK_CHANNEL_ID` repo variable. The bot is the Slack app in `dev/slack-app-vercel-build-report.json`; to recreate it, paste that manifest at <https://api.slack.com/apps?new_app=1> (From a manifest), install it, copy its Bot User OAuth Token into the secret, and `/invite @Vercel build log` to the channel
 
+## Branches
+
+-   Prefix every branch with a name that identifies the human it belongs to (first name, username, or nickname), then a slash: `marc/fix-moved-page-links`. Agents use the name of the human they are working for, never their own
+
 ## AI Chat Integration
 
 This site uses **runLLM** for the AI chat widget. The integration is implemented via:
