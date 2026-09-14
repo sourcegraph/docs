@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
 /**
- * Runs the docs checks in dev/check-*.mjs. `npm run build` runs them all
- * before `next build`.
+ * Runs the docs checks in dev/check-*.mjs. `npm run build` runs filenames and
+ * images before `next build`; links has its own pull request check
+ * (.github/workflows/check-links.yml), so a dead link does not fail a deploy.
  *
  * Usage: node dev/checks.mjs [check ...] [flags]
  *   node dev/checks.mjs                                 every check
