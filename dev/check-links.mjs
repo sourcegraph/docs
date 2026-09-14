@@ -16,8 +16,8 @@
  *   should be relative links; the finding proposes one, following src/data/redirects.ts
  * - With --check-external, external links on added lines that return 404 or 410
  *
- * next.config.js runs this with no flags on every build, so only dead page links
- * can fail a deploy; the flags below are for the pull request workflow.
+ * The pull request workflow (.github/workflows/check-links.yml) runs this with
+ * the flags below; `npm run build` does not run it, so findings never fail a deploy.
  *
  * Usage: node dev/check-links.mjs [options]
  *   --check-anchors        Also validate #anchors against headings
