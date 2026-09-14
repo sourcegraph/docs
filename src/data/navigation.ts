@@ -280,7 +280,21 @@ export const navigation: NavigationItem[] = [
 		topics: [
 			{
 				title: 'Agentic Batch Changes',
-				href: '/agentic-batch-changes'
+				href: '/agentic-batch-changes',
+				sections: [
+					{
+						title: 'Getting started',
+						href: '/agentic-batch-changes'
+					},
+					{
+						title: 'Writing prompts',
+						href: '/agentic-batch-changes/writing-prompts'
+					},
+					{
+						title: 'Configuration and administration',
+						href: '/agentic-batch-changes/configuration'
+					}
+				]
 			},
 			{
 				title: 'Batch Changes',

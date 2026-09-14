@@ -1,0 +1,157 @@
+# Configuration and administration
+
+## Customizing the agent
+
+The agent discovers a lot on its own through Deep Search: which package manager a repository uses, how CI is wired, and where similar migrations have been done before. But internal policies may not be written in the code: which base images you allow, how you name branches, which approvals a dependency bump needs, or what a good commit message looks like in your organization.
+
+You can add guidance on the **Agents** page of your Batch Changes settings, at `<instance_url>/users/<username>/settings/batch-changes/agents`. Site administrators add instance-wide guidance at `<instance_url>/admin/batch-changes/agents`, and organizations can carry shared guidance in their settings. Entries from all three levels combine.
+
+### Guidance and skills
+
+Guidance and skills configured here apply only to the coordinating agent you talk to directly, which researches your codebase, writes the plan, and manages the rollout.
+
+**Guidance** is [`AGENTS.md`](https://agents.md)-style text the agent sees on every run, before it reads your first message. Use it for rules that should always apply: house style, forbidden actions, default tools, and how to phrase changeset descriptions. Keep it short. Everything in guidance competes for the agent's attention on every turn, and the combined guidance is truncated at 32 KiB.
+
+A [**skill**](https://agentskills.io) is a named document the agent loads on demand when a task matches its description. Skills suit procedures that only matter some of the time: how to run your internal CI, how to upgrade a particular framework, or how your monorepo is laid out. A skill's content only uses context when it is loaded.
+
+Repository-backed skills can include supporting files, such as references, assets, or scripts. The coordinating agent can read these files when their source is accessible, but it does not execute bundled scripts directly. To run code, it must put that work in an execution step.
+
+### Loading guidance from a repository
+
+To load repository-backed guidance or skills, configure a repository source in your **Agents** settings. The coordinating agent reads these configured sources; it does not automatically load guidance from every repository in the batch change.
+
+The source repository must be available through Sourcegraph, but it does not need to be search-indexed. The agent reads the configured source path on the selected branch. If no branch is specified, it uses the repository's default branch.
+
+Keeping guidance in a repository lets changes go through code review and lets teams share guidance without sharing settings. The agent reloads configured sources when it processes a message, so changes on the configured branch take effect on the next turn. It does not reload them between individual tool calls within that turn.
+
+### Precedence
+
+Guidance loads in settings order: site, then organization, then user, so your own guidance appears after your administrator's. If you belong to multiple organizations, their settings load in organization ID order.
+
+Skills with distinct names are combined. Skill names are case-insensitive. When two skills share a name, the last one loaded wins: your skill overrides an organization's, which overrides the site's, and any of them can override a Sourcegraph default.
+
+### What to put in guidance
+
+Write guidance the way you'd brief a new colleague who is very capable and knows nothing about your organization. The most useful entries are the ones the agent can't infer from code:
+
+- **Image policy.** Which base images to prefer, whether the agent may build images or should stick to stock ones.
+- **Publication conventions.** Branch name patterns, changeset title format, required labels or reviewers, and whether to open drafts or ready-for-review changesets by default.
+- **Verification.** Which commands count as "tests pass" for each ecosystem, and which are too slow to run before publishing.
+- **CI.** How to fetch logs for a failed build and what to try first. This is what the agent uses when it sets up CI handling for you.
+- **Boundaries.** Repositories or directories the agent should never modify, and changes that always need a human to sign off.
+
+**Avoid restating the agent's own defaults.** It already researches before planning, tests on one repository before expanding, and asks before publishing, so guidance that repeats those rules adds length without changing behavior.
+
+### Changeset hooks
+
+Agentic Batch Changes introduces **changeset hooks**, which allow programmable responses to events like CI failures and merge conflicts. For example:
+
+- When CI fails, the agent can prepare a script to fetch CI logs for you. This data can be used to amend the agent's plan, or be handed off to a coding agent to fix immediately.
+- When a merge conflict is encountered, the agent can ask a coding agent to address it.
+
+To get set up, ask the agent for it in your agentic batch change. Fetching CI logs requires a hook step that uses your CI credential; attempting fixes automatically also requires a coding agent step in that hook. Detecting a failed check does not configure either action automatically. Encode processes that work for your organization in [guidance or skills](#guidance-and-skills).
+
+### Coding agent steps
+
+The coding agent step is a native step type for Agentic Batch Changes that lets the agent delegate non-deterministic or context-dependent changes to another coding agent. Coding agent steps are automatically pre-configured with the [Sourcegraph MCP](/api/mcp).
+
+Within a coding agent step, the agent has:
+
+- **Full MCP access under your identity.** The Sourcegraph MCP tools are available and authenticated as you, so the agent operates with your permissions.
+- **Access to the code being worked on.** The workspace's repository checkout is available to the agent as it makes changes.
+
+We currently support [Claude Code](https://claude.com/product/claude-code) and [Codex](https://openai.com/codex) as native coding agent steps.
+
+Codex is the default. You can request either agent in your prompt or [guidance](#guidance-and-skills); the coordinating agent selects it in the plan.
+
+Coding agent LLM traffic is routed through the [Sourcegraph Model Provider](/model-provider).
+
+Agentic Batch Changes does not use coding agent steps for every task. For deterministic changes, the agent will opt to write a script, or even an entire program, to efficiently apply some or all of the target changes.
+
+## Security and secrets
+
+The agent acts as you. Everything it reads, it reads with your [repository permissions](/admin/permissions), so it can't scope a change to a repository you can't see. Everything it publishes, it publishes with your [Batch Changes credential](/batch-changes/configuring-credentials), or the global credential your administrator configured. Your code host's branch protection, required checks, and review rules apply unchanged.
+
+### Approvals
+
+The agent researches, plans, and revises freely without publishing changes to your code host. Running the plan for the first time usually takes an explicit yes or instructions from you. Publishing, expanding the rollout, and fanning out to everything that remains may each need a reply, unless you authorized them up front in your prompt.
+
+When a new or changed step uses a secret, the agent shows you that step and waits for your approval before running it with your credential. You choose how far the approval extends: this run only, this agent, or all of your agents.
+
+### Secrets
+
+Some steps need credentials: a package registry token for private dependencies or an API key for reading CI logs. These are managed on two settings pages:
+
+- Your own secrets live under **Secrets** in your Batch Changes settings, at `/users/<username>/settings/batch-changes/secrets`.
+- Site administrators manage global secrets, available to every user, at `/admin/batch-changes/secrets`.
+
+Your own secret takes precedence over a global one with the same name.
+
+<Callout type="note">
+	Organization-level secrets aren't available to Agentic Batch Changes. Use a
+	user or global secret instead.
+</Callout>
+
+A step references a secret by name. Sourcegraph injects the value when the step runs and redacts it from logs; the value never appears in the plan, in the conversation, or in anything the agent reads. The agent never asks you to paste a secret into the conversation: when a step needs a credential that doesn't exist yet, it points you to the settings page and the least-privilege scope the token needs, then waits until you confirm it's there.
+
+### Isolation
+
+All code-modifying work runs in isolated containers on [Sourcegraph executors](/admin/executors), one per repository. A container sees the repository and the secrets its steps reference. It has no direct access to code host credentials, other users' secrets, or other repository checkouts. [Coding agent steps](#coding-agent-steps) can still use Sourcegraph MCP to access code with your permissions. Containers can't publish. Publication happens inside Sourcegraph.
+
+### Audit log
+
+Agent activity is recorded in the Sourcegraph audit log under the `batchChangeAgents` entity, with identifiers and no URLs, links, or tokens. On self-hosted instances, route it as you route the rest of the audit log.
+
+## Administration
+
+### Access
+
+Users need two permission pairs from the Batch Changes namespace in [role-based access control](/admin/access-control):
+
+- `Batch Changes: Read` together with `Batch Changes: Agent Read` to view agents and their conversations.
+- `Batch Changes: Write` together with `Batch Changes: Agent Write` to create and run them.
+
+Both halves of a pair are required. All four are part of the built-in User role, so every user has access once the feature is enabled. To roll it out gradually, remove the agent permissions from the User role and grant them through a role of your own.
+
+### Ownership
+
+Each agentic batch change has one owner, the user who created it, and only the owner can send messages, approve actions, and publish. Others can follow along through a shared read link, which lets any user on the instance read the conversation, the plan, and the results without changing anything. There is no co-ownership and no transfer. If the owner is unavailable, start a new agentic batch change to continue the work. Because the agent acts as its owner, the owner's repository permissions bound what it can touch.
+
+### Code hosts
+
+The agent publishes through [Batch Changes](/batch-changes) using your configured Batch Changes credentials. Reacting to CI failures and merge conflicts depends on what the code host reports back to Sourcegraph.
+
+Fork enforcement, rollout windows, commit signing, and branch auto-deletion apply unchanged.
+
+### Executors
+
+Make sure [code host connections](/admin/code-hosts) are configured for the repositories users want the agent to search and modify.
+
+All code-modifying work runs on executors:
+
+- [Sourcegraph Cloud](/cloud) customers have managed executors with no additional setup required.
+- Self-hosted customers need [executors deployed](/self-hosted/executors) and registered against both the `batches` and `batches-hooks` [queues](/self-hosted/executors/executors-config#queues), running a version that matches the instance. Without an executor on `batches-hooks`, batch changes can execute and publish, but CI and merge-conflict hook automations never run.
+
+### Usage limits
+
+Coding agent runs are metered per user through the **Batch Changes coding agent step runs** [entitlement](/admin/entitlements), managed under **Site admin → Users & auth → Entitlements**. Each coding agent run in a repository consumes one unit. A default entitlement applies to every user, and an explicit grant replaces the default for a specific user:
+
+- Users without an entitlement have unlimited usage.
+- A positive limit blocks further runs once reached until its window resets.
+- A limit of zero blocks coding agent runs entirely.
+
+Blocked runs tell the user which limit was hit and when it resets.
+
+Model usage, for both the agent's own conversation and its coding agent runs, draws on your instance's [Sourcegraph Model Provider](/model-provider) credits.
+
+### Web search
+
+Web search is enabled by default for the coordinating agent and its coding agents. To disable it for both, set `batchChanges.disableAgentWebSearch` to `true` in [site configuration](/admin/config/site-config).
+
+This setting disables web search tools. It does not block outbound network access from executor containers, including commands run by scripts or coding agents. Restrict that access separately through your executor network policy.
+
+### Images
+
+Steps run in container images the agent picks, preferring small public images that already carry the needed tools. You can restrict where images come from with `batchChanges.containerRegistryAllowlist` or `batchChanges.containerRegistryDenylist` in site configuration; the two are mutually exclusive, and an empty list allows every registry.
+
+When no public image fits, the agent can build one on the fly and reuse it across the batch change. Custom-built images are hosted directly in Sourcegraph. Image building is available on Sourcegraph Cloud by default and requires additional setup on self-hosted instances.
