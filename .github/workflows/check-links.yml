@@ -97,24 +97,13 @@ jobs:
                   fi
 
             - name: Suggest fixes as review comments
-              # One suggested change per added line with a fix. Suggestions already on
-              # the PR (same file, line, and text) are not posted again.
-              if: steps.check.outputs.broken == 'true' && github.event.pull_request.head.repo.full_name == github.repository
+              # One suggested change per finding with a fix, kept in sync with the
+              # findings; see dev/sync-review-comments.sh
+              if: github.event.pull_request.head.repo.full_name == github.repository
               env:
                   GH_TOKEN: ${{ github.token }}
                   PR_NUMBER: ${{ github.event.pull_request.number }}
-              run: |
-                  gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/comments" --paginate \
-                      --jq '.[] | {path, line, body}' | jq -s . > "$RUNNER_TEMP/posted.json"
-                  jq --slurpfile posted "$RUNNER_TEMP/posted.json" \
-                      '.comments |= map(select(. as $comment | $posted[0] | index({path: $comment.path, line: $comment.line, body: $comment.body}) | not))' \
-                      "$RUNNER_TEMP/review.json" > "$RUNNER_TEMP/review-new.json"
-
-                  if [ "$(jq '.comments | length' "$RUNNER_TEMP/review-new.json")" -gt 0 ]; then
-                      gh api --method POST "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews" \
-                          --input "$RUNNER_TEMP/review-new.json" > /dev/null \
-                          || echo "::warning::Could not post the suggested fixes; they are in the report above"
-                  fi
+              run: dev/sync-review-comments.sh '<!-- check-links-finding:' "$RUNNER_TEMP/review.json"
 
             - name: Fail when this PR introduces broken links
               if: steps.check.outputs.broken == 'true'

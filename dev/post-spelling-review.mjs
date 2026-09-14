@@ -100,10 +100,35 @@ function groupByFile(findings) {
 	return grouped;
 }
 
+// Source view (?plain=1, so Markdown is not rendered) with the word highlighted
+function sourceLink(finding) {
+	const {file, line, column, word} = finding;
+	const end = column + word.length;
+	return `https://github.com/${REPOSITORY}/blob/${HEAD_REF}/${file}?plain=1#L${line}C${column}-L${line}C${end}`;
+}
+
+// A non-spelling finding's own message, e.g. an unsorted dictionary entry,
+// pointing at its `relatedLine` when it has one
+function messageText(finding) {
+	const {file, message, relatedLine} = finding;
+	if (!relatedLine) return `${message}.`;
+	const url = `https://github.com/${REPOSITORY}/blob/${HEAD_REF}/${file}?plain=1#L${relatedLine}`;
+	return `${message} on [line ${relatedLine}](${url}).`;
+}
+
+// `word` → `suggestion`, or the finding's own message
+function summaryItem(finding) {
+	if (finding.message) {
+		return messageText(finding);
+	}
+	const suggestion = bestSuggestion(finding);
+	return `\`${finding.word}\`${suggestion ? ` → \`${suggestion}\`` : ''}`;
+}
+
 function summaryBody(findings) {
 	const lines = [
 		SUMMARY_MARKER,
-		`### ⚠️ CSpell found ${findings.length} spelling error(s) in this PR`,
+		`### ⚠️ Spell check found ${findings.length} issue(s) in this PR`,
 		'',
 		'Only findings on lines added by this PR are shown.',
 		...(findings.length > MAX_INLINE_COMMENTS
@@ -115,10 +140,11 @@ function summaryBody(findings) {
 	];
 	for (const [file, fileFindings] of groupByFile(findings)) {
 		lines.push(`**\`${file}\`**`);
-		for (const {line, column, word, context} of fileFindings) {
-			const excerpt = context.replaceAll('`', "'").slice(0, 160);
+		for (const finding of fileFindings) {
+			const {line, column} = finding;
 			lines.push(
-				`- line ${line}, column ${column}: \`${word}\` — \`${excerpt}\``
+				`- [line ${line}, column ${column}](${sourceLink(finding)})`,
+				`  - ${summaryItem(finding)}`
 			);
 		}
 		lines.push('');
@@ -207,13 +233,15 @@ function suggestionBlock(finding) {
 }
 
 function inlineBody(finding) {
-	return [
-		`${INLINE_MARKER} ${finding.word} -->`,
-		`\`${finding.word}\` is not in the dictionary.`,
-		'',
-		...suggestionBlock(finding),
-		`Please correct the spelling, or add the word to ${ALLOW_LIST_LINK} if it is correct.`
-	].join('\n');
+	const explanation = finding.message
+		? [messageText(finding)]
+		: [
+				`\`${finding.word}\` is not in the dictionary.`,
+				'',
+				...suggestionBlock(finding),
+				`Please correct the spelling, or add the word to ${ALLOW_LIST_LINK} if it is correct.`
+			];
+	return [`${INLINE_MARKER} ${finding.word} -->`, ...explanation].join('\n');
 }
 
 async function syncInlineComments(findings) {

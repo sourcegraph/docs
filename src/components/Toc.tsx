@@ -1,7 +1,6 @@
 'use client';
 
 import clsx from 'clsx';
-import {allPosts} from 'contentlayer/generated';
 import Link from 'next/link';
 import {useParams} from 'next/navigation';
 import {useCallback, useEffect, useState} from 'react';
@@ -18,16 +17,16 @@ interface Heading {
 interface Props {
 	headings: Heading[];
 	rawMarkdown?: string;
+	/** Source file path under docs/, for the "Edit this page" link. */
+	editPath: string;
 }
 
 type ParamsType = {
-	version?: string;
 	slug: string[];
 };
 
-export function TableOfContents({headings, rawMarkdown}: Props) {
+export function TableOfContents({headings, rawMarkdown, editPath}: Props) {
 	let [currentSection, setCurrentSection] = useState(headings[0]?.id);
-	const [path, setPath] = useState('');
 	const [copied, setCopied] = useState(false);
 	const params: ParamsType = useParams();
 	const basePath = process.env.NEXT_PUBLIC_DOCS_BASE_PATH || '';
@@ -62,22 +61,6 @@ export function TableOfContents({headings, rawMarkdown}: Props) {
 			})
 			.filter((x): x is {id: string; top: number} => x !== null);
 	}, []);
-
-	useEffect(() => {
-		const path = params.slug.join('/');
-
-		if (allPosts) {
-			const post = allPosts.find(
-				post => post._raw.flattenedPath === path
-			);
-			if (post) {
-				let currentPath = post._id;
-				if (params?.version)
-					currentPath = `versioned/${params.version}/${currentPath}`;
-				setPath(currentPath);
-			}
-		}
-	}, [params]);
 
 	useEffect(() => {
 		if (headings.length === 0) return;
@@ -165,7 +148,7 @@ export function TableOfContents({headings, rawMarkdown}: Props) {
 						<hr className="mt-4" />
 						<div className="mt-4 flex items-center text-sm">
 							<a
-								href={`https://github.com/sourcegraph/docs/edit/main/docs/${path}`}
+								href={`https://github.com/sourcegraph/docs/edit/main/docs/${editPath}`}
 								target="_blank"
 								rel="noopener noreferrer"
 								className="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"

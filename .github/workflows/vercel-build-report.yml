@@ -1,0 +1,91 @@
+name: Vercel build report
+
+# Vercel only shows build logs to members of its team. When a PR's Vercel
+# build fails, this comments the end of the build log on the PR, with the
+# full log as a workflow artifact when the comment cannot hold it all; when a
+# later revision builds, the comment is updated to say so and the artifact
+# is deleted. The full log is also attached to the Vercel Slack app's "failed
+# to deploy" post when the SLACK_BOT_TOKEN secret and SLACK_CHANNEL_ID
+# variable are set (see dev/slack-app-vercel-build-report.json).
+#
+# GitHub only delivers repository_dispatch (and finds workflow_dispatch
+# workflows) once the workflow file is on the default branch, so before merge
+# run dev/report-vercel-build.mjs locally instead. After merge, re-run on a PR
+# by hand with the same payload fields as inputs:
+#   gh workflow run vercel-build-report.yml \
+#       -f id=dpl_... -f state=error -f sha=<pr head sha>
+on:
+    repository_dispatch:
+        types: [vercel.deployment.error, vercel.deployment.success]
+    workflow_dispatch:
+        inputs:
+            id:
+                description: Vercel deployment ID (client_payload.id)
+                required: true
+            state:
+                description: Deployment state (client_payload.state.type)
+                required: true
+                type: choice
+                options: [error, success]
+            sha:
+                description: Full commit SHA of the PR head (client_payload.git.sha)
+                required: true
+
+permissions:
+    contents: read
+    pull-requests: write
+    # To delete the full-log artifact once the build passes
+    actions: write
+
+env:
+    DEPLOYMENT_ID: ${{ github.event.client_payload.id || inputs.id }}
+    DEPLOYMENT_STATE: ${{ github.event.client_payload.state.type || inputs.state }}
+    COMMIT_SHA: ${{ github.event.client_payload.git.sha || inputs.sha }}
+    GH_TOKEN: ${{ github.token }}
+    LOG_FILE: ${{ github.workspace }}/vercel-build.log
+
+jobs:
+    report:
+        if: github.event.client_payload.environment != 'production'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out dev/report-vercel-build.mjs
+              uses: actions/checkout@v4
+              with:
+                  sparse-checkout: dev/report-vercel-build.mjs
+                  sparse-checkout-cone-mode: false
+
+            - name: Fetch the build log from Vercel
+              # Vercel is only contacted when the build failed
+              if: env.DEPLOYMENT_STATE == 'error'
+              id: log
+              env:
+                  # Scoped to the sourcegraph-docs project, so it needs no team ID
+                  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+              run: node dev/report-vercel-build.mjs fetch-log "$LOG_FILE"
+
+            - name: Attach the full log when the comment cannot hold it all
+              if: steps.log.outputs.truncated == 'true'
+              id: artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: vercel-build-log-${{ env.COMMIT_SHA }}
+                  path: ${{ env.LOG_FILE }}
+                  retention-days: 30
+
+            - name: Comment on the pull request
+              env:
+                  PR_NUMBER: ${{ steps.log.outputs.pull_request }}
+                  ARTIFACT_ID: ${{ steps.artifact.outputs.artifact-id }}
+                  ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+              run: node dev/report-vercel-build.mjs comment "$LOG_FILE"
+
+            - name: Attach the log to the Vercel app's Slack post
+              if: env.DEPLOYMENT_STATE == 'error'
+              # The PR comment is the record; a Slack problem must not fail it
+              continue-on-error: true
+              env:
+                  PR_NUMBER: ${{ steps.log.outputs.pull_request }}
+                  SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+                  SLACK_CHANNEL_ID: ${{ vars.SLACK_CHANNEL_ID }}
+              run: node dev/report-vercel-build.mjs slack "$LOG_FILE"
