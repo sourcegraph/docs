@@ -7414,8 +7414,11 @@ Generated query for critical alert: `max((max(deriv(src_deepsearch_questions_in_
 
 **Next steps**
 
-- Check worker logs for `worker failed to process question` errors.
-- Common causes: upstream LLM provider failures (rate limiting or capacity, e.g. 429/503, and timeouts), database errors mid-processing, or worker panics (`worker panic while processing question`).
+- Errors are emitted by the **worker** service (log scope `worker.deepsearch`). Search worker logs over the alert window.
+- Three log messages increment this metric:
+    - `worker failed to process question`: a failure during agent processing. Common causes are upstream LLM provider failures (rate limiting or capacity, e.g. 429/503, and timeouts) and database errors mid-processing.
+    - `worker panic while processing question`: a panic in the question handler.
+    - `failed to reserve usage for question`: the usage limiter failed to check limits.
 - More help interpreting this metric is available in the [dashboards reference](dashboards#deepsearch-deepsearch_question_processing_error_rate).
 - **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
 
