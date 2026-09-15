@@ -2,6 +2,22 @@ import {TECHNICAL_CHANGELOG_RSS_URL} from './constants';
 
 const redirectsData = [
 	{
+		source: '/code-ownership',
+		destination: '/code-ownership/codeowners-format'
+	},
+	{
+		source: '/docs/ownership',
+		destination: '/code-ownership'
+	},
+	{
+		source: '/ownership/tls',
+		destination: '/admin/tls_ssl'
+	},
+	{
+		source: '/ownership/guide',
+		destination: '/code-ownership/guide'
+	},
+	{
 		source: '/integration/img/disable_extension.png',
 		destination: '/integration/img/disable-extension.png'
 	},
