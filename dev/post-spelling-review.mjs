@@ -258,6 +258,14 @@ async function syncInlineComments(findings) {
 			continue;
 		}
 		if (wanted.has(key)) {
+			const body = inlineBody(wanted.get(key));
+			if (body !== comment.body) {
+				await githubWrite(
+					'PATCH',
+					`/repos/${REPOSITORY}/pulls/comments/${comment.id}`,
+					{body}
+				);
+			}
 			wanted.delete(key);
 		} else {
 			await githubWrite(
