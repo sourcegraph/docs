@@ -92,6 +92,12 @@ export async function GET(
 		{
 			width: 1200,
 			height: 630,
+			// Next 16 changed ImageResponse's default to `max-age=0, must-revalidate`,
+			// which made every OG request a CDN miss. Restore the Next 14 default;
+			// the image is a pure function of the page title.
+			headers: {
+				'cache-control': 'public, immutable, no-transform, max-age=31536000'
+			},
 			fonts: [
 				{
 					name: 'PolySans',
