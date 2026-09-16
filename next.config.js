@@ -10,7 +10,6 @@ const basePath = process.env.VERCEL_ENV === 'production' ? '/docs' : '';
 
 const nextConfig = {
 	reactStrictMode: true,
-	swcMinify: true,
 	basePath,
 	env: {
 		NEXT_PUBLIC_DOCS_BASE_PATH: basePath

@@ -19,7 +19,7 @@ export function Tabs({children}: TabsProps) {
 		() =>
 			(
 				React.Children.map(children, child => {
-					if (!React.isValidElement(child)) return null;
+					if (!React.isValidElement<TabProps>(child)) return null;
 
 					const title = child.props.title;
 					const content = child.props.children;
@@ -68,6 +68,7 @@ export function Tabs({children}: TabsProps) {
 }
 
 interface TabProps {
+	title: string;
 	children: ReactNode;
 }
 

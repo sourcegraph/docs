@@ -1,5 +1,10 @@
 import {NextResponse} from 'next/server';
 
+// Next 15+ no longer caches GET handlers by default; keep this one prerendered
+// and revalidated every 5 minutes, as it was on Next 14.
+export const dynamic = 'force-static';
+export const revalidate = 300;
+
 // This endpoint proxies the release registry to not require access to another domain
 // when visiting sourcegraph.com/docs. This might help some customers with strict firewalls.
 export async function GET() {

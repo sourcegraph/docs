@@ -8,9 +8,9 @@ export const runtime = 'nodejs';
 
 export async function GET(
 	_request: Request,
-	{params}: {params: {path: string[]}}
+	{params}: {params: Promise<{path: string[]}>}
 ) {
-	const path = params.path.join('/');
+	const path = (await params).path.join('/');
 	const post = allPosts.find(post => post._raw.flattenedPath === path);
 
 	const headingTitle = post?.headings?.[0]?.title;
