@@ -13,7 +13,10 @@ export function TierCallout({children}: {children: ReactNode}) {
 		[ReactNode[], ReactNode]
 	>(
 		(acc, child) => {
-			if (isValidElement(child) && child.type === 'user') {
+			if (
+				isValidElement<{children: ReactNode}>(child) &&
+				child.type === 'user'
+			) {
 				acc[1] = child.props.children;
 			} else {
 				acc[0].push(child);

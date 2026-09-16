@@ -3,9 +3,9 @@ import {NextRequest, NextResponse} from 'next/server';
 
 export async function GET(
 	_: NextRequest,
-	{params}: {params: {slug: string[]}}
+	{params}: {params: Promise<{slug: string[]}>}
 ) {
-	const docPath = params.slug.join('/');
+	const docPath = (await params).slug.join('/');
 	const post = allPosts.find(post => post._raw.flattenedPath === docPath);
 
 	if (!post) {

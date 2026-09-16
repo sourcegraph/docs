@@ -6,11 +6,28 @@ import {ImageResponse} from 'next/og';
 
 export const runtime = 'nodejs';
 
+// Render every page's image at build time, like the pages themselves: no
+// function runs, no cold start, and each deploy refreshes the CDN copy.
+// Unknown paths 404 at the edge.
+export const dynamic = 'force-static';
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+	return [
+		// The root page's image; index.mdx's flattened path is '' and a
+		// catch-all needs at least one segment. Both render the default title.
+		{path: ['index']},
+		...allPosts
+			.filter(post => post._raw.flattenedPath !== '')
+			.map(post => ({path: post._raw.flattenedPath.split('/')}))
+	];
+}
+
 export async function GET(
 	_request: Request,
-	{params}: {params: {path: string[]}}
+	{params}: {params: Promise<{path: string[]}>}
 ) {
-	const path = params.path.join('/');
+	const path = (await params).path.join('/');
 	const post = allPosts.find(post => post._raw.flattenedPath === path);
 
 	const headingTitle = post?.headings?.[0]?.title;

@@ -36,10 +36,10 @@ export interface DocSearchProps {
 	hitComponent?: (props: {
 		hit: InternalDocSearchHit | StoredDocSearchHit;
 		children: React.ReactNode;
-	}) => JSX.Element;
+	}) => React.JSX.Element;
 	resultsFooterComponent?: (props: {
 		state: AutocompleteState<InternalDocSearchHit>;
-	}) => JSX.Element | null;
+	}) => React.JSX.Element | null;
 	transformSearchClient?: (searchClient: SearchClient) => SearchClient;
 	disableUserPersonalization?: boolean;
 	initialQuery?: string;

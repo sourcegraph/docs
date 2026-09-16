@@ -22,8 +22,9 @@ export const generateStaticParams = async () => {
 		.map(post => ({slug: post._raw.flattenedPath.split('/')}));
 };
 
-export const generateMetadata = ({params}: Props) => {
-	const path = params.slug.join('/');
+export const generateMetadata = async ({params}: Props) => {
+	const {slug} = await params;
+	const path = slug.join('/');
 	const post = allPosts.find(post => post._raw.flattenedPath === path);
 	if (post && post.headings && post.headings.length > 0) {
 		const title = post.headings[0].title;
@@ -42,13 +43,14 @@ export const generateMetadata = ({params}: Props) => {
 };
 
 interface Props {
-	params: {
+	params: Promise<{
 		slug: string[];
-	};
+	}>;
 }
 
-const PostLayout = ({params}: Props) => {
-	const path = params.slug.join('/');
+const PostLayout = async ({params}: Props) => {
+	const {slug} = await params;
+	const path = slug.join('/');
 	const post = allPosts.find(post => post._raw.flattenedPath === path);
 	if (!post) return notFound();
 
@@ -57,7 +59,7 @@ const PostLayout = ({params}: Props) => {
 	const content = (
 		<>
 			<div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none lg:pl-8 lg:pr-0 xl:px-16">
-				<Breadcrumbs path={params.slug} />
+				<Breadcrumbs path={slug} />
 				<article>
 					<Prose>
 						<Content components={MdxComponents()} />

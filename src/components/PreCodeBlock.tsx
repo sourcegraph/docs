@@ -3,9 +3,11 @@ import dynamic from 'next/dynamic';
 import React, {DetailedHTMLProps, HTMLAttributes} from 'react';
 import config from '../../docs.config';
 
-const Mermaid = dynamic(() => import('@/components/Mermaid').then(mod => mod.Mermaid), {
-	ssr: false
-});
+// Mermaid renders client-side in an effect; the server emits its loading
+// placeholder, so `ssr: false` is unnecessary (and disallowed here in Next 16).
+const Mermaid = dynamic(() =>
+	import('@/components/Mermaid').then(mod => mod.Mermaid)
+);
 
 interface PreProps
 	extends DetailedHTMLProps<HTMLAttributes<HTMLPreElement>, HTMLPreElement> {
@@ -82,7 +84,7 @@ export async function PreCodeBlock({children, ...props}: PreProps) {
 			if (typeof node === 'number') return String(node);
 			if (!node) return '';
 			if (Array.isArray(node)) return node.map(extractText).join('');
-			if (React.isValidElement(node) && node.props.children) {
+			if (React.isValidElement<{children?: React.ReactNode}>(node) && node.props.children) {
 				return extractText(node.props.children);
 			}
 			return '';
@@ -132,7 +134,7 @@ export async function PreCode({children, ...props}: PreProps) {
 	// If raw prop is not available, try to extract content from children
 	if (!codeContent && children) {
 		React.Children.forEach(children, child => {
-			if (React.isValidElement(child) && child.props.children) {
+			if (React.isValidElement<{children?: React.ReactNode}>(child) && child.props.children) {
 				codeContent += child.props.children;
 			}
 		});

@@ -55,7 +55,7 @@ function createRedirectUrl(
 		: `${request.nextUrl.origin}${basePath}/${destination}`;
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
 	const path = request.nextUrl.pathname;
 	const pathWithoutBase = path.replace('/docs', '');
 
