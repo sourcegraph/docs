@@ -6,6 +6,23 @@ import {ImageResponse} from 'next/og';
 
 export const runtime = 'nodejs';
 
+// Render every page's image at build time, like the pages themselves: no
+// function runs, no cold start, and each deploy refreshes the CDN copy.
+// Unknown paths 404 at the edge.
+export const dynamic = 'force-static';
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+	return [
+		// The root page's image; index.mdx's flattened path is '' and a
+		// catch-all needs at least one segment. Both render the default title.
+		{path: ['index']},
+		...allPosts
+			.filter(post => post._raw.flattenedPath !== '')
+			.map(post => ({path: post._raw.flattenedPath.split('/')}))
+	];
+}
+
 export async function GET(
 	_request: Request,
 	{params}: {params: Promise<{path: string[]}>}
@@ -92,12 +109,6 @@ export async function GET(
 		{
 			width: 1200,
 			height: 630,
-			// Next 16 changed ImageResponse's default to `max-age=0, must-revalidate`,
-			// which made every OG request a CDN miss. Restore the Next 14 default;
-			// the image is a pure function of the page title.
-			headers: {
-				'cache-control': 'public, immutable, no-transform, max-age=31536000'
-			},
 			fonts: [
 				{
 					name: 'PolySans',
