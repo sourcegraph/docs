@@ -2,10 +2,12 @@
 
 /**
  * Reports CSpell findings on a pull request: one summary comment in the
- * discussion, plus an inline review comment on each flagged line. Once the
- * findings are fixed, the summary is minimized as resolved and the inline
- * comments are deleted; the review that carried them has no body, so nothing
- * of it remains visible.
+ * discussion, plus an inline review comment on each flagged line. Findings in
+ * the pull request's title or description (those with a `field`) have no line
+ * to comment on, so they appear in the summary only. Once the findings are
+ * fixed, the summary is minimized as resolved and the inline comments are
+ * deleted; the review that carried them has no body, so nothing of it remains
+ * visible.
  *
  * Usage: node dev/post-spelling-review.mjs --findings <json-file> [--dry-run]
  *
@@ -107,6 +109,16 @@ function sourceLink(finding) {
 	return `https://github.com/${REPOSITORY}/blob/${HEAD_REF}/${file}?plain=1#L${line}C${column}-L${line}C${end}`;
 }
 
+// Where the finding is, linked to the source view when it is in a file
+function locationText(finding) {
+	const {line, column, field} = finding;
+	if (field === 'title') {
+		return `column ${column}`;
+	}
+	const location = `line ${line}, column ${column}`;
+	return field ? location : `[${location}](${sourceLink(finding)})`;
+}
+
 // A non-spelling finding's own message, e.g. an unsorted dictionary entry,
 // pointing at its `relatedLine` when it has one
 function messageText(finding) {
@@ -130,7 +142,7 @@ function summaryBody(findings) {
 		SUMMARY_MARKER,
 		`### ⚠️ Spell check found ${findings.length} issue(s) in this PR`,
 		'',
-		'Only findings on lines added by this PR are shown.',
+		'Only findings on lines added by this PR, and in its title and description, are shown.',
 		...(findings.length > MAX_INLINE_COMMENTS
 			? [
 					`Up to ${MAX_INLINE_COMMENTS} of them are also commented inline.`
@@ -139,11 +151,10 @@ function summaryBody(findings) {
 		''
 	];
 	for (const [file, fileFindings] of groupByFile(findings)) {
-		lines.push(`**\`${file}\`**`);
+		lines.push(fileFindings[0].field ? `**${file}**` : `**\`${file}\`**`);
 		for (const finding of fileFindings) {
-			const {line, column} = finding;
 			lines.push(
-				`- [line ${line}, column ${column}](${sourceLink(finding)})`,
+				`- ${locationText(finding)}`,
 				`  - ${summaryItem(finding)}`
 			);
 		}
@@ -246,7 +257,9 @@ function inlineBody(finding) {
 
 async function syncInlineComments(findings) {
 	const wanted = new Map(
-		findings.map(finding => [findingKey(finding), finding])
+		findings
+			.filter(finding => !finding.field)
+			.map(finding => [findingKey(finding), finding])
 	);
 	const comments = await githubList(
 		`/repos/${REPOSITORY}/pulls/${PR_NUMBER}/comments`
