@@ -2,9 +2,16 @@
 
 /**
  * Reports CSpell findings on lines added by a Git diff, and dictionary entries
- * added out of alphabetical order.
+ * added out of alphabetical order. Optionally also checks a pull request's
+ * title and description.
  *
- * Usage: node dev/check-spelling.mjs --base <revision> [--format text|json]
+ * Usage: node dev/check-spelling.mjs --base <revision>
+ *            [--pull-request <file>] [--format text|json]
+ *
+ * --pull-request names a file holding `<title>\n\n<description>`, as written
+ * by .github/workflows/spellcheck.yml. Its findings carry `field` ("title" or
+ * "description") instead of a repository path, so they are reported in the
+ * summary comment only.
  *
  * The json format feeds dev/post-spelling-review.mjs.
  * Exits 1 when spelling issues are found and 2 for operational errors.
@@ -17,6 +24,7 @@ import {fileURLToPath} from 'url';
 
 const args = process.argv.slice(2);
 const BASE = flagValue('--base');
+const PULL_REQUEST_FILE = flagValue('--pull-request');
 const FORMAT = flagValue('--format') ?? 'text';
 
 function flagValue(name) {
@@ -56,7 +64,9 @@ function addedLineRanges(base) {
 	return ranges;
 }
 
-function runCSpell(files) {
+// `input` is checked as a document named `stdin://<file>`, so the repository's
+// cspell.json still applies to text that is not in the repository
+function runCSpell(files, input) {
 	if (files.length === 0) {
 		return [];
 	}
@@ -71,7 +81,7 @@ function runCSpell(files) {
 			'--file',
 			...files
 		],
-		{encoding: 'utf8', maxBuffer: 50 * 1024 * 1024}
+		{encoding: 'utf8', input, maxBuffer: 50 * 1024 * 1024}
 	);
 
 	if (result.error) {
@@ -84,13 +94,33 @@ function runCSpell(files) {
 	}
 
 	return report.issues.map(issue => ({
-		file: path.relative(process.cwd(), fileURLToPath(issue.uri)),
+		file: path.relative(
+			process.cwd(),
+			fileURLToPath(issue.uri.replace(/^stdin:/, 'file:'))
+		),
 		line: issue.row,
 		column: issue.col,
 		word: issue.text,
 		suggestions: issue.suggestions?.slice(0, 3) ?? [],
 		text: issue.line.text.replace(/\r?\n$/, '')
 	}));
+}
+
+// The title is line 1 and the description starts on line 3, after a blank
+// separator. `file` becomes the label the reports group by; `field` marks the
+// finding as outside the repository.
+function pullRequestFindings(file) {
+	const input = readFileSync(file, 'utf8');
+	return runCSpell(['stdin://pull-request.md'], input).map(finding =>
+		finding.line === 1
+			? {...finding, file: 'Pull request title', field: 'title'}
+			: {
+					...finding,
+					file: 'Pull request description',
+					field: 'description',
+					line: finding.line - 2
+				}
+	);
 }
 
 // Entries in the dictionary files must be sorted, so duplicates stand out and
@@ -144,12 +174,10 @@ function findingsOnAddedLines(ranges, issues) {
 
 function formatText(findings) {
 	if (findings.length === 0) {
-		return 'No issues found in added lines.\n';
+		return 'No issues found.\n';
 	}
 
-	const lines = [
-		`Found ${findings.length} issue(s) in added lines:`
-	];
+	const lines = [`Found ${findings.length} issue(s):`];
 	for (const {file, line, column, word, message, relatedLine} of findings) {
 		const detail = message
 			? `${message}${relatedLine ? ` on line ${relatedLine}` : ''}`
@@ -169,10 +197,13 @@ async function main() {
 
 	const ranges = addedLineRanges(BASE);
 	const files = [...ranges.keys()];
-	const findings = findingsOnAddedLines(ranges, [
-		...runCSpell(files),
-		...unsortedDictionaryEntries(files)
-	]);
+	const findings = [
+		...findingsOnAddedLines(ranges, [
+			...runCSpell(files),
+			...unsortedDictionaryEntries(files)
+		]),
+		...(PULL_REQUEST_FILE ? pullRequestFindings(PULL_REQUEST_FILE) : [])
+	];
 	process.stdout.write(
 		FORMAT === 'json'
 			? JSON.stringify(findings, null, '\t') + '\n'

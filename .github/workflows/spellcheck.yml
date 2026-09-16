@@ -2,10 +2,13 @@ name: Spell check
 
 # Reports spelling errors on lines added by a pull request, as a summary comment
 # plus inline review comments on the flagged lines. Existing spelling errors and
-# errors on unchanged lines are not included.
+# errors on unchanged lines are not included. The pull request's title and
+# description are checked too, and reported in the summary comment.
 
 on:
     pull_request:
+        # `edited` fires when the title or description changes
+        types: [opened, synchronize, reopened, edited]
 
 permissions:
     contents: read
@@ -34,12 +37,18 @@ jobs:
               run: npm install --global cspell@10
 
             - name: Find spelling errors introduced by this PR
+              # Title and description come in through env, never inline in the
+              # script, so a crafted pull request cannot inject shell commands
               env:
                   BASE_SHA: ${{ github.event.pull_request.base.sha }}
+                  PR_TITLE: ${{ github.event.pull_request.title }}
+                  PR_BODY: ${{ github.event.pull_request.body }}
               run: |
                   base=$(git merge-base "$BASE_SHA" HEAD)
+                  printf '%s\n\n%s\n' "$PR_TITLE" "$PR_BODY" > "$RUNNER_TEMP/pull-request.md"
                   # Exit 1 means findings; anything else is an operational error
-                  node dev/check-spelling.mjs --base "$base" --format json \
+                  node dev/check-spelling.mjs --base "$base" \
+                      --pull-request "$RUNNER_TEMP/pull-request.md" --format json \
                       > "$RUNNER_TEMP/spelling.json" || [ "$?" -eq 1 ]
                   cat "$RUNNER_TEMP/spelling.json"
 
