@@ -1,0 +1,26 @@
+name: Diff Tour link
+
+# Posts a comment on each pull request linking to the Sourcegraph Diff Tour
+# for the changes in that PR, and keeps the comment up to date as the PR
+# changes. Once the PR is merged, the link points at the merge commit.
+#
+# Pull requests from forks are skipped: their GITHUB_TOKEN is read-only, so
+# the comment cannot be posted.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  diff-tour-link:
+    name: Comment the Diff Tour link on the pull request
+    runs-on: ubuntu-latest
+    if: >
+      github.event.pull_request.head.repo.full_name == github.repository
+      && (github.event.action != 'closed' || github.event.pull_request.merged)
+    steps:
+      - uses: sourcegraph/actions/diff-tour@main
