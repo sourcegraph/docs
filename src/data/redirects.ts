@@ -1,3 +1,16 @@
+// Redirects keep external traffic to old URLs (bookmarks, search results,
+// links in old product versions) landing on a page that exists. They are not
+// for broken internal links; fix those where they are written.
+//
+// Each entry maps the old path, as the browser requests it, straight to a
+// page that exists today:
+// - source: no /docs prefix, no #fragment (browsers never send fragments),
+//   and not the path of an existing page or an earlier entry
+// - destination: no /docs prefix, not another redirect, optionally with a
+//   #heading that exists on that page
+//
+// Check your entries: node dev/check-redirects.mjs (CI runs it on every PR)
+
 import {TECHNICAL_CHANGELOG_RSS_URL} from './constants';
 
 const redirectsData = [
