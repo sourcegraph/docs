@@ -32,7 +32,7 @@
   linking the job log, instead of failing the PR: an empty report says nothing
   about the PR
 - **Prove changed links resolve on a deploy**:
-  `node dev/verify-links-live.mjs --site <vercel-preview-url>` prints a
+  `node dev/verify-links-live.mjs --site <vercel-preview-url>/docs` prints a
   Markdown table for the PR description
 - **Spell check**: `.github/workflows/spellcheck.yml` runs
   `dev/check-spelling.mjs` on the lines a PR adds plus its title and
@@ -92,3 +92,13 @@ next run.
   <https://api.slack.com/apps?new_app=1> (From a manifest), install it, copy its
   Bot User OAuth Token into the secret, and `/invite @Vercel build log` to the
   channel.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

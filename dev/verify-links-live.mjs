@@ -13,11 +13,10 @@
 // Prints a Markdown table to paste into a PR. Old links point at --old-site so
 // reviewers can see the current breakage.
 //
-//   node dev/verify-links-live.mjs --site https://<preview>.vercel.app [--old-site https://sourcegraph.com/docs] [--base origin/main]
+//   node dev/verify-links-live.mjs --site https://<preview>.vercel.app/docs [--old-site https://sourcegraph.com/docs] [--base origin/main]
 //
-// Production serves under https://sourcegraph.com/docs (basePath in
-// next.config.js); Vercel previews serve at the root, so pass the full prefix
-// in --site.
+// Every deployment serves under /docs (basePath in next.config.js), so --site
+// includes that prefix.
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';

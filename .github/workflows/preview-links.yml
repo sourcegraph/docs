@@ -60,11 +60,11 @@ jobs:
             });
 
             // Mirror contentlayer's flattenedPath: docs/<path>.mdx -> /<path>,
-            // with a trailing /index dropped. Preview deployments have no basePath.
+            // with a trailing /index dropped, under the /docs basePath.
             const pages = files
               .filter(f => f.filename.startsWith('docs/') && f.filename.endsWith('.mdx') && f.status !== 'removed')
               .map(f => f.filename.slice('docs/'.length, -'.mdx'.length).replace(/^index$/, '').replace(/\/index$/, ''))
-              .map(path => ({path, url: `${previewUrl}/${path}`}));
+              .map(path => ({path, url: `${previewUrl}/docs/${path}`}));
 
             if (pages.length === 0) {
               core.info(`PR #${pr.number} changes no docs pages; not commenting.`);

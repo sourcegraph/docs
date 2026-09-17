@@ -54,7 +54,7 @@ Next, run the development server:
 pnpm run dev
 ```
 
-Finally, open [`http://localhost:3000`](http://localhost:3000) in your browser
+Finally, open [`http://localhost:3000/docs`](http://localhost:3000/docs) in your browser
 to view the website.
 
 ## Writing and contributing to Sourcegraph Docs
@@ -225,7 +225,7 @@ instructions visit
 
 As you make changes to the documentation, the development server will
 automatically update. Review your changes by navigating to
-`http://localhost:3000` in your browser.
+`http://localhost:3000/docs` in your browser.
 
 ### Previewing Vercel Deployments
 
