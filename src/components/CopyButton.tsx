@@ -29,6 +29,8 @@ export function CopyButton({text, lang}: {text: string; lang: string}) {
 				</div>
 				<div className="relative">
 					<button
+						type="button"
+						aria-label={copied ? 'Copied' : 'Copy code'}
 						onClick={handleCopy}
 						onMouseEnter={() => setShowTooltip(true)}
 						onMouseLeave={() => setShowTooltip(false)}
