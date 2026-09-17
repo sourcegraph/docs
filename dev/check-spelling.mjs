@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import 'nope-this-module-does-not-exist';
 
 /**
  * Reports CSpell findings on lines added by a Git diff, and dictionary entries

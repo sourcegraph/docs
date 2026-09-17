@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import 'nope-this-module-does-not-exist';
 
 /**
  * Dead link checker for MDX documentation files.

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import 'nope-this-module-does-not-exist';
 
 /**
  * Checks redirects in src/data/redirects.ts.
