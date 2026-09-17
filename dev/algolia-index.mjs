@@ -20,6 +20,7 @@
 // otherwise from the profile stored by `algolia profile add` (local use).
 
 import {spawnSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -37,6 +38,10 @@ const DEFAULT_APP_ID = '0EBA2NRQU3';
 // that matched.
 const MAX_CONTENT_LENGTH = 700;
 const MIN_CONTENT_LENGTH = 3;
+// Only deduplicate substantial prose. Short labels such as "Permissions" can
+// be useful on every page where they occur; long identical chunks are usually
+// generated-reference boilerplate.
+const MIN_DEDUPLICATION_LENGTH = 80;
 // Caps that keep generated reference pages (dashboards, alerts, changelog:
 // thousands of headings each) from dominating the index. Headings are always
 // indexed; only prose chunks are capped.
@@ -162,6 +167,9 @@ function stripFencedCodeBlocks(markdown) {
 }
 
 function stripMdxNoise(markdown) {
+	// Contentlayer's body.raw excludes frontmatter. Strip it explicitly too so
+	// this remains true if the indexer's input changes in the future.
+	markdown = markdown.replace(/^---\s*\n[\s\S]*?\n---\s*(?:\n|$)/, '');
 	// Inline code spans keep their contents verbatim: `<YOUR-CONFIG-FILE>` in a
 	// heading is text, not a tag.
 	const codeSpans = [];
@@ -266,7 +274,13 @@ function pageTitleFromPath(url) {
 	return last.replace(/[-_]+/g, ' ').replace(/^\w/, c => c.toUpperCase());
 }
 
-function buildPageRecords(post, owner) {
+function contentHash(content) {
+	return createHash('sha256')
+		.update(content.toLowerCase().replace(/\s+/g, ' ').trim())
+		.digest('hex');
+}
+
+function buildPageRecords(post, owner, deduplication) {
 	const url = post.url;
 	const pageUrl = SITE_URL + url;
 	const slugger = new GithubSlugger();
@@ -360,6 +374,14 @@ function buildPageRecords(post, owner) {
 		if (block.text === 'On this page') continue;
 		if (block.text.length < MIN_CONTENT_LENGTH) continue;
 		ensurePageRecord();
+		if (block.text.length >= MIN_DEDUPLICATION_LENGTH) {
+			const hash = contentHash(block.text);
+			if (deduplication.hashes.has(hash)) {
+				deduplication.removed += 1;
+				continue;
+			}
+			deduplication.hashes.add(hash);
+		}
 		pending.push(block.text);
 	}
 	flushContent();
@@ -380,10 +402,27 @@ function loadPosts() {
 		.sort((a, b) => a.url.localeCompare(b.url));
 }
 
+function deduplicateContent(records) {
+	const seen = new Set();
+	let removed = 0;
+	const unique = records.filter(record => {
+		if (record.type !== 'content' || record.content.length < MIN_DEDUPLICATION_LENGTH) {
+			return true;
+		}
+		const hash = contentHash(record.content);
+		if (seen.has(hash)) {
+			removed += 1;
+			return false;
+		}
+		seen.add(hash);
+		return true;
+	});
+	return {records: unique, removed};
+}
+
 // Standard DocSearch index settings plus our product/section facets.
 const settings = {
 	searchableAttributes: [
-		'unordered(hierarchy.lvl0)',
 		'unordered(hierarchy.lvl1)',
 		'unordered(hierarchy.lvl2)',
 		'unordered(hierarchy.lvl3)',
@@ -405,11 +444,9 @@ const settings = {
 	attributesToHighlight: ['hierarchy', 'content'],
 	attributesToSnippet: ['content:10'],
 	attributesForFaceting: ['product', 'section', 'type'],
-	// At most 3 hits per page, so a query that matches a whole product (e.g.
-	// "agentic batch changes" matches every record's lvl0) lists the product's
-	// pages instead of the table of contents of its landing page.
+	// Keep the page record plus at most one matching heading or prose chunk.
 	attributeForDistinct: 'url_without_anchor',
-	distinct: 3,
+	distinct: 2,
 	// Page titles before headings before prose; pageRank (from seoPriority)
 	// only breaks ties within a level, otherwise a landing page's headings
 	// would outrank its sibling pages.
@@ -425,12 +462,23 @@ const settings = {
 	minWordSizefor2Typos: 7,
 	allowTyposOnNumericTokens: false,
 	minProximity: 1,
-	ignorePlurals: true,
+	removeStopWords: ['en'],
+	ignorePlurals: ['en'],
 	advancedSyntax: true,
 	attributeCriteriaComputedByMinProximity: true,
 	removeWordsIfNoResults: 'allOptional',
 	hitsPerPage: 20
 };
+
+const synonyms = [
+	{objectID: 'api-key-access-token', type: 'synonym', synonyms: ['API key', 'access token']},
+	{objectID: 'sso-saml', type: 'synonym', synonyms: ['SSO', 'SAML', 'single sign-on']},
+	{objectID: 'login-sign-in', type: 'synonym', synonyms: ['login', 'sign in']},
+	{objectID: 'repo-repository', type: 'synonym', synonyms: ['repo', 'repository']},
+	{objectID: 'auth-authentication', type: 'synonym', synonyms: ['auth', 'authentication']},
+	{objectID: 'perms-permissions', type: 'synonym', synonyms: ['perms', 'permissions']},
+	{objectID: 'src-cli', type: 'synonym', synonyms: ['src-cli', 'src CLI']}
+];
 
 // ---------------------------------------------------------------------------
 // Push via the Algolia CLI
@@ -469,25 +517,30 @@ function printStats(records) {
 async function main() {
 	const owners = await loadNavigationOwners();
 	const posts = loadPosts().filter(p => !p.preview);
-	const records = [];
+	const allRecords = [];
 	const pages = [];
+	const deduplication = {hashes: new Set(), removed: 0};
 	for (const post of posts) {
 		const owner = resolveOwner(post.url, owners);
 		pages.push({url: post.url, ...owner});
-		records.push(...buildPageRecords(post, owner));
+		allRecords.push(...buildPageRecords(post, owner, deduplication));
 	}
+	const {records, removed: duplicateRecords} = deduplicateContent(allRecords);
+	const removed = deduplication.removed + duplicateRecords;
 
 	fs.mkdirSync(outDir, {recursive: true});
 	const recordsFile = path.join(outDir, 'records.ndjson');
 	const settingsFile = path.join(outDir, 'settings.json');
+	const synonymsFile = path.join(outDir, 'synonyms.ndjson');
 	fs.writeFileSync(recordsFile, records.map(r => JSON.stringify(r)).join('\n') + '\n');
 	fs.writeFileSync(settingsFile, JSON.stringify(settings, null, 2) + '\n');
+	fs.writeFileSync(synonymsFile, synonyms.map(s => JSON.stringify(s)).join('\n') + '\n');
 	fs.writeFileSync(
 		path.join(outDir, 'pages.json'),
 		JSON.stringify(pages, null, 2) + '\n'
 	);
 	console.log(
-		`Built ${records.length} records for ${pages.length} pages -> ${path.relative(root, recordsFile)}`
+		`Built ${records.length} records for ${pages.length} pages (${removed} duplicate content blocks removed) -> ${path.relative(root, recordsFile)}`
 	);
 	if (flag('--stats') || !dryRun) printStats(records);
 
@@ -498,6 +551,7 @@ async function main() {
 	const tmpIndex = `${indexName}_tmp`;
 	algolia(['settings', 'import', tmpIndex, '-F', settingsFile, '--wait']);
 	algolia(['objects', 'import', tmpIndex, '-F', recordsFile, '--wait']);
+	algolia(['synonyms', 'import', tmpIndex, '-F', synonymsFile, '--replace-existing-synonyms', '--wait']);
 	algolia(['indices', 'move', tmpIndex, indexName, '--confirm', '--wait']);
 	console.log(`\nIndex "${indexName}" updated with ${records.length} records.`);
 }
