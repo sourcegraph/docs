@@ -32,6 +32,18 @@ const nextConfig = {
 				permanent: false
 			}
 		];
+	},
+	// Vercel's skew protection appends `?dpl=<deployment id>` to asset URLs.
+	// `next/font` bakes that query into the CSS `url()`s at build time, but
+	// Next's webpack cache key ignores the deployment id, so a restored
+	// `.next/cache` re-emits CSS with the previous deployment's id and every
+	// font downloads twice (once per id). Fold the id into the cache key.
+	webpack(config) {
+		const deploymentId = process.env.NEXT_DEPLOYMENT_ID;
+		if (deploymentId && config.cache) {
+			config.cache.version = `${config.cache.version}|${deploymentId}`;
+		}
+		return config;
 	}
 };
 
