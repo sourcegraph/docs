@@ -11,6 +11,10 @@ const basePath = process.env.VERCEL_ENV === 'production' ? '/docs' : '';
 const nextConfig = {
 	reactStrictMode: true,
 	basePath,
+	// Orb portals proxy the dev server through a different hostname.
+	allowedDevOrigins: process.env.PUBLIC_URL
+		? [new URL(process.env.PUBLIC_URL).hostname]
+		: [],
 	env: {
 		NEXT_PUBLIC_DOCS_BASE_PATH: basePath
 	},
