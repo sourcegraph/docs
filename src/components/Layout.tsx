@@ -60,7 +60,7 @@ function Header() {
 							aria-label="Home page"
 							className="relative z-10 hidden md:block"
 						>
-							<Logo className="h-9 w-auto" />
+							<Logo />
 						</Link>
 						<Link
 							href="/"
