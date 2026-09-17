@@ -37,6 +37,7 @@ jobs:
               run: npm install --global cspell@10
 
             - name: Find spelling errors introduced by this PR
+              id: check
               # Title and description come in through env, never inline in the
               # script, so a crafted pull request cannot inject shell commands
               env:
@@ -46,15 +47,25 @@ jobs:
               run: |
                   base=$(git merge-base "$BASE_SHA" HEAD)
                   printf '%s\n\n%s\n' "$PR_TITLE" "$PR_BODY" > "$RUNNER_TEMP/pull-request.md"
-                  # Exit 1 means findings; anything else is an operational error
+                  # The script exits 1 both with findings and when it crashes at import
+                  # time. It writes its output in one go at the end, so a crash leaves
+                  # it empty. A crash is a warning, not a failed check: it says nothing
+                  # about the PR, and an empty report must not be posted as one
                   node dev/check-spelling.mjs --base "$base" \
                       --pull-request "$RUNNER_TEMP/pull-request.md" --format json \
-                      > "$RUNNER_TEMP/spelling.json" || [ "$?" -eq 1 ]
+                      > "$RUNNER_TEMP/spelling.json" || true
+                  if [ -s "$RUNNER_TEMP/spelling.json" ]; then
+                      echo "checked=true" >> "$GITHUB_OUTPUT"
+                  else
+                      echo "::warning::check-spelling crashed, so this PR was not checked"
+                  fi
                   cat "$RUNNER_TEMP/spelling.json"
 
             - name: Report on the pull request
               # Fork PRs get a read-only token; the findings are still in the job log
-              if: github.event.pull_request.head.repo.full_name == github.repository
+              if: >-
+                  github.event.pull_request.head.repo.full_name == github.repository
+                  && steps.check.outputs.checked == 'true'
               env:
                   GH_TOKEN: ${{ github.token }}
                   PR_NUMBER: ${{ github.event.pull_request.number }}
