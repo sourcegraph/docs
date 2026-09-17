@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import Link from 'next/link';
+import {NavigationLink} from '@/components/NavigationLink';
 import {usePathname, useSearchParams} from 'next/navigation';
 
 import {navigation, NavigationItem} from '@/data/navigation';
@@ -147,7 +147,7 @@ export function Navigation({
 							{separator.topics.map(topic => (
 								<li key={topic.title} className="relative">
 									<div className="flex w-full items-center justify-between">
-										<Link
+										<NavigationLink
 											href={prependVersion(topic.href)}
 											onClick={() => {
 												onLinkClick;
@@ -161,7 +161,7 @@ export function Navigation({
 											)}
 										>
 											{topic.title}
-										</Link>
+										</NavigationLink>
 										{topic.sections && (
 											<button
 												className="pointer-cursor rounded-md p-1 hover:bg-slate-200 dark:hover:bg-slate-800"
@@ -198,7 +198,7 @@ export function Navigation({
 															className="relative"
 														>
 															<div className="flex w-full items-center justify-between">
-																<Link
+																<NavigationLink
 																	href={prependVersion(
 																		section.href
 																	)}
@@ -220,7 +220,7 @@ export function Navigation({
 																	{
 																		section.title
 																	}
-																</Link>
+																</NavigationLink>
 																{section.subsections && (
 																	<button
 																		className="pointer-cursor rounded-md p-1 hover:bg-slate-200 dark:hover:bg-slate-800"
@@ -258,7 +258,7 @@ export function Navigation({
 																				}
 																				className="relative"
 																			>
-																				<Link
+																				<NavigationLink
 																					href={prependVersion(
 																						subsection.href
 																					)}
@@ -276,7 +276,7 @@ export function Navigation({
 																					{
 																						subsection.title
 																					}
-																				</Link>
+																				</NavigationLink>
 																			</li>
 																		)
 																	)}
