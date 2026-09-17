@@ -47,25 +47,24 @@ jobs:
             # The script exits 1 both with findings and when it crashes, e.g. because
             # this PR's copy of it cannot read the base branch's redirects.ts. It
             # writes its output in one go at the end, so a crash leaves it empty.
-            # A crash is a warning, not a failed check: it says nothing about the
-            # PR, and an empty report must not be posted as one.
+            # A crash does not fail the check, since it says nothing about the PR;
+            # the comment step reports it instead of posting the empty report.
             - name: Record broken redirects already present on the base branch
-              id: baseline
               run: |
                   node dev/check-redirects.mjs --format json \
                       --root "$RUNNER_TEMP/base" > "$RUNNER_TEMP/base-redirects.json" || true
-                  if ! [ -s "$RUNNER_TEMP/base-redirects.json" ]; then
-                      echo "::warning::check-redirects crashed on the base branch, so this PR was not checked"
-                      echo "crashed=true" >> "$GITHUB_OUTPUT"
-                  fi
 
             - name: Find redirects broken by this PR
               id: check
-              if: steps.baseline.outputs.crashed != 'true'
               env:
                   # Line links in the report open redirects.ts on the PR branch
                   LINK_BASE: ${{ github.event.pull_request.head.repo.html_url }}/blob/${{ github.event.pull_request.head.ref }}
               run: |
+                  if ! [ -s "$RUNNER_TEMP/base-redirects.json" ]; then
+                      echo "::warning::check-redirects crashed on the base branch, so this PR was not checked"
+                      echo "result=crashed" >> "$GITHUB_OUTPUT"
+                      exit 0
+                  fi
                   if node dev/check-redirects.mjs --format markdown \
                       --baseline "$RUNNER_TEMP/base-redirects.json" \
                       --diff "$RUNNER_TEMP/changes.diff" \
@@ -76,32 +75,35 @@ jobs:
                       echo "result=broken" >> "$GITHUB_OUTPUT"
                   else
                       echo "::warning::check-redirects crashed, so this PR was not checked"
+                      echo "result=crashed" >> "$GITHUB_OUTPUT"
                   fi
                   cat "$RUNNER_TEMP/report.md"
 
             - name: Comment on the pull request
               # Fork PRs get a read-only token; the report is still in the job log
-              if: >-
-                  github.event.pull_request.head.repo.full_name == github.repository
-                  && contains(fromJSON('["clean", "broken"]'), steps.check.outputs.result)
+              if: github.event.pull_request.head.repo.full_name == github.repository
               env:
                   GH_TOKEN: ${{ github.token }}
                   PR_NUMBER: ${{ github.event.pull_request.number }}
                   RESULT: ${{ steps.check.outputs.result }}
+                  RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
               run: |
                   marker='<!-- check-redirects-report -->'
                   existing_comment=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
                       --paginate --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n 1)
 
-                  # Comment only when there is something to report, or an earlier report to resolve
-                  if [ "$RESULT" = broken ]; then
-                      { echo "$marker"; cat "$RUNNER_TEMP/report.md"; } > "$RUNNER_TEMP/comment.md"
-                  elif [ -n "$existing_comment" ]; then
-                      printf '%s\n### ✅ The redirects an earlier revision of this PR broke are fixed\n' \
-                          "$marker" > "$RUNNER_TEMP/comment.md"
-                  else
-                      exit 0
-                  fi
+                  # Comment when there is something to report, or an earlier report to resolve
+                  case "$RESULT" in
+                      broken)
+                          { echo "$marker"; cat "$RUNNER_TEMP/report.md"; } > "$RUNNER_TEMP/comment.md" ;;
+                      crashed)
+                          printf '%s\n### ⚠️ The redirects check could not run on this revision\n\nThis is a problem with the check, not with this PR; see the [job log](%s).\n' \
+                              "$marker" "$RUN_URL" > "$RUNNER_TEMP/comment.md" ;;
+                      *)
+                          [ -n "$existing_comment" ] || exit 0
+                          printf '%s\n### ✅ This revision breaks no redirects\n' \
+                              "$marker" > "$RUNNER_TEMP/comment.md" ;;
+                  esac
 
                   if [ -n "$existing_comment" ]; then
                       gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$existing_comment" \
