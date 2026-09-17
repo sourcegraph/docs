@@ -164,6 +164,11 @@ export function Navigation({
 										</Link>
 										{topic.sections && (
 											<button
+												type="button"
+												aria-label={`Toggle ${topic.title} sections`}
+												aria-expanded={expandedTopics.includes(
+													topic.title
+												)}
 												className="pointer-cursor rounded-md p-1 hover:bg-slate-200 dark:hover:bg-slate-800"
 												onClick={() =>
 													handleTopicClick(
@@ -173,6 +178,7 @@ export function Navigation({
 												}
 											>
 												<ChevronRightIcon
+													aria-hidden="true"
 													className={clsx(
 														'pointer-cursor duration-400 h-4 w-4 text-slate-500 transition-transform dark:text-dark-text-secondary',
 														{
@@ -223,6 +229,11 @@ export function Navigation({
 																</Link>
 																{section.subsections && (
 																	<button
+																		type="button"
+																		aria-label={`Toggle ${section.title} subsections`}
+																		aria-expanded={expandedSections.includes(
+																			section.title
+																		)}
 																		className="pointer-cursor rounded-md p-1 hover:bg-slate-200 dark:hover:bg-slate-800"
 																		onClick={() =>
 																			handleSectionClick(
@@ -231,6 +242,7 @@ export function Navigation({
 																		}
 																	>
 																		<ChevronRightIcon
+																			aria-hidden="true"
 																			className={clsx(
 																				'pointer-cursor duration-400 h-4 w-4 text-slate-500 transition-transform dark:text-dark-text-secondary',
 																				{

@@ -1,6 +1,6 @@
 'use client';
 
-import {Suspense, useCallback, useEffect, useState} from 'react';
+import {Suspense, useCallback, useEffect, useRef, useState} from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {usePathname, useSearchParams} from 'next/navigation';
@@ -40,10 +40,15 @@ function CloseIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 function CloseOnNavigation({close}: {close: () => void}) {
 	let pathname = usePathname();
 	let searchParams = useSearchParams();
+	let location = `${pathname}?${searchParams.toString()}`;
+	let previousLocation = useRef(location);
 
 	useEffect(() => {
-		close();
-	}, [pathname, searchParams, close]);
+		if (previousLocation.current !== location) {
+			previousLocation.current = location;
+			close();
+		}
+	}, [location, close]);
 
 	return null;
 }

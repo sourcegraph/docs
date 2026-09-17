@@ -120,9 +120,12 @@ function loadRedirects() {
 			/TECHNICAL_CHANGELOG_RSS_URL\s*=\s*['"]([^'"]+)['"]/
 		)?.[1] ?? '';
 
+	// CI runs this revision of the script against the base branch too, so
+	// accept both export styles the file has used
 	const script = source
 		.replace(/^import .*$/gm, '')
 		.replace(/^export const /gm, 'const ')
+		.replace(/^export \{.*$/gm, '')
 		.replace(/module\.exports\s*=\s*\{[\s\S]*?\};?/g, '');
 
 	const sandbox = {TECHNICAL_CHANGELOG_RSS_URL: rssUrl};

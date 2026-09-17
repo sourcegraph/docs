@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 # Vercel's ignoreCommand (vercel.json): exit 0 to skip the build when the
 # commit only touches files the site build never reads. Anything dev/ that
-# `npm run build` runs (checks.mjs, check-*.mjs, generate-mermaid-icons.mjs)
+# `pnpm run build` runs (checks.mjs, check-*.mjs, generate-mermaid-icons.mjs)
 # must stay out of this list.
 exec git diff --quiet HEAD^ HEAD -- . \
 	':(exclude).github' \

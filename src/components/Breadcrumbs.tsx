@@ -45,7 +45,7 @@ export function Breadcrumbs({path}: {path: string[]}) {
 					<div>
 						<Link
 							href={prependVersion('/')}
-							className="text-sm font-medium text-gray-500 hover:text-link-light dark:hover:text-link"
+							className="text-sm font-medium text-gray-500 hover:text-link-light dark:text-gray-400 dark:hover:text-link"
 						>
 							Docs
 						</Link>
@@ -64,7 +64,7 @@ export function Breadcrumbs({path}: {path: string[]}) {
 									'ml-4 text-sm font-medium',
 									index === path.length - 1
 										? 'text-link-light hover:underline dark:text-link'
-										: 'text-gray-500 hover:text-link-light dark:hover:text-link'
+										: 'text-gray-500 hover:text-link-light dark:text-gray-400 dark:hover:text-link'
 								)}
 							>
 								{slug}

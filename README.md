@@ -11,8 +11,7 @@ documentation.
 
 ## Get started
 
-To get started with this template, clone this repository to your local machine
-using the following command:
+Clone this repository to your local machine using the following command:
 
 ```sh
 git clone https://github.com/sourcegraph/docs.git docs
@@ -73,8 +72,7 @@ All you need to do is:
 5. Provide a Commit message and an Extended description.
 6. Click on the green "Propose changes" button to create a PR.
 7. Add a PR reviewer to the Reviewers panel by clicking on the gear icon.
-8. Tag `@maedahbatool` in the `#docs` Slack channel and link to your PR to get
-   a quick review.
+8. Post a link to your PR in the `#docs` Slack channel to get a quick review.
     > NOTE: "Edit from GitHub" is generally recommended for text-based edits.
     > For more structural-based contributions like adding React components and
     > code blocks, it's always better to go with a local setup. This way, you
@@ -109,6 +107,7 @@ metadata. Here are the supported fields:
 | `title`       | string | No       | The page title                        |
 | `date`        | date   | No       | Last modified date (used in sitemap)  |
 | `seoPriority` | number | No       | Sitemap priority 0.0–1.0, default 0.5 |
+| `preview`     | bool   | No       | Hidden; 404 without `?preview` query  |
 
 Example:
 
@@ -151,29 +150,46 @@ We have a set of reusable React components located in the `src/components`
 directory. These components are designed to enhance the user experience and
 maintain consistency across our documentation.
 
-For example the cards layout appears by using the `<Callout>` component that
-can add `note`, `info`, or `warning` notices in docs.
-
-![Callout components rendered in the docs](https://storage.googleapis.com/sourcegraph-assets/Docs/CleanShot%202023-12-12%20at%2012.00.29%402x.png)
-
-You can use this component within your content as follows:
+For example, `<Callout>` adds a `note`, `info`, `tip`, or `warning` notice:
 
 ```js
 <Callout type="note">This feature is currently in Beta for all users.</Callout>
 ```
 
-This snippet creates a single `<QuickLink>` titled as "Get Cody". You can add
-as many cards you want while filling out all the relevant details.
+![Callout components rendered in the docs](https://storage.googleapis.com/sourcegraph-assets/Docs/CleanShot%202023-12-12%20at%2012.00.29%402x.png)
 
-Here are the list of all the supported components we have:
+The components available in MDX are registered in
+`src/components/MdxComponents.tsx`:
 
-- `<QuickLinks>`
-- `<ProductLinks>`
-- `<LinkCards>`
-- `<Callout>`
+| Component                  | Use                                             |
+| -------------------------- | ----------------------------------------------- |
+| `<Callout>`                | `type`: `note`, `info`, `tip`, or `warning`     |
+| `<TierCallout>`            | Which plan or tier a feature needs              |
+| `<QuickLinks>`             | Card grid; `<QuickLink>` takes `title`,         |
+|                            | `description`, `href`, `icon`                   |
+| `<LinkCards>`              | Card grid with images; `<LinkCard>` adds        |
+|                            | `imgSrc` and `imgAlt`                           |
+| `<ProductCards>`           | `<ProductCard>` grid, same props as `LinkCard`  |
+| `<Tabs>`                   | Tabbed content; `<Tab title="...">`             |
+| `<Accordion title="...">`  | Collapsible section                             |
+| `<Badge>`                  | Inline label                                    |
+| `<SupportedReleasesTable>` | Release tables on `/releases`, also             |
+|                            | `<DeprecatedReleasesTable>`                     |
+| `<ResourceEstimator>`      | Page-specific widgets, also `<FeatureParity>`   |
+|                            | and `<AWSOneClickLaunchForm>`                   |
 
-For a better docs experience, we'll continue adding more components in the
-future.
+For example:
+
+```js
+<QuickLinks>
+  <QuickLink
+    title="Terraform on AWS"
+    icon="installation"
+    href="/self-hosted/executors/deploy-executors-terraform-aws"
+    description="Deploy executors on AWS with Terraform."
+  />
+</QuickLinks>
+```
 
 ### Adding a link
 
@@ -227,6 +243,21 @@ Once you're satisfied with your changes, follow these steps:
 - Create a pull request to the
   [Sourcegraph documentation repository](https://github.com/sourcegraph/docs),
   and tag the appropriate reviewers.
+
+### Pull request checks
+
+GitHub Actions comment on your PR with anything it introduces:
+
+- **Broken links**: internal links and `#anchors` that no longer resolve,
+  absolute links to this site, and external links that 404. This check fails
+  the PR. Locally: `pnpm run check links --check-anchors --check-self-links`.
+- **Broken redirects**: entries in `src/data/redirects.ts` whose destination
+  no longer exists. Locally: `node dev/check-redirects.mjs`.
+- **Spelling**: CSpell on the lines you added, plus the PR title and
+  description. Advisory only. Add product names and identifiers to
+  `cspell-allow-list.txt`, in alphabetical order.
+- **Preview links**: direct links to the pages you changed on the Vercel
+  preview deployment, once it finishes.
 
 Thank you for contributing to Sourcegraph documentation! Your efforts help us
 provide top-notch learning experiences for our users. If you have any questions
