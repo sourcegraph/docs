@@ -1,3 +1,4 @@
+const {PHASE_DEVELOPMENT_SERVER} = require('next/constants');
 const {withContentlayer} = require('next-contentlayer2');
 /** @type {import('next').NextConfig} */
 
@@ -35,4 +36,10 @@ const nextConfig = {
 	}
 };
 
-module.exports = withContentlayer(nextConfig);
+// withContentlayer is a webpack hook that regenerates .contentlayer when content
+// changes, which `next dev --webpack` needs. `next build` uses Turbopack, with
+// dev/build-content.mjs generating .contentlayer beforehand.
+module.exports = phase =>
+	phase === PHASE_DEVELOPMENT_SERVER
+		? withContentlayer(nextConfig)
+		: nextConfig;

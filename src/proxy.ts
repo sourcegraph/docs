@@ -3,8 +3,7 @@ import {NextResponse} from 'next/server';
 import docsConfig from '../docs.config.js';
 
 import {TECHNICAL_CHANGELOG_RSS_URL} from './data/constants';
-
-const {updatedRedirectsData} = require('./data/redirects.ts');
+import {updatedRedirectsData} from './data/redirects';
 
 function createRedirectUrl(
 	request: NextRequest,

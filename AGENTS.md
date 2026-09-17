@@ -10,9 +10,15 @@
 - **Lint**: `pnpm run lint` (ESLint 9 flat config in `eslint.config.mjs`; React
   Compiler rules are warnings until the vendored
   `src/components/search/docsearch` code is rewritten)
-- **Framework**: Next.js 16 with `--webpack` (`next-contentlayer2` has no
-  Turbopack plugin); the request rewrite lives in `src/proxy.ts`;
-  `/api/releases` and `/api/versions` opt into static caching with
+- **Framework**: Next.js 16. `next build` uses Turbopack; `dev/build-content.mjs`
+  runs `contentlayer2 build` first, with its cache under `.next/cache` so Vercel
+  keeps it between deploys, and with each `.mdx` file's mtime set from its
+  content, since contentlayer2 keys its cache on mtime and a fresh clone resets
+  those (workaround; drop once <https://github.com/timlrx/contentlayer2/pull/94>
+  ships). `next dev --webpack` still uses the `next-contentlayer2` webpack plugin
+  to regenerate content on change (`next.config.js` applies it only in the dev
+  phase). The request rewrite lives in `src/proxy.ts`; `/api/releases` and
+  `/api/versions` opt into static caching with
   `export const dynamic = 'force-static'`
 - **Checks**: `pnpm run check` runs the checks in `dev/checks.mjs` (links,
   filenames, images); `pnpm run build` runs filenames and images first, so a

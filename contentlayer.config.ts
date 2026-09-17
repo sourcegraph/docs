@@ -6,6 +6,7 @@ import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
 import {MDXDocument, allCoreContent} from './src/utils/contentlayer';
 import {searchMetadata} from './src/data/search';
+import shadesOfPurple from './src/styles/shades-of-purple.json';
 import GithubSlugger from 'github-slugger';
 import {visit} from 'unist-util-visit';
 
@@ -96,15 +97,7 @@ function createSearchIndex(allPosts: MDXDocument[]) {
 
 const prettyCodeOptions = {
 	keepBackground: true,
-	theme: JSON.parse(
-		fs.readFileSync(
-			new URL(
-				'./../../../src/styles/shades-of-purple.json',
-				import.meta.url
-			),
-			'utf-8'
-		)
-	)
+	theme: shadesOfPurple
 };
 
 const rehypePlugins: any = [
