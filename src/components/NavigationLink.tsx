@@ -13,6 +13,14 @@ export function NavigationLink(props: NavigationLinkProps) {
 	const [hasIntent, setHasIntent] = useState(false);
 	const markIntent = () => setHasIntent(true);
 
+	// next/link treats an absolute URL on our own origin (sourcegraph.com/pricing)
+	// as an app route and prefetches the marketing page's HTML. Plain anchors
+	// for anything with a scheme.
+	if (typeof props.href === 'string' && /^https?:\/\//.test(props.href)) {
+		const {href, ...anchorProps} = props;
+		return <a href={href} {...anchorProps} />;
+	}
+
 	return (
 		<Link
 			{...props}

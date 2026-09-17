@@ -97,7 +97,7 @@ export function Navigation({
 
 	// Prepends version (if any) to the link path
 	const prependVersion = (path: string) => {
-		return version ? `/v/${version}${path}` : path;
+		return version && path.startsWith('/') ? `/v/${version}${path}` : path;
 	};
 
 	// Handle versions
