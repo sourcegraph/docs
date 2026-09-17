@@ -37,6 +37,7 @@ export default {
 				'00': '#060000',
 				'01': '#200302',
 				'02': '#410604',
+				'05': '#B80000', // 6.7:1 on white, WCAG AA text
 				'07': '#F34E3F', // Hero color
 				'08': '#FF7867',
 				'11': '#FFF3F0'
@@ -64,8 +65,8 @@ export default {
 			'dark-bg': '#060000', // Vermilion-00
 			'light-bg': '#fffcfc',
 			link: {
-				light: '#F34E3F', // Teal-07
-				DEFAULT: '#FF7867' // Teal-08
+				light: '#DA251B', // Vermilion-06, 4.8:1 on light-bg
+				DEFAULT: '#FF7867' // Vermilion-08
 			},
 			'link-underline': '#606060', // Teal-02
 			'link-underline-light': '#EAFCFF', // Teal-11
