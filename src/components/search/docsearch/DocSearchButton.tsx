@@ -40,12 +40,12 @@ export const DocSearchButton = React.forwardRef<
 				<div className="mt-1 flex items-center justify-center rounded-lg md:hidden">
 					<SearchIcon className="h-6 w-6 text-slate-400" />
 				</div>
-				<span className="sr-only md:not-sr-only md:ml-2 md:text-slate-500 md:dark:text-slate-500">
+				<span className="sr-only md:not-sr-only md:ml-2 md:text-slate-500 md:dark:text-slate-400">
 					Search docs...
 				</span>
 
 				{modifierKey && (
-					<kbd className="ml-auto hidden font-medium text-slate-400 md:block dark:text-slate-600">
+					<kbd className="ml-auto hidden font-medium text-slate-500 dark:text-slate-400 md:block">
 						<kbd className="font-sans">{modifierKey}</kbd>
 						<kbd className="font-sans">K</kbd>
 					</kbd>

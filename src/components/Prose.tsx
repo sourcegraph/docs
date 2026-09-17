@@ -31,7 +31,7 @@ export function Prose<T extends React.ElementType = 'div'>({
 				//table head alignment
 				'prose-th:table-cell',
 				// Strong
-				'prose-strong:text-vermilion-08 dark:prose-strong:text-vermilion-08',
+				'prose-strong:text-vermilion-05 dark:prose-strong:text-vermilion-08',
 				// Inline code block
 				'prose-code:before:content-none prose-code:after:content-none',
 				// Details blocks
