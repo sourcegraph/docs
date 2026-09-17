@@ -1,15 +1,14 @@
 import {type ClassValue, clsx} from 'clsx';
+import config from 'docs.config';
 import {twMerge} from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
-// The site is served under /docs (basePath in next.config.js). next/link adds it
-// to hrefs, but <img src> and next/image do not, so a root-relative path to a
-// file in public/ 404s unless prefixed here.
+// next/link and routing add the basePath; <img src>, <a href>, fetch() and
+// metadata URLs do not, so root-relative URLs for those go through here.
 export function withBasePath(url: string) {
-	const basePath = process.env.NEXT_PUBLIC_DOCS_BASE_PATH || '';
 	const isRootRelative = url.startsWith('/') && !url.startsWith('//');
-	return isRootRelative ? `${basePath}${url}` : url;
+	return isRootRelative ? `${config.DOCS_BASE_PATH}${url}` : url;
 }

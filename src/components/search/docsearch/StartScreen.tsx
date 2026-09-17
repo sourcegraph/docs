@@ -2,6 +2,7 @@ import {RecentIcon} from './icons/RecentIcon';
 import {ResetIcon} from './icons/ResetIcon';
 import {StarIcon} from './icons/StarIcon';
 import {curatedSearchSuggestions} from '../../../data/search';
+import {withBasePath} from '@/lib/utils';
 
 import {Results} from './Results';
 import type {ScreenStateProps} from './ScreenState';
@@ -24,8 +25,6 @@ type StartScreenProps = Omit<
 	translations?: StartScreenTranslations;
 };
 
-const basePath = process.env.NEXT_PUBLIC_DOCS_BASE_PATH || '';
-
 function Suggestions() {
 	return (
 		<section
@@ -38,7 +37,7 @@ function Suggestions() {
 			<ul>
 				{curatedSearchSuggestions.map(suggestion => (
 					<li key={suggestion.href}>
-						<a href={basePath + suggestion.href}>
+						<a href={withBasePath(suggestion.href)}>
 							<span className="DocSearch-Suggestion-title">
 								{suggestion.title}
 							</span>

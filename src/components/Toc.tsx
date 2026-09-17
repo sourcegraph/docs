@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import Link from 'next/link';
 import {useParams} from 'next/navigation';
 import {useCallback, useEffect, useState} from 'react';
+import {withBasePath} from '@/lib/utils';
 import {ClipboardIcon} from './icons/ClipboardIcon';
 import {PencilIcon} from './icons/PencilIcon';
 import {DocumentIcon} from './icons/DocumentIcon';
@@ -29,7 +30,6 @@ export function TableOfContents({headings, rawMarkdown, editPath}: Props) {
 	let [currentSection, setCurrentSection] = useState(headings[0]?.id);
 	const [copied, setCopied] = useState(false);
 	const params: ParamsType = useParams();
-	const basePath = process.env.NEXT_PUBLIC_DOCS_BASE_PATH || '';
 
 	const handleCopyPage = useCallback(async () => {
 		if (!rawMarkdown) return;
@@ -168,7 +168,7 @@ export function TableOfContents({headings, rawMarkdown, editPath}: Props) {
 						</div>
 						<div className="mt-2 flex items-center text-sm">
 							<a
-								href={`${basePath}/${params.slug.join('/')}.md`}
+								href={withBasePath(`/${params.slug.join('/')}.md`)}
 								target="_blank"
 								rel="noopener noreferrer"
 								className="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
