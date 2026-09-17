@@ -59,7 +59,7 @@ export async function GET(
 			}}
 		>
 			{/* Sourcegraph logo */}
-			{/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text -- Satori requires a native image, and alt text is not rendered. */}
+			{/* eslint-disable-next-line @next/next/no-img-element -- Satori requires a native image, and alt text is not rendered. */}
 			<img src={logoDataUrl} width={246} height={35} alt="" />
 
 			{/* Title */}
