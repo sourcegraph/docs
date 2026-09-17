@@ -1,6 +1,7 @@
 import typographyPlugin from '@tailwindcss/typography';
-import {type Config} from 'tailwindcss';
-const colors = require('tailwindcss/colors');
+import type {Config} from 'tailwindcss';
+import colors from 'tailwindcss/colors';
+import animatePlugin from 'tailwindcss-animate';
 
 export default {
 	content: ['./src/**/*.{js,jsx,ts,tsx,md}'],
@@ -205,5 +206,5 @@ export default {
 			}
 		}
 	},
-	plugins: [typographyPlugin, require('tailwindcss-animate')]
+	plugins: [typographyPlugin, animatePlugin]
 } satisfies Config;
