@@ -37,6 +37,7 @@ jobs:
               run: npm install --global cspell@10
 
             - name: Find spelling errors introduced by this PR
+              id: check
               # Title and description come in through env, never inline in the
               # script, so a crafted pull request cannot inject shell commands
               env:
@@ -46,10 +47,18 @@ jobs:
               run: |
                   base=$(git merge-base "$BASE_SHA" HEAD)
                   printf '%s\n\n%s\n' "$PR_TITLE" "$PR_BODY" > "$RUNNER_TEMP/pull-request.md"
-                  # Exit 1 means findings; anything else is an operational error
+                  # The script exits 1 both with findings and when it crashes at import
+                  # time. It writes its output in one go at the end, so a crash leaves
+                  # it empty. A crash does not fail the check, since it says nothing
+                  # about the PR; the report step says so instead of posting the
+                  # empty report
                   node dev/check-spelling.mjs --base "$base" \
                       --pull-request "$RUNNER_TEMP/pull-request.md" --format json \
-                      > "$RUNNER_TEMP/spelling.json" || [ "$?" -eq 1 ]
+                      > "$RUNNER_TEMP/spelling.json" || true
+                  if ! [ -s "$RUNNER_TEMP/spelling.json" ]; then
+                      echo "::warning::check-spelling crashed, so this PR was not checked"
+                      echo "crashed=true" >> "$GITHUB_OUTPUT"
+                  fi
                   cat "$RUNNER_TEMP/spelling.json"
 
             - name: Report on the pull request
@@ -60,4 +69,11 @@ jobs:
                   PR_NUMBER: ${{ github.event.pull_request.number }}
                   HEAD_SHA: ${{ github.event.pull_request.head.sha }}
                   HEAD_REF: ${{ github.event.pull_request.head.ref }}
-              run: node dev/post-spelling-review.mjs --findings "$RUNNER_TEMP/spelling.json"
+                  RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+                  CRASHED: ${{ steps.check.outputs.crashed }}
+              run: |
+                  if [ "$CRASHED" = true ]; then
+                      node dev/post-spelling-review.mjs --crashed
+                  else
+                      node dev/post-spelling-review.mjs --findings "$RUNNER_TEMP/spelling.json"
+                  fi

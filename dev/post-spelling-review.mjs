@@ -10,8 +10,11 @@
  * visible.
  *
  * Usage: node dev/post-spelling-review.mjs --findings <json-file> [--dry-run]
+ *        node dev/post-spelling-review.mjs --crashed [--dry-run]
  *
- * Reads the JSON written by `dev/check-spelling.mjs --format json`.
+ * Reads the JSON written by `dev/check-spelling.mjs --format json`. With
+ * `--crashed`, the summary says the check could not run and links the job log
+ * (RUN_URL) instead; the inline comments are left as they are.
  * Requires GH_TOKEN, GITHUB_REPOSITORY, PR_NUMBER, HEAD_SHA and HEAD_REF.
  */
 
@@ -19,6 +22,7 @@ import {readFileSync} from 'fs';
 
 const args = process.argv.slice(2);
 const FINDINGS_FILE = args[args.indexOf('--findings') + 1];
+const CRASHED = args.includes('--crashed');
 const DRY_RUN = args.includes('--dry-run');
 const MAX_INLINE_COMMENTS = 25;
 
@@ -27,6 +31,7 @@ const REPOSITORY = process.env.GITHUB_REPOSITORY;
 const PR_NUMBER = process.env.PR_NUMBER;
 const HEAD_SHA = process.env.HEAD_SHA;
 const HEAD_REF = process.env.HEAD_REF;
+const RUN_URL = process.env.RUN_URL;
 
 // Link to the PR branch, not the commit, so GitHub's edit button works from it
 const ALLOW_LIST_LINK = `[\`cspell-allow-list.txt\`](https://github.com/${REPOSITORY}/blob/${HEAD_REF}/cspell-allow-list.txt)`;
@@ -168,7 +173,22 @@ function summaryBody(findings) {
 	return lines.join('\n') + '\n';
 }
 
-async function upsertSummaryComment(findings) {
+function crashedBody() {
+	return [
+		SUMMARY_MARKER,
+		'### ⚠️ The spell check could not run on this revision',
+		'',
+		`This is a problem with the check, not with this PR; see the [job log](${RUN_URL}).`,
+		''
+	].join('\n');
+}
+
+const RESOLVED_BODY = `${SUMMARY_MARKER}\n### ✅ This revision introduces no spelling errors\n`;
+
+// Post the summary, or replace the earlier one. A resolved summary is kept,
+// collapsed, so the discussion still shows what was flagged and fixed; it is
+// reopened when there is something to say again.
+async function upsertSummaryComment(body, resolved) {
 	const comments = await githubList(
 		`/repos/${REPOSITORY}/issues/${PR_NUMBER}/comments`
 	);
@@ -177,27 +197,21 @@ async function upsertSummaryComment(findings) {
 	);
 
 	if (!existing) {
-		if (findings.length > 0) {
+		// Nothing to resolve
+		if (!resolved) {
 			await githubWrite(
 				'POST',
 				`/repos/${REPOSITORY}/issues/${PR_NUMBER}/comments`,
-				{body: summaryBody(findings)}
+				{body}
 			);
 		}
 		return;
 	}
 
-	// Keep the earlier report, collapsed as resolved, so the discussion still
-	// shows what was flagged and fixed. Reopen it when new findings appear.
-	const resolved = findings.length === 0;
 	await githubWrite(
 		'PATCH',
 		`/repos/${REPOSITORY}/issues/comments/${existing.id}`,
-		{
-			body: resolved
-				? `${SUMMARY_MARKER}\n### ✅ The spelling errors reported on an earlier revision are fixed\n`
-				: summaryBody(findings)
-		}
+		{body}
 	);
 	await setCommentMinimized(existing.node_id, resolved);
 }
@@ -323,13 +337,25 @@ async function main() {
 			throw new Error(`Missing required environment variable ${name}`);
 		}
 	}
+	if (CRASHED) {
+		if (!RUN_URL) {
+			throw new Error('Missing required environment variable RUN_URL');
+		}
+		console.log('Reporting that the check crashed');
+		await upsertSummaryComment(crashedBody(), false);
+		return;
+	}
 	if (!FINDINGS_FILE) {
 		throw new Error('Missing required --findings <json-file>');
 	}
 
 	const findings = JSON.parse(readFileSync(FINDINGS_FILE, 'utf8'));
 	console.log(`${findings.length} finding(s) to report`);
-	await upsertSummaryComment(findings);
+	const resolved = findings.length === 0;
+	await upsertSummaryComment(
+		resolved ? RESOLVED_BODY : summaryBody(findings),
+		resolved
+	);
 	await syncInlineComments(findings);
 }
 
