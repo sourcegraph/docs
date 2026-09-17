@@ -21,7 +21,9 @@
 - **Check redirects**: `node dev/check-redirects.mjs` reports broken entries in
   `src/data/redirects.ts` (CI comments on PRs that break redirects; see the
   script header for what it checks). Not part of `pnpm run check`: main has
-  hundreds of pre-existing findings, and CI only reports the ones a PR adds
+  hundreds of pre-existing findings, and CI only reports the ones a PR adds.
+  When a check script crashes, CI warns and skips the check instead of failing
+  it or commenting: an empty report says nothing about the PR
 - **Prove changed links resolve on a deploy**:
   `node dev/verify-links-live.mjs --site <vercel-preview-url>` prints a
   Markdown table for the PR description

@@ -44,15 +44,24 @@ jobs:
                   git worktree add "$RUNNER_TEMP/base" "$merge_base"
                   git diff -U0 "$merge_base" HEAD -- src/data/redirects.ts > "$RUNNER_TEMP/changes.diff"
 
+            # The script exits 1 both with findings and when it crashes, e.g. because
+            # this PR's copy of it cannot read the base branch's redirects.ts. It
+            # writes its output in one go at the end, so a crash leaves it empty.
+            # A crash is a warning, not a failed check: it says nothing about the
+            # PR, and an empty report must not be posted as one.
             - name: Record broken redirects already present on the base branch
-              # Exit 1 means findings, which is expected here
+              id: baseline
               run: |
                   node dev/check-redirects.mjs --format json \
-                      --root "$RUNNER_TEMP/base" > "$RUNNER_TEMP/base-redirects.json" \
-                      || [ $? -eq 1 ]
+                      --root "$RUNNER_TEMP/base" > "$RUNNER_TEMP/base-redirects.json" || true
+                  if ! [ -s "$RUNNER_TEMP/base-redirects.json" ]; then
+                      echo "::warning::check-redirects crashed on the base branch, so this PR was not checked"
+                      echo "crashed=true" >> "$GITHUB_OUTPUT"
+                  fi
 
             - name: Find redirects broken by this PR
               id: check
+              if: steps.baseline.outputs.crashed != 'true'
               env:
                   # Line links in the report open redirects.ts on the PR branch
                   LINK_BASE: ${{ github.event.pull_request.head.repo.html_url }}/blob/${{ github.event.pull_request.head.ref }}
@@ -62,26 +71,30 @@ jobs:
                       --diff "$RUNNER_TEMP/changes.diff" \
                       --review "$RUNNER_TEMP/review.json" \
                       --link-base "$LINK_BASE" > "$RUNNER_TEMP/report.md"; then
-                      echo "broken=false" >> "$GITHUB_OUTPUT"
+                      echo "result=clean" >> "$GITHUB_OUTPUT"
+                  elif [ -s "$RUNNER_TEMP/report.md" ]; then
+                      echo "result=broken" >> "$GITHUB_OUTPUT"
                   else
-                      echo "broken=true" >> "$GITHUB_OUTPUT"
+                      echo "::warning::check-redirects crashed, so this PR was not checked"
                   fi
                   cat "$RUNNER_TEMP/report.md"
 
             - name: Comment on the pull request
               # Fork PRs get a read-only token; the report is still in the job log
-              if: github.event.pull_request.head.repo.full_name == github.repository
+              if: >-
+                  github.event.pull_request.head.repo.full_name == github.repository
+                  && contains(fromJSON('["clean", "broken"]'), steps.check.outputs.result)
               env:
                   GH_TOKEN: ${{ github.token }}
                   PR_NUMBER: ${{ github.event.pull_request.number }}
-                  BROKEN: ${{ steps.check.outputs.broken }}
+                  RESULT: ${{ steps.check.outputs.result }}
               run: |
                   marker='<!-- check-redirects-report -->'
                   existing_comment=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
                       --paginate --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n 1)
 
                   # Comment only when there is something to report, or an earlier report to resolve
-                  if [ "$BROKEN" = true ]; then
+                  if [ "$RESULT" = broken ]; then
                       { echo "$marker"; cat "$RUNNER_TEMP/report.md"; } > "$RUNNER_TEMP/comment.md"
                   elif [ -n "$existing_comment" ]; then
                       printf '%s\n### ✅ The redirects an earlier revision of this PR broke are fixed\n' \
@@ -100,12 +113,14 @@ jobs:
             - name: Suggest fixes as review comments
               # One suggested change per fixable entry this PR added, kept in sync
               # with the findings; see dev/sync-review-comments.sh
-              if: github.event.pull_request.head.repo.full_name == github.repository
+              if: >-
+                  github.event.pull_request.head.repo.full_name == github.repository
+                  && contains(fromJSON('["clean", "broken"]'), steps.check.outputs.result)
               env:
                   GH_TOKEN: ${{ github.token }}
                   PR_NUMBER: ${{ github.event.pull_request.number }}
               run: dev/sync-review-comments.sh '<!-- check-redirects-finding:' "$RUNNER_TEMP/review.json"
 
             - name: Fail when this PR breaks redirects
-              if: steps.check.outputs.broken == 'true'
+              if: steps.check.outputs.result == 'broken'
               run: exit 1
