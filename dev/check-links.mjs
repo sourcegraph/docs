@@ -17,7 +17,7 @@
  * - With --check-external, external links on added lines that return 404 or 410
  *
  * The pull request workflow (.github/workflows/check-links.yml) runs this with
- * the flags below; `npm run build` does not run it, so findings never fail a deploy.
+ * the flags below; `pnpm run build` does not run it, so findings never fail a deploy.
  *
  * Usage: node dev/check-links.mjs [options]
  *   --check-anchors        Also validate #anchors against headings

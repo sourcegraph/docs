@@ -3,30 +3,38 @@
 ## Build Commands
 
 - **Type Check**: `npx tsc --noEmit`
-- **Build**: `npm run build`
-- **Dev**: `npm run dev`
-- **Lint**: `npm run lint` (ESLint 9 flat config in `eslint.config.mjs`; React
+- **Package manager**: `pnpm` (`packageManager` in `package.json`; `mise install`
+  gives you the pinned Node and pnpm from `.tool-versions`). Never `npm run`
+- **Build**: `pnpm run build`
+- **Dev**: `pnpm run dev`
+- **Lint**: `pnpm run lint` (ESLint 9 flat config in `eslint.config.mjs`; React
   Compiler rules are warnings until the vendored
   `src/components/search/docsearch` code is rewritten)
 - **Framework**: Next.js 16 with `--webpack` (`next-contentlayer2` has no
   Turbopack plugin); the request rewrite lives in `src/proxy.ts`;
   `/api/releases` and `/api/versions` opt into static caching with
   `export const dynamic = 'force-static'`
-- **Checks**: `npm run check` runs every `dev/check-*.mjs` (links, filenames,
-  images); `npm run build` runs filenames and images first, so a finding from
-  those fails a deploy. Links is not in the build: it runs as its own PR check
-  (`.github/workflows/check-links.yml`)
+- **Checks**: `pnpm run check` runs the checks in `dev/checks.mjs` (links,
+  filenames, images); `pnpm run build` runs filenames and images first, so a
+  finding from those fails a deploy. Links is not in the build: it runs as its
+  own PR check (`.github/workflows/check-links.yml`)
 - **Check redirects**: `node dev/check-redirects.mjs` reports broken entries in
   `src/data/redirects.ts` (CI comments on PRs that break redirects; see the
-  script header for what it checks). Not part of `npm run check`: main has
+  script header for what it checks). Not part of `pnpm run check`: main has
   hundreds of pre-existing findings, and CI only reports the ones a PR adds
 - **Prove changed links resolve on a deploy**:
   `node dev/verify-links-live.mjs --site <vercel-preview-url>` prints a
   Markdown table for the PR description
+- **Spell check**: `.github/workflows/spellcheck.yml` runs
+  `dev/check-spelling.mjs` on the lines a PR adds plus its title and
+  description, and comments the findings (advisory, never fails the PR).
+  Add product names and identifiers to `cspell-allow-list.txt`, in
+  alphabetical order; the check reports out-of-order entries. CSpell is not a
+  project dependency: `npx cspell@10 --no-progress <file>` to run it locally
 
 ### Links
 
-- `npm run check -- links --check-anchors --check-self-links`. CI comments on
+- `pnpm run check links --check-anchors --check-self-links`. CI comments on
   PRs that break links and fails the `Broken links introduced by this PR`
   check; see `dev/check-links.mjs`.
 - When moving a page or renaming a heading, update every link to it; a
@@ -36,7 +44,7 @@
 - To also probe the external links you added:
 
 ```sh
-npm run check -- links --check-anchors --check-self-links \
+pnpm run check links --check-anchors --check-self-links \
   --check-external --diff <(git diff -U0 origin/main)
 ```
 
