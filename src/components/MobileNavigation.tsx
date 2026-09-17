@@ -83,7 +83,7 @@ export function MobileNavigation() {
 				className="fixed inset-0 z-50 flex items-start overflow-y-auto bg-slate-900/50 pr-10 backdrop-blur lg:hidden"
 				aria-label="Navigation"
 			>
-				<Dialog.Panel className="min-h-full w-full max-w-xs bg-light-bg px-4 pb-12 pt-5 sm:px-6 dark:bg-dark-bg">
+				<Dialog.Panel className="min-h-full w-full max-w-xs bg-light-bg px-4 pb-12 pt-5 dark:bg-dark-bg sm:px-6">
 					<div className="flex items-center">
 						<button
 							type="button"
@@ -102,6 +102,15 @@ export function MobileNavigation() {
 							/>
 						</Link>
 					</div>
+					<Link
+						href="https://sourcegraph.com/changelog"
+						className="mt-5 inline-flex rounded-md px-1 text-base font-medium text-slate-500 hover:text-vermilion-11 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vermilion-11/50 dark:text-dark-text-secondary dark:hover:text-vermilion-11"
+					>
+						Changelog
+						<span className="ml-1" aria-hidden="true">
+							↗
+						</span>
+					</Link>
 					<Suspense fallback={null}>
 						<Navigation
 							className="mt-5 px-1"

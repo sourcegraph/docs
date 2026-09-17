@@ -25,6 +25,53 @@ export type NavigationItem = {
 
 export const navigation: NavigationItem[] = [
 	{
+		separator: 'AI & agents',
+		topics: [
+			{
+				title: 'Agentic Batch Changes',
+				href: '/agentic-batch-changes',
+				sections: [
+					{
+						title: 'Writing prompts',
+						href: '/agentic-batch-changes/writing-prompts'
+					},
+					{
+						title: 'Configuration and administration',
+						href: '/agentic-batch-changes/configuration'
+					}
+				]
+			},
+			{
+				title: 'Deep Search',
+				href: '/deep-search',
+				sections: [
+					{
+						title: 'Slack Integration',
+						href: '/slack-integration'
+					},
+					{
+						title: 'Context Filters',
+						href: '/context-filters'
+					}
+				]
+			},
+			{
+				title: 'MCP Server',
+				href: '/api/mcp',
+				sections: [
+					{
+						title: 'Authentication',
+						href: '/api/mcp/authentication'
+					},
+					{
+						title: 'Client integrations',
+						href: '/api/mcp/client-integrations'
+					}
+				]
+			}
+		]
+	},
+	{
 		separator: 'Code Intelligence',
 		topics: [
 			{
@@ -94,24 +141,6 @@ export const navigation: NavigationItem[] = [
 						href: '/code-search/faq'
 					}
 				]
-			},
-			{
-				title: 'Deep Search',
-				href: '/deep-search',
-				sections: [
-					{
-						title: 'Slack Integration',
-						href: '/slack-integration'
-					},
-					{
-						title: 'Context Filters',
-						href: '/context-filters'
-					}
-				]
-			},
-			{
-				title: 'Diff Tour',
-				href: '/diff-tour'
 			},
 			{
 				title: 'Code Navigation',
@@ -249,10 +278,6 @@ export const navigation: NavigationItem[] = [
 						href: '/cody/core-concepts/context',
 						subsections: [
 							{
-								title: 'Cody context',
-								href: '/cody/core-concepts/context'
-							},
-							{
 								title: 'Cody input and output token limits',
 								href: '/cody/core-concepts/token-limits'
 							},
@@ -272,30 +297,16 @@ export const navigation: NavigationItem[] = [
 					},
 					{title: 'Cody FAQ', href: '/cody/faq'}
 				]
+			},
+			{
+				title: 'Diff Tour',
+				href: '/diff-tour'
 			}
 		]
 	},
 	{
 		separator: 'Code management',
 		topics: [
-			{
-				title: 'Agentic Batch Changes',
-				href: '/agentic-batch-changes',
-				sections: [
-					{
-						title: 'Getting started',
-						href: '/agentic-batch-changes'
-					},
-					{
-						title: 'Writing prompts',
-						href: '/agentic-batch-changes/writing-prompts'
-					},
-					{
-						title: 'Configuration and administration',
-						href: '/agentic-batch-changes/configuration'
-					}
-				]
-			},
 			{
 				title: 'Batch Changes',
 				href: '/batch-changes',
@@ -435,10 +446,6 @@ export const navigation: NavigationItem[] = [
 				]
 			},
 			{
-				title: 'Code Monitoring',
-				href: '/code-monitoring'
-			},
-			{
 				title: 'Code Insights',
 				href: '/code-insights',
 				sections: [
@@ -453,6 +460,10 @@ export const navigation: NavigationItem[] = [
 					{title: 'How-tos', href: '/code-insights/how-tos'},
 					{title: '`src`', href: '/code-insights/references'}
 				]
+			},
+			{
+				title: 'Code Monitoring',
+				href: '/code-monitoring'
 			},
 			{
 				title: 'Code Ownership',
@@ -480,28 +491,23 @@ export const navigation: NavigationItem[] = [
 				]
 			},
 			{
-				title: 'Install Cody CLI',
-				href: '/cody/clients/install-cli'
-			},
-			{
-				title: 'Browser extensions',
-				href: '/integration/browser-extension',
+				title: 'Integrations',
+				href: '/integration',
 				sections: [
 					{
-						title: 'Browser search engine shortcuts',
-						href: '/integration/browser-extension/how-tos/browser-search-engine'
+						title: 'Browser extension',
+						href: '/integration/browser-extension'
+					},
+					{
+						title: 'Editor integrations',
+						href: '/integration/editor'
 					}
 				]
-			},
-			{
-				title: 'Editor integrations',
-				href: '/integration/editor'
 			},
 			{
 				title: 'Sourcegraph API',
 				href: '/api',
 				sections: [
-					{title: 'Sourcegraph API', href: '/api'},
 					{
 						title: 'Sourcegraph streaming search API',
 						href: '/api/stream-api'
@@ -515,31 +521,16 @@ export const navigation: NavigationItem[] = [
 						href: '/api/graphql'
 					}
 				]
-			},
-			{
-				title: 'Sourcegraph MCP server',
-				href: '/api/mcp',
-				sections: [
-					{
-						title: 'Authentication',
-						href: '/api/mcp/authentication'
-					},
-					{
-						title: 'Client integrations',
-						href: '/api/mcp/client-integrations'
-					}
-				]
 			}
 		]
 	},
 	{
-		separator: 'Platform',
+		separator: 'Deploy & administer',
 		topics: [
 			{
 				title: 'Administration',
 				href: '/admin',
 				sections: [
-					{title: 'Administration', href: '/admin'},
 					{title: 'Licensing', href: '/admin/licensing'},
 					{
 						title: 'Sourcegraph Enterprise Portal',
@@ -580,7 +571,7 @@ export const navigation: NavigationItem[] = [
 				href: '/cloud'
 			},
 			{
-				title: 'Enterprise self-hosted',
+				title: 'Self-hosted',
 				href: '/self-hosted',
 				sections: [
 					{
@@ -692,7 +683,7 @@ export const navigation: NavigationItem[] = [
 				href: '/model-provider'
 			},
 			{
-				title: 'Sourcegraph Analytics',
+				title: 'Analytics',
 				href: '/analytics',
 				sections: [
 					{title: 'Metrics', href: '/analytics#metrics'},
@@ -706,7 +697,7 @@ export const navigation: NavigationItem[] = [
 		]
 	},
 	{
-		separator: 'Pricing',
+		separator: 'Resources',
 		topics: [
 			{
 				title: 'Sourcegraph pricing',
@@ -715,15 +706,6 @@ export const navigation: NavigationItem[] = [
 			{
 				title: 'Pricing FAQs',
 				href: '/pricing/faqs'
-			}
-		]
-	},
-	{
-		separator: 'Help & support',
-		topics: [
-			{
-				title: 'Changelog',
-				href: 'https://sourcegraph.com/changelog'
 			},
 			{
 				title: 'Beta and experimental features',
