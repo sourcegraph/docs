@@ -81,7 +81,9 @@ export function proxy(request: NextRequest) {
 		`^\/(?:v\/|@)${docsConfig.DOCS_LATEST_VERSION}\/?$`
 	);
 	if (latestVersionOnlyMatch) {
-		return NextResponse.redirect(`https://sourcegraph.com/docs`);
+		return NextResponse.redirect(
+			`${request.nextUrl.origin}${docsConfig.DOCS_BASE_PATH}`
+		);
 	}
 
 	// Handle version without slug - both /v/X.Y and @X.Y formats (for non-latest versions)
@@ -97,21 +99,15 @@ export function proxy(request: NextRequest) {
 		);
 	}
 
-	// Handle version-specific redirects
-	if (path.startsWith(`/v/${docsConfig.DOCS_LATEST_VERSION}/`)) {
+	// Latest version with a slug: this deployment serves it, so stay here.
+	if (
+		path.startsWith(`/v/${docsConfig.DOCS_LATEST_VERSION}/`) ||
+		path.startsWith(`/@${docsConfig.DOCS_LATEST_VERSION}/`)
+	) {
 		return NextResponse.redirect(
 			createRedirectUrl(
 				request,
-				`https://sourcegraph.com/docs/:slug*`,
-				path
-			)
-		);
-	}
-	if (path.startsWith(`/@${docsConfig.DOCS_LATEST_VERSION}/`)) {
-		return NextResponse.redirect(
-			createRedirectUrl(
-				request,
-				`https://sourcegraph.com/docs/:slug*`,
+				`${request.nextUrl.origin}${docsConfig.DOCS_BASE_PATH}/:slug*`,
 				path
 			)
 		);
