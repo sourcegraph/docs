@@ -4287,6 +4287,4 @@ const updatedRedirectsData = redirectsData.map(redirect => {
 	};
 });
 
-module.exports = {
-	updatedRedirectsData
-};
+export {updatedRedirectsData};
