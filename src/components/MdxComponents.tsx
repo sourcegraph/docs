@@ -65,9 +65,6 @@ const MdxComponents = (version?: string) => {
 		img: (props: any) => {
 			return <ZoomableImage {...props} />;
 		},
-		video: (props: any) => {
-			return <video className="rounded-xl" {...props} />;
-		},
 		pre: (props: any) => <PreCodeBlock {...props} />,
 		table: (props: any) => (
 			<div {...props} className="w-full table-auto overflow-x-auto">

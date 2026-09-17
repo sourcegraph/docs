@@ -65,14 +65,6 @@ export const curatedSearchSuggestions = [
 ] as const;
 
 export const searchMetadata = {
-	provider: 'kbar',
-	kbarConfig: {
-		// Root-relative like every public/ path; contentlayer.config.ts only checks
-		// it is set before writing public/search.json.
-		searchDocumentsPath: '/search.json'
-	},
-	// For Algolia
-	// provider: 'algolia',
 	algoliaConfig: {
 		// The application ID provided by Algolia
 		appId: 'JSZOJ0ZYVG',
