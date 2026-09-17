@@ -20,14 +20,14 @@ with no PR yet. Fixes with PRs: #1998–#2004.
   never sets one. Derive it from the first paragraph.
 - Duplicate `<title>`s: the title is the first heading only, so 4 pages are
   "How-to guides", 3 "FAQs", 3 "How-tos", … Suffix with the parent section.
-- `src/app/sitemap.ts`: `lastmod` is the build time for every page, and both
-  `/docs` and `/docs/` are listed.
+- `src/app/sitemap.ts`: the last-modified time is the build time for every
+  page, and both `/docs` and `/docs/` are listed.
 - `docs/self-hosted/postgresql-collation-version-mismatch-resolution.mdx`
   renders 10 `<h1>`s; demote all but the first.
 - `docs/integration/gitlab.mdx:29` embeds `img/gitlab-code-intel.gif`, but
   nothing serves `docs/**/img` (404); move it to `public/` after #1977 lands.
   The other ~50 files in `docs/integration/img/` are orphaned.
-- Code-comment colour in the syntax theme is `#B362FF` on `#2d2b55` (3.84:1,
+- Code-comment color in the syntax theme is `#B362FF` on `#2d2b55` (3.84:1,
   below WCAG AA); the rest of the contrast findings landed in #1995.
 - `/admin/config/site-config#<key>` anchors (19 inbound links) do not exist:
   the schema renderer emits no per-key ids. Deferred by #1925.
