@@ -31,6 +31,10 @@ export const generateMetadata = async ({params}: Props) => {
 		const ogImageUrl = `${process.env.NEXT_PUBLIC_DOCS_BASE_PATH || ''}/api/og/${path}`;
 		return {
 			title,
+			// The root layout's canonical is the landing page; without this
+			// override every docs page tells search engines it is a duplicate
+			// of https://sourcegraph.com/docs.
+			alternates: {canonical: `/docs${post.url}`},
 			openGraph: {
 				images: [{url: ogImageUrl, width: 1200, height: 630}]
 			},
