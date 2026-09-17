@@ -229,7 +229,7 @@ function* blocks(markdown) {
 		}
 	};
 	for (const rawLine of lines) {
-		const line = rawLine.replace(/^\s*>\s?/, ''); // blockquotes
+		const line = rawLine.replace(/^\s*>\s?/, ''); // blockquote prefix
 		const heading = line.match(regXHeading);
 		if (heading) {
 			yield* flush();
@@ -458,7 +458,9 @@ const settings = {
 	ranking: ['words', 'filters', 'typo', 'attribute', 'proximity', 'exact', 'custom'],
 	highlightPreTag: '<span class="algolia-docsearch-suggestion--highlight">',
 	highlightPostTag: '</span>',
+	// cspell:disable-next-line -- Algolia's setting name
 	minWordSizefor1Typo: 3,
+	// cspell:disable-next-line -- Algolia's setting name
 	minWordSizefor2Typos: 7,
 	allowTyposOnNumericTokens: false,
 	minProximity: 1,
@@ -485,12 +487,12 @@ const synonyms = [
 // ---------------------------------------------------------------------------
 
 function algolia(cliArgs) {
-	const creds = [];
+	const credentialArgs = [];
 	if (process.env.ALGOLIA_ADMIN_API_KEY) {
-		creds.push('--application-id', process.env.ALGOLIA_APPLICATION_ID ?? DEFAULT_APP_ID);
-		creds.push('--api-key', process.env.ALGOLIA_ADMIN_API_KEY);
+		credentialArgs.push('--application-id', process.env.ALGOLIA_APPLICATION_ID ?? DEFAULT_APP_ID);
+		credentialArgs.push('--api-key', process.env.ALGOLIA_ADMIN_API_KEY);
 	}
-	const full = ['-y', '@algolia/cli', ...cliArgs, ...creds];
+	const full = ['-y', '@algolia/cli', ...cliArgs, ...credentialArgs];
 	console.log(`$ npx ${cliArgs.join(' ')}`);
 	const res = spawnSync('npx', full, {stdio: 'inherit', cwd: root});
 	if (res.status !== 0) {
