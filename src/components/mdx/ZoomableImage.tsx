@@ -32,6 +32,7 @@ export function ZoomableImage({className, alt, ...props}: ZoomableImageProps) {
 			<img
 				className={`cursor-zoom-in rounded-xl ${className ?? ''}`}
 				alt={alt}
+				loading="lazy"
 				onClick={openModal}
 				{...props}
 			/>
