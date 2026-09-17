@@ -28,6 +28,7 @@ export function ZoomableImage({className, alt, ...props}: ZoomableImageProps) {
 
 	return (
 		<>
+			{/* eslint-disable-next-line @next/next/no-img-element -- MDX image dimensions are unknown. */}
 			<img
 				className={`cursor-zoom-in rounded-xl ${className ?? ''}`}
 				alt={alt}
@@ -63,6 +64,7 @@ export function ZoomableImage({className, alt, ...props}: ZoomableImageProps) {
 							<line x1="6" y1="6" x2="18" y2="18" />
 						</svg>
 					</button>
+					{/* eslint-disable-next-line @next/next/no-img-element -- MDX image dimensions are unknown. */}
 					<img
 						className="max-h-[90vh] max-w-[90vw] cursor-zoom-out rounded-lg object-contain"
 						alt={alt}
