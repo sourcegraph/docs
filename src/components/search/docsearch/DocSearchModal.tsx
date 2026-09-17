@@ -3,6 +3,7 @@ import {
 	type AlgoliaInsightsHit
 } from '@algolia/autocomplete-core';
 import type {SearchResponse} from '@algolia/client-search';
+import {useRouter} from 'next/navigation';
 import React from 'react';
 
 import type {DocSearchProps} from './DocSearch';
@@ -44,6 +45,8 @@ export type DocSearchModalProps = DocSearchProps & {
 	translations?: ModalTranslations;
 };
 
+const SNIPPET_LENGTH = 12;
+
 export function DocSearchModal({
 	appId,
 	apiKey,
@@ -70,10 +73,29 @@ export function DocSearchModal({
 		searchBox: searchBoxTranslations,
 		...screenStateTranslations
 	} = translations;
+	const router = useRouter();
+	const [initialQueryFromSelection] = React.useState(() =>
+		typeof window !== 'undefined'
+			? window.getSelection()?.toString().slice(0, MAX_QUERY_SIZE) || ''
+			: ''
+	);
+	const initialQuery = initialQueryFromProp || initialQueryFromSelection;
+	const [favoriteSearches] = React.useState(() =>
+		createStoredSearches<StoredDocSearchHit>({
+			key: `__DOCSEARCH_FAVORITE_SEARCHES__${indexName}`,
+			limit: 10
+		})
+	);
+	const [recentSearches] = React.useState(() =>
+		createStoredSearches<StoredDocSearchHit>({
+			key: `__DOCSEARCH_RECENT_SEARCHES__${indexName}`,
+			limit: favoriteSearches.getAll().length === 0 ? 7 : 4
+		})
+	);
 	const [state, setState] = React.useState<
 		DocSearchState<InternalDocSearchHit>
 	>({
-		query: '',
+		query: initialQuery,
 		collections: [],
 		completion: null,
 		context: {},
@@ -87,38 +109,11 @@ export function DocSearchModal({
 	const formElementRef = React.useRef<HTMLDivElement | null>(null);
 	const dropdownRef = React.useRef<HTMLDivElement | null>(null);
 	const inputRef = React.useRef<HTMLInputElement | null>(null);
-	const snippetLength = React.useRef<number>(10);
-	// The selected product chip. Kept in a ref as well as state so that
-	// `getSources` (captured once by `createAutocomplete`) always reads the
-	// current value without recreating the autocomplete instance.
 	const [activeProduct, setActiveProduct] = React.useState<string | null>(
 		null
 	);
-	const activeProductRef = React.useRef<string | null>(null);
-	const initialQueryFromSelection = React.useRef(
-		typeof window !== 'undefined'
-			? window.getSelection()!.toString().slice(0, MAX_QUERY_SIZE)
-			: ''
-	).current;
-	const initialQuery = React.useRef(
-		initialQueryFromProp || initialQueryFromSelection
-	).current;
 
 	const searchClient = useSearchClient(appId, apiKey, transformSearchClient);
-	const favoriteSearches = React.useRef(
-		createStoredSearches<StoredDocSearchHit>({
-			key: `__DOCSEARCH_FAVORITE_SEARCHES__${indexName}`,
-			limit: 10
-		})
-	).current;
-	const recentSearches = React.useRef(
-		createStoredSearches<StoredDocSearchHit>({
-			key: `__DOCSEARCH_RECENT_SEARCHES__${indexName}`,
-			// We display 7 recent searches and there's no favorites, but only
-			// 4 when there are favorites.
-			limit: favoriteSearches.getAll().length === 0 ? 7 : 4
-		})
-	).current;
 
 	const saveRecentSearch = React.useCallback(
 		function saveRecentSearch(item: InternalDocSearchHit) {
@@ -180,7 +175,8 @@ export function DocSearchModal({
 				initialState: {
 					query: initialQuery,
 					context: {
-						searchSuggestions: ['Cody', 'Code Search']
+						searchSuggestions: ['Cody', 'Code Search'],
+						activeProduct: null
 					}
 				},
 				insights,
@@ -236,7 +232,9 @@ export function DocSearchModal({
 					}
 
 					const insightsActive = Boolean(insights);
-					const product = activeProductRef.current;
+					const product = sourcesState.context.activeProduct as
+						| string
+						| null;
 
 					return searchClient
 						.search<DocSearchHit>([
@@ -261,13 +259,13 @@ export function DocSearchModal({
 										? {facetFilters: [`product:${product}`]}
 										: {}),
 									attributesToSnippet: [
-										`hierarchy.lvl1:${snippetLength.current}`,
-										`hierarchy.lvl2:${snippetLength.current}`,
-										`hierarchy.lvl3:${snippetLength.current}`,
-										`hierarchy.lvl4:${snippetLength.current}`,
-										`hierarchy.lvl5:${snippetLength.current}`,
-										`hierarchy.lvl6:${snippetLength.current}`,
-										`content:${snippetLength.current}`
+										`hierarchy.lvl1:${SNIPPET_LENGTH}`,
+										`hierarchy.lvl2:${SNIPPET_LENGTH}`,
+										`hierarchy.lvl3:${SNIPPET_LENGTH}`,
+										`hierarchy.lvl4:${SNIPPET_LENGTH}`,
+										`hierarchy.lvl5:${SNIPPET_LENGTH}`,
+										`hierarchy.lvl6:${SNIPPET_LENGTH}`,
+										`content:${SNIPPET_LENGTH}`
 									],
 									snippetEllipsisText: '…',
 									highlightPreTag: '<mark>',
@@ -344,12 +342,11 @@ export function DocSearchModal({
 										getItems() {
 											return Object.values(
 												groupBy(
-													items,
+													transformItems(items),
 													item => item.hierarchy.lvl1,
 													maxResultsPerGroup
 												)
 											)
-												.map(transformItems)
 												.map(groupedHits =>
 													groupedHits.map(item => {
 														let parent: InternalDocSearchHit | null =
@@ -415,27 +412,28 @@ export function DocSearchModal({
 		]
 	);
 
-	const {getEnvironmentProps, getRootProps, refresh} = autocomplete;
+	const {getEnvironmentProps, getRootProps, refresh, setContext} =
+		autocomplete;
 
 	const selectProduct = React.useCallback(
 		(product: string | null) => {
-			const next = product === activeProductRef.current ? null : product;
-			activeProductRef.current = next;
+			const next = product === activeProduct ? null : product;
 			setActiveProduct(next);
+			setContext({activeProduct: next});
 			// Re-run `getSources` with the current query and the new filter.
 			refresh();
 			inputRef.current?.focus();
 		},
-		[refresh]
+		[activeProduct, refresh, setContext]
 	);
 
 	useTouchEvents({
 		getEnvironmentProps,
-		panelElement: dropdownRef.current,
-		formElement: formElementRef.current,
-		inputElement: inputRef.current
+		panelRef: dropdownRef,
+		formRef: formElementRef,
+		inputRef
 	});
-	useTrapFocus({container: containerRef.current});
+	useTrapFocus({containerRef});
 
 	React.useEffect(() => {
 		document.body.classList.add('DocSearch--active');
@@ -452,18 +450,28 @@ export function DocSearchModal({
 	}, []);
 
 	React.useEffect(() => {
-		const isMobileMediaQuery = window.matchMedia('(max-width: 768px)');
-
-		if (isMobileMediaQuery.matches) {
-			snippetLength.current = 5;
-		}
-	}, []);
-
-	React.useEffect(() => {
 		if (dropdownRef.current) {
 			dropdownRef.current.scrollTop = 0;
 		}
 	}, [state.query]);
+
+	React.useEffect(() => {
+		const url = new URL(window.location.href);
+		if (state.query) {
+			url.searchParams.set('search', state.query);
+		} else {
+			url.searchParams.delete('search');
+		}
+		window.history.replaceState(window.history.state, '', url);
+	}, [state.query]);
+
+	React.useEffect(() => {
+		if (state.activeItemId === null) return;
+		const activeItem = state.collections
+			.flatMap(collection => collection.items)
+			.find(item => item.__autocomplete_id === state.activeItemId);
+		if (activeItem) router.prefetch(activeItem.url);
+	}, [router, state.activeItemId, state.collections]);
 
 	// We don't focus the input when there's an initial query (i.e. Selection
 	// Search) because users rather want to see the results directly, without the
@@ -517,6 +525,29 @@ export function DocSearchModal({
 				.join(' ')}
 			role="button"
 			tabIndex={0}
+			onKeyDownCapture={event => {
+				if (
+					event.key !== 'Enter' ||
+					(!event.metaKey && !event.ctrlKey) ||
+					state.activeItemId === null
+				) {
+					return;
+				}
+				const activeItem = state.collections
+					.flatMap(collection => collection.items)
+					.find(
+						item => item.__autocomplete_id === state.activeItemId
+					);
+				if (activeItem) {
+					event.preventDefault();
+					event.stopPropagation();
+					window.open(
+						activeItem.url,
+						'_blank',
+						'noopener,noreferrer'
+					);
+				}
+			}}
 			onMouseDown={event => {
 				if (event.target === event.currentTarget) {
 					onClose();
@@ -526,10 +557,6 @@ export function DocSearchModal({
 			<div
 				className="DocSearch-Modal w-full max-w-xl overflow-hidden rounded-2xl border border-light-border-2 bg-light-bg dark:border-dark-border dark:bg-dark-bg"
 				ref={modalRef}
-				style={{
-					transform: `scale(0.99)`,
-					pointerEvents: `auto`
-				}}
 			>
 				{/* <header className="DocSearch-SearchBar border-light-border-2 dark:border-dark-border flex items-center space-x-4 border-b p-4" ref={formElementRef}> */}
 				<header
@@ -551,30 +578,32 @@ export function DocSearchModal({
 				</header>
 
 				{productFilters.length > 0 && (
-					<div
-						className="DocSearch-Products"
-						role="toolbar"
-						aria-label="Filter results by product"
-					>
-						<button
-							type="button"
-							className="DocSearch-Product"
-							aria-pressed={activeProduct === null}
-							onClick={() => selectProduct(null)}
+					<div className="DocSearch-Products-wrap">
+						<div
+							className="DocSearch-Products"
+							role="toolbar"
+							aria-label="Filter results by product"
 						>
-							All
-						</button>
-						{productFilters.map(product => (
 							<button
-								key={product}
 								type="button"
 								className="DocSearch-Product"
-								aria-pressed={activeProduct === product}
-								onClick={() => selectProduct(product)}
+								aria-pressed={activeProduct === null}
+								onClick={() => selectProduct(null)}
 							>
-								{product}
+								All
 							</button>
-						))}
+							{productFilters.map(product => (
+								<button
+									key={product}
+									type="button"
+									className="DocSearch-Product"
+									aria-pressed={activeProduct === product}
+									onClick={() => selectProduct(product)}
+								>
+									{product}
+								</button>
+							))}
+						</div>
 					</div>
 				)}
 

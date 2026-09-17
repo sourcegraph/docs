@@ -1,4 +1,5 @@
 import React from 'react';
+import {productFilterLinks} from '../../../data/search';
 
 import type {ScreenStateProps} from './ScreenState';
 import type {InternalDocSearchHit} from './types';
@@ -17,6 +18,8 @@ type NoResultsScreenProps = Omit<
 	translations?: NoResultsScreenTranslations;
 };
 
+const basePath = process.env.NEXT_PUBLIC_DOCS_BASE_PATH || '';
+
 export function NoResultsScreen({
 	translations = {},
 	...props
@@ -29,6 +32,10 @@ export function NoResultsScreen({
 	} = translations;
 	const searchSuggestions: string[] | undefined = props.state.context
 		.searchSuggestions as string[];
+	const linkedSuggestions = searchSuggestions
+		?.map(title => ({title, href: productFilterLinks[title]}))
+		.filter(suggestion => suggestion.href)
+		.slice(0, 3);
 
 	return (
 		<div className="DocSearch-NoResults">
@@ -39,34 +46,22 @@ export function NoResultsScreen({
 				{noResultsText} "<strong>{props.state.query}</strong>"
 			</p>
 
-			{searchSuggestions && searchSuggestions.length > 0 && (
+			{linkedSuggestions && linkedSuggestions.length > 0 && (
 				<div className="DocSearch-NoResults-Prefill-List">
-					<p className="DocSearch-Help">{suggestedQueryText}:</p>
+					<p className="DocSearch-Help">
+						{suggestedQueryText} these products:
+					</p>
 					<ul>
-						{searchSuggestions
-							.slice(0, 3)
-							.reduce<React.ReactNode[]>(
-								(acc, search) => [
-									...acc,
-									<li key={search}>
-										<button
-											className="DocSearch-Prefill"
-											key={search}
-											type="button"
-											onClick={() => {
-												props.setQuery(
-													search.toLowerCase() + ' '
-												);
-												props.refresh();
-												props.inputRef.current!.focus();
-											}}
-										>
-											{search}
-										</button>
-									</li>
-								],
-								[]
-							)}
+						{linkedSuggestions.map(suggestion => (
+							<li key={suggestion.title}>
+								<a
+									className="DocSearch-Prefill"
+									href={basePath + suggestion.href}
+								>
+									{suggestion.title}
+								</a>
+							</li>
+						))}
 					</ul>
 				</div>
 			)}

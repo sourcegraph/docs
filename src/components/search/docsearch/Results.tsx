@@ -48,7 +48,10 @@ function HitPath({hit}: {hit: StoredDocSearchHit}) {
 			{levels.map((level, index) => (
 				<React.Fragment key={level}>
 					{index > 0 && (
-						<span className="DocSearch-Hit-path-separator" aria-hidden>
+						<span
+							className="DocSearch-Hit-path-separator"
+							aria-hidden
+						>
 							{' › '}
 						</span>
 					)}
@@ -59,13 +62,12 @@ function HitPath({hit}: {hit: StoredDocSearchHit}) {
 	);
 }
 
-interface ResultsProps<TItem extends BaseItem>
-	extends AutocompleteApi<
-		TItem,
-		React.FormEvent,
-		React.MouseEvent,
-		React.KeyboardEvent
-	> {
+interface ResultsProps<TItem extends BaseItem> extends AutocompleteApi<
+	TItem,
+	React.FormEvent,
+	React.MouseEvent,
+	React.KeyboardEvent
+> {
 	title: string;
 	collection: AutocompleteState<TItem>['collections'][0];
 	renderIcon: (props: {item: TItem; index: number}) => React.ReactNode;
@@ -122,17 +124,17 @@ function Result<TItem extends StoredDocSearchHit>({
 }: ResultProps<TItem>) {
 	const [isDeleting, setIsDeleting] = React.useState(false);
 	const [isFavoriting, setIsFavoriting] = React.useState(false);
-	const action = React.useRef<(() => void) | null>(null);
+	const [action, setAction] = React.useState<(() => void) | null>(null);
 	const Hit = hitComponent!;
 
 	function runDeleteTransition(cb: () => void) {
 		setIsDeleting(true);
-		action.current = cb;
+		setAction(() => cb);
 	}
 
 	function runFavoriteTransition(cb: () => void) {
 		setIsFavoriting(true);
-		action.current = cb;
+		setAction(() => cb);
 	}
 
 	return (
@@ -147,8 +149,9 @@ function Result<TItem extends StoredDocSearchHit>({
 				.filter(Boolean)
 				.join(' ')}
 			onTransitionEnd={() => {
-				if (action.current) {
-					action.current();
+				if (action) {
+					action();
+					setAction(null);
 				}
 			}}
 			{...getItemProps({

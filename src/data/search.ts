@@ -17,6 +17,53 @@ export const productFilters: string[] = [
 	'Self-hosted'
 ];
 
+export const productFilterLinks: Record<string, string> = {
+	'Agentic Batch Changes': '/agentic-batch-changes',
+	'Deep Search': '/deep-search',
+	'Code Search': '/code-search',
+	'Code Navigation': '/code-navigation',
+	'Batch Changes': '/batch-changes',
+	'Code Insights': '/code-insights',
+	Cody: '/cody',
+	'MCP Server': '/api/mcp',
+	'Sourcegraph CLI': '/cli',
+	Administration: '/admin',
+	'Self-hosted': '/self-hosted'
+};
+
+export const curatedSearchSuggestions = [
+	{
+		title: 'Getting started',
+		description: 'Set up Sourcegraph and learn the basics.',
+		href: '/getting-started'
+	},
+	{
+		title: 'Code Search',
+		description: 'Search code across repositories and code hosts.',
+		href: '/code-search'
+	},
+	{
+		title: 'Batch Changes',
+		description: 'Make and track large-scale code changes.',
+		href: '/batch-changes'
+	},
+	{
+		title: 'Deep Search',
+		description: 'Ask complex questions across your codebase.',
+		href: '/deep-search'
+	},
+	{
+		title: 'Sourcegraph MCP Server',
+		description: 'Connect AI tools to Sourcegraph context.',
+		href: '/api/mcp'
+	},
+	{
+		title: 'Administration',
+		description: 'Configure authentication, access, and deployments.',
+		href: '/admin'
+	}
+] as const;
+
 export const searchMetadata = {
 	provider: 'kbar',
 	kbarConfig: {

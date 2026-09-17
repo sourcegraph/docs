@@ -1,6 +1,7 @@
 import {RecentIcon} from './icons/RecentIcon';
 import {ResetIcon} from './icons/ResetIcon';
 import {StarIcon} from './icons/StarIcon';
+import {curatedSearchSuggestions} from '../../../data/search';
 
 import {Results} from './Results';
 import type {ScreenStateProps} from './ScreenState';
@@ -23,6 +24,35 @@ type StartScreenProps = Omit<
 	translations?: StartScreenTranslations;
 };
 
+const basePath = process.env.NEXT_PUBLIC_DOCS_BASE_PATH || '';
+
+function Suggestions() {
+	return (
+		<section
+			className="DocSearch-Suggestions"
+			aria-labelledby="search-suggestions"
+		>
+			<div className="DocSearch-Hit-source" id="search-suggestions">
+				Suggestions
+			</div>
+			<ul>
+				{curatedSearchSuggestions.map(suggestion => (
+					<li key={suggestion.href}>
+						<a href={basePath + suggestion.href}>
+							<span className="DocSearch-Suggestion-title">
+								{suggestion.title}
+							</span>
+							<span className="DocSearch-Suggestion-description">
+								{suggestion.description}
+							</span>
+						</a>
+					</li>
+				))}
+			</ul>
+		</section>
+	);
+}
+
 export function StartScreen({translations = {}, ...props}: StartScreenProps) {
 	const {
 		recentSearchesTitle = 'Recent',
@@ -33,13 +63,14 @@ export function StartScreen({translations = {}, ...props}: StartScreenProps) {
 		removeFavoriteSearchButtonTitle = 'Remove this search from favorites'
 	} = translations;
 	if (props.state.status === 'idle' && props.hasCollections === false) {
-		if (props.disableUserPersonalization) {
-			return null;
-		}
-
 		return (
-			<div className="DocSearch-StartScreen">
-				<p className="DocSearch-Help">{noRecentSearchesText}</p>
+			<div className="DocSearch-Dropdown-Container">
+				<Suggestions />
+				{!props.disableUserPersonalization && (
+					<p className="DocSearch-Help DocSearch-NoRecent">
+						{noRecentSearchesText}
+					</p>
+				)}
 			</div>
 		);
 	}
@@ -50,6 +81,7 @@ export function StartScreen({translations = {}, ...props}: StartScreenProps) {
 
 	return (
 		<div className="DocSearch-Dropdown-Container">
+			<Suggestions />
 			<Results
 				{...props}
 				title={recentSearchesTitle}
