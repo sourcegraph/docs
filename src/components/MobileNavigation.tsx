@@ -6,6 +6,7 @@ import Link from 'next/link';
 import {usePathname, useSearchParams} from 'next/navigation';
 import {Dialog} from '@headlessui/react';
 import {Navigation} from '@/components/Navigation';
+import {withBasePath} from '@/lib/utils';
 
 function MenuIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -100,7 +101,7 @@ export function MobileNavigation() {
 						<Link href="/" className="ml-6" aria-label="Home page">
 							<Image
 								className="h-9 w-9"
-								src="/sourcegraph-mark.svg"
+								src={withBasePath('/sourcegraph-mark.svg')}
 								alt="Sourcegraph Docs"
 								width={36}
 								height={36}
