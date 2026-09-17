@@ -58,7 +58,7 @@ const PostLayout = async ({params}: Props) => {
 
 	const content = (
 		<>
-			<div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none lg:pl-8 lg:pr-0 xl:px-16">
+			<main className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none lg:pl-8 lg:pr-0 xl:px-16">
 				<Breadcrumbs path={slug} />
 				<article>
 					<Prose>
@@ -66,7 +66,7 @@ const PostLayout = async ({params}: Props) => {
 					</Prose>
 				</article>
 				<PrevNextLinks />
-			</div>
+			</main>
 			<TableOfContents
 				headings={post.headings}
 				rawMarkdown={post.body.raw}
