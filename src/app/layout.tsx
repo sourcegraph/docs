@@ -1,6 +1,7 @@
 import {Providers} from '@/app/providers';
 import {Layout} from '@/components/Layout';
 import {TECHNICAL_CHANGELOG_RSS_URL} from '@/data/constants';
+import {withBasePath} from '@/lib/utils';
 import clsx from 'clsx';
 import config from 'docs.config';
 import {type Metadata} from 'next';
@@ -26,11 +27,11 @@ export const metadata: Metadata = {
 		canonical: '/docs'
 	},
 	openGraph: {
-		images: [{url: `${process.env.NEXT_PUBLIC_DOCS_BASE_PATH || ''}/api/og/index`, width: 1200, height: 630}]
+		images: [{url: withBasePath('/api/og/index'), width: 1200, height: 630}]
 	},
 	twitter: {
 		card: 'summary_large_image',
-		images: [{url: `${process.env.NEXT_PUBLIC_DOCS_BASE_PATH || ''}/api/og/index`, width: 1200, height: 630}]
+		images: [{url: withBasePath('/api/og/index'), width: 1200, height: 630}]
 	}
 };
 

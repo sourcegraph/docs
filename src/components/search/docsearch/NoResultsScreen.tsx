@@ -1,5 +1,6 @@
 import React from 'react';
 import {productFilterLinks} from '../../../data/search';
+import {withBasePath} from '@/lib/utils';
 
 import type {ScreenStateProps} from './ScreenState';
 import type {InternalDocSearchHit} from './types';
@@ -17,8 +18,6 @@ type NoResultsScreenProps = Omit<
 > & {
 	translations?: NoResultsScreenTranslations;
 };
-
-const basePath = process.env.NEXT_PUBLIC_DOCS_BASE_PATH || '';
 
 export function NoResultsScreen({
 	translations = {},
@@ -56,7 +55,7 @@ export function NoResultsScreen({
 							<li key={suggestion.title}>
 								<a
 									className="DocSearch-Prefill"
-									href={basePath + suggestion.href}
+									href={withBasePath(suggestion.href)}
 								>
 									{suggestion.title}
 								</a>

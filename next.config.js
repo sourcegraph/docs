@@ -1,22 +1,15 @@
 const {PHASE_DEVELOPMENT_SERVER} = require('next/constants');
 const {withContentlayer} = require('next-contentlayer2');
+const {DOCS_BASE_PATH} = require('./docs.config.js');
 /** @type {import('next').NextConfig} */
-
-// sourcegraph.com proxies /docs/* to this site. Previews and local dev use the
-// same basePath so that a root-relative URL which 404s in production also 404s
-// there, instead of only breaking after deploy.
-const basePath = '/docs';
 
 const nextConfig = {
 	reactStrictMode: true,
-	basePath,
+	basePath: DOCS_BASE_PATH,
 	// Orb portals proxy the dev server through a different hostname.
 	allowedDevOrigins: process.env.PUBLIC_URL
 		? [new URL(process.env.PUBLIC_URL).hostname]
 		: [],
-	env: {
-		NEXT_PUBLIC_DOCS_BASE_PATH: basePath
-	},
 	// Nothing serves `/`, so the deployment URLs Vercel links from Slack / GitHub
 	// and http://localhost:3000 would 404. sourcegraph.com never proxies `/` to
 	// us. Stay on the same host so visitors see this exact deployment.
@@ -24,7 +17,7 @@ const nextConfig = {
 		return [
 			{
 				source: '/',
-				destination: basePath,
+				destination: DOCS_BASE_PATH,
 				basePath: false,
 				permanent: false
 			}

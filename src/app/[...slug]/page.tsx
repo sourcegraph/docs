@@ -4,6 +4,7 @@ import {PreviewGuard} from '@/components/PreviewGuard';
 import {PrevNextLinks} from '@/components/PrevNextLinks';
 import {Prose} from '@/components/Prose';
 import {TableOfContents} from '@/components/Toc';
+import {withBasePath} from '@/lib/utils';
 import {allPosts} from 'contentlayer/generated';
 import {getMDXComponent} from 'next-contentlayer2/hooks';
 import {notFound} from 'next/navigation';
@@ -28,7 +29,7 @@ export const generateMetadata = async ({params}: Props) => {
 	const post = allPosts.find(post => post._raw.flattenedPath === path);
 	if (post && post.headings && post.headings.length > 0) {
 		const title = post.headings[0].title;
-		const ogImageUrl = `${process.env.NEXT_PUBLIC_DOCS_BASE_PATH || ''}/api/og/${path}`;
+		const ogImageUrl = withBasePath(`/api/og/${path}`);
 		return {
 			title,
 			// The root layout's canonical is the landing page; without this

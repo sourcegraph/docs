@@ -2,6 +2,7 @@
 
 import {useEffect, useState} from 'react';
 import Link from 'next/link';
+import {withBasePath} from '@/lib/utils';
 
 type Release = {
 	id: number;
@@ -31,8 +32,7 @@ export function SupportedReleasesTable() {
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		const basePath = process.env.NEXT_PUBLIC_DOCS_BASE_PATH || '';
-		fetch(`${basePath}/api/releases`)
+		fetch(withBasePath('/api/releases'))
 			.then(res => {
 				if (!res.ok) throw new Error('Failed to fetch releases');
 				return res.json();

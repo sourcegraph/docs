@@ -1,3 +1,4 @@
+import {withBasePath} from '@/lib/utils';
 import {productFilters, searchMetadata} from '../../data/search';
 import {DocSearch} from './docsearch/DocSearch';
 import type {DocSearchHit} from './docsearch/types';
@@ -7,14 +8,12 @@ import './docsearch/docsearch.css';
 
 // The Algolia crawler indexes production, so every hit URL is absolute
 // (https://sourcegraph.com/docs/...). Rewrite them to root-relative paths so
-// results resolve against whichever deployment is being viewed (Vercel
-// preview, local dev, or prod) instead of always jumping to prod.
+// results stay on whichever deployment is being viewed.
 const PROD_DOCS_URL_PREFIX = 'https://sourcegraph.com/docs';
-const basePath = process.env.NEXT_PUBLIC_DOCS_BASE_PATH || '';
 
 const toLocalUrl = (url: string): string =>
 	url.startsWith(PROD_DOCS_URL_PREFIX)
-		? basePath + url.slice(PROD_DOCS_URL_PREFIX.length)
+		? withBasePath(url.slice(PROD_DOCS_URL_PREFIX.length))
 		: url;
 
 const hitPriority = (hit: DocSearchHit): number => {
