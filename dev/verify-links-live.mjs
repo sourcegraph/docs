@@ -15,20 +15,21 @@
 //
 //   node dev/verify-links-live.mjs --site https://<preview>.vercel.app/docs [--old-site https://sourcegraph.com/docs] [--base origin/main]
 //
-// Every deployment serves under /docs (basePath in next.config.js), so --site
-// includes that prefix.
+// Every deployment serves under the basePath (docs.config.js), so --site
+// includes that prefix. Both default to production.
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { extractHeadings } from './check-links.mjs';
+import config from '../docs.config.js';
 
 const args = process.argv.slice(2);
 const argValue = (flag, fallback) => {
 	const index = args.indexOf(flag);
 	return index === -1 ? fallback : args[index + 1];
 };
-const SITE = argValue('--site', 'https://sourcegraph.com/docs').replace(/\/$/, '');
-const OLD_SITE = argValue('--old-site', 'https://sourcegraph.com/docs').replace(/\/$/, '');
+const SITE = argValue('--site', config.DOCS_PROD_URL).replace(/\/$/, '');
+const OLD_SITE = argValue('--old-site', config.DOCS_PROD_URL).replace(/\/$/, '');
 const BASE_REF = argValue('--base', 'origin/main');
 
 const LINK = /\]\(([^)\s]+)\)|href=["']([^"']+)["']/g;

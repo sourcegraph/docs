@@ -1,4 +1,5 @@
 import {MetadataRoute} from 'next';
+import config from 'docs.config';
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
 	return {
@@ -6,6 +7,6 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
 			userAgent: '*',
 			allow: '/'
 		},
-		sitemap: 'https://sourcegraph.com/docs/sitemap.xml'
+		sitemap: `${config.DOCS_PROD_URL}/sitemap.xml`
 	};
 }

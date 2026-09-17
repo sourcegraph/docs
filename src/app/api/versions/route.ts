@@ -1,4 +1,5 @@
 import {versions} from '@/data/versions';
+import config from 'docs.config';
 import {NextResponse} from 'next/server';
 
 // Next 15+ no longer caches GET handlers by default; the version list is
@@ -9,7 +10,7 @@ export function GET() {
 	return NextResponse.json(
 		versions.map((version, index) =>
 			index === 0
-				? {...version, url: 'https://sourcegraph.com/docs'}
+				? {...version, url: config.DOCS_PROD_URL}
 				: version
 		),
 		{

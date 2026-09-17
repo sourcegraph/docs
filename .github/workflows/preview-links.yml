@@ -29,6 +29,12 @@ jobs:
     if: github.event.client_payload.environment != 'production'
     runs-on: ubuntu-latest
     steps:
+      # The PR's own docs.config.js, for the basePath the preview serves under.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.client_payload.git.sha || inputs.sha }}
+          sparse-checkout: docs.config.js
+          sparse-checkout-cone-mode: false
       - uses: actions/github-script@v7
         env:
           PREVIEW_URL: ${{ github.event.client_payload.url || inputs.url }}
@@ -36,6 +42,7 @@ jobs:
         with:
           script: |
             const {PREVIEW_URL, COMMIT_SHA} = process.env;
+            const {DOCS_BASE_PATH} = require(`${process.env.GITHUB_WORKSPACE}/docs.config.js`);
             if (!PREVIEW_URL || !/^[0-9a-f]{40}$/i.test(COMMIT_SHA ?? '')) {
               core.setFailed(`Need a preview URL and a full commit SHA; got url=${JSON.stringify(PREVIEW_URL)} sha=${JSON.stringify(COMMIT_SHA)}. `
                 + `Vercel sends these as client_payload.url and client_payload.git.sha; workflow_dispatch takes them as the url and sha inputs.`);
@@ -60,11 +67,11 @@ jobs:
             });
 
             // Mirror contentlayer's flattenedPath: docs/<path>.mdx -> /<path>,
-            // with a trailing /index dropped, under the /docs basePath.
+            // with a trailing /index dropped, under the basePath.
             const pages = files
               .filter(f => f.filename.startsWith('docs/') && f.filename.endsWith('.mdx') && f.status !== 'removed')
               .map(f => f.filename.slice('docs/'.length, -'.mdx'.length).replace(/^index$/, '').replace(/\/index$/, ''))
-              .map(path => ({path, url: `${previewUrl}/docs/${path}`}));
+              .map(path => ({path, url: `${previewUrl}${DOCS_BASE_PATH}/${path}`}));
 
             if (pages.length === 0) {
               core.info(`PR #${pr.number} changes no docs pages; not commenting.`);

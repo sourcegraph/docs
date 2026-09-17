@@ -1,4 +1,5 @@
 import {withBasePath} from '@/lib/utils';
+import config from 'docs.config';
 import {productFilters, searchMetadata} from '../../data/search';
 import {DocSearch} from './docsearch/DocSearch';
 import type {DocSearchHit} from './docsearch/types';
@@ -6,14 +7,12 @@ import './docsearch/docsearch.css';
 
 // import '@docsearch/css';
 
-// The Algolia crawler indexes production, so every hit URL is absolute
-// (https://sourcegraph.com/docs/...). Rewrite them to root-relative paths so
-// results stay on whichever deployment is being viewed.
-const PROD_DOCS_URL_PREFIX = 'https://sourcegraph.com/docs';
-
+// The Algolia crawler indexes production, so every hit URL is absolute.
+// Rewrite them to root-relative paths so results stay on whichever deployment
+// is being viewed.
 const toLocalUrl = (url: string): string =>
-	url.startsWith(PROD_DOCS_URL_PREFIX)
-		? withBasePath(url.slice(PROD_DOCS_URL_PREFIX.length))
+	url.startsWith(config.DOCS_PROD_URL)
+		? withBasePath(url.slice(config.DOCS_PROD_URL.length))
 		: url;
 
 const hitPriority = (hit: DocSearchHit): number => {
