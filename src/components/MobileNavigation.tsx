@@ -107,7 +107,8 @@ export function MobileNavigation() {
 							/>
 						</Link>
 					</div>
-					<Link
+					{/* Plain anchor, so next/link does not prefetch the changelog app */}
+					<a
 						href="https://sourcegraph.com/changelog"
 						className="mt-5 inline-flex rounded-md px-1 text-base font-medium text-slate-500 hover:text-vermilion-11 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vermilion-11/50 dark:text-dark-text-secondary dark:hover:text-vermilion-11"
 					>
@@ -115,7 +116,7 @@ export function MobileNavigation() {
 						<span className="ml-1" aria-hidden="true">
 							↗
 						</span>
-					</Link>
+					</a>
 					<Suspense fallback={null}>
 						<Navigation
 							className="mt-5 px-1"

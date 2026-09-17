@@ -74,7 +74,10 @@ function Header() {
 						<Search />
 					</div>
 					<div className="relative flex basis-0 items-center justify-end gap-6 sm:gap-6 md:flex-grow">
-						<Link
+						{/* Plain anchor: next/link treats this same-origin URL as an
+						    app route and prefetches the changelog app's ~60 assets on
+						    every docs page. */}
+						<a
 							href="https://sourcegraph.com/changelog"
 							className="hidden whitespace-nowrap rounded-md text-xs font-medium text-slate-500 hover:text-vermilion-11 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vermilion-11/50 dark:text-dark-paragraph-text dark:hover:text-vermilion-11 lg:inline-flex"
 						>
@@ -82,7 +85,7 @@ function Header() {
 							<span className="ml-1" aria-hidden="true">
 								↗
 							</span>
-						</Link>
+						</a>
 						<VersionSelector />
 						<ThemeSelector className="relative z-10" />
 						<Link
