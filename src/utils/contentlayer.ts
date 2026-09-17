@@ -1,7 +1,5 @@
 import type {Document, MDX} from 'contentlayer2/core';
 
-const isProduction = process.env.NODE_ENV === 'production';
-
 export type MDXDocument = Document & {body: MDX};
 
 type ConvertUndefined<T> = OrNull<{
@@ -46,7 +44,7 @@ export function coreContent<T extends MDXDocument>(content: T): CoreContent<T> {
 
 /**
  * Omit body, _raw, _id from a list of MDX documents and returns only the core content
- * If `NODE_ENV` === "production", it will also filter out any documents with draft: true.
+ * of the documents that are not `preview: true`.
  *
  * @param {T[]} contents
  * @return {*}  {CoreContent<T>[]}
@@ -54,11 +52,6 @@ export function coreContent<T extends MDXDocument>(content: T): CoreContent<T> {
 export function allCoreContent<T extends MDXDocument>(
 	contents: T[]
 ): CoreContent<T>[] {
-	if (isProduction)
-		return contents
-			.map(c => coreContent(c))
-			.filter(c => !('draft' in c && c.draft === true))
-			.filter(c => !('preview' in c && c.preview === true));
 	return contents
 		.map(c => coreContent(c))
 		.filter(c => !('preview' in c && c.preview === true));
