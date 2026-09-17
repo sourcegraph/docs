@@ -12,14 +12,18 @@
  *   node dev/report-vercel-build.mjs slack <file> [--dry-run]
  *   node dev/report-vercel-build.mjs comment [--dry-run]
  *
- * fetch-log writes the build log to <file>, and `pull_request`, the PR Vercel
- * built the deployment for, to GITHUB_OUTPUT. It needs VERCEL_TOKEN, and
+ * fetch-log writes the build log to <file>, headed by the deployment's error
+ * message when Vercel recorded one (a build that fails before its first step,
+ * such as on an invalid vercel.json, has an error but no log lines). It writes
+ * `pull_request`, the PR Vercel built the deployment for, and `error`, that
+ * message on one line, to GITHUB_OUTPUT. It needs VERCEL_TOKEN, and
  * VERCEL_TEAM_ID unless the token is scoped to the project.
  *
  * slack uploads <file> into the thread of the Vercel Slack app's "failed to
  * deploy" post for the deployment in SLACK_CHANNEL_ID, looking back a week (so
  * a re-run by hand still finds it) and waiting up to 5 minutes for the post
- * to appear, then writes the reply's `permalink` to GITHUB_OUTPUT. It needs
+ * to appear, then writes the reply's `permalink` to GITHUB_OUTPUT. The reply
+ * quotes BUILD_ERROR, the `error` output of fetch-log, when set. It needs
  * SLACK_BOT_TOKEN (see dev/slack-app-vercel-build-report.json) and does
  * nothing when that or SLACK_CHANNEL_ID is unset. With --dry-run the post is
  * found but nothing is uploaded.
@@ -95,9 +99,10 @@ async function githubList(route) {
 	}
 }
 
-// Vercel records which PR a deployment was built for. Empty when the branch
-// was deployed before its PR was opened.
-async function fetchDeploymentPullRequestNumber() {
+// The deployment record: `meta.githubPrId` is the PR Vercel built it for
+// (empty when the branch was deployed before its PR was opened), and
+// `errorMessage`, `errorCode`, `errorStep` and `errorLink` say why it failed
+async function fetchDeployment() {
 	const url = new URL(
 		`https://api.vercel.com/v13/deployments/${DEPLOYMENT_ID}`
 	);
@@ -116,7 +121,22 @@ async function fetchDeploymentPullRequestNumber() {
 			`Deployment ${DEPLOYMENT_ID} was built from ${builtSha}, not ${COMMIT_SHA}`
 		);
 	}
-	return deployment.meta?.githubPrId;
+	return deployment;
+}
+
+// Why Vercel says the deployment failed, as log lines. This is all there is
+// when the deployment fails before its first build step, e.g. on an invalid
+// vercel.json.
+function deploymentErrorLines({errorMessage, errorCode, errorStep, errorLink}) {
+	if (!errorMessage) {
+		return [];
+	}
+	const details = [
+		errorCode && `code: ${errorCode}`,
+		errorStep && `step: ${errorStep}`,
+		errorLink && `see: ${errorLink}`
+	].filter(Boolean);
+	return ['Build Failed', errorMessage, ...details, ''];
 }
 
 // The dispatch payload has no PR number. The failure path gets it from the
@@ -169,8 +189,7 @@ async function fetchBuildLog() {
 	return events
 		.map(event => event.payload?.text ?? event.text)
 		.filter(text => typeof text === 'string')
-		.flatMap(text => text.replace(/\n$/, '').split('\n'))
-		.map(redact);
+		.flatMap(text => text.replace(/\n$/, '').split('\n'));
 }
 
 // Credential shapes a build might print. The log only goes to Slack, but the
@@ -215,11 +234,19 @@ async function fetchLog() {
 	if ((await findPullRequests()).length === 0) {
 		return;
 	}
-	const pullRequestNumber = await fetchDeploymentPullRequestNumber();
-	const logLines = await fetchBuildLog();
+	const deployment = await fetchDeployment();
+	const logLines = [
+		...deploymentErrorLines(deployment),
+		...(await fetchBuildLog())
+	].map(redact);
 	writeFileSync(logFile, logLines.join('\n') + '\n');
 	console.log(`Wrote ${logLines.length} log lines to ${logFile}`);
-	writeOutput('pull_request', pullRequestNumber ?? '');
+	writeOutput('pull_request', deployment.meta?.githubPrId ?? '');
+	// GITHUB_OUTPUT values are one line each
+	writeOutput(
+		'error',
+		redact(deployment.errorMessage ?? '').replace(/\s*\n\s*/g, ' ')
+	);
 }
 
 // The log stays in Slack, where only the workspace can read it; the public
@@ -390,7 +417,13 @@ async function uploadLogToThread(post, pulls) {
 	const links = pulls
 		.map(pull => `<${pull.html_url}|#${pull.number}>`)
 		.join(', ');
-	const initialComment = `Build log attached; PR ${links} links here.`;
+	const {BUILD_ERROR} = process.env;
+	const initialComment = [
+		BUILD_ERROR && `> ${BUILD_ERROR}`,
+		`Build log attached; PR ${links} links here.`
+	]
+		.filter(Boolean)
+		.join('\n');
 
 	if (DRY_RUN) {
 		console.log(
