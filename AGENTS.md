@@ -40,6 +40,25 @@ npm run check -- links --check-anchors --check-self-links \
   --check-external --diff <(git diff -U0 origin/main)
 ```
 
+### PR check comments
+
+The spelling, links, and redirects checks comment on the PR: a summary
+comment per check, plus an inline review comment with a `suggestion` block on
+each flagged line. After pushing, read them and follow the instructions they
+give (fix the spelling, the link, or the redirect); do not work around a
+finding, and add a word to `cspell-allow-list.txt` only when it is correct.
+
+```sh
+gh pr checks <pr>
+gh api repos/sourcegraph/docs/issues/<pr>/comments --paginate --jq '.[].body'
+gh api repos/sourcegraph/docs/pulls/<pr>/comments --paginate \
+    --jq '.[] | "\(.path):\(.line)\n\(.body)\n"'
+```
+
+Fork PRs get no comments; the findings are in the job log
+(`gh run view <run-id> --log`). The checks resolve their own comments on the
+next run.
+
 ### Vercel build failures
 
 - Vercel shows build logs only to its team members, so
