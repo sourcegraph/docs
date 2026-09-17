@@ -1,10 +1,20 @@
 'use client';
 
 import {useCallback, useEffect, useState} from 'react';
+import {withBasePath} from '@/lib/utils';
 
 interface ZoomableImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {}
 
-export function ZoomableImage({className, alt, ...props}: ZoomableImageProps) {
+export function ZoomableImage({
+	className,
+	alt,
+	src,
+	...rest
+}: ZoomableImageProps) {
+	const props = {
+		...rest,
+		src: typeof src === 'string' ? withBasePath(src) : src
+	};
 	const [isOpen, setIsOpen] = useState(false);
 
 	const openModal = useCallback(() => setIsOpen(true), []);
