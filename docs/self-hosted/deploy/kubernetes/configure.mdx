@@ -226,7 +226,7 @@ components:
 Follow these steps to configure the otel-collector to export traces to an external OTEL-compatible backend:
 
 1. Create a subdirectory called 'patches' within the directory of your overlay
-2. Copy and paste the [base/otel-collector/otel-collector.ConfigMap.yaml file](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s@master/-/tree/base/otel-collector/otel-collector.ConfigMap.yaml) to the new [patches subdirectory](/self-hosted/deploy/kubernetes/kustomize/#patches-directory)
+2. Copy and paste the [base/otel-collector/otel-collector.ConfigMap.yaml file](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/base/monitoring/otel-collector/otel-collector.ConfigMap.yaml) to the new patches subdirectory
 3. In the copied file, make the necessary changes to the `exporters` and `service` blocks to connect to your backend based on the documentation linked above
 4. Include the following content in your overlay:
 
@@ -265,7 +265,7 @@ This will set namespace to the `namespace` value (`ns-sourcegraph` in this examp
 
 ### Create a namespace
 
-To create a new namespace, include the [utils/namespace](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/tree/components/resources/namespace) component in your overlay.
+To create a new namespace, include the [utils/namespace](https://github.com/sourcegraph/deploy-sourcegraph-k8s/tree/main/components/resources/namespace) component in your overlay.
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
@@ -472,10 +472,10 @@ It also updates the storage class name for all resources to `sourcegraph`.
 
 **Step 1**: Follow the [official instructions](https://docs.aws.amazon.com/eks/latest/userguide/ebs-csi.html) to deploy the [Amazon Elastic Block Store (Amazon EBS) Container Storage Interface (CSI) driver](https://docs.aws.amazon.com/eks/latest/userguide/ebs-csi.html).
 
-**Step 2**: Include one of the AWS storage class components in your overlay: [storage-class/aws/eks](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/tree/components/storage-class/aws/eks) or [storage-class/aws/ebs](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/tree/components/storage-class/aws/ebs)
+**Step 2**: Include one of the AWS storage class components in your overlay: [storage-class/aws/ebs-csi](https://github.com/sourcegraph/deploy-sourcegraph-k8s/tree/main/components/storage-class/aws/ebs-csi) or [storage-class/aws/aws-ebs](https://github.com/sourcegraph/deploy-sourcegraph-k8s/tree/main/components/storage-class/aws/aws-ebs)
 
-- The [storage-class/aws/ebs-csi](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/tree/components/storage-class/aws/eks) component is configured with the `ebs.csi.aws.com` storage class provisioner for clusters with self-managed Amazon EBS Container Storage Interface driver installed
-- The [storage-class/aws/aws-ebs](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/tree/components/storage-class/aws/ebs) component is configured with the `kubernetes.io/aws-ebs` storage class provisioner for clusters with the [AWS EBS CSI driver installed as Amazon EKS add-on](https://docs.aws.amazon.com/eks/latest/userguide/managing-ebs-csi.html)
+- The [storage-class/aws/ebs-csi](https://github.com/sourcegraph/deploy-sourcegraph-k8s/tree/main/components/storage-class/aws/ebs-csi) component is configured with the `ebs.csi.aws.com` storage class provisioner for clusters with self-managed Amazon EBS Container Storage Interface driver installed
+- The [storage-class/aws/aws-ebs](https://github.com/sourcegraph/deploy-sourcegraph-k8s/tree/main/components/storage-class/aws/aws-ebs) component is configured with the `kubernetes.io/aws-ebs` storage class provisioner for clusters with the [AWS EBS CSI driver installed as Amazon EKS add-on](https://docs.aws.amazon.com/eks/latest/userguide/managing-ebs-csi.html)
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
@@ -923,11 +923,11 @@ Learn more about [Google Cloud Platform Firewall rules](https://cloud.google.com
 
 Sourcegraph should now be accessible at `$EXTERNAL_ADDR:30080`, where `$EXTERNAL_ADDR` is the address of _any_ node in the cluster.
 
-Learn more about [AWS Security Group rules](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_SecurityGroups.html).
+Learn more about [AWS Security Group rules](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html).
 
 ### Rancher Kubernetes Engine
 
-If your [Rancher Kubernetes Engine (RKE)](https://rancher.com/docs/rke/latest/en/) cluster is configured to use [NodePort](https://docs.ranchermanager.rancher.io/v2.0-v2.4/how-to-guides/new-user-guides/migrate-from-v1.6-v2.x/expose-services#nodeport), include the [network/nodeport/custom component](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/tree/components/network/nodeport/custom) to change the port type for `sourcegraph-frontend` service from `ClusterIP` to `NodePort` to use `nodePort: 30080`:
+If your [Rancher Kubernetes Engine (RKE)](https://rancher.com/docs/rke/latest/en/) cluster is configured to use NodePort, include the [network/nodeport/custom component](https://github.com/sourcegraph/deploy-sourcegraph-k8s/tree/main/components/network/nodeport/custom) to change the port type for `sourcegraph-frontend` service from `ClusterIP` to `NodePort` to use `nodePort: 30080`:
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
@@ -1065,7 +1065,7 @@ Similar changes will be required for other pods and services, depending on the s
 
 For optimal performance and resilience, it is recommended to use an external database when deploying Sourcegraph. For more information on database requirements, please refer to the [Postgres guide](/self-hosted/postgres).
 
-To connect Sourcegraph to an existing PostgreSQL instance, add the relevant environment variables ([such as PGHOST, PGPORT, PGUSER, etc.](http://www.postgresql.org/docs/current/static/libpq-envars.html)) to the frontend ConfigMap by adding the new environment variables to the end of the _FRONTEND ENV VARS_ section at the bottom of your [kustomization file](/self-hosted/deploy/kubernetes/kustomize/#kustomizationyaml). For example:
+To connect Sourcegraph to an existing PostgreSQL instance, add the relevant environment variables ([such as PGHOST, PGPORT, PGUSER, etc.](https://www.postgresql.org/docs/current/libpq-envars.html)) to the frontend ConfigMap by adding the new environment variables to the end of the _FRONTEND ENV VARS_ section at the bottom of your [kustomization file](/self-hosted/deploy/kubernetes/kustomize/#kustomizationyaml). For example:
 
 ```yaml
 # instances/$INSTANCE_NAME/kustomization.yaml
@@ -1152,7 +1152,7 @@ components:
     - ../../components/enable/ssh/root
 ```
 
-> NOTE: If you are running Sourcegraph with privileges using our [privileged component](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/tree/components/privileged), you are most likely running Sourcegraph with `root` access and should use the [ssh/root component](https://sourcegraph.com/github.com/sourcegraph/deploy-sourcegraph-k8s/-/tree/components/enable/ssh/root) to enable SSH cloning.
+> NOTE: If you are running Sourcegraph with privileges using our [privileged component](https://github.com/sourcegraph/deploy-sourcegraph-k8s/tree/main/components/privileged), you are most likely running Sourcegraph with `root` access and should use the [ssh/root component](https://github.com/sourcegraph/deploy-sourcegraph-k8s/tree/main/components/enable/ssh/root) to enable SSH cloning.
 
 **Step 4:** Update code host configuration
 
@@ -1185,8 +1185,7 @@ Once you have a license key, add it to your [site configuration](/admin/config/s
 
 ## Filtering cAdvisor metrics
 
-cAdvisor can pick up metrics for services unrelated to the Sourcegraph deployment running on the same nodes
-([Learn more](https://docs-legacy.sourcegraph.com/dev/background-information/observability/cadvisor#known-issues)) **when running with privileges**. To work around this:
+cAdvisor can pick up metrics for services unrelated to the Sourcegraph deployment running on the same nodes **when running with privileges**. To work around this:
 
 1\. Create a subdirectory called 'patches' within the directory of your overlay
 
@@ -1313,7 +1312,7 @@ components:
 
 ## Outbound Traffic
 
-When working with an [Internet Gateway](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html) or VPC it may be necessary to expose ports for outbound network traffic. Sourcegraph must open port 443 for outbound traffic to code hosts, and to enable [telemetry](/admin/pings) with Sourcegraph.com. Port 22 must also be opened to enable git SSH cloning by Sourcegraph. In addition, please make sure to apply other required changes to secure your cluster in a manner that meets your organization's security requirements.
+When working with an [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html) or VPC it may be necessary to expose ports for outbound network traffic. Sourcegraph must open port 443 for outbound traffic to code hosts, and to enable [telemetry](/admin/pings) with Sourcegraph.com. Port 22 must also be opened to enable git SSH cloning by Sourcegraph. In addition, please make sure to apply other required changes to secure your cluster in a manner that meets your organization's security requirements.
 
 ---
 
