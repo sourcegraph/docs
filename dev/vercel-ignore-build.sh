@@ -13,6 +13,7 @@ exec git diff --quiet HEAD^ HEAD -- . \
 	':(exclude).gitignore' \
 	':(exclude)cspell*' \
 	':(exclude)dev/TODO.md' \
+	':(exclude)reports' \
 	':(exclude)dev/check-spelling.mjs' \
 	':(exclude)dev/post-spelling-review.mjs' \
 	':(exclude)dev/report-vercel-build.mjs' \
