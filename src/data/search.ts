@@ -65,12 +65,6 @@ export const curatedSearchSuggestions = [
 ] as const;
 
 export const searchMetadata = {
-	provider: 'kbar',
-	kbarConfig: {
-		searchDocumentsPath: '/docs/search.json' // path to load documents to search
-	},
-	// For Algolia
-	// provider: 'algolia',
 	algoliaConfig: {
 		// The application ID provided by Algolia
 		appId: 'JSZOJ0ZYVG',
