@@ -35,7 +35,7 @@ export const generateMetadata = async ({params}: Props) => {
 			// The root layout's canonical is the landing page; without this
 			// override every docs page tells search engines it is a duplicate
 			// of https://sourcegraph.com/docs.
-			alternates: {canonical: `/docs${post.url}`},
+			alternates: {canonical: withBasePath(post.url)},
 			openGraph: {
 				images: [{url: ogImageUrl, width: 1200, height: 630}]
 			},

@@ -11,7 +11,7 @@ export const versions: VersionI[] = [
 	{
 		name: `v${config.DOCS_LATEST_VERSION}`,
 		label: 'latest',
-		url: '/docs'
+		url: config.DOCS_BASE_PATH
 	},
 	{
 		name: 'v7.7',

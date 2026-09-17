@@ -8,13 +8,14 @@ import {
 	ChevronDownIcon
 } from '@heroicons/react/20/solid';
 import clsx from 'clsx';
+import config from 'docs.config';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 import {Fragment, useEffect, useState} from 'react';
 
 const versionsUrl =
 	process.env.NEXT_PUBLIC_DOCS_VERSIONS_URL ??
-	'https://sourcegraph.com/docs/api/versions';
+	`${config.DOCS_PROD_URL}/api/versions`;
 
 function isVersion(value: unknown): value is VersionI {
 	if (typeof value !== 'object' || value === null) return false;

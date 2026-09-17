@@ -12,7 +12,7 @@ import {Suspense} from 'react';
 import '@/styles/tailwind.css';
 
 export const metadata: Metadata = {
-	metadataBase: new URL('https://sourcegraph.com'),
+	metadataBase: new URL(config.DOCS_PROD_ORIGIN),
 	title: {
 		template: '%s - Sourcegraph docs',
 		default: 'Sourcegraph docs'
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 		'docsearch:version': `v${config.DOCS_LATEST_VERSION}`
 	},
 	alternates: {
-		canonical: '/docs'
+		canonical: config.DOCS_BASE_PATH
 	},
 	openGraph: {
 		images: [{url: withBasePath('/api/og/index'), width: 1200, height: 630}]
