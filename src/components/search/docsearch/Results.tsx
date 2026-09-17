@@ -9,6 +9,56 @@ import type {DocSearchProps} from './DocSearch';
 import {Snippet} from './Snippet';
 import type {InternalDocSearchHit, StoredDocSearchHit} from './types';
 
+type HierarchyLevel = keyof StoredDocSearchHit['hierarchy'];
+
+const HEADING_LEVELS: HierarchyLevel[] = [
+	'lvl2',
+	'lvl3',
+	'lvl4',
+	'lvl5',
+	'lvl6'
+];
+
+/**
+ * Hierarchy attributes shown as the breadcrumb under a hit, starting at the
+ * page title (lvl1) and ending at the heading section the hit lives in.
+ * - lvlN heading hits: lvl1 › lvl2 › … › lvl(N-1)
+ * - content hits: lvl1 › deepest non-empty heading
+ */
+function getPathLevels(hit: StoredDocSearchHit): HierarchyLevel[] {
+	const path: HierarchyLevel[] = ['lvl1'];
+	if (hit.type === 'content') {
+		const deepest = [...HEADING_LEVELS]
+			.reverse()
+			.find(level => hit.hierarchy[level]);
+		if (deepest) path.push(deepest);
+		return path;
+	}
+	for (const level of HEADING_LEVELS) {
+		if (level === hit.type) break;
+		if (hit.hierarchy[level]) path.push(level);
+	}
+	return path;
+}
+
+function HitPath({hit}: {hit: StoredDocSearchHit}) {
+	const levels = getPathLevels(hit);
+	return (
+		<span className="DocSearch-Hit-path">
+			{levels.map((level, index) => (
+				<React.Fragment key={level}>
+					{index > 0 && (
+						<span className="DocSearch-Hit-path-separator" aria-hidden>
+							{' › '}
+						</span>
+					)}
+					<Snippet hit={hit} attribute={`hierarchy.${level}`} />
+				</React.Fragment>
+			))}
+		</span>
+	);
+}
+
 interface ResultsProps<TItem extends BaseItem>
 	extends AutocompleteApi<
 		TItem,
@@ -136,11 +186,7 @@ function Result<TItem extends StoredDocSearchHit>({
 									hit={item}
 									attribute={`hierarchy.${item.type}`}
 								/>
-								<Snippet
-									className="DocSearch-Hit-path"
-									hit={item}
-									attribute="hierarchy.lvl1"
-								/>
+								<HitPath hit={item} />
 							</div>
 						)}
 
@@ -151,11 +197,7 @@ function Result<TItem extends StoredDocSearchHit>({
 								hit={item}
 								attribute="content"
 							/>
-							<Snippet
-								className="DocSearch-Hit-path"
-								hit={item}
-								attribute="hierarchy.lvl1"
-							/>
+							<HitPath hit={item} />
 						</div>
 					)}
 

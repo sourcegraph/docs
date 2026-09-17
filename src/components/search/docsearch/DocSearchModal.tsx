@@ -50,6 +50,7 @@ export function DocSearchModal({
 	indexName,
 	placeholder = 'What are you searching for?',
 	searchParameters,
+	productFilters = [],
 	maxResultsPerGroup,
 	onClose = noop,
 	transformItems = identity,
@@ -87,6 +88,13 @@ export function DocSearchModal({
 	const dropdownRef = React.useRef<HTMLDivElement | null>(null);
 	const inputRef = React.useRef<HTMLInputElement | null>(null);
 	const snippetLength = React.useRef<number>(10);
+	// The selected product chip. Kept in a ref as well as state so that
+	// `getSources` (captured once by `createAutocomplete`) always reads the
+	// current value without recreating the autocomplete instance.
+	const [activeProduct, setActiveProduct] = React.useState<string | null>(
+		null
+	);
+	const activeProductRef = React.useRef<string | null>(null);
 	const initialQueryFromSelection = React.useRef(
 		typeof window !== 'undefined'
 			? window.getSelection()!.toString().slice(0, MAX_QUERY_SIZE)
@@ -228,6 +236,7 @@ export function DocSearchModal({
 					}
 
 					const insightsActive = Boolean(insights);
+					const product = activeProductRef.current;
 
 					return searchClient
 						.search<DocSearchHit>([
@@ -245,8 +254,12 @@ export function DocSearchModal({
 										'hierarchy.lvl6',
 										'content',
 										'type',
-										'url'
+										'url',
+										'product'
 									],
+									...(product
+										? {facetFilters: [`product:${product}`]}
+										: {}),
 									attributesToSnippet: [
 										`hierarchy.lvl1:${snippetLength.current}`,
 										`hierarchy.lvl2:${snippetLength.current}`,
@@ -404,6 +417,18 @@ export function DocSearchModal({
 
 	const {getEnvironmentProps, getRootProps, refresh} = autocomplete;
 
+	const selectProduct = React.useCallback(
+		(product: string | null) => {
+			const next = product === activeProductRef.current ? null : product;
+			activeProductRef.current = next;
+			setActiveProduct(next);
+			// Re-run `getSources` with the current query and the new filter.
+			refresh();
+			inputRef.current?.focus();
+		},
+		[refresh]
+	);
+
 	useTouchEvents({
 		getEnvironmentProps,
 		panelElement: dropdownRef.current,
@@ -524,6 +549,34 @@ export function DocSearchModal({
 						onClose={onClose}
 					/>
 				</header>
+
+				{productFilters.length > 0 && (
+					<div
+						className="DocSearch-Products"
+						role="toolbar"
+						aria-label="Filter results by product"
+					>
+						<button
+							type="button"
+							className="DocSearch-Product"
+							aria-pressed={activeProduct === null}
+							onClick={() => selectProduct(null)}
+						>
+							All
+						</button>
+						{productFilters.map(product => (
+							<button
+								key={product}
+								type="button"
+								className="DocSearch-Product"
+								aria-pressed={activeProduct === product}
+								onClick={() => selectProduct(product)}
+							>
+								{product}
+							</button>
+						))}
+					</div>
+				)}
 
 				<div className="DocSearch-Dropdown" ref={dropdownRef}>
 					<ScreenState

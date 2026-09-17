@@ -157,10 +157,15 @@ html.dark {
 	background: var(--docsearch-modal-background);
 	border-radius: 6px;
 	box-shadow: var(--docsearch-modal-shadow);
+	display: flex;
 	flex-direction: column;
 	margin: 60px auto auto;
+	max-height: var(--docsearch-modal-height);
 	max-width: var(--docsearch-modal-width);
 	position: relative;
+}
+.DocSearch-Modal > header {
+	flex-shrink: 0;
 }
 .DocSearch-SearchBar {
 	display: flex;
@@ -263,11 +268,53 @@ html.dark {
 .DocSearch-Cancel {
 	display: none;
 }
+.DocSearch-Products {
+	display: flex;
+	flex-shrink: 0;
+	flex-wrap: wrap;
+	gap: 6px;
+	padding: 8px var(--docsearch-spacing);
+	border-bottom: 1px solid theme('colors.light-border-2');
+}
+html.dark .DocSearch-Products,
+html[data-theme='dark'] .DocSearch-Products {
+	border-bottom-color: theme('colors.dark-border');
+}
+.DocSearch-Product {
+	flex: 0 0 auto;
+	appearance: none;
+	border: 1px solid transparent;
+	border-radius: 9999px;
+	background: var(--docsearch-searchbox-background);
+	color: var(--docsearch-muted-color);
+	font-size: 0.75em;
+	font-weight: 500;
+	line-height: 1;
+	padding: 6px 10px;
+	white-space: nowrap;
+	cursor: pointer;
+}
+.DocSearch-Product:hover {
+	color: var(--docsearch-highlight-color);
+	border-color: var(--docsearch-highlight-color);
+}
+.DocSearch-Product:focus-visible {
+	outline: 2px solid var(--docsearch-primary-color);
+	outline-offset: 1px;
+}
+.DocSearch-Product[aria-pressed='true'] {
+	background: var(--docsearch-primary-color);
+	border-color: var(--docsearch-primary-color);
+	color: theme('colors.white');
+}
+.DocSearch-Hit-path-separator {
+	opacity: 0.6;
+}
+
 .DocSearch-Dropdown {
-	max-height: calc(
-		var(--docsearch-modal-height) - var(--docsearch-searchbox-height) -
-			var(--docsearch-spacing) - var(--docsearch-footer-height)
-	);
+	/* Takes whatever height the header, product chips, and footer leave over
+	   inside the modal's max-height. */
+	flex: 1 1 auto;
 	min-height: var(--docsearch-spacing);
 	overflow-y: auto;
 	overflow-y: overlay;
@@ -589,9 +636,6 @@ svg.DocSearch-Hit-Select-Icon {
 		--docsearch-spacing: 10px;
 		--docsearch-footer-height: 40px;
 	}
-	.DocSearch-Dropdown {
-		height: 100%;
-	}
 	.DocSearch-Container {
 		height: 100vh;
 		height: -webkit-fill-available;
@@ -600,8 +644,16 @@ svg.DocSearch-Hit-Select-Icon {
 	}
 	.DocSearch-Footer {
 		border-radius: 0;
-		bottom: 0;
-		position: absolute;
+	}
+	/* One swipeable row of chips instead of several wrapped rows. */
+	.DocSearch-Products {
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		scrollbar-width: none;
+		-webkit-overflow-scrolling: touch;
+	}
+	.DocSearch-Products::-webkit-scrollbar {
+		display: none;
 	}
 	.DocSearch-Hit-content-wrapper {
 		display: flex;
@@ -615,14 +667,9 @@ svg.DocSearch-Hit-Select-Icon {
 		height: -webkit-fill-available;
 		height: calc(var(--docsearch-vh, 1vh) * 100);
 		margin: 0;
+		max-height: none;
 		max-width: 100%;
 		width: 100%;
-	}
-	.DocSearch-Dropdown {
-		max-height: calc(
-			var(--docsearch-vh, 1vh) * 100 - var(--docsearch-searchbox-height) -
-				var(--docsearch-spacing) - var(--docsearch-footer-height)
-		);
 	}
 	.DocSearch-Cancel {
 		appearance: none;

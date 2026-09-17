@@ -49,6 +49,10 @@ export declare type DocSearchHit = {
 	url_without_anchor: string;
 	type: ContentType;
 	anchor: string | null;
+	/** Product facet (nav topic title), e.g. "Agentic Batch Changes". */
+	product?: string;
+	/** Nav section the product belongs to, e.g. "Code Intelligence". */
+	section?: string;
 	hierarchy: {
 		lvl0: string;
 		lvl1: string;

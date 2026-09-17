@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {searchMetadata} from '../../data/search';
+import {productFilters, searchMetadata} from '../../data/search';
 import {DocSearch} from './docsearch/DocSearch';
 import type {DocSearchHit} from './docsearch/types';
 import './docsearch/docsearch.css';
@@ -48,6 +48,8 @@ export const Search = () => {
 			apiKey={algoliaConfig.apiKey}
 			initialQuery={initialQuery}
 			maxResultsPerGroup={algoliaConfig.maxResultsPerGroup}
+			searchParameters={algoliaConfig.searchParameters}
+			productFilters={productFilters}
 			transformItems={transformItems}
 		/>
 	);

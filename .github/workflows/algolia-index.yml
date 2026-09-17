@@ -1,0 +1,61 @@
+name: Algolia index
+
+# Rebuilds the `sourcegraph_docs` Algolia index from the docs content whenever
+# main changes. Records carry a `product` facet derived from
+# src/data/navigation.ts, which the search modal uses for grouping, filter
+# chips, and product boosts (see dev/algolia-index.mjs and src/data/search.ts).
+#
+# Needs the ALGOLIA_ADMIN_API_KEY repository secret: an Algolia API key for app
+# 0EBA2NRQU3 with addObject, deleteObject, deleteIndex, settings, editSettings
+# and browse ACLs, restricted to indices `sourcegraph_docs*`.
+
+on:
+    push:
+        branches: [main]
+        paths:
+            - 'docs/**'
+            - 'src/data/navigation.ts'
+            - 'contentlayer.config.ts'
+            - 'dev/algolia-index.mjs'
+            - '.github/workflows/algolia-index.yml'
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+concurrency:
+    group: algolia-index
+    cancel-in-progress: true
+
+jobs:
+    index:
+        name: Build and push index
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out main
+              uses: actions/checkout@v4
+
+            - name: Set up pnpm
+              uses: pnpm/action-setup@v4
+
+            # Node 24 is pre-cached on ubuntu-latest.
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+                  cache: pnpm
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            # The indexer reads .contentlayer/generated, so build it first.
+            - name: Build contentlayer
+              run: pnpm exec contentlayer2 build
+
+            - name: Build records (dry run, prints per-product counts)
+              run: node dev/algolia-index.mjs --dry-run --stats
+
+            - name: Push index
+              env:
+                  ALGOLIA_ADMIN_API_KEY: ${{ secrets.ALGOLIA_ADMIN_API_KEY }}
+              run: node dev/algolia-index.mjs
