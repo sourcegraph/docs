@@ -73,9 +73,9 @@ export const searchMetadata = {
 	// provider: 'algolia',
 	algoliaConfig: {
 		// The application ID provided by Algolia
-		appId: '0EBA2NRQU3',
+		appId: 'JSZOJ0ZYVG',
 		// Public API key: it is safe to commit it
-		apiKey: '1b6e51c1d4ef24bef0a5f1ab00dad80a',
+		apiKey: 'c5cc1bd201c071d93bff66d671ae6eef',
 		// Built by dev/algolia-index.mjs (not the Algolia crawler).
 		indexName: 'sourcegraph_docs',
 		maxResultsPerGroup: 20,

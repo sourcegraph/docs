@@ -32,7 +32,7 @@ const outDir = path.join(root, '.algolia');
 
 const SITE_URL = 'https://sourcegraph.com/docs';
 const DEFAULT_INDEX = 'sourcegraph_docs';
-const DEFAULT_APP_ID = '0EBA2NRQU3';
+const DEFAULT_APP_ID = 'JSZOJ0ZYVG';
 // Consecutive paragraphs under the same heading are merged into chunks of up to
 // this many characters; snippets (`attributesToSnippet`) still surface the part
 // that matched.
