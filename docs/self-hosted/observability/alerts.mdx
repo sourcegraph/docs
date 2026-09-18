@@ -2392,6 +2392,7 @@ Generated query for critical alert: `min((sum by (app) (up{app=~".*(pgsql\\|code
 **Descriptions**
 
 - <span class="badge badge-warning">warning</span> precise-code-intel-worker: 3600s+ maximum time a precise codeintel upload has been waiting to be processed for 15m0s
+- <span class="badge badge-critical">critical</span> precise-code-intel-worker: 86400s+ maximum time a precise codeintel upload has been waiting to be processed for 15m0s
 
 **Next steps**
 
@@ -2403,7 +2404,8 @@ Generated query for critical alert: `min((sum by (app) (up{app=~".*(pgsql\\|code
 
 ```json
 "observability.silenceAlerts": [
-  "warning_precise-code-intel-worker_codeintel_upload_queue_duration"
+  "warning_precise-code-intel-worker_codeintel_upload_queue_duration",
+  "critical_precise-code-intel-worker_codeintel_upload_queue_duration"
 ]
 ```
 
@@ -2413,6 +2415,8 @@ Generated query for critical alert: `min((sum by (app) (up{app=~".*(pgsql\\|code
 <summary>Technical details</summary>
 
 Generated query for warning alert: `max((max(src_workerutil_queue_duration_seconds{domain="precise_code_intel_upload_worker"})) &gt;= 3600)`
+
+Generated query for critical alert: `max((max(src_workerutil_queue_duration_seconds{domain="precise_code_intel_upload_worker"})) &gt;= 86400)`
 
 </details>
 
@@ -3189,10 +3193,11 @@ Generated query for critical alert: `(min((sum(src_worker_jobs{job=~"^worker.*",
 **Descriptions**
 
 - <span class="badge badge-warning">warning</span> worker: 21600s+ oldest recent completed SCIP upload age missing from the commit graph fast path for 15m0s
+- <span class="badge badge-critical">critical</span> worker: 259200s+ oldest recent completed SCIP upload age missing from the commit graph fast path for 15m0s
 
 **Next steps**
 
-- Completed, unexpired SCIP uploads finished 1-48h ago are not represented in the persisted commit graph fast path.
+- Completed, unexpired SCIP uploads finished 1-96h ago are not represented in the persisted commit graph fast path.
 - Check whether the codeintel commit graph updater worker is running and healthy.
 - Check worker logs for commit graph update failures.
 - Inspect codeintel commit graph freshness and upload processing panels for related backlog or errors.
@@ -3201,7 +3206,8 @@ Generated query for critical alert: `(min((sum(src_worker_jobs{job=~"^worker.*",
 
 ```json
 "observability.silenceAlerts": [
-  "warning_worker_codeintel_commit_graph_fast_path_oldest_missing_upload_age_seconds"
+  "warning_worker_codeintel_commit_graph_fast_path_oldest_missing_upload_age_seconds",
+  "critical_worker_codeintel_commit_graph_fast_path_oldest_missing_upload_age_seconds"
 ]
 ```
 
@@ -3211,6 +3217,8 @@ Generated query for critical alert: `(min((sum(src_worker_jobs{job=~"^worker.*",
 <summary>Technical details</summary>
 
 Generated query for warning alert: `max((max(src_codeintel_commit_graph_fast_path_oldest_missing_upload_age_seconds{job=~"^worker.*"\} and on (instance, job) (increase(src_codeintel_commit_graph_fast_path_reporter_total\{job=~"^worker.*"}[15m]) &gt; 0)) or on () vector(0)) &gt; 21600)`
+
+Generated query for critical alert: `max((max(src_codeintel_commit_graph_fast_path_oldest_missing_upload_age_seconds{job=~"^worker.*"\} and on (instance, job) (increase(src_codeintel_commit_graph_fast_path_reporter_total\{job=~"^worker.*"}[15m]) &gt; 0)) or on () vector(0)) &gt; 259200)`
 
 </details>
 
@@ -4730,6 +4738,42 @@ Generated query for warning alert: `max((cadvisor_container_cpu_usage_percentage
 <summary>Technical details</summary>
 
 Generated query for warning alert: `max((max by (name) (container_memory_rss{name=~"^searcher.*"\} / container_spec_memory_limit_bytes\{name=~"^searcher.*"}) * 100) &gt;= 90)`
+
+</details>
+
+<br />
+
+## searcher: memory_map_areas_percentage_used
+
+<p class="subtitle">process memory map areas percentage used (per instance)</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> searcher: 60%+ process memory map areas percentage used (per instance)
+- <span class="badge badge-critical">critical</span> searcher: 80%+ process memory map areas percentage used (per instance)
+
+**Next steps**
+
+- Scale out searcher to distribute mapped archives and CAS segments across more processes.
+- Increase vm.max_map_count on the host if scaling does not keep usage below the warning threshold.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#searcher-memory_map_areas_percentage_used).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_searcher_memory_map_areas_percentage_used",
+  "critical_searcher_memory_map_areas_percentage_used"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max(((proc_metrics_memory_map_current_count / proc_metrics_memory_map_max_limit) * 100) &gt;= 60)`
+
+Generated query for critical alert: `max(((proc_metrics_memory_map_current_count / proc_metrics_memory_map_max_limit) * 100) &gt;= 80)`
 
 </details>
 
