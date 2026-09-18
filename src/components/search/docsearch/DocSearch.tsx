@@ -31,6 +31,11 @@ export interface DocSearchProps {
 	indexName: string;
 	placeholder?: string;
 	searchParameters?: SearchOptions;
+	/**
+	 * Product names (values of the `product` facet) offered as filter chips
+	 * above the results. Empty or undefined hides the chip row.
+	 */
+	productFilters?: string[];
 	maxResultsPerGroup?: number;
 	transformItems?: (items: DocSearchHit[]) => DocSearchHit[];
 	hitComponent?: (props: {

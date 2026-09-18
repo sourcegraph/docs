@@ -20,13 +20,12 @@ export type SearchBoxTranslations = Partial<{
 	searchInputLabel: string;
 }>;
 
-interface SearchBoxProps
-	extends AutocompleteApi<
-		InternalDocSearchHit,
-		React.FormEvent,
-		React.MouseEvent,
-		React.KeyboardEvent
-	> {
+interface SearchBoxProps extends AutocompleteApi<
+	InternalDocSearchHit,
+	React.FormEvent,
+	React.MouseEvent,
+	React.KeyboardEvent
+> {
 	state: AutocompleteState<InternalDocSearchHit>;
 	autoFocus: boolean;
 	inputRef: MutableRefObject<HTMLInputElement | null>;
@@ -35,7 +34,17 @@ interface SearchBoxProps
 	translations?: SearchBoxTranslations;
 }
 
-export function SearchBox({translations = {}, ...props}: SearchBoxProps) {
+export function SearchBox({
+	translations = {},
+	inputRef,
+	autoFocus,
+	isFromSelection,
+	onClose,
+	state,
+	getFormProps,
+	getInputProps,
+	getLabelProps
+}: SearchBoxProps) {
 	const {
 		resetButtonTitle = 'Clear the query',
 		resetButtonAriaLabel = 'Clear the query',
@@ -43,21 +52,28 @@ export function SearchBox({translations = {}, ...props}: SearchBoxProps) {
 		cancelButtonAriaLabel = 'Cancel',
 		searchInputLabel = 'Search'
 	} = translations;
-	const {onReset} = props.getFormProps({
-		inputElement: props.inputRef.current
-	});
+	const [inputElement, setInputElement] =
+		React.useState<HTMLInputElement | null>(null);
+	const setInputRef = React.useCallback(
+		(element: HTMLInputElement | null) => {
+			inputRef.current = element;
+			setInputElement(element);
+		},
+		[inputRef]
+	);
+	const {onReset} = getFormProps({inputElement});
 
 	React.useEffect(() => {
-		if (props.autoFocus && props.inputRef.current) {
-			props.inputRef.current.focus();
+		if (autoFocus && inputRef.current) {
+			inputRef.current.focus();
 		}
-	}, [props.autoFocus, props.inputRef]);
+	}, [autoFocus, inputRef]);
 
 	React.useEffect(() => {
-		if (props.isFromSelection && props.inputRef.current) {
-			props.inputRef.current.select();
+		if (isFromSelection && inputRef.current) {
+			inputRef.current.select();
 		}
-	}, [props.isFromSelection, props.inputRef]);
+	}, [isFromSelection, inputRef]);
 
 	return (
 		<>
@@ -70,7 +86,7 @@ export function SearchBox({translations = {}, ...props}: SearchBoxProps) {
 				onReset={onReset}
 			>
 				{/* <label className="DocSearch-MagnifierLabel block w-5" {...props.getLabelProps()}> */}
-				<label className="block w-5" {...props.getLabelProps()}>
+				<label className="block w-5" {...getLabelProps()}>
 					<SearchIcon className="text-slate-400 dark:text-slate-300" />
 					<span className="DocSearch-VisuallyHiddenForAccessibility">
 						{searchInputLabel}
@@ -85,15 +101,15 @@ export function SearchBox({translations = {}, ...props}: SearchBoxProps) {
 					// className="DocSearch-Input"
 					className="DocSearch-Input h-8 w-full bg-transparent text-base text-slate-600 placeholder-slate-400 focus:outline-none dark:text-dark-text-primary dark:placeholder-slate-500"
 					// className="h-8 w-full bg-transparent text-slate-600 placeholder-slate-400 focus:outline-none dark:text-dark-text-primary dark:placeholder-slate-500"
-					ref={props.inputRef}
-					{...props.getInputProps({
-						inputElement: props.inputRef.current!,
-						autoFocus: props.autoFocus,
+					ref={setInputRef}
+					{...getInputProps({
+						inputElement,
+						autoFocus,
 						maxLength: MAX_QUERY_SIZE
 					})}
 				/>
 
-				{!props.state.query && (
+				{!state.query && (
 					<kbd className="inline-block whitespace-nowrap rounded border border-slate-500 px-1.5 align-middle text-xs font-medium leading-4 tracking-wide text-slate-500">
 						ESC
 					</kbd>
@@ -104,7 +120,7 @@ export function SearchBox({translations = {}, ...props}: SearchBoxProps) {
 					title={resetButtonTitle}
 					className="DocSearch-Reset"
 					aria-label={resetButtonAriaLabel}
-					hidden={!props.state.query}
+					hidden={!state.query}
 				>
 					<ResetIcon />
 				</button>
@@ -114,7 +130,7 @@ export function SearchBox({translations = {}, ...props}: SearchBoxProps) {
 				className="DocSearch-Cancel"
 				type="reset"
 				aria-label={cancelButtonAriaLabel}
-				onClick={props.onClose}
+				onClick={onClose}
 			>
 				{cancelButtonText}
 			</button>

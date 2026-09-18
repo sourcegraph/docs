@@ -3,18 +3,21 @@ import React from 'react';
 
 interface UseTouchEventsProps {
 	getEnvironmentProps: AutocompleteApi<any>['getEnvironmentProps'];
-	panelElement: HTMLDivElement | null;
-	formElement: HTMLDivElement | null;
-	inputElement: HTMLInputElement | null;
+	panelRef: React.RefObject<HTMLDivElement | null>;
+	formRef: React.RefObject<HTMLDivElement | null>;
+	inputRef: React.RefObject<HTMLInputElement | null>;
 }
 
 export function useTouchEvents({
 	getEnvironmentProps,
-	panelElement,
-	formElement,
-	inputElement
+	panelRef,
+	formRef,
+	inputRef
 }: UseTouchEventsProps) {
 	React.useEffect(() => {
+		const panelElement = panelRef.current;
+		const formElement = formRef.current;
+		const inputElement = inputRef.current;
 		if (!(panelElement && formElement && inputElement)) {
 			return undefined;
 		}
@@ -32,5 +35,5 @@ export function useTouchEvents({
 			window.removeEventListener('touchstart', onTouchStart);
 			window.removeEventListener('touchmove', onTouchMove);
 		};
-	}, [getEnvironmentProps, panelElement, formElement, inputElement]);
+	}, [getEnvironmentProps, panelRef, formRef, inputRef]);
 }

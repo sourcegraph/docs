@@ -1,11 +1,12 @@
 import React from 'react';
 
 interface UseTrapFocusProps {
-	container: HTMLElement | null;
+	containerRef: React.RefObject<HTMLElement | null>;
 }
 
-export function useTrapFocus({container}: UseTrapFocusProps) {
+export function useTrapFocus({containerRef}: UseTrapFocusProps) {
 	React.useEffect(() => {
+		const container = containerRef.current;
 		if (!container) {
 			return undefined;
 		}
@@ -37,5 +38,5 @@ export function useTrapFocus({container}: UseTrapFocusProps) {
 		return () => {
 			container.removeEventListener('keydown', trapFocus);
 		};
-	}, [container]);
+	}, [containerRef]);
 }
