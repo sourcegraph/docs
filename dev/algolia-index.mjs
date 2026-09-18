@@ -518,7 +518,9 @@ function printStats(records) {
 
 async function main() {
 	const owners = await loadNavigationOwners();
-	const posts = loadPosts().filter(p => !p.preview);
+	const posts = loadPosts().filter(
+		p => !p.preview && p.url !== '/technical-changelog'
+	);
 	const allRecords = [];
 	const pages = [];
 	const deduplication = {hashes: new Set(), removed: 0};
