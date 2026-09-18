@@ -99,20 +99,11 @@ If desired, a Sourcegraph admin can enable Code Insights access to repositories 
 
 ## Feature parity limitations
 
-### Features currently available only on insights over all your repositories
-
--   **[Filtering insights](/code-insights/explanations/code-insights-filters)**: available in 3.41+ ~~we do not yet allow filtering for insights that run over explicitly defined lists of repositories, except for "detect and track" insights.~~
-
 ### Features currently available only on insights over explicitly defined repository lists
 
 Because these insights need to run dramatically fewer queries than insights over thousands of repositories, you will have access to a number of features not _yet_ supported for insights over all repositories. These are:
 
 -   **Live previews**: showing the preview of your insight in real time
--   **[Released] Dynamic x-axis ranges**: available in 3.35+ ~~set a custom amount of historical data you care about~~
--   **[Released] Editing data series queries after creation**: available in 3.35+ ~~for insights over all repositories, you must make a new insight if you wish to run a different query~~
--   **[Released] "Diff click"**: available in 3.36+ ~~click a datapoint on your insight and be taken to a diff search showing any changes contributing to the difference between a datapoint and the prior one~~
-
-> NOTE: many of the above-listed features will become available for insights over all repositories as well. The above list is ordered top-down, where items on the top of the list will arrive roughly sooner than items on the bottom.
 
 ### Limitations specific to "Detect and track patterns" insights (automatically generated data series)
 
@@ -121,17 +112,3 @@ Please see [Current limitations of automatically generated data series](/code-in
 ## In certain cases, chart datapoints don't match the result count of a Sourcegraph search
 
 There are currently a few subtle differences in how code insights and Sourcegraph web app searches handle defaults when searching over all repositories. Refer to [Common reasons code insights may not match search results](/code-insights/references/common-reasons-code-insights-may-not-match-search-results).
-
-## Older versions' limitations
-
-### Version 3.30 (July 2021) or older
-
-#### Search-based Code Insights can only run over ~50-70 repositories
-
-Because this version of the prototype runs on frontend API calls to Sourcegraph searches, it may run slowly (or possibly timeout) if you're using it over many repositories or with many data series for each insight.
-
-#### The max match count is 5,000 matches per repository
-
-The current limit on searching over historical versions of repositories, which is an unindexed search, is 5,000 results per repository. If there are more than 5,000 matches, the search stops and returns a count of 5,000, and the code insight graph will calculate the overall chart using 5,000 as the match count for that repository. (This means if you query over two repositories and one of them hits this limit, the value shown on the graph will be 5,000 + [the match count in the other repository]).
-
-\_This limit was lifted in the August 2021 release of Sourcegraph `3.31`
