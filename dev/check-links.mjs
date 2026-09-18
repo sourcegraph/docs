@@ -47,6 +47,7 @@ import fs from 'fs';
 import path from 'path';
 import GithubSlugger from 'github-slugger';
 import { fileURLToPath, pathToFileURL } from 'url';
+import config from '../docs.config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -280,11 +281,17 @@ function extractLinks(content, filePath) {
 }
 
 // Absolute links to this site, in every form the docs have used: http or https,
-// scheme-relative, www., the legacy docs.sourcegraph.com host, or sourcegraph.com/docs.
-// Links pinned to an old version (/@5.1/..., /v/5.1/...) are external: the
-// middleware sends them to that version's own site (5.1.sourcegraph.com), whose
-// pages are not in this repo, so only --check-external can validate them.
-const SELF_LINK_REGEX = /^(?:https?:)?\/\/(?:www\.)?(?:docs\.sourcegraph\.com|sourcegraph\.com\/docs)(?=[/#?]|$)(?!\/@|\/v\/)/i;
+// scheme-relative, www., the legacy docs.sourcegraph.com host, or the production
+// URL from docs.config.js. Links pinned to an old version (/@5.1/..., /v/5.1/...)
+// are external: the middleware sends them to that version's own site
+// (5.1.sourcegraph.com), whose pages are not in this repo, so only
+// --check-external can validate them.
+const escapeRegExp = text => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const PROD_HOST_AND_PATH = config.DOCS_PROD_URL.replace(/^https?:\/\//, '');
+const SELF_LINK_REGEX = new RegExp(
+	`^(?:https?:)?//(?:www\\.)?(?:docs\\.sourcegraph\\.com|${escapeRegExp(PROD_HOST_AND_PATH)})(?=[/#?]|$)(?!/@|/v/)`,
+	'i'
+);
 
 export function isSelfLink(url) {
 	return SELF_LINK_REGEX.test(url);
@@ -582,7 +589,7 @@ function markdownFindingList(findings) {
 
 const ABSOLUTE_LINKS_ADVICE =
 	'Write links on this site as relative paths (`/admin/config/site-config`), ' +
-	'not `https://sourcegraph.com/docs/…`: absolute links leave the preview ' +
+	`not \`${config.DOCS_PROD_URL}/…\`: absolute links leave the preview ` +
 	'deployment and local dev server, and hide moved pages behind redirects.';
 
 // Body for a pull request comment. With --diff, findings are split into

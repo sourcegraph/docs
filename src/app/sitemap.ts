@@ -1,12 +1,11 @@
 import {MetadataRoute} from 'next';
 import {allPosts} from 'contentlayer/generated';
+import config from 'docs.config';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-	const baseUrl = 'https://sourcegraph.com/docs';
-
 	const links: MetadataRoute.Sitemap = [
 		{
-			url: baseUrl,
+			url: config.DOCS_PROD_URL,
 			lastModified: new Date(),
 			changeFrequency: 'weekly',
 			priority: 1.0
@@ -18,7 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 		.forEach(post => {
 			const priority = post.seoPriority;
 			links.push({
-				url: `${baseUrl}${post.url}`,
+				url: `${config.DOCS_PROD_URL}${post.url}`,
 				lastModified: post.date ? new Date(post.date) : new Date(),
 				changeFrequency: 'weekly',
 				...(priority !== undefined && priority !== 0.5 && {priority})

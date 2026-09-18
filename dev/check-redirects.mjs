@@ -10,8 +10,8 @@
  * - the source has no #fragment: browsers never send fragments, so such an
  *   entry can never match
  * - the source has no earlier entry: the middleware uses the first match only
- * - neither path starts with /docs: the middleware strips that prefix from
- *   requests and adds it to destinations
+ * - neither path starts with the basePath (docs.config.js): Next strips it
+ *   from requests and the middleware adds it to destinations
  * - the destination is a page, not another redirect
  * - the destination page exists under docs/ (or is a file under public/)
  * - when the destination has a #fragment, the heading exists on that page
@@ -39,11 +39,13 @@ import path from 'path';
 import vm from 'vm';
 import {fileURLToPath} from 'url';
 import {extractHeadings, listFiles, routeFor} from './check-links.mjs';
+import config from '../docs.config.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const args = process.argv.slice(2);
 const ROOT_DIR = path.resolve(flagValue('--root') ?? path.dirname(__dirname));
+const BASE_PATH = config.DOCS_BASE_PATH;
 const FORMAT = flagValue('--format') ?? 'text';
 const BASELINE_FILE = flagValue('--baseline');
 const LINK_BASE = flagValue('--link-base')?.replace(/\/$/, '');
@@ -72,12 +74,12 @@ const PROBLEM = {
 			'If the redirect destination has a #fragment, it takes precedence, otherwise if the customer ' +
 			"clicked a link which has a #fragment, it'll be kept and tried on the destination page."
 	},
-	docsPrefix: {
-		heading: 'Source or destination starts with /docs',
+	basePathPrefix: {
+		heading: `Source or destination starts with ${BASE_PATH}`,
 		fix:
-			'Write paths without the /docs prefix. The site removes /docs from the requested URL before ' +
-			'matching sources, and adds it back in front of the destination, so a /docs/... source never ' +
-			'matches and a /docs/... destination lands on /docs/docs/....'
+			`Write paths without the ${BASE_PATH} prefix. The site removes ${BASE_PATH} from the requested URL before ` +
+			`matching sources, and adds it back in front of the destination, so a ${BASE_PATH}/... source never ` +
+			`matches and a ${BASE_PATH}/... destination lands on ${BASE_PATH}${BASE_PATH}/....`
 	},
 	duplicateSource: {
 		heading:
@@ -198,7 +200,8 @@ function findBrokenRedirects(redirects, headingsByRoute) {
 	const report = (redirect, problem, {detail, fix} = {}) =>
 		findings.push({...redirect, problem: problem.heading, detail, fix});
 	const withoutFragment = url => url.split('#')[0];
-	const withoutDocsPrefix = url => url.replace(/^\/docs(?=\/)/, '');
+	const withoutBasePath = url =>
+		url.startsWith(`${BASE_PATH}/`) ? url.slice(BASE_PATH.length) : url;
 	const isRedirect = pathname =>
 		firstBySource.has(pathname) && !headingsByRoute.has(pathname);
 
@@ -220,13 +223,13 @@ function findBrokenRedirects(redirects, headingsByRoute) {
 			report(redirect, PROBLEM.shadowsPage);
 		}
 		if (
-			source.pathname.startsWith('/docs/') ||
-			redirect.destination.startsWith('/docs/')
+			source.pathname.startsWith(`${BASE_PATH}/`) ||
+			redirect.destination.startsWith(`${BASE_PATH}/`)
 		) {
-			report(redirect, PROBLEM.docsPrefix, {
+			report(redirect, PROBLEM.basePathPrefix, {
 				fix: {
-					source: withoutDocsPrefix(redirect.source),
-					destination: withoutDocsPrefix(redirect.destination)
+					source: withoutBasePath(redirect.source),
+					destination: withoutBasePath(redirect.destination)
 				}
 			});
 			continue;

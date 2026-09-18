@@ -1,11 +1,12 @@
 import MdxComponents from '@/components/MdxComponents';
 import {Prose} from '@/components/Prose';
+import {withBasePath} from '@/lib/utils';
 import {allPosts} from 'contentlayer/generated';
 import {getMDXComponent} from 'next-contentlayer2/hooks';
 import {notFound} from 'next/navigation';
 
 export const generateMetadata = () => {
-	const ogImageUrl = `${process.env.NEXT_PUBLIC_DOCS_BASE_PATH || ''}/api/og/index`;
+	const ogImageUrl = withBasePath('/api/og/index');
 	return {
 		openGraph: {
 			images: [{url: ogImageUrl, width: 1200, height: 630}]
