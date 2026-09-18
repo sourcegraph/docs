@@ -1,5 +1,6 @@
 import {useTheme} from 'next-themes';
 import {Listbox} from '@headlessui/react';
+import {ChevronDownIcon} from '@heroicons/react/20/solid';
 import clsx from 'clsx';
 
 const themes = [
@@ -44,24 +45,56 @@ function SystemIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	);
 }
 
-export function ThemeSelector(
-	props: React.ComponentPropsWithoutRef<typeof Listbox<'div'>>
-) {
+export function ThemeSelector({
+	showLabel = false,
+	...props
+}: React.ComponentPropsWithoutRef<typeof Listbox<'div'>> & {
+	showLabel?: boolean;
+}) {
 	let {theme, setTheme} = useTheme();
 
 	return (
 		<Listbox as="div" value={theme} onChange={setTheme} {...props}>
-			<Listbox.Label className="sr-only">Theme</Listbox.Label>
+			{!showLabel && (
+				<Listbox.Label className="sr-only">Theme</Listbox.Label>
+			)}
 			<Listbox.Button
-				className="flex h-7 w-7 items-center justify-center rounded-lg shadow-md shadow-black/5 ring-1 ring-light-border-2 dark:bg-dark-bg-2 dark:ring-inset dark:ring-dark-border"
-				aria-label="Theme"
+				className={
+					showLabel
+						? 'flex min-h-11 w-full items-center justify-between rounded-md px-1 text-sm text-slate-500 hover:text-vermilion-11 dark:text-dark-text-secondary'
+						: 'flex h-7 w-7 items-center justify-center rounded-lg shadow-md shadow-black/5 ring-1 ring-light-border-2 dark:bg-dark-bg-2 dark:ring-inset dark:ring-dark-border'
+				}
+				aria-label={showLabel ? undefined : 'Theme'}
 			>
-				<LightIcon className={clsx('h-4 w-4 fill-link dark:hidden')} />
-				<DarkIcon
-					className={clsx('hidden h-4 w-4 fill-link dark:block')}
-				/>
+				{showLabel ? (
+					<>
+						<span>Appearance</span>
+						<span className="flex items-center gap-2">
+							{
+								themes.find(option => option.value === theme)
+									?.name
+							}
+							<ChevronDownIcon
+								className="h-4 w-4"
+								aria-hidden="true"
+							/>
+						</span>
+					</>
+				) : (
+					<>
+						<LightIcon className="h-4 w-4 fill-link dark:hidden" />
+						<DarkIcon className="hidden h-4 w-4 fill-link dark:block" />
+					</>
+				)}
 			</Listbox.Button>
-			<Listbox.Options className="absolute left-1/2 top-full mt-3 w-36 -translate-x-1/2 space-y-1 rounded-xl bg-light-bg-1 p-3 text-sm font-medium shadow-md shadow-black/5 ring-1 ring-black/5 dark:bg-dark-bg-2 dark:ring-white/5">
+			<Listbox.Options
+				className={clsx(
+					'absolute z-10 space-y-1 rounded-xl bg-light-bg-1 p-3 text-sm font-medium shadow-md shadow-black/5 ring-1 ring-black/5 dark:bg-dark-bg-2 dark:ring-white/5',
+					showLabel
+						? 'bottom-full left-0 mb-2 w-full'
+						: 'left-1/2 top-full mt-3 w-36 -translate-x-1/2'
+				)}
+			>
 				{themes.map(theme => (
 					<Listbox.Option
 						key={theme.value}
@@ -69,6 +102,7 @@ export function ThemeSelector(
 						className={({active, selected}) =>
 							clsx(
 								'flex cursor-pointer select-none items-center rounded-xl p-1',
+								showLabel && 'min-h-11',
 								{
 									'text-link': selected,
 									'text-slate-700 dark:text-white':

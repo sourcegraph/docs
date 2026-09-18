@@ -78,10 +78,7 @@ export default function VersionSelector() {
 	return (
 		<Menu as="div" className="relative inline-block text-left">
 			<div>
-				<Menu.Button
-					className="inline-flex w-full items-center justify-center gap-x-1.5
-				rounded-md px-2 py-2 text-xs font-medium text-slate-500 shadow-sm ring-1 ring-inset ring-light-border-2 hover:bg-vermilion-08 hover:text-vermilion-11 dark:bg-dark-bg-2 dark:text-dark-paragraph-text dark:ring-inset dark:ring-dark-border"
-				>
+				<Menu.Button className="inline-flex min-h-11 w-full items-center justify-center gap-x-1.5 whitespace-nowrap rounded-md px-2 py-2 text-sm font-medium text-slate-500 ring-inset ring-light-border-2 hover:bg-vermilion-08 hover:text-vermilion-11 dark:text-dark-paragraph-text dark:ring-dark-border lg:min-h-0 lg:text-xs lg:shadow-sm lg:ring-1 lg:dark:bg-dark-bg-2">
 					{selectedVersion.label === 'latest'
 						? 'Latest'
 						: selectedVersion.name}

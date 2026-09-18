@@ -6,6 +6,7 @@ import Link from 'next/link';
 import {usePathname, useSearchParams} from 'next/navigation';
 import {Dialog} from '@headlessui/react';
 import {Navigation} from '@/components/Navigation';
+import {ThemeSelector} from '@/components/ThemeSelector';
 
 function MenuIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -74,7 +75,7 @@ export function MobileNavigation() {
 			<button
 				type="button"
 				onClick={() => setIsOpen(true)}
-				className="relative"
+				className="relative flex h-11 w-11 items-center justify-center"
 				aria-label="Open navigation"
 			>
 				<MenuIcon className="h-6 w-6 stroke-slate-500" />
@@ -88,18 +89,23 @@ export function MobileNavigation() {
 				className="fixed inset-0 z-50 flex items-start overflow-y-auto bg-slate-900/50 pr-10 backdrop-blur lg:hidden"
 				aria-label="Navigation"
 			>
-				<Dialog.Panel className="min-h-full w-full max-w-xs bg-light-bg px-4 pb-12 pt-5 dark:bg-dark-bg sm:px-6">
-					<div className="flex items-center">
+				<Dialog.Panel className="flex h-dvh w-full max-w-xs flex-col bg-light-bg px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2.5 dark:bg-dark-bg sm:px-6">
+					<div className="flex shrink-0 items-center">
 						<button
 							type="button"
 							onClick={() => close()}
+							className="-ml-2 flex h-11 w-11 items-center justify-center"
 							aria-label="Close navigation"
 						>
 							<CloseIcon className="h-6 w-6 stroke-slate-500" />
 						</button>
-						<Link href="/" className="ml-6" aria-label="Home page">
+						<Link
+							href="/"
+							className="ml-2 flex h-11 w-11 items-center justify-center"
+							aria-label="Home page"
+						>
 							<Image
-								className="h-9 w-9"
+								className="h-6 w-6"
 								src="/sourcegraph-mark.svg"
 								alt="Sourcegraph Docs"
 								width={36}
@@ -107,22 +113,30 @@ export function MobileNavigation() {
 							/>
 						</Link>
 					</div>
-					{/* Plain anchor, so next/link does not prefetch the changelog app */}
-					<a
-						href="https://sourcegraph.com/changelog"
-						className="mt-5 inline-flex rounded-md px-1 text-base font-medium text-slate-500 hover:text-vermilion-11 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vermilion-11/50 dark:text-dark-text-secondary dark:hover:text-vermilion-11"
-					>
-						Changelog
-						<span className="ml-1" aria-hidden="true">
-							↗
-						</span>
-					</a>
-					<Suspense fallback={null}>
-						<Navigation
-							className="mt-5 px-1"
-							onLinkClick={onLinkClick}
-						/>
-					</Suspense>
+					<div className="mt-5 min-h-0 flex-1 overflow-y-auto overscroll-contain pb-5">
+						<Suspense fallback={null}>
+							<Navigation
+								className="px-1"
+								onLinkClick={onLinkClick}
+							/>
+						</Suspense>
+					</div>
+					<div className="shrink-0 border-t border-light-border pt-2 dark:border-dark-border">
+						<ThemeSelector showLabel className="relative" />
+						<a
+							href="https://github.com/sourcegraph/docs"
+							className="flex min-h-11 items-center justify-between rounded-md px-1 text-sm text-slate-500 hover:text-vermilion-11 dark:text-dark-text-secondary dark:hover:text-vermilion-11"
+						>
+							GitHub <span aria-hidden="true">↗</span>
+						</a>
+						{/* Plain anchor, so next/link does not prefetch the changelog app */}
+						<a
+							href="https://sourcegraph.com/changelog"
+							className="flex min-h-11 items-center justify-between rounded-md px-1 text-sm text-slate-500 hover:text-vermilion-11 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vermilion-11/50 dark:text-dark-text-secondary dark:hover:text-vermilion-11"
+						>
+							Changelog <span aria-hidden="true">↗</span>
+						</a>
+					</div>
 				</Dialog.Panel>
 			</Dialog>
 		</>
