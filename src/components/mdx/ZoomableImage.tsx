@@ -2,9 +2,23 @@
 
 import {useCallback, useEffect, useState} from 'react';
 
+import docsConfig from '../../../docs.config';
+
 interface ZoomableImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {}
 
-export function ZoomableImage({className, alt, ...props}: ZoomableImageProps) {
+/**
+ * Serve allow-listed remote PNG/JPEGs through Next's image optimizer: WebP, at most
+ * 1920px wide (enough for the content column on a 2x display), cached at the edge.
+ * The width must be one of Next's default `deviceSizes`.
+ */
+function optimizedSrc(src: ZoomableImageProps['src']) {
+	if (typeof src !== 'string' || !/\.(png|jpe?g)$/i.test(src)) return src;
+	if (!docsConfig.OPTIMIZED_IMAGE_ORIGINS.some(origin => src.startsWith(origin))) return src;
+	const basePath = process.env.NEXT_PUBLIC_DOCS_BASE_PATH ?? '';
+	return `${basePath}/_next/image?url=${encodeURIComponent(src)}&w=1920&q=75`;
+}
+
+export function ZoomableImage({className, alt, src, ...props}: ZoomableImageProps) {
 	const [isOpen, setIsOpen] = useState(false);
 
 	const openModal = useCallback(() => setIsOpen(true), []);
@@ -32,6 +46,7 @@ export function ZoomableImage({className, alt, ...props}: ZoomableImageProps) {
 			<img
 				className={`cursor-zoom-in rounded-xl ${className ?? ''}`}
 				alt={alt}
+				src={optimizedSrc(src)}
 				loading="lazy"
 				onClick={openModal}
 				{...props}
@@ -69,6 +84,7 @@ export function ZoomableImage({className, alt, ...props}: ZoomableImageProps) {
 					<img
 						className="max-h-[90vh] max-w-[90vw] cursor-zoom-out rounded-lg object-contain"
 						alt={alt}
+						src={src}
 						onClick={e => e.stopPropagation()}
 						{...props}
 					/>

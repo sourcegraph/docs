@@ -1,5 +1,6 @@
 const {PHASE_DEVELOPMENT_SERVER} = require('next/constants');
 const {withContentlayer} = require('next-contentlayer2');
+const {OPTIMIZED_IMAGE_ORIGINS} = require('./docs.config');
 /** @type {import('next').NextConfig} */
 
 // in prod, we serve the docs from sourcegraph.com/docs, and this requires special config on the GFE side
@@ -18,6 +19,12 @@ const nextConfig = {
 		: [],
 	env: {
 		NEXT_PUBLIC_DOCS_BASE_PATH: basePath
+	},
+	// MDX screenshots are uncompressed PNGs on GCS with a one-hour cache. ZoomableImage
+	// routes them through `/_next/image`, which serves WebP from Vercel's edge cache.
+	images: {
+		remotePatterns: OPTIMIZED_IMAGE_ORIGINS.map(origin => new URL(`${origin}**`)),
+		minimumCacheTTL: 60 * 60 * 24 * 7
 	},
 	// With basePath set, nothing serves `/`, so the *.vercel.app deployment URL
 	// that Vercel links from Slack / GitHub 404s. sourcegraph.com never proxies
