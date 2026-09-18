@@ -11,6 +11,7 @@
  * - Links whose case differs from the real path (work on macOS, 404 on Linux)
  * - Missing anchor/heading references
  * - Invalid file paths
+ * - E-mail addresses without mailto:, which resolve to a page path
  * - With --check-self-links, absolute links to this site (https://sourcegraph.com/docs/...,
  *   the legacy https://docs.sourcegraph.com/... host, http://, //, www.), which
  *   should be relative links; the finding proposes one, following src/data/redirects.ts
@@ -348,9 +349,10 @@ function validateLink(link, currentFile, maps) {
 		return null;
 	}
 	
-	// Skip email addresses without mailto: prefix (common shorthand)
+	// An e-mail address without mailto: is a relative link: the browser resolves
+	// [Support](support@example.com) to /docs/<page>/support@example.com
 	if (url.includes('@') && !url.startsWith('/') && !url.includes('/')) {
-		return null;
+		return { error: 'E-mail address without mailto: resolves to a page path', fix: `mailto:${url}` };
 	}
 	
 	// Handle anchor-only links (#heading)
