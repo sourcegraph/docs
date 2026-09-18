@@ -44,14 +44,14 @@ function Header() {
 		<header className="sticky top-0 z-50">
 			<div
 				className={clsx(
-					'flex flex-none flex-wrap items-center justify-between bg-light-bg px-4 py-6 shadow-md shadow-slate-900/5 transition duration-500 dark:border-dark-border dark:shadow-none sm:px-6 lg:border-b lg:border-light-border lg:px-8',
+					'flex flex-none flex-wrap items-center justify-between bg-light-bg px-4 py-2.5 shadow-md shadow-slate-900/5 transition duration-500 dark:border-dark-border dark:shadow-none sm:px-6 lg:border-b lg:border-light-border lg:px-8 lg:py-6',
 					isScrolled
 						? 'dark:bg-dark-bg-1 dark:backdrop-blur dark:[@supports(backdrop-filter:blur(0))]:bg-dark-bg-1/80'
 						: 'dark:bg-transparent'
 				)}
 			>
 				<div className="mx-auto flex w-full max-w-8xl items-center justify-between sm:px-2 lg:px-8">
-					<div className="mr-6 flex lg:hidden">
+					<div className="-ml-2 mr-2 flex lg:hidden">
 						<MobileNavigation />
 					</div>
 					<div className="relative flex flex-grow basis-0 items-center">
@@ -64,16 +64,16 @@ function Header() {
 						</Link>
 						<Link
 							href="/"
-							className="relative z-10 block md:hidden"
+							className="relative z-10 flex h-11 w-11 items-center justify-center md:hidden"
 							aria-label="Home page"
 						>
 							<LogoMark className="h-6 w-6" />
 						</Link>
 					</div>
-					<div className="-my-5 mr-6 sm:mr-8 md:mr-0">
+					<div className="order-last -mr-2 ml-2 lg:order-none lg:-my-5 lg:ml-0 lg:mr-0">
 						<Search />
 					</div>
-					<div className="relative flex basis-0 items-center justify-end gap-6 sm:gap-6 md:flex-grow">
+					<div className="relative flex items-center justify-end gap-2 lg:flex-grow lg:basis-0 lg:gap-6">
 						{/* Plain anchor: next/link treats this same-origin URL as an
 						    app route and prefetches the changelog app's ~60 assets on
 						    every docs page. */}
@@ -87,10 +87,10 @@ function Header() {
 							</span>
 						</a>
 						<VersionSelector />
-						<ThemeSelector className="relative z-10" />
+						<ThemeSelector className="relative z-10 hidden lg:block" />
 						<Link
 							href="https://github.com/sourcegraph/docs"
-							className="group"
+							className="group hidden lg:block"
 							aria-label="GitHub"
 						>
 							<span className="flex h-7 w-7 items-center justify-center rounded-lg shadow-md shadow-black/5 ring-1 ring-light-border-2 dark:bg-dark-bg-2 dark:ring-inset dark:ring-dark-border">
