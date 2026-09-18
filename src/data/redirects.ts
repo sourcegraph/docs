@@ -15,10 +15,6 @@ import {TECHNICAL_CHANGELOG_RSS_URL} from './constants';
 
 const redirectsData = [
 	{
-		source: '/integration/img/disable_extension.png',
-		destination: '/integration/img/disable-extension.png'
-	},
-	{
 		source: '/admin/tls_ssl',
 		destination: '/self-hosted/http-https-configuration'
 	},
