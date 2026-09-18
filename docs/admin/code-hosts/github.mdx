@@ -88,7 +88,7 @@ When creating a code host connection for a GitHub App with multiple installation
 
 > NOTE: When you create a GitHub App, Sourcegraph automatically sets up an [incoming webhook](/admin/webhooks/incoming) for the app. This webhook subscribes to events for any repository or organization the app has access to, allowing Sourcegraph to keep repository and permission data in sync with GitHub.
 
-> NOTE: If you are using [Batch Changes](/batch-changes/), you can create a GitHub App to perform [commit signing](/admin/config/batch-changes#commit-signing-for-github) (Beta).
+> NOTE: If you are using [Batch Changes](/batch-changes/), you can create a GitHub App to perform [commit signing](/admin/config/batch-changes#commit-signing-with-github-apps) (Beta).
 
 #### Multiple installations
 
@@ -321,7 +321,7 @@ See [Internal rate limits](/admin/code-hosts/rate-limits#internal-rate-limits).
 
 Prerequisite for configuring repository permission syncing: [Add GitHub as an authentication provider](/admin/auth/#github).
 
-> NOTE: If your GitHub organization enforces SAML SSO, consider configuring [`requiredSsoOrgs`](/admin/auth/#requiredssoOrgs) in your GitHub auth provider to ensure users properly authorize the OAuth application during sign-in. This helps prevent permissions syncing issues caused by tokens that lack SSO authorization.
+> NOTE: If your GitHub organization enforces SAML SSO, consider configuring [`requiredSsoOrgs`](/admin/auth#github) in your GitHub auth provider to ensure users properly authorize the OAuth application during sign-in. This helps prevent permissions syncing issues caused by tokens that lack SSO authorization.
 
 Then, add or edit the GitHub connection as described above and include the `authorization` field:
 
@@ -338,7 +338,7 @@ Repo-centric permission syncing is done by calling the [list repository collabor
 
 > IMPORTANT: We strongly recommend configuring both read and write access to associated repositories for permission syncing due to GitHub's token scope requirements. Without write access, there will be a conflict between [user-centric sync](/admin/permissions/syncing#troubleshooting) and repo-centric sync. In that case, [disable repo-centric permission sync](/admin/permissions/syncing#disable-repo-centric-permission-sync) (supported in Sourcegraph 5.0.4+).
 
-> IMPORTANT: Optional, but strongly recommended - [continue with configuring webhooks for permissions](/admin/webhooks/incoming#user-permissions).
+> IMPORTANT: Optional, but strongly recommended - [continue with configuring webhooks for permissions](/admin/webhooks/incoming#github).
 
 <span class="virtual-br"></span>
 
@@ -372,13 +372,13 @@ If you would like internal repositories to remain private, but you're experienci
 
 ### Trigger permissions sync from GitHub webhooks
 
-Follow the link to [configure webhooks for permissions for Github](/admin/webhooks/incoming#user-permissions)
+Follow the link to [configure webhooks for permissions for Github](/admin/webhooks/incoming#github)
 
 ### Teams and organizations permissions caching
 
 > NOTE: This is an experimental feature.
 
-> WARNING: The following section is experimental and might not work properly anymore on new Sourcegraph versions (post 4.0+). Please prefer [configuring webhooks for permissions instead](/admin/webhooks/incoming#user-permissions)
+> WARNING: The following section is experimental and might not work properly anymore on new Sourcegraph versions (post 4.0+). Please prefer [configuring webhooks for permissions instead](/admin/webhooks/incoming#github)
 
 Github code host can leverage caching mechanisms to reduce the number of API calls used when syncing permissions. This can significantly reduce the amount of time it takes to perform a full cycle of permissions sync due to reduced instances of being rate limited by the code host, and is useful for code hosts with very large numbers of users and repositories.
 
