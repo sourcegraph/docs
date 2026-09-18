@@ -70,5 +70,3 @@ export const versions: VersionI[] = [
 		url: 'https://6.7.sourcegraph.com/'
 	}
 ];
-
-export const latestVersion = versions[0];
