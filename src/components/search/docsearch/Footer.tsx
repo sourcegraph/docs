@@ -8,7 +8,6 @@ export type FooterTranslations = Partial<{
 	navigateDownKeyAriaLabel: string;
 	closeText: string;
 	closeKeyAriaLabel: string;
-	searchByText: string;
 }>;
 
 type FooterProps = Partial<{
@@ -50,15 +49,13 @@ export function Footer({translations = {}}: FooterProps) {
 		navigateUpKeyAriaLabel = 'Arrow up',
 		navigateDownKeyAriaLabel = 'Arrow down',
 		closeText = 'to close',
-		closeKeyAriaLabel = 'Escape key',
-		searchByText = 'Search by'
+		closeKeyAriaLabel = 'Escape key'
 	} = translations;
 
 	return (
 		<>
 			<div className="DocSearch-Logo text-xs text-slate-600 opacity-60 dark:text-slate-400">
 				Search by Algolia
-				{/* <AlgoliaLogo translations={{ searchByText }} /> */}
 			</div>
 			<ul className="DocSearch-Commands">
 				<li>
