@@ -1,19 +1,24 @@
-export function Logo(props: React.ComponentPropsWithoutRef<'svg'>) {
-	const basePath = process.env.NEXT_PUBLIC_DOCS_BASE_PATH || '';
+import Image from 'next/image';
 
+// Imported, not served from `public/`, so the files get content-hashed
+// `/_next/static/media/` URLs that the CDN caches immutably.
+import logoDark from '@/images/logo-theme-dark.svg';
+import logoLight from '@/images/logo-theme-light.svg';
+
+export function Logo() {
 	return (
 		<>
-			{/* eslint-disable-next-line @next/next/no-img-element -- SVG logos do not need image optimization. */}
-			<img
+			<Image
 				className="hidden h-[23px] w-[190px] dark:block"
-				src={`${basePath}/logo-theme-dark.svg`}
+				src={logoDark}
 				alt="Sourcegraph Docs"
+				priority
 			/>
-			{/* eslint-disable-next-line @next/next/no-img-element -- SVG logos do not need image optimization. */}
-			<img
+			<Image
 				className="block h-[23px] w-[190px] dark:hidden"
-				src={`${basePath}/logo-theme-light.svg`}
+				src={logoLight}
 				alt="Sourcegraph Docs"
+				priority
 			/>
 		</>
 	);

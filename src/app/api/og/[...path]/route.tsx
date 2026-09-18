@@ -39,7 +39,7 @@ export async function GET(
 
 	const [polySansFont, logoSvg] = await Promise.all([
 		readFile(join(process.cwd(), 'src/fonts/PolySans-Neutral.woff')),
-		readFile(join(process.cwd(), 'public/logo-theme-dark.svg'), 'utf-8')
+		readFile(join(process.cwd(), 'src/images/logo-theme-dark.svg'), 'utf-8')
 	]);
 
 	const logoDataUrl = `data:image/svg+xml,${encodeURIComponent(logoSvg)}`;
