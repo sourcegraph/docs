@@ -14,3 +14,9 @@
   "Generating static pages" time (locally 6.6s with them, 3.6s without).
   Options: hoist the font and logo reads in `src/app/api/og/[...path]/route.tsx`
   to module scope, or render one image per top-level section instead of per page
+- Serve MDX screenshots as WebP through `/_next/image`: branch
+  `marc/perf/webp-images` (split out of #1975) routes allow-listed GCS
+  PNG/JPEGs through Next's image optimizer, 1214 KB → 214 KB on
+  `/batch-changes/delete-a-batch-change`. Needs a decision on the Vercel
+  Image Optimization bill (~360 source images, one transform per week per
+  region) before it goes up as a PR
