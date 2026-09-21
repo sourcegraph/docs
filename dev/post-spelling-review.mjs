@@ -1,28 +1,25 @@
 #!/usr/bin/env node
 
 /**
- * Reports CSpell findings on a pull request: one summary comment in the
- * discussion, plus an inline review comment on each flagged line. Findings in
- * the pull request's title or description (those with a `field`) have no line
- * to comment on, so they appear in the summary only. Once the findings are
- * fixed, the summary is minimized as resolved and the inline comments are
- * deleted; the review that carried them has no body, so nothing of it remains
- * visible.
+ * Reports CSpell findings on a pull request: writes the summary for the PR's
+ * status comment (posted by dev/upsert-report-comment.sh), and keeps one
+ * inline review comment on each flagged line. Findings in the pull request's
+ * title or description (those with a `field`) have no line to comment on, so
+ * they appear in the summary only. Once the findings are fixed, the inline
+ * comments are deleted; the review that carried them has no body, so nothing
+ * of it remains visible.
  *
- * Usage: node dev/post-spelling-review.mjs --findings <json-file> [--dry-run]
- *        node dev/post-spelling-review.mjs --crashed [--dry-run]
+ * Usage: node dev/post-spelling-review.mjs --findings <json-file> --summary <md-file> [--dry-run]
  *
- * Reads the JSON written by `dev/check-spelling.mjs --format json`. With
- * `--crashed`, the summary says the check could not run and links the job log
- * (RUN_URL) instead; the inline comments are left as they are.
+ * Reads the JSON written by `dev/check-spelling.mjs --format json`.
  * Requires GH_TOKEN, GITHUB_REPOSITORY, PR_NUMBER, HEAD_SHA and HEAD_REF.
  */
 
-import {readFileSync} from 'fs';
+import {readFileSync, writeFileSync} from 'fs';
 
 const args = process.argv.slice(2);
 const FINDINGS_FILE = args[args.indexOf('--findings') + 1];
-const CRASHED = args.includes('--crashed');
+const SUMMARY_FILE = args[args.indexOf('--summary') + 1];
 const DRY_RUN = args.includes('--dry-run');
 const MAX_INLINE_COMMENTS = 25;
 
@@ -31,12 +28,10 @@ const REPOSITORY = process.env.GITHUB_REPOSITORY;
 const PR_NUMBER = process.env.PR_NUMBER;
 const HEAD_SHA = process.env.HEAD_SHA;
 const HEAD_REF = process.env.HEAD_REF;
-const RUN_URL = process.env.RUN_URL;
 
 // Link to the PR branch, not the commit, so GitHub's edit button works from it
 const ALLOW_LIST_LINK = `[\`cspell-allow-list.txt\`](https://github.com/${REPOSITORY}/blob/${HEAD_REF}/cspell-allow-list.txt)`;
 
-const SUMMARY_MARKER = '<!-- cspell-report -->';
 const INLINE_MARKER = '<!-- cspell-finding:';
 
 async function github(method, route, body) {
@@ -73,26 +68,6 @@ async function githubWrite(method, route, body) {
 	console.log(`${DRY_RUN ? '[dry-run] ' : ''}${method} ${route}`);
 	if (!DRY_RUN) {
 		await github(method, route, body);
-	}
-}
-
-// Minimizing a comment is GraphQL-only. Both mutations are idempotent.
-async function setCommentMinimized(nodeId, minimized) {
-	const mutation = minimized
-		? 'minimizeComment(input: {subjectId: $id, classifier: RESOLVED}) { clientMutationId }'
-		: 'unminimizeComment(input: {subjectId: $id}) { clientMutationId }';
-	console.log(
-		`${DRY_RUN ? '[dry-run] ' : ''}${minimized ? 'minimize' : 'unminimize'} comment ${nodeId}`
-	);
-	if (DRY_RUN) {
-		return;
-	}
-	const result = await github('POST', '/graphql', {
-		query: `mutation ($id: ID!) { ${mutation} }`,
-		variables: {id: nodeId}
-	});
-	if (result.errors) {
-		throw new Error(`GraphQL failed: ${JSON.stringify(result.errors)}`);
 	}
 }
 
@@ -142,9 +117,13 @@ function summaryItem(finding) {
 	return `\`${finding.word}\`${suggestion ? ` → \`${suggestion}\`` : ''}`;
 }
 
+// The status comment's text. Its first line carries the count for
+// dev/upsert-report-comment.sh, which adds the running total below it
 function summaryBody(findings) {
+	if (findings.length === 0) {
+		return '### ✅ This revision introduces no spelling errors\n';
+	}
 	const lines = [
-		SUMMARY_MARKER,
 		`### ⚠️ Spell check found ${findings.length} issue(s) in this PR`,
 		'',
 		'Only findings on lines added by this PR, and in its title and description, are shown.',
@@ -171,49 +150,6 @@ function summaryBody(findings) {
 		"Run `npx cspell@10 --no-progress --dot '**/*'` locally to check the full repository."
 	);
 	return lines.join('\n') + '\n';
-}
-
-function crashedBody() {
-	return [
-		SUMMARY_MARKER,
-		'### ⚠️ The spell check could not run on this revision',
-		'',
-		`This is a problem with the check, not with this PR; see the [job log](${RUN_URL}).`,
-		''
-	].join('\n');
-}
-
-const RESOLVED_BODY = `${SUMMARY_MARKER}\n### ✅ This revision introduces no spelling errors\n`;
-
-// Post the summary, or replace the earlier one. A resolved summary is kept,
-// collapsed, so the discussion still shows what was flagged and fixed; it is
-// reopened when there is something to say again.
-async function upsertSummaryComment(body, resolved) {
-	const comments = await githubList(
-		`/repos/${REPOSITORY}/issues/${PR_NUMBER}/comments`
-	);
-	const existing = comments.find(comment =>
-		comment.body.startsWith(SUMMARY_MARKER)
-	);
-
-	if (!existing) {
-		// Nothing to resolve
-		if (!resolved) {
-			await githubWrite(
-				'POST',
-				`/repos/${REPOSITORY}/issues/${PR_NUMBER}/comments`,
-				{body}
-			);
-		}
-		return;
-	}
-
-	await githubWrite(
-		'PATCH',
-		`/repos/${REPOSITORY}/issues/comments/${existing.id}`,
-		{body}
-	);
-	await setCommentMinimized(existing.node_id, resolved);
 }
 
 function findingKey({file, line, word}) {
@@ -337,25 +273,13 @@ async function main() {
 			throw new Error(`Missing required environment variable ${name}`);
 		}
 	}
-	if (CRASHED) {
-		if (!RUN_URL) {
-			throw new Error('Missing required environment variable RUN_URL');
-		}
-		console.log('Reporting that the check crashed');
-		await upsertSummaryComment(crashedBody(), false);
-		return;
-	}
-	if (!FINDINGS_FILE) {
-		throw new Error('Missing required --findings <json-file>');
+	if (!FINDINGS_FILE || !SUMMARY_FILE) {
+		throw new Error('Missing required --findings <json-file> --summary <md-file>');
 	}
 
 	const findings = JSON.parse(readFileSync(FINDINGS_FILE, 'utf8'));
 	console.log(`${findings.length} finding(s) to report`);
-	const resolved = findings.length === 0;
-	await upsertSummaryComment(
-		resolved ? RESOLVED_BODY : summaryBody(findings),
-		resolved
-	);
+	writeFileSync(SUMMARY_FILE, summaryBody(findings));
 	await syncInlineComments(findings);
 }
 

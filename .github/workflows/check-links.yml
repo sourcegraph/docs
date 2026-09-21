@@ -85,29 +85,14 @@ jobs:
                   PR_NUMBER: ${{ github.event.pull_request.number }}
                   RESULT: ${{ steps.check.outputs.result }}
                   RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+              # The status comment keeps a running total; see dev/upsert-report-comment.sh
               run: |
-                  marker='<!-- check-links-report -->'
-                  existing_comment=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
-                      --paginate --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n 1)
-
-                  # Comment when there is something to report, or an earlier report to resolve
-                  case "$RESULT" in
-                      broken)
-                          { echo "$marker"; cat "$RUNNER_TEMP/report.md"; } > "$RUNNER_TEMP/comment.md" ;;
-                      crashed)
-                          printf '%s\n### ⚠️ The links check could not run on this revision\n\nThis is a problem with the check, not with this PR; see the [job log](%s).\n' \
-                              "$marker" "$RUN_URL" > "$RUNNER_TEMP/comment.md" ;;
-                      *)
-                          [ -n "$existing_comment" ] || exit 0
-                          printf '%s\n### ✅ This revision introduces no broken links\n' \
-                              "$marker" > "$RUNNER_TEMP/comment.md" ;;
-                  esac
-
-                  if [ -n "$existing_comment" ]; then
-                      gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$existing_comment" \
-                          --field body=@"$RUNNER_TEMP/comment.md"
+                  if [ "$RESULT" = crashed ]; then
+                      printf '### ⚠️ The links check could not run on this revision\n\nThis is a problem with the check, not with this PR; see the [job log](%s).\n' \
+                          "$RUN_URL" > "$RUNNER_TEMP/report.md"
+                      dev/upsert-report-comment.sh '<!-- check-links-report -->' "$RUNNER_TEMP/report.md" --crashed
                   else
-                      gh pr comment "$PR_NUMBER" --body-file "$RUNNER_TEMP/comment.md"
+                      dev/upsert-report-comment.sh '<!-- check-links-report -->' "$RUNNER_TEMP/report.md"
                   fi
 
             - name: Suggest fixes as review comments

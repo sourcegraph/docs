@@ -74,7 +74,10 @@ gh api repos/sourcegraph/docs/pulls/<pr>/comments --paginate \
 
 Fork PRs get no comments; the findings are in the job log
 (`gh run view <run-id> --log`). The checks resolve their own comments on the
-next run.
+next run: inline comments are deleted, and the summary comment is updated in
+place (`dev/upsert-report-comment.sh`) with a `Total findings` / `Remediated`
+table, so a merged PR's comment says how many findings it was merged with.
+`dev/pr-check-metrics.sh [merged-since]` sums those tables over merged PRs.
 
 ### Vercel build failures
 
