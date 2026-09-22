@@ -57,6 +57,27 @@ curl -X GET "https://analytics.sourcegraph.com/api/reports/by-user-client-date?i
  -H "Authorization: Bearer $ACCESS_TOKEN"
 ```
 
+### User registry export
+
+The user registry endpoint returns the current user registry snapshot for a Sourcegraph instance as CSV. The required `instanceURL` must identify an instance that your access token has permission to access.
+
+The export contains the following columns:
+
+- `Instance user ID`: The identifier used to correlate a user with user-level analytics exports.
+- `Service Account`: Whether the user is a service account (`true` or `false`).
+
+To download the user registry:
+
+```sh
+export INSTANCE_URL="<INSTANCE_URL>" # e.g. example.sourcegraphcloud.com
+
+curl --fail-with-body --get \
+ "https://analytics.sourcegraph.com/api/reports/user-registry" \
+ -H "Authorization: Bearer $ACCESS_TOKEN" \
+ --data-urlencode "instanceURL=$INSTANCE_URL" \
+ --output user_registry.csv
+```
+
 ### Credit buckets
 
 The credits API endpoint provides access to credit bucket allocations and consumption for your instance. To retrieve this data, run the following commands:
