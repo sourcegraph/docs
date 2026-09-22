@@ -48,19 +48,19 @@ function createRedirectUrl(
 	}
 
 	// Handle relative paths
-	const basePath = '/docs';
+	const base = `${request.nextUrl.origin}${docsConfig.DOCS_BASE_PATH}`;
 	return destination.startsWith('/')
-		? `${request.nextUrl.origin}${basePath}${destination}`
-		: `${request.nextUrl.origin}${basePath}/${destination}`;
+		? `${base}${destination}`
+		: `${base}/${destination}`;
 }
 
 export function proxy(request: NextRequest) {
+	// nextUrl.pathname excludes basePath, so /docs/x arrives here as /x.
 	const path = request.nextUrl.pathname;
-	const pathWithoutBase = path.replace('/docs', '');
 
 	// Handle .md suffix - return raw markdown
-	if (pathWithoutBase.endsWith('.md')) {
-		const docPath = pathWithoutBase.replace(/\.md$/, '');
+	if (path.endsWith('.md')) {
+		const docPath = path.replace(/\.md$/, '');
 		const url = request.nextUrl.clone();
 		url.pathname = `/api/md${docPath}`;
 		return NextResponse.rewrite(url);
@@ -68,7 +68,7 @@ export function proxy(request: NextRequest) {
 
 	// Handle base redirects from redirects.ts
 	const redirect = updatedRedirectsData.find(
-		(r: any) => r.source === pathWithoutBase
+		(r: any) => r.source === path
 	);
 	if (redirect) {
 		return NextResponse.redirect(
@@ -77,15 +77,17 @@ export function proxy(request: NextRequest) {
 	}
 
 	// Handle latest version without path - redirect to main docs
-	const latestVersionOnlyMatch = pathWithoutBase.match(
+	const latestVersionOnlyMatch = path.match(
 		`^\/(?:v\/|@)${docsConfig.DOCS_LATEST_VERSION}\/?$`
 	);
 	if (latestVersionOnlyMatch) {
-		return NextResponse.redirect(`https://sourcegraph.com/docs`);
+		return NextResponse.redirect(
+			`${request.nextUrl.origin}${docsConfig.DOCS_BASE_PATH}`
+		);
 	}
 
 	// Handle version without slug - both /v/X.Y and @X.Y formats (for non-latest versions)
-	const versionOnlyMatch = pathWithoutBase.match(
+	const versionOnlyMatch = path.match(
 		/^\/(?:v\/|@)(\d+\.\d+)\/?$/
 	);
 	if (
@@ -97,48 +99,42 @@ export function proxy(request: NextRequest) {
 		);
 	}
 
-	// Handle version-specific redirects
-	if (pathWithoutBase.startsWith(`/v/${docsConfig.DOCS_LATEST_VERSION}/`)) {
+	// Latest version with a slug: this deployment serves it, so stay here.
+	if (
+		path.startsWith(`/v/${docsConfig.DOCS_LATEST_VERSION}/`) ||
+		path.startsWith(`/@${docsConfig.DOCS_LATEST_VERSION}/`)
+	) {
 		return NextResponse.redirect(
 			createRedirectUrl(
 				request,
-				`https://sourcegraph.com/docs/:slug*`,
-				pathWithoutBase
+				`${request.nextUrl.origin}${docsConfig.DOCS_BASE_PATH}/:slug*`,
+				path
 			)
 		);
 	}
-	if (pathWithoutBase.startsWith(`/@${docsConfig.DOCS_LATEST_VERSION}/`)) {
-		return NextResponse.redirect(
-			createRedirectUrl(
-				request,
-				`https://sourcegraph.com/docs/:slug*`,
-				pathWithoutBase
-			)
-		);
-	}
-	const versionMatch = pathWithoutBase.match(/^\/v\/(\d+\.\d+)\/(.*)/);
+	const versionMatch = path.match(/^\/v\/(\d+\.\d+)\/(.*)/);
 	if (versionMatch) {
 		return NextResponse.redirect(
 			createRedirectUrl(
 				request,
 				'https://:version.sourcegraph.com/:slug*',
-				pathWithoutBase
+				path
 			)
 		);
 	}
-	const atVersionMatch = pathWithoutBase.match(/^\/@(\d+\.\d+)\/(.*)/);
+	const atVersionMatch = path.match(/^\/@(\d+\.\d+)\/(.*)/);
 
 	if (atVersionMatch) {
 		return NextResponse.redirect(
 			createRedirectUrl(
 				request,
 				'https://:version.sourcegraph.com/:slug*',
-				pathWithoutBase
+				path
 			)
 		);
 	}
 
-	if (pathWithoutBase === '/changelog.rss')
+	if (path === '/changelog.rss')
 		return NextResponse.redirect(TECHNICAL_CHANGELOG_RSS_URL);
 
 	return NextResponse.next();

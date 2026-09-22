@@ -67,7 +67,9 @@ export const curatedSearchSuggestions = [
 export const searchMetadata = {
 	provider: 'kbar',
 	kbarConfig: {
-		searchDocumentsPath: '/docs/search.json' // path to load documents to search
+		// Root-relative like every public/ path; contentlayer.config.ts only checks
+		// it is set before writing public/search.json.
+		searchDocumentsPath: '/search.json'
 	},
 	// For Algolia
 	// provider: 'algolia',

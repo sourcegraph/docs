@@ -25,12 +25,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import GithubSlugger from 'github-slugger';
+import config from '../docs.config.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const generatedDir = path.join(root, '.contentlayer/generated/Post');
 const outDir = path.join(root, '.algolia');
 
-const SITE_URL = 'https://sourcegraph.com/docs';
 const DEFAULT_INDEX = 'sourcegraph_docs';
 const DEFAULT_APP_ID = 'JSZOJ0ZYVG';
 // Consecutive paragraphs under the same heading are merged into chunks of up to
@@ -282,7 +282,7 @@ function contentHash(content) {
 
 function buildPageRecords(post, owner, deduplication) {
 	const url = post.url;
-	const pageUrl = SITE_URL + url;
+	const pageUrl = config.DOCS_PROD_URL + url;
 	const slugger = new GithubSlugger();
 	const pageRank = Math.round((post.seoPriority ?? 0.5) * 100);
 	const records = [];

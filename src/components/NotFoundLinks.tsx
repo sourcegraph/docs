@@ -4,6 +4,7 @@ import {usePreviousPathname} from '@/components/PreviousPathname';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 import {useEffect, useMemo, useState} from 'react';
+import config from 'docs.config';
 
 const linkClassName =
 	'text-sm font-medium text-slate-900 hover:underline dark:text-white';
@@ -22,9 +23,6 @@ function nearestExistingAncestor(
 	return null;
 }
 
-// Production serves the docs under /docs (basePath in next.config.js).
-const basePath = process.env.NEXT_PUBLIC_DOCS_BASE_PATH || '';
-
 interface PageLink {
 	href: string;
 	pathname: string;
@@ -39,8 +37,8 @@ function docsReferrer(): PageLink | null {
 	if (!document.referrer) return null;
 	const referrer = new URL(document.referrer);
 	if (referrer.origin !== window.location.origin) return null;
-	if (!referrer.pathname.startsWith(`${basePath}/`)) return null;
-	const pathname = referrer.pathname.slice(basePath.length);
+	if (!referrer.pathname.startsWith(`${config.DOCS_BASE_PATH}/`)) return null;
+	const pathname = referrer.pathname.slice(config.DOCS_BASE_PATH.length);
 	// The home link already covers the root.
 	if (pathname === '/') return null;
 	return {href: pathname + referrer.search + referrer.hash, pathname};
