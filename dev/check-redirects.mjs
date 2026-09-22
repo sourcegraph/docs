@@ -8,7 +8,9 @@
  * - the source does not shadow an existing page (the middleware would redirect
  *   visitors away from a page that exists)
  * - the source has no #fragment: browsers never send fragments, so such an
- *   entry can never match
+ *   entry can never match; when the page at the source path still exists, the
+ *   report says to remove the entry rather than drop the fragment, since that
+ *   would shadow the page
  * - the source has no earlier entry: the middleware uses the first match only
  * - neither path starts with /docs: the middleware strips that prefix from
  *   requests and adds it to destinations
@@ -64,11 +66,21 @@ const PROBLEM = {
 			"Redirects take precedence over pages, so visitors to that page's URL are redirected away from it. " +
 			'Update or remove the redirect or the page to remove the conflict.'
 	},
+	fragmentSourceOnPage: {
+		heading: 'Source has a #fragment, and its page still exists',
+		fix:
+			'Remove this entry. #fragments are processed in the browser, so browsers never send them to ' +
+			'web servers, and this entry can never match; but dropping the #fragment would redirect ' +
+			'visitors away from a page that exists.\n\n' +
+			'To send readers of that heading to a new location, keep the heading on the page with a ' +
+			'link to the new location, and fix the internal links that point at it.'
+	},
 	fragmentSource: {
 		heading: 'Source has a #fragment, so this redirect can never match',
 		fix:
-			'Use the page path alone as the source. #fragments are processed in the browser, so browsers ' +
-			'never send them to web servers.\n\n' +
+			'Use the page path alone as the source; that page no longer exists, so the whole-page ' +
+			'redirect shadows nothing. #fragments are processed in the browser, so browsers never send ' +
+			'them to web servers.\n\n' +
 			'If the redirect destination has a #fragment, it takes precedence, otherwise if the customer ' +
 			"clicked a link which has a #fragment, it'll be kept and tried on the destination page."
 	},
@@ -205,6 +217,11 @@ function findBrokenRedirects(redirects, headingsByRoute) {
 	for (const redirect of redirects) {
 		const source = splitUrl(redirect.source);
 		if (source.fragment) {
+			// Dropping the fragment must not create a redirect that shadows a page
+			if (headingsByRoute.has(source.pathname)) {
+				report(redirect, PROBLEM.fragmentSourceOnPage, {fix: {remove: true}});
+				continue;
+			}
 			// Another entry may already cover the source without its fragment
 			const fix = firstBySource.has(withoutFragment(redirect.source))
 				? {remove: true}
