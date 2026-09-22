@@ -6,6 +6,7 @@ import type {
 import React from 'react';
 
 import type {DocSearchProps} from './DocSearch';
+import {MIN_QUERY_SIZE} from './constants';
 import type {ErrorScreenTranslations} from './ErrorScreen';
 import {ErrorScreen} from './ErrorScreen';
 import type {NoResultsScreenTranslations} from './NoResultsScreen';
@@ -22,13 +23,14 @@ export type ScreenStateTranslations = Partial<{
 	noResultsScreen: NoResultsScreenTranslations;
 }>;
 
-export interface ScreenStateProps<TItem extends BaseItem>
-	extends AutocompleteApi<
-		TItem,
-		React.FormEvent,
-		React.MouseEvent,
-		React.KeyboardEvent
-	> {
+export interface ScreenStateProps<
+	TItem extends BaseItem
+> extends AutocompleteApi<
+	TItem,
+	React.FormEvent,
+	React.MouseEvent,
+	React.KeyboardEvent
+> {
 	state: AutocompleteState<TItem>;
 	recentSearches: StoredSearchPlugin<StoredDocSearchHit>;
 	favoriteSearches: StoredSearchPlugin<StoredDocSearchHit>;
@@ -47,6 +49,19 @@ export interface ScreenStateProps<TItem extends BaseItem>
 
 export const ScreenState = React.memo(
 	({translations = {}, ...props}: ScreenStateProps<InternalDocSearchHit>) => {
+		if (
+			props.state.query &&
+			props.state.query.trim().length < MIN_QUERY_SIZE
+		) {
+			return (
+				<div className="DocSearch-StartScreen">
+					<p className="DocSearch-Help" role="status">
+						Type at least {MIN_QUERY_SIZE} characters to search.
+					</p>
+				</div>
+			);
+		}
+
 		if (props.state.status === 'error') {
 			return <ErrorScreen translations={translations?.errorScreen} />;
 		}
@@ -82,8 +97,9 @@ export const ScreenState = React.memo(
 		//  - Empty screen → Results screen
 		//  - NoResults screen → NoResults screen with another query
 		return (
-			nextProps.state.status === 'loading' ||
-			nextProps.state.status === 'stalled'
+			nextProps.state.query.trim().length >= MIN_QUERY_SIZE &&
+			(nextProps.state.status === 'loading' ||
+				nextProps.state.status === 'stalled')
 		);
 	}
 );

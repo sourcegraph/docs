@@ -14,7 +14,7 @@ import type {ScreenStateTranslations} from './ScreenState';
 import {ScreenState} from './ScreenState';
 import type {SearchBoxTranslations} from './SearchBox';
 import {SearchBox} from './SearchBox';
-import {MAX_QUERY_SIZE} from './constants';
+import {MAX_QUERY_SIZE, MIN_QUERY_SIZE} from './constants';
 import {createStoredSearches} from './stored-searches';
 import type {
 	DocSearchHit,
@@ -229,6 +229,10 @@ export function DocSearchModal({
 								}
 							}
 						];
+					}
+
+					if (query.trim().length < MIN_QUERY_SIZE) {
+						return [];
 					}
 
 					const insightsActive = Boolean(insights);
