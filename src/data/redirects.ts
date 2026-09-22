@@ -2497,7 +2497,7 @@ const redirectsData = [
 	{
 		source: '/batch_changes/explanations/permissions_in_batch_changes#disabling-batch-changes-for-non-site-admin-users',
 		destination:
-			'/batch-changes/permissions-in-batch-changes#disabling-batch-changes-for-non-site-admin-users'
+			'/batch-changes/permissions-in-batch-changes#restricting-batch-changes-to-specific-users'
 	},
 	{
 		source: '/batch_changes/explanations/batch_changes_design',

@@ -2,7 +2,18 @@
 
 Granular controls for who can access [Batch Changes](/batch-changes/) can be configured by site admins by tuning the roles assigned to users and the permissions granted to those roles. This page describes the permission types available for Batch Changes, and whether they are granted by default to the **User** [system role](/admin/access-control#system-roles). All permissions are granted to the **Site Administrator** system role by default.
 
-| Name                  | Description                                                                                                                                                                                                                                          | Granted to **User** by default? |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-----------------------------: |
-| `batch_changes:read`  | <ul><li>User can view batch changes, changesets, and batch specs.</li><li>User can view bulk operations and batch spec workspaces.</li></ul>                                                                                                          |                ✓                |
-| `batch_changes:write` | <ul><li>User can create, update, close, or delete batch changes.</li><li>User can create, execute, and apply batch specs.</li><li>User can perform bulk operations on changesets such as publishing, commenting on, closing, or merging them.</li></ul> |                ✓                |
+| Name                        | Description                                                                                                                                                                                                                                             | Granted to **User** by default? |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-----------------------------: |
+| `batch_changes:read`        | <ul><li>User can view batch changes, changesets, and batch specs.</li><li>User can view bulk operations and batch spec workspaces.</li></ul>                                                                                                            |                ✓                |
+| `batch_changes:write`       | <ul><li>User can create, update, close, or delete batch changes.</li><li>User can create, execute, and apply batch specs.</li><li>User can perform bulk operations on changesets such as publishing, commenting on, closing, or merging them.</li></ul> |                ✓                |
+| `batch_changes:agent_read`  | <ul><li>User can view [agentic batch changes](/agentic-batch-changes/), including agents, their conversations, and results.</li><li>Requires `batch_changes:read` as well.</li></ul>                                                                    |                ✓                |
+| `batch_changes:agent_write` | <ul><li>User can create, run, and modify [agentic batch changes](/agentic-batch-changes/).</li><li>Requires `batch_changes:write` as well.</li></ul>                                                                                                    |                ✓                |
+
+These permissions gate access to the Batch Changes feature as a whole. Within a batch change, what a user can see and do is further limited by the batch change's [permission levels](/batch-changes/permissions-in-batch-changes#permission-levels-for-batch-changes) and by their [repository permissions](/batch-changes/permissions-in-batch-changes#repository-permissions-for-batch-changes). Merging changesets can additionally be restricted to site admins with the `batchChanges.restrictMergeToAdmins` [site configuration](/batch-changes/permissions-in-batch-changes#restricting-merges-to-site-admins) property.
+
+<Callout type="note">
+	The site configuration property `batchChanges.restrictToAdmins` is
+	deprecated and has no effect. To restrict Batch Changes to site admins,
+	remove the `batch_changes:read` and `batch_changes:write` permissions from
+	the **User** role instead.
+</Callout>
