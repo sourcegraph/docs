@@ -765,7 +765,7 @@ const redirectsData = [
 	},
 	{
 		source: '/user/campaigns/managing_access',
-		destination: '/batch_changes/explanations/permissions_in_batch_changes'
+		destination: '/batch-changes/permissions-in-batch-changes'
 	},
 	{
 		source: '/dev/campaigns_database_layout.dot',
@@ -816,7 +816,7 @@ const redirectsData = [
 	},
 	{
 		source: '/campaigns/explanations/permissions_in_batch_changes',
-		destination: '/batch_changes/explanations/permissions_in_batch_changes'
+		destination: '/batch-changes/permissions-in-batch-changes'
 	},
 	{
 		source: '/campaigns/explanations/introduction_to_batch_changes',
@@ -2485,19 +2485,8 @@ const redirectsData = [
 		destination: '/batch-changes/'
 	},
 	{
-		source: '/batch_changes/explanations/permissions_in_batch_changes#code-host-interactions-in-batch-changes',
-		destination:
-			'/batch-changes/permissions-in-batch-changes#code-host-interactions-in-batch-changes'
-	},
-	{
-		source: '/batch_changes/explanations/permissions_in_batch_changes#repository-permissions-for-batch-changes',
-		destination:
-			'/batch-changes/permissions-in-batch-changes#repository-permissions-for-batch-changes'
-	},
-	{
-		source: '/batch_changes/explanations/permissions_in_batch_changes#disabling-batch-changes-for-non-site-admin-users',
-		destination:
-			'/batch-changes/permissions-in-batch-changes#disabling-batch-changes-for-non-site-admin-users'
+		source: '/batch_changes/explanations/permissions_in_batch_changes',
+		destination: '/batch-changes/permissions-in-batch-changes'
 	},
 	{
 		source: '/batch_changes/explanations/batch_changes_design',
