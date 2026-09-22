@@ -9,9 +9,13 @@
  * comments are deleted; the review that carried them has no body, so nothing
  * of it remains visible.
  *
- * Usage: node dev/post-spelling-review.mjs --findings <json-file> --summary <md-file> [--dry-run]
+ * Usage: node dev/post-spelling-review.mjs --findings <json-file> \
+ *            --summary <md-file> --keys <keys-file> [--dry-run]
  *
- * Reads the JSON written by `dev/check-spelling.mjs --format json`.
+ * Reads the JSON written by `dev/check-spelling.mjs --format json`. Writes
+ * the summary Markdown and, to the keys file, one identity per finding (file
+ * and word, since line numbers shift between revisions) for
+ * dev/upsert-report-comment.sh to count across revisions.
  * Requires GH_TOKEN, GITHUB_REPOSITORY, PR_NUMBER, HEAD_SHA and HEAD_REF.
  */
 
@@ -20,6 +24,7 @@ import {readFileSync, writeFileSync} from 'fs';
 const args = process.argv.slice(2);
 const FINDINGS_FILE = args[args.indexOf('--findings') + 1];
 const SUMMARY_FILE = args[args.indexOf('--summary') + 1];
+const KEYS_FILE = args[args.indexOf('--keys') + 1];
 const DRY_RUN = args.includes('--dry-run');
 const MAX_INLINE_COMMENTS = 25;
 
@@ -152,6 +157,16 @@ function summaryBody(findings) {
 	return lines.join('\n') + '\n';
 }
 
+// One JSON string per line, as dev/check-links.mjs writes its --keys file:
+// any character fits, and `>` is escaped since the lines end up inside an
+// HTML comment on the PR. Not imported from there, since this job does not
+// install its github-slugger dependency
+function findingKeyLines(findings) {
+	return [...new Set(findings.map(({file, word}) => `${file}\u0000${word}`))]
+		.map(key => JSON.stringify(key).replaceAll('>', '\\u003e') + '\n')
+		.join('');
+}
+
 function findingKey({file, line, word}) {
 	return `${file}:${line}:${word}`;
 }
@@ -273,13 +288,16 @@ async function main() {
 			throw new Error(`Missing required environment variable ${name}`);
 		}
 	}
-	if (!FINDINGS_FILE || !SUMMARY_FILE) {
-		throw new Error('Missing required --findings <json-file> --summary <md-file>');
+	if (!FINDINGS_FILE || !SUMMARY_FILE || !KEYS_FILE) {
+		throw new Error(
+			'Missing required --findings <json-file> --summary <md-file> --keys <keys-file>'
+		);
 	}
 
 	const findings = JSON.parse(readFileSync(FINDINGS_FILE, 'utf8'));
 	console.log(`${findings.length} finding(s) to report`);
 	writeFileSync(SUMMARY_FILE, summaryBody(findings));
+	writeFileSync(KEYS_FILE, findingKeyLines(findings));
 	await syncInlineComments(findings);
 }
 

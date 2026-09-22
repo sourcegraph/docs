@@ -71,13 +71,14 @@ jobs:
                   HEAD_REF: ${{ github.event.pull_request.head.ref }}
                   RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
                   CRASHED: ${{ steps.check.outputs.crashed }}
-              # The status comment keeps a running total; see dev/upsert-report-comment.sh
+              # The status comment keeps a findings/remediated table; see dev/upsert-report-comment.sh
               run: |
                   if [ "$CRASHED" = true ]; then
                       printf '### ⚠️ The spell check could not run on this revision\n\nThis is a problem with the check, not with this PR; see the [job log](%s).\n' \
                           "$RUN_URL" > "$RUNNER_TEMP/summary.md"
                       dev/upsert-report-comment.sh '<!-- cspell-report -->' "$RUNNER_TEMP/summary.md" --crashed
                   else
-                      node dev/post-spelling-review.mjs --findings "$RUNNER_TEMP/spelling.json" --summary "$RUNNER_TEMP/summary.md"
-                      dev/upsert-report-comment.sh '<!-- cspell-report -->' "$RUNNER_TEMP/summary.md"
+                      node dev/post-spelling-review.mjs --findings "$RUNNER_TEMP/spelling.json" \
+                          --summary "$RUNNER_TEMP/summary.md" --keys "$RUNNER_TEMP/keys.txt"
+                      dev/upsert-report-comment.sh '<!-- cspell-report -->' "$RUNNER_TEMP/summary.md" "$RUNNER_TEMP/keys.txt"
                   fi

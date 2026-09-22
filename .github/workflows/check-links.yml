@@ -67,6 +67,7 @@ jobs:
                       --baseline "$RUNNER_TEMP/base-links.json" \
                       --diff "$RUNNER_TEMP/changes.diff" \
                       --review "$RUNNER_TEMP/review.json" \
+                      --keys "$RUNNER_TEMP/keys.txt" \
                       --link-base "$LINK_BASE" > "$RUNNER_TEMP/report.md"; then
                       echo "result=clean" >> "$GITHUB_OUTPUT"
                   elif [ -s "$RUNNER_TEMP/report.md" ]; then
@@ -85,14 +86,14 @@ jobs:
                   PR_NUMBER: ${{ github.event.pull_request.number }}
                   RESULT: ${{ steps.check.outputs.result }}
                   RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-              # The status comment keeps a running total; see dev/upsert-report-comment.sh
+              # The status comment keeps a findings/remediated table; see dev/upsert-report-comment.sh
               run: |
                   if [ "$RESULT" = crashed ]; then
                       printf '### ⚠️ The links check could not run on this revision\n\nThis is a problem with the check, not with this PR; see the [job log](%s).\n' \
                           "$RUN_URL" > "$RUNNER_TEMP/report.md"
                       dev/upsert-report-comment.sh '<!-- check-links-report -->' "$RUNNER_TEMP/report.md" --crashed
                   else
-                      dev/upsert-report-comment.sh '<!-- check-links-report -->' "$RUNNER_TEMP/report.md"
+                      dev/upsert-report-comment.sh '<!-- check-links-report -->' "$RUNNER_TEMP/report.md" "$RUNNER_TEMP/keys.txt"
                   fi
 
             - name: Suggest fixes as review comments

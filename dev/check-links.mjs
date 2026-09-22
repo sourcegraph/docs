@@ -39,6 +39,8 @@
  *   --review <file>        Write a GitHub pull request review (JSON body for
  *                          POST /repos/{owner}/{repo}/pulls/{n}/reviews) with one
  *                          suggested-change comment per added line that has a fix
+ *   --keys <file>          Write the findings' identities, one per line, for
+ *                          dev/upsert-report-comment.sh to count across revisions
  *
  * Exits 1 when any finding is reported.
  */
@@ -62,6 +64,7 @@ const LINK_BASE = flagValue('--link-base')?.replace(/\/$/, '');
 const DIFF = parseDiff(flagValue('--diff'));
 const CHECK_EXTERNAL = args.includes('--check-external');
 const REVIEW_FILE = flagValue('--review');
+const KEYS_FILE = flagValue('--keys');
 
 if (CHECK_EXTERNAL && !DIFF) {
 	throw new Error('--check-external needs --diff, to know which lines were added');
@@ -516,6 +519,14 @@ function findingKey({ file, url, error }) {
 	return `${file}\n${url}\n${error}`;
 }
 
+// The --keys file: one JSON string per line, so a key can hold any character,
+// with `>` escaped since the lines end up inside an HTML comment on the PR
+export function findingKeyLines(keys) {
+	return [...new Set(keys)]
+		.map(key => JSON.stringify(key).replaceAll('>', '\\u003e') + '\n')
+		.join('');
+}
+
 function withoutBaseline(findings, baselineFile) {
 	const baseline = new Set(
 		JSON.parse(fs.readFileSync(baselineFile, 'utf-8')).map(findingKey)
@@ -678,6 +689,9 @@ async function main() {
 
 	if (REVIEW_FILE) {
 		fs.writeFileSync(REVIEW_FILE, JSON.stringify(reviewRequest(findings), null, '\t') + '\n');
+	}
+	if (KEYS_FILE) {
+		fs.writeFileSync(KEYS_FILE, findingKeyLines(findings.map(findingKey)));
 	}
 	process.stdout.write(format(findings));
 	process.exit(findings.length === 0 ? 0 : 1);
