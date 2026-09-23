@@ -144,6 +144,21 @@ Blocked runs tell the user which limit was hit and when it resets.
 
 Model usage, for both the agent's own conversation and its coding agent runs, draws on your instance's [Sourcegraph Model Provider](/model-provider) credits.
 
+### Deep Search
+
+Before drafting a plan, the agent researches with [Deep Search](/deep-search). Deep Search usage consumes subscription credits separately from the agentic batch change’s own metering.
+
+The agent is built to research deliberately rather than repeatedly:
+
+- It starts with one focused research request covering the repositories, patterns, and edge cases it needs, instead of running a search for each repository.
+- Once Deep Search identifies an exact repository and path, it reads those files directly instead of starting another search.
+- It reuses an existing Deep Search when you link to one in your prompt.
+- It stops researching and drafts the plan once it has enough information to proceed.
+
+Mechanical, well-scoped changes often need no Deep Search at all. Research resumes when a change requires judgment, such as amending a plan after your feedback, working through a complicated scenario, or re-checking the codebase for an agentic batch change that has been open for a long time.
+
+You can shape this behavior with [guidance](#guidance-and-skills) if your team wants the agent to research more or less aggressively. Subscription admins can view Deep Search consumption on the [Credits page in Enterprise Portal](/admin/enterprise-portal#credits).
+
 ### Web search
 
 Web search is enabled by default for the coordinating agent and its coding agents. To disable it for both, set `batchChanges.disableAgentWebSearch` to `true` in [site configuration](/admin/config/site-config).
