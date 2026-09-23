@@ -39,9 +39,6 @@ export function NoResultsScreen({
 
 	return (
 		<div className="DocSearch-NoResults">
-			{/* <div className="DocSearch-Screen-Icon flex self-center">
-        <NoResultsIcon />
-      </div> */}
 			<p className="DocSearch-Title">
 				{noResultsText} "<strong>{props.state.query}</strong>"
 			</p>
