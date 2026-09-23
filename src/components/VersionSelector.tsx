@@ -1,6 +1,6 @@
 'use client';
 
-import {VersionI, versions} from '@/data/versions';
+import {latestVersion, VersionI, versions} from '@/data/versions';
 import {Menu, Transition} from '@headlessui/react';
 import {
 	ArrowUpRightIcon,
@@ -37,11 +37,11 @@ export default function VersionSelector() {
 	const versionName = versionIndex >= 0 && segments[versionIndex + 1];
 	const selectedVersionName = versionName
 		? `v${versionName}`
-		: versions[0].name;
+		: latestVersion.name;
 	const selectedVersion =
 		availableVersions.find(
 			version => version.name === selectedVersionName
-		) ?? versions[0];
+		) ?? latestVersion;
 
 	useEffect(() => {
 		const controller = new AbortController();
@@ -59,12 +59,12 @@ export default function VersionSelector() {
 
 				setAvailableVersions(
 					remoteVersions.some(
-						version => version.name === versions[0].name
+						version => version.name === latestVersion.name
 					)
 						? remoteVersions
 						: [
 								...remoteVersions,
-								{...versions[0], label: undefined}
+								{...latestVersion, label: undefined}
 							]
 				);
 			})
