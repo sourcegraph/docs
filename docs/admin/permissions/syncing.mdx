@@ -250,17 +250,17 @@ scheduled. Default values are shown below:
 ```json
 {
 	// Time interval between each iteration of the scheduler
-	"permissions.syncScheduleInterval": 15,
+	"permissions.syncScheduleInterval": 60,
 	// Number of user permissions to schedule for syncing in single scheduler iteration.
-	"permissions.syncOldestUsers": 10,
+	"permissions.syncOldestUsers": 100,
 	// Number of repo permissions to schedule for syncing in single scheduler iteration.
-	"permissions.syncOldestRepos": 10,
+	"permissions.syncOldestRepos": 100,
 	// Don't sync a user's permissions if they have synced within the last n seconds.
-	"permissions.syncUsersBackoffSeconds": 60,
+	"permissions.syncUsersBackoffSeconds": 900,
 	// Don't sync a repo's permissions if it has synced within the last n seconds.
-	"permissions.syncReposBackoffSeconds": 60,
+	"permissions.syncReposBackoffSeconds": 900,
 	// The maximum number of user-centric permissions syncing jobs that can be spawned concurrently.
-	"permissions.syncUsersMaxConcurrency": 1,
+	"permissions.syncUsersMaxConcurrency": 5,
 	// The maximum number of repo-centric permissions syncing jobs that can be spawned concurrently.
 	"permissions.syncReposMaxConcurrency": 5
 }
@@ -290,8 +290,8 @@ the `syncOldestUsers` value to what is desired in your organization.
 
 **Example**:
 There are `10 000` users, `40 000` repositories and the desired time to do a full cycle of permission sync is `2 hours`. That
-means we need to sync 5000 users an hour. If we keep the `syncScheduleInterval` to `15s` (the default), we schedule 4-times
-a minute. `5000/(4 * 60) = 20.8`, so the scheduler needs to schedule 21 users on each iteration to get under the 2 hour mark.
+means we need to sync 5000 users an hour. If we keep the `syncScheduleInterval` to `60s` (the default), we schedule once
+a minute. `5000/60 = 83.3`, so the scheduler needs to schedule 84 users on each iteration to get under the 2 hour mark.
 
 The rate limit for the code host would need to be changed to support the load. In that case the recommendation
 is to set it to 2x of the amount of [requests expected from permission syncing](#request-count).
@@ -311,8 +311,8 @@ permission sync in these situations:
 
 **Example**
 There are `10 000` users, `5000` repositories and the desired time for a full permission sync cycle is `2 hours`. That means we
-need to sync 2500 repositories an hour. If we keep the `syncScheduleInterval` to `15s`(the default), we schedule 4-times
-a minute. `2500/(4 * 60) = 10.4`, so the scheduler needs to schedule 11 repositories on each iteration to get under the 2 hour mark.
+need to sync 2500 repositories an hour. If we keep the `syncScheduleInterval` to `60s` (the default), we schedule once
+a minute. `2500/60 = 41.7`, so the scheduler needs to schedule 42 repositories on each iteration to get under the 2 hour mark.
 
 The rate limit for the code host needs to be changed to support the load. In that case the recommendation
 is to set it to 2x of the amount of [requests expected from permission syncing](#request-count).
