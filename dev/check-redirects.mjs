@@ -30,6 +30,8 @@
  *                          diff added get a suggested change
  *   --review <file>        Write a pull request review with one suggested
  *                          change per fixable finding to this JSON file
+ *   --keys <file>          Write the findings' identities, one per line, for
+ *                          dev/upsert-report-comment.sh to count across revisions
  *
  * Exits 1 when any finding is reported.
  */
@@ -38,7 +40,7 @@ import fs from 'fs';
 import path from 'path';
 import vm from 'vm';
 import {fileURLToPath} from 'url';
-import {extractHeadings, listFiles, routeFor} from './check-links.mjs';
+import {extractHeadings, findingKeyLines, listFiles, routeFor} from './check-links.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -49,6 +51,7 @@ const BASELINE_FILE = flagValue('--baseline');
 const LINK_BASE = flagValue('--link-base')?.replace(/\/$/, '');
 const DIFF_FILE = flagValue('--diff');
 const REVIEW_FILE = flagValue('--review');
+const KEYS_FILE = flagValue('--keys');
 
 const REDIRECTS_PATH = 'src/data/redirects.ts';
 const REDIRECTS_FILE = path.join(ROOT_DIR, REDIRECTS_PATH);
@@ -489,6 +492,9 @@ function main() {
 			REVIEW_FILE,
 			JSON.stringify(reviewRequest(findings, added), null, '\t') + '\n'
 		);
+	}
+	if (KEYS_FILE) {
+		fs.writeFileSync(KEYS_FILE, findingKeyLines(findings.map(findingKey)));
 	}
 
 	// Not process.exit(): that can truncate stdout when it is a pipe
