@@ -1,5 +1,9 @@
 # TODO
 
+- Automate the monthly docs version bump: `dev/versioning-proposal.md`.
+  Step 1 (one `DOCS_VERSIONS` list in `docs.config.js`, derive
+  `src/data/versions.ts` and `docs/legacy.mdx` from it) needs no secrets and
+  can start once the proposal is agreed
 - Rewrite `src/components/search/docsearch/` (vendored Algolia DocSearch) so the
   React Compiler ESLint rules `react-hooks/refs`, `react-hooks/set-state-in-effect`
   and `react-hooks/static-components` can go back to `error` in `eslint.config.mjs`
