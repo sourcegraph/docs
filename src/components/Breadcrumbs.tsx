@@ -1,77 +1,65 @@
-'use client';
-
 import Link from 'next/link';
-import clsx from 'clsx';
 import {ChevronRightIcon} from '@heroicons/react/20/solid';
-import {useEffect, useState} from 'react';
-import {usePathname} from 'next/navigation';
+import {allPosts} from 'contentlayer/generated';
+
+const linkClassName =
+	'text-sm font-medium text-gray-500 hover:text-link-light dark:text-gray-400 dark:hover:text-link';
+
+// One crumb per path segment. A segment is linked only when a page exists at
+// that path (many section directories have no index page), and is labelled
+// with that page's first heading instead of its slug.
+function crumbFor(path: string[], index: number) {
+	const segments = path.slice(0, index + 1);
+	const page = allPosts.find(
+		post => post._raw.flattenedPath === segments.join('/')
+	);
+	const title: string | undefined = page?.headings?.[0]?.title;
+	return {
+		label: title ?? segments[index],
+		href: page ? `/${segments.map(encodeURIComponent).join('/')}` : null
+	};
+}
 
 export function Breadcrumbs({path}: {path: string[]}) {
-	let pathname = usePathname();
-	const [version, setVersion] = useState<string | null>(null);
-
-	const createLink = ({path, index}: {path: string[]; index: number}) => {
-		let linkPath = `/${path
-			.slice(0, index + 1)
-			.map(encodeURIComponent)
-			.join('/')}`;
-		return prependVersion(linkPath);
-	};
-
-	// Prepends version (if any) to the link path
-	const prependVersion = (path: string) => {
-		return version ? `/v/${version}${path}` : path;
-	};
-
-	// Handle versions
-	useEffect(() => {
-		// Extract the version name from the URL path, if any
-		const segments = pathname.split('/');
-		const versionIndex = segments.findIndex(segment => segment === 'v');
-		// Versioned link example:
-		// docs/v/5.1.2/ where versionName = 5.1.2
-		const versionName = versionIndex >= 0 && segments[versionIndex + 1];
-		if (!versionName) {
-			setVersion(null);
-			return;
-		}
-		setVersion(versionName);
-	}, [pathname]);
-
 	return (
 		<nav className="mb-8 flex" aria-label="Breadcrumb">
 			<ol role="list" className="flex items-center space-x-4">
 				<li>
-					<div>
-						<Link
-							href={prependVersion('/')}
-							className="text-sm font-medium text-gray-500 hover:text-link-light dark:text-gray-400 dark:hover:text-link"
-						>
-							Docs
-						</Link>
-					</div>
+					<Link href="/" className={linkClassName}>
+						Docs
+					</Link>
 				</li>
-				{path.map((slug, index) => (
-					<li key={slug}>
-						<div className="flex items-center">
+				{path.map((_, index) => {
+					const {label, href} = crumbFor(path, index);
+					const isCurrent = index === path.length - 1;
+					return (
+						<li key={index} className="flex items-center">
 							<ChevronRightIcon
 								className="h-5 w-5 flex-shrink-0 text-gray-400"
 								aria-hidden="true"
 							/>
-							<Link
-								href={createLink({path, index})}
-								className={clsx(
-									'ml-4 text-sm font-medium',
-									index === path.length - 1
-										? 'text-link-light hover:underline dark:text-link'
-										: 'text-gray-500 hover:text-link-light dark:text-gray-400 dark:hover:text-link'
-								)}
-							>
-								{slug}
-							</Link>
-						</div>
-					</li>
-				))}
+							{isCurrent ? (
+								<span
+									aria-current="page"
+									className="ml-4 text-sm font-medium text-gray-900 dark:text-white"
+								>
+									{label}
+								</span>
+							) : href ? (
+								<Link
+									href={href}
+									className={`ml-4 ${linkClassName}`}
+								>
+									{label}
+								</Link>
+							) : (
+								<span className="ml-4 text-sm font-medium text-gray-500 dark:text-gray-400">
+									{label}
+								</span>
+							)}
+						</li>
+					);
+				})}
 			</ol>
 		</nav>
 	);
