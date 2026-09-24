@@ -335,6 +335,12 @@ function validateLink(link, currentFile, maps) {
 	if (isSelfLink(url)) {
 		return CHECK_SELF_LINKS ? validateSelfLink(url, currentFile, maps) : null;
 	}
+
+	// Generated monitoring descriptions include instance-relative Grafana links.
+	// Their targets live on the reader's Sourcegraph instance, not in the docs.
+	if (url.startsWith('/-/debug/grafana/')) {
+		return null;
+	}
 	
 	// Skip external links, mailto, tel, javascript, etc.
 	if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//') ||
