@@ -1,7 +1,6 @@
 'use client';
 
 import {useEffect, useState} from 'react';
-import Link from 'next/link';
 
 type Release = {
 	id: number;
@@ -16,9 +15,14 @@ type Release = {
 	canonical_name: string;
 };
 
+// The registry reports versions as v8.0.0; the changelog URLs use 8.0.0
+function versionNumber(release: Release): string {
+	return release.version.replace(/^v/, '');
+}
+
 // Sourcegraph supports the two most recent major versions.
 function majorVersion(release: Release): number {
-	return Number(release.version.replace(/^v/, '').split('.')[0]);
+	return Number(versionNumber(release).split('.')[0]);
 }
 
 function formatDate(dateString: string): string {
@@ -90,35 +94,22 @@ export function SupportedReleasesTable() {
 						<th className="px-4 py-2 text-left font-semibold">
 							Release Notes
 						</th>
-						<th className="px-4 py-2 text-left font-semibold">
-							Install
-						</th>
 					</tr>
 				</thead>
 				<tbody>
 					{releases.map(release => (
 						<tr key={release.id}>
-							<td className="px-4 py-2">
-								{release.canonical_name}
-							</td>
+							<td className="px-4 py-2">{release.version}</td>
 							<td className="px-4 py-2">
 								{formatDate(release.promoted_at)}
 							</td>
 							<td className="px-4 py-2">
 								<a
-									href={`https://sourcegraph.com/changelog/releases/${release.version.replace(/^v/, '')}`}
+									href={`https://sourcegraph.com/changelog/releases/${versionNumber(release)}`}
 									className="text-blue-600 hover:underline dark:text-blue-400"
 								>
 									Notes
 								</a>
-							</td>
-							<td className="px-4 py-2">
-								<Link
-									href="/admin/deploy"
-									className="text-blue-600 hover:underline dark:text-blue-400"
-								>
-									Install
-								</Link>
 							</td>
 						</tr>
 					))}
