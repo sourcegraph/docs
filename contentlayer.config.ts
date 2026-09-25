@@ -1,11 +1,8 @@
 import {defineDocumentType, makeSource} from 'contentlayer2/source-files';
-import fs from 'fs';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypePrettyCode from 'rehype-pretty-code';
 import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
-import {MDXDocument, allCoreContent} from './src/utils/contentlayer';
-import {searchMetadata} from './src/data/search';
 import shadesOfPurple from './src/styles/shades-of-purple.json';
 import GithubSlugger from 'github-slugger';
 import {visit} from 'unist-util-visit';
@@ -82,19 +79,6 @@ export const Post = defineDocumentType(() => ({
 	}
 }));
 
-function createSearchIndex(allPosts: MDXDocument[]) {
-	if (
-		searchMetadata?.provider === 'kbar' &&
-		searchMetadata.kbarConfig.searchDocumentsPath
-	) {
-		fs.writeFileSync(
-			`public/search.json`,
-			JSON.stringify(allCoreContent(allPosts))
-		);
-		console.log('Search index generated...');
-	}
-}
-
 const prettyCodeOptions = {
 	keepBackground: true,
 	theme: shadesOfPurple
@@ -138,9 +122,5 @@ export default makeSource({
 		rehypePlugins: rehypePlugins,
 		// Externalize mermaid to prevent bundling its problematic Unicode regex patterns
 		esbuildOptions: options => ({...options, external: [...(options.external ?? []), 'mermaid']})
-	},
-	onSuccess: async importData => {
-		const {allPosts} = await importData();
-		createSearchIndex(allPosts);
 	}
 });
