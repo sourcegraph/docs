@@ -20,3 +20,8 @@
   `/batch-changes/delete-a-batch-change`. Needs a decision on the Vercel
   Image Optimization bill (~360 source images, one transform per week per
   region) before it goes up as a PR
+- `dev/post-spelling-review.mjs` crashes with a 404 when two Spell check runs
+  overlap (a push and a description edit within seconds both trigger the
+  workflow): the first run deletes stale inline comments, the second tries to
+  delete the same ones. Tolerate 404 on DELETE in `syncInlineComments`, or add
+  a `concurrency` group to `.github/workflows/spellcheck.yml`
