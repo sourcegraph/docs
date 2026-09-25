@@ -90,6 +90,8 @@ export function SupportedReleasesTable() {
 							<td className="px-4 py-2">
 								<a
 									href={`https://sourcegraph.com/changelog/releases/${versionNumber(release)}`}
+									target="_blank"
+									rel="noopener noreferrer"
 									className="text-blue-600 hover:underline dark:text-blue-400"
 								>
 									{release.version}
