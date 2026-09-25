@@ -1300,76 +1300,6 @@ const redirectsData = [
 		destination: '/cody/capabilities/autocomplete'
 	},
 	{
-		source: '/cody/autocomplete#code-autocomplete',
-		destination: '/cody/capabilities/autocomplete'
-	},
-	{
-		source: '/cody/autocomplete#what-is-cody-code-autocomplete',
-		destination: '/cody/capabilities/autocomplete'
-	},
-	{
-		source: '/cody/capabilities#code-autocomplete',
-		destination: '/cody/capabilities/autocomplete'
-	},
-	{
-		source: '/cody/autocomplete#enabling-autocomplete',
-		destination: '/cody/capabilities/autocomplete'
-	},
-	{
-		source: '/cody/autocomplete#configuring-on-sourcegraph-enterprise',
-		destination:
-			'/cody/capabilities/autocomplete#configure-autocomplete-on-an-enterprise-sourcegraph-instance'
-	},
-	{
-		source: '/cody/capabilities#configure-autocomplete-on-sourcegraph-enterprise',
-		destination:
-			'/cody/capabilities/autocomplete#configure-autocomplete-on-an-enterprise-sourcegraph-instance'
-	},
-	{
-		source: '/cody/autocomplete#accessing-autocomplete-logs',
-		destination: '/cody/capabilities/autocomplete#access-autocomplete-logs'
-	},
-	{
-		source: '/cody/capabilities#access-autocomplete-logs',
-		destination: '/cody/capabilities/autocomplete#access-autocomplete-logs'
-	},
-	{
-		source: '/cody#get-cody',
-		destination: '/cody'
-	},
-	{
-		source: '/cody#getting-started',
-		destination: '/cody'
-	},
-	{
-		source: '/cody#features',
-		destination: '/cody#main-features'
-	},
-	{
-		source: '/cody#chatbot-that-knows-your-code',
-		destination: '/cody'
-	},
-	{
-		source: '/cody#fix-code-inline',
-		destination: '/cody/capabilities'
-	},
-	{
-		source: '/cody/capabilities#fix-code-inline',
-		destination: '/cody/capabilities'
-	},
-	{
-		source: '/cody#recipes',
-		destination: '/cody/capabilities/commands'
-	},
-	{
-		source: '/cody/capabilities#cody-recipes',
-		destination: '/cody/capabilities/commands'
-	},
-	{
-		source: '/cody#autocomplete',
-		destination: '/cody/capabilities/autocomplete'
-	},
-	{
 		source: '/cody/overview',
 		destination: '/cody/'
 	},
@@ -1418,131 +1348,12 @@ const redirectsData = [
 		destination: '/cody/clients/enable-cody-enterprise'
 	},
 	{
-		source: '/cody/quickstart#quickstart-for-cody-in-vs-code',
-		destination: '/cody/quickstart'
-	},
-	{
-		source: '/cody/quickstart#introduction',
-		destination: '/cody/quickstart#cody-quickstart'
-	},
-	{
-		source: '/cody/quickstart#getting-started-with-the-cody-extension-and-recipes',
-		destination:
-			'/cody/quickstart#getting-started-with-cody-extension-and-commands'
-	},
-	{
-		source: '/cody/quickstart#generate-a-unit-test',
-		destination: '/cody/quickstart#1-generate-a-unit-test'
-	},
-	{
-		source: '/cody/quickstart#ask-cody-to-pull-reference-documentation',
-		destination:
-			'/cody/quickstart#3-ask-cody-to-pull-reference-documentation'
-	},
-	{
-		source: '/cody/quickstart#ask-cody-to-write-context-aware-code',
-		destination: '/cody/quickstart#working-with-the-cody-extension'
-	},
-	{
-		source: '/cody/overview/install-jetbrains#introduction',
-		destination: '/cody/clients/install-jetbrains'
-	},
-	{
-		source: '/cody/overview/install-jetbrains#requirements',
-		destination: '/cody/clients/install-jetbrains#prerequisites'
-	},
-	{
-		source: '/cody/overview/install-jetbrains#prerequisites',
-		destination: '/cody/clients/install-jetbrains#prerequisites'
-	},
-	{
-		source: '/cody/overview/install-jetbrains#optional-enable-code-graph-context-for-context-aware-answers',
-		destination:
-			'/cody/clients/install-jetbrains#optional-enable-code-graph-context-for-context-aware-answers'
-	},
-	{
-		source: '/cody/overview/install-jetbrains#enable-code-graph-context-for-context-aware-answers-optional',
-		destination:
-			'/cody/clients/install-jetbrains#optional-enable-code-graph-context-for-context-aware-answers'
-	},
-	{
-		source: '/cody/overview/install-jetbrains#get-started-with-cody',
-		destination: '/cody/clients/install-jetbrains'
-	},
-	{
-		source: '/cody/overview/install-vscode#introduction',
-		destination: '/cody/clients/install-vscode'
-	},
-	{
-		source: '/cody/overview/install-vscode#requirements',
-		destination: '/cody/clients/install-vscode#prerequisites'
-	},
-	{
-		source: '/cody/overview/install-vscode#prerequisites',
-		destination: '/cody/clients/install-vscode#prerequisites'
-	},
-	{
-		source: '/cody/overview/install-vscode#optional-enable-code-graph-context-for-context-aware-answers',
-		destination:
-			'/cody/clients/install-vscode#enable-code-graph-context-for-context-aware-answers-optional'
-	},
-	{
-		source: '/cody/overview/install-vscode#enable-code-graph-context-for-context-aware-answers-optional',
-		destination:
-			'/cody/clients/install-vscode#enable-code-graph-context-for-context-aware-answers-optional'
-	},
-	{
-		source: '/cody/overview/enable-cody-enterprise#using-a-third-party-llm-provider-directly',
-		destination:
-			'/cody/clients/enable-cody-enterprise#using-a-third-party-llm-provider'
-	},
-	{
-		source: '/cody/overview/enable-cody-enterprise#using-a-third-party-llm-provider',
-		destination:
-			'/cody/clients/enable-cody-enterprise#using-a-third-party-llm-provider'
-	},
-	{
-		source: '/cody/overview/enable-cody-enterprise#turning-cody-on-only-for-some-users',
-		destination:
-			'/cody/clients/enable-cody-enterprise#enable-cody-only-for-some-users'
-	},
-	{
-		source: '/cody/overview/enable-cody-enterprise#enable-cody-only-for-some-users',
-		destination:
-			'/cody/clients/enable-cody-enterprise#enable-cody-only-for-some-users'
-	},
-	{
-		source: '/cody/overview/enable-cody-enterprise#turning-cody-off',
-		destination: '/cody/clients/enable-cody-enterprise#disable-cody'
-	},
-	{
-		source: '/cody/overview/enable-cody-enterprise#disable-cody',
-		destination: '/cody/clients/enable-cody-enterprise#disable-cody'
-	},
-	{
 		source: '/cody/explanations',
 		destination: '/cody/core-concepts'
 	},
 	{
-		source: '/cody/explanations/code_graph_context#embeddings',
-		destination: '/cody/embeddings'
-	},
-	{
-		source: '/cody/core-concepts/embeddings#embeddings',
-		destination: '/cody/embeddings'
-	},
-	{
-		source: '/cody/explanations/code_graph_context#configuring-embeddings',
-		destination: '/cody/embeddings/configure-embeddings'
-	},
-	{
 		source: '/cody/core-concepts/embeddings/configure-embeddings',
 		destination: '/cody/embeddings/configure-embeddings'
-	},
-	{
-		source: '/cody/explanations/code_graph_context#filtering-files-from-embeddings',
-		destination:
-			'/cody/embeddings/manage-embeddings#filter-files-from-embeddings'
 	},
 	{
 		source: '/cody/core-concepts/embeddings/manage-embeddings#filter-files-from-embeddings',
@@ -1550,43 +1361,21 @@ const redirectsData = [
 			'/cody/embeddings/manage-embeddings#filter-files-from-embeddings'
 	},
 	{
-		source: '/cody/explanations/code_graph_context#storing-embedding-indexes',
-		destination:
-			'/cody/embeddings/manage-embeddings#store-embedding-indexes'
-	},
-	{
 		source: '/cody/core-concepts/embeddings/manage-embeddings#store-embedding-indexes',
 		destination:
 			'/cody/embeddings/manage-embeddings#store-embedding-indexes'
-	},
-	{
-		source: '/cody/explanations/code_graph_context#using-s3',
-		destination: '/cody/embeddings/manage-embeddings#using-s3'
 	},
 	{
 		source: '/cody/core-concepts/embeddings/manage-embeddings#using-s3',
 		destination: '/cody/embeddings/manage-embeddings#using-s3'
 	},
 	{
-		source: '/cody/explanations/code_graph_context#using-gcs',
-		destination: '/cody/embeddings/manage-embeddings#using-gcs'
-	},
-	{
 		source: '/cody/core-concepts/embeddings/manage-embeddings#using-gcs',
 		destination: '/cody/embeddings/manage-embeddings#using-gcs'
 	},
 	{
-		source: '/cody/explanations/code_graph_context#provisioning-buckets',
-		destination: '/cody/embeddings/manage-embeddings#provisioning-buckets'
-	},
-	{
 		source: '/cody/core-concepts/embeddings/manage-embeddings#provisioning-buckets',
 		destination: '/cody/embeddings/manage-embeddings#provisioning-buckets'
-	},
-	{
-		source: '/cody/explanations/code_graph_context#environment-variables-for-the-embeddings-service',
-		destination:
-			'/cody/embeddings/manage-embeddings#environment-variables-for-the-embeddings-service'
 	},
 	{
 		source: '/cody/core-concepts/embeddings/manage-embeddings#environment-variables-for-the-embeddings-service',
@@ -1594,70 +1383,9 @@ const redirectsData = [
 			'/cody/embeddings/manage-embeddings#environment-variables-for-the-embeddings-service'
 	},
 	{
-		source: '/cody/explanations/code_graph_context#incremental-embeddings',
-		destination: '/cody/embeddings#incremental-embeddings'
-	},
-	{
-		source: '/cody/core-concepts/embeddings#incremental-embeddings',
-		destination: '/cody/embeddings#incremental-embeddings'
-	},
-	{
-		source: '/cody/explanations/code_graph_context#adjust-the-minimum-time-interval-between-automatically-scheduled-embeddings',
-		destination:
-			'/cody/embeddings#minimum-time-interval-between-automatically-scheduled-embeddings'
-	},
-	{
-		source: '/cody/core-concepts/embeddings#minimum-time-interval-between-automatically-scheduled-embeddings',
-		destination:
-			'/cody/embeddings#minimum-time-interval-between-automatically-scheduled-embeddings'
-	},
-	{
-		source: '/cody/explanations/code_graph_context#using-a-third-party-embeddings-provider-directly',
-		destination: '/cody/embeddings#third-party-embeddings-provider'
-	},
-	{
-		source: '/cody/core-concepts/embeddings#third-party-embeddings-provider',
-		destination: '/cody/embeddings#third-party-embeddings-provider'
-	},
-	{
-		source: '/cody/explanations/code_graph_context#openai',
-		destination: '/cody/embeddings#openai'
-	},
-	{
-		source: '/cody/core-concepts/embeddings#openai',
-		destination: '/cody/embeddings#openai'
-	},
-	{
-		source: '/cody/explanations/code_graph_context#azure-openai-span-class-badge-badge-experimental-experimental-span',
-		destination: '/cody/embeddings#azure-openai'
-	},
-	{
-		source: '/cody/core-concepts/embeddings#azure-openai',
-		destination: '/cody/embeddings#azure-openai'
-	},
-	{
-		source: '/cody/explanations/code_graph_context#disabling-embeddings',
-		destination: '/cody/embeddings#disable-embeddings'
-	},
-	{
-		source: '/cody/core-concepts/embeddings#disable-embeddings',
-		destination: '/cody/embeddings#disable-embeddings'
-	},
-	{
-		source: '/cody/explanations/code_graph_context#configuring-the-global-policy-match-limit',
-		destination:
-			'/cody/embeddings/usage-and-limits#configure-global-policy-match-limit'
-	},
-	{
 		source: '/cody/core-concepts/embeddings/usage-and-limits#configure-global-policy-match-limit',
 		destination:
 			'/cody/embeddings/usage-and-limits#configure-global-policy-match-limit'
-	},
-	{
-		// cspell:disable-next-line
-		source: '/cody/explanations/code_graph_context#limitting-the-number-of-embeddings-that-can-be-generated',
-		destination:
-			'/cody/embeddings/usage-and-limits#limit-the-number-of-embeddings-that-can-be-generated'
 	},
 	{
 		source: '/cody/core-concepts/embeddings/usage-and-limits#limit-the-number-of-embeddings-that-can-be-generated',
@@ -1673,122 +1401,11 @@ const redirectsData = [
 		destination: '/cody/embeddings/embedding-index'
 	},
 	{
-		source: '/cody/explanations/indexing#generate-embeddings-index',
-		destination:
-			'/cody/embeddings/embedding-index#generate-embeddings-index'
-	},
-	{
-		source: '/cody/core-concepts/embeddings/embedding-index#generate-embeddings-index',
-		destination:
-			'/cody/embeddings/embedding-index#generate-embeddings-index'
-	},
-	{
-		source: '/cody/explanations/indexing#sourcegraph-enterprise',
-		destination: '/cody/embeddings/embedding-index#sourcegraph-enterprise'
-	},
-	{
-		source: '/cody/core-concepts/embeddings/embedding-index#sourcegraph-enterprise',
-		destination: '/cody/embeddings/embedding-index#sourcegraph-enterprise'
-	},
-	{
-		source: '/cody/explanations/indexing#sourcegraph-com',
-		destination: '/cody/embeddings/embedding-index#sourcegraphcom'
-	},
-	{
-		source: '/cody/core-concepts/embeddings/embedding-index#sourcegraph-com',
-		destination: '/cody/embeddings/embedding-index#sourcegraphcom'
-	},
-	{
-		source: '/cody/explanations/indexing#enable-codebase-aware-answers',
-		destination:
-			'/cody/embeddings/embedding-index#enable-codebase-aware-answers'
-	},
-	{
-		source: '/cody/core-concepts/embeddings/embedding-index#enable-codebase-aware-answers',
-		destination:
-			'/cody/embeddings/embedding-index#enable-codebase-aware-answers'
-	},
-	{
-		source: '/cody/explanations/indexing#extension-settings',
-		destination:
-			'/cody/embeddings/embedding-index#cody-vs-code-extension-settings'
-	},
-	{
-		source: '/cody/core-concepts/embeddings/embedding-index#cody-vs-code-extension-settings',
-		destination:
-			'/cody/embeddings/embedding-index#cody-vs-code-extension-settings'
-	},
-	{
-		source: '/cody/explanations/indexing#manual-configuration',
-		destination: '/cody/embeddings/embedding-index#manual-configuration'
-	},
-	{
-		source: '/cody/core-concepts/embeddings/embedding-index#manual-configuration',
-		destination: '/cody/embeddings/embedding-index#manual-configuration'
-	},
-	{
-		source: '/cody/explanations/indexing#settings-json',
-		destination: '/cody/embeddings/embedding-index#settingsjson'
-	},
-	{
-		source: '/cody/core-concepts/embeddings/embedding-index#settings-json',
-		destination: '/cody/embeddings/embedding-index#settingsjson'
-	},
-	{
 		source: '/cody/explanations/policies',
 		destination: '/cody/embeddings/configure-embeddings#policies'
 	},
 	{
-		source: '/cody/core-concepts/embeddings/configure-embeddings#policies',
-		destination: '/cody/embeddings/configure-embeddings#policies'
-	},
-	{
-		source: '/cody/explanations/policies#how-to-create-an-embeddings-policy',
-		destination:
-			'/cody/embeddings/configure-embeddings#create-an-embeddings-policy'
-	},
-	{
-		source: '/cody/core-concepts/embeddings/configure-embeddings#create-an-embeddings-policy',
-		destination:
-			'/cody/embeddings/configure-embeddings#create-an-embeddings-policy'
-	},
-	{
-		source: '/cody/explanations/policies#example-1',
-		destination:
-			'/cody/embeddings/configure-embeddings#how-pattern-matching-works'
-	},
-	{
-		source: '/cody/core-concepts/embeddings/configure-embeddings#how-pattern-matching-works',
-		destination:
-			'/cody/embeddings/configure-embeddings#how-pattern-matching-works'
-	},
-	{
-		source: '/cody/explanations/policies#example-2',
-		destination:
-			'/cody/embeddings/configure-embeddings#how-pattern-matching-works'
-	},
-	{
-		source: '/cody/explanations/policies#example-3',
-		destination:
-			'/cody/embeddings/configure-embeddings#how-pattern-matching-works'
-	},
-	{
-		source: '/cody/explanations/policies#lifecycle-of-an-embeddings-policy',
-		destination:
-			'/cody/embeddings/configure-embeddings#lifecycle-of-an-embeddings-policy'
-	},
-	{
-		source: '/cody/core-concepts/embeddings/configure-embeddings#lifecycle-of-an-embeddings-policy',
-		destination:
-			'/cody/embeddings/configure-embeddings#lifecycle-of-an-embeddings-policy'
-	},
-	{
 		source: '/cody/explanations/schedule_one_off_embeddings_jobs',
-		destination:
-			'/cody/embeddings/configure-embeddings#schedule-embeddings-jobs'
-	},
-	{
-		source: '/cody/core-concepts/embeddings/configure-embeddings#schedule-embeddings-jobs',
 		destination:
 			'/cody/embeddings/configure-embeddings#schedule-embeddings-jobs'
 	},
@@ -1805,30 +1422,8 @@ const redirectsData = [
 		destination: '/cody/clients'
 	},
 	{
-		source: '/cody/overview#getting-started',
-		destination: '/cody/clients'
-	},
-	{
 		source: '/cody/core-concepts/cody_gateway',
 		destination: '/cody/core-concepts/cody-gateway'
-	},
-	{
-		source: '/cody/core-concepts/cody_gateway#using-cody-gateway-in-sourcegraph-enterprise',
-		destination:
-			'/cody/core-concepts/cody-gateway#using-cody-gateway-in-sourcegraph-enterprise'
-	},
-	{
-		source: '/cody/core-concepts/cody_gateway#configuring-custom-models',
-		destination:
-			'/cody/core-concepts/cody-gateway#configuring-custom-models'
-	},
-	{
-		source: '/cody/core-concepts/cody_gateway#rate-limits-and-quotas',
-		destination: '/cody/core-concepts/cody-gateway#rate-limits-and-quotas'
-	},
-	{
-		source: '/cody/core-concepts/cody_gateway#privacy-and-security',
-		destination: '/cody/core-concepts/cody-gateway#privacy-and-security'
 	},
 	{
 		source: '/cody/custom-commands',
@@ -1916,11 +1511,6 @@ const redirectsData = [
 	},
 
 	{
-		source: '/code_search/reference/queries#search-pattern-syntax',
-		destination: '/code-search/queries#search-pattern-syntax'
-	},
-
-	{
 		source: '/code_search/reference/language',
 		destination: '/code-search/queries/language'
 	},
@@ -1938,75 +1528,15 @@ const redirectsData = [
 	},
 
 	{
-		source: '/code_navigation/how-to/configure_data_retention#applying-data-retention-policies-globally',
-		destination:
-			'/code-search/code-navigation/auto_indexing#applying-indexing-policies-globally'
-	},
-
-	{
 		source: '/code_navigation/how-to/index_a_go_repository',
 		destination:
 			'/code-search/code-navigation/how-to/index_a_go_repository'
 	},
 
 	{
-		source: '/code_navigation/how-to/index_a_go_repository#automated-indexing',
-		destination:
-			'/code-search/code-navigation/how-to/index_a_go_repository#automated-indexing'
-	},
-
-	{
-		source: '/code_navigation/how-to/index_a_go_repository#github-actions',
-		destination:
-			'/code-search/code-navigation/how-to/index_a_go_repository#github-actions'
-	},
-
-	{
-		source: '/code_navigation/how-to/index_a_go_repository#circleci',
-		destination:
-			'/code-search/code-navigation/how-to/index_a_go_repository#circleci'
-	},
-
-	{
-		source: '/code_navigation/how-to/index_a_go_repository#travis-ci',
-		destination:
-			'/code-search/code-navigation/how-to/index_a_go_repository#travis-ci'
-	},
-
-	{
-		source: '/code_navigation/how-to/index_a_go_repository#manual-indexing',
-		destination:
-			'/code-search/code-navigation/how-to/index_a_go_repository#manual-indexing'
-	},
-
-	{
 		source: '/code_navigation/how-to/index_a_typescript_and_javascript_repository',
 		destination:
 			'/code-search/code-navigation/how-to/index_a_typescript_and_javascript_repository'
-	},
-
-	{
-		source: '/code_navigation/how-to/index_a_typescript_and_javascript_repository#indexing-in-ci-using-scip-typescript-directly',
-		destination:
-			'/code-search/code-navigation/how-to/index_a_typescript_and_javascript_repository#indexing-in-ci-using-scip-typescript-directly'
-	},
-
-	{
-		source: '/code_navigation/how-to/index_a_typescript_and_javascript_repository#optional-scip-typescript-flags',
-		destination:
-			'/code-search/code-navigation/how-to/index_a_typescript_and_javascript_repository#optional-scip-typescript-flags'
-	},
-
-	{
-		source: '/code_navigation/how-to/index_a_typescript_and_javascript_repository#indexing-in-ci-using-the-scip-typescript-docker-image',
-		destination:
-			'/code-search/code-navigation/how-to/index_a_typescript_and_javascript_repository#indexing-in-ci-using-the-scip-typescript-docker-image'
-	},
-
-	{
-		source: '/code_navigation/how-to/index_a_typescript_and_javascript_repository#one-off-indexing-using-scip-typescript-locally',
-		destination:
-			'/code-search/code-navigation/how-to/index_a_typescript_and_javascript_repository#one-off-indexing-using-scip-typescript-locally'
 	},
 
 	{
@@ -2021,122 +1551,15 @@ const redirectsData = [
 	},
 
 	{
-		source: '/code_navigation/how-to/adding_lsif_to_workflows#language-specific-guides',
-		destination:
-			'/code-search/code-navigation/how-to/adding_lsif_to_workflows#language-specific-guides'
-	},
-
-	{
-		source: '/code_navigation/how-to/adding_lsif_to_workflows#benefits-of-ci-integration',
-		destination:
-			'/code-search/code-navigation/how-to/adding_lsif_to_workflows#benefits-of-ci-integration'
-	},
-
-	{
-		source: '/code_navigation/how-to/adding_lsif_to_workflows#using-indexer-containers',
-		destination:
-			'/code-search/code-navigation/how-to/adding_lsif_to_workflows#using-indexer-containers'
-	},
-
-	{
-		source: '/code_navigation/how-to/adding_lsif_to_workflows#github-action-examples',
-		destination:
-			'/code-search/code-navigation/how-to/adding_lsif_to_workflows#github-action-examples'
-	},
-
-	{
-		source: '/code_navigation/how-to/adding_lsif_to_workflows#circle-ci-examples',
-		destination:
-			'/code-search/code-navigation/how-to/adding_lsif_to_workflows#circle-ci-examples'
-	},
-
-	{
-		source: '/code_navigation/how-to/adding_lsif_to_workflows#travis-ci-examples',
-		destination:
-			'/code-search/code-navigation/how-to/adding_lsif_to_workflows#travis-ci-examples'
-	},
-
-	{
-		source: '/code_navigation/how-to/adding_lsif_to_workflows#ci-from-scratch',
-		destination:
-			'/code-search/code-navigation/how-to/adding_lsif_to_workflows#ci-from-scratch'
-	},
-
-	{
-		source: '/code_navigation/how-to/adding_lsif_to_workflows#uploading-indexes-to-sourcegraphcom',
-		destination:
-			'/code-search/code-navigation/how-to/adding_lsif_to_workflows#uploading-indexes-to-sourcegraphcom'
-	},
-
-	{
 		source: '/code_navigation/how-to/enable_auto_indexing',
 		destination:
 			'/code-search/code-navigation/auto_indexing#enable-auto-indexing'
 	},
 
 	{
-		source: '/code_navigation/how-to/enable_auto_indexing#deploy-executors',
-		destination:
-			'/code-search/code-navigation/auto_indexing#enable-auto-indexing#deploy-executors'
-	},
-
-	{
-		source: '/code_navigation/how-to/enable_auto_indexing#enable-index-job-scheduling',
-		destination:
-			'/code-search/code-navigation/auto_indexing#enable-auto-indexing#enable-index-job-scheduling'
-	},
-
-	{
-		source: '/code_navigation/how-to/enable_auto_indexing#tune-the-index-scheduler',
-		destination:
-			'/code-search/code-navigation/auto_indexing#enable-auto-indexing#tune-the-index-scheduler'
-	},
-
-	{
 		source: '/code_navigation/how-to/configure_auto_indexing',
 		destination:
 			'/code-search/code-navigation/auto_indexing#configure-auto-indexing'
-	},
-
-	{
-		source: '/code_navigation/how-to/configure_auto_indexing#configure-auto-indexing-policies',
-		destination:
-			'/code-search/code-navigation/auto_indexing#configure-auto-indexing-policies'
-	},
-
-	{
-		source: '/code_navigation/how-to/configure_auto_indexing#applying-indexing-policies-globally',
-		destination:
-			'/code-search/code-navigation/auto_indexing#applying-indexing-policies-globally'
-	},
-
-	{
-		source: '/code_navigation/how-to/configure_auto_indexing#applying-indexing-policies-to-a-specific-repository',
-		destination:
-			'/code-search/code-navigation/auto_indexing#applying-indexing-policies-to-a-specific-repository'
-	},
-
-	{
-		source: '/code_navigation/how-to/configure_auto_indexing#explicit-index-job-configuration',
-		destination:
-			'/code-search/code-navigation/auto_indexing#explicit-index-job-configuration'
-	},
-
-	{
-		source: '/code_navigation/how-to/configure_auto_indexing#private-repositories-and-packages-configuration',
-		destination:
-			'/code-search/code-navigation/auto_indexing#private-repositories-and-packages-configuration'
-	},
-
-	{
-		source: '/code_navigation/how-to/configure_auto_indexing#go',
-		destination: '/code-search/code-navigation/auto_indexing#go'
-	},
-
-	{
-		source: '/code_navigation/how-to/configure_auto_indexing#typescriptjavascript',
-		destination:
-			'/code-search/code-navigation/auto_indexing#typescriptjavascript'
 	},
 
 	{
@@ -2157,42 +1580,13 @@ const redirectsData = [
 	},
 
 	{
-		source: '/code_navigation/explanations/introduction_to_code_navigation#search-based-vs-precise',
-		destination: '/code-search/code-navigation#code-navigation-types'
-	},
-
-	{
 		source: '/code_navigation/explanations/precise_code_navigation',
 		destination: '/code-search/code-navigation/precise_code_navigation'
 	},
 
 	{
-		source: '/code_navigation/explanations/precise_code_navigation#why-are-my-results-sometimes-incorrect',
-		destination:
-			'/code-search/code-navigation/troubleshooting#why-are-my-results-sometimes-incorrect'
-	},
-
-	{
 		source: '/code_navigation/explanations/uploads',
 		destination: '/code-search/code-navigation/explanations/uploads'
-	},
-
-	{
-		source: '/code_navigation/explanations/uploads#lifecycle-of-an-upload',
-		destination:
-			'/code-search/code-navigation/explanations/uploads#lifecycle-of-an-upload'
-	},
-
-	{
-		source: '/code_navigation/explanations/uploads#lifecycle-of-an-upload-via-ui',
-		destination:
-			'/code-search/code-navigation/explanations/uploads#lifecycle-of-an-upload-via-ui'
-	},
-
-	{
-		source: '/code_navigation/explanations/uploads#repository-commit-graph',
-		destination:
-			'/code-search/code-navigation/explanations/uploads#repository-commit-graph'
 	},
 
 	{
@@ -2202,94 +1596,14 @@ const redirectsData = [
 	},
 
 	{
-		source: '/code_navigation/explanations/search_based_code_navigation#how-does-it-work',
-		destination:
-			'/code-search/code-navigation/search_based_code_navigation#how-does-it-work'
-	},
-
-	{
-		source: '/code_navigation/explanations/search_based_code_navigation#what-configuration-settings-can-i-apply',
-		destination:
-			'/code-search/code-navigation/search_based_code_navigation#what-configuration-settings-can-i-apply'
-	},
-
-	{
 		source: '/code_navigation/explanations/features',
 		destination: '/code-search/code-navigation/features'
 	},
 
-	{
-		source: '/code_navigation/explanations/features#popover',
-		destination: '/code-search/code-navigation/features#popover'
-	},
-	{
-		source: '/code_navigation/explanations/features#go-to-definition',
-		destination: '/code-search/code-navigation/features#go-to-definition'
-	},
-	{
-		source: '/code_navigation/explanations/features#find-references',
-		destination: '/code-search/code-navigation/features#find-references'
-	},
-	{
-		source: '/code_navigation/explanations/features#dependency-navigation',
-		destination:
-			'/code-search/code-navigation/features#dependency-navigation'
-	},
-	{
-		source: '/code_navigation/explanations/features#find-implementations',
-		destination:
-			'/code-search/code-navigation/features#find-implementations'
-	},
-
-	{
-		source: '/code_navigation/explanations/features#perform-an-action',
-		destination: '/code-search/code-navigation/features#perform-an-action'
-	},
-
-	{
-		source: '/code_navigation/explanations/features#symbol-search',
-		destination: '/code-search/types/symbol'
-	},
 
 	{
 		source: '/code_navigation/explanations/rockskip',
 		destination: '/code-search/code-navigation/rockskip'
-	},
-
-	{
-		source: '/code_navigation/explanations/rockskip#when-should-i-use-rockskip',
-		destination:
-			'/code-search/code-navigation/rockskip#when-should-i-use-rockskip'
-	},
-
-	{
-		source: '/code_navigation/explanations/rockskip#how-do-i-enable-rockskip',
-		destination:
-			'/code-search/code-navigation/rockskip#how-do-i-enable-rockskip'
-	},
-
-	{
-		source: '/code_navigation/explanations/rockskip#how-long-does-indexing-take',
-		destination:
-			'/code-search/code-navigation/rockskip#how-long-does-indexing-take'
-	},
-
-	{
-		source: '/code_navigation/explanations/rockskip#what-resources-does-rockskip-use',
-		destination:
-			'/code-search/code-navigation/rockskip#what-resources-does-rockskip-use'
-	},
-
-	{
-		source: '/code_navigation/explanations/rockskip#how-do-i-check-the-indexing-status',
-		destination:
-			'/code-search/code-navigation/rockskip#how-do-i-check-the-indexing-status'
-	},
-
-	{
-		source: '/code_navigation/explanations/rockskip#when-is-indexing-triggered',
-		destination:
-			'/code-search/code-navigation/rockskip#when-is-indexing-triggered'
 	},
 
 	{
@@ -2299,56 +1613,8 @@ const redirectsData = [
 	},
 
 	{
-		source: '/code_navigation/explanations/writing_an_indexer#understanding-the-scip-protobuf-schema',
-		destination:
-			'/code-search/code-navigation/writing_an_indexer#understanding-the-scip-protobuf-schema'
-	},
-
-	{
-		source: '/code_navigation/explanations/writing_an_indexer#importing-or-generating-scip-bindings',
-		destination:
-			'/code-search/code-navigation/writing_an_indexer#importing-or-generating-scip-bindings'
-	},
-
-	{
-		source: '/code_navigation/explanations/writing_an_indexer#generating-minimal-index-with-occurrence-information',
-		destination:
-			'/code-search/code-navigation/writing_an_indexer#generating-minimal-index-with-occurrence-information'
-	},
-
-	{
-		source: '/code_navigation/explanations/writing_an_indexer#snapshot-testing-with-scip-cli',
-		destination:
-			'/code-search/code-navigation/writing_an_indexer#snapshot-testing-with-scip-cli'
-	},
-
-	{
-		source: '/code_navigation/explanations/writing_an_indexer#progressively-adding-support-for-language-features',
-		destination:
-			'/code-search/code-navigation/writing_an_indexer#progressively-adding-support-for-language-features'
-	},
-
-	{
 		source: '/code_navigation/explanations/auto_indexing',
 		destination: '/code-search/code-navigation/auto_indexing'
-	},
-
-	{
-		source: '/code_navigation/explanations/auto_indexing#lifecycle-of-an-indexing-job',
-		destination:
-			'/code-search/code-navigation/auto_indexing#lifecycle-of-an-indexing-job'
-	},
-
-	{
-		source: '/code_navigation/how-to/configure_auto_indexing#lifecycle-of-an-indexing-job',
-		destination:
-			'/code-search/code-navigation/auto_indexing#lifecycle-of-an-indexing-job'
-	},
-
-	{
-		source: '/code_navigation/how-to/configure_auto_indexing#lifecycle-of-an-indexing-job-via-ui',
-		destination:
-			'/code-search/code-navigation/auto_indexing#lifecycle-of-an-indexing-job-via-ui'
 	},
 
 	{
@@ -2358,56 +1624,14 @@ const redirectsData = [
 	},
 
 	{
-		source: '/code_navigation/explanations/auto_indexing_inference#go',
-		destination:
-			'/code-search/code-navigation/explanations/auto_indexing_inference#go'
-	},
-
-	{
-		source: '/code_navigation/explanations/auto_indexing_inference#typescript',
-		destination:
-			'/code-search/code-navigation/explanations/auto_indexing_inference#typescript'
-	},
-
-	{
-		source: '/code_navigation/explanations/auto_indexing_inference#java',
-		destination:
-			'/code-search/code-navigation/explanations/auto_indexing_inference#java'
-	},
-
-	{
-		source: '/code_navigation/explanations/auto_indexing_inference#rust',
-		destination:
-			'/code-search/code-navigation/explanations/auto_indexing_inference#rust'
-	},
-
-	{
 		source: '/code_navigation/references/troubleshooting',
 		destination: '/code-search/code-navigation/troubleshooting'
-	},
-
-	{
-		source: '/code_navigation/references/troubleshooting#when-are-issues-related-to-code-intelligence',
-		destination:
-			'/code-search/code-navigation/troubleshooting#when-are-issues-related-to-code-intelligence'
-	},
-
-	{
-		source: '/code_navigation/references/troubleshooting#gathering-evidence',
-		destination:
-			'/code-search/code-navigation/troubleshooting#gathering-evidence'
 	},
 
 	{
 		source: '/code_navigation/references/indexers',
 		destination:
 			'/code-search/code-navigation/writing_an_indexer#sourcegraph-recommended-indexers'
-	},
-
-	{
-		source: '/code_navigation/references/indexers#quick-reference',
-		destination:
-			'/code-search/code-navigation/writing_an_indexer#quick-reference'
 	},
 
 	{
@@ -2422,42 +1646,8 @@ const redirectsData = [
 	},
 
 	{
-		source: '/code_navigation/references/envvars#frontend',
-		destination: '/code-search/code-navigation/envvars#frontend'
-	},
-
-	{
-		source: '/code_navigation/references/envvars#worker',
-		destination: '/code-search/code-navigation/envvars#worker'
-	},
-
-	{
-		source: '/code_navigation/references/envvars#precise-code-intel-worker',
-		destination:
-			'/code-search/code-navigation/envvars#precise-code-intel-worker'
-	},
-
-	{
 		source: '/code_navigation/references/auto_indexing_configuration',
 		destination: '/code-search/code-navigation/auto_indexing_configuration'
-	},
-
-	{
-		source: '/code_navigation/references/auto_indexing_configuration#keys',
-		destination:
-			'/code-search/code-navigation/auto_indexing_configuration#keys'
-	},
-
-	{
-		source: '/code_navigation/references/auto_indexing_configuration#index-job-object',
-		destination:
-			'/code-search/code-navigation/auto_indexing_configuration#index-job-object'
-	},
-
-	{
-		source: '/code_navigation/references/auto_indexing_configuration#docker-step-object',
-		destination:
-			'/code-search/code-navigation/auto_indexing_configuration#docker-step-object'
 	},
 
 	{
@@ -2529,32 +1719,13 @@ const redirectsData = [
 		destination: '/batch-changes/publishing-changesets'
 	},
 	{
-		source: '/batch_changes/how-tos/publishing_changesets#publishing-changesets',
-		destination:
-			'/batch-changes/publishing-changesets#publishing-changesets'
-	},
-	{
 		source: '/batch_changes/how-tos/updating_a_batch_change',
 		destination: '/batch-changes/update-a-batch-change'
-	},
-	{
-		source: '/batch_changes/how-tos/updating_a_batch_change#removing-changesets',
-		destination: '/batch-changes/update-a-batch-change#removing-changesets'
 	},
 	{
 		source: '/batch_changes/how-tos/viewing_batch_changes',
 		destination:
 			'/batch-changes/create-a-batch-change#viewing-batch-changes'
-	},
-	{
-		source: '/batch_changes/how-tos/viewing_batch_changes#filtering-batch-changes',
-		destination:
-			'/batch-changes/create-a-batch-change#filtering-batch-changes'
-	},
-	{
-		source: '/batch_changes/how-tos/viewing_batch_changes#filtering-changesets',
-		destination:
-			'/batch-changes/create-a-batch-change#filtering-changesets'
 	},
 	{
 		source: '/batch_changes/how-tos/tracking_existing_changesets',
@@ -2567,16 +1738,6 @@ const redirectsData = [
 	{
 		source: '/batch_changes/how-tos/configuring_credentials',
 		destination: '/batch-changes/configuring-credentials'
-	},
-	{
-		source: '/batch_changes/how-tos/configuring_credentials#personal-access-tokens',
-		destination:
-			'/batch-changes/configuring-credentials#personal-access-tokens'
-	},
-	{
-		source: '/batch_changes/how-tos/configuring_credentials#global-service-account-tokens',
-		destination:
-			'/batch-changes/configuring-credentials#global-service-account-tokens'
 	},
 	{
 		source: '/batch_changes/how-tos/handling_errored_changesets',
@@ -2610,198 +1771,17 @@ const redirectsData = [
 		destination: '/batch-changes/requirements'
 	},
 	{
-		source: '/batch_changes/references/requirements#batch-changes-effect-on-code-host-rate-limits',
-		destination:
-			'/batch-changes/requirements#batch-changes-effect-on-code-host-rate-limits'
-	},
-	{
 		source: '/batch_changes/references/batch_spec_yaml_reference',
 		destination: '/batch-changes/batch-spec-yaml-reference'
 	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#name',
-		destination: '/batch-changes/batch-spec-yaml-reference#name'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#description',
-		destination: '/batch-changes/batch-spec-yaml-reference#description'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#on',
-		destination: '/batch-changes/batch-spec-yaml-reference#on'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#onrepositoriesmatchingquery',
-		destination:
-			'/batch-changes/batch-spec-yaml-reference#onrepositoriesmatchingquery'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#onrepository',
-		destination: '/batch-changes/batch-spec-yaml-reference#onrepository'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#steps',
-		destination: '/batch-changes/batch-spec-yaml-reference#steps'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#stepsrun',
-		destination: '/batch-changes/batch-spec-yaml-reference#stepsrun'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#stepscontainer',
-		destination: '/batch-changes/batch-spec-yaml-reference#stepscontainer'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#stepsenv',
-		destination: '/batch-changes/batch-spec-yaml-reference#stepsenv'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#stepsfiles',
-		destination: '/batch-changes/batch-spec-yaml-reference#stepsfiles'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#stepsoutputs',
-		destination: '/batch-changes/batch-spec-yaml-reference#stepsoutputs'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#stepsoutputsnamevalue',
-		destination:
-			'/batch-changes/batch-spec-yaml-reference#stepsoutputsnamevalue'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#stepsoutputsnameformat',
-		destination:
-			'/batch-changes/batch-spec-yaml-reference#stepsoutputsnameformat'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#stepsif',
-		destination: '/batch-changes/batch-spec-yaml-reference#stepsif'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#stepsmount',
-		destination: '/batch-changes/batch-spec-yaml-reference#stepsmount'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#importchangesets',
-		destination:
-			'/batch-changes/batch-spec-yaml-reference#importchangesets'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#importchangesetsrepository',
-		destination:
-			'/batch-changes/batch-spec-yaml-reference#importchangesetsrepository'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#importchangesetsexternalids',
-		destination:
-			'/batch-changes/batch-spec-yaml-reference#importchangesetsexternalids'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#changesettemplate',
-		destination:
-			'/batch-changes/batch-spec-yaml-reference#changesettemplate'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#changesettemplatetitle',
-		destination:
-			'/batch-changes/batch-spec-yaml-reference#changesettemplatetitle'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#changesettemplatebody',
-		destination:
-			'/batch-changes/batch-spec-yaml-reference#changesettemplatebody'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#changesettemplatebranch',
-		destination:
-			'/batch-changes/batch-spec-yaml-reference#changesettemplatebranch'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#changesettemplatecommit',
-		destination:
-			'/batch-changes/batch-spec-yaml-reference#changesettemplatecommit'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#changesettemplatecommitmessage',
-		destination:
-			'/batch-changes/batch-spec-yaml-reference#changesettemplatecommitmessage'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#changesettemplatecommitauthor',
-		destination:
-			'/batch-changes/batch-spec-yaml-reference#changesettemplatecommitauthor'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#changesettemplatepublished',
-		destination:
-			'/batch-changes/batch-spec-yaml-reference#changesettemplatepublished'
-	},
 	// Do not comment
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#changesettemplatefork',
-		destination:
-			'/batch-changes/batch-spec-yaml-reference#changesettemplatefork'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#transformchanges',
-		destination:
-			'/batch-changes/batch-spec-yaml-reference#transformchanges'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#transformchangesgroup',
-		destination:
-			'/batch-changes/batch-spec-yaml-reference#transformchangesgroup'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#transformchangesgroupdirectory',
-		destination:
-			'/batch-changes/batch-spec-yaml-reference#transformchangesgroupdirectory'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#transformchangesgroupbranch',
-		destination:
-			'/batch-changes/batch-spec-yaml-reference#transformchangesgroupbranch'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#transformchangesgrouprepository',
-		destination:
-			'/batch-changes/batch-spec-yaml-reference#transformchangesgrouprepository'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#workspaces',
-		destination: '/batch-changes/batch-spec-yaml-reference#workspaces'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#workspacesrootatlocationof',
-		destination:
-			'/batch-changes/batch-spec-yaml-reference#workspacesrootatlocationof'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#workspacesin',
-		destination: '/batch-changes/batch-spec-yaml-reference#workspacesin'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_yaml_reference#workspacesonlyfetchworkspace',
-		destination:
-			'/batch-changes/batch-spec-yaml-reference#workspacesonlyfetchworkspace'
-	},
 	{
 		source: '/batch_changes/references/batch_spec_templating',
 		destination: '/batch-changes/batch-spec-templating'
 	},
 	{
-		source: '/batch_changes/references/batch_spec_templating#fields-with-template-support',
-		destination:
-			'/batch-changes/batch-spec-templating#fields-with-template-support'
-	},
-	{
 		source: '/batch_changes/references/batch_spec_cheat_sheet',
 		destination: '/batch-changes/batch-spec-cheat-sheet'
-	},
-	{
-		source: '/batch_changes/references/batch_spec_cheat_sheet#write-a-github-actions-workflow-that-includes-github-expression-syntax',
-		destination:
-			'/batch-changes/batch-spec-cheat-sheet#write-a-github-actions-workflow-that-includes-github-expression-syntax'
 	},
 	{
 		source: '/batch_changes/references/troubleshooting',
@@ -2814,21 +1794,6 @@ const redirectsData = [
 	{
 		source: '/admin/code_hosts/bitbucketserver',
 		destination: '/integration/bitbucket_server'
-	},
-	{
-		source: '/cody/clients/enable-cody-enterprise#using-a-third-party-llm-provider',
-		destination:
-			'/cody/clients/enable-cody-enterprise#supported-models-and-model-providers'
-	},
-	{
-		source: '/cody/overview/enable-cody-enterprise#using-a-third-party-llm-provider-directly',
-		destination:
-			'/cody/clients/enable-cody-enterprise#supported-models-and-model-providers'
-	},
-	{
-		source: '/cody/overview/enable-cody-enterprise#using-a-third-party-llm-provider',
-		destination:
-			'/cody/clients/enable-cody-enterprise#supported-models-and-model-providers'
 	},
 	// Model Config docs
 	{
@@ -2889,17 +1854,6 @@ const redirectsData = [
 	},
 
 	{
-		source: '/admin/pricing#how-are-active-users-calculated-for-sourcegraph-cody',
-		destination: '/cody/usage-and-pricing#billing-faqs-for-cody-enterprise'
-	},
-
-	{
-		source: '/admin/pricing#how-are-active-users-calculated-for-sourcegraph-code-search-and-code-intelligence-platform',
-		destination:
-			'/pricing/faqs#how-are-active-users-calculated-for-sourcegraph-code-search-and-code-intelligence-platform'
-	},
-
-	{
 		source: '/cody/embedded-repos',
 		destination: '/cody'
 	},
@@ -2933,42 +1887,6 @@ const redirectsData = [
 		destination: '/cody/capabilities/chat'
 	},
 
-	{
-		source: '/analytics/cloud#access-tokens',
-		destination: '/analytics/api#access-tokens'
-	},
-	{
-		source: '/analytics/cloud#token-management-apis',
-		destination: '/analytics/api#token-management-apis'
-	},
-	{
-		source: '/analytics/cloud#enablement-instructions',
-		destination: '/analytics#enablement-instructions'
-	},
-	{
-		source: '/analytics/cloud#data-export',
-		destination: '/analytics#data-export-and-api'
-	},
-	{
-		source: '/analytics/cloud#token-creation',
-		destination: '/analytics/api#token-creation'
-	},
-	{
-		source: '/analytics/cloud#token-listing',
-		destination: '/analytics/api#token-listing'
-	},
-	{
-		source: '/analytics/cloud#token-revocation',
-		destination: '/analytics/api#token-revocation'
-	},
-	{
-		source: '/analytics/cloud#api-reference',
-		destination: '/analytics/api#api-reference'
-	},
-	{
-		source: '/analytics/cloud#csv-export',
-		destination: '/analytics/api#csv-export'
-	},
 	{
 		source: '/analytics/cloud',
 		destination: '/analytics'
@@ -3457,10 +2375,6 @@ const redirectsData = [
 	{
 		source: '/admin/how-to/upgrade-postgres-12-16-builtin-dbs',
 		destination: '/self-hosted/how-to/upgrade-postgres-12-16-builtin-dbs'
-	},
-	{
-		source: '/admin/http_https_configuration',
-		destination: '/self-hosted/http_https_configuration'
 	},
 	{
 		source: '/admin/config/network-filtering',
