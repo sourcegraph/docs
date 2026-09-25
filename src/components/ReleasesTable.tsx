@@ -82,25 +82,21 @@ export function SupportedReleasesTable() {
 						<th className="px-4 py-2 text-left font-semibold">
 							Release Date
 						</th>
-						<th className="px-4 py-2 text-left font-semibold">
-							Changelog
-						</th>
 					</tr>
 				</thead>
 				<tbody>
 					{releases.map(release => (
 						<tr key={release.id}>
-							<td className="px-4 py-2">{release.version}</td>
-							<td className="px-4 py-2">
-								{release.promoted_at.slice(0, 10)}
-							</td>
 							<td className="px-4 py-2">
 								<a
 									href={`https://sourcegraph.com/changelog/releases/${versionNumber(release)}`}
 									className="text-blue-600 hover:underline dark:text-blue-400"
 								>
-									Notes
+									{release.version}
 								</a>
+							</td>
+							<td className="px-4 py-2">
+								{release.promoted_at.slice(0, 10)}
 							</td>
 						</tr>
 					))}
