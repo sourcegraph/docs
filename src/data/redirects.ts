@@ -344,10 +344,6 @@ const redirectsData = [
 		destination: '/admin/auth/saml/microsoft_adfs'
 	},
 	{
-		source: '/admin/config/critical_config',
-		destination: '/admin/migration/3_11'
-	},
-	{
 		source: '/admin/external_service/bitbucketserver',
 		destination: '/integration/bitbucket_server'
 	},
@@ -363,10 +359,6 @@ const redirectsData = [
 		source: '/admin/monitoring/reporting_search_timeouts',
 		destination:
 			'/admin/observability/troubleshooting#scenario-search-timeouts'
-	},
-	{
-		source: '/admin/monitoring/metrics_reference',
-		destination: '/admin/observability/metrics_guide'
 	},
 	{
 		source: '/admin/monitoring/slack_alert_channel',
@@ -387,50 +379,9 @@ const redirectsData = [
 		destination: '/admin/observability'
 	},
 	{
-		source: '/integration/google_gsuite',
-		destination: '/integration/google_workspace'
-	},
-	{
-		source: '/dev/architecture/life-of-a-search-query',
-		destination:
-			'/dev/background-information/architecture/life-of-a-search-query'
-	},
-	{
-		source: '/dev/architecture/architecture.dot',
-		destination:
-			'/dev/background-information/architecture/architecture.dot'
-	},
-	{
-		source: '/dev/architecture/life-of-a-ping',
-		destination: '/dev/background-information/architecture/life-of-a-ping'
-	},
-	{
-		source: '/dev/architecture/life-of-a-repository',
-		destination:
-			'/dev/background-information/architecture/life-of-a-repository'
-	},
-	{
-		source: '/dev/architecture/search-pagination',
-		destination:
-			'/dev/background-information/architecture/search-pagination'
-	},
-	{
 		source: '/dev/architecture/architecture.svg',
 		destination:
 			'/dev/background-information/architecture/architecture.svg'
-	},
-	{
-		source: '/dev/codeintel/architecture',
-		destination: '/dev/background-information/codeintel/architecture'
-	},
-	{
-		source: '/dev/codeintel/deployment',
-		destination: '/dev/background-information/codeintel/deployment'
-	},
-	{
-		source: '/dev/codeintel/diagrams/architecture.dot',
-		destination:
-			'/dev/background-information/codeintel/diagrams/architecture.dot'
 	},
 	{
 		source: '/dev/codeintel/diagrams/architecture.svg',
@@ -438,19 +389,9 @@ const redirectsData = [
 			'/dev/background-information/codeintel/diagrams/architecture.svg'
 	},
 	{
-		source: '/dev/codeintel/diagrams/definitions.mermaid',
-		destination:
-			'/dev/background-information/codeintel/diagrams/definitions.mermaid'
-	},
-	{
 		source: '/dev/codeintel/diagrams/definitions.svg',
 		destination:
 			'/dev/background-information/codeintel/diagrams/definitions.svg'
-	},
-	{
-		source: '/dev/codeintel/diagrams/extension-definitions.mermaid',
-		destination:
-			'/dev/background-information/codeintel/diagrams/extension-definitions.mermaid'
 	},
 	{
 		source: '/dev/codeintel/diagrams/extension-definitions.svg',
@@ -458,19 +399,9 @@ const redirectsData = [
 			'/dev/background-information/codeintel/diagrams/extension-definitions.svg'
 	},
 	{
-		source: '/dev/codeintel/diagrams/extension-hover.mermaid',
-		destination:
-			'/dev/background-information/codeintel/diagrams/extension-hover.mermaid'
-	},
-	{
 		source: '/dev/codeintel/diagrams/extension-hover.svg',
 		destination:
 			'/dev/background-information/codeintel/diagrams/extension-hover.svg'
-	},
-	{
-		source: '/dev/codeintel/diagrams/extension-references.mermaid',
-		destination:
-			'/dev/background-information/codeintel/diagrams/extension-references.mermaid'
 	},
 	{
 		source: '/dev/codeintel/diagrams/extension-references.svg',
@@ -478,18 +409,8 @@ const redirectsData = [
 			'/dev/background-information/codeintel/diagrams/extension-references.svg'
 	},
 	{
-		source: '/dev/codeintel/diagrams/hover.mermaid',
-		destination:
-			'/dev/background-information/codeintel/diagrams/hover.mermaid'
-	},
-	{
 		source: '/dev/codeintel/diagrams/hover.svg',
 		destination: '/dev/background-information/codeintel/diagrams/hover.svg'
-	},
-	{
-		source: '/dev/codeintel/diagrams/references.mermaid',
-		destination:
-			'/dev/background-information/codeintel/diagrams/references.mermaid'
 	},
 	{
 		source: '/dev/codeintel/diagrams/references.svg',
@@ -497,100 +418,14 @@ const redirectsData = [
 			'/dev/background-information/codeintel/diagrams/references.svg'
 	},
 	{
-		source: '/dev/codeintel/diagrams/resolve-page.mermaid',
-		destination:
-			'/dev/background-information/codeintel/diagrams/resolve-page.mermaid'
-	},
-	{
 		source: '/dev/codeintel/diagrams/resolve-page.svg',
 		destination:
 			'/dev/background-information/codeintel/diagrams/resolve-page.svg'
 	},
 	{
-		source: '/dev/codeintel/diagrams/upload.mermaid',
-		destination:
-			'/dev/background-information/codeintel/diagrams/upload.mermaid'
-	},
-	{
 		source: '/dev/codeintel/diagrams/upload.svg',
 		destination:
 			'/dev/background-information/codeintel/diagrams/upload.svg'
-	},
-	{
-		source: '/dev/codeintel/extensions',
-		destination: '/dev/background-information/codeintel/extensions'
-	},
-	{
-		source: '/dev/codeintel/index',
-		destination: '/dev/background-information/codeintel/index'
-	},
-	{
-		source: '/dev/codeintel/queries',
-		destination: '/dev/background-information/codeintel/queries'
-	},
-	{
-		source: '/dev/codeintel/uploads',
-		destination: '/dev/background-information/codeintel/uploads'
-	},
-	{
-		source: '/dev/graphql_api',
-		destination: '/dev/background-information/graphql_api'
-	},
-	{
-		source: '/dev/observability',
-		destination: '/dev/background-information/observability'
-	},
-	{
-		source: '/dev/postgresql',
-		destination: '/dev/background-information/postgresql'
-	},
-	{
-		source: '/dev/renovate',
-		destination: '/dev/background-information/renovate'
-	},
-	{
-		source: '/dev/tech_stack',
-		destination: '/dev/background-information/tech_stack'
-	},
-	{
-		source: '/dev/telemetry',
-		destination: '/dev/background-information/telemetry'
-	},
-	{
-		source: '/dev/testing',
-		destination: '/dev/background-information/testing'
-	},
-	{
-		source: '/dev/web/build',
-		destination: '/dev/background-information/web/build'
-	},
-	{
-		source: '/dev/code_host_integrations',
-		destination: '/dev/background-information/web/code_host_integrations'
-	},
-	{
-		source: '/dev/web/graphql',
-		destination: '/dev/background-information/web/graphql'
-	},
-	{
-		source: '/dev/web/index',
-		destination: '/dev/background-information/web/index'
-	},
-	{
-		source: '/dev/web/web_app',
-		destination: '/dev/background-information/web/web_app'
-	},
-	{
-		source: '/dev/phabricator_gitolite',
-		destination: '/dev/how-to/configure_phabricator_gitolite'
-	},
-	{
-		source: '/dev/documentation',
-		destination: '/dev/how-to/documentation_implementation'
-	},
-	{
-		source: '/dev/zoekt',
-		destination: '/dev/how-to/zoekt_local_dev'
 	},
 	{
 		source: '/user/search/examples',
@@ -605,29 +440,8 @@ const redirectsData = [
 		destination: '/code_search/reference/language'
 	},
 	{
-		source: '/user/search/structural',
-		destination: '/code_search/reference/structural'
-	},
-	{
-		source: '/user/search/opengrok',
-		destination: '/code_search/how-to/opengrok'
-	},
-	{
 		source: '/user/search/saved_searches',
 		destination: '/code_search/how-to/saved_searches'
-	},
-	{
-		source: '/user/search/scopes',
-		destination: '/code_search/how-to/scopes'
-	},
-	{
-		source: '/user/code_intelligence/lsif_quickstart',
-		destination: '/user/code_intelligence/how-to/index_other_languages'
-	},
-	{
-		source: '/user/code_intelligence/basic_code_intelligence',
-		destination:
-			'/user/code_intelligence/explanations/search_based_code_intelligence'
 	},
 	{
 		source: '/user/code_intelligence/features',
@@ -724,18 +538,6 @@ const redirectsData = [
 		destination: '/admin/user_surveys'
 	},
 	{
-		source: '/user/repository/badges',
-		destination: '/user/personalization/badges'
-	},
-	{
-		source: '/user/quick_links',
-		destination: '/user/personalization/quick_links'
-	},
-	{
-		source: '/user/themes',
-		destination: '/user/personalization/themes'
-	},
-	{
 		source: '/user/search',
 		destination: '/code_search'
 	},
@@ -764,27 +566,9 @@ const redirectsData = [
 		destination: '/batch-changes/permissions-in-batch-changes'
 	},
 	{
-		source: '/dev/campaigns_database_layout.dot',
-		destination:
-			'/dev/background-information/batch_changes/batch_changes_database_layout.dot'
-	},
-	{
 		source: '/dev/campaigns_database_layout.svg',
 		destination:
 			'/dev/background-information/batch_changes/batch_changes_database_layout.svg'
-	},
-	{
-		source: '/dev/campaigns_design',
-		destination:
-			'/dev/background-information/batch_changes/batch_changes_design'
-	},
-	{
-		source: '/dev/campaigns_development',
-		destination: '/dev/background-information/batch_changes/index'
-	},
-	{
-		source: '/dev/automation_development',
-		destination: '/dev/background-information/batch_changes/index'
 	},
 	{
 		source: '/campaigns/campaign_spec_yaml_reference',
@@ -794,11 +578,6 @@ const redirectsData = [
 		source: '/dev/background-information/campaigns/campaigns_database_layout.svg',
 		destination:
 			'/dev/background-information/batch_changes/batch_changes_database_layout.svg'
-	},
-	{
-		source: '/dev/background-information/campaigns/campaigns_database_layout.dot',
-		destination:
-			'/dev/background-information/batch_changes/batch_changes_database_layout.dot'
 	},
 	{
 		source: '/campaigns/explanations/how_src_executes_a_campaign_spec',
@@ -836,10 +615,6 @@ const redirectsData = [
 		destination: '/batch_changes/references/troubleshooting'
 	},
 	{
-		source: '/campaigns/references/name-change',
-		destination: '/batch_changes/references/name-change'
-	},
-	{
 		source: '/campaigns/references/campaign_spec_yaml_reference',
 		destination: '/batch_changes/references/batch_spec_yaml_reference'
 	},
@@ -850,10 +625,6 @@ const redirectsData = [
 	{
 		source: '/campaigns/references/campaign_spec_templating',
 		destination: '/batch_changes/references/batch_spec_templating'
-	},
-	{
-		source: '/campaigns/references',
-		destination: '/batch_changes/references'
 	},
 	{
 		source: '/campaigns/tutorials/update_base_images_in_dockerfiles',
@@ -925,10 +696,6 @@ const redirectsData = [
 		destination: '/batch_changes/how-tos/tracking_existing_changesets'
 	},
 	{
-		source: '/campaigns/how-tos',
-		destination: '/batch_changes/how-tos'
-	},
-	{
 		source: '/campaigns/quickstart',
 		destination: '/batch_changes/quickstart'
 	},
@@ -939,10 +706,6 @@ const redirectsData = [
 	{
 		source: '/cli/references/campaigns/apply',
 		destination: '/cli/references/batch/apply'
-	},
-	{
-		source: '/cli/references/campaigns/index',
-		destination: '/cli/references/batch/index'
 	},
 	{
 		source: '/cli/references/campaigns/new',
@@ -973,14 +736,6 @@ const redirectsData = [
 		destination: '/batch_changes/references/troubleshooting'
 	},
 	{
-		source: '/dev/background-information/continuous_integration',
-		destination: '/dev/background-information/ci'
-	},
-	{
-		source: '/dev/how-to/add_and_use_logging',
-		destination: '/dev/how-to/add_logging'
-	},
-	{
 		source: '/admin/install',
 		destination: '/admin/deploy'
 	},
@@ -995,10 +750,6 @@ const redirectsData = [
 	{
 		source: '/admin/install/kubernetes/eks',
 		destination: '/admin/deploy/kubernetes/eks'
-	},
-	{
-		source: '/admin/install/kubernetes/helm',
-		destination: '/admin/deploy/kubernetes/helm'
 	},
 	{
 		source: '/admin/install/kubernetes',
@@ -1019,10 +770,6 @@ const redirectsData = [
 	{
 		source: '/admin/install/kubernetes/troubleshoot',
 		destination: '/admin/deploy/kubernetes/troubleshoot'
-	},
-	{
-		source: '/admin/install/kubernetes/update',
-		destination: '/admin/deploy/kubernetes/update'
 	},
 	{
 		source: '/admin/install/kubernetes/overlays',
@@ -1147,34 +894,12 @@ const redirectsData = [
 		destination: '/code_navigation/explanations/uploads'
 	},
 	{
-		source: '/code_intelligence/explanations',
-		destination: '/code_navigation/explanations'
-	},
-	{
-		source: '/code_intelligence/explanations/diagrams',
-		destination: '/code_navigation/explanations/diagrams'
-	},
-	{
-		source: '/code_intelligence/explanations/diagrams/index-states.mermaid',
-		destination:
-			'/code_navigation/explanations/diagrams/index-states.mermaid'
-	},
-	{
 		source: '/code_intelligence/explanations/diagrams/index-states.svg',
 		destination: '/code_navigation/explanations/diagrams/index-states.svg'
 	},
 	{
-		source: '/code_intelligence/explanations/diagrams/upload-states.mermaid',
-		destination:
-			'/code_navigation/explanations/diagrams/upload-states.mermaid'
-	},
-	{
 		source: '/code_intelligence/explanations/diagrams/upload-states.svg',
 		destination: '/code_navigation/explanations/diagrams/upload-states.svg'
-	},
-	{
-		source: '/code_intelligence/apidocs',
-		destination: '/code_navigation/apidocs'
 	},
 	{
 		source: '/code_intelligence/how-to/adding_lsif_to_many_repos',
@@ -1211,25 +936,9 @@ const redirectsData = [
 			'/code_navigation/how-to/index_a_typescript_and_javascript_repository'
 	},
 	{
-		source: '/code_intelligence/how-to/index_other_languages',
-		destination: '/code_navigation/how-to/index_other_languages'
-	},
-	{
-		source: '/code_intelligence/how-to',
-		destination: '/code_navigation/how-to'
-	},
-	{
-		source: '/code_intelligence/how-to/img/CodeReview.gif',
-		destination: '/code_navigation/how-to/img/CodeReview.gif'
-	},
-	{
 		source: '/code_intelligence/how-to/img/experimental-language-server-enable.png',
 		destination:
 			'/code_navigation/how-to/img/experimental-language-server-enable.png'
-	},
-	{
-		source: '/code_intelligence/how-to/img/extension-example.gif',
-		destination: '/code_navigation/how-to/img/extension-example.gif'
 	},
 	{
 		source: '/code_intelligence/how-to/img/network-description.png',
@@ -1256,20 +965,12 @@ const redirectsData = [
 		destination: '/code_navigation/how-to/img/workflow.png'
 	},
 	{
-		source: '/code_intelligence/how-to/img',
-		destination: '/code_navigation/how-to/img'
-	},
-	{
 		source: '/code_intelligence/references/auto_indexing_configuration',
 		destination: '/code_navigation/references/auto_indexing_configuration'
 	},
 	{
 		source: '/code_intelligence/references/envvars',
 		destination: '/code_navigation/references/envvars'
-	},
-	{
-		source: '/code_intelligence/references/faq',
-		destination: '/code_navigation/references/faq'
 	},
 	{
 		source: '/code_intelligence/references/indexers',
@@ -1280,16 +981,8 @@ const redirectsData = [
 		destination: '/code_navigation/references/precise_examples'
 	},
 	{
-		source: '/code_intelligence/references/requirements',
-		destination: '/code_navigation/references/requirements'
-	},
-	{
 		source: '/code_intelligence/references/troubleshooting',
 		destination: '/code_navigation/references/troubleshooting'
-	},
-	{
-		source: '/code_intelligence/references',
-		destination: '/code_navigation/references'
 	},
 	{
 		source: '/code_intelligence',
@@ -1392,14 +1085,6 @@ const redirectsData = [
 	{
 		source: '/cody/overview/install-jetbrains',
 		destination: '/cody/clients/install-jetbrains'
-	},
-	{
-		source: '/app',
-		destination: '/cody/clients/app'
-	},
-	{
-		source: '/cody/overview/app',
-		destination: '/cody/clients/app'
 	},
 	{
 		source: '/cody/explanations/enabling_cody',
@@ -1536,10 +1221,6 @@ const redirectsData = [
 		destination: '/cody/embeddings/configure-embeddings'
 	},
 	{
-		source: '/cody/core-concepts/embeddings/configure-embeddings',
-		destination: '/cody/embeddings/configure-embeddings'
-	},
-	{
 		source: '/cody/explanations/code_graph_context#filtering-files-from-embeddings',
 		destination:
 			'/cody/embeddings/manage-embeddings#filter-files-from-embeddings'
@@ -1665,14 +1346,6 @@ const redirectsData = [
 			'/cody/embeddings/usage-and-limits#limit-the-number-of-embeddings-that-can-be-generated'
 	},
 	{
-		source: '/cody/explanations/indexing',
-		destination: '/cody/embeddings/embedding-index'
-	},
-	{
-		source: '/cody/core-concepts/embeddings/embedding-index',
-		destination: '/cody/embeddings/embedding-index'
-	},
-	{
 		source: '/cody/explanations/indexing#generate-embeddings-index',
 		destination:
 			'/cody/embeddings/embedding-index#generate-embeddings-index'
@@ -1735,10 +1408,6 @@ const redirectsData = [
 		destination: '/cody/embeddings/embedding-index#settingsjson'
 	},
 	{
-		source: '/cody/explanations/policies',
-		destination: '/cody/embeddings/configure-embeddings#policies'
-	},
-	{
 		source: '/cody/core-concepts/embeddings/configure-embeddings#policies',
 		destination: '/cody/embeddings/configure-embeddings#policies'
 	},
@@ -1781,11 +1450,6 @@ const redirectsData = [
 		source: '/cody/core-concepts/embeddings/configure-embeddings#lifecycle-of-an-embeddings-policy',
 		destination:
 			'/cody/embeddings/configure-embeddings#lifecycle-of-an-embeddings-policy'
-	},
-	{
-		source: '/cody/explanations/schedule_one_off_embeddings_jobs',
-		destination:
-			'/cody/embeddings/configure-embeddings#schedule-embeddings-jobs'
 	},
 	{
 		source: '/cody/core-concepts/embeddings/configure-embeddings#schedule-embeddings-jobs',
@@ -1873,11 +1537,6 @@ const redirectsData = [
 	{
 		source: '/code_search/how-to/search_contexts',
 		destination: '/code-search/working/search_contexts'
-	},
-
-	{
-		source: '/code_search/how-to/exhaustive',
-		destination: '/code-search/types/exhaustive'
 	},
 
 	{
@@ -2012,12 +1671,6 @@ const redirectsData = [
 	{
 		source: '/code_navigation/how-to/adding_lsif_to_many_repos',
 		destination: '/code-search/code-navigation/precise_code_navigation'
-	},
-
-	{
-		source: '/code_navigation/how-to/adding_lsif_to_workflows',
-		destination:
-			'/code-search/code-navigation/how-to/adding_lsif_to_workflows'
 	},
 
 	{
@@ -3378,14 +3031,6 @@ const redirectsData = [
 		destination: '/self-hosted/external_services/object_storage'
 	},
 	{
-		source: '/admin/external_services/postgres',
-		destination: '/self-hosted/external_services/postgres'
-	},
-	{
-		source: '/admin/external_services/redis',
-		destination: '/self-hosted/external_services/redis'
-	},
-	{
 		source: '/admin/how-to/blobstore_debugging',
 		destination: '/self-hosted/how-to/blobstore_debugging'
 	},
@@ -3465,10 +3110,6 @@ const redirectsData = [
 	{
 		source: '/admin/config/network-filtering',
 		destination: '/self-hosted/network-filtering'
-	},
-	{
-		source: '/admin/observability/.gitattributes',
-		destination: '/self-hosted/observability/.gitattributes'
 	},
 	{
 		source: '/admin/observability/alerting',
