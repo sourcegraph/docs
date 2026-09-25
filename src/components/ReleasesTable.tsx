@@ -25,15 +25,6 @@ function majorVersion(release: Release): number {
 	return Number(versionNumber(release).split('.')[0]);
 }
 
-function formatDate(dateString: string): string {
-	const date = new Date(dateString);
-	return date.toLocaleDateString('en-US', {
-		day: 'numeric',
-		month: 'long',
-		year: 'numeric'
-	});
-}
-
 export function SupportedReleasesTable() {
 	const [releases, setReleases] = useState<Release[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -89,7 +80,7 @@ export function SupportedReleasesTable() {
 							Release
 						</th>
 						<th className="px-4 py-2 text-left font-semibold">
-							General Availability Date
+							Release Date
 						</th>
 						<th className="px-4 py-2 text-left font-semibold">
 							Release Notes
@@ -101,7 +92,7 @@ export function SupportedReleasesTable() {
 						<tr key={release.id}>
 							<td className="px-4 py-2">{release.version}</td>
 							<td className="px-4 py-2">
-								{formatDate(release.promoted_at)}
+								{release.promoted_at.slice(0, 10)}
 							</td>
 							<td className="px-4 py-2">
 								<a
