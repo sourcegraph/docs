@@ -147,6 +147,30 @@ To enable forks, update the site configuration to include:
 }
 ```
 
+## Pull request attribution
+
+By default, classic and agentic Batch Changes identify the Sourcegraph batch change that created a changeset in two places:
+
+-   A link to the originating batch change appended to the pull request or merge request description.
+-   A `Sourcegraph-Batch-Change` trailer in the commit message.
+
+If description updates cause unwanted code host notifications, set `batchChanges.attributionMode` to `trailerOnly` in site configuration:
+
+```json
+{
+	"batchChanges.attributionMode": "trailerOnly"
+}
+```
+
+The setting supports these values:
+
+| Value            | Behavior                                                                                    |
+| ---------------- | ------------------------------------------------------------------------------------------- |
+| `bodyAndTrailer` | Adds attribution to both the changeset description and commit message. This is the default. |
+| `trailerOnly`    | Adds attribution only to the commit message, leaving the changeset description unchanged.   |
+
+The commit trailer always contains a link to the classic batch change or agent conversation that created the changeset. If a changeset template explicitly includes `${{ batch_change_link }}`, Sourcegraph honors that template even when `trailerOnly` is configured.
+
 ## Automatically delete branches on merge/close
 
 Sourcegraph can be configured to automatically delete branches created for Batch Changes changesets when changesets are merged or closed by enabling the `batchChanges.autoDeleteBranch` site configuration option.
