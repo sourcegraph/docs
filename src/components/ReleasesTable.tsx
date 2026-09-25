@@ -83,7 +83,7 @@ export function SupportedReleasesTable() {
 							Release Date
 						</th>
 						<th className="px-4 py-2 text-left font-semibold">
-							Release Notes
+							Changelog
 						</th>
 					</tr>
 				</thead>
