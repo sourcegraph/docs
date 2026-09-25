@@ -23,9 +23,8 @@ const redirectsData = [
 		destination: '/self-hosted/http-https-configuration'
 	},
 	{
-		source: '/docs/admin/deploy_executors',
-		destination:
-			'https://sourcegraph.com/docs/admin/executors/deploy_executors'
+		source: '/admin/deploy_executors',
+		destination: '/self-hosted/executors'
 	},
 	{
 		source: '/dev/roadmap',
@@ -352,8 +351,8 @@ const redirectsData = [
 		destination: '/integration/bitbucket_server'
 	},
 	{
-		source: '/admin/install/cluster.md',
-		destination: '/admin/deploy/index.md'
+		source: '/admin/install/cluster',
+		destination: '/self-hosted/deploy'
 	},
 	{
 		source: '/admin/monitoring',
@@ -1089,10 +1088,6 @@ const redirectsData = [
 		destination: '/admin/deploy/resource_estimator'
 	},
 	{
-		source: '/admin/install/cluster.md',
-		destination: '/admin/deploy'
-	},
-	{
 		source: '/admin/deploy/cluster',
 		destination: '/admin/deploy'
 	},
@@ -1545,17 +1540,11 @@ const redirectsData = [
 			'/cody/embeddings/manage-embeddings#filter-files-from-embeddings'
 	},
 	{
-		source: '/cody/core-concepts/embeddings/manage-embeddings#filter-files-from-embeddings',
-		destination:
-			'/cody/embeddings/manage-embeddings#filter-files-from-embeddings'
+		source: '/cody/core-concepts/embeddings/manage-embeddings',
+		destination: '/cody'
 	},
 	{
 		source: '/cody/explanations/code_graph_context#storing-embedding-indexes',
-		destination:
-			'/cody/embeddings/manage-embeddings#store-embedding-indexes'
-	},
-	{
-		source: '/cody/core-concepts/embeddings/manage-embeddings#store-embedding-indexes',
 		destination:
 			'/cody/embeddings/manage-embeddings#store-embedding-indexes'
 	},
@@ -1564,15 +1553,7 @@ const redirectsData = [
 		destination: '/cody/embeddings/manage-embeddings#using-s3'
 	},
 	{
-		source: '/cody/core-concepts/embeddings/manage-embeddings#using-s3',
-		destination: '/cody/embeddings/manage-embeddings#using-s3'
-	},
-	{
 		source: '/cody/explanations/code_graph_context#using-gcs',
-		destination: '/cody/embeddings/manage-embeddings#using-gcs'
-	},
-	{
-		source: '/cody/core-concepts/embeddings/manage-embeddings#using-gcs',
 		destination: '/cody/embeddings/manage-embeddings#using-gcs'
 	},
 	{
@@ -1580,16 +1561,7 @@ const redirectsData = [
 		destination: '/cody/embeddings/manage-embeddings#provisioning-buckets'
 	},
 	{
-		source: '/cody/core-concepts/embeddings/manage-embeddings#provisioning-buckets',
-		destination: '/cody/embeddings/manage-embeddings#provisioning-buckets'
-	},
-	{
 		source: '/cody/explanations/code_graph_context#environment-variables-for-the-embeddings-service',
-		destination:
-			'/cody/embeddings/manage-embeddings#environment-variables-for-the-embeddings-service'
-	},
-	{
-		source: '/cody/core-concepts/embeddings/manage-embeddings#environment-variables-for-the-embeddings-service',
 		destination:
 			'/cody/embeddings/manage-embeddings#environment-variables-for-the-embeddings-service'
 	},
@@ -1649,18 +1621,12 @@ const redirectsData = [
 			'/cody/embeddings/usage-and-limits#configure-global-policy-match-limit'
 	},
 	{
-		source: '/cody/core-concepts/embeddings/usage-and-limits#configure-global-policy-match-limit',
-		destination:
-			'/cody/embeddings/usage-and-limits#configure-global-policy-match-limit'
+		source: '/cody/core-concepts/embeddings/usage-and-limits',
+		destination: '/cody'
 	},
 	{
 		// cspell:disable-next-line
 		source: '/cody/explanations/code_graph_context#limitting-the-number-of-embeddings-that-can-be-generated',
-		destination:
-			'/cody/embeddings/usage-and-limits#limit-the-number-of-embeddings-that-can-be-generated'
-	},
-	{
-		source: '/cody/core-concepts/embeddings/usage-and-limits#limit-the-number-of-embeddings-that-can-be-generated',
 		destination:
 			'/cody/embeddings/usage-and-limits#limit-the-number-of-embeddings-that-can-be-generated'
 	},
