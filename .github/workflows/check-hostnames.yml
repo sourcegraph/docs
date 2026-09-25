@@ -1,0 +1,95 @@
+name: Example hostnames
+
+# Reports placeholder hostnames on lines added by a pull request that are not
+# the recommended ones (dev/example-hostnames.json), as a summary comment plus
+# an inline suggested change on each flagged line. Advisory: never fails the PR.
+
+on:
+    pull_request:
+
+# A new push supersedes the run for the previous one
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+    pull-requests: write
+
+jobs:
+    check-hostnames:
+        name: Example hostnames (advisory)
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out pull request head
+              uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.event.pull_request.head.sha }}
+                  fetch-depth: 0
+
+            - name: Find placeholder hostnames added by this PR
+              id: check
+              env:
+                  BASE_SHA: ${{ github.event.pull_request.base.sha }}
+                  # File links in the report open the file on the PR branch
+                  LINK_BASE: ${{ github.event.pull_request.head.repo.html_url }}/blob/${{ github.event.pull_request.head.ref }}
+              # The script exits 1 both with findings and when it crashes. It writes
+              # its output in one go at the end, so a crash leaves it empty. The
+              # comment step reports a crash instead of posting the empty report.
+              run: |
+                  git diff -U0 "$(git merge-base "$BASE_SHA" HEAD)" HEAD -- docs > "$RUNNER_TEMP/changes.diff"
+                  if node dev/check-hostnames.mjs --format markdown \
+                      --diff "$RUNNER_TEMP/changes.diff" \
+                      --review "$RUNNER_TEMP/review.json" \
+                      --link-base "$LINK_BASE" > "$RUNNER_TEMP/report.md"; then
+                      echo "result=clean" >> "$GITHUB_OUTPUT"
+                  elif [ -s "$RUNNER_TEMP/report.md" ]; then
+                      echo "result=found" >> "$GITHUB_OUTPUT"
+                  else
+                      echo "::warning::check-hostnames crashed, so this PR was not checked"
+                      echo "result=crashed" >> "$GITHUB_OUTPUT"
+                  fi
+                  cat "$RUNNER_TEMP/report.md"
+
+            - name: Comment on the pull request
+              # Fork PRs get a read-only token; the report is still in the job log
+              if: github.event.pull_request.head.repo.full_name == github.repository
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
+                  RESULT: ${{ steps.check.outputs.result }}
+                  RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+              run: |
+                  marker='<!-- check-hostnames-report -->'
+                  existing_comment=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
+                      --paginate --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n 1)
+
+                  # Comment when there is something to report, or an earlier report to resolve
+                  case "$RESULT" in
+                      found)
+                          { echo "$marker"; cat "$RUNNER_TEMP/report.md"; } > "$RUNNER_TEMP/comment.md" ;;
+                      crashed)
+                          printf '%s\n### ⚠️ The example hostnames check could not run on this revision\n\nThis is a problem with the check, not with this PR; see the [job log](%s).\n' \
+                              "$marker" "$RUN_URL" > "$RUNNER_TEMP/comment.md" ;;
+                      *)
+                          [ -n "$existing_comment" ] || exit 0
+                          { echo "$marker"; cat "$RUNNER_TEMP/report.md"; } > "$RUNNER_TEMP/comment.md" ;;
+                  esac
+
+                  if [ -n "$existing_comment" ]; then
+                      gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$existing_comment" \
+                          --field body=@"$RUNNER_TEMP/comment.md"
+                  else
+                      gh pr comment "$PR_NUMBER" --body-file "$RUNNER_TEMP/comment.md"
+                  fi
+
+            - name: Suggest fixes as review comments
+              # One suggested change per flagged line, kept in sync with the
+              # findings; see dev/sync-review-comments.sh
+              if: >-
+                  github.event.pull_request.head.repo.full_name == github.repository
+                  && contains(fromJSON('["clean", "found"]'), steps.check.outputs.result)
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
+              run: dev/sync-review-comments.sh '<!-- check-hostnames-finding:' "$RUNNER_TEMP/review.json"

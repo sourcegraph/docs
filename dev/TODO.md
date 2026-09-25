@@ -22,6 +22,17 @@ One PR per task; delete a task when its PR merges.
   `1.0.30001810`); dedupe to the newer one so `next build` stops warning that
   Browserslist data is stale. #1909 was closed unmerged
 
+## PR checks
+
+- Four scripts each parse `git diff -U0` for added lines: `addedLineRanges`
+  in `dev/check-spelling.mjs`, `parseDiff` in `dev/check-links.mjs` and
+  `dev/check-hostnames.mjs`, `addedLines` in `dev/check-redirects.mjs`. Move
+  one into a dependency-free `dev/diff.mjs` and import it from all four
+- `check-links.yml`, `check-redirects.yml`, and `check-hostnames.yml` carry the
+  same "Comment on the pull request" shell step (find the marker comment,
+  PATCH or create it). Move it to a `dev/` script next to
+  `sync-review-comments.sh`
+
 ## Docs site audit leftovers
 
 Findings from the crawl of all 502 pages
