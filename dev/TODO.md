@@ -18,16 +18,6 @@ One PR per task; delete a task when its PR merges.
   "Generating static pages" time (locally 6.6s with them, 3.6s without).
   Options: hoist the font and logo reads in `src/app/api/og/[...path]/route.tsx`
   to module scope, or render one image per top-level section instead of per page
-- Serve MDX screenshots as WebP through `/_next/image`: branch
-  `marc/perf/webp-images` (split out of #1975) routes allow-listed GCS
-  PNG/JPEGs through Next's image optimizer, 1214 KB → 214 KB on
-  `/batch-changes/delete-a-batch-change`. Needs a decision on the Vercel
-  Image Optimization bill (~360 source images, one transform per week per
-  region) before it goes up as a PR
-- Move the static redirect table out of `src/proxy.ts` into
-  `next.config.js#redirects`, so they are served from the edge config instead
-  of running the proxy on every request. Draft #1907 was closed; branch
-  `marc/site/redirects-in-next-config` has the start
 - `pnpm-lock.yaml` pins two `caniuse-lite` versions (`1.0.30001769` and
   `1.0.30001810`); dedupe to the newer one so `next build` stops warning that
   Browserslist data is stale. #1909 was closed unmerged
@@ -38,10 +28,6 @@ Findings from the crawl of all 502 pages
 (<https://ampcode.com/threads/T-01a0ae50-f7f0-779c-aa66-3887c9953e33>)
 with no PR yet. Fixes with PRs: #1998–#2004.
 
-- Cloudflare AI Labyrinth injects a hidden `<a href="/cdn-cgi/content?id=…">`
-  as the first child of `<body>` for suspected bots, so React hydration fails
-  (#418) on 102 of 502 pages. Cloudflare setting: exclude
-  `sourcegraph.com/docs/*` from AI Labyrinth.
 - Every page has the same `<meta name="description">`
   (`src/app/layout.tsx`); `generateMetadata` in `src/app/[...slug]/page.tsx`
   never sets one. Derive it from the first paragraph.
@@ -74,20 +60,11 @@ with no PR yet. Fixes with PRs: #1998–#2004.
 
 ## GitHub repo settings (needs an org admin)
 
-Already on: delete branch on merge, squash-only merges, auto-merge, squash
-title/body from PR, `main` ruleset blocks deletion and force-push and requires
-a PR with 1 approval.
-
 - Add required status checks to the `main` ruleset: the link check and the
   Vercel build. Today "Broken links introduced by this PR" and "CSpell
   (advisory)" can be red and the PR still merges.
-- Add a "Require signed commits" rule to the `main` ruleset.
 - Restrict the ruleset's `allowed_merge_methods` to `squash`; it still lists
   `merge` and `rebase`, so only the repo-level setting enforces squash.
-- Turn off `allow_update_branch` ("Always suggest updating PR branches"); the
-  button rewrites commits unsigned.
-- Turn on `dismiss_stale_reviews_on_push`; consider
-  `require_last_push_approval` and `required_review_thread_resolution`.
 - Turn off Projects (`has_projects`); Issues are already off.
 - Add `CODEOWNERS` and `.github/dependabot.yml`; confirm Actions permissions
   and Dependabot alerts are on (not readable without admin).
