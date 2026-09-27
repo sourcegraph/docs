@@ -2,13 +2,8 @@
 
 import {latestVersion, VersionI, versions} from '@/data/versions';
 import {Menu, Transition} from '@headlessui/react';
-import {
-	ArrowUpRightIcon,
-	CheckIcon,
-	ChevronDownIcon
-} from '@heroicons/react/20/solid';
+import {CheckIcon, ChevronDownIcon} from '@heroicons/react/20/solid';
 import clsx from 'clsx';
-import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 import {Fragment, useEffect, useState} from 'react';
 
@@ -118,6 +113,9 @@ export default function VersionSelector() {
 											active &&
 												'bg-vermilion-08 text-vermilion-11',
 											count === 0 && 'rounded-t-md',
+											count ===
+												availableVersions.length - 1 &&
+												'rounded-b-md',
 											'flex w-full items-center justify-between px-3 py-2'
 										)}
 									>
@@ -140,22 +138,6 @@ export default function VersionSelector() {
 								)}
 							</Menu.Item>
 						))}
-					{/* Legacy versions */}
-					<Menu.Item>
-						{({active}) => (
-							<Link
-								href="/legacy"
-								className={clsx(
-									active &&
-										'bg-vermilion-08 text-vermilion-11',
-									'flex items-center justify-between rounded-b-md px-3 py-2'
-								)}
-							>
-								Legacy versions
-								<ArrowUpRightIcon className="h-3 w-3" />
-							</Link>
-						)}
-					</Menu.Item>
 				</Menu.Items>
 			</Transition>
 		</Menu>

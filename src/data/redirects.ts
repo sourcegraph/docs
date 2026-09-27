@@ -4285,6 +4285,12 @@ const redirectsData = [
 		source: '/admin/how-to/converting-version-contexts-to-search-contexts',
 		destination: '/code-search/working/search-contexts'
 	},
+	// The legacy versions page listed docs sites for unsupported versions; the
+	// version dropdown lists every supported version's docs site
+	{
+		source: '/legacy',
+		destination: '/releases'
+	},
 ];
 
 const updatedRedirectsData = redirectsData.map(redirect => {
