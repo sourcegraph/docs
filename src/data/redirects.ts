@@ -4196,6 +4196,15 @@ const redirectsData = [
 		source: '/admin/beta-and-experimental-features',
 		destination: '/beta-and-experimental'
 	},
+	// Release notes moved to sourcegraph.com/changelog; older changelogs are no longer published
+	{
+		source: '/technical-changelog',
+		destination: 'https://sourcegraph.com/changelog'
+	},
+	{
+		source: '/CHANGELOG',
+		destination: 'https://sourcegraph.com/changelog'
+	},
 	// RSS feed moved from /docs/technical-changelog.rss to /changelog/technical-changelog.rss
 	// This redirect preserves existing RSS subscriptions
 	{

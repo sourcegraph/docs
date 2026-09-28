@@ -1,7 +1,6 @@
 'use client';
 
 import {useEffect, useState} from 'react';
-import Link from 'next/link';
 
 type Release = {
 	id: number;
@@ -16,13 +15,14 @@ type Release = {
 	canonical_name: string;
 };
 
-function formatDate(dateString: string): string {
-	const date = new Date(dateString);
-	return date.toLocaleDateString('en-US', {
-		day: 'numeric',
-		month: 'long',
-		year: 'numeric'
-	});
+// The registry reports versions as v8.0.0; the changelog URLs use 8.0.0
+function versionNumber(release: Release): string {
+	return release.version.replace(/^v/, '');
+}
+
+// Sourcegraph supports the two most recent major versions.
+function majorVersion(release: Release): number {
+	return Number(versionNumber(release).split('.')[0]);
 }
 
 export function SupportedReleasesTable() {
@@ -38,10 +38,13 @@ export function SupportedReleasesTable() {
 				return res.json();
 			})
 			.then((data: Release[]) => {
-				const supportedReleases = data.filter(
+				const published = data.filter(
 					r => r.public && !r.is_development
 				);
-				setReleases(supportedReleases);
+				const newestMajor = Math.max(...published.map(majorVersion));
+				setReleases(
+					published.filter(r => majorVersion(r) >= newestMajor - 1)
+				);
 				setLoading(false);
 			})
 			.catch(err => {
@@ -77,16 +80,7 @@ export function SupportedReleasesTable() {
 							Release
 						</th>
 						<th className="px-4 py-2 text-left font-semibold">
-							General Availability Date
-						</th>
-						<th className="px-4 py-2 text-left font-semibold">
-							Supported
-						</th>
-						<th className="px-4 py-2 text-left font-semibold">
-							Release Notes
-						</th>
-						<th className="px-4 py-2 text-left font-semibold">
-							Install
+							Release Date
 						</th>
 					</tr>
 				</thead>
@@ -94,221 +88,17 @@ export function SupportedReleasesTable() {
 					{releases.map(release => (
 						<tr key={release.id}>
 							<td className="px-4 py-2">
-								{release.canonical_name}
-							</td>
-							<td className="px-4 py-2">
-								{formatDate(release.promoted_at)}
-							</td>
-							<td className="px-4 py-2">✅</td>
-							<td className="px-4 py-2">
 								<a
-									href={`https://sourcegraph.com/changelog/releases/${release.version.replace(/^v/, '')}`}
+									href={`https://sourcegraph.com/changelog/releases/${versionNumber(release)}`}
+									target="_blank"
+									rel="noopener noreferrer"
 									className="text-blue-600 hover:underline dark:text-blue-400"
 								>
-									Notes
+									{release.version}
 								</a>
 							</td>
 							<td className="px-4 py-2">
-								<Link
-									href="/admin/deploy"
-									className="text-blue-600 hover:underline dark:text-blue-400"
-								>
-									Install
-								</Link>
-							</td>
-						</tr>
-					))}
-				</tbody>
-			</table>
-		</div>
-	);
-}
-
-export function DeprecatedReleasesTable() {
-	const deprecatedReleases = [
-		{
-			version: '5.10 Patch 1',
-			date: 'December 2024',
-			url: 'https://sourcegraph.com/changelog/releases/5.10.1164'
-		},
-		{
-			version: '5.10 Patch 0',
-			date: 'November 2024',
-			url: 'https://sourcegraph.com/changelog/releases/5.10.0'
-		},
-		{
-			version: '5.9 Patch 3',
-			date: 'November 2024',
-			url: 'https://sourcegraph.com/changelog/releases/5.9.1590'
-		},
-		{
-			version: '5.9 Patch 2',
-			date: 'November 2024',
-			url: 'https://sourcegraph.com/changelog/releases/5.9.347'
-		},
-		{
-			version: '5.9 Patch 1',
-			date: 'November 2024',
-			url: 'https://sourcegraph.com/changelog/releases/5.9.45'
-		},
-		{
-			version: '5.9 Patch 0',
-			date: 'October 2024',
-			url: 'https://sourcegraph.com/changelog/releases/5.9.0'
-		},
-		{
-			version: '5.8 Patch 1',
-			date: 'October 2024',
-			url: 'https://sourcegraph.com/changelog/releases/5.8.1579'
-		},
-		{
-			version: '5.8 Patch 0',
-			date: 'October 2024',
-			url: 'https://sourcegraph.com/changelog/releases/5.8.0'
-		},
-		{
-			version: '5.7 Patch 1',
-			date: 'September 2024',
-			url: 'https://sourcegraph.com/changelog/releases/5.7.2474'
-		},
-		{
-			version: '5.7 Patch 0',
-			date: 'September 2024',
-			url: 'https://sourcegraph.com/changelog/releases/5.7.0'
-		},
-		{version: '5.6 Patch 2', date: 'August 2024', anchor: 'v562535'},
-		{version: '5.6 Patch 1', date: 'August 2024', anchor: 'v56185'},
-		{version: '5.6', date: 'August 2024', anchor: 'v560'},
-		{version: '5.5', date: 'July 2024', anchor: 'v553956'},
-		{version: '5.4', date: 'May 2024', anchor: 'v547765'},
-		{version: '5.3', date: 'February 2024', anchor: 'v5312303'},
-		{version: '5.2', date: 'October 2023', anchor: 'v527'},
-		{version: '5.1', date: 'June 2023', anchor: 'v519'},
-		{version: '5.0', date: 'March 2023', anchor: 'v506'},
-		{version: '4.5', date: 'February 2023', anchor: 'v451'},
-		{version: '4.4', date: 'January 2023', anchor: 'v442'},
-		{version: '4.3', date: 'December 2022', anchor: 'v431'},
-		{version: '4.2', date: 'November 2022', anchor: 'v421'},
-		{version: '4.1', date: 'October 2022', anchor: 'v413'},
-		{version: '4.0', date: 'September 2022', anchor: 'v401'},
-		{
-			version: '3.43',
-			date: 'August 2022',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3432'
-		},
-		{
-			version: '3.42',
-			date: 'July 2022',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3422'
-		},
-		{
-			version: '3.41',
-			date: 'June 2022',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3411'
-		},
-		{
-			version: '3.40',
-			date: 'May 2022',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3402'
-		},
-		{
-			version: '3.39',
-			date: 'April 2022',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3391'
-		},
-		{
-			version: '3.38',
-			date: 'March 2022',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3381'
-		},
-		{
-			version: '3.37',
-			date: 'February 2022',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3370'
-		},
-		{
-			version: '3.36',
-			date: 'January 2022',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3363'
-		},
-		{
-			version: '3.35',
-			date: 'December 2021',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3352'
-		},
-		{
-			version: '3.34',
-			date: 'November 2021',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3342'
-		},
-		{
-			version: '3.33',
-			date: 'October 2021',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3332'
-		},
-		{
-			version: '3.32',
-			date: 'September 2021',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3321'
-		},
-		{
-			version: '3.31',
-			date: 'August 2021',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3312'
-		},
-		{
-			version: '3.30',
-			date: 'July 2021',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3304'
-		},
-		{
-			version: '3.29',
-			date: 'June 2021',
-			url: 'https://github.com/sourcegraph/sourcegraph-public-snapshot/blob/main/CHANGELOG.md#3290'
-		}
-	];
-
-	return (
-		<div className="w-full overflow-x-auto">
-			<table className="min-w-full">
-				<thead>
-					<tr>
-						<th className="px-4 py-2 text-left font-semibold">
-							Release
-						</th>
-						<th className="px-4 py-2 text-left font-semibold">
-							General Availability Date
-						</th>
-						<th className="px-4 py-2 text-left font-semibold">
-							Supported
-						</th>
-						<th className="px-4 py-2 text-left font-semibold">
-							Release Notes
-						</th>
-					</tr>
-				</thead>
-				<tbody>
-					{deprecatedReleases.map(release => (
-						<tr key={release.version}>
-							<td className="px-4 py-2">{release.version}</td>
-							<td className="px-4 py-2">{release.date}</td>
-							<td className="px-4 py-2">❌</td>
-							<td className="px-4 py-2">
-								{release.url ? (
-									<a
-										href={release.url}
-										className="text-blue-600 hover:underline dark:text-blue-400"
-									>
-										Notes
-									</a>
-								) : (
-									<Link
-										href={`/technical-changelog#${release.anchor}`}
-										className="text-blue-600 hover:underline dark:text-blue-400"
-									>
-										Notes
-									</Link>
-								)}
+								{release.promoted_at.slice(0, 10)}
 							</td>
 						</tr>
 					))}

@@ -67,7 +67,6 @@ const FALLBACK_PRODUCTS = [
 	{prefix: '/how-to', product: 'How-to guides', section: 'Documentation'},
 	{prefix: '/dotcom', product: 'Sourcegraph.com', section: 'Documentation'},
 	{prefix: '/releases', product: 'Releases', section: 'Documentation'},
-	{prefix: '/technical-changelog', product: 'Technical changelog', section: 'Documentation'},
 	{prefix: '/legacy', product: 'Legacy', section: 'Documentation'},
 	{prefix: '/pricing', product: 'Pricing', section: 'Resources'}
 ];
@@ -518,9 +517,7 @@ function printStats(records) {
 
 async function main() {
 	const owners = await loadNavigationOwners();
-	const posts = loadPosts().filter(
-		p => !p.preview && p.url !== '/technical-changelog'
-	);
+	const posts = loadPosts().filter(p => !p.preview);
 	const allRecords = [];
 	const pages = [];
 	const deduplication = {hashes: new Set(), removed: 0};
