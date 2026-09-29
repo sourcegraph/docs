@@ -7586,9 +7586,9 @@ Generated query for critical alert: `max((sum(increase(src_deepsearch_question_o
 <details>
 <summary>Technical details</summary>
 
-Custom query for warning alert: `max(((sum(increase(src_batch_change_agent_message_errors_total{op="Handle"\}[5m])) / (sum(increase(src_batch_change_agent_message_total\{op="Handle"\}[5m])) + sum(increase(src_batch_change_agent_message_errors_total\{op="Handle"\}[5m]))) * 100) and ((sum(increase(src_batch_change_agent_message_total\{op="Handle"\}[5m])) + sum(increase(src_batch_change_agent_message_errors_total\{op="Handle"}[5m]))) &gt;= 5)) &gt; 20)`
+Custom query for warning alert: `max(((sum(increase(src_batch_change_agent_message_errors_total{op="Handle"\}[30m])) / (sum(increase(src_batch_change_agent_message_total\{op="Handle"\}[30m])) + sum(increase(src_batch_change_agent_message_errors_total\{op="Handle"\}[30m]))) * 100) and ((sum(increase(src_batch_change_agent_message_total\{op="Handle"\}[30m])) + sum(increase(src_batch_change_agent_message_errors_total\{op="Handle"}[30m]))) &gt;= 5)) &gt; 20)`
 
-Custom query for critical alert: `max(((sum(increase(src_batch_change_agent_message_errors_total{op="Handle"\}[5m])) / (sum(increase(src_batch_change_agent_message_total\{op="Handle"\}[5m])) + sum(increase(src_batch_change_agent_message_errors_total\{op="Handle"\}[5m]))) * 100) and ((sum(increase(src_batch_change_agent_message_total\{op="Handle"\}[5m])) + sum(increase(src_batch_change_agent_message_errors_total\{op="Handle"}[5m]))) &gt;= 5)) &gt; 50)`
+Custom query for critical alert: `max(((sum(increase(src_batch_change_agent_message_errors_total{op="Handle"\}[30m])) / (sum(increase(src_batch_change_agent_message_total\{op="Handle"\}[30m])) + sum(increase(src_batch_change_agent_message_errors_total\{op="Handle"\}[30m]))) * 100) and ((sum(increase(src_batch_change_agent_message_total\{op="Handle"\}[30m])) + sum(increase(src_batch_change_agent_message_errors_total\{op="Handle"}[30m]))) &gt;= 5)) &gt; 50)`
 
 </details>
 
@@ -7632,6 +7632,118 @@ Generated query for critical alert: `max((max(src_workerutil_queue_duration_seco
 
 <br />
 
+## batch-change-agents: batch_change_agent_runs_over_context_budget
+
+<p class="subtitle">runs stopped because the conversation no longer fits the context budget over 1h</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> batch-change-agents: 0+ runs stopped because the conversation no longer fits the context budget over 1h
+- <span class="badge badge-critical">critical</span> batch-change-agents: 3+ runs stopped because the conversation no longer fits the context budget over 1h
+
+**Next steps**
+
+- Each run here failed the user`s message with "the conversation no longer fits the agent`s context budget, even after compaction". The user cannot recover on their own, since an agent has a single thread.
+- The critical threshold means either several agents are affected or one user has retried repeatedly without success; both need someone to look at the affected threads.
+- Search worker logs for that message to find the affected threadIDs, then look at the preceding "compacted thread" entries for the same thread to see what the compacter kept and why the result was still too large.
+- If the thread has a batch spec or a single tool result that alone approaches the budget, compaction cannot help; otherwise treat this as a compaction strategy or estimator bug.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#batch-change-agents-batch_change_agent_runs_over_context_budget).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_batch-change-agents_batch_change_agent_runs_over_context_budget",
+  "critical_batch-change-agents_batch_change_agent_runs_over_context_budget"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((sum(increase(src_agent_runs_total{stop_reason="max_input_tokens",workload="batch_change_agent"}[1h]))) &gt; 0)`
+
+Generated query for critical alert: `max((sum(increase(src_agent_runs_total{stop_reason="max_input_tokens",workload="batch_change_agent"}[1h]))) &gt; 3)`
+
+</details>
+
+<br />
+
+## batch-change-agents: batch_change_agent_compaction_failures
+
+<p class="subtitle">failed context compactions over 30m</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> batch-change-agents: 2+ failed context compactions over 30m
+- <span class="badge badge-critical">critical</span> batch-change-agents: more than 50% of context compactions failed over 1h
+
+**Next steps**
+
+- A failed compaction fails the message it ran in, so this shows up as user-visible errors on long threads.
+- Search worker logs for "agent: compaction failed" to find the underlying error: summarizer model call failures point at the LLM provider, and SaveThreadCompaction errors point at the database or a concurrent run on the same thread.
+- Check the "Compaction summarizer" group: summarizer input sizes near the model`s context window mean the summarizer call itself is being rejected.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#batch-change-agents-batch_change_agent_compaction_failures).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_batch-change-agents_batch_change_agent_compaction_failures",
+  "critical_batch-change-agents_batch_change_agent_compaction_failures"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((sum(increase(src_agent_compactions_total{status!="success",workload="batch_change_agent"}[30m]))) &gt; 2)`
+
+Custom query for critical alert: `max(((sum(increase(src_agent_compactions_total{status!="success",workload="batch_change_agent"\}[1h])) / sum(increase(src_agent_compactions_total\{workload="batch_change_agent"\}[1h])) * 100) and (sum(increase(src_agent_compactions_total\{workload="batch_change_agent"}[1h])) &gt;= 4)) &gt; 50)`
+
+</details>
+
+<br />
+
+## batch-change-agents: batch_change_agent_wake_error_rate
+
+<p class="subtitle">wake processing error rate over 5m</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> batch-change-agents: 20%+ wake processing error rate over 5m for 15m0s
+- <span class="badge badge-critical">critical</span> batch-change-agents: 50%+ wake processing error rate over 5m for 15m0s
+
+**Next steps**
+
+- Check worker logs for errors from the batch_change_agent_wake worker`s Handle operation; they carry the agentID and threadID and the underlying error.
+- Wake jobs only read inbox state and enqueue a message, so failures usually point at the database or at the message queue store rather than at the LLM provider.
+- Compare with the "Job queue stores" group: a matching error rate on the wake worker store means the store, not the handler, is failing.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#batch-change-agents-batch_change_agent_wake_error_rate).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_batch-change-agents_batch_change_agent_wake_error_rate",
+  "critical_batch-change-agents_batch_change_agent_wake_error_rate"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Custom query for warning alert: `max(((sum(increase(src_batch_change_agent_wake_errors_total{op="Handle"\}[30m])) / (sum(increase(src_batch_change_agent_wake_total\{op="Handle"\}[30m])) + sum(increase(src_batch_change_agent_wake_errors_total\{op="Handle"\}[30m]))) * 100) and ((sum(increase(src_batch_change_agent_wake_total\{op="Handle"\}[30m])) + sum(increase(src_batch_change_agent_wake_errors_total\{op="Handle"}[30m]))) &gt;= 5)) &gt; 20)`
+
+Custom query for critical alert: `max(((sum(increase(src_batch_change_agent_wake_errors_total{op="Handle"\}[30m])) / (sum(increase(src_batch_change_agent_wake_total\{op="Handle"\}[30m])) + sum(increase(src_batch_change_agent_wake_errors_total\{op="Handle"\}[30m]))) * 100) and ((sum(increase(src_batch_change_agent_wake_total\{op="Handle"\}[30m])) + sum(increase(src_batch_change_agent_wake_errors_total\{op="Handle"}[30m]))) &gt;= 5)) &gt; 50)`
+
+</details>
+
+<br />
+
 ## batch-change-agents: batch_change_agent_records_reset
 
 <p class="subtitle">stalled jobs reset to queued over 1h by queue</p>
@@ -7665,6 +7777,43 @@ Generated query for warning alert: `max((sum by (domain) (increase(src_dbworker_
 
 <br />
 
+## batch-change-agents: batch_change_agent_record_reset_failures
+
+<p class="subtitle">stalled jobs marked failed over 1h by queue</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> batch-change-agents: 0+ stalled jobs marked failed over 1h by queue
+- <span class="badge badge-critical">critical</span> batch-change-agents: 5+ stalled jobs marked failed over 1h by queue
+
+**Next steps**
+
+- The job stalled repeatedly and ran out of retries, so the message or wake it carried was dropped; the user`s message is left in a failed state without an answer.
+- Find the affected records via the failure_message column on batch_change_agent_jobs or batch_change_agent_wake_jobs, and check worker logs for panics or OOM-kills around the stall times.
+- Sustained resets in `batch_change_agent_records_reset` for the same queue point at a crash loop rather than an isolated bad job.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#batch-change-agents-batch_change_agent_record_reset_failures).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_batch-change-agents_batch_change_agent_record_reset_failures",
+  "critical_batch-change-agents_batch_change_agent_record_reset_failures"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((sum by (domain) (increase(src_dbworker_resetter_record_reset_failures_total{domain=~"^batch_change_agent_.*_resetter$"}[1h]))) &gt; 0)`
+
+Generated query for critical alert: `max((sum by (domain) (increase(src_dbworker_resetter_record_reset_failures_total{domain=~"^batch_change_agent_.*_resetter$"}[1h]))) &gt; 5)`
+
+</details>
+
+<br />
+
 ## batch-change-agents: batch_change_agent_message_stream_publish_errors
 
 <p class="subtitle">message stream publish errors per second</p>
@@ -7693,6 +7842,39 @@ Generated query for warning alert: `max((sum by (domain) (increase(src_dbworker_
 <summary>Technical details</summary>
 
 Generated query for warning alert: `max((sum(rate(src_batch_change_agents_stream_publish_errors_total[5m]))) &gt; 0)`
+
+</details>
+
+<br />
+
+## batch-change-agents: batch_change_agent_thread_stream_publish_errors
+
+<p class="subtitle">thread stream publish errors per second</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> batch-change-agents: 0+ thread stream publish errors per second for 5m0s
+
+**Next steps**
+
+- These are publish attempts that failed after retries were exhausted, so clients miss the prompt to refetch the thread until their next reconnect or navigation.
+- Check Redis health and connectivity from the worker; `batch_change_agent_message_stream_publish_errors` failing at the same time confirms a shared Redis problem.
+- Thread state itself is unaffected: the entries are persisted before publishing.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#batch-change-agents-batch_change_agent_thread_stream_publish_errors).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_batch-change-agents_batch_change_agent_thread_stream_publish_errors"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((sum(rate(src_batch_change_agents_thread_stream_publish_errors_total[5m]))) &gt; 0)`
 
 </details>
 

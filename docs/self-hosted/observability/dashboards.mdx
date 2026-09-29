@@ -37540,7 +37540,7 @@ histogram_quantile(0.50, sum(rate(src_batch_change_agent_message_duration_second
 
 <p class="subtitle">Message processing error rate over 5m</p>
 
-Percentage of message handler invocations that ended in an error. The alert is gated on at least 5 attempts in the window so it stays quiet during idle periods.
+Percentage of message handler invocations that ended in an error. The alerts evaluate the rate over 30m and are gated on at least 5 attempts in that window, so they stay quiet during idle periods.
 
 Refer to the [alerts reference](alerts#batch-change-agents-batch_change_agent_message_error_rate) for 2 alerts related to this panel.
 
@@ -37928,6 +37928,56 @@ histogram_quantile(0.95, sum by (le, workload) (rate(src_agent_compaction_durati
 
 <br />
 
+### Batch Change Agents: Agent loop health
+
+#### batch-change-agents: batch_change_agent_runs_over_context_budget
+
+<p class="subtitle">Runs stopped because the conversation no longer fits the context budget over 1h</p>
+
+Agent runs that ended with stop reason max_input_tokens: the prompt exceeded the budget even after compaction, or the provider rejected an already compacted prompt. Expected to be zero.
+
+Refer to the [alerts reference](alerts#batch-change-agents-batch_change_agent_runs_over_context_budget) for 2 alerts related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100500` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_agent_runs_total{workload="batch_change_agent",stop_reason="max_input_tokens"}[1h]))
+```
+</details>
+
+<br />
+
+#### batch-change-agents: batch_change_agent_compaction_failures
+
+<p class="subtitle">Failed context compactions over 30m</p>
+
+Compactions that did not complete successfully. The warning tolerates an isolated provider error. The critical alert fires when more than half of the compactions over 1h failed (gated on at least 4 compactions), which means long threads cannot make progress regardless of traffic volume.
+
+Refer to the [alerts reference](alerts#batch-change-agents-batch_change_agent_compaction_failures) for 2 alerts related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100501` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_agent_compactions_total{workload="batch_change_agent",status!="success"}[30m]))
+```
+</details>
+
+<br />
+
 ### Batch Change Agents: Compaction summarizer
 
 #### batch-change-agents: batch_change_agent_compaction_p95_summary_input_tokens
@@ -37938,7 +37988,7 @@ Provider-reported input size of the summarizer call. The transcript is capped by
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100500` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100600` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -37964,7 +38014,7 @@ Number of wake jobs being processed concurrently. The wake worker only resolves 
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100600` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100700` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -37988,7 +38038,7 @@ Rate of wake jobs by result: woken created an automated turn, empty found no unr
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100601` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100701` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -38012,7 +38062,7 @@ sum by (outcome) (rate(src_batch_change_agent_wake_outcomes_total[5m])) * 60
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100602` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100702` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -38032,11 +38082,11 @@ histogram_quantile(0.95, sum(rate(src_batch_change_agent_wake_duration_seconds_b
 
 <p class="subtitle">Wake processing error rate over 5m</p>
 
-Percentage of wake handler invocations that ended in an error. Wake failures are retried and rarely user-visible, but a sustained nonzero rate means threads are not being re-activated when new inbox items arrive.
+Percentage of wake handler invocations that ended in an error. Wake failures are retried and rarely user-visible, but a sustained rate means threads are not being re-activated when new inbox items arrive. The alerts evaluate the rate over 30m and are gated on at least 5 attempts in that window, so they stay quiet during idle periods.
 
-This panel has no related alerts.
+Refer to the [alerts reference](alerts#batch-change-agents-batch_change_agent_wake_error_rate) for 2 alerts related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100610` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100710` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -38062,7 +38112,7 @@ Rate of successful worker store operations (dequeue, mark-complete, etc.) for th
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100700` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100800` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -38086,7 +38136,7 @@ Percentage of worker store operations that errored, per queue. A sustained nonze
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100701` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100801` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -38110,7 +38160,7 @@ sum by (domain) (increase(src_workerutil_dbworker_store_errors_total{domain=~"^b
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100702` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100802` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -38136,7 +38186,7 @@ Number of stalled batch change agent jobs that the resetter moved back to the qu
 
 Refer to the [alerts reference](alerts#batch-change-agents-batch_change_agent_records_reset) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100800` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100900` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -38158,9 +38208,9 @@ sum by (domain) (increase(src_dbworker_resetter_record_resets_total{domain=~"^ba
 
 Number of stalled jobs that exhausted their retries and were marked as failed, per queue. A nonzero value means some agent messages or wakes were permanently dropped after repeated crashes.
 
-This panel has no related alerts.
+Refer to the [alerts reference](alerts#batch-change-agents-batch_change_agent_record_reset_failures) for 2 alerts related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100801` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100901` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -38184,7 +38234,7 @@ sum by (domain) (increase(src_dbworker_resetter_record_reset_failures_total{doma
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100802` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100902` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -38210,7 +38260,7 @@ Rate of per-message stream events (turn deltas, tool calls, completion, etc.) su
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100900` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=101000` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -38234,7 +38284,7 @@ Rate of per-message stream events that could not be published to Redis after ret
 
 Refer to the [alerts reference](alerts#batch-change-agents-batch_change_agent_message_stream_publish_errors) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100901` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=101001` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -38258,7 +38308,7 @@ Rate of Redis subscription transport errors (a subscription died mid-stream). Su
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100902` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=101002` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -38282,7 +38332,7 @@ Rate of thread-level stream events (new message created, title updated) successf
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100910` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=101010` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -38304,9 +38354,9 @@ sum by (event_type) (rate(src_batch_change_agents_thread_stream_publish_success_
 
 Rate of thread-level stream events that could not be published to Redis after retries. Clients recover thread state on their next refetch.
 
-This panel has no related alerts.
+Refer to the [alerts reference](alerts#batch-change-agents-batch_change_agent_thread_stream_publish_errors) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100911` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=101011` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -38330,7 +38380,7 @@ Rate of Redis subscription transport errors on the thread-level stream.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100912` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=101012` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
