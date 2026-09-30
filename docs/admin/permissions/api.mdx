@@ -18,11 +18,11 @@ In that case, it might be less resource intensive to sync the permissions from e
 
 It is important to note, that when using explicit permissions API, the permissions are written to the database as provided, without further verification that such permissions do exist on the code host side.
 
-Keeping the permissions in sync and fresh is the responsibility of the site admins.
+Keeping the permissions in sync and fresh is the responsibility of the administrators.
 
 ## Configuration
 
-To enable the permissions API, add the following to the [site configuration](/admin/config/site-config):
+To enable the permissions API, add the following to the [advanced configuration](/admin/config/site-config):
 
 ```json
 "permissions.userMapping": {
@@ -36,7 +36,7 @@ The `bindID` value specifies how to uniquely identify users when setting permiss
 - `username`: You can [set permissions](#setting-repository-permissions-for-users) for users by specifying their Sourcegraph usernames. Using usernames is **preferred**, as usernames are required to be unique for each user.
 - `email`: You can [set permissions](#setting-repository-permissions-for-users) for users by specifying their email addresses (which must be verified primary emails associated with their Sourcegraph user account). This method can lead to unexpected results if there are multiple Sourcegraph user accounts with the same verified email address. Also, the email address is case-sensitive, so it should be exactly the same as set on the sourcegraph UI.
 
-After you enable the permissions API, you must [set permissions](#setting-repository-permissions-for-users) to allow users to view repositories (site admins bypass all permissions checks and can always view all repositories).
+After you enable the permissions API, you must [set permissions](#setting-repository-permissions-for-users) to allow users to view repositories (administrators bypass all permissions checks and can always view all repositories).
 
 > NOTE: If you were previously using [permissions syncing](/admin/permissions/syncing), e.g. syncing permissions from Github, then those permissions are used as the initial state after enabling explicit permissions. Otherwise, the initial state is for all repositories to have an empty set of authorized users, so users will not be able to view any repositories.
 
@@ -84,7 +84,7 @@ mutation {
 }
 ```
 
-Now, only the users specified in the `userPermissions` parameter will be allowed to view the repository. Sourcegraph automatically enforces these permissions for all operations. (Site admins bypass all permissions checks by default. See the [Site administrators](/admin/permissions/#site-administrators) section)
+Now, only the users specified in the `userPermissions` parameter will be allowed to view the repository. Sourcegraph automatically enforces these permissions for all operations. (Administrators bypass all permissions checks by default. See the [Administrators](/admin/permissions/#site-administrators) section)
 
 You can call `setRepositoryPermissionsForUsers` repeatedly to set permissions for each repository, and whenever you want to change the list of authorized users.
 
@@ -94,7 +94,7 @@ You can call `setRepositoryPermissionsForUsers` repeatedly to set permissions fo
 
 Sourcegraph supports permissions on a per-file/directory basis.
 
-To enable the sub-repo permissions API, add the following to the [site configuration](/admin/config/site-config):
+To enable the sub-repo permissions API, add the following to the [advanced configuration](/admin/config/site-config):
 
 ```json
 "experimentalFeatures": {
