@@ -68,13 +68,11 @@ curl -H 'Private-Token: $ACCESS_TOKEN' -XGET 'https://$GITLAB_HOSTNAME/api/v4/pr
 
 ## Repository permissions
 
-GitLab permissions can be configured in three ways:
+GitLab permissions can be configured in two ways, set by `authorization.identityProvider.type`:
 
-1. Set up GitLab as an OAuth sign-on provider for Sourcegraph (recommended)
-2. Use a GitLab administrator (sudo-level) personal access token in conjunction with another SSO provider
-   (recommended only if the first option is not possible)
-3. Assume username equivalency between Sourcegraph and GitLab (warning: this is generally unsafe and
-   should only be used if you are using strictly `http-header` authentication).
+1. [`oauth`](#oauth-application): Set up GitLab as an OAuth sign-on provider for Sourcegraph (recommended)
+2. [`username`](#username): Use a GitLab administrator (sudo-level) access token and assume username equivalency between Sourcegraph and GitLab (warning: this is generally unsafe and
+   should only be used if you are using strictly `http-header` authentication)
 
 > NOTE: It can take some time to complete full cycle of repository permissions sync if you have a large number of users or repositories. [See sync duration time](/admin/permissions/syncing#sync-duration) for more information.
 
@@ -100,43 +98,14 @@ Then, [add or edit a GitLab connection](#repository-syncing) and include the `au
 In this case, a user's OAuth token will be used to get a list of repositories that the user can access.
 [Repository-centric permissions syncing](/admin/permissions/syncing) will be disabled.
 
-### Administrator (sudo-level) access token
-
-This method requires administrator access to GitLab so that Sourcegraph can access the [admin GitLab Users API endpoint](https://docs.gitlab.com/ee/api/users.html#for-admins). For each GitLab user, this endpoint provides the user ID that comes from the authentication provider, so Sourcegraph can associate a user in its system to a user in GitLab.
-
-Prerequisite: Add the [SAML](/admin/auth/#saml) or [OpenID Connect](/admin/auth/#openid-connect)
-authentication provider you use to sign into GitLab.
-
-Then, [add or edit a GitLab connection](#repository-syncing) using an administrator (sudo-level) personal access token, and include the `authorization` field:
-
-```json
-{
-	"url": "https://gitlab.com",
-	"token": "$PERSONAL_ACCESS_TOKEN",
-	// ...
-	"authorization": {
-		"identityProvider": {
-			"type": "external",
-			"authProviderID": "$AUTH_PROVIDER_ID",
-			"authProviderType": "$AUTH_PROVIDER_TYPE",
-			"gitlabProvider": "$AUTH_PROVIDER_GITLAB_ID"
-		}
-	}
-}
-```
-
-`$AUTH_PROVIDER_ID` and `$AUTH_PROVIDER_TYPE` identify the authentication provider to use and should
-match the fields specified in the authentication provider config
-(`auth.providers`). The authProviderID can be found in the `configID` field of the auth provider config.
-
-`$AUTH_PROVIDER_GITLAB_ID` should match the `identities.provider` returned by
-[the admin GitLab Users API endpoint](https://docs.gitlab.com/ee/api/users.html#for-admins).
-
 ### Username
 
 Prerequisite: Ensure that `http-header` is the _only_ authentication provider type configured for
 Sourcegraph. If this is not the case, then it will be possible for users to escalate privileges,
 because Sourcegraph usernames are mutable.
+
+During permissions sync, Sourcegraph links each Sourcegraph user to the GitLab user with the same username, then
+[impersonates](https://docs.gitlab.com/api/rest/authentication/#sudo) that GitLab user to list the projects they can access. Users do not need to sign in with GitLab. A Sourcegraph user with no matching GitLab username gets no access to this connection's private or internal repositories. The connection's `token` must belong to a GitLab administrator and have the `api` and `sudo` scopes.
 
 [Add or edit a GitLab connection](#repository-syncing) and include the `authorization` field:
 
@@ -349,14 +318,15 @@ The Sourcegraph instance's site admin must [update the `corsOrigin` site config 
 
 ## Access token scopes
 
-Sourcegraph requires an access token with `api` permissions (and `sudo`, if you are using an `external` identity provider type). These permissions are required for the following reasons:
+Sourcegraph requires an access token with `api` permissions (and `sudo`, if you are using the `username` identity provider type). These permissions are required for the following reasons:
 
 We are actively collaborating with GitLab to improve our integration (e.g. the [Sourcegraph GitLab native integration](https://docs.gitlab.com/ee/integration/sourcegraph.html) and [better APIs for querying repository permissions](https://gitlab.com/gitlab-org/gitlab/issues/20532)).
 
 | Request Type                                                                                                 | Required GitLab scope                                      | Sourcegraph usage                                                                                                                                                                                                                                                                           |
 | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`GET /projects`](https://docs.gitlab.com/ee/api/projects.html#list-all-projects)                            | `api` or `read_api`                                        | (1) For repository discovery when specifying `projectQuery` in code host configuration; (2) If using an `external` identity provider type, also used as a test query to ensure token is `sudo` (`sudo` not required otherwise).                                                             |
-| [`GET /users`](https://docs.gitlab.com/ee/api/users.html#list-users)                                         | `read_user`, `api` or `read_api`                           | If you are using an `external` identity provider type, used to discover user accounts.                                                                                                                                                                                                      |
+| [`GET /projects`](https://docs.gitlab.com/ee/api/projects.html#list-all-projects)                            | `api` or `read_api`                                        | (1) For repository discovery when specifying `projectQuery` in code host configuration; (2) If using the `username` identity provider type, also used as a test query to ensure token is `sudo`, and, impersonating each user, to list the projects they can access (`sudo` not required otherwise).  |
+| [`GET /users`](https://docs.gitlab.com/ee/api/users.html#list-users)                                         | `read_user`, `api` or `read_api`                           | If you are using the `username` identity provider type, used to find the GitLab user whose username matches the Sourcegraph username.                                                                                                                                                       |
+| [`GET /projects/:id/members/all`](https://docs.gitlab.com/api/project_members/#list-all-members-of-a-project)  | `api` or `read_api`                                        | If you are using the `username` identity provider type, used for [repository-centric permissions syncing](/admin/permissions/syncing).                                                                                                                                                      |
 | [`GET /users/:id`](https://docs.gitlab.com/ee/api/users.html#single-user)                                    | `read_user`, `api` or `read_api`                           | If using GitLab OAuth, used to fetch user metadata during the OAuth sign in process.                                                                                                                                                                                                        |
 | [`GET /projects/:id`](https://docs.gitlab.com/ee/api/projects.html#get-single-project)                       | `api` or `read_api`                                        | (1) If using GitLab OAuth and repository permissions, used to determine if a user has access to a given _project_; (2) Used to query repository metadata (e.g. description) for display on Sourcegraph.                                                                                     |
 | [`GET /projects/:id/repository/tree`](https://docs.gitlab.com/ee/api/repositories.html#list-repository-tree) | `api` or `read_api`                                        | If using GitLab OAuth and repository permissions, used to verify a given user has access to the file contents of a repository within a project (i.e. does not merely have `Guest` permissions).                                                                                             |
