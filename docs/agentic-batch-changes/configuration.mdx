@@ -4,7 +4,7 @@
 
 The agent discovers a lot on its own through Deep Search: which package manager a repository uses, how CI is wired, and where similar migrations have been done before. But internal policies may not be written in the code: which base images you allow, how you name branches, which approvals a dependency bump needs, or what a good commit message looks like in your organization.
 
-You can add guidance on the **Agents** page of your Batch Changes settings, at `<instance_url>/users/<username>/settings/batch-changes/agents`. Site administrators add instance-wide guidance at `<instance_url>/admin/batch-changes/agents`, and organizations can carry shared guidance in their settings. Entries from all three levels combine.
+You can add guidance on the **Agents** page of your Batch Changes settings, at `<instance_url>/users/<username>/settings/batch-changes/agents`. Administrators add instance-wide guidance at `<instance_url>/admin/batch-changes/agents`, and organizations can carry shared guidance in their settings. Entries from all three levels combine.
 
 ### Guidance and skills
 
@@ -83,7 +83,7 @@ When a new or changed step uses a secret, the agent shows you that step and wait
 Some steps need credentials: a package registry token for private dependencies or an API key for reading CI logs. These are managed on two settings pages:
 
 - Your own secrets live under **Secrets** in your Batch Changes settings, at `/users/<username>/settings/batch-changes/secrets`.
-- Site administrators manage global secrets, available to every user, at `/admin/batch-changes/secrets`.
+- Administrators manage global secrets, available to every user, at `/admin/batch-changes/secrets`.
 
 Your own secret takes precedence over a global one with the same name.
 
@@ -134,7 +134,7 @@ All code-modifying work runs on executors:
 
 ### Usage limits
 
-Coding agent runs are metered per user through the **Batch Changes coding agent step runs** [entitlement](/admin/entitlements), managed under **Site admin → Users & auth → Entitlements**. Each coding agent run in a repository consumes one unit. A default entitlement applies to every user, and an explicit grant replaces the default for a specific user:
+Coding agent runs are metered per user through the **Batch Changes coding agent step runs** [entitlement](/admin/entitlements), managed under **Administration → Users & auth → Entitlements**. Each coding agent run in a repository consumes one unit. A default entitlement applies to every user, and an explicit grant replaces the default for a specific user:
 
 - Users without an entitlement have unlimited usage.
 - A positive limit blocks further runs once reached until its window resets.
@@ -161,16 +161,16 @@ You can shape this behavior with [guidance](#guidance-and-skills) if your team w
 
 ### Web search
 
-Web search is enabled by default for the coordinating agent and its coding agents. To disable it for both, set `batchChanges.disableAgentWebSearch` to `true` in [site configuration](/admin/config/site-config).
+Web search is enabled by default for the coordinating agent and its coding agents. To disable it for both, set `batchChanges.disableAgentWebSearch` to `true` in [advanced configuration](/admin/config/site-config).
 
 This setting disables web search tools. It does not block outbound network access from executor containers, including commands run by scripts or coding agents. Restrict that access separately through your executor network policy.
 
 ### Images
 
-Steps run in container images the agent picks, preferring small public images that already carry the needed tools. You can restrict where images come from with `batchChanges.containerRegistryAllowlist` or `batchChanges.containerRegistryDenylist` in site configuration; the two are mutually exclusive, and an empty list allows every registry.
+Steps run in container images the agent picks, preferring small public images that already carry the needed tools. You can restrict where images come from with `batchChanges.containerRegistryAllowlist` or `batchChanges.containerRegistryDenylist` in advanced configuration; the two are mutually exclusive, and an empty list allows every registry.
 
 When no public image fits, the agent can build one on the fly and reuse it across the batch change. Custom-built images are hosted directly in Sourcegraph. Image building is available on Sourcegraph Cloud by default and requires additional setup on self-hosted instances.
 
 ### Pull request attribution
 
-Agentic Batch Changes link generated changesets back to their agent conversation in both the changeset description and commit message by default. Site administrators can [configure pull request attribution](/admin/config/batch-changes#pull-request-attribution) to keep this link out of descriptions that may trigger unwanted code host notifications.
+Agentic Batch Changes link generated changesets back to their agent conversation in both the changeset description and commit message by default. Administrators can [configure pull request attribution](/admin/config/batch-changes#pull-request-attribution) to keep this link out of descriptions that may trigger unwanted code host notifications.

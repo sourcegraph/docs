@@ -1,13 +1,13 @@
 # Loading configuration via the file system (declarative config)
 
-Some teams require Sourcegraph configuration to be stored in version control as opposed to editing via the Site admin
+Some teams require Sourcegraph configuration to be stored in version control as opposed to editing via the Administration
 UI.
 
 ## Benefits
 
 1. Configuration can be checked into version control (e.g., Git).
 2. Configuration is enforced across the entire instance, and edits cannot be made via the web UI (by default).
-3. Declarative site-config
+3. Declarative advanced configuration
 4. Sourcegraph watches the config file for changes and applies any new updates to the corresponding external services.
 
 ## Drawbacks
@@ -18,27 +18,31 @@ Loading configuration in this manner has two significant drawbacks:
    scratch space, though).
 2. Sourcegraph sometimes performs automatic migrations of configuration when upgrading versions. This process will now
    be more manual for you (see below).
-3. Site-config contains **sensitive information** (see [Merging site config](#merging-site-configuration) for
+3. Advanced configuration contains **sensitive information** (see [Merging advanced configuration](#merging-site-configuration) for
    mitigations)
 
-## Site configuration
+<span id="site-configuration"></span>
+
+## Advanced configuration
 
 Set `SITE_CONFIG_FILE=site.json` and mount the config on:
 
 -   [Docker Compose](/self-hosted/deploy/docker-compose/) and [Kubernetes](/self-hosted/deploy/kubernetes/): all `frontend`
     containers
 
-Where `site.json` is a file that contains the [site configuration](/admin/config/site-config), which you would otherwise edit
-through the in-app site configuration editor.
+Where `site.json` is a file that contains the [advanced configuration](/admin/config/site-config), which you would otherwise edit
+through the in-app advanced configuration editor.
 
 If you want to _allow_ edits to be made through the web UI (which will be overwritten with what is in the file on a
 subsequent restart), you may additionally set `SITE_CONFIG_ALLOW_EDITS=true`.
 
 > NOTE: If you do enable this, it is your responsibility to ensure the configuration on your instance and in the file remain in sync.
 
-### Merging site-configuration
+<span id="merging-site-configuration"></span>
 
-You may separate your site-config into a sensitive and non-sensitive `jsonc` / `json`. Set the env
+### Merging advanced configuration
+
+You may separate your advanced configuration into a sensitive and non-sensitive `jsonc` / `json`. Set the env
 var `SITE_CONFIG_FILE=/etc/site.json:/other/sensitive-site-config.json`. Note the path separator of `:`
 
 This will merge both files. Sourcegraph will need access both files.
@@ -129,12 +133,12 @@ It will still perform such migrations on the configuration loaded from file, it 
 When you upgrade Sourcegraph, you should do the following to ensure your configurations do not become invalid:
 
 1. Upgrade Sourcegraph to the new version
-1. Visit each configuration page in the web UI (management console, site configuration, each code host)
+1. Visit each configuration page in the web UI (management console, advanced configuration, each code host)
 1. Copy the (now migrated) configuration from those pages into your JSON files.
 
 It is essential to follow the above steps after **every** Sourcegraph version update, because we only guarantee migrations remain valid across two minor versions. If you fail to apply a migration and later upgrade Sourcegraph twice more, you may effectively "skip" an important migration.
 
-We're planning to improve this by having Sourcegraph notify you as a site admin when you should do the above, since today it is not actually required in most upgrades. In the meantime, we will do our best to communicate when this is needed to you through the changelog.
+We're planning to improve this by having Sourcegraph notify you as an administrator when you should do the above, since today it is not actually required in most upgrades. In the meantime, we will do our best to communicate when this is needed to you through the changelog.
 
 ## Kubernetes ConfigMap
 

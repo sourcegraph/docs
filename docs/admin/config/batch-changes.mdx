@@ -1,6 +1,6 @@
-# Batch Changes site admin configuration reference
+# Batch Changes administrator configuration reference
 
-Batch Changes is generally configured through the same [site configuration](/admin/config/site-config) and [code host configuration](/admin/code-hosts/) as the rest of Sourcegraph. However, Batch Changes features may require specific configuration, and those are documented here.
+Batch Changes is generally configured through the same [advanced configuration](/admin/config/site-config) and [code host configuration](/admin/code-hosts/) as the rest of Sourcegraph. However, Batch Changes features may require specific configuration, and those are documented here.
 
 ## Access control
 
@@ -8,7 +8,7 @@ Batch Changes is [RBAC-enabled](/admin/access-control/) <span class="badge badge
 
 ### Enable organization members to administer
 
-By default, only a batch change's author or a site admin can administer (apply, close, rename, etc.) a batch change. However, admins can use [organizations](/admin/organizations) to facilitate closer collaboration and shared administrative control over batch changes by enabling the `orgs.allMembersBatchChangesAdmin` setting for an organization. When enabled, members of the organization will be able to administer all batch changes created in that organization's namespace. Batch changes created in other namespaces (user or organization) will still be restricted to the author and site admins.
+By default, only a batch change's author or an administrator can administer (apply, close, rename, etc.) a batch change. However, admins can use [organizations](/admin/organizations) to facilitate closer collaboration and shared administrative control over batch changes by enabling the `orgs.allMembersBatchChangesAdmin` setting for an organization. When enabled, members of the organization will be able to administer all batch changes created in that organization's namespace. Batch changes created in other namespaces (user or organization) will still be restricted to the author and administrators.
 
 ## Rollout windows
 
@@ -16,7 +16,7 @@ By default, Sourcegraph attempts to reconcile (create, update, or close) changes
 
 Configuring rollout windows allows changesets to be reconciled at a slower or faster rate based on the time of day and/or the day of the week. These windows are applied to changesets across all code hosts, but they only affect the rate at which changesets are created/published, updated, or closed, as well as some other internal operations like importing and detaching. Bulk operations to publish changesets also respect the rollout window; however, bulk commenting, merging, and closing will happen all at once.
 
-Rollout windows are configured through the `batchChanges.rolloutWindows` [site configuration option](/admin/config/site-config). If specified, this option contains an array of rollout window objects that are used to schedule changesets. The format of these objects [is given below](#rollout-window-object).
+Rollout windows are configured through the `batchChanges.rolloutWindows` [advanced configuration option](/admin/config/site-config). If specified, this option contains an array of rollout window objects that are used to schedule changesets. The format of these objects [is given below](#rollout-window-object).
 
 ### Behavior
 
@@ -133,13 +133,13 @@ Sourcegraph can track incoming webhooks from code hosts to more easily debug iss
 
 ## Forks
 
-Sourcegraph can be configured to push branches created by Batch Changes to a fork of the repository, rather than the repository itself, for example if users of your code host typically do not have push access to the original repository. You can enable pushing to forks globally with the `batchChanges.enforceForks` site configuration option. Users can also indicate they do or do not want to push to forks for an individual batch change by specifying the property `changesetTemplate.fork` in their batch spec. If the batch spec property is present, it will override the site configuration option. See the [batch spec YAML reference](/batch-changes/batch-spec-yaml-reference#changesettemplatefork) for more information.
+Sourcegraph can be configured to push branches created by Batch Changes to a fork of the repository, rather than the repository itself, for example if users of your code host typically do not have push access to the original repository. You can enable pushing to forks globally with the `batchChanges.enforceForks` advanced configuration option. Users can also indicate they do or do not want to push to forks for an individual batch change by specifying the property `changesetTemplate.fork` in their batch spec. If the batch spec property is present, it will override the advanced configuration option. See the [batch spec YAML reference](/batch-changes/batch-spec-yaml-reference#changesettemplatefork) for more information.
 
 The fork will be created in the namespace of the user publishing the changeset, or the namespace of the service account if [global service account](/batch-changes/configuring-credentials#global-service-account-tokens) is in use. The name of the fork Sourcegraph creates will be prefixed with the name of the original repo's namespace in order to prevent potential repo name collisions. For example, a batch spec targeting `github.com/my-org/project` would create or use any existing fork by the name `github.com/user/my-org-project`.
 
 ### Examples
 
-To enable forks, update the site configuration to include:
+To enable forks, update the advanced configuration to include:
 
 ```json
 {
@@ -154,7 +154,7 @@ By default, classic and agentic Batch Changes identify the Sourcegraph batch cha
 -   A link to the originating batch change appended to the pull request or merge request description.
 -   A `Sourcegraph-Batch-Change` trailer in the commit message.
 
-If description updates cause unwanted code host notifications, set `batchChanges.attributionMode` to `trailerOnly` in site configuration:
+If description updates cause unwanted code host notifications, set `batchChanges.attributionMode` to `trailerOnly` in advanced configuration:
 
 ```json
 {
@@ -173,13 +173,13 @@ The commit trailer always contains a link to the classic batch change or agent c
 
 ## Automatically delete branches on merge/close
 
-Sourcegraph can be configured to automatically delete branches created for Batch Changes changesets when changesets are merged or closed by enabling the `batchChanges.autoDeleteBranch` site configuration option.
+Sourcegraph can be configured to automatically delete branches created for Batch Changes changesets when changesets are merged or closed by enabling the `batchChanges.autoDeleteBranch` advanced configuration option.
 
 When enabled, Batch Changes will override any setting on the repository on the code host itself and attempt to remove the source branch of the changeset when the changeset is merged or closed. This is useful for keeping repositories clean of stale branches.
 
 Not every code host supports this in the same way; some code host APIs expose a property on the changeset which can be toggled to enable this behavior, while others require a separate API call to delete the branch after the changeset is merged/closed.
 
-For those that support a changeset property, Batch Changes will automatically set the property to match the site config setting. The property will be updated whenever the changeset is updated, so that the settings stay in sync. Using a changeset property has the added benefit that the branch will be deleted even if the changeset is merged/closed on the code host itself, rather than through Sourcegraph.
+For those that support a changeset property, Batch Changes will automatically set the property to match the advanced configuration setting. The property will be updated whenever the changeset is updated, so that the settings stay in sync. Using a changeset property has the added benefit that the branch will be deleted even if the changeset is merged/closed on the code host itself, rather than through Sourcegraph.
 
 For those that require a separate API call, Batch Changes will only be able to delete the branch if the changeset is merged/closed _using Sourcegraph_. If the changeset is merged/closed on the code host itself, Batch Changes will not be able to delete the branch.
 
@@ -202,7 +202,7 @@ Batch Changes supports commit signing with both GitHub apps and with SSH keys.
 
 Commit signing with SSH keys is supported with Sourcegraph v6.2 or more and can only be combined with a personal or fine-grained access token.
 
-Sourcegraph can be configured to sign commits using SSH keys with user and site admin credentials.
+Sourcegraph can be configured to sign commits using SSH keys with user and administrator credentials.
 
 To enable **commit signing for your Batch Changes user**, navigate to **Settings > Batch Changes** and click **Add credentials** for a GitHub or GitLab code host.
 
@@ -223,9 +223,9 @@ Make sure you add it as a signing key.
 
 ![Add the key to your code host as a signing key](https://storage.googleapis.com/sourcegraph-assets/docs/images/batch_changes/2025/github_add_signing_key.png)
 
-To enable **commit signing as a site admin**, navigate to **Site Admin > Section: Batch Changes > Settings** and click **Add credentials** for a GitHub or GitLab code host. The rest of the setup is the same as above.
+To enable **commit signing as an administrator**, navigate to **Administration > Section: Batch Changes > Settings** and click **Add credentials** for a GitHub or GitLab code host. The rest of the setup is the same as above.
 
-![Site admin settings for batch changes](https://storage.googleapis.com/sourcegraph-assets/docs/images/batch_changes/2025/batch_changes_site_admin_settings.png)
+![Administration settings for batch changes](https://storage.googleapis.com/sourcegraph-assets/docs/images/batch_changes/2025/batch_changes_site_admin_settings.png)
 
 ### Commit signing with GitHub apps
 
@@ -248,7 +248,7 @@ GitHub Apps are also the recommended way to [sync repositories on GitHub](/admin
 
 To create a GitHub App for commit signing and connect it to Sourcegraph:
 
-1. Go to **Site admin > Batch Changes > Settings** on Sourcegraph.
+1. Go to **Administration > Batch Changes > Settings** on Sourcegraph.
 
 ![The Batch Changes settings page on Sourcegraph, scrolled to show commit signing integrations](https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-apps-batches-list-dark.png)
 
@@ -285,7 +285,7 @@ Once public, App can be installed in additional namespaces either from Sourcegra
 
 #### Installing from Sourcegraph
 
-1. Go to **Site admin > Batch Changes > Settings** and click **Edit** on the App you want to install in another namespace. You'll be taken to the App details page.
+1. Go to **Administration > Batch Changes > Settings** and click **Edit** on the App you want to install in another namespace. You'll be taken to the App details page.
 
 ![The GitHub App details page on Sourcegraph](https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-details-batches-dark.png)
 
@@ -302,7 +302,7 @@ Once public, App can be installed in additional namespaces either from Sourcegra
 1. Go to the GitHub App page. You can get here easily from Sourcegraph by clicking **View in GitHub** for the App you want to install in another namespace.
 2. Click **Configure**, or go to **App settings > Install App**, and select the organization or user account you want to install the App on.
 3. As before, you will be asked to review the App permissions and select which repositories the App can access before installing it in a namespace. Once you click **Install** and the setup completes, you will be redirected back to Sourcegraph.
-4. GitHub App installations will be automatically synced in the background. Return to **Site admin > Batch Changes > Settings** and click **Edit** on the App you added the new installation for. You'll be taken to the App details page. Once synced, you will see the new installation listed, and you will be able to push signed commits for repositories in this namespace.
+4. GitHub App installations will be automatically synced in the background. Return to **Administration > Batch Changes > Settings** and click **Edit** on the App you added the new installation for. You'll be taken to the App details page. Once synced, you will see the new installation listed, and you will be able to push signed commits for repositories in this namespace.
 
 ![The GitHub App details page on Sourcegraph, scrolled to show a second new installation](https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-app-post-multi-install-batches-dark.png)
 
@@ -312,7 +312,7 @@ You can uninstall a GitHub App from a namespace or remove it altogether at any t
 
 To remove an installation in a single namespace, click **View in GitHub** for the installation you want to remove. If you are able to administer Apps in this namespace, you will see **Uninstall "[APP NAME]"** in the "Danger zone" at the bottom of the page. Click **Uninstall** to remove the App from this namespace. Sourcegraph will periodically sync installations in the background. It may temporarily throw errors related to the missing installation until the sync completes. You can check the GitHub App details page to confirm the installation has been removed.
 
-To remove an App entirely, go to **Site admin > Batch Changes > Settings** and click **Remove** for the App you want to remove. You will be prompted to confirm you want to remove the App from Sourcegraph. Once removed from the Sourcegraph side, Sourcegraph will no longer communicate with your GitHub instance via the App unless explicitly reconnected. However, the App will still exist on GitHub unless manually deleted there, as well.
+To remove an App entirely, go to **Administration > Batch Changes > Settings** and click **Remove** for the App you want to remove. You will be prompted to confirm you want to remove the App from Sourcegraph. Once removed from the Sourcegraph side, Sourcegraph will no longer communicate with your GitHub instance via the App unless explicitly reconnected. However, the App will still exist on GitHub unless manually deleted there, as well.
 
 ### GitHub App token use
 
@@ -324,7 +324,7 @@ Installation access tokens are short-lived, non-refreshable tokens that give Sou
 
 ### Rejecting Unverified Commits
 
-Admins can configure Batch Changes to error when it creates commits that are not signed. This can be done by enabling the `batchChanges.rejectUnverifiedCommits` setting in the site configuration:
+Admins can configure Batch Changes to error when it creates commits that are not signed. This can be done by enabling the `batchChanges.rejectUnverifiedCommits` setting in the advanced configuration:
 
 ```json
 {
@@ -335,7 +335,7 @@ Admins can configure Batch Changes to error when it creates commits that are not
 
 ## Custom Certificates
 
-If you are using a self-signed certificate for your GitHub Enterprise instance, configure `tls.external` in the **Site configuration** with your certificate(s).
+If you are using a self-signed certificate for your GitHub Enterprise instance, configure `tls.external` in the **Advanced configuration** with your certificate(s).
 
 ```json
 {
@@ -354,13 +354,13 @@ However, if the user deletion is permanent, deleting both account and data, then
 
 ## Batch Spec Library
 
-The Batch Spec Library offers curated examples and guided templates that make large-scale code modifications accessible to developers at every skill level. As a site admin you can manage the library.
+The Batch Spec Library offers curated examples and guided templates that make large-scale code modifications accessible to developers at every skill level. As an administrator you can manage the library.
 
 The library distinguishes between [templates](#templates) and [examples](#library-examples). Examples are batch specs that are meant to be modified by power users who are comfortable with the batch spec syntax. Templates, on the other hand, are batch specs that contain variables that the user can provide data for through form fields without having to modify the batch spec code.
 
 Sourcegraph instances come with a couple of examples out of the box. You can use the GraphQL APIs to [manage the Batch Spec Library](#managing-the-batch-spec-library).
 
-As a site admin, you can [feature records](#featured-records) to highlight the most useful templates and examples for your organization.
+As an administrator, you can [feature records](#featured-records) to highlight the most useful templates and examples for your organization.
 
 ### Examples
 
@@ -383,10 +383,10 @@ Variables can be used to replace any text in the batch spec except the batch cha
 ### Managing the Batch Spec Library
 
 <Callout type="note">
-	Site admins can manage the Batch Spec library in Sourcegraph v6.4 and more.
+	Administrators can manage the Batch Spec library in Sourcegraph v6.4 and more.
 </Callout>
 
-Site admins can manage the library through the GraphQL mutations `createBatchSpecLibraryRecord`, `updateBatchSpecLibraryRecord`, and `deleteBatchSpecLibraryRecord`. Use the query `batchSpecLibrary` to list all available Batch Spec examples.
+Administrators can manage the library through the GraphQL mutations `createBatchSpecLibraryRecord`, `updateBatchSpecLibraryRecord`, and `deleteBatchSpecLibraryRecord`. Use the query `batchSpecLibrary` to list all available Batch Spec examples.
 
 ```graphql
 createBatchSpecLibraryRecord(name: "example", spec: "version: 2\nname: example") {
@@ -411,7 +411,7 @@ batchSpecLibrary(first: 100) {
 
 ### Featured Records
 
-Site-admins can mark a record as featured by either clicking the star button next to the list of library records or adding the `"featured"` [label](#labels) label with a GraphQL mutation. Featured records will automatically move to a section atop the remaining library records.
+Administrators can mark a record as featured by either clicking the star button next to the list of library records or adding the `"featured"` [label](#labels) label with a GraphQL mutation. Featured records will automatically move to a section atop the remaining library records.
 
 ### Labels
 
