@@ -47,9 +47,13 @@ env:
 jobs:
     report:
         # `failed` is also sent for checks_failed, aliasing_failed and account
-        # problems, where the build log shows a build that passed
+        # problems, where the build log shows a build that passed. A failed
+        # build also sends a second `failed` dispatch in Vercel's error-event
+        # shape, which has no `id` (DispatchDataDeploymentErrorEvent in
+        # vercel/repository-dispatch); skip it
         if: >-
-            github.event.client_payload.environment != 'production'
+            (github.event_name == 'workflow_dispatch' || github.event.client_payload.id)
+            && github.event.client_payload.environment != 'production'
             && (github.event.client_payload.state.type != 'failed'
                 || github.event.client_payload.state.detail == 'deployment_failed')
         runs-on: ubuntu-latest
