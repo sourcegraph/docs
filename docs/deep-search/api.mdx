@@ -113,7 +113,7 @@ export SRC_ACCESS_TOKEN="your-token-here"
 All Deep Search API endpoints are prefixed with `/.api/deepsearch/v1` and require the `X-Requested-With` header to identify the client:
 
 ```bash
-curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1' \
+curl 'https://sourcegraph.example.com/.api/deepsearch/v1' \
   -H 'Accept: application/json' \
   -H 'Content-Type: application/json' \
   -H "Authorization: token $SRC_ACCESS_TOKEN" \
@@ -132,7 +132,7 @@ All Deep Search conversations are processed asynchronously. When you create a co
 Create a new Deep Search conversation by asking a question:
 
 ```bash
-curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1' \
+curl 'https://sourcegraph.example.com/.api/deepsearch/v1' \
   -H 'Accept: application/json' \
   -H 'Content-Type: application/json' \
   -H "Authorization: token $SRC_ACCESS_TOKEN" \
@@ -178,14 +178,14 @@ The API returns a conversation object with the question initially in `processing
 	"updated_at": "2025-09-24T08:14:06Z",
 	"user_id": 1,
 	"read_token": "caebeb05-7755-4f89-834f-e3ee4a6acb25",
-	"share_url": "https://your-sourcegraph-instance.com/deepsearch/caebeb05-7755-4f89-834f-e3ee4a6acb25"
+	"share_url": "https://sourcegraph.example.com/deepsearch/caebeb05-7755-4f89-834f-e3ee4a6acb25"
 }
 ```
 
 To get the completed answer, poll the conversation endpoint:
 
 ```bash
-curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/140' \
+curl 'https://sourcegraph.example.com/.api/deepsearch/v1/140' \
   -H 'Accept: application/json' \
   -H "Authorization: token $SRC_ACCESS_TOKEN" \
   -H 'X-Requested-With: my-client 1.0.0'
@@ -205,7 +205,7 @@ Once processing is complete, the response will include the answer:
 			"updated_at": "2025-09-24T08:14:15Z",
 			"status": "completed",
 			"title": "GitHub README check",
-			"answer": "Yes, [github.com/sourcegraph/sourcegraph](https://sourcegraph.test:3443/github.com/sourcegraph/sourcegraph) has a [README.md](https://sourcegraph.test:3443/github.com/sourcegraph/sourcegraph/-/blob/README.md) file in the root directory.",
+			"answer": "Yes, [github.com/sourcegraph/sourcegraph](https://sourcegraph.example.com/github.com/sourcegraph/sourcegraph) has a [README.md](https://sourcegraph.example.com/github.com/sourcegraph/sourcegraph/-/blob/README.md) file in the root directory.",
 			"sources": [
 				{
 					"type": "Repository",
@@ -240,7 +240,7 @@ Once processing is complete, the response will include the answer:
 		"quota_limit": -1,
 		"reset_time": "2025-10-01T00:00:00Z"
 	},
-	"share_url": "https://sourcegraph.test:3443/deepsearch/caebeb05-7755-4f89-834f-e3ee4a6acb25"
+	"share_url": "https://sourcegraph.example.com/deepsearch/caebeb05-7755-4f89-834f-e3ee4a6acb25"
 }
 ```
 
@@ -249,7 +249,7 @@ Once processing is complete, the response will include the answer:
 Continue a conversation by adding follow-up questions. The `conversation_id` in the request body must match the conversation ID in the URL:
 
 ```bash
-curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/140/questions' \
+curl 'https://sourcegraph.example.com/.api/deepsearch/v1/140/questions' \
   -H 'Accept: application/json' \
   -H 'Content-Type: application/json' \
   -H "Authorization: token $SRC_ACCESS_TOKEN" \
@@ -263,13 +263,13 @@ Get all your conversations with optional filtering:
 
 ```bash
 # List all conversations
-curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1' \
+curl 'https://sourcegraph.example.com/.api/deepsearch/v1' \
   -H 'Accept: application/json' \
   -H "Authorization: token $SRC_ACCESS_TOKEN" \
   -H 'X-Requested-With: my-client 1.0.0'
 
 # List with pagination and filtering
-curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1?page_first=10&sort=created_at' \
+curl 'https://sourcegraph.example.com/.api/deepsearch/v1?page_first=10&sort=created_at' \
   -H 'Accept: application/json' \
   -H "Authorization: token $SRC_ACCESS_TOKEN" \
   -H 'X-Requested-With: my-client 1.0.0'
@@ -290,7 +290,7 @@ Available query parameters:
 **Get a specific conversation:**
 
 ```bash
-curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/140' \
+curl 'https://sourcegraph.example.com/.api/deepsearch/v1/140' \
   -H 'Accept: application/json' \
   -H "Authorization: token $SRC_ACCESS_TOKEN" \
   -H 'X-Requested-With: my-client 1.0.0'
@@ -299,7 +299,7 @@ curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/140' \
 **Delete a conversation:**
 
 ```bash
-curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/140' \
+curl 'https://sourcegraph.example.com/.api/deepsearch/v1/140' \
   -X DELETE \
   -H "Authorization: token $SRC_ACCESS_TOKEN" \
   -H 'X-Requested-With: my-client 1.0.0'
@@ -308,7 +308,7 @@ curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/140' \
 **Cancel a processing question:**
 
 ```bash
-curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1/140/questions/163/cancel' \
+curl 'https://sourcegraph.example.com/.api/deepsearch/v1/140/questions/163/cancel' \
   -X POST \
   -H 'Accept: application/json' \
   -H "Authorization: token $SRC_ACCESS_TOKEN" \
@@ -324,7 +324,7 @@ The read token is also visible in the web client URL and in the `share_url` fiel
 Note that you can only access other users' conversations via read tokens if sharing is enabled on your Sourcegraph instance.
 
 ```bash
-curl 'https://your-sourcegraph-instance.com/.api/deepsearch/v1?filter_read_token=5d9aa113-c511-4687-8b71-dbc2dd733c03' \
+curl 'https://sourcegraph.example.com/.api/deepsearch/v1?filter_read_token=5d9aa113-c511-4687-8b71-dbc2dd733c03' \
   -H 'Accept: application/json' \
   -H "Authorization: token $SRC_ACCESS_TOKEN" \
   -H 'X-Requested-With: my-client 1.0.0'

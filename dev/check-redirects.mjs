@@ -114,7 +114,12 @@ function flagValue(name) {
 // Returns [{ source, destination, line }].
 function loadRedirects() {
 	const source = fs.readFileSync(REDIRECTS_FILE, 'utf-8');
-	const constants = fs.readFileSync(CONSTANTS_FILE, 'utf-8');
+	// Older revisions (and the sourcegraph/docs-legacy-versions branches this
+	// script also runs on) have no constants.ts, and their redirects.ts does
+	// not import it
+	const constants = fs.existsSync(CONSTANTS_FILE)
+		? fs.readFileSync(CONSTANTS_FILE, 'utf-8')
+		: '';
 	const rssUrl =
 		constants.match(
 			/TECHNICAL_CHANGELOG_RSS_URL\s*=\s*['"]([^'"]+)['"]/
