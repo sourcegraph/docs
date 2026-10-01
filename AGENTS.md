@@ -81,9 +81,8 @@ next run.
 - Vercel shows build logs only to its team members, so
   `.github/workflows/vercel-build-report.yml` attaches the log to the Vercel
   Slack app's "failed to deploy" post in the `SLACK_CHANNEL_ID` channel
-  (`#alerts-vercel-doc-site` here) and comments a link to it on the PR (see
-  `dev/report-vercel-build.mjs`). The log itself never goes on the PR, since
-  the repository is public.
+  and comments a link to it on the PR (see `dev/report-vercel-build.mjs`).
+  The log itself never goes on the PR, since the repository is public.
 - It reads Vercel with the `VERCEL_TOKEN` repo secret, a token scoped to the
   `sourcegraph-docs` project that expires 2026-12-10; mint a new one with
   `POST /v3/user/tokens?teamId=<team>` and `projectId` in the body.
