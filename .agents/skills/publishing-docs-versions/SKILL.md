@@ -12,7 +12,7 @@ Use this skill for the Sourcegraph docs repo release-version workflow: cutting l
 - Remotes:
   - `origin` = `sourcegraph/docs`
   - `legacy` = `sourcegraph/docs-legacy-versions`
-- 7.x legacy branches use underscores: `v7_0`, `v7_1`, `v7_2`, etc.
+- Legacy branches are named `v<major>_<minor>` with an underscore: `v5_2`, `v6_12`, `v7_7`, etc.
 - Legacy branches are pushed directly to the `legacy` remote.
 - `origin/main` is protected; direct pushes are rejected. Make a branch on `origin` and open a PR.
 - The files that control latest/previous versions are:
