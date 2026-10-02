@@ -45,7 +45,14 @@
   (`https://sourcegraph.example.com` where a whole URL is meant) and
   `github.example.com` for a code host; never `<URL>`, `[hostname]`, or a
   `$VARIABLE` the reader has to guess. In a shell snippet a `$VARIABLE` is
-  fine only when the same snippet exports it with an example value
+  fine only when the same snippet exports it with an example value. Example
+  URLs use `https://`, except loopback, in-cluster, proxy, and XML-namespace
+  addresses. The `🤖 Sync generated docs` PRs overwrite the
+  `SCHEMA_SYNC_START`…`SCHEMA_SYNC_END` blocks and whole pages
+  (`self-hosted/observability/{alerts,dashboards}.mdx`, `cli/references/`,
+  `ai/models.mdx`, `cody/capabilities/supported-models.mdx`,
+  `admin/telemetry/`); fix those in sourcegraph/sourcegraph instead.
+  `git log --author=sourcegraph-buildkite -- <file>` shows whether a page is one
 
 ### Links
 
