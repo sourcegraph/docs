@@ -16,25 +16,13 @@ function createRedirectUrl(
 		const versionMatch = path.match(/(?:\/v\/|@)(\d+\.\d+)\/(.*)/);
 
 		if (versionMatch) {
-			const version = versionMatch[1];
-			const remainingPath = versionMatch[2];
-
-			// Find matching redirect for the remaining path
-			const redirect = updatedRedirectsData.find(
-				(r: any) =>
-					r.source === `/${remainingPath}` ||
-					r.source === remainingPath
-			);
-
-			// If redirect exists, use its destination, otherwise use the remaining path
-			const finalPath = redirect
-				? redirect.destination.replace(/^\//, '')
-				: remainingPath;
-
-			// Replace placeholders and construct final URL
+			// Pass the path through unchanged: each versioned site carries the
+			// redirects that were current for its version, and applying this
+			// branch's redirects.ts here sends old versions to pages that did not
+			// exist yet.
 			return destination
-				.replace(':version', version)
-				.replace(':slug*', finalPath);
+				.replace(':version', versionMatch[1])
+				.replace(':slug*', versionMatch[2]);
 		}
 
 		// Handle other cases as before
@@ -47,11 +35,12 @@ function createRedirectUrl(
 		return destination;
 	}
 
-	// Handle relative paths
-	const basePath = '/docs';
+	// Handle relative paths. basePath is '/docs' on sourcegraph.com/docs and
+	// '' on the X.Y.sourcegraph.com deployments (see next.config.js).
+	const {origin, basePath} = request.nextUrl;
 	return destination.startsWith('/')
-		? `${request.nextUrl.origin}${basePath}${destination}`
-		: `${request.nextUrl.origin}${basePath}/${destination}`;
+		? `${origin}${basePath}${destination}`
+		: `${origin}${basePath}/${destination}`;
 }
 
 export function proxy(request: NextRequest) {

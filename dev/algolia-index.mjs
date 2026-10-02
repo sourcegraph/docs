@@ -43,10 +43,16 @@ const MIN_CONTENT_LENGTH = 3;
 // generated-reference boilerplate.
 const MIN_DEDUPLICATION_LENGTH = 80;
 // Caps that keep generated reference pages (dashboards, alerts, changelog:
-// thousands of headings each) from dominating the index. Headings are always
-// indexed; only prose chunks are capped.
+// thousands of headings each) from dominating the index.
 const MAX_CONTENT_PER_SECTION = 3;
 const MAX_CONTENT_PER_PAGE = 600;
+// Pages left out of the index. The generated observability references have a
+// heading per dashboard panel (~1,700) and per alert (~250), which made up over
+// a quarter of the index; the pages are still reachable from the sidebar.
+const EXCLUDED_PAGES = new Set([
+	'/self-hosted/observability/dashboards',
+	'/self-hosted/observability/alerts'
+]);
 
 const args = process.argv.slice(2);
 const flag = name => args.includes(name);
@@ -517,7 +523,7 @@ function printStats(records) {
 
 async function main() {
 	const owners = await loadNavigationOwners();
-	const posts = loadPosts().filter(p => !p.preview);
+	const posts = loadPosts().filter(p => !p.preview && !EXCLUDED_PAGES.has(p.url));
 	const allRecords = [];
 	const pages = [];
 	const deduplication = {hashes: new Set(), removed: 0};

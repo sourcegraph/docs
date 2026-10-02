@@ -37434,7 +37434,7 @@ sum(increase(src_deepsearch_question_outcome_total{outcome="token_limit_exceeded
 
 ## Batch Change Agents
 
-<p class="subtitle">Agent loops, wake-ups, and LLM usage. For batch change internals, see <a href="/-/debug/grafana/d/batch-changes/batch-changes">Batch Changes</a>.</p>
+<p class="subtitle">Agent loops, wake-ups, and LLM usage. For batch change internals, see the Batch Changes dashboard.</p>
 
 To see this dashboard, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents` on your Sourcegraph instance.
 
@@ -38078,6 +38078,30 @@ histogram_quantile(0.95, sum(rate(src_batch_change_agent_wake_duration_seconds_b
 
 <br />
 
+#### batch-change-agents: batch_change_agent_pending_wakes
+
+<p class="subtitle">Pending agent wakes</p>
+
+Number of non-idle threads with unread inbox items whose wake is retried once a minute. Most are threads waiting on an ask_user question, which only the user can unblock; pending wakes well above "active message handlers" means threads are stuck in processing with no running job, so check the "Stalled job resetters" group.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-agents?viewPanel=100703` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(src_batch_change_agent_wake_outcomes_total{outcome="busy"}[5m])) * 60
+```
+</details>
+
+<br />
+
 #### batch-change-agents: batch_change_agent_wake_error_rate
 
 <p class="subtitle">Wake processing error rate over 5m</p>
@@ -38278,9 +38302,9 @@ sum by (event_type) (rate(src_batch_change_agents_stream_publish_success_total[5
 
 #### batch-change-agents: batch_change_agent_message_stream_publish_errors
 
-<p class="subtitle">Message stream publish errors per second</p>
+<p class="subtitle">Message stream publish failures over 15m</p>
 
-Rate of per-message stream events that could not be published to Redis after retries.
+Number of per-message stream events that could not be published to Redis after retries in the last 15 minutes.
 
 Refer to the [alerts reference](alerts#batch-change-agents-batch_change_agent_message_stream_publish_errors) for 1 alert related to this panel.
 
@@ -38294,7 +38318,7 @@ To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-ag
 Query:
 
 ```
-sum(rate(src_batch_change_agents_stream_publish_errors_total[5m]))
+sum(increase(src_batch_change_agents_stream_publish_failures_total[15m]))
 ```
 </details>
 
@@ -38350,9 +38374,9 @@ sum by (event_type) (rate(src_batch_change_agents_thread_stream_publish_success_
 
 #### batch-change-agents: batch_change_agent_thread_stream_publish_errors
 
-<p class="subtitle">Thread stream publish errors per second</p>
+<p class="subtitle">Thread stream publish failures over 15m</p>
 
-Rate of thread-level stream events that could not be published to Redis after retries. Clients recover thread state on their next refetch.
+Number of thread-level stream events that could not be published to Redis after retries in the last 15 minutes. Clients recover thread state on their next refetch.
 
 Refer to the [alerts reference](alerts#batch-change-agents-batch_change_agent_thread_stream_publish_errors) for 1 alert related to this panel.
 
@@ -38366,7 +38390,7 @@ To see this panel, visit `/-/debug/grafana/d/batch-change-agents/batch-change-ag
 Query:
 
 ```
-sum(rate(src_batch_change_agents_thread_stream_publish_errors_total[5m]))
+sum(increase(src_batch_change_agents_thread_stream_publish_failures_total[15m]))
 ```
 </details>
 
