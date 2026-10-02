@@ -40,16 +40,30 @@
   Add product names and identifiers to `cspell-allow-list.txt`, in
   alphabetical order; the check reports out-of-order entries. CSpell is not a
   project dependency: `npx cspell@10 --no-progress <file>` to run it locally
-- **Example hostnames**: placeholder hostnames in docs are `*.example.com`
-  (`sourcegraph.example.com` for the reader's instance, `github.example.com`
-  for a code host, `https://sourcegraph.example.com` where a whole URL is
-  meant). `.github/workflows/check-hostnames.yml` runs `dev/check-hostnames.mjs`
+- **Example hostnames**: placeholder hostnames in docs are `*.example.com` 
+  (`sourcegraph.example.com` for the reader's instance, 
+  `github.example.com` for a code host, 
+  `https://sourcegraph.example.com` where a whole URL is meant); 
+  never `<URL>`, `[hostname]`, or a `$VARIABLE` the reader has to guess.
+  Example URLs use `https://`, except where needed, eg. loopback, 
+  in-cluster, proxy, and XML-namespace addresses. 
+  In a shell snippet a `$VARIABLE` is fine only when the same snippet 
+  exports it with an example value. 
+  `.github/workflows/check-hostnames.yml` runs `dev/check-hostnames.mjs`
   on the lines a PR adds and comments the findings with suggested changes
-  (advisory, never fails the PR). `dev/example-hostnames.json` maps each
-  recommended hostname to the placeholders seen in its place, as literal text,
-  a `*` glob, or a `/regex/`, matched case-insensitively with `-`, `_`, and
-  `.` interchangeable; add to it when the check misses one, keeping keys and
-  lists sorted. `node dev/check-hostnames.mjs` checks all of `docs/`
+  (advisory, never fails the PR). 
+  `dev/example-hostnames.json` maps each recommended hostname to the 
+  placeholders seen in its place, 
+  as either literal text,  a `*` glob, or a `/regex/`, 
+  matched case-insensitively with `-`, `_`, and `.` interchangeable; 
+  add to it when the check misses one, keeping keys and lists sorted. 
+  `node dev/check-hostnames.mjs` checks all of `docs/`
+  The `🤖 Sync generated docs` PRs overwrite the
+  `SCHEMA_SYNC_START`…`SCHEMA_SYNC_END` blocks and whole pages
+  (`self-hosted/observability/{alerts,dashboards}.mdx`, `cli/references/`,
+  `ai/models.mdx`, `cody/capabilities/supported-models.mdx`,
+  `admin/telemetry/`); fix those in sourcegraph/sourcegraph instead.
+  `git log --author=sourcegraph-buildkite -- <file>` shows whether a page is one
 
 ### Links
 
