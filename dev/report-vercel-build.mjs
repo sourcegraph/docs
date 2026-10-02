@@ -22,16 +22,18 @@
  * slack uploads <file> into the thread of the Vercel Slack app's "failed to
  * deploy" post for the deployment in SLACK_CHANNEL_ID, looking back a week (so
  * a re-run by hand still finds it) and waiting up to 5 minutes for the post
- * to appear, then writes the reply's `permalink` to GITHUB_OUTPUT. The reply
- * quotes BUILD_ERROR, the `error` output of fetch-log, when set. It needs
- * SLACK_BOT_TOKEN (see dev/slack-app-vercel-build-report.json) and does
- * nothing when that or SLACK_CHANNEL_ID is unset. With --dry-run the post is
- * found but nothing is uploaded.
+ * to appear, then writes the reply's `permalink` to GITHUB_OUTPUT, along with
+ * the channel's name as `channel`. The reply quotes BUILD_ERROR, the `error`
+ * output of fetch-log, when set. It needs SLACK_BOT_TOKEN (see
+ * dev/slack-app-vercel-build-report.json) and does nothing when that or
+ * SLACK_CHANNEL_ID is unset. With --dry-run the post is found but nothing is
+ * uploaded.
  *
  * comment posts on PR_NUMBER, the PR Vercel built the deployment for. When
  * unset (the success path, or a deployment Vercel recorded no PR for) it falls
  * back to every open PR at COMMIT_SHA. A failure comment links
- * SLACK_PERMALINK, or the channel when the upload did not happen. With
+ * SLACK_PERMALINK, or just says Slack when the upload did not happen, and
+ * names SLACK_CHANNEL, the `channel` output of slack, when set. With
  * --dry-run the comment is printed instead.
  *
  * All need DEPLOYMENT_ID, DEPLOYMENT_STATE (failed or success), COMMIT_SHA,
@@ -252,15 +254,16 @@ async function fetchLog() {
 // The log stays in Slack, where only the workspace can read it; the public
 // comment says where to look
 function failureBody() {
-	const {SLACK_PERMALINK} = process.env;
+	const {SLACK_PERMALINK, SLACK_CHANNEL} = process.env;
 	const where = SLACK_PERMALINK
 		? `[attached to its Slack post](${SLACK_PERMALINK})`
 		: 'in Slack';
+	const channel = SLACK_CHANNEL ? ` in #${SLACK_CHANNEL}` : '';
 	return [
 		MARKER,
 		'### ❌ The Vercel build failed for this PR',
 		'',
-		`Vercel only shows build logs to members of its team, so the build log is ${where} in #alerts-vercel-doc-site.`,
+		`Vercel only shows build logs to members of its team, so the build log is ${where}${channel}.`,
 		''
 	].join('\n');
 }
@@ -479,6 +482,16 @@ async function slack() {
 	if (DEPLOYMENT_STATE !== 'failed') {
 		console.log('The build passed; Vercel already posts that to Slack');
 		return;
+	}
+	// The PR comment names the channel. A token without channels:read still
+	// uploads the log; the comment then just says Slack
+	try {
+		const {channel} = await slackApi('conversations.info', {
+			channel: SLACK_CHANNEL_ID
+		});
+		writeOutput('channel', channel.name);
+	} catch (error) {
+		console.log(`${error.message}; the PR comment will not name the channel`);
 	}
 	// The same guard as fetch-log and comment, so Slack only ever gets logs
 	// for commits an open PR from this repository is at
