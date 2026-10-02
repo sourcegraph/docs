@@ -7816,17 +7816,20 @@ Generated query for critical alert: `max((sum by (domain) (increase(src_dbworker
 
 ## batch-change-agents: batch_change_agent_message_stream_publish_errors
 
-<p class="subtitle">message stream publish errors per second</p>
+<p class="subtitle">message stream publish failures over 15m</p>
 
 **Descriptions**
 
-- <span class="badge badge-warning">warning</span> batch-change-agents: 0+ message stream publish errors per second for 5m0s
+- <span class="badge badge-warning">warning</span> batch-change-agents: 0+ message stream publish failures over 15m
 
 **Next steps**
 
 - These are publish attempts that failed after retries were exhausted, so the corresponding live event was dropped and clients only recover it on reconnect/refetch.
-- Check Redis health and connectivity from the worker (the redispool.Store keyspace).
+- Check the "redis-store_up" panel on the Redis dashboard; the worker and the frontend both publish these events to redis-store.
+- Search worker and frontend logs for "failed to publish event after 3 retries"; the attached error names the cause (connection refused, timeout, out of memory).
+- The "message stream transport errors" panel rising at the same time means subscribers are losing Redis too, which points at Redis rather than at the publisher.
 - Confirm the message processing itself is healthy via the "Message worker" group; stream publish failures do not fail the underlying message.
+- Break the count down by event type with src_batch_change_agents_stream_publish_errors_total.
 - More help interpreting this metric is available in the [dashboards reference](dashboards#batch-change-agents-batch_change_agent_message_stream_publish_errors).
 - **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
 
@@ -7841,7 +7844,7 @@ Generated query for critical alert: `max((sum by (domain) (increase(src_dbworker
 <details>
 <summary>Technical details</summary>
 
-Generated query for warning alert: `max((sum(rate(src_batch_change_agents_stream_publish_errors_total[5m]))) &gt; 0)`
+Generated query for warning alert: `max((sum(increase(src_batch_change_agents_stream_publish_failures_total[15m]))) &gt; 0)`
 
 </details>
 
@@ -7849,17 +7852,19 @@ Generated query for warning alert: `max((sum(rate(src_batch_change_agents_stream
 
 ## batch-change-agents: batch_change_agent_thread_stream_publish_errors
 
-<p class="subtitle">thread stream publish errors per second</p>
+<p class="subtitle">thread stream publish failures over 15m</p>
 
 **Descriptions**
 
-- <span class="badge badge-warning">warning</span> batch-change-agents: 0+ thread stream publish errors per second for 5m0s
+- <span class="badge badge-warning">warning</span> batch-change-agents: 0+ thread stream publish failures over 15m
 
 **Next steps**
 
 - These are publish attempts that failed after retries were exhausted, so clients miss the prompt to refetch the thread until their next reconnect or navigation.
-- Check Redis health and connectivity from the worker; `batch_change_agent_message_stream_publish_errors` failing at the same time confirms a shared Redis problem.
+- Check the "redis-store_up" panel on the Redis dashboard; only the worker publishes thread events, to redis-store.
+- Search worker logs for "failed to publish event after 3 retries"; the attached error names the cause. `batch_change_agent_message_stream_publish_errors` failing at the same time confirms a shared Redis problem rather than a publisher bug.
 - Thread state itself is unaffected: the entries are persisted before publishing.
+- Break the count down by event type with src_batch_change_agents_thread_stream_publish_errors_total.
 - More help interpreting this metric is available in the [dashboards reference](dashboards#batch-change-agents-batch_change_agent_thread_stream_publish_errors).
 - **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
 
@@ -7874,7 +7879,7 @@ Generated query for warning alert: `max((sum(rate(src_batch_change_agents_stream
 <details>
 <summary>Technical details</summary>
 
-Generated query for warning alert: `max((sum(rate(src_batch_change_agents_thread_stream_publish_errors_total[5m]))) &gt; 0)`
+Generated query for warning alert: `max((sum(increase(src_batch_change_agents_thread_stream_publish_failures_total[15m]))) &gt; 0)`
 
 </details>
 
