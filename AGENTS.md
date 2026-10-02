@@ -40,14 +40,25 @@
   Add product names and identifiers to `cspell-allow-list.txt`, in
   alphabetical order; the check reports out-of-order entries. CSpell is not a
   project dependency: `npx cspell@10 --no-progress <file>` to run it locally
-- **Placeholder hostnames**: in prose and config samples write
-  `sourcegraph.example.com` for the reader's instance
-  (`https://sourcegraph.example.com` where a whole URL is meant) and
-  `github.example.com` for a code host; never `<URL>`, `[hostname]`, or a
-  `$VARIABLE` the reader has to guess. In a shell snippet a `$VARIABLE` is
-  fine only when the same snippet exports it with an example value. Example
-  URLs use `https://`, except loopback, in-cluster, proxy, and XML-namespace
-  addresses. The `🤖 Sync generated docs` PRs overwrite the
+- **Example hostnames**: placeholder hostnames in docs are `*.example.com` 
+  (`sourcegraph.example.com` for the reader's instance, 
+  `github.example.com` for a code host, 
+  `https://sourcegraph.example.com` where a whole URL is meant); 
+  never `<URL>`, `[hostname]`, or a `$VARIABLE` the reader has to guess.
+  Example URLs use `https://`, except where needed, eg. loopback, 
+  in-cluster, proxy, and XML-namespace addresses. 
+  In a shell snippet a `$VARIABLE` is fine only when the same snippet 
+  exports it with an example value. 
+  `.github/workflows/check-hostnames.yml` runs `dev/check-hostnames.mjs`
+  on the lines a PR adds and comments the findings with suggested changes
+  (advisory, never fails the PR). 
+  `dev/example-hostnames.json` maps each recommended hostname to the 
+  placeholders seen in its place, 
+  as either literal text,  a `*` glob, or a `/regex/`, 
+  matched case-insensitively with `-`, `_`, and `.` interchangeable; 
+  add to it when the check misses one, keeping keys and lists sorted. 
+  `node dev/check-hostnames.mjs` checks all of `docs/`
+  The `🤖 Sync generated docs` PRs overwrite the
   `SCHEMA_SYNC_START`…`SCHEMA_SYNC_END` blocks and whole pages
   (`self-hosted/observability/{alerts,dashboards}.mdx`, `cli/references/`,
   `ai/models.mdx`, `cody/capabilities/supported-models.mdx`,
@@ -72,11 +83,12 @@ pnpm run check links --check-anchors --check-self-links \
 
 ### PR check comments
 
-The spelling, links, and redirects checks comment on the PR: a summary
-comment per check, plus an inline review comment with a `suggestion` block on
-each flagged line. After pushing, read them and follow the instructions they
-give (fix the spelling, the link, or the redirect); do not work around a
-finding, and add a word to `cspell-allow-list.txt` only when it is correct.
+The spelling, links, redirects, and example hostnames checks comment on the
+PR: a summary comment per check, plus an inline review comment with a
+`suggestion` block on each flagged line. After pushing, read them and follow
+the instructions they give (fix the spelling, the link, the redirect, or the
+hostname); do not work around a finding, and add a word to
+`cspell-allow-list.txt` only when it is correct.
 
 ```sh
 gh pr checks <pr>
