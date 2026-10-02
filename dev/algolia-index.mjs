@@ -73,7 +73,6 @@ const FALLBACK_PRODUCTS = [
 	{prefix: '/how-to', product: 'How-to guides', section: 'Documentation'},
 	{prefix: '/dotcom', product: 'Sourcegraph.com', section: 'Documentation'},
 	{prefix: '/releases', product: 'Releases', section: 'Documentation'},
-	{prefix: '/legacy', product: 'Legacy', section: 'Documentation'},
 	{prefix: '/pricing', product: 'Pricing', section: 'Resources'}
 ];
 

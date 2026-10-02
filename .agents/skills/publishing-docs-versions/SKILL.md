@@ -18,7 +18,6 @@ Use this skill for the Sourcegraph docs repo release-version workflow: cutting l
 - The files that control latest/previous versions are:
   - `docs.config.js`
   - `src/data/versions.ts`
-  - `docs/legacy.mdx`
 - `src/data/versions.ts` on `origin/main` is the canonical dropdown list. The
   current site exposes it through `/docs/api/versions`, and legacy selectors
   load that manifest at runtime.
@@ -78,12 +77,11 @@ For `v7_3`, for example:
 - `docs.config.js`: `DOCS_LATEST_VERSION: '7.3'`
 - `src/data/versions.ts`: first entry identifies `v7.3` without a `latest`
   label; fallback entries should include `v7.2`, `v7.1`, `v7.0`, then 6.x.
-- `docs/legacy.mdx`: `Sourcegraph 7.X` should include `7.2`, `7.1`, `7.0` (not 7.3 itself).
 
 Commit and push:
 
 ```bash
-git add docs.config.js src/data/versions.ts docs/legacy.mdx
+git add docs.config.js src/data/versions.ts
 git commit -m "Update docs latest version to X.Y"
 git push legacy vX_Y
 ```
@@ -104,18 +102,16 @@ For `7.4`, for example:
 
 - `docs.config.js`: `DOCS_LATEST_VERSION: '7.4'`
 - `src/data/versions.ts`: add previous versions in descending order: `v7.3`, `v7.2`, `v7.1`, `v7.0`, then 6.x.
-- `docs/legacy.mdx`: add/update `Sourcegraph 7.X` with `7.3`, `7.2`, `7.1`, `7.0`.
 
 Commit, push the branch, and open a PR:
 
 ```bash
-git add docs.config.js src/data/versions.ts docs/legacy.mdx
+git add docs.config.js src/data/versions.ts
 git commit -m "Update docs latest version to X.Y"
 git push -u origin eg-update-docs-to-X-Y
 gh pr create --base main --head eg-update-docs-to-X-Y --title "Update docs latest version to X.Y" --body "## Summary
 - Set DOCS_LATEST_VERSION to X.Y
 - Add previous 7.x versions to the version selector
-- Update the legacy versions page
 
 ## Test plan
 - Not run (config/navigation content change only)"
@@ -126,7 +122,7 @@ gh pr create --base main --head eg-update-docs-to-X-Y --title "Update docs lates
 Use lightweight verification for this content/config change:
 
 ```bash
-git diff -- docs.config.js src/data/versions.ts docs/legacy.mdx
+git diff -- docs.config.js src/data/versions.ts
 git status --short --branch
 git ls-remote --heads legacy 'v7_*'
 ```
