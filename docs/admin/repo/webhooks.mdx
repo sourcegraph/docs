@@ -6,19 +6,23 @@ By default, Sourcegraph polls code hosts to keep repository contents up to date.
 
 Polling, however, falls short in cases where immediate updates are desired or when the number of repositories causes significant load on the code host.
 
-To address this, there is a repository update webhook that triggers a repository update on Sourcegraph within minutes. The webhook is authenticated using access tokens (which you can create at e.g. `https://sourcegraph.example.com/site-admin/tokens`).
+To address this, there is a repository update webhook endpoint which adds a high priority job to the repo fetch queue. 
 
-Here's an example using curl.
+The webhook endpoint is authenticated using access tokens which you can create at `https://sourcegraph.example.com/site-admin/tokens`
+
+Here's an example using curl:
 
 ```bash
-curl -XPOST -H 'Authorization: token $ACCESS_TOKEN' https://sourcegraph.example.com/.api/repos/$REPO_NAME/-/refresh
+curl -XPOST \
+    -H 'Authorization: token $SRC_ACCESS_TOKEN' \
+    https://sourcegraph.example.com/.api/repos/$REPO_NAME/-/refresh
 ```
 
 ## Disabling built-in repo updating
 
-Sourcegraph will periodically ask your code-host to list its repositories (e.g. via its HTTP API) to _discover repositories_. You can control how often this occurs by changing [`repoListUpdateInterval`](/admin/config/site-config) in the site config.
+Sourcegraph will periodically ask your code host to list its repositories via its HTTP API to _discover repositories_. You can control how often this occurs by changing [`repoListUpdateInterval`](/admin/config/site-config) in the site config.
 
-For repositories that Sourcegraph is already aware of, it will periodically perform background Git repository updates. You can disable this if you wish by setting [`disableAutoGitUpdates`](/admin/config/site-config) to `true`. In which case, the repository will only update when the webhook is used or, e.g., if a user visits the repository directly. This may be desirable in cases where you wish to rely solely on the repository update webhook, for example.
+For repositories that Sourcegraph is already aware of, it will periodically perform background git repository updates. You can disable this if needed by setting [`disableAutoGitUpdates`](/admin/config/site-config) to `true`, then the repository will only be updated when the webhook is used or when a user visits the repository directly.
 
 ## Code host webhooks
 
