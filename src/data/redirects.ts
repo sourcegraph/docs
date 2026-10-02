@@ -3371,19 +3371,19 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/external_services',
-		destination: '/self-hosted/external_services'
+		destination: '/self-hosted/external-services'
 	},
 	{
 		source: '/admin/external_services/object_storage',
-		destination: '/self-hosted/external_services/object_storage'
+		destination: '/self-hosted/external-services/object-storage'
 	},
 	{
 		source: '/admin/external_services/postgres',
-		destination: '/self-hosted/external_services/postgres'
+		destination: '/self-hosted/external-services/postgres'
 	},
 	{
 		source: '/admin/external_services/redis',
-		destination: '/self-hosted/external_services/redis'
+		destination: '/self-hosted/external-services/redis'
 	},
 	{
 		source: '/admin/how-to/blobstore_debugging',
@@ -3869,6 +3869,10 @@ const redirectsData = [
 		destination: '/code-insights/how-tos/filtering-an-insight'
 	},
 	{
+		source: '/code_insights/how-tos/Troubleshooting',
+		destination: '/code-insights/how-tos/Troubleshooting'
+	},
+	{
 		source: '/code_insights/language_insight_quickstart',
 		destination: '/code-insights/language-insight-quickstart'
 	},
@@ -3890,12 +3894,24 @@ const redirectsData = [
 		destination: '/code-insights/references/incomplete-data-points'
 	},
 	{
+		source: '/code_insights/references/license',
+		destination: '/code-insights/references/license'
+	},
+	{
 		source: '/code_insights/references/repository_scope',
 		destination: '/code-insights/references/repository-scope'
 	},
 	{
+		source: '/code_insights/references/requirements',
+		destination: '/code-insights/references/requirements'
+	},
+	{
 		source: '/code_insights/references/search_aggregations_use_cases',
 		destination: '/code-insights/references/search-aggregations-use-cases'
+	},
+	{
+		source: '/code_insights/types/inventory-stats',
+		destination: '/code-insights/types/inventory-stats'
 	},
 	{
 		source: '/code_monitoring',
@@ -4001,6 +4017,10 @@ const redirectsData = [
 		destination: '/integration/browser-extension'
 	},
 	{
+		source: '/integration/browser_extension/how-tos',
+		destination: '/integration/browser-extension/how-tos'
+	},
+	{
 		source: '/integration/browser_extension/how-tos/browser_search_engine',
 		destination:
 			'/integration/browser-extension/how-tos/browser-search-engine'
@@ -4008,6 +4028,26 @@ const redirectsData = [
 	{
 		source: '/integration/browser_extension/how-tos/google_workspace',
 		destination: '/integration/browser-extension/how-tos/google-workspace'
+	},
+	{
+		source: '/integration/browser_extension/how-tos/troubleshooting',
+		destination: '/integration/browser-extension/how-tos/troubleshooting'
+	},
+	{
+		source: '/integration/browser_extension/quickstart',
+		destination: '/integration/browser-extension/quickstart'
+	},
+	{
+		source: '/integration/browser_extension/references',
+		destination: '/integration/browser-extension/references'
+	},
+	{
+		source: '/integration/browser_extension/references/features',
+		destination: '/integration/browser-extension/references/features'
+	},
+	{
+		source: '/integration/browser_extension/references/privacy',
+		destination: '/integration/browser-extension/references/privacy'
 	},
 	{
 		source: '/integration/migrating_firefox_extension',
@@ -4106,6 +4146,14 @@ const redirectsData = [
 		destination: '/self-hosted/external-services/object-storage'
 	},
 	{
+		source: '/self-hosted/external_services/postgres',
+		destination: '/self-hosted/external-services/postgres'
+	},
+	{
+		source: '/self-hosted/external_services/redis',
+		destination: '/self-hosted/external-services/redis'
+	},
+	{
 		source: '/self-hosted/how-to/blobstore_debugging',
 		destination: '/self-hosted/how-to/blobstore-debugging'
 	},
@@ -4174,6 +4222,10 @@ const redirectsData = [
 		source: '/self-hosted/updates/docker_compose',
 		destination:
 			'https://sourcegraph.com/changelog/self-hosted/docker-compose'
+	},
+	{
+		source: '/self-hosted/updates/pure_docker',
+		destination: '/self-hosted/deploy/docker-compose/upgrade'
 	},
 	{
 		source: '/self-hosted/updates/pure-docker',
