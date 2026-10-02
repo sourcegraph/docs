@@ -11,6 +11,7 @@ exec git diff --quiet HEAD^ HEAD -- . \
 	':(exclude)AGENTS.md' \
 	':(exclude)README.md' \
 	':(exclude).gitignore' \
+	':(exclude)renovate.json' \
 	':(exclude)cspell*' \
 	':(exclude)dev/TODO.md' \
 	':(exclude)dev/check-spelling.mjs' \
