@@ -3869,6 +3869,10 @@ const redirectsData = [
 		destination: '/code-insights/how-tos/filtering-an-insight'
 	},
 	{
+		source: '/code_insights/how-tos/Troubleshooting',
+		destination: '/code-insights/how-tos/Troubleshooting'
+	},
+	{
 		source: '/code_insights/language_insight_quickstart',
 		destination: '/code-insights/language-insight-quickstart'
 	},
@@ -3890,12 +3894,24 @@ const redirectsData = [
 		destination: '/code-insights/references/incomplete-data-points'
 	},
 	{
+		source: '/code_insights/references/license',
+		destination: '/code-insights/references/license'
+	},
+	{
 		source: '/code_insights/references/repository_scope',
 		destination: '/code-insights/references/repository-scope'
 	},
 	{
+		source: '/code_insights/references/requirements',
+		destination: '/code-insights/references/requirements'
+	},
+	{
 		source: '/code_insights/references/search_aggregations_use_cases',
 		destination: '/code-insights/references/search-aggregations-use-cases'
+	},
+	{
+		source: '/code_insights/types/inventory-stats',
+		destination: '/code-insights/types/inventory-stats'
 	},
 	{
 		source: '/code_monitoring',
