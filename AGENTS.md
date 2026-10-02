@@ -46,8 +46,10 @@
   meant). `.github/workflows/check-hostnames.yml` runs `dev/check-hostnames.mjs`
   on the lines a PR adds and comments the findings with suggested changes
   (advisory, never fails the PR). `dev/example-hostnames.json` maps each
-  recommended hostname to the placeholders seen in its place; add to it when
-  the check misses one. `node dev/check-hostnames.mjs` checks all of `docs/`
+  recommended hostname to the placeholders seen in its place, as literal text,
+  a `*` glob, or a `/regex/`, matched case-insensitively with `-`, `_`, and
+  `.` interchangeable; add to it when the check misses one, keeping keys and
+  lists sorted. `node dev/check-hostnames.mjs` checks all of `docs/`
 
 ### Links
 

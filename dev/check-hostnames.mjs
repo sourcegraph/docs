@@ -8,13 +8,18 @@
  * comments the findings; it never fails the PR.
  *
  * dev/example-hostnames.json maps each recommended hostname to the
- * placeholders seen in its place. An entry matches as a whole hostname, or as
- * the tail of one: `mycompany.com` under `example.com` turns
- * `prometheus.mycompany.com` into `prometheus.example.com`. The longest entry
- * wins where several match. A recommended value with a scheme, like
- * `https://sourcegraph.example.com`, is for placeholders that stand for a whole
- * URL; the scheme is dropped where the text already has one. Auto-generated
- * SCHEMA_SYNC blocks are skipped: fix those upstream.
+ * placeholders seen in its place. An entry is literal text, a glob where `*`
+ * matches any run of hostname characters other than `.`, or a regular
+ * expression written `/.../` (escape backslashes for JSON: `\\.`). Matching
+ * ignores case, and in literal and glob entries each of `-`, `_`, and `.`
+ * matches any of the three, so `your-domain.com` also covers
+ * `your_domain.com`. An entry matches as a whole hostname, or as the tail of
+ * one: `mycompany.com` under `example.com` turns `prometheus.mycompany.com`
+ * into `prometheus.example.com`. The longest entry wins where several match. A
+ * recommended value with a scheme, like `https://sourcegraph.example.com`, is
+ * for placeholders that stand for a whole URL; the scheme is dropped where the
+ * text already has one. Auto-generated SCHEMA_SYNC blocks are skipped: fix
+ * those upstream.
  *
  * Usage: node dev/check-hostnames.mjs [options]
  *   --diff <file>        Unified diff, e.g. from `git diff -U0 origin/main`;
@@ -79,40 +84,66 @@ function parseDiff(file) {
 	return addedLines;
 }
 
-// {placeholder → recommended}, and one regex matching any placeholder as a
-// whole hostname or the tail of one. Alternatives are tried in order, so the
-// longest placeholder wins where several match; the tail prefix is lazy, so a
-// placeholder that includes the subdomain wins over one that does not.
+// In a literal or glob entry, each separator matches any separator. Space is
+// not one: `YOUR-SOURCEGRAPH-INSTANCE` must not match the prose "your
+// Sourcegraph instance"
+const SEPARATOR = '[-_.]';
+
+// Regex source for one mapping entry: a `/.../` entry as written, anything
+// else as literal text where `*` matches any run of hostname characters
+// other than `.`
+function entryPattern(entry) {
+	const regex = entry.match(/^\/(.+)\/$/);
+	if (regex) return regex[1];
+	return entry
+		.split('*')
+		.map(part =>
+			part
+				.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+				.replace(/\\\.|[-_]/g, SEPARATOR)
+		)
+		.join('[\\w-]*');
+}
+
+// [{recommended, exact}] with `exact` matching a whole placeholder, longest
+// entry first, and one regex matching any placeholder as a whole hostname or
+// the tail of one. Alternatives are tried in order, so the longest entry wins
+// where several match; the tail prefix is lazy, so an entry that includes the
+// subdomain wins over one that does not.
 function loadMapping() {
 	const mapping = JSON.parse(
 		fs.readFileSync(path.join(ROOT_DIR, MAPPING_FILE), 'utf-8')
 	);
-	const recommendedFor = new Map();
-	for (const [recommended, placeholders] of Object.entries(mapping)) {
-		if (recommended === '$comment') continue;
-		for (const placeholder of placeholders) {
-			recommendedFor.set(placeholder, recommended);
-		}
-	}
-	const alternatives = [...recommendedFor.keys()]
-		.sort((a, b) => b.length - a.length)
-		.map(placeholder => placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-		.join('|');
+	const entries = Object.entries(mapping)
+		.filter(([recommended]) => recommended !== '$comment')
+		.flatMap(([recommended, placeholders]) =>
+			placeholders.map(placeholder => ({recommended, placeholder}))
+		)
+		.sort((a, b) => b.placeholder.length - a.placeholder.length)
+		.map(({recommended, placeholder}) => {
+			const source = entryPattern(placeholder);
+			return {
+				recommended,
+				source,
+				exact: new RegExp(`^(?:${source})$`, 'i')
+			};
+		});
+	const alternatives = entries.map(entry => `(?:${entry.source})`).join('|');
 	const pattern = new RegExp(
-		`(?<![\\w.-])((?:[\\w*-]+\\.)*?)(${alternatives})(?![\\w-]|\\.\\w)`,
-		'g'
+		`(?<![\\w.-])(?<prefix>(?:[\\w*-]+\\.)*?)(?<placeholder>${alternatives})(?![\\w-]|\\.\\w)`,
+		'gi'
 	);
-	return {recommendedFor, pattern};
+	return {entries, pattern};
 }
 
-const {recommendedFor, pattern} = loadMapping();
+const {entries, pattern} = loadMapping();
 
 // The recommended text for a match: the subdomains the text had in front of
 // the placeholder are kept, and the scheme is left out where the text has one
 function replacement(prefix, placeholder, precededByScheme) {
-	const [, scheme = '', host] = recommendedFor
-		.get(placeholder)
-		.match(/^(\w+:\/\/)?(.*)$/);
+	const [, scheme = '', host] = entries
+		.find(entry => entry.exact.test(placeholder))
+		.recommended.match(/^(\w+:\/\/)?(.*)$/);
 	return (precededByScheme ? '' : scheme) + prefix + host;
 }
 
@@ -121,26 +152,27 @@ function replacement(prefix, placeholder, precededByScheme) {
 // included, and `fixed` is the line with every placeholder replaced
 function checkLine(file, line, text) {
 	const findings = [];
-	const fixed = text.replace(
-		pattern,
-		(match, prefix, placeholder, offset, whole) => {
-			const recommended = replacement(
-				prefix,
-				placeholder,
-				/:\/\/$/.test(whole.slice(0, offset))
-			);
-			findings.push({
-				file,
-				line,
-				column: offset + 1,
-				placeholder: match,
-				recommended,
-				text
-			});
-			return recommended;
-		}
-	);
-	return {findings, fixed};
+	let fixed = '';
+	let end = 0;
+	for (const match of text.matchAll(pattern)) {
+		const {prefix, placeholder} = match.groups;
+		const recommended = replacement(
+			prefix,
+			placeholder,
+			/:\/\/$/.test(text.slice(0, match.index))
+		);
+		findings.push({
+			file,
+			line,
+			column: match.index + 1,
+			placeholder: match[0],
+			recommended,
+			text
+		});
+		fixed += text.slice(end, match.index) + recommended;
+		end = match.index + match[0].length;
+	}
+	return {findings, fixed: fixed + text.slice(end)};
 }
 
 // Sorted relative paths of the .md and .mdx files under docs/
