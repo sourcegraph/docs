@@ -40,6 +40,12 @@
   Add product names and identifiers to `cspell-allow-list.txt`, in
   alphabetical order; the check reports out-of-order entries. CSpell is not a
   project dependency: `npx cspell@10 --no-progress <file>` to run it locally
+- **Placeholder hostnames**: in prose and config samples write
+  `sourcegraph.example.com` for the reader's instance
+  (`https://sourcegraph.example.com` where a whole URL is meant) and
+  `github.example.com` for a code host; never `<URL>`, `[hostname]`, or a
+  `$VARIABLE` the reader has to guess. In a shell snippet a `$VARIABLE` is
+  fine only when the same snippet exports it with an example value
 
 ### Links
 
