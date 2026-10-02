@@ -22,7 +22,9 @@
   `export const dynamic = 'force-static'`
 - **Checks**: `pnpm run check` runs the checks in `dev/checks.mjs` (links,
   filenames, images); `pnpm run build` runs filenames and images first, so a
-  finding from those fails a deploy. Links is not in the build: it runs as its
+  finding from those fails a deploy. Filenames also runs as its own PR check
+  (`.github/workflows/check-filenames.yml`), failing on an underscore in a
+  file or folder name under `docs/`. Links is not in the build: it runs as its
   own PR check (`.github/workflows/check-links.yml`)
 - **Check redirects**: `node dev/check-redirects.mjs` reports broken entries in
   `src/data/redirects.ts` (CI comments on PRs that break redirects; see the

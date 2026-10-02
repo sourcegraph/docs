@@ -1,0 +1,31 @@
+name: Check filenames
+
+# Fails when a file or folder name under docs/ contains an underscore: they
+# become URL paths, which use hyphens. Runs the same dev/check-filenames.mjs
+# that `pnpm run build` runs, so a bad name fails here before it fails the
+# Vercel build, whose log only Vercel team members can read.
+
+on:
+    pull_request:
+
+# A new push supersedes the run for the previous one
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+
+jobs:
+    check-filenames:
+        name: Underscores in docs/ file and folder names
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out pull request head
+              uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.event.pull_request.head.sha }}
+
+            # No install step: the script has no dependencies beyond Node
+            - name: Find underscores in docs/ file and folder names
+              run: node dev/check-filenames.mjs
