@@ -262,4 +262,4 @@ GitHub Actions comment on your PR with anything it introduces:
 
 Thank you for contributing to Sourcegraph documentation! Your efforts help us
 provide top-notch learning experiences for our users. If you have any questions
-or need assistance, feel free to reach out.
+or need assistance, feel free to reach out
