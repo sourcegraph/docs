@@ -13,7 +13,8 @@
  * those upstream.
  *
  * The pull request workflow (.github/workflows/check-duplicates.yml) runs this
- * with --baseline and --diff, so a PR hears only about duplication it adds; it
+ * with --baseline and --diff, so a PR hears about the duplication it adds, and
+ * about the other copies of a passage it edits, which now disagree with it; it
  * never fails the PR. main has hundreds of pre-existing findings.
  *
  * Usage: node dev/check-duplicates.mjs [options]
@@ -21,10 +22,10 @@
  *   --threshold <0-1>    Report pairs at least this similar (default: 0.5)
  *   --min-words <n>      Skip passages with fewer words (default: 20)
  *   --format <name>      Output as text (default), json, or markdown
- *   --baseline <file>    Only report pairs absent from this JSON file (produced
- *                        by --format json on another revision). Pairs are
- *                        matched by the file and heading of each passage, so
- *                        editing a pre-existing duplicate does not report it
+ *   --baseline <file>    JSON from --format json on another revision. Pairs it
+ *                        already has, matched by the file and heading of each
+ *                        passage, are reported apart as edited rather than
+ *                        added, and only when --diff touches them
  *   --diff <file>        Unified diff, e.g. from `git diff -U0 origin/main`;
  *                        only report pairs where a passage has an added line
  *   --link-base <url>    Markdown output links each passage to <url>/<path>,
@@ -293,11 +294,15 @@ function pairKey({a, b}) {
 	return [passageKey(a), passageKey(b)].sort().join('\u0000');
 }
 
-function withoutBaseline(pairs, baselineFile) {
+// The pairs with `preexisting` set where the baseline already had the pair
+function markPreexisting(pairs, baselineFile) {
 	const baseline = new Set(
 		JSON.parse(fs.readFileSync(baselineFile, 'utf-8')).map(pairKey)
 	);
-	return pairs.filter(pair => !baseline.has(pairKey(pair)));
+	return pairs.map(pair => ({
+		...pair,
+		preexisting: baseline.has(pairKey(pair))
+	}));
 }
 
 // The first line of the passage that the diff added, or undefined
@@ -358,16 +363,19 @@ function location({file, line, endLine}) {
 	return `${file}:${line}${endLine > line ? `-${endLine}` : ''}`;
 }
 
-function formatText(pairs) {
-	const scope = BASELINE_FILE || DIFF ? 'new ' : '';
-	if (pairs.length === 0) {
-		return `✅ No ${scope}duplicated passages found!\n`;
-	}
-	const groups = clusters(pairs);
-	const lines = [
-		`❌ Found ${pairs.length} ${scope}duplicated pair(s) of passages in ${groups.length} group(s):`
-	];
-	for (const {passages, similarity} of groups) {
+// With --baseline, the pairs the change added and the ones it only edited:
+// an author touching one copy should hear about the other, since the two
+// now disagree, but the advice differs. Without one, every pair is "added".
+function splitByBaseline(pairs) {
+	return {
+		added: pairs.filter(pair => !pair.preexisting),
+		edited: pairs.filter(pair => pair.preexisting)
+	};
+}
+
+function textGroups(pairs) {
+	const lines = [];
+	for (const {passages, similarity} of clusters(pairs)) {
 		lines.push(
 			'',
 			`${passages.length} passages at least ${percent(similarity)} similar:`
@@ -375,6 +383,29 @@ function formatText(pairs) {
 		for (const passage of passages) {
 			lines.push(`   ${location(passage)}`, `   └─ ${passage.snippet}`);
 		}
+	}
+	return lines;
+}
+
+function formatText(pairs) {
+	const scope = DIFF ? ' in this change' : '';
+	if (pairs.length === 0) {
+		return `✅ No duplicated passages found${scope}!\n`;
+	}
+	const {added, edited} = splitByBaseline(pairs);
+	const lines = [];
+	if (added.length > 0) {
+		lines.push(
+			`❌ Found ${added.length} duplicated pair(s) of passages${scope} in ${clusters(added).length} group(s):`,
+			...textGroups(added)
+		);
+	}
+	if (edited.length > 0) {
+		lines.push(
+			...(lines.length > 0 ? [''] : []),
+			`⚠️ ${edited.length} edited passage pair(s) were already duplicated in ${clusters(edited).length} group(s):`,
+			...textGroups(edited)
+		);
 	}
 	return lines.join('\n') + '\n';
 }
@@ -400,32 +431,50 @@ const CONVENTION =
 	'cannot drift apart. Before writing a config snippet, search `docs/` for the ' +
 	'key and link to the existing one.';
 
+const EDITED_ADVICE =
+	'The passage you changed is also written somewhere else, so the two copies ' +
+	'now disagree. Decide which page is the home for it, and replace the other ' +
+	'copy with a link; or make the same change there too.';
+
+function markdownGroups(pairs) {
+	return clusters(pairs).flatMap(({passages, similarity}) => [
+		`**${passages.length} passages, at least ${percent(similarity)} similar**`,
+		...passages.map(
+			passage => `- ${passageLink(passage)}: ${passage.snippet}`
+		),
+		''
+	]);
+}
+
 // Body for a pull request comment
 function formatMarkdown(pairs) {
 	if (pairs.length === 0) {
-		return '### ✅ This revision adds no duplicated passages\n';
+		return '### ✅ This revision adds no duplicated passages, and edits none\n';
 	}
-	const groups = clusters(pairs);
-	const lines = [
-		`### ⚠️ This PR adds ${pairs.length} duplicated pair(s) of passages`,
-		'',
-		'Only passages this PR added are listed, with the places that already say ' +
-			'the same thing; duplication already on the base branch is not. ' +
-			'Each added passage also has an inline comment.',
-		''
-	];
-	for (const {passages, similarity} of groups) {
+	const {added, edited} = splitByBaseline(pairs);
+	const lines = [];
+	if (added.length > 0) {
 		lines.push(
-			`**${passages.length} passages, at least ${percent(similarity)} similar**`,
-			...passages.map(
-				passage => `- ${passageLink(passage)}: ${passage.snippet}`
-			),
+			`### ⚠️ This PR adds ${added.length} duplicated pair(s) of passages`,
+			'',
+			'Passages this PR added, with the places that already say the same ' +
+				'thing. Each added passage also has an inline comment.',
+			'',
+			...markdownGroups(added),
+			CONVENTION,
 			''
 		);
 	}
+	if (edited.length > 0) {
+		lines.push(
+			`### ⚠️ This PR edits ${edited.length} passage pair(s) that were already duplicated`,
+			'',
+			EDITED_ADVICE,
+			'',
+			...markdownGroups(edited)
+		);
+	}
 	lines.push(
-		CONVENTION,
-		'',
 		'Reproduce locally with `node dev/check-duplicates.mjs --diff <(git diff -U0 origin/main)`.'
 	);
 	return lines.join('\n') + '\n';
@@ -435,37 +484,45 @@ function formatMarkdown(pairs) {
 // posted earlier to the findings still present and delete the rest
 const REVIEW_MARKER = '<!-- check-duplicates-finding:';
 
-// Body for POST /repos/{owner}/{repo}/pulls/{n}/reviews: one comment per added
-// passage, on its first added line, naming the passages it duplicates. No
-// review body: a submitted review cannot be deleted, so a body would outlive
-// the comments once the duplication is gone.
+// Body for POST /repos/{owner}/{repo}/pulls/{n}/reviews: one comment per
+// passage the diff touched, on its first added line, naming the passages it
+// duplicates; the advice depends on whether the duplication is new. No review
+// body: a submitted review cannot be deleted, so a body would outlive the
+// comments once the duplication is gone.
 function reviewRequest(pairs) {
-	const partners = new Map(); // added passage → [{passage, similarity}]
-	for (const {similarity, a, b} of pairs) {
+	const partners = new Map(); // touched passage → [{passage, similarity, preexisting}]
+	for (const {similarity, a, b, preexisting} of pairs) {
 		for (const [passage, partner] of [
 			[a, b],
 			[b, a]
 		]) {
 			if (addedLineIn(passage) === undefined) continue;
 			if (!partners.has(passage)) partners.set(passage, []);
-			partners.get(passage).push({passage: partner, similarity});
+			partners
+				.get(passage)
+				.push({passage: partner, similarity, preexisting});
 		}
 	}
-	const comments = [...partners].map(([passage, duplicates]) => ({
-		path: passage.file,
-		line: addedLineIn(passage),
-		side: 'RIGHT',
-		body: [
-			`${REVIEW_MARKER} ${duplicates.map(({passage}) => passageKey(passage)).join(', ')} -->`,
-			'This passage says the same thing as:',
-			...duplicates.map(
-				({passage, similarity}) =>
-					`- ${passageLink(passage)} (${percent(similarity)} similar)`
-			),
-			'',
-			CONVENTION
-		].join('\n')
-	}));
+	const comments = [...partners].map(([passage, duplicates]) => {
+		const onlyEdited = duplicates.every(({preexisting}) => preexisting);
+		return {
+			path: passage.file,
+			line: addedLineIn(passage),
+			side: 'RIGHT',
+			body: [
+				`${REVIEW_MARKER} ${duplicates.map(({passage}) => passageKey(passage)).join(', ')} -->`,
+				onlyEdited
+					? 'This passage was already duplicated, and is now out of step with:'
+					: 'This passage says the same thing as:',
+				...duplicates.map(
+					({passage, similarity}) =>
+						`- ${passageLink(passage)} (${percent(similarity)} similar)`
+				),
+				'',
+				onlyEdited ? EDITED_ADVICE : CONVENTION
+			].join('\n')
+		};
+	});
 	return {event: 'COMMENT', body: '', comments};
 }
 
@@ -500,14 +557,17 @@ function main() {
 	);
 	let pairs = findDuplicatePairs(passages);
 	if (BASELINE_FILE) {
-		pairs = withoutBaseline(pairs, BASELINE_FILE);
+		pairs = markPreexisting(pairs, BASELINE_FILE);
 	}
-	if (DIFF) {
-		pairs = pairs.filter(
-			({a, b}) =>
-				addedLineIn(a) !== undefined || addedLineIn(b) !== undefined
-		);
-	}
+	// With a diff, a pre-existing pair the change edited is still reported, so
+	// the author hears about the other copy; without one, nothing says which
+	// pre-existing pairs matter, so they are all left out
+	pairs = DIFF
+		? pairs.filter(
+				({a, b}) =>
+					addedLineIn(a) !== undefined || addedLineIn(b) !== undefined
+			)
+		: pairs.filter(pair => !pair.preexisting);
 	if (REVIEW_FILE) {
 		fs.writeFileSync(
 			REVIEW_FILE,

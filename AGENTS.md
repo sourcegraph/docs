@@ -40,23 +40,23 @@
   Add product names and identifiers to `cspell-allow-list.txt`, in
   alphabetical order; the check reports out-of-order entries. CSpell is not a
   project dependency: `npx cspell@10 --no-progress <file>` to run it locally
-- **Example hostnames**: placeholder hostnames in docs are `*.example.com` 
-  (`sourcegraph.example.com` for the reader's instance, 
-  `github.example.com` for a code host, 
-  `https://sourcegraph.example.com` where a whole URL is meant); 
+- **Example hostnames**: placeholder hostnames in docs are `*.example.com`
+  (`sourcegraph.example.com` for the reader's instance,
+  `github.example.com` for a code host,
+  `https://sourcegraph.example.com` where a whole URL is meant);
   never `<URL>`, `[hostname]`, or a `$VARIABLE` the reader has to guess.
-  Example URLs use `https://`, except where needed, eg. loopback, 
-  in-cluster, proxy, and XML-namespace addresses. 
-  In a shell snippet a `$VARIABLE` is fine only when the same snippet 
-  exports it with an example value. 
+  Example URLs use `https://`, except where needed, eg. loopback,
+  in-cluster, proxy, and XML-namespace addresses.
+  In a shell snippet a `$VARIABLE` is fine only when the same snippet
+  exports it with an example value.
   `.github/workflows/check-hostnames.yml` runs `dev/check-hostnames.mjs`
   on the lines a PR adds and comments the findings with suggested changes
-  (advisory, never fails the PR). 
-  `dev/example-hostnames.json` maps each recommended hostname to the 
-  placeholders seen in its place, 
-  as either literal text,  a `*` glob, or a `/regex/`, 
-  matched case-insensitively with `-`, `_`, and `.` interchangeable; 
-  add to it when the check misses one, keeping keys and lists sorted. 
+  (advisory, never fails the PR).
+  `dev/example-hostnames.json` maps each recommended hostname to the
+  placeholders seen in its place,
+  as either literal text,  a `*` glob, or a `/regex/`,
+  matched case-insensitively with `-`, `_`, and `.` interchangeable;
+  add to it when the check misses one, keeping keys and lists sorted.
   `node dev/check-hostnames.mjs` checks all of `docs/`
   The `🤖 Sync generated docs` PRs overwrite the
   `SCHEMA_SYNC_START`…`SCHEMA_SYNC_END` blocks and whole pages
@@ -66,9 +66,11 @@
   `git log --author=sourcegraph-buildkite -- <file>` shows whether a page is one
 - **Duplicated content**: `.github/workflows/check-duplicates.yml` runs
   `dev/check-duplicates.mjs` and comments the passages a PR adds that say the
-  same thing as a passage elsewhere under `docs/`, paraphrased or verbatim
-  (advisory, never fails the PR). Not part of `pnpm run check`: main has
-  hundreds of pre-existing findings, and CI only reports the ones a PR adds.
+  same thing as a passage elsewhere under `docs/`, paraphrased or verbatim,
+  and the passages a PR edits that were already duplicated, so the author can
+  pick the home and replace the other copy with a link (advisory, never fails
+  the PR). Not part of `pnpm run check`: main has hundreds of pre-existing
+  findings, and CI only reports the ones a PR adds or edits.
   `node dev/check-duplicates.mjs --diff <(git diff -U0 origin/main)` runs it
   on your branch; without `--diff` it lists every duplicate in `docs/`
 
