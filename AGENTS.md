@@ -64,6 +64,22 @@
   `ai/models.mdx`, `cody/capabilities/supported-models.mdx`,
   `admin/telemetry/`); fix those in sourcegraph/sourcegraph instead.
   `git log --author=sourcegraph-buildkite -- <file>` shows whether a page is one
+- **Duplicated content**: `.github/workflows/check-duplicates.yml` runs
+  `dev/check-duplicates.mjs` and comments the passages a PR adds that say the
+  same thing as a passage elsewhere under `docs/`, paraphrased or verbatim
+  (advisory, never fails the PR). Not part of `pnpm run check`: main has
+  hundreds of pre-existing findings, and CI only reports the ones a PR adds.
+  `node dev/check-duplicates.mjs --diff <(git diff -U0 origin/main)` runs it
+  on your branch; without `--diff` it lists every duplicate in `docs/`
+
+### One home per fact
+
+- Each fact has one home. Link to it instead of copying it, so the copies
+  cannot drift apart.
+- Before writing a config snippet, `rg` the key under `docs/` and link to the
+  existing one.
+- The `SCHEMA_SYNC_START`…`SCHEMA_SYNC_END` blocks are the home for every
+  setting's default. Never restate a default elsewhere.
 
 ### Links
 
@@ -83,12 +99,13 @@ pnpm run check links --check-anchors --check-self-links \
 
 ### PR check comments
 
-The spelling, links, redirects, and example hostnames checks comment on the
-PR: a summary comment per check, plus an inline review comment with a
-`suggestion` block on each flagged line. After pushing, read them and follow
-the instructions they give (fix the spelling, the link, the redirect, or the
-hostname); do not work around a finding, and add a word to
-`cspell-allow-list.txt` only when it is correct.
+The spelling, links, redirects, example hostnames, and duplicated content
+checks comment on the PR: a summary comment per check, plus an inline review
+comment on each flagged line, with a `suggestion` block where the fix is
+mechanical. After pushing, read them and follow the instructions they give
+(fix the spelling, the link, the redirect, or the hostname; replace the
+duplicated passage with a link to its home); do not work around a finding,
+and add a word to `cspell-allow-list.txt` only when it is correct.
 
 ```sh
 gh pr checks <pr>
