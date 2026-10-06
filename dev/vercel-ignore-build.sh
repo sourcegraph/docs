@@ -22,4 +22,5 @@ exec git diff --quiet HEAD^ HEAD -- . \
 	':(exclude)dev/report-vercel-build.mjs' \
 	':(exclude)dev/verify-links-live.mjs' \
 	':(exclude)dev/sync-review-comments.sh' \
+	':(exclude)dev/vercel-ignore-build.sh' \
 	':(exclude)dev/slack-app-vercel-build-report.json'
