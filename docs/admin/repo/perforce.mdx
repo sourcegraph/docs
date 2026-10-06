@@ -303,24 +303,22 @@ The following experimental features are available for Perforce depots. These are
 
 ### Changelist ID in URLs
 
-Note: When enabling changelist IDs in URLs for the first time, Perforce depots can be unavailable for a few minutes on the Sourcegraph instance, due to the initial mapping of changelist IDs to generated commit ID happening in the background. If you have a large number of Perforce depots, we recommend proceeding with the following steps in a maintenance window in which you don't expect large amounts of traffic on your Sourcegraph instance.
-
-Add `"perforceChangelistMapping": "enabled",` to `experimentalFeatures` in the [advanced configuration](/admin/config/site-config):
-
-```json
-{
-	"experimentalFeatures": {
-		"perforceChangelistMapping": "enabled"
-	}
-}
-```
-
-When enabled, URLs for Perforce code hosts will use the Changelist (CL) ID instead of commit SHAs. Areas that benefit from this at the moment are:
+URLs for Perforce code hosts use the Changelist (CL) ID instead of commit SHAs. Areas that benefit from this at the moment are:
 
 -   Viewing a specific CL
 -   Viewing the files of a depot at a specific CL
 -   Viewing a specific file added / removed / modified in a specific CL
 -   Viewing the list of CLs
+
+To disable it, add this to the [advanced configuration](/admin/config/site-config):
+
+```json
+{
+	"experimentalFeatures": {
+		"perforceChangelistMapping": "disabled"
+	}
+}
+```
 
 ### Searching within a specific changelist
 
@@ -339,7 +337,7 @@ repo:^Talkhouse/main$ rev:changelist/123 text to find
 #### Limitations
 
 -   After a depot is cloned or fetched, Sourcegraph computes and stores mappings of CL IDs to commit SHAs. This mapping can take several minutes for large clones/fetches. When a background mapping job is running, the depot won't be serviceable as URLs referring to CL IDs may not resolve and users may see an error while interacting with the depot.
--   This experimental configuration can not be selectively enabled for a specific perforce depot.
+-   This experimental configuration can not be selectively enabled or disabled for a specific perforce depot.
 
 #### Mechanism
 

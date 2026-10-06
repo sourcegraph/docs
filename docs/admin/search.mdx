@@ -90,24 +90,21 @@ The resource requirements for indexed search vary considerably based on the text
 
 Sourcegraph always maintains an index of the source code on your default branch. Some organizations have other branches that are regularly searched. To speed up search for those branches, Sourcegraph can be configured to index up to 64 branches per repository.
 
-You can configure indexed branches in advanced configuration under the `experimentalFeatures.search.index.branches` setting. For example:
+Configure the extra branches per repository with `search.index.branches`. To also index the revisions matched by [query-based search contexts](/code-search/working/search-contexts#query-based-search-contexts), set `search.index.query.contexts`:
 
 ```json
-"experimentalFeatures": {
-  "search.index.branches": {
-   "github.com/sourcegraph/sourcegraph": ["3.15", "develop"],
-   "github.com/sourcegraph/src-cli": ["next"]
-  }
+{
+	"experimentalFeatures": {
+		"search.index.branches": {
+			"github.com/sourcegraph/sourcegraph": ["3.15", "develop"],
+			"github.com/sourcegraph/src-cli": ["next"]
+		},
+		"search.index.query.contexts": true
+	}
 }
 ```
 
-Indexing multiple branches will add additional resource requirements to Sourcegraph (particularly memory). The indexer will deduplicate documents between branches. So the size of your index will grow in relation to the number of unique documents. Refer to our [resource estimator](/self-hosted/deploy/resource-estimator) to estimate whether additional resources are required.
-
-<Callout type="note">
-	{' '}
-	The default branch (HEAD) and all revisions specified in version contexts are
-	always indexed.
-</Callout>
+The indexer deduplicates documents between branches, so the size of your index will grow with the number of unique documents. Indexing multiple branches will increase CPU and memory requirements.
 
 ### Scaling considerations
 
