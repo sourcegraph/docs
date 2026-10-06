@@ -1,24 +1,24 @@
 # Builtin password authentication
 
-The [`builtin` auth provider](/admin/config/site-config#builtin-password-authentication) manages user accounts inside Sourcegraph. It supports user signup, login, and password reset. This is the simplest provider type to set up, and is the default auth provider on a fresh installation for the first user so they can create an account and become site admin.
+The [`builtin` auth provider](/admin/config/site-config#builtin-password-authentication) manages user accounts inside Sourcegraph. It supports user signup, login, and password reset. This is the simplest provider type to set up, and is the default auth provider on a fresh installation for the first user so they can create an account and become administrator.
 
 Use this auth provider, if you have no organizational requirements to use a SSO provider.
 
 When enabled, users will be able to login using username/password combinations from the login screen.
 
-Signup can either be allowed to all users, the site admin can provision accounts, or new users can request an account.
+Signup can either be allowed to all users, the administrator can provision accounts, or new users can request an account.
 
 ![Login form for builtin authentication](https://storage.googleapis.com/sourcegraph-assets/docs/images/admin/auth/login_signup.png)
 
 <Callout type="note">
 	If Sourcegraph is running on a free license all users will be created as
-	site admins. Learn more about license settings on our [pricing
+	administrators. Learn more about license settings on our [pricing
 	page](https://about.sourcegraph.com/pricing).
 </Callout>
 
 ## Enabling this authentication provider
 
-Add the following section to your site configuration:
+Add the following section to your advanced configuration:
 
 ```json
 {
@@ -63,19 +63,19 @@ When `allowSignup` is not set, or set to `false`, users will see a request accou
 	configurations.
 </Callout>
 
-New users can submit a form and site admins will see the request in the navbar on the instance, where they can approve or reject the requests.
+New users can submit a form and administrators will see the request in the navbar on the instance, where they can approve or reject the requests.
 
 ![List of pending access requests for admin to approve](https://storage.googleapis.com/sourcegraph-assets/docs/images/admin/auth/pending-access-requests.png)
 
 ## Disable account requests from users
 
-The account request feature can be disabled by setting `"auth.accessRequest": { "enabled": false }`. When disabled, new user accounts can only be created by the site admin manually.
+The account request feature can be disabled by setting `"auth.accessRequest": { "enabled": false }`. When disabled, new user accounts can only be created by the administrator manually.
 
 ## Creating builtin authentication users
 
 Users can be created for builtin password authentication in several ways:
 
--   through the site admin page `/site-admin/users/new`
+-   through the Administration page `/site-admin/users/new`
 -   through users [signing up](#allow-all-new-users-to-sign-up-to-your-sourcegraph-instance)
 -   through the `createUser` mutation in the GraphQL API
 -   through [`src users create`](/cli/references/users/create)
@@ -84,9 +84,9 @@ When [SMTP is enabled](/self-hosted/email), special behaviours apply to whether 
 
 ## Account lockout
 
-Password reset links expire after 4 hours by default - this can be configured in site configuration with the [`auth.passwordResetLinkExpiry`](/admin/config/site-config#auth-passwordResetLinkExpiry) field.
+Password reset links expire after 4 hours by default - this can be configured in advanced configuration with the [`auth.passwordResetLinkExpiry`](/admin/config/site-config#auth-passwordResetLinkExpiry) field.
 
-Account will be locked out for 30 minutes after 5 consecutive failed sign-in attempts within one hour for the builtin authentication provider. The threshold and duration of lockout and consecutive periods can be customized via `"auth.lockout"` in the site configuration:
+Account will be locked out for 30 minutes after 5 consecutive failed sign-in attempts within one hour for the builtin authentication provider. The threshold and duration of lockout and consecutive periods can be customized via `"auth.lockout"` in the advanced configuration:
 
 ```json
 {
@@ -102,7 +102,7 @@ Account will be locked out for 30 minutes after 5 consecutive failed sign-in att
 }
 ```
 
-To enabled self-serve account unlock through emails, add the following lines to your site configuration:
+To enabled self-serve account unlock through emails, add the following lines to your advanced configuration:
 
 ```json
 {
