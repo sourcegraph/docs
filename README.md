@@ -32,7 +32,7 @@ following versions of `node` and `pnpm` installed:
 
 **Note**: If you have `mise` available you can install the above versions for
 only this repository by running the following command from your terminal in the
-root folder:
+root folder
 
 ```sh
 mise install
