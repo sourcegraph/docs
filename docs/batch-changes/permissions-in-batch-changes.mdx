@@ -20,7 +20,7 @@ To see the batch change's proposed changes on a repository, a user requires **re
 	Changes](#repository-permissions-for-batch-changes).
 </Callout>
 
-Site admins have admin permissions on all batch changes. However, other users can only have admin permissions on the batch changes they created and read access to other batch changes.
+Administrators have admin permissions on all batch changes. However, other users can only have admin permissions on the batch changes they created and read access to other batch changes.
 
 These levels apply on top of [role-based access control](/admin/access-control/batch-changes): a user needs the `batch_changes:read` permission to view any batch change and the `batch_changes:write` permission to create or execute one. See [Restricting Batch Changes to specific users](#restricting-batch-changes-to-specific-users).
 
@@ -86,24 +86,26 @@ If you are not permitted to view a repository on Sourcegraph, you won't be able 
 
 ## Disabling Batch Changes
 
-A site admin can disable Batch Changes for a Sourcegraph instance by setting the [site configuration](/admin/config/site-config) property `"batchChanges.enabled"` to `false`.
+An administrator can disable Batch Changes for a Sourcegraph instance by setting the [advanced configuration](/admin/config/site-config) property `"batchChanges.enabled"` to `false`.
 
 ## Restricting Batch Changes to specific users
 
 Access to Batch Changes is controlled through [role-based access control (RBAC)](/admin/access-control/batch-changes). By default, the built-in **User** role is granted both the `batch_changes:read` and `batch_changes:write` permissions, so every user can view, create, and run batch changes.
 
-To restrict Batch Changes to site admins or to a specific group of users:
+To restrict Batch Changes to administrators or to a specific group of users:
 
-1. Go to **Site admin > Users & auth > Roles**.
+1. Go to **Administration > Users & auth > Roles**.
 2. Edit the **User** role and remove the `batch_changes:read` and `batch_changes:write` permissions.
 3. Optionally, [create a custom role](/admin/access-control#creating-a-new-role-and-assigning-it-permissions) that grants these permissions and [assign it](/admin/access-control#managing-user-roles) to the users who should keep access.
 
-The **Site Administrator** role always retains all Batch Changes permissions.
+The **Administrator** role always retains all Batch Changes permissions.
 
 <Callout type="note">
-	The site configuration property `"batchChanges.restrictToAdmins"` is deprecated and has no effect. Use RBAC as described above instead.
+	The advanced configuration property `"batchChanges.restrictToAdmins"` is deprecated and has no effect. Use RBAC as described above instead.
 </Callout>
 
-## Restricting merges to site admins
+<span id="restricting-merges-to-site-admins"></span>
 
-A site admin can prevent non-admin users from merging changesets or enabling auto-merge through Batch Changes by setting the [site configuration](/admin/config/site-config) property `"batchChanges.restrictMergeToAdmins"` to `true`. This is useful when the code host credential or GitHub App used by Batch Changes has broader merge permissions than individual users would otherwise have. All other Batch Changes operations remain governed by RBAC and the permission levels described above.
+## Restricting merges to administrators
+
+An administrator can prevent non-admin users from merging changesets or enabling auto-merge through Batch Changes by setting the [advanced configuration](/admin/config/site-config) property `"batchChanges.restrictMergeToAdmins"` to `true`. This is useful when the code host credential or GitHub App used by Batch Changes has broader merge permissions than individual users would otherwise have. All other Batch Changes operations remain governed by RBAC and the permission levels described above.

@@ -51,8 +51,8 @@ module "executors" {
 | Variable                                       | Description                                                                                                                                                                                                                |
 | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `availability_zone`                            | The AWS availability zone to create the instance in.                                                                                                                                                                       |
-| `executor_sourcegraph_external_url`            | The public URL of your Sourcegraph instance. This corresponds to the `externalURL` value in your Sourcegraph instance's site configuration and must be resolvable from the provisioned executor compute resources.         |
-| `executor_sourcegraph_executor_proxy_password` | The access token corresponding to the `executors.accessToken` in your Sourcegraph instance's site configuration.                                                                                                           |
+| `executor_sourcegraph_external_url`            | The public URL of your Sourcegraph instance. This corresponds to the `externalURL` value in your Sourcegraph instance's advanced configuration and must be resolvable from the provisioned executor compute resources.         |
+| `executor_sourcegraph_executor_proxy_password` | The access token corresponding to the `executors.accessToken` in your Sourcegraph instance's advanced configuration.                                                                                                           |
 | `executor_queue_name`                          | The single [queue](/self-hosted/executors/executors-config#queues) from which the executor should pull jobs. Either this or `executor_queue_names` must be set.                                                                   |
 | `executor_queue_names`                         | The [queues](/self-hosted/executors/executors-config#queues) from which the executor should pull jobs. Executors serving batch changes need both `batches` and `batches-hooks`. Either this or `executor_queue_name` must be set. |
 | `executor_instance_tag`                        | A label tag to add to all the executors; can be used for filtering out the right instances in monitoring.                                                                                                                  |
@@ -133,11 +133,11 @@ The following is a step-by-step guide on provisioning a single `codeintel` execu
 1. [Install Terraform](#terraform-version).
 2. Install the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
 3. Run `aws configure` to set up your credentials and default region.
-4. Set up your Sourcegraph instance's Site configuration for executors
+4. Set up your Sourcegraph instance's Advanced configuration for executors
     1. Click on your profile picture in the top right corner
-    2. Select **Site admin**
+    2. Select **Administration**
     3. Expand the **Configuration** section
-    4. Select **Site configuration**
+    4. Select **Advanced configuration**
     5. Set the following,
         - `"externalURL": "https://sourcegraph.example.com"`
             - Replace with a URL that is accessible from the EC2 instance
@@ -151,13 +151,13 @@ The following is a step-by-step guide on provisioning a single `codeintel` execu
     - `region` to the AWS region to provision the executor in
 7. Change the following in `main.tf`
     - `availability_zone` to an availability zone within your chosen region (e.g. `us-west-2a`)
-    - `executor_sourcegraph_external_url` to the URL configured in your instance's **Site configuration**
-    - `executor_sourcegraph_executor_proxy_password` to the access token configured in your instance's **Site configuration**
+    - `executor_sourcegraph_external_url` to the URL configured in your instance's **Advanced configuration**
+    - `executor_sourcegraph_executor_proxy_password` to the access token configured in your instance's **Advanced configuration**
 8. Run `terraform init` to download the Sourcegraph executor modules.
 9. Run `terraform plan` to preview the changes that will occur to your AWS infrastructure.
 10. Run `terraform apply` and enter "yes" after reviewing the proposed changes to create the executor resources.
     - Ensure `terraform apply` exited with code 0 and did not print any errors
-11. Go back to the site admin page, expand **Executors**, click **Instances**, and check to see if your executor shows up in the list with a green dot 🟢
+11. Go back to the Administration page, expand **Executors**, click **Instances**, and check to see if your executor shows up in the list with a green dot 🟢
 
 ### Validation
 
@@ -214,7 +214,7 @@ ubuntu@ip-10-0-1-42:~$ curl https://sourcegraph.example.com
 
 ### Configure Auto-indexing
 
-1. Go to the **Site admin** page
+1. Go to the **Administration** page
 2. Expand **Code graph**,
 3. Select **Configuration**
 4. Click **Create new policy**, and fill in:

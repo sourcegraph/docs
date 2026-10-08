@@ -8,9 +8,9 @@ Sourcegraph supports [Perforce Helix](https://www.perforce.com/solutions/version
 
 Perforce depots can be added to a Sourcegraph instance by adding the appropriate [code host connection](/admin/code-hosts/).
 
-To enable Perforce code host connections, a site admin must:
+To enable Perforce code host connections, an administrator must:
 
-1. Go to **Site admin > Manage code hosts > Add code host**
+1. Go to **Administration > Manage code hosts > Add code host**
 
 1. Scroll down the list of supported code hosts and select **Perforce**.
 
@@ -130,7 +130,7 @@ File-level permissions eliminate the need for [syncing subdirectories to match p
 
 To enable file-level permissions:
 
-1. Add the following entry to your site configuration file:
+1. Add the following entry to your advanced configuration file:
 
     ```json
     {
@@ -178,7 +178,7 @@ To ensure Sourcegraph handles host rules according to your requirements, you hav
 
 ##### Enforcing host rules
 
-If you want Sourcegraph to enforce host-specific permissions, you need to enable IP restriction enforcement in your [site configuration](/admin/config/site-config):
+If you want Sourcegraph to enforce host-specific permissions, you need to enable IP restriction enforcement in your [advanced configuration](/admin/config/site-config):
 
 ```json
 {
@@ -220,7 +220,7 @@ With this setting, Sourcegraph will ignore any rules with a host other than `*`,
 -   As long as a user has been granted at least `Read` permissions in Perforce they will be able to view content in Sourcegraph.
 -   As a special case, commits in which a user does not have permissions to read any files are hidden. If a user can read a subset of files in a commit, only those files are shown.
 -   [file-level permissions must be disabled for Batch Changes to work](#known-issues-and-limitations).
--   Setting `authz.enforceForSiteAdmins` to `true` in the site configuration will enforce permissions for admin users. They may not be able to see repositories and their contents if their Sourcegraph user account email does not match with their email on the Perforce server.
+-   Setting `authz.enforceForSiteAdmins` to `true` in the advanced configuration will enforce permissions for admin users. They may not be able to see repositories and their contents if their Sourcegraph user account email does not match with their email on the Perforce server.
 
 ## Configuration
 
@@ -303,24 +303,22 @@ The following experimental features are available for Perforce depots. These are
 
 ### Changelist ID in URLs
 
-Note: When enabling changelist IDs in URLs for the first time, Perforce depots can be unavailable for a few minutes on the Sourcegraph instance, due to the initial mapping of changelist IDs to generated commit ID happening in the background. If you have a large number of Perforce depots, we recommend proceeding with the following steps in a maintenance window in which you don't expect large amounts of traffic on your Sourcegraph instance.
-
-Add `"perforceChangelistMapping": "enabled",` to `experimentalFeatures` in the [site configuration](/admin/config/site-config):
-
-```json
-{
-	"experimentalFeatures": {
-		"perforceChangelistMapping": "enabled"
-	}
-}
-```
-
-When enabled, URLs for Perforce code hosts will use the Changelist (CL) ID instead of commit SHAs. Areas that benefit from this at the moment are:
+URLs for Perforce code hosts use the Changelist (CL) ID instead of commit SHAs. Areas that benefit from this at the moment are:
 
 -   Viewing a specific CL
 -   Viewing the files of a depot at a specific CL
 -   Viewing a specific file added / removed / modified in a specific CL
 -   Viewing the list of CLs
+
+To disable it, add this to the [advanced configuration](/admin/config/site-config):
+
+```json
+{
+	"experimentalFeatures": {
+		"perforceChangelistMapping": "disabled"
+	}
+}
+```
 
 ### Searching within a specific changelist
 
@@ -339,17 +337,17 @@ repo:^Talkhouse/main$ rev:changelist/123 text to find
 #### Limitations
 
 -   After a depot is cloned or fetched, Sourcegraph computes and stores mappings of CL IDs to commit SHAs. This mapping can take several minutes for large clones/fetches. When a background mapping job is running, the depot won't be serviceable as URLs referring to CL IDs may not resolve and users may see an error while interacting with the depot.
--   This experimental configuration can not be selectively enabled for a specific perforce depot.
+-   This experimental configuration can not be selectively enabled or disabled for a specific perforce depot.
 
 #### Mechanism
 
 To support CLs natively in the URLs, Sourcegraph performs background computation after syncing the contents of a depot. That's done by parsing each generated commit to retrieve the corresponding CL ID and store it in the `repo_commits_changelists` table. This is currently performed on only one depot at a time and we are working to support this for multiple depots in parallel in an upcoming release.
 
-Additionally, while removing a depot from a code host config will mark it as "deleted", the mapped information will **not** be deleted to prevent forced re-computation after an accidental removal of depot from a code host config. Similarly recloning a depot will **not** trigger a computation of all the CLs from the beginning of the depot's source control history. If site admins are recloning or deleting and re-adding a depot to Sourcegraph as a result of history rewrite of a depot in Perforce, they should get in [touch with us](mailto:support@sourcegraph.com) for next steps.
+Additionally, while removing a depot from a code host config will mark it as "deleted", the mapped information will **not** be deleted to prevent forced re-computation after an accidental removal of depot from a code host config. Similarly recloning a depot will **not** trigger a computation of all the CLs from the beginning of the depot's source control history. If administrators are recloning or deleting and re-adding a depot to Sourcegraph as a result of history rewrite of a depot in Perforce, they should get in [touch with us](mailto:support@sourcegraph.com) for next steps.
 
 ### Batch Changes support for Perforce depots
 
-Add `"batchChanges.enablePerforce": true` to `experimentalFeatures` in the [site configuration](/admin/config/site-config):
+Add `"batchChanges.enablePerforce": true` to `experimentalFeatures` in the [advanced configuration](/admin/config/site-config):
 
 ```json
 {
