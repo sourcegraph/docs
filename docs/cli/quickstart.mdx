@@ -35,12 +35,18 @@ chmod +x /usr/local/bin/src
 You can install using PowerShell as follows:
 
 ```powershell
-New-Item -ItemType Directory 'C:\Program Files\Sourcegraph'
+$SrcGraphInstallDir = "$env:ProgramFiles\Sourcegraph"
+New-Item -ItemType Directory -Path $SrcGraphInstallDir -Force
+$regexAddPath = [regex]::Escape('%ProgramFiles%\Sourcegraph')
 
-Invoke-WebRequest https://sourcegraph.com/.api/src-cli/src_windows_amd64.exe -OutFile 'C:\Program Files\Sourcegraph\src.exe'
+Invoke-WebRequest https://sourcegraph.com/.api/src-cli/src_windows_amd64.exe -OutFile "$SrcGraphInstallDir\src.exe"
 
-[Environment]::SetEnvironmentVariable('Path', [Environment]::GetEnvironmentVariable('Path', [EnvironmentVariableTarget]::Machine) + ';C:\Program Files\Sourcegraph', [EnvironmentVariableTarget]::Machine)
-$env:Path += ';C:\Program Files\Sourcegraph'
+$Path = (Get-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment').GetValue('Path', '', 'DoNotExpandEnvironmentNames')
+$arrPath = $Path -split ';' | Where-Object { $_ -notMatch "^$regexAddPath\\?" } 
+$arrPath += '%ProgramFiles%\Sourcegraph'
+[String]$strPath = $arrPath -join ';' 
+Set-ItemProperty -LiteralPath 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name Path -Value $strPath -Type ExpandString -ErrorAction 'Stop' | Out-Null
+$env:Path = (Get-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment').GetValue('Path')
 ```
 
 For other options, please refer to [the Windows specific `src` documentation](/cli/explanations/windows).
