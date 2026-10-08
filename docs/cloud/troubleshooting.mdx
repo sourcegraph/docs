@@ -1,0 +1,71 @@
+# Troubleshooting Sourcegraph Cloud
+
+Sourcegraph manages the infrastructure of your Cloud instance, and our on-call engineers monitor its
+performance and health. Site admins on Cloud instances do not have access to Grafana, Prometheus,
+Jaeger, or server logs; Sourcegraph investigates those on your behalf.
+
+To report an error or performance issue, collect what you can from the sections below and
+[contact Sourcegraph Support](https://help.sourcegraph.com/hc/en-us/requests/new) or email
+`support@sourcegraph.com`. Don't delay contacting support if some of this information is
+unavailable. See [Support and SLAs](/sla#sourcegraph-cloud-sla-managed-instance) for response times.
+
+## Describe the issue
+
+Include:
+
+- Your instance URL
+- The affected users and repositories
+- When the issue occurred (with time zone) and how often it happens
+- Reproduction steps, and the expected and actual behavior
+- Screenshots or the exact error messages
+
+## Collect browser evidence
+
+Open the browser developer tools (right-click in the browser > **Inspect**):
+
+- **Console** tab: copy any errors shown while reproducing the issue.
+- **Network** tab: find slow or failing requests. Select a request and, in its **Headers** tab, copy
+  the `x-trace` response header when present. Send this trace ID and the time of the request to
+  support. The Jaeger link in the `x-trace-url` header is only accessible to Sourcegraph.
+
+Check **Preserve log** to keep the list of requests across page loads.
+
+## Search issues
+
+Include the original query, and whether adding `index:only`, `timeout:60s`, or `count:all` to it
+changes the result.
+
+To get a trace ID for a search, add the `trace=1` parameter to the search results page URL
+(`&trace=1` if the URL already has parameters), run the search, and copy the `x-trace` header from
+the [Network tab](#collect-browser-evidence).
+
+## Repository syncing issues
+
+If repositories are not cloning or updating, include the errors shown in the status notifications in
+the navigation bar and on the **Site admin > Code host connections** page
+(`/admin/external-services`), and the affected repositories.
+
+## Check diagnostics
+
+Go to **Site admin > Diagnostics** (`/admin/diagnostics`). Review its **Background jobs**,
+**Outbound requests**, **Pings**, and **Slow requests** tabs for failures or slow activity related
+to the issue, and include the relevant error details or screenshots.
+
+## Copy configuration
+
+Go to **Settings > Report a bug** (`/user/settings/report-bug`) and copy the configuration shown
+there. For site admins, it includes the site configuration, code host configuration, and settings.
+Redact credentials, tokens, and other sensitive content before sharing.
+
+## Collect instance stats
+
+The following are useful context for performance issues:
+
+- Number of repositories (shown at the top of the **Site admin > Repositories** page, `/admin/repositories`)
+- Whether one or more large monorepos contain most of the code
+- Number of users and usage stats from [Sourcegraph Analytics](/analytics)
+
+## Audit logs
+
+Audit logs are separate from the server logs Sourcegraph uses for troubleshooting. They are
+[available on request or through LogPush](/cloud#audit-logs).

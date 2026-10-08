@@ -4,12 +4,11 @@ This is a guide for investigating errors and performance issues, with the goal o
 issue or generating a high-quality issue report.
 
 <Callout type="info">
-	**Sourcegraph Cloud:** follow the [Sourcegraph Cloud checklist](#sourcegraph-cloud). The scenarios
-	and the Grafana, Prometheus, Jaeger, and log actions below are for self-hosted deployments: Cloud
-	customers cannot access them, and Sourcegraph operators investigate them on your behalf.
+	This guide is for self-hosted deployments. If you use Sourcegraph Cloud, see
+	[Troubleshooting Sourcegraph Cloud](/cloud/troubleshooting).
 </Callout>
 
-**How to use this guide for self-hosted deployments:**
+**How to use this guide:**
 
 1. Scan through [Specific scenarios](#specific-scenarios) to see if any of these applies to you. If
    any do, follow the instructions in the subsection.
@@ -21,35 +20,6 @@ issue or generating a high-quality issue report.
 
 > NOTE: This guide assumes you have administrator privileges on the Sourcegraph instance. If you are
 > non-admin user, report your error the administrator and have them walk through this guide.
-
-## Sourcegraph Cloud
-
-Sourcegraph manages the infrastructure of your Cloud instance. To report an error or performance
-issue, collect what you can from the following list and
-[contact Sourcegraph Support](https://help.sourcegraph.com/hc/en-us/requests/new) or email
-`support@sourcegraph.com`. Don't delay contacting support if some of this information is
-unavailable.
-
-1. **Context:** your instance URL, the affected users and repositories, when the issue occurred
-   (with time zone), how often it happens, reproduction steps, expected and actual behavior, and
-   screenshots or the exact error messages.
-1. **Browser evidence:** the [browser console](#check-browser-console) output, and the slow or
-   failing requests from the [browser network panel](#check-browser-network-panel), with their
-   `x-trace` response header when present. Send the trace ID to support; the Jaeger link in the
-   `x-trace-url` header is not accessible to Cloud customers.
-1. **Search issues:** the original query, and whether adding `index:only`, `timeout:60s`, or
-   `count:all` to it changes the result. To get a trace ID for a search, add the `trace=1`
-   parameter to the search results page URL (`&trace=1` if the URL already has parameters), then
-   copy the `x-trace` header as above.
-1. **Repository syncing issues:** errors shown in the status notifications in the navigation bar and
-   on the **Site admin > Code host connections** page (`/admin/external-services`), and the
-   affected repositories.
-1. **Site admin evidence:** relevant findings from [Diagnostics](#check-diagnostics), your
-   [Sourcegraph configuration](#copy-configuration), and [instance stats](#collect-instance-stats).
-   Redact credentials, tokens, and other sensitive content before sharing.
-
-Audit logs are separate from the server logs Sourcegraph uses for troubleshooting, and are
-[available on request or through LogPush](/cloud#audit-logs).
 
 ## Specific scenarios
 
@@ -278,8 +248,7 @@ You can further diagnose an overloaded zoekt-webserver via watchdog logs or metr
 This section contains various actions that can be taken to collect information or update Sourcegraph
 in order to resolve an error or performance issue. You should typically not read this section
 directly, but start with the [General scenarios](#general-scenarios) section to determine which actions are
-appropriate. On Sourcegraph Cloud, start with the [Sourcegraph Cloud checklist](#sourcegraph-cloud)
-instead.
+appropriate.
 
 ### Check browser console
 
@@ -297,20 +266,17 @@ Network panel](https://developers.google.com/web/tools/chrome-devtools/network).
 -   Check the waterfall diagram at the top and the Waterfall column in the list of network requests to
     quickly identify high-latency requests.
 -   Clicking on a request will open up a panel that provides additional details about the request.
-    -   If a request is taking a long time, inspect the Headers tab of this panel and copy the
-        `x-trace` response header (the trace ID) when present. On self-hosted deployments, the
-        `x-trace-url` response header links to the trace, or you can
-        [look up the trace ID in Jaeger](#collect-a-jaeger-trace). On Sourcegraph Cloud, send the
-        trace ID and the time of the request to support; Cloud customers cannot open the Jaeger link.
+    -   If a request is taking a long time, inspect the Headers tab of this panel and find the
+        `x-trace` response header (the trace ID) or the `x-trace-url` response header (a link to the
+        trace). Once you've obtained the trace ID, [look it up in Jaeger](#collect-a-jaeger-trace).
 -   You can check `Preserve log` to preserve the list of requests across page loads and reloads.
 
 ### Check diagnostics
 
-Site admins on self-hosted and Sourcegraph Cloud instances can go to **Site admin > Diagnostics**
-(`/admin/diagnostics`). Review its **Background jobs**, **Outbound requests**, **Pings**, and
-**Slow requests** tabs for failures or slow activity related to the issue, and include the relevant
-error details or screenshots in the issue report. The **Migrations** tab is not available to Cloud
-customers.
+Go to **Site admin > Diagnostics** (`/admin/diagnostics`). Review its **Background jobs**,
+**Outbound requests**, **Pings**, **Slow requests**, and **Migrations** tabs for failures or slow
+activity related to the issue, and include the relevant error details or screenshots in the issue
+report.
 
 ### Check resource usage
 
