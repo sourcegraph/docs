@@ -74,12 +74,24 @@
   redirect in `src/data/redirects.ts` does not satisfy the check.
 - Link to this site with relative paths (`/admin/config/site-config`), never
   `https://sourcegraph.com/docs/…` or `https://docs.sourcegraph.com/…`.
-- To also probe the external links you added:
+- main has hundreds of pre-existing findings. To see only the ones your
+  branch adds, as CI does, record the merge base with `--format json` and
+  pass it as `--baseline`; `--diff` does not filter findings, it only scopes
+  `--check-external` and the review comments to added lines:
 
 ```sh
-pnpm run check links --check-anchors --check-self-links \
-  --check-external --diff <(git diff -U0 origin/main)
+base=$(git merge-base origin/main HEAD)
+git worktree add --detach /tmp/docs-base "$base"
+node dev/check-links.mjs --check-anchors --check-self-links --format json \
+  --root /tmp/docs-base > /tmp/docs-base-links.json
+git worktree remove /tmp/docs-base
+git diff -U0 "$base" | pnpm run check links --check-anchors --check-self-links \
+  --check-external --baseline /tmp/docs-base-links.json --diff /dev/stdin
 ```
+
+- Pipe the diff to `--diff /dev/stdin`, not `--diff <(git diff ...)`:
+  `dev/checks.mjs` spawns the check with only stdin/stdout/stderr, so the
+  process-substitution descriptor is gone and the check fails with `EBADF`
 
 ### PR check comments
 
