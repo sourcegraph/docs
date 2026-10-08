@@ -34,6 +34,11 @@
 - **Prove changed links resolve on a deploy**:
   `node dev/verify-links-live.mjs --site <vercel-preview-url>` prints a
   Markdown table for the PR description
+- **Diff a preview against production**:
+  `node dev/diff-deployments.mjs --site <vercel-preview-url>` fetches every
+  sitemap page from both, strips build ids, chunk hashes and the basePath, and
+  writes a unified diff of the pages that differ to `logs/`. Pass the preview's
+  `/docs` prefix when it serves under one
 - **Spell check**: `.github/workflows/spellcheck.yml` runs
   `dev/check-spelling.mjs` on the lines a PR adds plus its title and
   description, and comments the findings (advisory, never fails the PR).
