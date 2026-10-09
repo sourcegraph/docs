@@ -3,13 +3,18 @@
 This is a guide for investigating errors and performance issues, with the goal of resolving the
 issue or generating a high-quality issue report.
 
+<Callout type="info">
+	This guide is for self-hosted deployments. If you use Sourcegraph Cloud, see
+	[Troubleshooting Sourcegraph Cloud](/cloud/troubleshooting).
+</Callout>
+
 **How to use this guide:**
 
 1. Scan through [Specific scenarios](#specific-scenarios) to see if any of these applies to you. If
    any do, follow the instructions in the subsection.
 1. Scan through [General scenarios](#general-scenarios) to find which scenario(s) applies to you. If any do,
    follow the instructions to update your instance or collect information for the issue report.
-1. If you cannot resolve the issue on your own, [contact us](https://help.sourcegraph.com/hc/en-us/requests/new) with the collected
+1. If you cannot resolve the issue on your own, [contact us](https://help.sourcegraph.com/inbox/new) with the collected
    information. Enterprise customers may alternatively file a support ticket or email
    `support@sourcegraph.com`.
 
@@ -22,26 +27,27 @@ issue or generating a high-quality issue report.
 
 If this is the case, this could indicate high gitserver load. To confirm, take the following steps:
 
-1. [Open Grafana](/self-hosted/observability/metrics#grafana).
-1. **If using Sourcegraph 3.14**: Simply check if either of these alerts are firing:
-    - `gitserver: 50+ concurrent command executions (abnormally high load)`
-    - `gitserver: echo command execution duration exceeding 1s`
-1. **If using an older version of Sourcegraph:**
-    - Go to the Sourcegraph Internal > Gitserver rev2 dashboard.
-    - Examine the "Echo Duration Seconds" dashboard (tracks the `src_gitserver_echo_duration_seconds`
-      metric) and "Commands running concurrently" dashboard (tracks the `src_gitserver_exec_running`
-      metric). If either of these is high (> 1s echo duration or 100s simultaneous execs), then this
-      indicates gitserver is under heavy load and likely the bottleneck.
+1. [Open Grafana](/self-hosted/observability/metrics#grafana) and go to the **Git Server** dashboard.
+1. Check whether the [`gitserver: echo_command_duration_test`](/self-hosted/observability/alerts#gitserver-echo_command_duration_test)
+   alert is firing. The **Echo test command duration** panel tracks the
+   `src_gitserver_echo_duration_seconds` metric; on a healthy node it stays below 5ms, and the alert
+   fires when it stays at 20ms or more for 30 seconds.
+1. Check the **Git commands running on each gitserver instance** panel, which tracks the
+   `src_gitserver_exec_running` metric. A consistently high value indicates gitserver is under
+   heavy load and likely the bottleneck.
 1. Confirm your gitserver is not under-provisioned, by e.g. comparing its allocated resources with what the [resource estimator](/self-hosted/deploy/resource-estimator) shows.
 
-Solution: set `USE_ENHANCED_LANGUAGE_DETECTION=false` in the Sourcegraph runtime
-environment.
+If gitserver is overloaded, follow the next steps for the
+[`echo_command_duration_test`](/self-hosted/observability/alerts#gitserver-echo_command_duration_test)
+alert: allocate gitserver CPU and memory according to the resource estimator, and provision more
+IOPS if its persistent volume is slow.
 
 #### Scenario: no cloning, syncing, updating or deleting is happening
 
 Observed state: Sourcegraph instance does not react to any updates to code hosts and no cloning is happening.
 The cause of this state could be worker queries that are too large for the limits of the running Postgres DB.
-One symptom is seeing repo syncer errors ending in `driver: bad connection` in the worker logs, or the same error in the "Code host status panel" (Clicking the cloud icon).
+One symptom is seeing repo syncer errors ending in `driver: bad connection` in the worker logs, or the same error in the
+status notifications in the navigation bar and on the **Site admin > Code host connections** page (`/admin/external-services`).
 
 The fix is to increase the memory on Postgres DB which will increase certain Postgres-internal limits and will allow
 the queries from worker to go through.
@@ -53,7 +59,8 @@ to be updated it could be from `Out of memory` errors. A fix here is to increase
 
 This section contains a list of scenarios, each of which contains instructions that include
 [actions](#actions) that are appropriate to the scenario. Note that more than one scenario may apply
-to a given issue.
+to a given issue. For any scenario, [Diagnostics](#check-diagnostics) may show related failures or
+slow requests.
 
 #### Scenario: the issue is NOT performance-related and there is a consistent reproduction.
 
@@ -99,9 +106,10 @@ find a repro if possible. If that isn't possible, file an issue with the followi
 1. Open the [browser developer network panel](#check-browser-network-panel) and identify slow
    requests.
 1. [Use Jaeger](#collect-a-jaeger-trace) to drill down into slow requests and understand which
-   components of the request are slow. Remember that many Sourcegraph API requests identify the
-   Jaeger trace ID in the `x-trace` HTTP response header, which makes it easy to look up the trace
-   corresponding to a particular request.
+   components of the request are slow. Sourcegraph returns the trace ID in the `x-trace` HTTP
+   response header and, when a tracing backend is configured, a link to the trace in the
+   `x-trace-url` header, which makes it easy to look up the trace corresponding to a particular
+   request.
 1. Copy the [Sourcegraph configuration](#copy-configuration) to the error report.
 
 #### Scenario: the issue is performance-related and there is NOT a consistent reproduction
@@ -158,21 +166,18 @@ If Sourcegraph feels sluggish overall, the likely culprit is resource allocation
 
 If you are seeing cAdvisor metrics from a namespace outside of the one Sourcegraph is currently deployed into.
 
-1. Update your cAdvisor configuration to use namespaced monitoring. See the [cAdvisor monitoring example](https://github.com/sourcegraph/deploy-sourcegraph-k8s/tree/main/examples/monitoring/cadvisor) and [cAdvisor README](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/base/monitoring/cadvisor/README.md) for namespace configuration
+1. Update your Prometheus configuration to keep only metrics from the Sourcegraph namespace. See
+   [Filtering cAdvisor metrics](/self-hosted/deploy/kubernetes/configure#filtering-cadvisor-metrics).
 2. Apply this configuration and restart Prometheus
-
-_Note:_ This is unneeded if you are using the 'namespaced' overlay
 
 #### Scenario: search timeouts
 
 If your users are experiencing search timeouts or search performance issues, please perform the following steps:
 
-1. Try appending variations of `index:only`, `timeout:60s` and `count:999999` to the search query to see if it is still slow.
-1. [Access Grafana directly](/self-hosted/observability/metrics#accessing-grafana-directly).
-1. Select the **+** icon on the left-hand side, then choose **Import**.
-1. Paste [this JSON](https://gist.githubusercontent.com/slimsag/3fcc134f5ce09728188b94b463131527/raw/f8b545f4ce14b0c30a93f05cd1ee469594957a2c/sourcegraph-debug-search-timeouts.json) into the input and click **Load**.
-1. Once the dashboard appears, include screenshots of **the entire** dashboard in the issue report.
-1. Include the logs of `zoekt-webserver` container in the `indexed-search` pods. If you are using single Docker container enable [debug logs](/self-hosted/observability/#Logs) first.
+1. Try appending variations of `index:only`, `timeout:60s` and `count:all` to the search query to see if it is still slow.
+1. [Trace the search query](/self-hosted/observability/tracing#trace-a-search-query) and include the trace in the issue report.
+1. [Open Grafana](/self-hosted/observability/metrics#grafana) and include screenshots of the **Frontend** dashboard's **Search at a glance** section and of the **Zoekt** dashboard in the issue report.
+1. Include the [logs](#examine-logs) of the `zoekt-webserver` container in the `indexed-search` pods (Kubernetes) or the `zoekt-webserver-0` container (Docker Compose).
 
 #### Scenario: zoekt-webserver is in a `CrashloopBackOff` and `err cannot allocate memory`
 
@@ -198,7 +203,7 @@ $ sysctl -n vm.max_map_count
 
     - 250,000 repositories / 2 indexed-search replicas = 125,000 repos to index per replica.
 
-1.  If the `vm.max_map_count` is lower than the result of the above calculation. Adjust the `vm.max_map_count` by executing:
+1.  If the `vm.max_map_count` is lower than twice the result of the above calculation (250,000 in this example), raise the `vm.max_map_count` to at least that value, for example:
 
         sudo sysctl -w vm.max_map_count=262144
 
@@ -210,6 +215,11 @@ $ sudo sysctl -n vm.max_map_count
 ```
 
 1. Ensure the change will persist a system reboot by updating the `vm.max_map_count` setting in `/etc/sysctl.conf`.
+
+The [`zoekt: memory_map_areas_percentage_used`](/self-hosted/observability/alerts#zoekt-memory_map_areas_percentage_used)
+alert warns before Zoekt runs out of memory map areas. Adding `indexed-search` replicas or keeping
+[shard merging](/admin/search#shard-merging) enabled (the default) also reduces the number of memory
+map areas each replica needs.
 
 #### Scenario: zoekt-webserver is restarting due to watchdog
 
@@ -256,38 +266,41 @@ Network panel](https://developers.google.com/web/tools/chrome-devtools/network).
 -   Check the waterfall diagram at the top and the Waterfall column in the list of network requests to
     quickly identify high-latency requests.
 -   Clicking on a request will open up a panel that provides additional details about the request.
-    -   If a GraphQL request is taking a long time, you should obtain its Jaeger trace ID by inspecting
-        the Headers tab of this panel and finding the `X-Trace` or `x-trace` response header value. Once
-        you've obtained this trace ID, [look it up in Jaeger](#collect-a-jaeger-trace).
+    -   If a request is taking a long time, inspect the Headers tab of this panel and find the
+        `x-trace` response header (the trace ID) or the `x-trace-url` response header (a link to the
+        trace). Once you've obtained the trace ID, [look it up in Jaeger](#collect-a-jaeger-trace).
 -   You can check `Preserve log` to preserve the list of requests across page loads and reloads.
+
+### Check diagnostics
+
+Go to **Site admin > Diagnostics** (`/admin/diagnostics`). Review its **Background jobs**,
+**Outbound requests**, **Pings**, **Slow requests**, and **Migrations** tabs for failures or slow
+activity related to the issue, and include the relevant error details or screenshots in the issue
+report.
 
 ### Check resource usage
 
-[Access Prometheus](/self-hosted/observability/metrics#accessing-prometheus) and examine the following metrics:
+[Open Grafana](/self-hosted/observability/metrics#grafana). Most service dashboards (for example
+**Frontend**, **Git Server**, and **Searcher**) have these sections:
 
-**Memory:** `process_resident_memory_bytes` is a gauge that tracks memory usage per backend process.
+-   **Container monitoring**: CPU and memory usage, filesystem I/O, and containers that went missing
+    (for example, because they were OOM killed).
+-   **Provisioning indicators**: short-term and long-term CPU and memory usage compared with the
+    container's limits, which shows whether a service is under-provisioned.
 
--   Example: `process_resident_memory_bytes{app="indexed-search"}` shows memory usage for each
-    indexed-search instance.
+**Disk:** the **Git Server** dashboard's **Disk space remaining** panel tracks free disk space on
+gitserver, from the `src_gitserver_disk_space_available` and `src_gitserver_disk_space_total` metrics.
 
-**CPU:** `process_cpu_seconds_total` is a counter that tracks cumulative CPU seconds used .
-
--   Example: `rate(process_cpu_seconds_total{app="sourcegraph-frontend"}[1m])` shows average CPU usage
-    for each sourcegraph-frontend instance over the last minute.
-
-**Disk:** `gitserver_disk_free_percent` is a gauge that tracks free disk space on gitserver.
+To query the underlying metrics yourself, [access Prometheus directly](/self-hosted/observability/metrics#accessing-prometheus-directly).
 
 ### Check end-user stats
 
-Go to `/site-admin/usage-statistics` to view daily, weekly, and monthly user statistics.
+Use [Sourcegraph Analytics](/analytics) to view usage over time, such as active users and the
+number of searches.
 
-To drill down (e.g., into sub-daily traffic, visits per page type, latencies, etc.), [access
-Grafana](/self-hosted/observability/metrics#grafana) and visit the Sourcegraph Internal > HTTP dashboard page, which
-includes the following panels:
-
--   QPS by Status Code
--   QPS by URL Route
--   P90 Request Duration (request latency at the 90th percentile)
+To drill down into search traffic and latencies, [open Grafana](/self-hosted/observability/metrics#grafana)
+and go to the **Frontend** dashboard. Its **Search at a glance** section includes the 90th and 99th
+percentile search request duration, search timeouts, and search errors.
 
 Grafana contains ready-made dashboards derived from Prometheus metrics. Any chart in Grafana
 mentioned here can be viewed in Prometheus by clicking the dropdown menu next to the Grafana panel
@@ -295,33 +308,34 @@ title > Edit > copying the expression in the Metrics field.
 
 ### Check error rates
 
-[Access Grafana](/self-hosted/observability/metrics#grafana) and view the following charts:
+[Open Grafana](/self-hosted/observability/metrics#grafana) and view the following dashboards:
 
--   Folder: Sourcegraph Internal > Dashboard: HTTP > Chart: QPS by Status Code
-    -   This shows request rates by HTTP status code for end-user requests.
--   Folder: General
-    -   This contains dashboards for each core service in Sourcegraph. Examine each for high-level
-        metrics important to the health of each service.
+-   **Overview**: a summary of alert events across all Sourcegraph services.
+-   **Frontend**: the **Search at a glance** section shows search timeouts and errors for end-user
+    requests.
+-   Each service dashboard (for example **Git Server**, **Searcher**, and **Zoekt**) shows
+    high-level metrics important to the health of that service, along with its alert events.
 
 ### Collect a Jaeger trace
 
 If you are looking for the trace associated with a specific request,
 
 -   [Find the trace ID in the HTTP response in the browser developer tools "Network" tab](#check-browser-network-panel).
--   [Access Jaeger](/self-hosted/observability/tracing#accessing-jaeger) and look up the trace ID.
+-   [Open Jaeger](/self-hosted/observability/tracing#jaeger) and look up the trace ID.
 
 If you do not have a specific request or cannot find the trace ID,
 
--   [Access Jaeger](/self-hosted/observability/tracing#accessing-jaeger).
+-   [Open Jaeger](/self-hosted/observability/tracing#jaeger).
 -   Search for a matching span by setting the appropriate fields in the sidebar.
 
-2 ways: start with a span ID, or manually locate your span by searching the Jaeger GUI
+See [How to use traces](/self-hosted/observability/tracing#how-to-use-traces) for how to request a
+trace for a search query or GraphQL request.
 
 ### Examine logs
 
-If you are using the single Docker container or Docker Compose deployment option, logs are printed
-to `stdout` and `stderr`. You should be able to access these using your infrastructure provider's
-standard log viewing mechanism.
+If you are using the Docker Compose deployment option, logs are printed to `stdout` and `stderr`.
+Retrieve them with `docker logs $CONTAINER_NAME` (for example, `docker logs sourcegraph-frontend-0`),
+or use your infrastructure provider's standard log viewing mechanism.
 
 If you are using Kubernetes,
 
@@ -332,17 +346,19 @@ $POD_ID`. This can be useful for diagnosing why a container crashed.
 -   You can tail logs for all pods associated with a given deployment: `kubectl logs -f
 deployment/sourcegraph-frontend --container=frontend --since=10m`
 
+See [Logs](/self-hosted/observability/logs) to change the log level or format.
+
 ### Copy configuration
 
-Go to the URL path `/site-admin/report-bug` to obtain an all-in-one text box of all Sourcegraph
-configuration (which includes advanced configuration, code host configuration, and global
-settings). This lets you easily copy all configuration to an issue report (NOTE: remember to redact
-any secrets).
+Go to **Settings > Report a bug** (the URL path `/user/settings/report-bug`) to obtain an all-in-one
+text box of all Sourcegraph configuration. For site admins, this includes the site configuration,
+code host configuration, and settings. This lets you easily copy all configuration to an issue
+report (NOTE: remember to redact any secrets).
 
 ### Collect instance stats
 
 The following statistics are useful background context when reporting a performance issue:
 
--   Number of repositories (can be found on the `/site-admin/repositories` page, search for "repositories total")
+-   Number of repositories (shown at the top of the **Site admin > Repositories** page, `/admin/repositories`)
 -   Size distribution of repositories (e.g., are there one or more large "monorepos" that contain most of the code?)
--   Number of users and daily usage stats from `/site-admin/usage-statistics`
+-   Number of users and usage stats from [Sourcegraph Analytics](/analytics)

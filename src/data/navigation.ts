@@ -568,7 +568,13 @@ export const navigation: NavigationItem[] = [
 			},
 			{
 				title: 'Sourcegraph Cloud',
-				href: '/cloud'
+				href: '/cloud',
+				sections: [
+					{
+						title: 'Troubleshooting',
+						href: '/cloud/troubleshooting'
+					}
+				]
 			},
 			{
 				title: 'Self-hosted',
