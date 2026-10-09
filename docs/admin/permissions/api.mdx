@@ -36,8 +36,6 @@ The `bindID` value specifies how to uniquely identify users when setting permiss
 - `username`: You can [set permissions](#setting-repository-permissions-for-users) for users by specifying their Sourcegraph usernames. Using usernames is **preferred**, as usernames are required to be unique for each user.
 - `email`: You can [set permissions](#setting-repository-permissions-for-users) for users by specifying their email addresses (which must be verified primary emails associated with their Sourcegraph user account). This method can lead to unexpected results if there are multiple Sourcegraph user accounts with the same verified email address. Also, the email address is case-sensitive, so it should be exactly the same as set on the sourcegraph UI.
 
-`bindID` applies to the GraphQL operations; the Sourcegraph API identifies users as `users/@<username>`, `users/<verified email>`, or `users/<numeric ID>`.
-
 After you enable the permissions API, you must [set permissions](#setting-repository-permissions-for-users) to allow users to view repositories (administrators bypass all permissions checks and can always view all repositories).
 
 > NOTE: If you were previously using [permissions syncing](/admin/permissions/syncing), e.g. syncing permissions from Github, then those permissions are used as the initial state after enabling explicit permissions. Otherwise, the initial state is for all repositories to have an empty set of authorized users, so users will not be able to view any repositories.
@@ -46,18 +44,9 @@ After you enable the permissions API, you must [set permissions](#setting-reposi
 
 ## Managing explicit permissions
 
-The Sourcegraph API requires an [access token](/cli/how-tos/creating-an-access-token) with the `externalapi:read` scope for read operations or the `externalapi:write` scope for write operations, for a user with the `REPO_PERMISSIONS` permission (administrators have it by default).
+Use the `explicitrepopermissions.v1.Service` operations to grant, revoke, check, and list explicit permissions. See `/api-reference` on your Sourcegraph instance (e.g. `https://sourcegraph.example.com/api-reference`) for the operations, request examples, and schemas. Requests need an [access token](/cli/how-tos/creating-an-access-token) with the `externalapi:read` scope to read and `externalapi:write` to make changes, for a user with the `REPO_PERMISSIONS` permission (administrators have it by default).
 
-Each operation is served at `/api/explicitrepopermissions.v1.Service/<operation>`:
-
-| Operation                      | Description                                               |
-| ------------------------------ | --------------------------------------------------------- |
-| `CreateExplicitRepoPermission` | Grant a user explicit access to a repository.             |
-| `DeleteExplicitRepoPermission` | Revoke a user's explicit access to a repository.          |
-| `GetExplicitRepoPermission`    | Check whether a user has explicit access to a repository. |
-| `ListExplicitRepoPermissions`  | List explicit permissions for a repository or for a user. |
-
-Repositories are identified by their numeric ID, for example `repositories/123`. The Sourcegraph API cannot look up repositories by name yet, so get the ID with the [GraphQL API](/api/graphql):
+The Sourcegraph API identifies repositories by numeric ID and cannot look them up by name yet. Get the ID with the [GraphQL API](/api/graphql):
 
 ```graphql
 query {
@@ -66,8 +55,6 @@ query {
 	}
 }
 ```
-
-For request examples and schemas, see `/api-reference` on your Sourcegraph instance (e.g. `https://sourcegraph.example.com/api-reference`).
 
 The following operations are only available in the [GraphQL API](/api/graphql) for now.
 
@@ -82,9 +69,7 @@ mutation {
 	setRepositoryPermissionsUnrestricted(
 		repositories: ["<repo ID>", "<repo ID>", "<repo ID>"]
 		unrestricted: true
-	) {
-		alwaysNil
-	}
+	)
 }
 ```
 
@@ -117,9 +102,9 @@ mutation {
 
 Now, only the users specified in the `userPermissions` parameter will be allowed to view the repository. Sourcegraph automatically enforces these permissions for all operations. (Administrators bypass all permissions checks by default. See the [Administrators](/admin/permissions/#site-administrators) section)
 
-You can call `setRepositoryPermissionsForUsers` repeatedly to set permissions for each repository, and whenever you want to change the list of authorized users. It is also the way to grant access to users who don't exist in Sourcegraph yet: permissions for a `bindID` without a matching user are stored as pending and applied when the user is created, or, for email `bindID`s, when the email is verified.
+You can call `setRepositoryPermissionsForUsers` repeatedly to set permissions for each repository, and whenever you want to change the list of authorized users. Unlike the Sourcegraph API, it accepts users who don't exist in Sourcegraph yet; their permissions apply once a user with that username or verified email exists.
 
-> NOTE: `setRepositoryPermissionsForUsers` replaces all explicit permissions for the repository, including those granted with the Sourcegraph API.
+> NOTE: The mutation also removes permissions granted with the Sourcegraph API.
 
 ## Setting sub-repository permissions for users
 
