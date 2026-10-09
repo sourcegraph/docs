@@ -75,7 +75,7 @@ Each operation is served at `https://sourcegraph.example.com/api/explicitrepoper
 | `GetExplicitRepoPermission`    | Check whether a user has explicit access to a repository. |
 | `ListExplicitRepoPermissions`  | List explicit permissions for a repository or for a user. |
 
-Each permission is a single grant for one user on one repository. Granting or revoking access for one user does not change the access of any other user.
+Each permission is a single grant for one user on one repository. Granting or revoking access for one user does not change the access of any other user. To make a repository's explicit permissions match a list of users, [list](#listing-explicit-permissions) the repository's current permissions, [grant](#granting-a-user-access-to-a-repository) access to users missing from the list, and [revoke](#revoking-a-users-access-to-a-repository) access from users not in the list.
 
 ### Resource names
 
@@ -197,7 +197,7 @@ query {
 
 ### Setting repository permissions for users
 
-The `setRepositoryPermissionsForUsers` mutation replaces the full list of users allowed to view a repository in one call. Users are identified by their `bindID`, and permissions for a `bindID` that does not match an existing user are applied when that user is created.
+The `setRepositoryPermissionsForUsers` mutation replaces the full list of users allowed to view a repository in one call. Use it if you need to grant access to users who do not exist in Sourcegraph yet: users are identified by their `bindID`, and permissions for a `bindID` that does not match an existing user are applied when that user is created.
 
 ```graphql
 mutation {
