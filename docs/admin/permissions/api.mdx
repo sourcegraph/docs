@@ -24,7 +24,7 @@ Keeping the permissions in sync and fresh is the responsibility of the administr
 
 ## Configuration
 
-To enable the permissions API, add the following to the [advanced configuration](/admin/config/site-config):
+The Sourcegraph API operations work without this setting. To restrict repositories from code host connections that don't sync permissions, so that only users with explicit permissions can view them, add the following to the [advanced configuration](/admin/config/site-config):
 
 ```json
 "permissions.userMapping": {
@@ -36,11 +36,11 @@ To enable the permissions API, add the following to the [advanced configuration]
 The `bindID` value specifies how to uniquely identify users when setting permissions with the [GraphQL operations](#capabilities-only-available-in-the-graphql-api). The Sourcegraph API does not use `bindID`; it identifies users by [resource name](#resource-names) instead.
 
 - `username`: You can [set permissions](#setting-repository-permissions-for-users) for users by specifying their Sourcegraph usernames. Using usernames is **preferred**, as usernames are required to be unique for each user.
-- `email`: You can [set permissions](#setting-repository-permissions-for-users) for users by specifying their email addresses (which must be verified primary emails associated with their Sourcegraph user account). This method can lead to unexpected results if there are multiple Sourcegraph user accounts with the same verified email address. Also, the email address is case-sensitive, so it should be exactly the same as set on the sourcegraph UI.
+- `email`: You can [set permissions](#setting-repository-permissions-for-users) for users by specifying their email addresses (which must be verified emails associated with their Sourcegraph user account). This method can lead to unexpected results if there are multiple Sourcegraph user accounts with the same verified email address. Also, the email address is case-sensitive, so it should be exactly the same as set on the sourcegraph UI.
 
-After you enable the permissions API, you must [grant permissions](#managing-explicit-permissions) to allow users to view repositories (administrators bypass all permissions checks and can always view all repositories).
+After you enable this setting, you must [grant permissions](#managing-explicit-permissions) to allow users to view private repositories. Public repositories remain visible to all users, and administrators bypass all permissions checks by default.
 
-> NOTE: If you were previously using [permissions syncing](/admin/permissions/syncing), e.g. syncing permissions from Github, then those permissions are used as the initial state after enabling explicit permissions. Otherwise, the initial state is for all repositories to have an empty set of authorized users, so users will not be able to view any repositories.
+> NOTE: If you were previously using [permissions syncing](/admin/permissions/syncing), e.g. syncing permissions from Github, then those permissions are used as the initial state after enabling explicit permissions. Otherwise, the initial state is for all private repositories to have an empty set of authorized users, so users will not be able to view them.
 
 > NOTE: In some cases, in order for the repo permissions to be enforced, you must re-save the code host connection configuration with some modification to the JSON after enabling the permissions API.
 
@@ -58,7 +58,7 @@ The token needs the following scopes:
 | `GetExplicitRepoPermission`, `ListExplicitRepoPermissions`     | `externalapi:read`  |
 | `CreateExplicitRepoPermission`, `DeleteExplicitRepoPermission` | `externalapi:write` |
 
-Tokens with the `user:all` scope are also accepted, but their use is recorded in the audit log. We recommend creating tokens with the `externalapi:*` scopes for integrations.
+Tokens with the `user:all` scope are also accepted. Requests that rely on `user:all` instead of an `externalapi:*` scope are recorded in the audit log. We recommend creating tokens with the `externalapi:*` scopes for integrations.
 
 The user the token belongs to must also have the `REPO_PERMISSIONS#READ` permission for read operations and `REPO_PERMISSIONS#WRITE` for write operations. The Administrator [role](/admin/access-control) has both by default.
 
@@ -75,7 +75,7 @@ Each operation is served at `https://sourcegraph.example.com/api/explicitrepoper
 | `GetExplicitRepoPermission`    | Check whether a user has explicit access to a repository. |
 | `ListExplicitRepoPermissions`  | List explicit permissions for a repository or for a user. |
 
-Each permission is a single grant for one user on one repository. Granting or revoking access for one user does not change the access of any other user. To make a repository's explicit permissions match a list of users, [list](#listing-explicit-permissions) the repository's current permissions, [grant](#granting-a-user-access-to-a-repository) access to users missing from the list, and [revoke](#revoking-a-users-access-to-a-repository) access from users not in the list.
+Each permission is a single grant for one user on one repository. Granting or revoking access for one user does not change the access of any other user. To make a repository's explicit permissions match a list of users, [list](#listing-explicit-permissions) the repository's current permissions, [grant](#granting-a-user-access-to-a-repository) access to users missing from the list, and [revoke](#revoking-a-users-access-to-a-repository) access from users not in the list. Unlike the GraphQL [`setRepositoryPermissionsForUsers`](#setting-repository-permissions-for-users) mutation, this is not a single atomic change, and it only works for users who already exist in Sourcegraph.
 
 ### Resource names
 
@@ -157,7 +157,7 @@ To list every repository a user has explicit access to, use the user as the pare
 
 To get the next page, repeat the request with `pageToken` set to the returned `nextPageToken`. When `nextPageToken` is empty or missing, there are no more results.
 
-The list only contains permissions granted through the explicit permissions API. Permissions synced from code hosts are not included. To see all repositories a user can access, see [Listing a user's authorized repositories](#listing-a-users-authorized-repositories).
+The list only contains explicit permissions, including those granted to existing users with the GraphQL API. Permissions synced from code hosts, and [pending permissions](#setting-repository-permissions-for-users) that were later applied to a user, are not included. To list a user's stored permissions from all sources, see [Listing a user's authorized repositories](#listing-a-users-authorized-repositories).
 
 ### Checking a single permission
 
@@ -179,7 +179,7 @@ curl -X POST "https://sourcegraph.example.com/api/explicitrepopermissions.v1.Ser
   -d '{ "name": "repositories/123/explicitRepoPermissions/@alice" }'
 ```
 
-A successful request returns an empty JSON object. Only permissions granted through the explicit permissions API can be revoked; for a permission synced from a code host, or one that does not exist, the request fails with a `not_found` error.
+A successful request returns an empty JSON object. Only explicit permissions can be revoked: if the user only has access through permissions synced from a code host, or has no access, the request fails with a `not_found` error. Revoking an explicit permission does not remove access the user has through synced permissions.
 
 ## Capabilities only available in the GraphQL API
 
@@ -197,7 +197,7 @@ query {
 
 ### Setting repository permissions for users
 
-The `setRepositoryPermissionsForUsers` mutation replaces the full list of users allowed to view a repository in one call. Use it if you need to grant access to users who do not exist in Sourcegraph yet: users are identified by their `bindID`, and permissions for a `bindID` that does not match an existing user are applied when that user is created.
+The `setRepositoryPermissionsForUsers` mutation replaces a repository's explicit permissions with a new list of users in one call. Use it if you need to grant access to users who do not exist in Sourcegraph yet: users are identified by their `bindID`, and permissions for a `bindID` that does not match an existing user are stored as pending. Pending permissions for a username are applied when a matching user is created; pending permissions for an email address are applied when a user verifies that address.
 
 ```graphql
 mutation {
@@ -210,9 +210,9 @@ mutation {
 }
 ```
 
-Now, only the users specified in the `userPermissions` parameter will be allowed to view the repository. Sourcegraph automatically enforces these permissions for all operations. (Administrators bypass all permissions checks by default. See the [Administrators](/admin/permissions/#administrators) section)
+Now, only the users specified in the `userPermissions` parameter have explicit permissions for the repository. Other users can still view it if they have access through permissions synced from a code host, or if the repository is public. Sourcegraph automatically enforces these permissions for all operations. (Administrators bypass all permissions checks by default. See the [Administrators](/admin/permissions/#administrators) section)
 
-> NOTE: The mutation replaces all explicit permissions for the repository, including permissions granted with the Sourcegraph API.
+> NOTE: The mutation replaces all explicit permissions and pending permissions for the repository, including permissions granted with the Sourcegraph API. It also removes the repository's [unrestricted](#setting-a-repository-as-unrestricted) setting.
 
 ### Setting a repository as unrestricted
 
@@ -225,7 +225,9 @@ mutation {
 	setRepositoryPermissionsUnrestricted(
 		repositories: ["<repo ID>", "<repo ID>", "<repo ID>"]
 		unrestricted: true
-	)
+	) {
+		alwaysNil
+	}
 }
 ```
 
@@ -275,7 +277,7 @@ The default permission if a path is not specified is to deny access.
 
 ### Listing a user's authorized repositories
 
-You may query the set of repositories visible to a particular user with the `authorizedUserRepositories` [GraphQL API](/api/graphql) query, which accepts a `username` or `email` parameter to specify the user:
+You may query the repositories a particular user has stored permissions for, from explicit permissions and from code host syncing, with the `authorizedUserRepositories` [GraphQL API](/api/graphql) query. It accepts a `username` or `email` parameter to specify the user, and returns pending permissions for users who do not exist yet. It does not include repositories the user can view only because they are public or unrestricted.
 
 ```graphql
 query {
