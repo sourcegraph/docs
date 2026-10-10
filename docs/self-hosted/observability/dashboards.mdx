@@ -19356,16 +19356,18 @@ Query:
 
 <br />
 
-#### searcher: store_zip_prepare_duration
+#### searcher: store_archive_prepare_duration
 
-<p class="subtitle">Average archive preparation duration by cache outcome over 5m</p>
+<p class="subtitle">Average archive preparation duration by format and cache outcome over 5m</p>
 
 This graph measures the average time needed to make a repository archive
-available to a search. Cache misses include fetching code from gitserver and
-should be slower than hits. Compare this with the fetch queue to distinguish
-dependency or cache pressure from local search execution. The average is used
-because the current histogram`s highest finite bucket is 10 seconds, while a
-large archive fetch can take minutes.
+available to a search, split by archive format. Structural search always uses
+ZIP archives; other unindexed searches use paired archives when
+SEARCHER_USE_PAIRED_ARCHIVES is enabled and ZIP archives otherwise. Cache misses
+include fetching code from gitserver and should be slower than hits. Compare
+this with the fetch queue to distinguish dependency or cache pressure from
+local search execution. The average is used because the histograms` highest
+finite bucket is 10 seconds, while a large archive fetch can take minutes.
 
 This panel has no related alerts.
 
@@ -19379,7 +19381,35 @@ To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=100111`
 Query:
 
 ```
-sum by (cache_hit) (rate(searcher_store_zip_prepare_duration_sum{instance=~`${instance:regex}`}[5m])) / sum by (cache_hit) (rate(searcher_store_zip_prepare_duration_count{instance=~`${instance:regex}`}[5m]))
+label_replace(sum by (cache_hit) (rate(searcher_store_zip_prepare_duration_sum{instance=~`${instance:regex}`}[5m])) / sum by (cache_hit) (rate(searcher_store_zip_prepare_duration_count{instance=~`${instance:regex}`}[5m])), "format", "zip", "", "") or label_replace(sum by (cache_hit) (rate(searcher_store_archive_prepare_duration_sum{instance=~`${instance:regex}`}[5m])) / sum by (cache_hit) (rate(searcher_store_archive_prepare_duration_count{instance=~`${instance:regex}`}[5m])), "format", "paired", "", "")
+```
+</details>
+
+<br />
+
+#### searcher: store_archive_rebuilds
+
+<p class="subtitle">Paired search archives rebuilt after failing validation every 5m (per instance)</p>
+
+This graph should remain zero. Each rebuild means a cached paired archive was
+truncated or corrupt, so searcher discarded it and fetched the repository again.
+Occasional rebuilds after a crash or node failure are expected. Sustained
+rebuilds point to disk problems or an archive writer bug; inspect searcher logs
+for `rebuilding invalid search archive`.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/searcher/searcher?viewPanel=100112` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (instance) (increase(searcher_store_archive_rebuild_total{instance=~`${instance:regex}`}[5m]))
 ```
 </details>
 
@@ -38090,7 +38120,7 @@ histogram_quantile(0.95, sum(rate(src_batch_change_agent_wake_duration_seconds_b
 
 <p class="subtitle">Pending agent wakes</p>
 
-Number of non-idle threads with unread inbox items whose wake is retried once a minute. Most are threads waiting on an ask_user question, which only the user can unblock; pending wakes well above "active message handlers" means threads are stuck in processing with no running job, so check the "Stalled job resetters" group.
+Number of mid-turn threads with unread inbox items whose wake is retried once a minute. A wake for a thread waiting on an ask_user question or tool approval is dropped instead: an answer, an approval, or a new message resumes the agent with a hint to read the inbox, and a cancel resumes nothing. Pending wakes well above "active message handlers" means threads are stuck in processing with no running job, so check the "Stalled job resetters" group.
 
 This panel has no related alerts.
 
