@@ -1,6 +1,6 @@
 # Explicit permissions API
 
-Sourcegraph's GraphQL API allows users to explicitly set repository permissions. This is an alternative to other mechanisms, which involve directly talking to the code host.
+The [Sourcegraph API](/api) allows users to explicitly set repository permissions. This is an alternative to other mechanisms, which involve directly talking to the code host.
 
 ## Permissions mechanisms in parallel
 
@@ -41,6 +41,22 @@ After you enable the permissions API, you must [set permissions](#setting-reposi
 > NOTE: If you were previously using [permissions syncing](/admin/permissions/syncing), e.g. syncing permissions from Github, then those permissions are used as the initial state after enabling explicit permissions. Otherwise, the initial state is for all repositories to have an empty set of authorized users, so users will not be able to view any repositories.
 
 > NOTE: In some cases, in order for the repo permissions to be enforced, you must re-save the code host connection configuration with some modification to the JSON after enabling the permissions API.
+
+## Managing explicit permissions
+
+Use the `explicitrepopermissions.v1.Service` operations to grant, revoke, check, and list explicit permissions. See `/api-reference` on your Sourcegraph instance (e.g. `https://sourcegraph.example.com/api-reference`) for the operations, request examples, and schemas. Requests need an [access token](/cli/how-tos/creating-an-access-token) with the `externalapi:read` scope to read and `externalapi:write` to make changes, for a user with the `REPO_PERMISSIONS` [permission](/admin/access-control) (administrators have it by default).
+
+The Sourcegraph API identifies repositories by numeric ID and cannot look them up by name yet. Get the ID with the [GraphQL API](/api/graphql):
+
+```graphql
+query {
+	repository(name: "github.example.com/owner/repo") {
+		databaseID
+	}
+}
+```
+
+The following operations are only available in the [GraphQL API](/api/graphql) for now.
 
 ## Setting a repository as unrestricted
 
@@ -87,6 +103,8 @@ mutation {
 Now, only the users specified in the `userPermissions` parameter will be allowed to view the repository. Sourcegraph automatically enforces these permissions for all operations. (Administrators bypass all permissions checks by default. See the [Administrators](/admin/permissions/#site-administrators) section)
 
 You can call `setRepositoryPermissionsForUsers` repeatedly to set permissions for each repository, and whenever you want to change the list of authorized users.
+
+> NOTE: The mutation also removes permissions granted with the Sourcegraph API.
 
 ## Setting sub-repository permissions for users
 
