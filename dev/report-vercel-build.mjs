@@ -1,50 +1,47 @@
 #!/usr/bin/env node
 
 /**
- * Reports a failed Vercel build on its pull request, since Vercel only shows
- * build logs to members of the Vercel team. The log itself goes to Slack, so
+ * Attaches a Vercel build's log, with a link to its pull request, to the
+ * Vercel Slack app's post for the deployment, since Vercel only shows build
+ * logs, and the PR a deployment is for, to members of the Vercel team. A
+ * failed build is also reported on its PR. The log only goes to Slack, so
  * anything sensitive a build prints stays inside the workspace instead of a
  * public PR; the PR comment only links to it. When a later revision builds,
  * the same comment is updated to say so.
  *
  * Usage:
- *   node dev/report-vercel-build.mjs fetch-log <file>
- *   node dev/report-vercel-build.mjs slack <file> [--dry-run]
- *   node dev/report-vercel-build.mjs comment [--dry-run]
+ *   node dev/report-vercel-build.mjs [--dry-run]
  *
- * fetch-log writes the build log to <file>, headed by the deployment's error
- * message when Vercel recorded one (a build that fails before its first step,
- * such as on an invalid vercel.json, has an error but no log lines). It writes
- * `pull_request`, the PR Vercel built the deployment for, and `error`, that
- * message on one line, to GITHUB_OUTPUT. It needs VERCEL_TOKEN, and
- * VERCEL_TEAM_ID unless the token is scoped to the project.
+ * In order:
  *
- * slack uploads <file> into the thread of the Vercel Slack app's "failed to
- * deploy" post for the deployment in SLACK_CHANNEL_ID, looking back a week (so
- * a re-run by hand still finds it) and waiting up to 5 minutes for the post
- * to appear, then writes the reply's `permalink` to GITHUB_OUTPUT, along with
- * the channel's name as `channel`. The reply quotes BUILD_ERROR, the `error`
- * output of fetch-log, when set. It needs SLACK_BOT_TOKEN (see
- * dev/slack-app-vercel-build-report.json) and does nothing when that or
- * SLACK_CHANNEL_ID is unset. With --dry-run the post is found but nothing is
- * uploaded.
+ * 1. GitHub is asked which PRs the commit belongs to: the open PRs at that
+ *    head (a preview deployment), or the merged PR that introduced the commit
+ *    (a production deployment). Nothing happens for a commit with neither,
+ *    which also keeps the Vercel token from being used for a commit nobody
+ *    with push access pushed.
+ * 2. The build log is read from Vercel, headed by the deployment's error
+ *    message when it recorded one (a build that fails before its first step,
+ *    such as on an invalid vercel.json, has an error but no log lines), and
+ *    redacted.
+ * 3. The log is uploaded into the thread of the Vercel Slack app's post for
+ *    the deployment in SLACK_CHANNEL_ID, with a comment linking the PR. The
+ *    post is looked for a week back (so a re-run by hand still finds it) and
+ *    for up to 5 minutes (the app can post after this runs). Skipped when
+ *    SLACK_BOT_TOKEN or SLACK_CHANNEL_ID is unset; a Slack error is a
+ *    warning, so the PR still hears about a failed build.
+ * 4. When the build failed, each open PR gets a comment linking the Slack
+ *    reply, or just saying Slack when the upload did not happen. When it
+ *    passed, an earlier failure comment is updated to say so.
  *
- * comment posts on PR_NUMBER, the PR Vercel built the deployment for. When
- * unset (the success path, or a deployment Vercel recorded no PR for) it falls
- * back to every open PR at COMMIT_SHA. A failure comment links
- * SLACK_PERMALINK, or just says Slack when the upload did not happen, and
- * names SLACK_CHANNEL, the `channel` output of slack, when set. With
- * --dry-run the comment is printed instead.
+ * With --dry-run, steps 1 and 2 run, the Slack post is found, and what would
+ * be uploaded and commented is printed instead.
  *
- * All need DEPLOYMENT_ID, DEPLOYMENT_STATE (failed or success), COMMIT_SHA,
- * GH_TOKEN and GITHUB_REPOSITORY.
+ * Needs DEPLOYMENT_ID, DEPLOYMENT_STATE (failed or success), COMMIT_SHA,
+ * GH_TOKEN, GITHUB_REPOSITORY and VERCEL_TOKEN (plus VERCEL_TEAM_ID unless the
+ * token is scoped to the project). SLACK_BOT_TOKEN is the bot in
+ * dev/slack-app-vercel-build-report.json.
  */
 
-import {appendFileSync, readFileSync, writeFileSync} from 'fs';
-
-const [command, logFile] = process.argv
-	.slice(2)
-	.filter(argument => !argument.startsWith('--'));
 const DRY_RUN = process.argv.includes('--dry-run');
 // A week, so a re-run by hand finds the post; the deployment ID match is
 // exact, so the wider window cannot pick a wrong post
@@ -61,15 +58,7 @@ const {DEPLOYMENT_ID, DEPLOYMENT_STATE, COMMIT_SHA, SLACK_CHANNEL_ID} =
 const MARKER = '<!-- vercel-build-report -->';
 const MARKER_PATTERN = /^<!-- vercel-build-report(?: artifact=\d+)? -->/;
 
-async function fetchJson(url, headers) {
-	const response = await fetch(url, {headers});
-	if (!response.ok) {
-		throw new Error(
-			`GET ${url} failed: ${response.status} ${await response.text()}`
-		);
-	}
-	return response.json();
-}
+// ---------------------------------------------------------------- GitHub
 
 async function github(method, route, body) {
 	const response = await fetch(`${API_URL}${route}`, {
@@ -101,19 +90,63 @@ async function githubList(route) {
 	}
 }
 
+// The PRs GitHub associates with the commit: the open PRs at that head for a
+// preview deployment, or the merged PR that introduced the commit to the
+// default branch for a production one. A stale event for a commit an open PR
+// has moved past is ignored, and so are open fork PRs.
+async function findPullRequests() {
+	const pulls = await github(
+		'GET',
+		`/repos/${REPOSITORY}/commits/${COMMIT_SHA}/pulls`
+	);
+	const linked = pulls.filter(pull => {
+		if (pull.merged_at) {
+			return true;
+		}
+		if (pull.state !== 'open' || pull.head.sha !== COMMIT_SHA) {
+			return false;
+		}
+		// head.repo is null when the fork was deleted
+		if (pull.head.repo?.full_name !== REPOSITORY) {
+			console.log(`PR #${pull.number} is from a fork; not reporting`);
+			return false;
+		}
+		return true;
+	});
+	if (linked.length === 0) {
+		console.log(
+			`No open PR with head ${COMMIT_SHA} and no merged PR that introduced it; nothing to do`
+		);
+	}
+	return linked;
+}
+
+// ---------------------------------------------------------------- Vercel
+
+async function vercel(path, parameters = {}) {
+	const url = new URL(`https://api.vercel.com${path}`);
+	for (const [name, value] of Object.entries(parameters)) {
+		url.searchParams.set(name, value);
+	}
+	if (process.env.VERCEL_TEAM_ID) {
+		url.searchParams.set('teamId', process.env.VERCEL_TEAM_ID);
+	}
+	const response = await fetch(url, {
+		headers: {authorization: `Bearer ${process.env.VERCEL_TOKEN}`}
+	});
+	if (!response.ok) {
+		throw new Error(
+			`GET ${url} failed: ${response.status} ${await response.text()}`
+		);
+	}
+	return response.json();
+}
+
 // The deployment record: `meta.githubPrId` is the PR Vercel built it for
 // (empty when the branch was deployed before its PR was opened), and
 // `errorMessage`, `errorCode`, `errorStep` and `errorLink` say why it failed
 async function fetchDeployment() {
-	const url = new URL(
-		`https://api.vercel.com/v13/deployments/${DEPLOYMENT_ID}`
-	);
-	if (process.env.VERCEL_TEAM_ID) {
-		url.searchParams.set('teamId', process.env.VERCEL_TEAM_ID);
-	}
-	const deployment = await fetchJson(url, {
-		authorization: `Bearer ${process.env.VERCEL_TOKEN}`
-	});
+	const deployment = await vercel(`/v13/deployments/${DEPLOYMENT_ID}`);
 	// The deployment ID and commit arrive as separate inputs; only publish
 	// the log of the deployment Vercel built from that commit
 	const builtSha =
@@ -141,52 +174,12 @@ function deploymentErrorLines({errorMessage, errorCode, errorStep, errorLink}) {
 	return ['Build Failed', errorMessage, ...details, ''];
 }
 
-// The dispatch payload has no PR number. The failure path gets it from the
-// deployment; the success path only knows the commit, so it looks up the PRs
-// at that head. Either way a stale event for a commit a PR has moved past is
-// ignored, and so are fork PRs.
-async function findPullRequests(pullRequestNumber) {
-	const pulls = pullRequestNumber
-		? [
-				await github(
-					'GET',
-					`/repos/${REPOSITORY}/pulls/${pullRequestNumber}`
-				)
-			]
-		: await github(
-				'GET',
-				`/repos/${REPOSITORY}/commits/${COMMIT_SHA}/pulls`
-			);
-	const open = pulls.filter(pull => {
-		if (pull.state !== 'open' || pull.head.sha !== COMMIT_SHA) {
-			return false;
-		}
-		// head.repo is null when the fork was deleted
-		if (pull.head.repo?.full_name !== REPOSITORY) {
-			console.log(`PR #${pull.number} is from a fork; not reporting`);
-			return false;
-		}
-		return true;
-	});
-	if (open.length === 0) {
-		console.log(`No open PR with head ${COMMIT_SHA}; nothing to do`);
-	}
-	return open;
-}
-
 // Build log lines, oldest first. Vercel keeps them as events; only the ones
 // with text are log lines.
-async function fetchBuildLog() {
-	const url = new URL(
-		`https://api.vercel.com/v3/deployments/${DEPLOYMENT_ID}/events`
-	);
-	url.searchParams.set('limit', '-1');
-	url.searchParams.set('direction', 'forward');
-	if (process.env.VERCEL_TEAM_ID) {
-		url.searchParams.set('teamId', process.env.VERCEL_TEAM_ID);
-	}
-	const events = await fetchJson(url, {
-		authorization: `Bearer ${process.env.VERCEL_TOKEN}`
+async function fetchBuildLogLines() {
+	const events = await vercel(`/v3/deployments/${DEPLOYMENT_ID}/events`, {
+		limit: '-1',
+		direction: 'forward'
 	});
 	return events
 		.map(event => event.payload?.text ?? event.text)
@@ -220,101 +213,21 @@ function redact(line) {
 	);
 }
 
-function writeOutput(name, value) {
-	if (process.env.GITHUB_OUTPUT) {
-		appendFileSync(process.env.GITHUB_OUTPUT, `${name}=${value}\n`);
-	}
-}
-
-async function fetchLog() {
-	if (!process.env.VERCEL_TOKEN) {
-		throw new Error('VERCEL_TOKEN is required to read the build log');
-	}
-	// Ask GitHub before Vercel, so the Vercel token is only ever used for a
-	// commit that an open PR from this repository is at, i.e. pushed by
-	// someone who can already push here
-	if ((await findPullRequests()).length === 0) {
-		return;
-	}
-	const deployment = await fetchDeployment();
-	const logLines = [
+// The redacted log as text, and the deployment's error message on one line,
+// for quoting
+async function fetchBuildLog(deployment) {
+	const lines = [
 		...deploymentErrorLines(deployment),
-		...(await fetchBuildLog())
+		...(await fetchBuildLogLines())
 	].map(redact);
-	writeFileSync(logFile, logLines.join('\n') + '\n');
-	console.log(`Wrote ${logLines.length} log lines to ${logFile}`);
-	writeOutput('pull_request', deployment.meta?.githubPrId ?? '');
-	// GITHUB_OUTPUT values are one line each
-	writeOutput(
-		'error',
-		redact(deployment.errorMessage ?? '').replace(/\s*\n\s*/g, ' ')
-	);
+	console.log(`Read ${lines.length} log lines from Vercel`);
+	return {
+		log: lines.join('\n') + '\n',
+		error: redact(deployment.errorMessage ?? '').replace(/\s*\n\s*/g, ' ')
+	};
 }
 
-// The log stays in Slack, where only the workspace can read it; the public
-// comment says where to look
-function failureBody() {
-	const {SLACK_PERMALINK, SLACK_CHANNEL} = process.env;
-	const where = SLACK_PERMALINK
-		? `[attached to its Slack post](${SLACK_PERMALINK})`
-		: 'in Slack';
-	const channel = SLACK_CHANNEL ? ` in #${SLACK_CHANNEL}` : '';
-	return [
-		MARKER,
-		'### ❌ The Vercel build failed for this PR',
-		'',
-		`Vercel only shows build logs to members of its team, so the build log is ${where}${channel}.`,
-		''
-	].join('\n');
-}
-
-async function comment() {
-	const pulls = await findPullRequests(process.env.PR_NUMBER);
-	for (const pull of pulls) {
-		await report(pull);
-	}
-}
-
-// Comment only when the build failed, or an earlier failure is resolved
-async function report(pull) {
-	const comments = await githubList(
-		`/repos/${REPOSITORY}/issues/${pull.number}/comments`
-	);
-	const existing = comments.find(comment =>
-		MARKER_PATTERN.test(comment.body)
-	);
-
-	let body;
-	if (DEPLOYMENT_STATE === 'failed') {
-		body = failureBody();
-	} else if (existing) {
-		body = `${MARKER}\n### ✅ The Vercel build that failed on an earlier revision of this PR passes\n`;
-	} else {
-		console.log(`PR #${pull.number} has no failed build to resolve`);
-		return;
-	}
-
-	if (DRY_RUN) {
-		console.log(
-			`[dry-run] would ${existing ? 'update' : 'create'} comment on PR #${pull.number}:\n`
-		);
-		console.log(body);
-	} else if (existing) {
-		console.log(`Updating comment ${existing.id} on PR #${pull.number}`);
-		await github(
-			'PATCH',
-			`/repos/${REPOSITORY}/issues/comments/${existing.id}`,
-			{body}
-		);
-	} else {
-		console.log(`Commenting on PR #${pull.number}`);
-		await github(
-			'POST',
-			`/repos/${REPOSITORY}/issues/${pull.number}/comments`,
-			{body}
-		);
-	}
-}
+// ----------------------------------------------------------------- Slack
 
 // Every method used here takes form encoding, including the file one
 async function slackApi(method, parameters) {
@@ -351,12 +264,13 @@ function slackMessageText(message) {
 }
 
 // The Vercel Slack app posts "<commit title> failed to deploy" for each
-// failed deployment, with the short SHA in a context block and an Inspect
-// button whose URL ends in the deployment ID. The ID is matched, since two
-// PRs at one commit get two deployments and two posts. The app and this
-// workflow are triggered by the same event, so its post can land after this
-// runs; keep looking for a while before giving up.
-async function findVercelFailurePost() {
+// failed deployment and a deployed post for each successful one, with the
+// short SHA in a context block and an Inspect button whose URL ends in the
+// deployment ID. The ID is matched, since two PRs at one commit get two
+// deployments and two posts. The app and this workflow are triggered by the
+// same event, so its post can land after this runs; keep looking for a while
+// before giving up.
+async function findVercelPost() {
 	const deploymentId = DEPLOYMENT_ID.replace(/^dpl_/, '');
 	const oldest = Date.now() / 1000 - SLACK_HISTORY_DAYS * 24 * 60 * 60;
 	const deadline = Date.now() + SLACK_WAIT_MINUTES * 60_000;
@@ -373,13 +287,9 @@ async function findVercelFailurePost() {
 					...(cursor && {cursor})
 				}
 			);
-			const post = messages.find(message => {
-				const text = slackMessageText(message);
-				return (
-					text.includes('failed to deploy') &&
-					text.includes(deploymentId)
-				);
-			});
+			const post = messages.find(message =>
+				slackMessageText(message).includes(deploymentId)
+			);
 			if (post) {
 				return post;
 			}
@@ -391,7 +301,7 @@ async function findVercelFailurePost() {
 		}
 		if (Date.now() >= deadline) {
 			console.log(
-				`No Vercel "failed to deploy" post for ${DEPLOYMENT_ID} in the last ${SLACK_HISTORY_DAYS} days; giving up. Newest messages seen:`
+				`No Vercel post for ${DEPLOYMENT_ID} in the last ${SLACK_HISTORY_DAYS} days; giving up. Newest messages seen:`
 			);
 			for (const message of seen.slice(0, 20)) {
 				console.log(
@@ -409,21 +319,38 @@ async function findVercelFailurePost() {
 	}
 }
 
+// In Slack message text, `<url|label>` is a link, so these three characters
+// have to be escaped in a label
+function escapeSlackText(text) {
+	return text
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;');
+}
+
+// `#123 title` linking to each PR. The title is there for readers who cannot
+// open Vercel's Inspect link, which is the point of the reply.
+function pullRequestLinks(pulls) {
+	return pulls
+		.map(
+			pull =>
+				`<${pull.html_url}|#${pull.number} ${escapeSlackText(pull.title)}>`
+		)
+		.join(', ');
+}
+
 // Slack takes files in three steps: ask for an upload URL, POST the bytes to
-// it, then say which channel and thread to share the file in. Returns the
-// permalink of the reply carrying the file, for the PR comment.
-async function uploadLogToThread(post, pulls) {
-	const log = readFileSync(logFile);
+// it, then say which channel and thread to share the file in. The PR link
+// rides on the file's comment, which is the one message the bot can post
+// without chat:write. Returns the permalink of the reply carrying the file,
+// for the PR comment.
+async function uploadLogToThread(post, pulls, {log, error}) {
 	const shortSha = COMMIT_SHA.slice(0, 7);
 	// .txt, so Slack shows it inline instead of offering a download
 	const filename = `vercel-build-${shortSha}.txt`;
-	const links = pulls
-		.map(pull => `<${pull.html_url}|#${pull.number}>`)
-		.join(', ');
-	const {BUILD_ERROR} = process.env;
 	const initialComment = [
-		BUILD_ERROR && `> ${BUILD_ERROR}`,
-		`Build log attached; PR ${links} links here.`
+		error && `> ${error}`,
+		`Build log for PR ${pullRequestLinks(pulls)}`
 	]
 		.filter(Boolean)
 		.join('\n');
@@ -436,7 +363,7 @@ async function uploadLogToThread(post, pulls) {
 	}
 	const {upload_url: uploadUrl, file_id: fileId} = await slackApi(
 		'files.getUploadURLExternal',
-		{filename, length: log.length}
+		{filename, length: Buffer.byteLength(log)}
 	);
 	const upload = await fetch(uploadUrl, {method: 'POST', body: log});
 	if (!upload.ok) {
@@ -472,41 +399,91 @@ async function uploadLogToThread(post, pulls) {
 	return permalink;
 }
 
-async function slack() {
+// Where the log went, for the PR comment: the reply's permalink, and the
+// channel's name when the token can read it
+async function attachLogInSlack(pulls, buildLog) {
 	if (!process.env.SLACK_BOT_TOKEN || !SLACK_CHANNEL_ID) {
 		console.log(
 			'SLACK_BOT_TOKEN or SLACK_CHANNEL_ID unset; not posting to Slack'
 		);
-		return;
+		return {};
 	}
-	if (DEPLOYMENT_STATE !== 'failed') {
-		console.log('The build passed; Vercel already posts that to Slack');
-		return;
-	}
-	// The PR comment names the channel. A token without channels:read still
-	// uploads the log; the comment then just says Slack
+	let channel;
 	try {
-		const {channel} = await slackApi('conversations.info', {
+		const info = await slackApi('conversations.info', {
 			channel: SLACK_CHANNEL_ID
 		});
-		writeOutput('channel', channel.name);
+		channel = info.channel.name;
 	} catch (error) {
-		console.log(`${error.message}; the PR comment will not name the channel`);
+		console.log(
+			`${error.message}; the PR comment will not name the channel`
+		);
 	}
-	// The same guard as fetch-log and comment, so Slack only ever gets logs
-	// for commits an open PR from this repository is at
-	const pulls = await findPullRequests(process.env.PR_NUMBER);
-	if (pulls.length === 0) {
+	const post = await findVercelPost();
+	const permalink = post && (await uploadLogToThread(post, pulls, buildLog));
+	return {channel, permalink};
+}
+
+// ------------------------------------------------------------ PR comment
+
+// The log stays in Slack, where only the workspace can read it; the public
+// comment says where to look
+function failureBody({permalink, channel}) {
+	const where = permalink
+		? `[attached to its Slack post](${permalink})`
+		: 'in Slack';
+	const inChannel = channel ? ` in #${channel}` : '';
+	return [
+		MARKER,
+		'### ❌ The Vercel build failed for this PR',
+		'',
+		`Vercel only shows build logs to members of its team, so the build log is ${where}${inChannel}.`,
+		''
+	].join('\n');
+}
+
+// Comment only when the build failed, or an earlier failure is resolved
+async function commentOnPullRequest(pull, slack) {
+	const comments = await githubList(
+		`/repos/${REPOSITORY}/issues/${pull.number}/comments`
+	);
+	const existing = comments.find(comment =>
+		MARKER_PATTERN.test(comment.body)
+	);
+
+	let body;
+	if (DEPLOYMENT_STATE === 'failed') {
+		body = failureBody(slack);
+	} else if (existing) {
+		body = `${MARKER}\n### ✅ The Vercel build that failed on an earlier revision of this PR passes\n`;
+	} else {
+		console.log(`PR #${pull.number} has no failed build to resolve`);
 		return;
 	}
-	const post = await findVercelFailurePost();
-	if (post) {
-		const permalink = await uploadLogToThread(post, pulls);
-		if (permalink) {
-			writeOutput('permalink', permalink);
-		}
+
+	if (DRY_RUN) {
+		console.log(
+			`[dry-run] would ${existing ? 'update' : 'create'} comment on PR #${pull.number}:\n`
+		);
+		console.log(body);
+	} else if (existing) {
+		console.log(`Updating comment ${existing.id} on PR #${pull.number}`);
+		await github(
+			'PATCH',
+			`/repos/${REPOSITORY}/issues/comments/${existing.id}`,
+			{body}
+		);
+	} else {
+		console.log(`Commenting on PR #${pull.number}`);
+		await github(
+			'POST',
+			`/repos/${REPOSITORY}/issues/${pull.number}/comments`,
+			{body}
+		);
 	}
 }
+
+// ------------------------------------------------------------------ main
 
 async function main() {
 	for (const name of [
@@ -514,7 +491,8 @@ async function main() {
 		'DEPLOYMENT_STATE',
 		'COMMIT_SHA',
 		'GH_TOKEN',
-		'GITHUB_REPOSITORY'
+		'GITHUB_REPOSITORY',
+		'VERCEL_TOKEN'
 	]) {
 		if (!process.env[name]) {
 			throw new Error(`Missing required environment variable ${name}`);
@@ -523,18 +501,35 @@ async function main() {
 	if (!['failed', 'success'].includes(DEPLOYMENT_STATE)) {
 		throw new Error(`Unexpected DEPLOYMENT_STATE ${DEPLOYMENT_STATE}`);
 	}
-	const usage =
-		'Usage: node dev/report-vercel-build.mjs fetch-log|slack <file>, or comment';
-	if (command === 'comment') {
-		await comment();
-	} else if (!logFile) {
-		throw new Error(usage);
-	} else if (command === 'fetch-log') {
-		await fetchLog();
-	} else if (command === 'slack') {
-		await slack();
-	} else {
-		throw new Error(usage);
+
+	// GitHub first, so the Vercel token is only ever used for a commit that
+	// an open PR from this repository is at, or that a PR merged into it,
+	// i.e. pushed by someone who can already push here
+	const linked = await findPullRequests();
+	if (linked.length === 0) {
+		return;
+	}
+	const deployment = await fetchDeployment();
+	// Two PRs at one commit get a deployment each; Vercel names the PR it
+	// built this one for
+	const built = linked.filter(
+		pull => String(pull.number) === deployment.meta?.githubPrId
+	);
+	const pulls = built.length > 0 ? built : linked;
+	const buildLog = await fetchBuildLog(deployment);
+
+	// A Slack problem is a warning: the PR should still hear about a failure
+	let slack = {};
+	try {
+		slack = await attachLogInSlack(pulls, buildLog);
+	} catch (error) {
+		console.log(`::warning::${error.message}`);
+	}
+
+	// Only open PRs get a comment: a production deployment's merged PR is
+	// linked from Slack, not commented on
+	for (const pull of pulls.filter(pull => pull.state === 'open')) {
+		await commentOnPullRequest(pull, slack);
 	}
 }
 
