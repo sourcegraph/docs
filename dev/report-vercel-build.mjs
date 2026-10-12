@@ -39,7 +39,7 @@
  * Needs DEPLOYMENT_ID, DEPLOYMENT_STATE (failed or success), COMMIT_SHA,
  * GH_TOKEN, GITHUB_REPOSITORY and VERCEL_TOKEN (plus VERCEL_TEAM_ID unless the
  * token is scoped to the project). SLACK_BOT_TOKEN is the bot in
- * dev/slack-app-vercel-build-report.json.
+ * dev/report-vercel-build-slack-app-manifest.json.
  */
 
 const DRY_RUN = process.argv.includes('--dry-run');
