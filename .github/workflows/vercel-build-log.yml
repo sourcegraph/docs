@@ -1,20 +1,21 @@
-name: Vercel build report
+name: Vercel build log
 
 # Vercel only shows build logs, and the PR a deployment is for, to members of
 # its team. This attaches the build log to the Vercel Slack app's post for
 # each deployment (SLACK_BOT_TOKEN secret and SLACK_CHANNEL_ID variable; see
-# dev/report-vercel-build-slack-app-manifest.json), with a link to the PR: the open PR
-# at the commit for a preview deployment, or the merged PR that introduced it
-# for a production one. When a PR's build fails, the PR also gets a comment
-# linking to the log; when a later revision builds, the comment is updated to
-# say so. The log never goes on the PR itself, so anything sensitive a build
-# prints stays in Slack instead of a public repository.
+# dev/vercel-build-log-slack-app-manifest.json), with a link to the PR: the
+# open PR at the commit for a preview deployment, or the merged PR that
+# introduced it for a production one. When a PR's build fails, the PR also
+# gets a comment linking to the log; when a later revision builds, the
+# comment is updated to say so. The log never goes on the PR itself, so
+# anything sensitive a build prints stays in Slack instead of a public
+# repository.
 #
 # GitHub only delivers repository_dispatch (and finds workflow_dispatch
 # workflows) once the workflow file is on the default branch, so before merge
-# run dev/report-vercel-build.mjs locally instead. After merge, re-run on a
+# run dev/vercel-build-log.mjs locally instead. After merge, re-run on a
 # deployment by hand with the same payload fields as inputs:
-#   gh workflow run report-vercel-build.yml \
+#   gh workflow run vercel-build-log.yml \
 #       -f id=dpl_... -f state=failed -f sha=<commit sha>
 on:
     repository_dispatch:
@@ -40,7 +41,7 @@ permissions:
     pull-requests: write
 
 jobs:
-    report:
+    log:
         # `failed` is also sent for checks_failed, aliasing_failed and account
         # problems, where the build log shows a build that passed. A failed
         # build also sends a second `failed` dispatch in Vercel's error-event
@@ -52,10 +53,10 @@ jobs:
                 || github.event.client_payload.state.detail == 'deployment_failed')
         runs-on: ubuntu-latest
         steps:
-            - name: Check out dev/report-vercel-build.mjs
+            - name: Check out dev/vercel-build-log.mjs
               uses: actions/checkout@v4
               with:
-                  sparse-checkout: dev/report-vercel-build.mjs
+                  sparse-checkout: dev/vercel-build-log.mjs
                   sparse-checkout-cone-mode: false
 
             - name: Attach the log to the Vercel app's Slack post, and comment on the PR
@@ -68,4 +69,4 @@ jobs:
                   VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
                   SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
                   SLACK_CHANNEL_ID: ${{ vars.SLACK_CHANNEL_ID }}
-              run: node dev/report-vercel-build.mjs
+              run: node dev/vercel-build-log.mjs

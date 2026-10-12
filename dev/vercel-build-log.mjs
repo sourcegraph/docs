@@ -10,7 +10,7 @@
  * the same comment is updated to say so.
  *
  * Usage:
- *   node dev/report-vercel-build.mjs [--dry-run]
+ *   node dev/vercel-build-log.mjs [--dry-run]
  *
  * In order:
  *
@@ -39,7 +39,7 @@
  * Needs DEPLOYMENT_ID, DEPLOYMENT_STATE (failed or success), COMMIT_SHA,
  * GH_TOKEN, GITHUB_REPOSITORY and VERCEL_TOKEN (plus VERCEL_TEAM_ID unless the
  * token is scoped to the project). SLACK_BOT_TOKEN is the bot in
- * dev/report-vercel-build-slack-app-manifest.json.
+ * dev/vercel-build-log-slack-app-manifest.json.
  */
 
 const DRY_RUN = process.argv.includes('--dry-run');
@@ -54,9 +54,11 @@ const REPOSITORY = process.env.GITHUB_REPOSITORY;
 const {DEPLOYMENT_ID, DEPLOYMENT_STATE, COMMIT_SHA, SLACK_CHANNEL_ID} =
 	process.env;
 
-// Comments from before the log moved to Slack carry an artifact ID here
-const MARKER = '<!-- vercel-build-report -->';
-const MARKER_PATTERN = /^<!-- vercel-build-report(?: artifact=\d+)? -->/;
+// Comments from before the rename use the old name, and ones from before the
+// log moved to Slack carry an artifact ID
+const MARKER = '<!-- vercel-build-log -->';
+const MARKER_PATTERN =
+	/^<!-- vercel-build-(?:log|report)(?: artifact=\d+)? -->/;
 
 // ---------------------------------------------------------------- GitHub
 

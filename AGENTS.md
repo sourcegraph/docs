@@ -116,16 +116,16 @@ next run.
 ### Vercel build failures
 
 - Vercel shows build logs only to its team members, so
-  `.github/workflows/report-vercel-build.yml` attaches the log to the Vercel
+  `.github/workflows/vercel-build-log.yml` attaches the log to the Vercel
   Slack app's "failed to deploy" post in the `SLACK_CHANNEL_ID` channel
-  and comments a link to it on the PR (see `dev/report-vercel-build.mjs`).
+  and comments a link to it on the PR (see `dev/vercel-build-log.mjs`).
   The log itself never goes on the PR, since the repository is public.
 - It reads Vercel with the `VERCEL_TOKEN` repo secret, a token scoped to the
   `sourcegraph-docs` project that expires 2026-12-10; mint a new one with
   `POST /v3/user/tokens?teamId=<team>` and `projectId` in the body.
 - Slack needs the `SLACK_BOT_TOKEN` repo secret and `SLACK_CHANNEL_ID` repo
   variable. The bot is the Slack app in
-  `dev/report-vercel-build-slack-app-manifest.json`; to recreate it, paste
+  `dev/vercel-build-log-slack-app-manifest.json`; to recreate it, paste
   that manifest at
   <https://api.slack.com/apps?new_app=1> (From a manifest), install it, copy its
   Bot User OAuth Token into the secret, and `/invite @Vercel build log` to the
