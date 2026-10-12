@@ -54,11 +54,9 @@ const REPOSITORY = process.env.GITHUB_REPOSITORY;
 const {DEPLOYMENT_ID, DEPLOYMENT_STATE, COMMIT_SHA, SLACK_CHANNEL_ID} =
 	process.env;
 
-// Comments from before the rename use the old name, and ones from before the
-// log moved to Slack carry an artifact ID
+// Comments from before the log moved to Slack carry an artifact ID here
 const MARKER = '<!-- vercel-build-log -->';
-const MARKER_PATTERN =
-	/^<!-- vercel-build-(?:log|report)(?: artifact=\d+)? -->/;
+const MARKER_PATTERN = /^<!-- vercel-build-log(?: artifact=\d+)? -->/;
 
 // ---------------------------------------------------------------- GitHub
 
