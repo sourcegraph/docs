@@ -26,23 +26,11 @@ The following is a list of Sourcegraph services that initiate outbound connectio
 
 ## Outbound access to Sourcegraph services
 
-### Services gateway (upcoming 8.1 release)
+Sourcegraph uses `https://services.sourcegraph.com` for Pings, Telemetry Gateway, and Enterprise Portal traffic, including license verification, credit/quota checks, and consumption reporting.
 
-The upcoming Sourcegraph 8.1 release defaults to `https://services.sourcegraph.com` for Pings, Telemetry Gateway, and Enterprise Portal traffic, including license verification, credit/quota checks, and consumption reporting. The gateway infrastructure is available now, but older releases do not automatically switch to this endpoint.
+Allow **outbound TCP port `443` to `34.36.231.254`**, with **HTTPS and HTTP/2 gRPC** support through your firewall or proxy. For hostname-based filtering, allow `services.sourcegraph.com`. Keep the hostname for TLS; do not replace it with the IP address. No inbound firewall rule is required.
 
-Allow outbound connections from your instance to **`34.36.231.254` on TCP port `443`**, with support for **HTTPS and HTTP/2 gRPC** through any firewall or proxy. If your network also filters by hostname, allow `services.sourcegraph.com`. Both `services.sourcegraph.com` and `pings.sourcegraph.com` resolve to this retained Pings IPv4 address. Keep the hostname for TLS; do not replace it with the IP address. This is an outbound destination allowlist, not an inbound firewall rule.
-
-The services gateway is not Cloudflare-proxied, so this path does **not** require Cloudflare's shared IP ranges. This single IP covers only these service interactions, not code hosts, LLM providers, update/download artifacts, browser access to Enterprise Portal, or every Sourcegraph integration. Keep the destinations required by your other enabled features.
-
-### Older releases and direct endpoints
-
-Until you upgrade to a release that uses the services gateway, retain the outbound rules for your existing destinations, including hostname rules where required:
-
-- `pings.sourcegraph.com`: `34.36.231.254`.
-- `telemetry-gateway.sourcegraph.com`: `34.107.157.31`.
-- `sourcegraph.com`: the full [Cloudflare IP ranges](https://www.cloudflare.com/ips/), when required by your configured services.
-
-Keep access to your configured Enterprise Portal endpoint and any other custom endpoints. Do not remove those rules merely because the services gateway is available.
+The gateway is not Cloudflare-proxied and does **not** require Cloudflare's shared IP ranges. This IP covers only these service interactions. Keep separate access rules for code hosts, LLM providers, update/download artifacts, browser access to Enterprise Portal, custom endpoints, and other enabled integrations.
 
 ## HTTP proxy configuration
 
