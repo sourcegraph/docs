@@ -78,6 +78,8 @@ To view which files are skipped during indexing, visit the repository settings p
 
 To force the indexer to include specific files (like `yarn.lock` or other large text files) that are otherwise skipped, add their file path or a glob pattern to the [search.largeFiles](/admin/search#maximum-file-size) setting in your advanced configuration and reindex the repository. Note that files must still be valid UTF-8 to be indexed, even if added to `search.largeFiles`.
 
+The unique trigram limit applies only to indexed search. Unindexed search, which runs for unindexed branches and revisions and for queries with `index:no`, still searches the content of these files, so the same query can return more results unindexed than indexed. Files skipped this way are mostly minified JavaScript, source maps, and lockfiles. Their paths are still indexed, so they show up in `type:path` searches. To find content matches in them, add `index:no` to the query, or add them to `search.largeFiles` as described above.
+
 For large deployments we recommend horizontally scaling indexed search. You can do this by adjusting the [number of replicas](/self-hosted/deploy/kubernetes/configure). Sourcegraph shards repository indexes across replicas. When the replica count changes Sourcegraph will slowly rebalance indexes to ensure availability of existing indexes.
 
 The resource requirements for indexed search vary considerably based on the text contents of your repositories, but a good estimate is that the node should have enough memory to hold the entire text contents of the default branch of each repository.
