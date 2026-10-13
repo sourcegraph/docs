@@ -24,6 +24,36 @@ The following is a list of Sourcegraph services that initiate outbound connectio
 -   **worker**: Sourcegraph Worker background jobs that may require establishing connections to
     services hosted within an organization's private network
 
+## Outbound access to Sourcegraph services
+
+### Services gateway (upcoming 8.1 release)
+
+The upcoming Sourcegraph 8.1 release defaults to `https://services.sourcegraph.com` for Pings, Telemetry Gateway, and Enterprise Portal traffic, including license verification, credit/quota checks, and consumption reporting. The gateway infrastructure is available now, but older releases do not automatically switch to this endpoint.
+
+Allow outbound connections from your instance to **`34.36.231.254` on TCP port `443`**, with support for **HTTPS and HTTP/2 gRPC** through any firewall or proxy. Both `services.sourcegraph.com` and `pings.sourcegraph.com` resolve to this retained Pings IPv4 address. Keep the hostname in client configuration for TLS; do not replace it with the IP address. This is an outbound destination allowlist, not an inbound firewall rule.
+
+The services gateway is not Cloudflare-proxied, so this path does **not** require Cloudflare's shared IP ranges. This single IP covers only these service interactions, not code hosts, LLM providers, update/download artifacts, browser access to Enterprise Portal, or every Sourcegraph integration. Keep the destinations required by your other enabled features.
+
+### Custom endpoints
+
+In the upcoming 8.1 release, `SERVICES_GATEWAY_URL` sets the shared endpoint and defaults to `https://services.sourcegraph.com`. If you configure it, use an absolute HTTPS origin without credentials, a path, query, or fragment, and set it on each relevant frontend and worker deployment. These subsystem overrides take precedence for their respective traffic:
+
+- `UPDATE_CHECK_BASE_URL`: Pings/update checks.
+- `ENTERPRISE_PORTAL_URL`: Enterprise Portal, including licensing and credit/consumption interactions.
+- `TELEMETRY_GATEWAY_EXPORTER_EXPORT_ADDR`: Telemetry Gateway.
+
+Allow outbound access to any overridden destinations as well; the single-IP rule applies only to traffic using the default gateway. In 8.1, `LICENSE_CHECK_API_URL` is removed; use `ENTERPRISE_PORTAL_URL` for a custom Portal endpoint. An empty telemetry export address selects the gateway rather than disabling export. Production telemetry exemptions remain license-controlled. Authentication and protocols are unchanged, and user and organization metadata export remains opt-in.
+
+### Older releases and direct endpoints
+
+Until you upgrade to a release that uses the services gateway, retain the outbound rules for your existing destinations. These also apply when explicitly configured as overrides:
+
+- `pings.sourcegraph.com`: `34.36.231.254`.
+- `telemetry-gateway.sourcegraph.com`: `34.107.157.31`.
+- `sourcegraph.com`: the full [Cloudflare IP ranges](https://www.cloudflare.com/ips/), when required by your configured services.
+
+Keep access to your configured Enterprise Portal endpoint and any other custom endpoints. Do not remove those rules merely because the services gateway is available.
+
 ## HTTP proxy configuration
 
 All Sourcegraph services respect the conventional `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY` environment variables for
