@@ -577,8 +577,8 @@ All advanced configuration options and their default values are shown below.
 	// The number of concurrent external service syncers that can run.
 	"repoConcurrentExternalServiceSyncers": 3,
 
-	// Interval (in minutes) for checking code hosts (such as GitHub, Gitolite, etc.) for new repositories.
-	"repoListUpdateInterval": 1,
+	// Minimum interval (in minutes) between syncs of each code host (such as GitHub, Gitolite, etc.). Code hosts with no changes or with sync errors are synced less often, up to every 8 hours.
+	"repoListUpdateInterval": 2,
 
 	// Configuration for repository purge worker.
 	"repoPurgeWorker": {
@@ -642,6 +642,11 @@ All advanced configuration options and their default values are shown below.
 
 	// EXPERIMENTAL: Use content-based language detection for lang: filters (Zoekt only).
 	"searchContentBasedLanguageDetection": false,
+
+	// Policies the Sourcegraph instance applies to the src CLI. These are served unauthenticated at /.api/src-cli/config so the CLI can read them before authenticating, so do not place sensitive values here. The allowAccessTokenAuth policy is enforced server-side.
+	"srcCli": {
+		"allowAccessTokenAuth": true
+	},
 
 	// Syntax highlighting configuration
 	// Other example values:
@@ -778,7 +783,7 @@ All advanced configuration options and their default values are shown below.
 	// Enables users to change their username after account creation. Warning: setting this to be true has security implications if you have enabled (or will at any point in the future enable) repository permissions with an option that relies on username equivalency between Sourcegraph and an external service or authentication provider. Do NOT set this to true if you are using non-built-in authentication OR rely on username equivalency for repository permissions.
 	"auth.enableUsernameChanges": false,
 
-	// When enabled, users are required to connect at least one external account to their Sourcegraph account. Site admins are exempt from this requirement.
+	// When enabled, users are required to connect at least one external account to their Sourcegraph account. Site admins are exempt from this requirement. To require an account for a specific code host authentication provider, set `enforceAccountConnection` on that provider in `auth.providers`.
 	"auth.enforceExternalAccountConnection": false,
 
 	// Enables OAuth 2.0 Dynamic Client Registration (RFC 7591) for the Sourcegraph identity provider. When enabled, OAuth clients can self-register programmatically instead of requiring manual pre-configuration. This is used for MCP clients; if `mcp.enabled` is `false`, this setting is treated as `false`.
