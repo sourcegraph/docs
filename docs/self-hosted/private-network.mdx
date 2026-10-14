@@ -32,55 +32,13 @@ To ensure a smooth experience, instances must allow **outbound TCP port `443` to
 
 ## HTTP proxy configuration
 
-All Sourcegraph services respect the conventional `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY` environment variables for
-routing Sourcegraph client application HTTP traffic through a proxy server. The steps for configuring proxy environment
-variables will depend on your Sourcegraph deployment method.
+Sourcegraph services respect the conventional `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY` environment variables. Set them on the `frontend`, `gitserver`, and `worker` services, using the example override file for your deployment method:
 
-Set them on `frontend`, `gitserver`, and `worker`, the services which make outbound HTTP requests. `migrator` only connects to Postgres, and `executor` only connects to the frontend and does not pass these variables to its jobs, so neither needs them.
-
-### Kubernetes Helm
-
-Add the proxy environment variables to your Sourcegraph Helm chart [override file](https://github.com/sourcegraph/deploy-sourcegraph-helm/blob/main/charts/sourcegraph/values.yaml). See the [outbound-http-proxy example](https://github.com/sourcegraph/deploy-sourcegraph-helm/blob/main/charts/sourcegraph/examples/outbound-http-proxy/override.yaml) for a complete override file.
-
-```yaml
-frontend|gitserver|worker:
-    env:
-        HTTP_PROXY:
-            value: http://proxy.example.com:8080
-        HTTPS_PROXY:
-            value: http://proxy.example.com:8080
-        NO_PROXY:
-            value: 'blobstore,codeinsights-db,codeintel-db,sourcegraph-frontend-internal,sourcegraph-frontend,gitserver,grafana,indexed-search-indexer,indexed-search,jaeger-query,pgsql,precise-code-intel-worker,prometheus,redis-cache,redis-store,searcher,syntect-server,worker-executors,worker,cloud-sql-proxy,localhost,127.0.0.1,.svc,.svc.cluster.local,kubernetes.default.svc'
-```
-
-<Callout type="info">
-If the updated Sourcegraph pods fail to pass their readiness or health checks after configuring the HTTP proxy environment variables, you may also need to add your k8s cluster pod & service CIDR ranges to the `NO_PROXY` environment variable. For example, if the k8s cluster pod & service CIDR ranges are `10.10.0.0/16` and `10.20.0.0/16`, configure the `NO_PROXY` environment variable as:
-
-```yaml
-frontend|gitserver|worker:
-    env:
-        NO_PROXY:
-            value: 'blobstore,codeinsights-db,codeintel-db,sourcegraph-frontend-internal,sourcegraph-frontend,gitserver,grafana,indexed-search-indexer,indexed-search,jaeger-query,pgsql,precise-code-intel-worker,prometheus,redis-cache,redis-store,searcher,syntect-server,worker-executors,worker,cloud-sql-proxy,localhost,127.0.0.1,.svc,.svc.cluster.local,kubernetes.default.svc,10.10.0.0/16,10.20.0.0/16'
-```
-
-</Callout>
-
-### Docker Compose
-
-Add the proxy environment variables to your docker compose override file. See the [outbound-http-proxy example](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/main/docker-compose/examples/outbound-http-proxy/docker-compose.override.yaml) for a complete override file.
-
-```yaml
-services:
-    sourcegraph-frontend-0|sourcegraph-frontend-internal|gitserver-0|worker:
-        environment:
-            HTTP_PROXY: http://proxy.example.com:8080
-            HTTPS_PROXY: http://proxy.example.com:8080
-            NO_PROXY: blobstore,caddy,cadvisor,codeinsights-db,codeinsights-db-exporter,codeintel-db,codeintel-db-exporter,gitserver-0,grafana,migrator,node-exporter,otel-collector,pgsql,pgsql-exporter,precise-code-intel-worker,prometheus,redis-cache,redis-store,searcher-0,sourcegraph-frontend-0,sourcegraph-frontend-internal,syntactic-code-intel-worker,syntect-server,worker,zoekt-indexserver-0,zoekt-webserver-0,localhost,127.0.0.1
-```
+- [Kubernetes Helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/blob/main/charts/sourcegraph/examples/outbound-http-proxy/override.yaml)
+- [Docker Compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/main/docker-compose/examples/outbound-http-proxy/docker-compose.override.yaml)
 
 <Callout type="warning">
-	Failure to configure `NO_PROXY` correctly can cause the proxy configuration
-	to interfere with local networking between internal Sourcegraph services.
+`NO_PROXY` must list every Sourcegraph service, so traffic between them does not go through the proxy. If services fail their health checks after adding the proxy, also add your cluster or Docker network CIDR ranges, for example `10.10.0.0/16,10.20.0.0/16`.
 </Callout>
 
 ## Docker networking configuration
