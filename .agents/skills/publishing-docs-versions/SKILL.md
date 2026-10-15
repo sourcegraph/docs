@@ -37,29 +37,75 @@ Example: when 7.4 is released, archive 7.3 as `legacy/v7_3`, then update `origin
 
 ## Finding the cut point for a legacy branch
 
-Always inspect history instead of guessing:
+The archive for `P.Q` must not contain anything merged at or after the public
+release of `X.Y`. The publish time is a hard ceiling, not a target: an earlier
+hand-picked cut is fine when the reason is stated at the confirmation step.
+Never default to the `origin/main` tip.
+
+1. Get the publish time of `X.Y.0` in UTC. Use the GitHub release; fall back to
+   the changelog API. Do not use the tag or `created_at`: the tag exists before
+   the release is public (7.7.0 was tagged 28 hours before it was published).
+   Also record when the `X.Y.x` release branch was cut from `main`.
+
+```bash
+gh api repos/sourcegraph/sourcegraph/releases/tags/vX.Y.0 --jq '{published_at, created_at}'
+curl -s 'https://sourcegraph.com/changelog/.api/search?q=X.Y.0' \
+  | jq '.results[] | select(.type=="release-page" and .slug=="X.Y.0") | .release.sourcegraph | {promotedAt, gitSha}'
+gh api repos/sourcegraph/sourcegraph/compare/main...X.Y.x --jq '.merge_base_commit.commit.committer.date'
+```
+
+2. Find the ceiling commit and the docs PRs the archive must exclude. Use the
+   full ISO timestamp; a date-only value widens the window.
 
 ```bash
 git fetch --all --prune
-git log --date=short --pretty=format:'%h %ad %s' origin/main --since='<release date - 1 week>' --until='<release date + 2 weeks>' --reverse
-git for-each-ref refs/remotes/legacy --format='%(refname:short) %(objectname:short) %(committerdate:short) %(subject)' | sort -V | tail -50
+PUBLISHED=<published_at, e.g. 2026-01-02T03:04:05Z>
+git log -1 --first-parent --before="$PUBLISHED" --date=iso-strict --format='%h %cd %s' origin/main
+gh pr list --repo sourcegraph/docs --state merged --search "base:main merged:>=$PUBLISHED" --json number,title,mergedAt,mergeCommit
+git for-each-ref refs/remotes/legacy --format='%(refname:short) %(objectname:short) %(committerdate:short)' | sort -V | tail -5
 ```
 
-Pick the commit the user considers the correct snapshot for the previous version. If the user gives a release date but not a commit, use the repo’s existing pattern:
+   `git merge-base --is-ancestor <mergeCommit> <cut>` must fail for every PR
+   that list returns.
 
-- Choose a hand-picked `origin/main` commit near the release cut.
-- Prefer the last relevant docs commit on the release date when obvious.
-- If no version-bump commit exists yet and the user wants the just-current docs archived, use the current `origin/main` tip.
+3. Flag PRs merged between the release-branch cut date and the ceiling that may
+   carry `X.Y` content. Flagging is a signal for the user, not an automatic
+   exclusion.
 
-For reference, recent historical decisions:
+- Bodies or review comments saying "merge after X.Y releases", "hold until", or
+  "do not merge":
 
-- `legacy/v7_0` was cut from `a5d80e5e` and then got empty no-op marker commits.
-- `legacy/v7_1` was cut from `6b8ae421` for the Apr 24 release-date snapshot.
-- `legacy/v7_2` was cut from `fccceac6`, then updated with a version metadata commit.
+```bash
+gh pr list --repo sourcegraph/docs --state all --search "base:main updated:<branch-cut-date>..<published + 7 days>" --json number,title,state,mergedAt,body
+gh api repos/sourcegraph/docs/pulls/<n>/comments --jq '.[].body'
+```
+
+- `🤖 Sync generated docs` PRs whose sync commit is dated after the release-branch
+  cut: their pages come from `main`, which is already the next version.
+- PRs that link a `sourcegraph/sourcegraph` PR. If that PR's merge commit is on
+  `X.Y.x`, the docs PR documents an `X.Y` feature:
+
+```bash
+gh api repos/sourcegraph/sourcegraph/compare/X.Y.x...<merge_commit_sha> --jq .status
+```
+
+  `behind` means included. For `diverged`, search for a `[Backport X.Y.x]` PR
+  before concluding it is not.
+
+4. Propose and wait. Post the publish time and its source, the ceiling commit,
+   the excluded PRs, each flagged PR with its reason, and the proposed cut. If
+   the proposed cut is earlier than the ceiling, say why. Stop until the user
+   confirms the commit. Do not create or push the legacy branch before that.
+
+Example: `v8_0` was first cut from the `origin/main` tip `fb50b82b` (#2090,
+"Merge after 8.1 releases", merged six minutes after 8.1.0 was published) and
+re-cut from `ddfe8c2`. The ceiling was `5e5bb56`; `ddfe8c2` also left out #2078
+(documents sourcegraph#16774, which is on `8.1.x`) and the post-cut sync #2071.
 
 ## Creating and pushing the legacy branch
 
-Create the branch from the selected cut commit, add an empty marker commit, and push to `legacy`:
+Only after the user confirmed the cut commit. Create the branch from it, add an
+empty marker commit, and push to `legacy`:
 
 ```bash
 git switch --detach <cut-commit>
@@ -130,6 +176,8 @@ git ls-remote --heads legacy 'v7_*'
 Confirm:
 
 - The legacy branch points to the pushed commit.
+- No docs PR merged at or after the `X.Y.0` publish time is an ancestor of the
+  legacy branch.
 - The legacy branch identifies itself without claiming to be latest and lists
   only older fallback versions.
 - The origin PR branch sets the new latest version and includes the archived version in previous-version lists.
