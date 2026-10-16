@@ -1,22 +1,27 @@
-# Deep Search Context Filters
+# Agent Context Filters
 
 <TierCallout>
 	Supported on [Enterprise](/pricing/plans/enterprise) plans. Configuring
 	context filters requires administrator access.
 </TierCallout>
 
-Context filters are an admin-defined exclusion list for [Deep Search](/deep-search). Anything matched by a filter is invisible to the agent: it never appears in an answer, and it cannot be read, searched, diffed, or resolved by any Deep Search tool.
+Context filters are an admin-defined exclusion list for the agents that run inside [Deep Search](/deep-search) and [Agentic Batch Changes](/agentic-batch-changes). Anything matched by a filter is invisible to the agent.
+
+Two site configuration keys hold the rules, and both have the same shape:
+
+- `experimentalFeatures.agents.contextFilters` applies to both agents. Put new rules here.
+- `experimentalFeatures.deepSearch.contextFilters` is the older key that predates Agentic Batch Changes. It stays effective, and its rules also apply to both agents, so you do not need to move existing rules. See [Which key to use](#which-key-to-use).
 
 ## Why use context filters
 
-- **Keep secrets out of the agent's context.** Excluded content never leaves your instance, so it cannot be quoted, summarized, or forwarded to a third-party model provider.
-- **Reduce noise.** Vendored dependencies, generated code, and archived repositories can be hidden so Deep Search spends its research on code that matters.
+- **Keep secrets out of the agent's context.** Excluded content is never returned by the agent's tools, so the agent cannot quote it, summarize it, or forward it to a third-party model provider.
+- **Reduce noise.** Vendored dependencies, generated code, and archived repositories can be hidden so the agent spends its research on code that matters.
 
 ## How context filters work
 
-Filtering happens before any content reaches the LLM and does not rely on prompting, so the model cannot reason it's way around the filters. 
+Filtering happens in the tools the agent uses to read repositories, before any content reaches the LLM, and does not rely on prompting, so the model cannot reason its way around the filters.
 
-To Deep Search, excluded content is indistinguishable from content that does not exist. 
+To the agent, excluded content is indistinguishable from content that does not exist. Agentic Batch Changes adds one check on top of this: a [coding agent step](#coding-agent-steps) works on a full checkout and therefore cannot run at all in a repository that contains excluded content. Other batch change steps, such as `run` steps, execute on an unfiltered checkout; see [Agentic Batch Changes](#agentic-batch-changes).
 
 ## Configuring context filters
 
@@ -24,7 +29,7 @@ An administrator configures filters under **Administration → Configuration →
 
 ```jsonc
 "experimentalFeatures": {
-  "deepSearch.contextFilters": {
+  "agents.contextFilters": {
     "exclude": [
       // Hide an entire repository.
       { "repoNamePatterns": ["^github\\.com/acme/secrets$"] },
@@ -40,7 +45,13 @@ An administrator configures filters under **Administration → Configuration →
 }
 ```
 
-Config changes apply to the next Deep Search run; no restart is required. A rule must set at least one of the two fields.
+Config changes apply to the next agent run; no restart is required. `exclude` must contain at least one rule, a rule must set at least one of the two fields, and each field you set must list at least one pattern. To turn filtering off, remove the key; an empty `exclude` list is rejected. Saving an invalid pattern through the site admin UI is rejected. If an invalid pattern reaches the running configuration another way, for example through `SITE_CONFIG_FILE`, the agents block every repository until it is fixed rather than running with no filters.
+
+### Which key to use
+
+Rules from `agents.contextFilters` and `deepSearch.contextFilters` are combined into one list, and every agent applies the whole list. A rule in either key hides the same content from Deep Search, from the Agentic Batch Changes agent, and from its coding agent steps. There is no way to exclude content from one agent only.
+
+Add new rules to `agents.contextFilters`. Rules you already have in `deepSearch.contextFilters` keep working and need no migration; if both keys are set, their rules are simply combined.
 
 ## Pattern syntax
 
@@ -49,9 +60,9 @@ Both `repoNamePatterns` and `filePathPatterns` take a list of Go [RE2](https://g
 - **Patterns are unanchored.** `internal` matches `github.com/acme/internal-tools`. Use `^...$` when you mean the whole string.
 - **`.` matches any character except a newline, including `/`.** Escape it as `github\.com`. The pattern `a.b` also matches the repository `a/b`.
 - **Backslashes must be doubled in JSON.** The regex `\.env$` is written `"\\.env$"`.
-- **Repository names and file paths match case-insensitively.** `README` also excludes `readme`.
-- **RE2 does not support backreferences or lookaround assertions.** Patterns like `(a)\1` is rejected.
-- **Patterns in a list are combined with OR** `["^a$", "^b$"]` matches either.
+- **Repository names match case-insensitively; file paths match case-sensitively.** `acme/Secrets` excludes `github.com/acme/secrets`, but `README` does not exclude `readme.md`. Prefix a file pattern with `(?i)` to make it case-insensitive: `"(?i)readme"`.
+- **RE2 does not support backreferences or lookaround assertions.** Patterns like `(a)\1` are rejected.
+- **Patterns in a list are combined with OR.** `["^a$", "^b$"]` matches either.
 
 ### What the patterns are matched against
 
@@ -75,7 +86,7 @@ Within a single rule the two fields are combined with AND, and an omitted field 
 {"repoNamePatterns": ["^github\\.com/acme/secrets$"]}
 ```
 
-`github.com/acme/secrets` disappears completely: it is dropped from repository lists and search results, its refs and revisions cannot be resolved, and every tool reports it as nonexistent.
+`github.com/acme/secrets` disappears completely: it is dropped from repository lists and search results, its refs and revisions cannot be resolved, and every repository tool reports it as nonexistent. A [coding agent step](#coding-agent-steps) targeting it fails with an explicit message instead.
 
 Anchoring matters here. `^github\.com/acme/secrets$` leaves `github.com/acme/secrets-docs` visible, while the unanchored `acme/secrets` hides both.
 
@@ -85,7 +96,7 @@ Anchoring matters here. `^github\.com/acme/secrets$` leaves `github.com/acme/sec
 {"filePathPatterns": ["\\.env$", "^secrets/"]}
 ```
 
-Every `.env` file, and everything under a top-level `secrets/` directory, is hidden in all repositories. The repositories themselves stay searchable, only the matching files go missing. A files-only rule never hides a repository, so `github.com/acme/backend` still appears in repository lists even if all of its files are filtered.
+Every `.env` file, and everything under a top-level `secrets/` directory, is hidden in all repositories. The repositories themselves stay searchable, only the matching files go missing. A files-only rule never hides a repository, so `github.com/acme/backend` still appears in repository lists even if all of its files are filtered. The exception is [coding agent steps](#coding-agent-steps), which cannot run in a repository that contains even one matching file.
 
 ### Files within a repository
 
@@ -98,6 +109,36 @@ Every `.env` file, and everything under a top-level `secrets/` directory, is hid
 
 `deploy/` and `config/prod/` are hidden in `github.com/acme/backend` only. The same paths in a different repo (e.g., `github.com/acme/frontend`) stay visible.
 
+## Agentic Batch Changes
+
+The [Agentic Batch Changes](/agentic-batch-changes) agent applies the combined rules everywhere it reads code through Sourcegraph: when it researches with Deep Search, when it reads files, searches, and resolves repositories directly, and in the [Sourcegraph MCP](/api/mcp) tools available inside its coding agent steps. When the agent's batch spec is resolved into workspaces, repositories matched by a rule that has only `repoNamePatterns` are dropped, so the agent cannot change them even if its spec names them. A rule with `filePathPatterns` does not drop a workspace, even when its `repoNamePatterns` match; it hides the matching files from the agent's tools and, for coding agent steps, blocks the repository as described below.
+
+Workspace filtering applies only to batch specs the agent manages. A batch spec you write and run yourself keeps every workspace, but its coding agent steps are still subject to the check below.
+
+Steps run on a full checkout of the repository in an executor container, and context filters do not remove files from that checkout. A `run` step's script can read any file in the repository, including excluded ones. Coding agent steps are the exception: because a coding agent reads the checkout freely, Sourcegraph refuses to start it rather than let it see excluded content.
+
+### Coding agent steps
+
+A [coding agent step](/agentic-batch-changes/configuration#coding-agent-steps) runs a coding agent on a full checkout of the repository, where individual files cannot be hidden. Instead of hiding files, Sourcegraph refuses to run coding agent steps in a repository when any of the following is true:
+
+- The repository matches a rule that has only `repoNamePatterns`.
+- The repository contains at least one file matching a `filePathPatterns` rule that applies to it, either a files-only rule or a rule whose `repoNamePatterns` match the repository. Sourcegraph checks this with a path search at the commit the workspace uses, so one `.env` file anywhere in the repository is enough.
+- The repository has a `.sourcegraph/ignore` file, and at least one `filePathPatterns` rule applies to the repository. The ignore file hides paths from search, so Sourcegraph cannot verify that no excluded file is present and fails closed.
+
+The check runs before the executor job for the repository starts, and only when a coding agent step would actually run: an execution whose coding agent steps are all skipped by an `if:` condition or served from the execution cache does not trigger it. When the check blocks an execution, the executor job never starts, so the `run` steps in that job do not run either. Coding agent steps in [changeset hooks](/agentic-batch-changes/configuration#changeset-hooks) are checked the same way.
+
+A blocked repository fails its execution with one of these messages, which the agent sees as well:
+
+- "Coding agent steps cannot run in this repository because it is excluded by the agent context filters in the site configuration (experimentalFeatures.agents.contextFilters)."
+- "Coding agent steps cannot run in this repository because it contains files excluded by the agent context filters in the site configuration (experimentalFeatures.agents.contextFilters)."
+- "Coding agent steps cannot run in this repository because it has a .sourcegraph/ignore file, which hides files from the search that enforces the agent context filters in the site configuration (experimentalFeatures.agents.contextFilters)."
+
+The message names neither the rule nor the matching file. If the path search itself fails or returns incomplete results, the execution fails with "could not verify the repository against the agent context filters; please retry or contact your administrator" and can be retried.
+
+A blocked coding agent step does not consume a unit of the user's coding agent step [entitlement](/agentic-batch-changes/configuration#usage-limits).
+
 ## Verifying a filter
 
 Ask Deep Search a question that would require the excluded content, and @-mention the repository or file directly. A working filter produces an answer that does not reference the content, and the [list of sources](/deep-search) contains none of it. If you @-mention filtered content, Deep Search reports it as not found rather than acknowledging that it was excluded.
+
+To verify the coding agent step check, add a files-only rule that matches a file in a test repository, for example `{"filePathPatterns": ["^context-filter-canary\\.txt$"]}`, and run an agentic batch change with a coding agent step against that repository. The execution for that repository fails with the "contains files excluded" message above instead of running the step. A repository-only rule cannot be verified this way, because the agent drops that repository's workspace before anything executes; to see the "is excluded" message, run a batch spec you wrote yourself with a `codingAgent` step against the excluded repository.
