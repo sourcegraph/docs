@@ -14,6 +14,10 @@ export const versions: VersionI[] = [
 		url: '/docs'
 	},
 	{
+		name: 'v8.0',
+		url: 'https://8.0.sourcegraph.com'
+	},
+	{
 		name: 'v7.7',
 		url: 'https://7.7.sourcegraph.com'
 	},
