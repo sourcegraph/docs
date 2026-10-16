@@ -98,6 +98,10 @@ A step references a secret by name. Sourcegraph injects the value when the step 
 
 All code-modifying work runs in isolated containers on [Sourcegraph executors](/admin/executors), one per repository. A container sees the repository and the secrets its steps reference. It has no direct access to code host credentials, other users' secrets, or other repository checkouts. [Coding agent steps](#coding-agent-steps) can still use Sourcegraph MCP to access code with your permissions. Containers can't publish. Publication happens inside Sourcegraph.
 
+### Context filters
+
+Administrators can exclude repositories and files from the agent's Sourcegraph tools with [context filters](/context-filters), configured under `experimentalFeatures.agents.contextFilters`. Excluded content is invisible to the agent's research and to the Sourcegraph MCP tools in its coding agent steps, and a repository excluded as a whole is dropped from the agent's workspaces. Because a coding agent step works on a full checkout, it [does not run at all](/context-filters#coding-agent-steps) in a repository that a rule excludes or that contains an excluded file. Filters do not remove files from the checkout that `run` steps execute on.
+
 ### Audit log
 
 Agent activity is recorded in the Sourcegraph audit log under the `batchChangeAgents` entity, with identifiers and no URLs, links, or tokens. On self-hosted instances, route it as you route the rest of the audit log.

@@ -1,5 +1,20 @@
 # Sourcegraph Docs - Agent Instructions
 
+## Documentation style
+
+- Write long-lived feature and configuration docs in the present tense for the
+  behavior readers will use when the docs are published. Avoid time-relative
+  wording such as "upcoming", "new", or "now" that requires later cleanup.
+- PRs for unreleased behavior can be ready for review. Coordinate merge timing
+  with the relevant release or weekly update, and record that dependency in the
+  PR description, not in customer prose.
+- Describe the current behavior concisely. Put release transitions and old/new
+  comparisons in upgrade notes rather than permanent feature docs. Retain
+  version-specific guidance only when readers still need it to use or upgrade
+  supported releases.
+- Number ordered Markdown lists sequentially (`1.`, `2.`, `3.`), rather than
+  writing every item as `1.`.
+
 ## Build Commands
 
 - **Type Check**: `npx tsc --noEmit`

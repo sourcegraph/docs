@@ -3198,6 +3198,7 @@ Generated query for critical alert: `(min((sum(src_worker_jobs{job=~"^worker.*",
 **Next steps**
 
 - Completed, unexpired SCIP uploads finished 1-96h ago are not represented in the persisted commit graph fast path.
+- Uploads whose commit is no longer reachable from any ref (for example, on a deleted branch) are excluded, so the remaining uploads are expected to become visible.
 - Check whether the codeintel commit graph updater worker is running and healthy.
 - Check worker logs for commit graph update failures.
 - Inspect codeintel commit graph freshness and upload processing panels for related backlog or errors.
@@ -3876,7 +3877,7 @@ Generated query for warning alert: `min((max by (name) (src_github_rate_limit_re
 
 **Descriptions**
 
-- <span class="badge badge-critical">critical</span> worker: less than 30 remaining calls to GitLab rest API before hitting the rate limit
+- <span class="badge badge-warning">warning</span> worker: less than 30 remaining calls to GitLab rest API before hitting the rate limit
 
 **Next steps**
 
@@ -3886,7 +3887,7 @@ Generated query for warning alert: `min((max by (name) (src_github_rate_limit_re
 
 ```json
 "observability.silenceAlerts": [
-  "critical_worker_gitlab_rest_rate_limit_remaining"
+  "warning_worker_gitlab_rest_rate_limit_remaining"
 ]
 ```
 
@@ -3895,7 +3896,7 @@ Generated query for warning alert: `min((max by (name) (src_github_rate_limit_re
 <details>
 <summary>Technical details</summary>
 
-Generated query for critical alert: `min((max by (name) (src_gitlab_rate_limit_remaining{resource="rest"})) &lt;= 30)`
+Generated query for warning alert: `min((max by (name) (src_gitlab_rate_limit_remaining{resource="rest"})) &lt;= 30)`
 
 </details>
 
@@ -7368,8 +7369,7 @@ Custom query for critical alert: `max(((sum(increase(src_deepsearch_question_pro
 
 **Descriptions**
 
-- <span class="badge badge-warning">warning</span> deepsearch: 3+ questions taking longer than 5 minutes over 15m
-- <span class="badge badge-critical">critical</span> deepsearch: 10+ questions taking longer than 5 minutes over 15m
+- <span class="badge badge-warning">warning</span> deepsearch: 3+ questions taking longer than 5 minutes over 15m for 10m0s
 
 **Next steps**
 
@@ -7381,8 +7381,7 @@ Custom query for critical alert: `max(((sum(increase(src_deepsearch_question_pro
 
 ```json
 "observability.silenceAlerts": [
-  "warning_deepsearch_deepsearch_slow_questions",
-  "critical_deepsearch_deepsearch_slow_questions"
+  "warning_deepsearch_deepsearch_slow_questions"
 ]
 ```
 
@@ -7391,9 +7390,7 @@ Custom query for critical alert: `max(((sum(increase(src_deepsearch_question_pro
 <details>
 <summary>Technical details</summary>
 
-Generated query for warning alert: `max((sum(increase(src_deepsearch_question_processing_duration_seconds_count{operation="question"\}[15m])) - sum(increase(src_deepsearch_question_processing_duration_seconds_bucket\{le="300",operation="question"}[15m]))) &gt; 3)`
-
-Generated query for critical alert: `max((sum(increase(src_deepsearch_question_processing_duration_seconds_count{operation="question"\}[15m])) - sum(increase(src_deepsearch_question_processing_duration_seconds_bucket\{le="300",operation="question"}[15m]))) &gt; 10)`
+Generated query for warning alert: `max((sum(increase(src_deepsearch_question_processing_duration_seconds_count{operation="question"\}[15m])) - sum(increase(src_deepsearch_question_processing_duration_seconds_bucket\{le=~"300([.]0)?",operation="question"}[15m]))) &gt; 3)`
 
 </details>
 
@@ -7405,7 +7402,7 @@ Generated query for critical alert: `max((sum(increase(src_deepsearch_question_p
 
 **Descriptions**
 
-- <span class="badge badge-critical">critical</span> deepsearch: 3+ truncated questions with no answer produced over 15m
+- <span class="badge badge-critical">critical</span> deepsearch: 5+ truncated questions with no answer produced over 15m for 10m0s
 
 **Next steps**
 
@@ -7427,7 +7424,7 @@ Generated query for critical alert: `max((sum(increase(src_deepsearch_question_p
 <details>
 <summary>Technical details</summary>
 
-Generated query for critical alert: `max((sum(increase(src_deepsearch_question_outcome_total{outcome="response_truncated_no_answer"}[15m]))) &gt; 3)`
+Custom query for critical alert: `max(((sum(increase(src_deepsearch_question_outcome_total{outcome="response_truncated_no_answer"\}[15m]))) and (sum(increase(src_deepsearch_question_outcome_total\{outcome="response_truncated_no_answer"\}[5m])) &gt;= 2) and (sum(increase(src_deepsearch_question_outcome_total\{outcome="response_truncated_no_answer"}[15m])) / sum(increase(src_deepsearch_question_outcome_total[15m])) &gt;= 0.05) and (sum(increase(src_deepsearch_question_outcome_total[15m])) &gt;= 20)) &gt;= 5)`
 
 </details>
 
