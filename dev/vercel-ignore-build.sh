@@ -13,9 +13,14 @@ exec git diff --quiet HEAD^ HEAD -- . \
 	':(exclude).gitignore' \
 	':(exclude)renovate.json' \
 	':(exclude)cspell*' \
+	':(exclude)dev/check-duplicates.mjs' \
+	':(exclude)dev/check-hostnames.mjs' \
+	':(exclude)dev/check-redirects.mjs' \
 	':(exclude)dev/check-spelling.mjs' \
+	':(exclude)dev/example-hostnames.json' \
 	':(exclude)dev/post-spelling-review.mjs' \
 	':(exclude)dev/report-vercel-build.mjs' \
 	':(exclude)dev/verify-links-live.mjs' \
 	':(exclude)dev/sync-review-comments.sh' \
+	':(exclude)dev/vercel-ignore-build.sh' \
 	':(exclude)dev/slack-app-vercel-build-report.json'
