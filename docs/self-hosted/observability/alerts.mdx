@@ -3225,6 +3225,43 @@ Generated query for critical alert: `max((max(src_codeintel_commit_graph_fast_pa
 
 <br />
 
+## worker: codeintel_uploads_writing_duration
+
+<p class="subtitle">maximum time a processed SCIP upload has been waiting for the destination writer</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> worker: 3600s+ maximum time a processed SCIP upload has been waiting for the destination writer for 15m0s
+- <span class="badge badge-critical">critical</span> worker: 86400s+ maximum time a processed SCIP upload has been waiting for the destination writer for 15m0s
+
+**Next steps**
+
+- Check that the worker runs the codeintel-destination-writer job, and its logs for write or promotion errors.
+- Check that the worker can reach the codeintel destination bundle store and the code intelligence database.
+- Check the codeintel-db dashboard for resource saturation.
+- More help interpreting this metric is available in the [dashboards reference](dashboards#worker-codeintel_uploads_writing_duration).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_worker_codeintel_uploads_writing_duration",
+  "critical_worker_codeintel_uploads_writing_duration"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((max(src_codeintel_uploads_writing_max_age_seconds)) &gt;= 3600)`
+
+Generated query for critical alert: `max((max(src_codeintel_uploads_writing_max_age_seconds)) &gt;= 86400)`
+
+</details>
+
+<br />
+
 ## worker: src_repoupdater_max_sync_backoff
 
 <p class="subtitle">time since oldest sync</p>
@@ -7535,9 +7572,9 @@ Generated query for critical alert: `max((max(src_workerutil_queue_duration_seco
 <details>
 <summary>Technical details</summary>
 
-Generated query for warning alert: `max((sum(increase(src_agent_runs_total{stop_reason="max_input_tokens",workload="batch_change_agent"}[1h]))) &gt; 0)`
+Generated query for warning alert: `max((sum(increase(src_agent_runs_total{agent="main",stop_reason="max_input_tokens",workload="batch_change_agent"}[1h]))) &gt; 0)`
 
-Generated query for critical alert: `max((sum(increase(src_agent_runs_total{stop_reason="max_input_tokens",workload="batch_change_agent"}[1h]))) &gt; 3)`
+Generated query for critical alert: `max((sum(increase(src_agent_runs_total{agent="main",stop_reason="max_input_tokens",workload="batch_change_agent"}[1h]))) &gt; 3)`
 
 </details>
 
