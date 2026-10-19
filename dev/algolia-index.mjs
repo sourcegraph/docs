@@ -71,7 +71,6 @@ const indexName = option('--index', DEFAULT_INDEX);
 const FALLBACK_PRODUCTS = [
 	{prefix: '/getting-started', product: 'Getting started', section: 'Documentation'},
 	{prefix: '/how-to', product: 'How-to guides', section: 'Documentation'},
-	{prefix: '/dotcom', product: 'Sourcegraph.com', section: 'Documentation'},
 	{prefix: '/releases', product: 'Releases', section: 'Documentation'},
 	{prefix: '/pricing', product: 'Pricing', section: 'Resources'}
 ];
