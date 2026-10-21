@@ -1,0 +1,121 @@
+# Connectors
+
+Connectors give Agentic Batch Changes access to tools outside your code, such as CI systems, issue trackers, observability tools, and internal documentation. A connector is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that an administrator connects once for everyone, or that a user adds for their own agents.
+
+For example, with a Buildkite connector, the agent can check recent CI failures before it plans a change. With a Backstage connector, it can find every catalog entry with placeholder data and then update the `catalog.yaml` files in the affected repositories.
+
+<Callout type="note" title="Availability">
+Connectors are experimental and turned off by default. On self-hosted instances, an administrator enables them by creating a boolean feature flag named `connectors` on the **Feature flags** page under **Administration → Configuration**, or with the [GraphQL API](/admin/how-to/manage-feature-flags-with-graphql). Use feature flag overrides to enable connectors for specific users first. On Sourcegraph Cloud, ask your account team to enable them.
+</Callout>
+
+## How agents use connectors
+
+Both agents in an agentic batch change can use connectors:
+
+- **The coordinating agent**, which you talk to, gets a `connectors` tool. It uses connectors to research and plan, for example to look up a list of repositories by criticality, or to read the logs of a failed build.
+- **Coding agents** in [coding agent steps](/agentic-batch-changes/configuration#coding-agent-steps) can call the same tools while they change a repository.
+
+Agents call connector tools from short scripts instead of one tool at a time. Every enabled tool is a function named after the connector's slug and the tool's name: the `read_file` tool of a connector with the slug `sg` becomes `sg_read_file`. A script can call several tools, loop over their results, and keep only what matters, so large responses from an MCP server don't fill up the agent's context. For example, the coordinating agent might run:
+
+```lua
+local text = connectors.sg_read_file({repo = "github.com/acme/api", path = "go.mod"})
+return string.find(text, "golang.org/x/net", 1, true) ~= nil
+```
+
+In the conversation, each call shows the script and which connector tools it called. Expand it to see the output.
+
+A connector's tools appear to the agent only if the connector needs no sign-in, or if the person who owns the agentic batch change has connected their account to it. Agents always use the owner's connections, including in coding agent steps.
+
+When a task needs a connector you haven't connected, the agent calls it anyway. The call fails, and a **Connect** button for that connector appears right above the message input, visible only to you. You can dismiss it. After you connect, tell the agent and it can use the connector from your next message on.
+
+## Adding a connector
+
+Administrators manage connectors under **Administration → Integrations → Connectors**. This requires the `Integration management` write permission, which site administrators have.
+
+Connectors use MCP's Streamable HTTP transport, and fall back to the older HTTP with Server-Sent Events transport. MCP servers that only run locally over standard input and output (stdio) are not supported.
+
+To add a connector:
+
+1. Select **Add connector** and enter the URL of the MCP server's endpoint, such as `https://mcp.buildkite.com/mcp`. Sourcegraph checks the server and suggests a name and slug from the information the server provides, or from the URL. If the server requires authentication and supports OAuth, OAuth is preselected. Users can see the URL, so don't put API keys in it, even if the server allows that; use a bearer token or a custom header instead.
+2. Adjust the **name**, which users see, and the **slug**, which prefixes the names of the connector's tools. Slugs start with a lowercase letter and contain up to 30 lowercase letters, digits, and underscores. Slugs can't overlap: if one connector uses `sg`, another can't use `sg_dev`, because both could produce a tool named `sg_dev_search`.
+3. Choose how the connector authenticates, see [Authentication](#authentication).
+4. Optionally add **custom headers** that are sent with every request, such as `X-Tenant-ID`.
+5. Save the connector. For connectors without authentication or with a bearer token, Sourcegraph connects to the server, checks that it accepts the credentials, and lists its tools; saving fails if it can't. For OAuth, Sourcegraph checks the authorization server and registers its OAuth client.
+
+You can't change the URL of a connector after you create it, so credentials saved for one server are never sent to another. To move to a new URL, add a new connector and delete the old one.
+
+### Authentication
+
+| Option                 | When to use it                                                                                | Who connects                                         |
+| ---------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| **No authentication**  | The server is public, or it's on your network and needs no credentials.                       | Nobody; every user can use it immediately.           |
+| **Bearer token**       | The server accepts one shared token, such as a service account's API key. All users share it. | The administrator, once.                             |
+| **Per-user API token** | Each user should use their own personal access token, such as a Linear or Sentry API key.     | Each user, in their settings.                        |
+| **OAuth**              | The server supports OAuth sign-in. Each user signs in with their own account.                 | Each user, in their settings or from a conversation. |
+
+When you choose OAuth, Sourcegraph discovers the server's authorization server automatically, following the [MCP authorization specification](https://modelcontextprotocol.io/specification/latest/basic/authorization). If the authorization server supports dynamic client registration, Sourcegraph registers itself as an OAuth client, and you don't need to enter anything else. Otherwise, register an OAuth client with the authorization server using the redirect URL `https://sourcegraph.example.com/.auth/connectors/callback`, and enter the client ID and, if the server requires it, the client secret.
+
+If the server doesn't support OAuth, the OAuth option is unavailable and the form explains why.
+
+The redirect URL is based on your instance's external URL. If the external URL changes after an OAuth client was registered, users can't connect until you edit the connector and save it again. The connectors page shows a warning when this happens.
+
+### Managing tools
+
+Each connector lists the tools its server provides, with their descriptions and what they may do, based on hints from the server:
+
+- **Read-only**: the tool doesn't modify data.
+- **Writes**: the tool may modify data, but doesn't delete or overwrite it.
+- **Destructive**: the tool may delete or overwrite data.
+- **Unknown effects**: the server gives no hints, so the tool may delete or overwrite data.
+
+Tools are enabled by default, except destructive tools and tools with unknown effects. An agentic batch change can run a tool once for every repository it changes, so enable those tools only if agents should use them. Toggle tools individually, or use **Enable all**, **Disable all**, and **Disable write tools**. Disabled tools are hidden from all agents.
+
+Sourcegraph refreshes each connector's tools every six hours, and when an administrator selects **Refresh tools**. New destructive tools start disabled. Refreshing also checks that the server is reachable and that authentication works: if a refresh fails, the connector shows the error.
+
+If the server rejects a connector's bearer token or custom header credentials, during a refresh or when an agent calls a tool, Sourcegraph notifies the site administrators in Sourcegraph and by email. For personal connectors, it notifies the owner instead. The connector list also shows a warning on the connector. The notification and the warning go away once the server accepts the credentials again, after you update the connector or the next refresh succeeds.
+
+For connectors with per-user authentication, Sourcegraph lists the tools once the first user connects.
+
+### Editing and deleting connectors
+
+You can change everything except the URL and the authentication type; to use another, add a new connector. Changing the OAuth client or the authorization server disconnects all users, who then need to connect again.
+
+Deleting a connector removes it and all users' connections to it. If Sourcegraph registered an OAuth client for it, Sourcegraph also deletes that client at the authorization server where the server supports it.
+
+### Network access
+
+Connectors that administrators add can reach the same networks as [code host connections](/admin/code-hosts):
+
+- On self-hosted instances, they can reach servers on your internal network, unless [`EXTERNAL_DENY_LIST`](/self-hosted/network-filtering) blocks them. Requests come from the `frontend` and `worker` services.
+- On Sourcegraph Cloud, they reach servers in your private network through private connectivity, such as [Sourcegraph Connect](/cloud/private-connectivity-sourcegraph-connect), [GCP Private Service Connect](/cloud/private-connectivity-gcp), or [AWS PrivateLink](/cloud/private-connectivity-aws). Ask your account team to add the MCP server's hostname.
+
+Personal connectors can only reach public addresses by default. To let them reach other addresses on a self-hosted instance, use [`UNTRUSTED_EXTERNAL_ALLOW_LIST`](/self-hosted/network-filtering).
+
+Coding agents call connector tools through Sourcegraph, so executors don't need network access to MCP servers.
+
+Connectors can't connect to the host of the instance's own external URL. Agents already have Sourcegraph's tools, and a connector with a shared access token would let every user's agents act with that token's permissions.
+
+## Using connectors as a user
+
+Your connectors are in your user settings under **Connectors**. The page lists the connectors your administrator added and your personal connectors, with the tools each one provides.
+
+- **Connect** signs you in to an OAuth connector. **Disconnect** removes your connection.
+- For connectors with per-user API tokens, enter your token and select **Save token**. **Remove token** deletes it.
+- The **Use in Agentic Batch Changes** checkbox turns a connector on or off for your agentic batch changes. It's on by default, and only appears once a connector is usable, either because it needs no sign-in or because you've connected. The GraphQL API can also turn a connector off for only batch change agents or only coding agents; the checkbox stays checked while either uses the connector.
+
+When a connection expires or is revoked, Sourcegraph notifies you in Sourcegraph and by email, and the connector shows **Connection expired** with a **Reconnect** button. Agents can't use the connector until you reconnect.
+
+Site administrators can open another user's **Connectors** page to see that user's connectors, connections, and settings. Only the user can change them.
+
+### Personal connectors
+
+Select **Add connector** on the same page to add an MCP server that only your agents use. This requires the `CONNECTORS#WRITE_USER` [permission](/admin/access-control), which the **User** role grants by default. Administrators can remove it from the role under **Administration → Users & auth → Role-based access control**. Personal connectors support no authentication, a bearer token, and OAuth. Personal connectors can only reach MCP servers on public addresses. You manage their tools the same way administrators manage shared ones. Their slugs can't overlap with the slugs of the connectors your administrator added.
+
+## Security
+
+- **Agents act as the owner.** Connector tools run with the credentials of the person who owns the agentic batch change: their own OAuth connection or API token, or the shared bearer token. Other people viewing a conversation never see a **Connect** button and never lend it their connections.
+- **Credentials stay with their server.** Sourcegraph only sends bearer tokens, API tokens, OAuth access tokens, and custom header values to the connector's own origin: redirects and endpoints on other hosts don't receive them, and the URL of a connector can't change. OAuth client secrets and refresh tokens only go to the authorization server's token endpoint, without following redirects.
+- **Credentials are encrypted at rest** when the `connectorKey` [encryption key](/self-hosted/encryption) is configured.
+- **Requests identify Sourcegraph.** Requests to MCP and authorization servers use the user agent `Sourcegraph-Bot/<version> (connectors)`.
+- **Audit logs.** Sourcegraph records connector changes, users connecting, disconnecting and turning connectors off, expired connections, and every tool call in the [audit log](/admin/audit-log), under the entity `connectors`.
+- **Icons are stored.** Sourcegraph fetches each connector's icon when it's saved and stores it, so browsers never contact MCP servers.
