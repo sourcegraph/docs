@@ -733,6 +733,34 @@ Provider override `serverSideConfig` fields:
 Provisioned throughput for Amazon Bedrock models can be configured using the `"awsBedrockProvisionedThroughput"` server-side configuration type. Refer to the [Model Overrides](/cody/enterprise/model-configuration#model-overrides) section for more details.
 
 <Callout type="note">
+	The `"awsBedrock"` provider type supports only Anthropic Claude models. To
+	use OpenAI models hosted on Amazon Bedrock, configure an `"openaicompatible"`
+	provider that points to the Bedrock OpenAI-compatible endpoint instead.
+</Callout>
+
+To use OpenAI models through Amazon Bedrock, set the endpoint `url` to `https://bedrock-runtime.<region>.amazonaws.com/openai/v1` and `accessToken` to an [Amazon Bedrock API key](https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys.html):
+
+```json
+"providerOverrides": [
+  {
+    "id": "aws-bedrock-openai",
+    "displayName": "OpenAI models through AWS Bedrock",
+    "serverSideConfig": {
+      "type": "openaicompatible",
+      "endpoints": [
+        {
+          "url": "https://bedrock-runtime.us-east-1.amazonaws.com/openai/v1",
+          "accessToken": "<BEDROCK_API_KEY>"
+        }
+      ]
+    }
+  }
+]
+```
+
+Add models for this provider in `modelOverrides` as shown in the Generic OpenAI-compatible example, using the Bedrock model ID (for example, `openai.gpt-oss-120b-1:0`) as the `modelName`. The Bedrock OpenAI-compatible endpoint supports only `/chat/completions`, so [disable legacy completions](#disabling-legacy-completions) if you use these models for autocomplete.
+
+<Callout type="note">
 	If using [IAM roles for EC2 / instance role
 	binding](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html),
 	you may need to increase the [HttpPutResponseHopLimit
