@@ -3576,7 +3576,11 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/updates/automatic',
-		destination: '/self-hosted/updates/automatic'
+		destination: '/self-hosted/updates'
+	},
+	{
+		source: '/self-hosted/updates/automatic',
+		destination: '/self-hosted/updates'
 	},
 	{
 		source: '/admin/updates/docker_compose',
@@ -3613,7 +3617,11 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/updates/migrator/upgrading-early-versions',
-		destination: '/self-hosted/updates/migrator/upgrading-early-versions'
+		destination: '/self-hosted/updates'
+	},
+	{
+		source: '/self-hosted/updates/migrator/upgrading-early-versions',
+		destination: '/self-hosted/updates'
 	},
 	{
 		source: '/admin/updates/pure_docker',
