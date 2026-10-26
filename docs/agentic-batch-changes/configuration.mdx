@@ -6,6 +6,12 @@ The agent discovers a lot on its own through Deep Search: which package manager 
 
 You can add guidance on the **Agents** page of your Batch Changes settings, at `sourcegraph.example.com/users/<username>/settings/batch-changes/agents`. Administrators add instance-wide guidance at `sourcegraph.example.com/admin/batch-changes/agents`, and organizations can carry shared guidance in their settings. Entries from all three levels combine.
 
+<Callout type="note">
+	Deep Search uses its own guidance and skills, even when called by Agentic
+	Batch Changes. Configure them separately in [Deep Search
+	settings](/deep-search#customization).
+</Callout>
+
 ### Guidance and skills
 
 Guidance and skills configured here apply only to the coordinating agent you talk to directly, which researches your codebase, writes the plan, and manages the rollout.
@@ -97,6 +103,10 @@ A step references a secret by name. Sourcegraph injects the value when the step 
 ### Isolation
 
 All code-modifying work runs in isolated containers on [Sourcegraph executors](/admin/executors), one per repository. A container sees the repository and the secrets its steps reference. It has no direct access to code host credentials, other users' secrets, or other repository checkouts. [Coding agent steps](#coding-agent-steps) can still use Sourcegraph MCP to access code with your permissions. Containers can't publish. Publication happens inside Sourcegraph.
+
+### Context filters
+
+Administrators can exclude repositories and files from the agent's Sourcegraph tools with [context filters](/context-filters), configured under `experimentalFeatures.agents.contextFilters`. Excluded content is invisible to the agent's research and to the Sourcegraph MCP tools in its coding agent steps, and a repository excluded as a whole is dropped from the agent's workspaces. Because a coding agent step works on a full checkout, it [does not run at all](/context-filters#coding-agent-steps) in a repository that a rule excludes or that contains an excluded file. Filters do not remove files from the checkout that `run` steps execute on.
 
 ### Audit log
 
