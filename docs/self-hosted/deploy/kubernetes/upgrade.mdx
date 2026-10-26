@@ -20,7 +20,7 @@ A [standard upgrade](/self-hosted/updates/#upgrade-types) occurs between a Sourc
 
 ### Upgrade with Kubernetes Kustomize
 
-The following procedure is for performing a **standard upgrade** with Sourcegraph instances version **`v4.5.0` and above**, which have [**migrated**](/self-hosted/deploy/kubernetes/kustomize/migrate) to the [deploy-sourcegraph-k8s repo](https://github.com/sourcegraph/deploy-sourcegraph-k8s).
+The following procedure is for performing a **standard upgrade** with Sourcegraph instances deployed with the [deploy-sourcegraph-k8s repo](https://github.com/sourcegraph/deploy-sourcegraph-k8s).
 
 **Step 1**: Create a backup copy of the deployment configuration file
 
@@ -111,7 +111,7 @@ To perform a multi-version upgrade via migrators [upgrade](/self-hosted/updates/
     kubectl apply --prune -l deploy=sourcegraph -f cluster.yaml
     ```
 
-    > Note: This step will ensure that any PostgreSQL upgrade performed as an entrypoint script will have a chance to execute before the migrator is run. For more information see [Upgrading PostgreSQL](/self-hosted/postgres#upgrading-postgresql). **Starting in [Sourcegraph 7.0.0](https://sourcegraph.com/changelog/releases/7.0), the entrypoint upgrade script has been removed. Users on PostgreSQL 12 must upgrade to a 6.x release first.**
+    > Note: This step will ensure that any PostgreSQL upgrade performed as an entrypoint script will have a chance to execute before the migrator is run. For more information see [Upgrading PostgreSQL](/self-hosted/postgres#upgrading-postgresql).
 
 4. **Run Migrator with the `upgrade` command**:
 
@@ -123,8 +123,8 @@ To perform a multi-version upgrade via migrators [upgrade](/self-hosted/updates/
 
         ```yaml
          - name: migrator
-           image: "index.docker.io/sourcegraph/migrator:6.0.0" // here we use a later version of migrator than the version we're upgrading too.
-           args: ["upgrade", "--from=v5.9.0", "--to=5.11.0"]
+           image: "index.docker.io/sourcegraph/migrator:{CURRENT_VERSION_NO_V}" // here we use a later version of migrator than the version we're upgrading too.
+           args: ["upgrade", "--from=v7.5.0", "--to=v8.1.0"]
            env:
         ```
 
@@ -161,18 +161,8 @@ To perform a multi-version upgrade via migrators [upgrade](/self-hosted/updates/
            system, terminal, and any other details, to:
              https://sourcegraph.com/contact
 
-        ✱ Sourcegraph migrator 4.5.1
-        👉 Migrating to v3.43 (step 1 of 3)
-        👉 Running schema migrations
-        ✅ Schema migrations complete
-        👉 Running out of band migrations [1 2 4 5 7 13 14 15 16]
-        ✅ Out of band migrations complete
-        👉 Migrating to v4.3 (step 2 of 3)
-        👉 Running schema migrations
-        ✅ Schema migrations complete
-        👉 Running out of band migrations [17 18]
-        ✅ Out of band migrations complete
-        👉 Migrating to v4.5 (step 3 of 3)
+        ✱ Sourcegraph migrator 8.1.1335
+        👉 Migrating to v8.1 (step 1 of 1)
         👉 Running schema migrations
         ✅ Schema migrations complete
         $ kubectl -n sourcegraph get jobs
@@ -193,14 +183,6 @@ To perform a multi-version upgrade via migrators [upgrade](/self-hosted/updates/
     kubectl apply --prune -l deploy=sourcegraph -f cluster.yaml
     ```
     Your instance should now be up and running in the new version!
-
----
-
-### Using MVU to Migrate to Kustomize
-
-Due to limitations with the Kustomize deployment method introduced in Sourcegraph `v4.5.0`, multi-version upgrades (e.g. `v4.2.0` -> `v5.0.3`), migrations to `deploy-sourcegraph-k8s` should be conducted separately from a full upgrade.
-
-Admins upgrading a Sourcegraph instance older than `v4.5.0` and migrating from our [legacy kubernetes](https://github.com/sourcegraph/deploy-sourcegraph) offering to our new [kustomize manifests](https://github.com/sourcegraph/deploy-sourcegraph-k8s) should upgrade to `v4.5.0` perform the `migrate` [procedure](/self-hosted/deploy/kubernetes/kustomize/migrate) and then perform the remaining upgrade to bring Sourcegraph up to the desired version.
 
 ## Rollback
 

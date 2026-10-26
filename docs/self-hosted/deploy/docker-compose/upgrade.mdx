@@ -68,10 +68,6 @@ $ docker-compose up -d --remove-orphans
 > 	advisement.{' '}
 > </Callout>
 
-<Callout type="warning">
-If you are upgrading to [Sourcegraph 7.0.0](https://sourcegraph.com/changelog/releases/7.0) or later and your databases are still on PostgreSQL 12, you must first upgrade to a 6.x release (such as 6.11.x) to allow the automatic PostgreSQL 12 to 16 upgrade to complete. The entrypoint script that performs this upgrade has been removed in 7.0.0.
-</Callout>
-
 To perform a multi-version upgrade via migrators [upgrade](/self-hosted/updates/migrator/migrator-operations#upgrade) command on a Sourcegraph instance running on Docker compose follow the procedure below:
 
 1. **Check Upgrade Readiness**:
@@ -98,15 +94,15 @@ To perform a multi-version upgrade via migrators [upgrade](/self-hosted/updates/
     ```yaml
     migrator:
         container_name: migrator
-        image: 'index.docker.io/sourcegraph/migrator:6.0.0'
+        image: 'index.docker.io/sourcegraph/migrator:{CURRENT_VERSION_NO_V}'
     ```
     2. Set the migrator `command:` to `upgrade` you'll need to supply a `--to=` argument to the version you're upgrading to.
        **Example:**
     ```yaml
-    command: ['upgrade', '--from=v5.9.0', '--to=v6.0.0']
+    command: ['upgrade', '--from=v7.5.0', '--to=v8.1.0']
     ```
     > _Note: you may add the `--dry-run` flag to the `command:` to test things out before altering the dbs_ 3. Run migrator with `docker-compose up migrator`
-    - Migrator `depends_on:` will ensure the databases are ready before attempting to run the migrator. Ensuring that database entry point scripts are run before the migrator attempts to connect to the databases. For users upgrading from a version earlier than `5.10.0`, a PostgreSQL version is required and will be performed automatically here. For more details, see [Upgrading PostgreSQL](/self-hosted/postgres#upgrading-postgresql).
+    - Migrator `depends_on:` will ensure the databases are ready before attempting to run the migrator. Ensuring that database entry point scripts are run before the migrator attempts to connect to the databases.
     **Example:**
     ```sh
     $ ~/deploy-sourcegraph-docker/docker-compose/ docker-compose up migrator
@@ -120,7 +116,7 @@ To perform a multi-version upgrade via migrators [upgrade](/self-hosted/updates/
     ✔ Container migrator Created 0.0s
     ! migrator The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested 0.0s
     Attaching to migrator
-    migrator | ✱ Sourcegraph migrator 6.0.0
+    migrator | ✱ Sourcegraph migrator 8.1.1335
     migrator | ⚠️ Failed to check for migrator update: unexpected status code 404. Continuing...
     migrator | Attempting connection to frontend...
     migrator | ✅ Connection to frontend succeeded
@@ -130,7 +126,7 @@ To perform a multi-version upgrade via migrators [upgrade](/self-hosted/updates/
     migrator | ✅ Connection to codeintel succeeded
     migrator | Attempting connection to codeinsights...
     migrator | ✅ Connection to codeinsights succeeded
-    migrator | 👉 Migrating to v6.0 (step 1 of 1)
+    migrator | 👉 Migrating to v8.1 (step 1 of 1)
     migrator | 👉 Running schema migrations
     migrator | ✅ Schema migrations complete
     migrator exited with code 0
@@ -144,7 +140,7 @@ To perform a multi-version upgrade via migrators [upgrade](/self-hosted/updates/
     ```yaml
     migrator:
         container_name: migrator
-        image: 'index.docker.io/sourcegraph/migrator:6.0.0@sha256:ec295eb0b743da6bf56777ca6524972267a5c442b0288095e2fe12fce38ebacc'
+        image: 'index.docker.io/sourcegraph/migrator:{CURRENT_VERSION_NO_V}'
         cpus: 0.5
         mem_limit: '500m'
         command: ['up']
