@@ -463,7 +463,17 @@ export const navigation: NavigationItem[] = [
 			},
 			{
 				title: 'Code Monitoring',
-				href: '/code-monitoring'
+				href: '/code-monitoring',
+				sections: [
+					{
+						title: 'Notifications',
+						href: '/code-monitoring/notifications'
+					},
+					{
+						title: 'Administration',
+						href: '/code-monitoring/administration'
+					}
+				]
 			},
 			{
 				title: 'Code Ownership',

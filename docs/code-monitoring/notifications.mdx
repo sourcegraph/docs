@@ -1,0 +1,66 @@
+# Code Monitoring notifications
+
+A monitor supports one email action, one Slack action, and one generic webhook action together. Results are excluded by default. Email and Slack include a monitor name, match count, and search link; generic webhooks include the query and monitor metadata.
+
+Before sending code excerpts, review [destination privacy](/code-monitoring#choose-a-safe-destination). Email and Slack truncate included results; follow the links to inspect the code. Search limits apply to all notification types.
+
+## Email
+
+The monitor form sends email to the editor's verified primary address, not an arbitrary recipient list. An administrator saving an email action for another user can therefore change its recipient to the administrator's address.
+
+An administrator must configure `email.address` and `email.smtp`; see [SMTP and email delivery](/self-hosted/email).
+
+## Slack
+
+Slack actions require an [incoming webhook](https://docs.slack.dev/messaging/sending-messages-using-incoming-webhooks/) for the destination channel. Slack may require workspace approval to install the app; for a private channel, the person authorizing the webhook must be a member.
+
+The webhook is tied to the channel selected in Slack. Treat its URL as a secret. This action does not require Sourcegraph's separate Slack app integration.
+
+## Test a notification
+
+Action tests send synthetic data immediately. They test a destination, not the trigger query or detection of a real change. Webhook tests omit `results` even when results are enabled, use `test query` as the query, and provide a relative placeholder `monitorURL` rather than a link to your monitor.
+
+To check the full path, create a monitor for a disposable repository and an approved destination. Commit a harmless matching change on the monitored branch. After Sourcegraph fetches it, inspect the monitor's run, delivered notification, and linked commit. Disable or delete the test monitor afterwards.
+
+If delivery fails, see [troubleshooting](/code-monitoring/administration#troubleshooting).
+
+## Webhooks
+
+Webhook actions send an HTTP POST with a JSON body to a receiver reachable from Sourcegraph. Use HTTPS and a receiver you control, for example `https://monitoring.example.com/sourcegraph`. Return a successful `2xx` response after accepting the event. Deliveries can be retried, so handle duplicate requests safely.
+
+The action has no configurable signing secret or custom authorization headers. Choose an endpoint protection scheme compatible with that limitation. Do not expose a receiver that performs privileged operations without authenticating its requests.
+
+### Payload reference
+
+| Field                            | Contents                                                             |
+| -------------------------------- | -------------------------------------------------------------------- |
+| `monitorDescription`             | The monitor's name.                                                  |
+| `monitorURL`                     | A link to the monitor.                                               |
+| `query`                          | The search query, even when results are disabled.                    |
+| `results`                        | Matching commits. Omitted when results are disabled or empty.        |
+| `results[].repository`           | Repository name.                                                     |
+| `results[].commit`               | Commit hash.                                                         |
+| `results[].diff`                 | Diff preview for a diff match, not necessarily the full commit diff. |
+| `results[].matchedDiffRanges`    | Matched ranges in `diff`.                                            |
+| `results[].message`              | Commit-message preview for a commit match.                           |
+| `results[].matchedMessageRanges` | Matched ranges in `message`.                                         |
+
+Ranges are zero-based UTF-8 byte offsets, written as `[start, end)` pairs: the start is included, the end is excluded. They refer to the decoded preview string, not the JSON-escaped request body. Empty optional fields are omitted. The payload has no event ID or delivery timestamp.
+
+This illustrative payload uses a shortened message from the [CVE example](/code-monitoring#follow-cve-mentions-in-upstream-commits). The range highlights `CVE-2026-111943`:
+
+```json
+{
+	"monitorDescription": "Go CVE mentions",
+	"monitorURL": "https://sourcegraph.example.com/code-monitoring/Q29kZU1vbml0b3I6NDI=",
+	"query": "repo:^github\\.com/golang/go$ type:commit patternType:regexp CVE-\\d{4}-\\d+",
+	"results": [
+		{
+			"repository": "github.com/golang/go",
+			"commit": "7f86f957633ee31a1c17a1eb8452ca7a3d9bc141",
+			"message": "Fixes CVE-2026-111943\n",
+			"matchedMessageRanges": [[6, 21]]
+		}
+	]
+}
+```

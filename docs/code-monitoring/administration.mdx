@@ -1,0 +1,51 @@
+# Code Monitoring administration
+
+Code monitors belong to individual users. Only the owner and site administrators can view or manage a monitor; administrators can list monitors across the instance. Searches run with the owner's repository permissions, even when an administrator edits the monitor. Organization ownership and ownership transfer are not supported.
+
+## Configuration
+
+The `worker` service runs searches and notification actions. On self-hosted instances, `DISABLE_CODE_MONITORS=true` disables Code Monitoring in the frontend and worker services. See the [architecture overview](/admin/architecture#code-monitoring).
+
+Set polling and trigger-job limits in [site configuration](/admin/config/site-config):
+
+| Setting                     | Default | Purpose                                                                    |
+| --------------------------- | ------- | -------------------------------------------------------------------------- |
+| `codeMonitors.pollInterval` | `"5m"`  | Base delay before the next search. Increase it to reduce average load.     |
+| `codeMonitors.concurrency`  | `4`     | Concurrent trigger jobs per worker. Lower it to reduce peak load.          |
+| `codeMonitors.maxRuntime`   | `1`     | Maximum trigger-job runtime in minutes. Search-level timeouts still apply. |
+
+```json
+{
+	"codeMonitors": {
+		"pollInterval": "5m",
+		"concurrency": 4,
+		"maxRuntime": 1
+	}
+}
+```
+
+Email actions also require [SMTP configuration](/self-hosted/email).
+
+## Limits and delivery
+
+Broad queries, frequent commits, and many monitors increase load. Narrow repository and file scope before increasing runtime or concurrency. Search result limits and timeouts apply; `count:` controls the search match limit, not a notification quota.
+
+Code Monitoring does not guarantee complete or exactly-once delivery. A failed or limited search can leave commits unreported, and saved revisions can advance even after a search error. An action already queued or running is not queued again for another trigger. Delivery retries can cause duplicate notifications.
+
+An action job stops retrying after three recorded failures; HTTP delivery can make additional retries within a job attempt. Missing email configuration or an unverified recipient can fail without retrying.
+
+## Troubleshooting
+
+Monitor logs distinguish trigger failures from notification failures and show the 20 most recent runs. Finished runs older than 30 days are removed. For instance-level diagnosis, see [monitoring Sourcegraph](/self-hosted/how-to/monitoring-guide).
+
+| Symptom                                          | Check                                                                                                                                                                                                                               |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Query previews but cannot be saved               | Some Boolean combinations cannot run as one commit search. If the error is `cannot use different patterns for different repos`, split the query into separate monitors.                                                             |
+| Preview matches, but no notification             | Historical preview results are not an initial backlog. Check for a later matching commit, repository fetch status, and owner access. Check that both the monitor and its action are enabled; actions can be disabled independently. |
+| Search is pending or slow                        | Check worker health, query scope, and polling interval. Searches are not immediate.                                                                                                                                                 |
+| Search failed or timed out                       | Inspect the trigger error and narrow the query. Search the affected Git history manually; missed commits are not guaranteed to be replayed.                                                                                         |
+| Email is missing                                 | Check the verified primary address, SMTP configuration, and action log. See [email delivery troubleshooting](/self-hosted/email#sending-a-test-email).                                                                              |
+| Slack or webhook delivery fails                  | Check the action log, receiver response, and network access from Sourcegraph. Remove secret webhook URLs from support reports.                                                                                                      |
+| Webhook test fails, but scheduled delivery works | Test calls and scheduled deliveries use different network policies. For `failed to post webhook` against a private endpoint, check [outbound connection filtering](/self-hosted/network-filtering#untrusted-external-connections).  |
+
+See [notification testing](/code-monitoring/notifications#test-a-notification) for a controlled end-to-end check. When asking for help, include the monitor ID, run time, query scope, and error text, with sensitive values removed.
