@@ -142,21 +142,19 @@ All code-modifying work runs on executors:
 - [Sourcegraph Cloud](/cloud) customers have managed executors with no additional setup required.
 - Self-hosted customers need [executors deployed](/self-hosted/executors) and registered against both the `batches` and `batches-hooks` [queues](/self-hosted/executors/executors-config#queues), running a version that matches the instance. Without an executor on `batches-hooks`, batch changes can execute and publish, but CI and merge-conflict hook automations never run.
 
-### Usage limits
+### Billing
 
-Coding agent runs are metered per user through the **Batch Changes coding agent step runs** [entitlement](/admin/entitlements), managed under **Administration → Users & auth → Entitlements**. Each coding agent run in a repository consumes one unit. A default entitlement applies to every user, and an explicit grant replaces the default for a specific user:
+Agentic Batch Changes is billed per merged changeset. A changeset counts once it merges, whether it was merged on the code host or in Sourcegraph. Changesets that are closed or never merged are not billed, and model usage by the agent and its coding agent steps is not billed separately.
 
-- Users without an entitlement have unlimited usage.
-- A positive limit blocks further runs once reached until its window resets.
-- A limit of zero blocks coding agent runs entirely.
+Subscription admins can find the current rates and consumption on the [Credits page in Enterprise Portal](/admin/enterprise-portal#credits).
 
-Blocked runs tell the user which limit was hit and when it resets.
+When the subscription's credits don't cover another merged changeset, the agent can't publish new changesets. Changesets that are already published can still be merged.
 
-Model usage, for both the agent's own conversation and its coding agent runs, draws on your instance's [Sourcegraph Model Provider](/model-provider) credits.
+The agent's [Deep Search](#deep-search) research consumes credits at the [Deep Search rate](/deep-search#credit-consumption).
 
 ### Deep Search
 
-Before drafting a plan, the agent researches with [Deep Search](/deep-search). Deep Search usage consumes subscription credits separately from the agentic batch change’s own metering.
+Before drafting a plan, the agent researches with [Deep Search](/deep-search), which is [billed](#billing) at its own rate.
 
 The agent is built to research deliberately rather than repeatedly:
 
