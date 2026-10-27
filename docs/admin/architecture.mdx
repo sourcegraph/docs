@@ -77,18 +77,8 @@ flowchart LR
     %% External dependencies (right side)
     CodeHosts["<b>Code hosts</b><br/>GitHub, GitLab, Bitbucket, GHE, etc."]
 
-	subgraph ManagedServices["Sourcegraph&nbsp;managed&nbsp;services"]
-		EnterprisePortal["Enterprise Portal"]
-        click EnterprisePortal "#enterprise-portal"
-		TelemetryGateway["Telemetry Gateway"]
-        click TelemetryGateway "#analytics-and-telemetry"
-		Pings["Pings"]
-        click Pings "#analytics-and-telemetry"
-		ModelProvider["Sourcegraph Model Provider"]
-        click ModelProvider "#model-provider"
-	end
-
-    InferenceProviders["<b>Inference providers</b><br />Anthropic, OpenAI, Vertex AI, Fireworks, etc."]
+    ManagedServices["<b>Sourcegraph-managed services</b>"]
+    click ManagedServices "#connections-to-sourcegraph-managed-services"
 
     Observability["<b>Observability</b><br />OpenTelemetry tracing, metrics, logging"]
     click Observability "#observability"
@@ -116,8 +106,6 @@ flowchart LR
     CodeIntel ---> Storage
 
     Gitserver --> CodeHosts
-
-	ModelProvider --> InferenceProviders
 ```
 
 ## Core features
@@ -172,20 +160,21 @@ flowchart LR
         Postgres[("Postgres")]
     end
 
-    subgraph ManagedServices["Sourcegraph&nbsp;managed&nbsp;services"]
+    subgraph ServicesGateway["services.sourcegraph.com"]
         EnterprisePortal["Enterprise Portal<br/>(metering & quotas)"]
         click EnterprisePortal "#enterprise-portal"
-
-        ModelProvider["Sourcegraph Model Provider"]
-        click ModelProvider "#model-provider"
     end
+
+    ModelProvider["Sourcegraph Model Provider"]
+    click ModelProvider "#model-provider"
 
     InferenceProviders["<b>Inference providers</b><br/>Anthropic, OpenAI, etc."]
 
     %% Connections
     Clients --> Monolith
     WorkerPool --> Agent
-    Agent ---> ManagedServices
+    Agent -- "Credit / quota checks & consumption" ---> ServicesGateway
+    Agent ---> ModelProvider
     Agent --> Storage
     Agent --> Tools
 
@@ -284,7 +273,32 @@ Sourcegraph instances connect to the services gateway at `https://services.sourc
 2. [Verify licenses](/admin/licensing/).
 3. Check credit/quota availability and report consumption to [Enterprise Portal](/admin/enterprise-portal#credits).
 
-For self-hosted firewall and proxy requirements, see [outbound access to Sourcegraph services](/self-hosted/private-network#outbound-access-to-sourcegraph-services). Other enabled features and integrations may require additional external destinations.
+Model inference through the [Sourcegraph Model Provider](#model-provider) uses a separate connection, not the services gateway.
+
+```mermaid
+flowchart LR
+    Instance["Sourcegraph instance"]
+    Gateway["Services gateway<br/>services.sourcegraph.com"]
+    Pings["Pings"]
+    TelemetryGateway["Telemetry Gateway"]
+    EnterprisePortal["Enterprise Portal"]
+    ModelProvider["Sourcegraph Model Provider"]
+    InferenceProviders["Inference providers<br/>Anthropic, OpenAI, etc."]
+
+    Instance --> Gateway
+    Gateway -- "Pings & update checks" --> Pings
+    Gateway -- "Telemetry events" --> TelemetryGateway
+    Gateway -- "Licenses, credits & metering" --> EnterprisePortal
+    Instance -- "Model inference" --> ModelProvider
+    ModelProvider --> InferenceProviders
+
+    click Pings "/admin/pings"
+    click TelemetryGateway "#analytics-and-telemetry"
+    click EnterprisePortal "#enterprise-portal"
+    click ModelProvider "#model-provider"
+```
+
+For the services gateway's IP address, required ports and protocols, and firewall and proxy configuration, see [outbound access to Sourcegraph services](/self-hosted/private-network#outbound-access-to-sourcegraph-services). Other enabled features and integrations may require additional external destinations.
 
 ### Model Provider
 
@@ -304,7 +318,7 @@ The data we collect powers the [Sourcegraph Analytics service](/analytics).
 
 We take sensitive data/PII exfiltration, intentional or not, very seriously. Our [Telemetry docs](/admin/telemetry) outline some of the measures we take to ensure privacy and data security.
 
-Telemetry is exported through the `worker` service to the Sourcegraph-managed "Telemetry Gateway" service and "Pings" service, for telemetry events and aggregated reports, respectively.
+Telemetry is exported through the `worker` service via the [services gateway](#connections-to-sourcegraph-managed-services) to the Sourcegraph-managed "Telemetry Gateway" service and "Pings" service, for telemetry events and aggregated reports, respectively.
 
 ```mermaid
 flowchart LR
@@ -319,8 +333,10 @@ flowchart LR
         end
     end
 
-    worker -- "HTTPS + license key" --> pings[Pings]
-    worker -- "HTTPS + license key" --> tg[Telemetry Gateway]
+    worker -- "HTTPS / HTTP/2 gRPC<br/>+ license key" --> gateway["Services gateway<br/>services.sourcegraph.com"]
+    click gateway "#connections-to-sourcegraph-managed-services"
+    gateway -- "Aggregated pings" --> pings[Pings]
+    gateway -- "Telemetry events" --> tg[Telemetry Gateway]
 
     tg --> pipelines
     pings --> pipelines
@@ -343,7 +359,7 @@ flowchart LR
 
 Sourcegraph Enterprise Portal is the Sourcegraph-managed service for viewing your enterprise subscription and managing user access to Sourcegraph operated services.
 
-Enterprise Portal also handles Sourcegraph licensing and metering. Sourcegraph will reach out to the Enterprise Portal service to perform license verification checks, and also for metered capabilities like [Deep Search](#deep-search).
+Enterprise Portal also handles Sourcegraph licensing and metering. Sourcegraph instances connect to Enterprise Portal through the [services gateway](#connections-to-sourcegraph-managed-services) to perform license verification checks, check credit/quota availability, and report consumption for metered capabilities like [Deep Search](#deep-search).
 
 <Callout type="note">
 	Learn more in the [Sourcegraph Enterprise Portal
