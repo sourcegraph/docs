@@ -206,7 +206,7 @@ Refer to [outbound access to Sourcegraph services](/self-hosted/private-network#
 
 ## Using an HTTP proxy for ping requests
 
-Refer to [HTTP proxy configuration](/self-hosted/private-network#http-proxy-configuration) to route pings and all other outbound requests through a proxy.
+Refer to [HTTP proxy configuration](/self-hosted/private-network#http-proxy-configuration) to route pings through a proxy.
 
 ## Connections to Sourcegraph-managed services
 
@@ -227,7 +227,7 @@ The Cody app connects to Sourcegraph.com to send a limited selection of the ping
 
 It may happen that Sourcegraph will stop sending critical telemetry to Sourcegraph.com, if this happens it may indicate a problem with Sourcegraph's frontend database, or a site settings misconfiguration. Below are some debugging steps.
 
-Sourcegraph telemetry pings are handled by a goroutine running on Sourcegraph's frontend service called `updatecheck`, `updatecheck` is started on container startup and periodically requests a variety of queries be run in the `pgsql` database.
+The `update-check` job in the `worker` service sends telemetry pings. Every 30 to 40 minutes, it runs a variety of queries against the `pgsql` database and sends the results. If you run several `worker` replicas, only one of them runs the job at a time.
 
 ### Misconfigured update.channel
 
@@ -239,26 +239,12 @@ The most common scenario in which Sourcegraph stops sending pings is a change to
 
 _This setting must be set to "release" in order for the telemetry goroutine to run._
 
-### Check if the goroutine is running
+### Check that the worker runs the update-check job
 
-_This section is under development and currently only applies for docker-compose instances._
-
-If it's reported that pings aren't being sent to the Sourcegraph.com, you can check that the goroutine is running with the following command:
-
-```
-docker exec -it sourcegraph-frontend-0 sh -c 'wget -nv -O- 'http://127.0.0.1:6060/debug/pprof/goroutine?debug=1' | grep updatecheck'
-```
-
-Example:
-
-```
-[ec2-user@latveria-ip ~]$ docker exec -it sourcegraph-frontend-0 sh -c 'wget -nv -O- 'http://127.0.0.1:6060/debug/pprof/goroutine?debug=1' | grep updatecheck'
-2022-04-05 20:53:32 URL:http://127.0.0.1:6060/debug/pprof/goroutine?debug=1 [14660] -> "-" [1]
-#	0x1f052c5	github.com/sourcegraph/sourcegraph/cmd/frontend/internal/app/updatecheck.Start+0xc5	github.com/sourcegraph/sourcegraph/cmd/frontend/internal/app/updatecheck/client.go:697
-```
+If pings aren't reaching Sourcegraph, check that at least one `worker` instance runs the `update-check` job. A `worker` runs the job unless its `WORKER_JOB_ALLOWLIST` environment variable omits `update-check` (the default, `all`, includes it) or its `WORKER_JOB_BLOCKLIST` lists it. See [Split jobs and scale independently](/self-hosted/workers#3-split-jobs-and-scale-independently).
 
 ### Looking for errors in the logs
 
-If the `update.check` is running, and the advanced configuration is correctly configured, then it may be the case that `pgsql` is failing to return data from the SQL queries to the `frontend`. Check out the frontend logs for logs tagged [`telemetry: updatecheck failed`](https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+file:%5Ecmd/frontend/internal/app/updatecheck/client%5C.go+telemetry:+updatecheck+failed&patternType=literal).
+If the `update-check` job is running and the site configuration is correct, the ping request may be failing, or `pgsql` may be failing to return data from the queries to the `worker`. Check the `worker` logs for `updatecheck failed` errors.
 
 If issues persist, please reach out to a team member for support at support@sourcegraph.com

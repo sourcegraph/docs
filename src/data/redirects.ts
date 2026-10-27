@@ -3997,10 +3997,6 @@ const redirectsData = [
 		destination: '/code-search/working/search-subexpressions'
 	},
 	{
-		source: '/dotcom/indexing_open_source_code',
-		destination: '/dotcom/indexing-open-source-code'
-	},
-	{
 		source: '/integration/aws_codecommit',
 		destination: '/integration/aws-codecommit'
 	},
@@ -4342,6 +4338,20 @@ const redirectsData = [
 	{
 		source: '/legacy',
 		destination: '/releases'
+	},
+	// The Sourcegraph.com pages described the public instance and its open
+	// source index, and are no longer maintained
+	{
+		source: '/dotcom',
+		destination: '/'
+	},
+	{
+		source: '/dotcom/indexing-open-source-code',
+		destination: '/'
+	},
+	{
+		source: '/dotcom/indexing_open_source_code',
+		destination: '/'
 	},
 ];
 

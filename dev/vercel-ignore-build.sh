@@ -15,7 +15,7 @@ exec git diff --quiet HEAD^ HEAD -- . \
 	':(exclude)cspell*' \
 	':(exclude)dev/check-spelling.mjs' \
 	':(exclude)dev/post-spelling-review.mjs' \
-	':(exclude)dev/report-vercel-build.mjs' \
+	':(exclude)dev/vercel-build-log.mjs' \
 	':(exclude)dev/verify-links-live.mjs' \
 	':(exclude)dev/sync-review-comments.sh' \
-	':(exclude)dev/slack-app-vercel-build-report.json'
+	':(exclude)dev/vercel-build-log-slack-app-manifest.json'
