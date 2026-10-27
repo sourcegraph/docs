@@ -1,5 +1,20 @@
 # Sourcegraph Docs - Agent Instructions
 
+## Documentation style
+
+- Write long-lived feature and configuration docs in the present tense for the
+  behavior readers will use when the docs are published. Avoid time-relative
+  wording such as "upcoming", "new", or "now" that requires later cleanup.
+- PRs for unreleased behavior can be ready for review. Coordinate merge timing
+  with the relevant release or weekly update, and record that dependency in the
+  PR description, not in customer prose.
+- Describe the current behavior concisely. Put release transitions and old/new
+  comparisons in upgrade notes rather than permanent feature docs. Retain
+  version-specific guidance only when readers still need it to use or upgrade
+  supported releases.
+- Number ordered Markdown lists sequentially (`1.`, `2.`, `3.`), rather than
+  writing every item as `1.`.
+
 ## Build Commands
 
 - **Type Check**: `npx tsc --noEmit`
@@ -92,12 +107,24 @@
   redirect in `src/data/redirects.ts` does not satisfy the check.
 - Link to this site with relative paths (`/admin/config/site-config`), never
   `https://sourcegraph.com/docs/…` or `https://docs.sourcegraph.com/…`.
-- To also probe the external links you added:
+- main has hundreds of pre-existing findings. To see only the ones your
+  branch adds, as CI does, record the merge base with `--format json` and
+  pass it as `--baseline`; `--diff` does not filter findings, it only scopes
+  `--check-external` and the review comments to added lines:
 
 ```sh
-pnpm run check links --check-anchors --check-self-links \
-  --check-external --diff <(git diff -U0 origin/main)
+base=$(git merge-base origin/main HEAD)
+git worktree add --detach /tmp/docs-base "$base"
+node dev/check-links.mjs --check-anchors --check-self-links --format json \
+  --root /tmp/docs-base > /tmp/docs-base-links.json
+git worktree remove /tmp/docs-base
+git diff -U0 "$base" | pnpm run check links --check-anchors --check-self-links \
+  --check-external --baseline /tmp/docs-base-links.json --diff /dev/stdin
 ```
+
+- Pipe the diff to `--diff /dev/stdin`, not `--diff <(git diff ...)`:
+  `dev/checks.mjs` spawns the check with only stdin/stdout/stderr, so the
+  process-substitution descriptor is gone and the check fails with `EBADF`
 
 ### PR check comments
 
@@ -123,16 +150,17 @@ next run.
 ### Vercel build failures
 
 - Vercel shows build logs only to its team members, so
-  `.github/workflows/vercel-build-report.yml` attaches the log to the Vercel
+  `.github/workflows/vercel-build-log.yml` attaches the log to the Vercel
   Slack app's "failed to deploy" post in the `SLACK_CHANNEL_ID` channel
-  and comments a link to it on the PR (see `dev/report-vercel-build.mjs`).
+  and comments a link to it on the PR (see `dev/vercel-build-log.mjs`).
   The log itself never goes on the PR, since the repository is public.
 - It reads Vercel with the `VERCEL_TOKEN` repo secret, a token scoped to the
   `sourcegraph-docs` project that expires 2026-12-10; mint a new one with
   `POST /v3/user/tokens?teamId=<team>` and `projectId` in the body.
 - Slack needs the `SLACK_BOT_TOKEN` repo secret and `SLACK_CHANNEL_ID` repo
-  variable. The bot is the Slack app in `dev/slack-app-vercel-build-report.json`;
-  to recreate it, paste that manifest at
+  variable. The bot is the Slack app in
+  `dev/vercel-build-log-slack-app-manifest.json`; to recreate it, paste
+  that manifest at
   <https://api.slack.com/apps?new_app=1> (From a manifest), install it, copy its
   Bot User OAuth Token into the secret, and `/invite @Vercel build log` to the
   channel.
