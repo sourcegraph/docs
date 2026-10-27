@@ -104,6 +104,10 @@ export function Mermaid({chart}: MermaidProps) {
 				const isDark = resolvedTheme === 'dark';
 				mermaid.initialize({
 					startOnLoad: false,
+					// mermaid 12 defaults to the ELK layout and the "neo" look;
+					// keep the mermaid 11 rendering.
+					layout: 'dagre',
+					look: 'classic',
 					theme: 'base',
 					themeVariables: isDark ? DARK_THEME : LIGHT_THEME,
 					themeCSS: isDark
