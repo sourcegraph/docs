@@ -10620,6 +10620,213 @@ sum by(app) (up{app=~".*gitserver"}) / count by (app) (up{app=~".*gitserver"}) *
 
 <br />
 
+### Git Server: Continuity restores and manifest validation
+
+#### gitserver: continuity_restore_success_p95_duration
+
+<p class="subtitle">95th percentile successful restore duration by kind and planned download size class over 15m</p>
+
+Elapsed time of successful continuity cache restores, grouped by instance, restore kind (full or incremental) and planned download size class.
+Compare each series with the recovery budget for its size class rather than with a single threshold: large classes are expected to take longer.
+Read this together with the completion rate panel; percentiles from a handful of restores are not representative.
+See "Publication metrics and alert candidates" in cmd/gitserver/README.md for size class definitions and caveats, and use "continuity materialization finished" logs to investigate individual slow restores.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=102800` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.95, sum by (instance, kind, size_class, le) (rate(src_gitserver_continuity_materialization_duration_seconds_bucket{instance=~`${shard:regex}`, outcome="success", size_class!=""}[15m])))
+```
+</details>
+
+<br />
+
+#### gitserver: continuity_restore_success_p99_duration
+
+<p class="subtitle">99th percentile successful restore duration by kind and planned download size class over 15m</p>
+
+Tail latency of successful continuity cache restores, grouped by instance, restore kind and planned download size class.
+This is the latency candidate described in cmd/gitserver/README.md: sustained values above the recovery budget for a size class suggest slow storage downloads, verification or Git indexing.
+No alert is configured because recovery budgets have not yet been validated in production.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=102801` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.99, sum by (instance, kind, size_class, le) (rate(src_gitserver_continuity_materialization_duration_seconds_bucket{instance=~`${shard:regex}`, outcome="success", size_class!=""}[15m])))
+```
+</details>
+
+<br />
+
+#### gitserver: continuity_restore_success_rate
+
+<p class="subtitle">Successful restores by kind and planned download size class over 15m</p>
+
+Rate of successful continuity cache restores per size class.
+Use this as the sample size for the restore duration percentiles: a class with very few restores can produce noisy or misleading percentiles.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=102810` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (instance, kind, size_class) (rate(src_gitserver_continuity_materialization_duration_seconds_count{instance=~`${shard:regex}`, outcome="success", size_class!=""}[15m]))
+```
+</details>
+
+<br />
+
+#### gitserver: continuity_restore_unsuccessful
+
+<p class="subtitle">Failed and canceled restores by kind and planned download size class over 15m</p>
+
+Number of continuity cache restores that ended with an error or were canceled in the last 15 minutes.
+Errors indicate integrity, download or Git failures; inspect gitserver logs and storage availability, and restore a healthy replica before returning it to service.
+Cancellations, including those caused by intentional shutdowns, are not storage errors.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=102811` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (instance, kind, outcome, size_class) (increase(src_gitserver_continuity_materialization_duration_seconds_count{instance=~`${shard:regex}`, outcome!="success"}[15m]))
+```
+</details>
+
+<br />
+
+#### gitserver: continuity_restores_in_progress
+
+<p class="subtitle">Restores in progress by kind</p>
+
+Number of continuity cache restores currently running.
+Restores that remain in progress for longer than the largest expected restore, while the completion panels show no new restores of the same kind, may be stuck on downloads, Git processes or disk pressure.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=102812` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (instance, kind) (src_gitserver_continuity_materializations_in_progress{instance=~`${shard:regex}`})
+```
+</details>
+
+<br />
+
+#### gitserver: continuity_manifest_validation_p99_duration
+
+<p class="subtitle">99th percentile successful manifest validation duration by result over 5m</p>
+
+Tail latency of continuity manifest lookups against the configured authority, excluding errors and cancellations.
+Missing authority is normal before a repository is first published.
+Sustained high values point at PostgreSQL authority, storage availability or network latency.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=102820` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.99, sum by (instance, result, le) (rate(src_gitserver_continuity_manifest_validation_duration_seconds_bucket{instance=~`${shard:regex}`, result=~"changed|unchanged|missing"}[5m])))
+```
+</details>
+
+<br />
+
+#### gitserver: continuity_manifest_validation_error_ratio
+
+<p class="subtitle">Manifest validation error ratio over 5m</p>
+
+Percentage of continuity manifest lookups that failed.
+Ratios from low lookup volumes are noisy; compare with the lookup rate before acting.
+Check PostgreSQL authority, storage availability and permissions, and network latency.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=102821` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (instance) (rate(src_gitserver_continuity_manifest_validation_duration_seconds_count{instance=~`${shard:regex}`, result="error"}[5m])) / sum by (instance) (rate(src_gitserver_continuity_manifest_validation_duration_seconds_count{instance=~`${shard:regex}`}[5m])) * 100
+```
+</details>
+
+<br />
+
+#### gitserver: continuity_manifest_validation_rate
+
+<p class="subtitle">Manifest validations by result over 5m</p>
+
+Rate of continuity manifest lookups by result: changed, unchanged, missing, canceled or error.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/gitserver/gitserver?viewPanel=102822` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (instance, result) (rate(src_gitserver_continuity_manifest_validation_duration_seconds_count{instance=~`${shard:regex}`}[5m]))
+```
+</details>
+
+<br />
+
 ## Postgres
 
 <p class="subtitle">Postgres metrics, exported from postgres_exporter (not available on server).</p>
@@ -35926,7 +36133,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100600`
 Query:
 
 ```
-histogram_quantile(0.99, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v2.MeteringService",rpc_method=~"${metering_v2_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code=""}[2m])))
+histogram_quantile(0.99, sum by (le, rpc_method) (rate(rpc_client_call_duration_seconds_bucket{rpc_method=~"enterpriseportal\\.metering\\.v2\\.MeteringService/.+",rpc_method=~"$metering_v2_method",job=~"${caller:regex}",rpc_response_status_code="OK"}[2m])))
 ```
 </details>
 
@@ -35950,7 +36157,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100601`
 Query:
 
 ```
-histogram_quantile(0.95, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v2.MeteringService",rpc_method=~"${metering_v2_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code=""}[2m])))
+histogram_quantile(0.95, sum by (le, rpc_method) (rate(rpc_client_call_duration_seconds_bucket{rpc_method=~"enterpriseportal\\.metering\\.v2\\.MeteringService/.+",rpc_method=~"$metering_v2_method",job=~"${caller:regex}",rpc_response_status_code="OK"}[2m])))
 ```
 </details>
 
@@ -35974,7 +36181,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100602`
 Query:
 
 ```
-histogram_quantile(0.90, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v2.MeteringService",rpc_method=~"${metering_v2_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code=""}[2m])))
+histogram_quantile(0.90, sum by (le, rpc_method) (rate(rpc_client_call_duration_seconds_bucket{rpc_method=~"enterpriseportal\\.metering\\.v2\\.MeteringService/.+",rpc_method=~"$metering_v2_method",job=~"${caller:regex}",rpc_response_status_code="OK"}[2m])))
 ```
 </details>
 
@@ -35998,7 +36205,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100610`
 Query:
 
 ```
-histogram_quantile(0.99, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v2.MeteringService",rpc_method=~"${metering_v2_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])))
+histogram_quantile(0.99, sum by (le, rpc_method) (rate(rpc_client_call_duration_seconds_bucket{rpc_method=~"enterpriseportal\\.metering\\.v2\\.MeteringService/.+",rpc_method=~"$metering_v2_method",job=~"${caller:regex}",rpc_response_status_code!="OK"}[2m])))
 ```
 </details>
 
@@ -36022,7 +36229,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100611`
 Query:
 
 ```
-histogram_quantile(0.95, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v2.MeteringService",rpc_method=~"${metering_v2_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])))
+histogram_quantile(0.95, sum by (le, rpc_method) (rate(rpc_client_call_duration_seconds_bucket{rpc_method=~"enterpriseportal\\.metering\\.v2\\.MeteringService/.+",rpc_method=~"$metering_v2_method",job=~"${caller:regex}",rpc_response_status_code!="OK"}[2m])))
 ```
 </details>
 
@@ -36046,7 +36253,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100612`
 Query:
 
 ```
-histogram_quantile(0.90, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v2.MeteringService",rpc_method=~"${metering_v2_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])))
+histogram_quantile(0.90, sum by (le, rpc_method) (rate(rpc_client_call_duration_seconds_bucket{rpc_method=~"enterpriseportal\\.metering\\.v2\\.MeteringService/.+",rpc_method=~"$metering_v2_method",job=~"${caller:regex}",rpc_response_status_code!="OK"}[2m])))
 ```
 </details>
 
@@ -36070,7 +36277,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100620`
 Query:
 
 ```
-sum by (rpc_method) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.metering.v2.MeteringService",rpc_method=~"${metering_v2_method:regex}",job=~"${caller:regex}"}[5m]))
+sum by (rpc_method) (rate(rpc_client_call_duration_seconds_count{rpc_method=~"enterpriseportal\\.metering\\.v2\\.MeteringService/.+",rpc_method=~"$metering_v2_method",job=~"${caller:regex}"}[5m]))
 ```
 </details>
 
@@ -36094,7 +36301,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100630`
 Query:
 
 ```
-(100 * sum by (rpc_method) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.metering.v2.MeteringService",rpc_method=~"${metering_v2_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m]))) / sum by (rpc_method) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.metering.v2.MeteringService",rpc_method=~"${metering_v2_method:regex}",job=~"${caller:regex}"}[2m]))
+(100 * sum by (rpc_method) (rate(rpc_client_call_duration_seconds_count{rpc_method=~"enterpriseportal\\.metering\\.v2\\.MeteringService/.+",rpc_method=~"$metering_v2_method",job=~"${caller:regex}",rpc_response_status_code!="OK"}[2m]))) / sum by (rpc_method) (rate(rpc_client_call_duration_seconds_count{rpc_method=~"enterpriseportal\\.metering\\.v2\\.MeteringService/.+",rpc_method=~"$metering_v2_method",job=~"${caller:regex}"}[2m]))
 ```
 </details>
 
@@ -36118,7 +36325,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100631`
 Query:
 
 ```
-label_replace(sum by (rpc_method, rpc_connect_rpc_error_code) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.metering.v2.MeteringService",rpc_method=~"${metering_v2_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])), "rpc_connect_rpc_error_code", "ok", "rpc_connect_rpc_error_code", "")
+sum by (rpc_method, rpc_response_status_code) (rate(rpc_client_call_duration_seconds_count{rpc_method=~"enterpriseportal\\.metering\\.v2\\.MeteringService/.+",rpc_method=~"$metering_v2_method",job=~"${caller:regex}",rpc_response_status_code!="OK"}[2m]))
 ```
 </details>
 
@@ -36128,7 +36335,7 @@ label_replace(sum by (rpc_method, rpc_connect_rpc_error_code) (rate(rpc_client_d
 
 <p class="subtitle">Connect response code distribution per method over 2m</p>
 
-Rate of outbound Connect calls to enterpriseportal.metering.v2.MeteringService per method, broken down by rpc_connect_rpc_error_code. Successful calls (which carry no error-code attribute) are normalized to "ok".
+Rate of outbound Connect calls to enterpriseportal.metering.v2.MeteringService per method, broken down by rpc_response_status_code.
 
 This panel has no related alerts.
 
@@ -36142,7 +36349,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100640`
 Query:
 
 ```
-label_replace(sum by (rpc_method, rpc_connect_rpc_error_code) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.metering.v2.MeteringService",rpc_method=~"${metering_v2_method:regex}",job=~"${caller:regex}"}[2m])), "rpc_connect_rpc_error_code", "ok", "rpc_connect_rpc_error_code", "")
+sum by (rpc_method, rpc_response_status_code) (rate(rpc_client_call_duration_seconds_count{rpc_method=~"enterpriseportal\\.metering\\.v2\\.MeteringService/.+",rpc_method=~"$metering_v2_method",job=~"${caller:regex}"}[2m]))
 ```
 </details>
 
@@ -36168,7 +36375,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100700`
 Query:
 
 ```
-histogram_quantile(0.99, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v1.MeteringService",rpc_method=~"${metering_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code=""}[2m])))
+histogram_quantile(0.99, sum by (le, rpc_method) (rate(rpc_client_call_duration_seconds_bucket{rpc_method=~"enterpriseportal\\.metering\\.v1\\.MeteringService/.+",rpc_method=~"$metering_v1_method",job=~"${caller:regex}",rpc_response_status_code="OK"}[2m])))
 ```
 </details>
 
@@ -36192,7 +36399,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100701`
 Query:
 
 ```
-histogram_quantile(0.95, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v1.MeteringService",rpc_method=~"${metering_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code=""}[2m])))
+histogram_quantile(0.95, sum by (le, rpc_method) (rate(rpc_client_call_duration_seconds_bucket{rpc_method=~"enterpriseportal\\.metering\\.v1\\.MeteringService/.+",rpc_method=~"$metering_v1_method",job=~"${caller:regex}",rpc_response_status_code="OK"}[2m])))
 ```
 </details>
 
@@ -36216,7 +36423,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100702`
 Query:
 
 ```
-histogram_quantile(0.90, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v1.MeteringService",rpc_method=~"${metering_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code=""}[2m])))
+histogram_quantile(0.90, sum by (le, rpc_method) (rate(rpc_client_call_duration_seconds_bucket{rpc_method=~"enterpriseportal\\.metering\\.v1\\.MeteringService/.+",rpc_method=~"$metering_v1_method",job=~"${caller:regex}",rpc_response_status_code="OK"}[2m])))
 ```
 </details>
 
@@ -36240,7 +36447,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100710`
 Query:
 
 ```
-histogram_quantile(0.99, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v1.MeteringService",rpc_method=~"${metering_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])))
+histogram_quantile(0.99, sum by (le, rpc_method) (rate(rpc_client_call_duration_seconds_bucket{rpc_method=~"enterpriseportal\\.metering\\.v1\\.MeteringService/.+",rpc_method=~"$metering_v1_method",job=~"${caller:regex}",rpc_response_status_code!="OK"}[2m])))
 ```
 </details>
 
@@ -36264,7 +36471,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100711`
 Query:
 
 ```
-histogram_quantile(0.95, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v1.MeteringService",rpc_method=~"${metering_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])))
+histogram_quantile(0.95, sum by (le, rpc_method) (rate(rpc_client_call_duration_seconds_bucket{rpc_method=~"enterpriseportal\\.metering\\.v1\\.MeteringService/.+",rpc_method=~"$metering_v1_method",job=~"${caller:regex}",rpc_response_status_code!="OK"}[2m])))
 ```
 </details>
 
@@ -36288,7 +36495,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100712`
 Query:
 
 ```
-histogram_quantile(0.90, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.metering.v1.MeteringService",rpc_method=~"${metering_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])))
+histogram_quantile(0.90, sum by (le, rpc_method) (rate(rpc_client_call_duration_seconds_bucket{rpc_method=~"enterpriseportal\\.metering\\.v1\\.MeteringService/.+",rpc_method=~"$metering_v1_method",job=~"${caller:regex}",rpc_response_status_code!="OK"}[2m])))
 ```
 </details>
 
@@ -36312,7 +36519,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100720`
 Query:
 
 ```
-sum by (rpc_method) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.metering.v1.MeteringService",rpc_method=~"${metering_v1_method:regex}",job=~"${caller:regex}"}[5m]))
+sum by (rpc_method) (rate(rpc_client_call_duration_seconds_count{rpc_method=~"enterpriseportal\\.metering\\.v1\\.MeteringService/.+",rpc_method=~"$metering_v1_method",job=~"${caller:regex}"}[5m]))
 ```
 </details>
 
@@ -36336,7 +36543,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100730`
 Query:
 
 ```
-(100 * sum by (rpc_method) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.metering.v1.MeteringService",rpc_method=~"${metering_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m]))) / sum by (rpc_method) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.metering.v1.MeteringService",rpc_method=~"${metering_v1_method:regex}",job=~"${caller:regex}"}[2m]))
+(100 * sum by (rpc_method) (rate(rpc_client_call_duration_seconds_count{rpc_method=~"enterpriseportal\\.metering\\.v1\\.MeteringService/.+",rpc_method=~"$metering_v1_method",job=~"${caller:regex}",rpc_response_status_code!="OK"}[2m]))) / sum by (rpc_method) (rate(rpc_client_call_duration_seconds_count{rpc_method=~"enterpriseportal\\.metering\\.v1\\.MeteringService/.+",rpc_method=~"$metering_v1_method",job=~"${caller:regex}"}[2m]))
 ```
 </details>
 
@@ -36360,7 +36567,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100731`
 Query:
 
 ```
-label_replace(sum by (rpc_method, rpc_connect_rpc_error_code) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.metering.v1.MeteringService",rpc_method=~"${metering_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])), "rpc_connect_rpc_error_code", "ok", "rpc_connect_rpc_error_code", "")
+sum by (rpc_method, rpc_response_status_code) (rate(rpc_client_call_duration_seconds_count{rpc_method=~"enterpriseportal\\.metering\\.v1\\.MeteringService/.+",rpc_method=~"$metering_v1_method",job=~"${caller:regex}",rpc_response_status_code!="OK"}[2m]))
 ```
 </details>
 
@@ -36370,7 +36577,7 @@ label_replace(sum by (rpc_method, rpc_connect_rpc_error_code) (rate(rpc_client_d
 
 <p class="subtitle">Connect response code distribution per method over 2m</p>
 
-Rate of outbound Connect calls to enterpriseportal.metering.v1.MeteringService per method, broken down by rpc_connect_rpc_error_code. Successful calls (which carry no error-code attribute) are normalized to "ok".
+Rate of outbound Connect calls to enterpriseportal.metering.v1.MeteringService per method, broken down by rpc_response_status_code.
 
 This panel has no related alerts.
 
@@ -36384,7 +36591,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100740`
 Query:
 
 ```
-label_replace(sum by (rpc_method, rpc_connect_rpc_error_code) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.metering.v1.MeteringService",rpc_method=~"${metering_v1_method:regex}",job=~"${caller:regex}"}[2m])), "rpc_connect_rpc_error_code", "ok", "rpc_connect_rpc_error_code", "")
+sum by (rpc_method, rpc_response_status_code) (rate(rpc_client_call_duration_seconds_count{rpc_method=~"enterpriseportal\\.metering\\.v1\\.MeteringService/.+",rpc_method=~"$metering_v1_method",job=~"${caller:regex}"}[2m]))
 ```
 </details>
 
@@ -36410,7 +36617,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100800`
 Query:
 
 ```
-histogram_quantile(0.99, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.broadcastmessages.v1.BroadcastMessagesService",rpc_method=~"${broadcast_messages_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code=""}[2m])))
+histogram_quantile(0.99, sum by (le, rpc_method) (rate(rpc_client_call_duration_seconds_bucket{rpc_method=~"enterpriseportal\\.broadcastmessages\\.v1\\.BroadcastMessagesService/.+",rpc_method=~"$broadcast_messages_v1_method",job=~"${caller:regex}",rpc_response_status_code="OK"}[2m])))
 ```
 </details>
 
@@ -36434,7 +36641,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100801`
 Query:
 
 ```
-histogram_quantile(0.95, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.broadcastmessages.v1.BroadcastMessagesService",rpc_method=~"${broadcast_messages_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code=""}[2m])))
+histogram_quantile(0.95, sum by (le, rpc_method) (rate(rpc_client_call_duration_seconds_bucket{rpc_method=~"enterpriseportal\\.broadcastmessages\\.v1\\.BroadcastMessagesService/.+",rpc_method=~"$broadcast_messages_v1_method",job=~"${caller:regex}",rpc_response_status_code="OK"}[2m])))
 ```
 </details>
 
@@ -36458,7 +36665,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100802`
 Query:
 
 ```
-histogram_quantile(0.90, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.broadcastmessages.v1.BroadcastMessagesService",rpc_method=~"${broadcast_messages_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code=""}[2m])))
+histogram_quantile(0.90, sum by (le, rpc_method) (rate(rpc_client_call_duration_seconds_bucket{rpc_method=~"enterpriseportal\\.broadcastmessages\\.v1\\.BroadcastMessagesService/.+",rpc_method=~"$broadcast_messages_v1_method",job=~"${caller:regex}",rpc_response_status_code="OK"}[2m])))
 ```
 </details>
 
@@ -36482,7 +36689,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100810`
 Query:
 
 ```
-histogram_quantile(0.99, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.broadcastmessages.v1.BroadcastMessagesService",rpc_method=~"${broadcast_messages_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])))
+histogram_quantile(0.99, sum by (le, rpc_method) (rate(rpc_client_call_duration_seconds_bucket{rpc_method=~"enterpriseportal\\.broadcastmessages\\.v1\\.BroadcastMessagesService/.+",rpc_method=~"$broadcast_messages_v1_method",job=~"${caller:regex}",rpc_response_status_code!="OK"}[2m])))
 ```
 </details>
 
@@ -36506,7 +36713,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100811`
 Query:
 
 ```
-histogram_quantile(0.95, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.broadcastmessages.v1.BroadcastMessagesService",rpc_method=~"${broadcast_messages_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])))
+histogram_quantile(0.95, sum by (le, rpc_method) (rate(rpc_client_call_duration_seconds_bucket{rpc_method=~"enterpriseportal\\.broadcastmessages\\.v1\\.BroadcastMessagesService/.+",rpc_method=~"$broadcast_messages_v1_method",job=~"${caller:regex}",rpc_response_status_code!="OK"}[2m])))
 ```
 </details>
 
@@ -36530,7 +36737,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100812`
 Query:
 
 ```
-histogram_quantile(0.90, sum by (le, rpc_method) (rate(rpc_client_duration_milliseconds_bucket{rpc_service="enterpriseportal.broadcastmessages.v1.BroadcastMessagesService",rpc_method=~"${broadcast_messages_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])))
+histogram_quantile(0.90, sum by (le, rpc_method) (rate(rpc_client_call_duration_seconds_bucket{rpc_method=~"enterpriseportal\\.broadcastmessages\\.v1\\.BroadcastMessagesService/.+",rpc_method=~"$broadcast_messages_v1_method",job=~"${caller:regex}",rpc_response_status_code!="OK"}[2m])))
 ```
 </details>
 
@@ -36554,7 +36761,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100820`
 Query:
 
 ```
-sum by (rpc_method) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.broadcastmessages.v1.BroadcastMessagesService",rpc_method=~"${broadcast_messages_v1_method:regex}",job=~"${caller:regex}"}[5m]))
+sum by (rpc_method) (rate(rpc_client_call_duration_seconds_count{rpc_method=~"enterpriseportal\\.broadcastmessages\\.v1\\.BroadcastMessagesService/.+",rpc_method=~"$broadcast_messages_v1_method",job=~"${caller:regex}"}[5m]))
 ```
 </details>
 
@@ -36578,7 +36785,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100830`
 Query:
 
 ```
-(100 * sum by (rpc_method) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.broadcastmessages.v1.BroadcastMessagesService",rpc_method=~"${broadcast_messages_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m]))) / sum by (rpc_method) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.broadcastmessages.v1.BroadcastMessagesService",rpc_method=~"${broadcast_messages_v1_method:regex}",job=~"${caller:regex}"}[2m]))
+(100 * sum by (rpc_method) (rate(rpc_client_call_duration_seconds_count{rpc_method=~"enterpriseportal\\.broadcastmessages\\.v1\\.BroadcastMessagesService/.+",rpc_method=~"$broadcast_messages_v1_method",job=~"${caller:regex}",rpc_response_status_code!="OK"}[2m]))) / sum by (rpc_method) (rate(rpc_client_call_duration_seconds_count{rpc_method=~"enterpriseportal\\.broadcastmessages\\.v1\\.BroadcastMessagesService/.+",rpc_method=~"$broadcast_messages_v1_method",job=~"${caller:regex}"}[2m]))
 ```
 </details>
 
@@ -36602,7 +36809,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100831`
 Query:
 
 ```
-label_replace(sum by (rpc_method, rpc_connect_rpc_error_code) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.broadcastmessages.v1.BroadcastMessagesService",rpc_method=~"${broadcast_messages_v1_method:regex}",job=~"${caller:regex}",rpc_connect_rpc_error_code!=""}[2m])), "rpc_connect_rpc_error_code", "ok", "rpc_connect_rpc_error_code", "")
+sum by (rpc_method, rpc_response_status_code) (rate(rpc_client_call_duration_seconds_count{rpc_method=~"enterpriseportal\\.broadcastmessages\\.v1\\.BroadcastMessagesService/.+",rpc_method=~"$broadcast_messages_v1_method",job=~"${caller:regex}",rpc_response_status_code!="OK"}[2m]))
 ```
 </details>
 
@@ -36612,7 +36819,7 @@ label_replace(sum by (rpc_method, rpc_connect_rpc_error_code) (rate(rpc_client_d
 
 <p class="subtitle">Connect response code distribution per method over 2m</p>
 
-Rate of outbound Connect calls to enterpriseportal.broadcastmessages.v1.BroadcastMessagesService per method, broken down by rpc_connect_rpc_error_code. Successful calls (which carry no error-code attribute) are normalized to "ok".
+Rate of outbound Connect calls to enterpriseportal.broadcastmessages.v1.BroadcastMessagesService per method, broken down by rpc_response_status_code.
 
 This panel has no related alerts.
 
@@ -36626,7 +36833,7 @@ To see this panel, visit `/-/debug/grafana/d/metering/metering?viewPanel=100840`
 Query:
 
 ```
-label_replace(sum by (rpc_method, rpc_connect_rpc_error_code) (rate(rpc_client_duration_milliseconds_count{rpc_service="enterpriseportal.broadcastmessages.v1.BroadcastMessagesService",rpc_method=~"${broadcast_messages_v1_method:regex}",job=~"${caller:regex}"}[2m])), "rpc_connect_rpc_error_code", "ok", "rpc_connect_rpc_error_code", "")
+sum by (rpc_method, rpc_response_status_code) (rate(rpc_client_call_duration_seconds_count{rpc_method=~"enterpriseportal\\.broadcastmessages\\.v1\\.BroadcastMessagesService/.+",rpc_method=~"$broadcast_messages_v1_method",job=~"${caller:regex}"}[2m]))
 ```
 </details>
 
@@ -39656,7 +39863,7 @@ To see this panel, visit `/-/debug/grafana/d/externalapi/externalapi?viewPanel=1
 Query:
 
 ```
-sum by (rpc_service)(rate(rpc_server_duration_milliseconds_count{rpc_service=~"$rpc_service"}[5m]))
+sum by (rpc_service)(label_replace(rate(rpc_server_call_duration_seconds_count{rpc_method=~"$rpc_method"}[5m]), "rpc_service", "$1", "rpc_method", "(.+)/[^/]+"))
 ```
 </details>
 
@@ -39680,7 +39887,7 @@ To see this panel, visit `/-/debug/grafana/d/externalapi/externalapi?viewPanel=1
 Query:
 
 ```
-sum by (rpc_method)(rate(rpc_server_duration_milliseconds_count{rpc_service=~"$rpc_service"}[5m]))
+sum by (rpc_method)(rate(rpc_server_call_duration_seconds_count{rpc_method=~"$rpc_method"}[5m]))
 ```
 </details>
 
@@ -39704,7 +39911,7 @@ To see this panel, visit `/-/debug/grafana/d/externalapi/externalapi?viewPanel=1
 Query:
 
 ```
-sum(rate(rpc_server_duration_milliseconds_count{rpc_service=~"$rpc_service",rpc_connect_error_code!=""}[5m])) / (sum(rate(rpc_server_duration_milliseconds_count{rpc_service=~"$rpc_service"}[5m])) > 0) * 100
+sum(rate(rpc_server_call_duration_seconds_count{rpc_method=~"$rpc_method",rpc_response_status_code!="OK"}[5m])) / (sum(rate(rpc_server_call_duration_seconds_count{rpc_method=~"$rpc_method"}[5m])) > 0) * 100
 ```
 </details>
 
@@ -39728,7 +39935,7 @@ To see this panel, visit `/-/debug/grafana/d/externalapi/externalapi?viewPanel=1
 Query:
 
 ```
-sum by (rpc_connect_error_code)(rate(rpc_server_duration_milliseconds_count{rpc_service=~"$rpc_service",rpc_connect_error_code!=""}[5m]))
+sum by (rpc_response_status_code)(rate(rpc_server_call_duration_seconds_count{rpc_method=~"$rpc_method",rpc_response_status_code!="OK"}[5m]))
 ```
 </details>
 
@@ -39754,7 +39961,7 @@ To see this panel, visit `/-/debug/grafana/d/externalapi/externalapi?viewPanel=1
 Query:
 
 ```
-histogram_quantile(0.99, sum by (le)(rate(rpc_server_duration_milliseconds_bucket{rpc_service=~"$rpc_service"}[5m])))
+histogram_quantile(0.99, sum by (le)(rate(rpc_server_call_duration_seconds_bucket{rpc_method=~"$rpc_method"}[5m])))
 ```
 </details>
 
@@ -39778,7 +39985,7 @@ To see this panel, visit `/-/debug/grafana/d/externalapi/externalapi?viewPanel=1
 Query:
 
 ```
-histogram_quantile(0.90, sum by (le)(rate(rpc_server_duration_milliseconds_bucket{rpc_service=~"$rpc_service"}[5m])))
+histogram_quantile(0.90, sum by (le)(rate(rpc_server_call_duration_seconds_bucket{rpc_method=~"$rpc_method"}[5m])))
 ```
 </details>
 
@@ -39802,7 +40009,7 @@ To see this panel, visit `/-/debug/grafana/d/externalapi/externalapi?viewPanel=1
 Query:
 
 ```
-histogram_quantile(0.50, sum by (le)(rate(rpc_server_duration_milliseconds_bucket{rpc_service=~"$rpc_service"}[5m])))
+histogram_quantile(0.50, sum by (le)(rate(rpc_server_call_duration_seconds_bucket{rpc_method=~"$rpc_method"}[5m])))
 ```
 </details>
 
@@ -39826,7 +40033,7 @@ To see this panel, visit `/-/debug/grafana/d/externalapi/externalapi?viewPanel=1
 Query:
 
 ```
-histogram_quantile(0.99, sum by (le, rpc_method)(rate(rpc_server_duration_milliseconds_bucket{rpc_service=~"$rpc_service"}[5m])))
+histogram_quantile(0.99, sum by (le, rpc_method)(rate(rpc_server_call_duration_seconds_bucket{rpc_method=~"$rpc_method"}[5m])))
 ```
 </details>
 
@@ -39850,57 +40057,7 @@ To see this panel, visit `/-/debug/grafana/d/externalapi/externalapi?viewPanel=1
 Query:
 
 ```
-histogram_quantile(0.50, sum by (le, rpc_method)(rate(rpc_server_duration_milliseconds_bucket{rpc_service=~"$rpc_service"}[5m])))
-```
-</details>
-
-<br />
-
-### Sourcegraph external API: Request and response sizes
-
-#### externalapi: externalapi_p99_request_size
-
-<p class="subtitle">99th percentile request size</p>
-
-99th percentile external API request message size.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/externalapi/externalapi?viewPanel=100200` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Platform team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.99, sum by (le)(rate(rpc_server_request_size_bytes_bucket{rpc_service=~"$rpc_service"}[5m])))
-```
-</details>
-
-<br />
-
-#### externalapi: externalapi_p99_response_size
-
-<p class="subtitle">99th percentile response size</p>
-
-99th percentile external API response message size.
-
-This panel has no related alerts.
-
-To see this panel, visit `/-/debug/grafana/d/externalapi/externalapi?viewPanel=100201` on your Sourcegraph instance.
-
-<sub>*Managed by the Sourcegraph Platform team.*</sub>
-
-<details>
-<summary>Technical details</summary>
-
-Query:
-
-```
-histogram_quantile(0.99, sum by (le)(rate(rpc_server_response_size_bytes_bucket{rpc_service=~"$rpc_service"}[5m])))
+histogram_quantile(0.50, sum by (le, rpc_method)(rate(rpc_server_call_duration_seconds_bucket{rpc_method=~"$rpc_method"}[5m])))
 ```
 </details>
 
