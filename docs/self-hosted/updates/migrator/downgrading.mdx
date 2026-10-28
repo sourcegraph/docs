@@ -31,16 +31,33 @@ command: ['downgrade', '--from=v8.1', '--to=v8.0']
 _Command and output_
 
 ```bash
-$ ~/deploy-sourcegraph-docker/docker-compose/ v8.1.1335* docker-compose up -d migrator
-codeinsights-db is up-to-date
-codeintel-db is up-to-date
-pgsql is up-to-date
-Recreating migrator ... done
-$ ~/deploy-sourcegraph-docker/docker-compose/ v8.1.1335* docker logs migrator
+$ docker compose up -d migrator
+ Container codeinsights-db Running
+ Container codeintel-db Running
+ Container pgsql Running
+ Container migrator Recreate
+ Container migrator Recreated
+ Container codeinsights-db Waiting
+ Container codeintel-db Waiting
+ Container pgsql Waiting
+ Container codeinsights-db Healthy
+ Container codeintel-db Healthy
+ Container pgsql Healthy
+ Container migrator Starting
+ Container migrator Started
+$ docker logs migrator
 ✱ Sourcegraph migrator 8.1.1335
+Attempting connection to frontend...
+ ✓ Connection to frontend succeeded
+Attempting connection to frontend...
+ ✓ Connection to frontend succeeded
+Attempting connection to codeintel...
+ ✓ Connection to codeintel succeeded
+Attempting connection to codeinsights...
+ ✓ Connection to codeinsights succeeded
 👉 Migrating to v8.0 (step 1 of 1)
 👉 Running schema migrations
-✅ Schema migrations complete
+ ✓ Schema migrations complete
 ```
 
 Downgrade is run using a similar to procedure to a [multiversion upgrade](/self-hosted/updates/#upgrades-index):
