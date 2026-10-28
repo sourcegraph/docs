@@ -3275,19 +3275,39 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/deploy/machine-images/aws-ami',
-		destination: '/self-hosted/deploy/machine-images/aws-ami'
+		destination: '/self-hosted/deploy'
+	},
+	{
+		source: '/self-hosted/deploy/machine-images/aws-ami',
+		destination: '/self-hosted/deploy'
 	},
 	{
 		source: '/admin/deploy/machine-images/aws-oneclick',
-		destination: '/self-hosted/deploy/machine-images/aws-oneclick'
+		destination: '/self-hosted/deploy'
+	},
+	{
+		source: '/self-hosted/deploy/machine-images/aws-oneclick',
+		destination: '/self-hosted/deploy'
 	},
 	{
 		source: '/admin/deploy/machine-images/gce',
-		destination: '/self-hosted/deploy/machine-images/gce'
+		destination: '/self-hosted/deploy'
+	},
+	{
+		source: '/self-hosted/deploy/machine-images/gce',
+		destination: '/self-hosted/deploy'
+	},
+	{
+		source: '/how-to/aws-instance-sizing',
+		destination: '/self-hosted/deploy/instance-size'
 	},
 	{
 		source: '/admin/deploy/machine-images',
-		destination: '/self-hosted/deploy/machine-images'
+		destination: '/self-hosted/deploy'
+	},
+	{
+		source: '/self-hosted/deploy/machine-images',
+		destination: '/self-hosted/deploy'
 	},
 	{
 		source: '/admin/deploy/migrate-backup',
@@ -3311,7 +3331,11 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/deploy/single-node/script',
-		destination: '/self-hosted/deploy/single-node/script'
+		destination: '/self-hosted/deploy/single-node'
+	},
+	{
+		source: '/self-hosted/deploy/single-node/script',
+		destination: '/self-hosted/deploy/single-node'
 	},
 	{
 		source: '/admin/deploy/without_service_discovery',
@@ -3552,7 +3576,11 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/updates/automatic',
-		destination: '/self-hosted/updates/automatic'
+		destination: '/self-hosted/updates'
+	},
+	{
+		source: '/self-hosted/updates/automatic',
+		destination: '/self-hosted/updates'
 	},
 	{
 		source: '/admin/updates/docker_compose',
@@ -3589,7 +3617,11 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/updates/migrator/upgrading-early-versions',
-		destination: '/self-hosted/updates/migrator/upgrading-early-versions'
+		destination: '/self-hosted/updates'
+	},
+	{
+		source: '/self-hosted/updates/migrator/upgrading-early-versions',
+		destination: '/self-hosted/updates'
 	},
 	{
 		source: '/admin/updates/pure_docker',
