@@ -52,9 +52,12 @@
 - **Spell check**: `.github/workflows/spellcheck.yml` runs
   `dev/check-spelling.mjs` on the lines a PR adds plus its title and
   description, and comments the findings (advisory, never fails the PR).
-  Add product names and identifiers to `cspell-allow-list.txt`, in
-  alphabetical order; the check reports out-of-order entries. CSpell is not a
-  project dependency: `npx cspell@10 --no-progress <file>` to run it locally
+  Add product names and identifiers to `cspell-allow-list.txt` with
+  `node dev/allow-spelling-words.mjs <words>`, which keeps it in alphabetical
+  order (the check reports out-of-order entries), or comment `/spell <words>`
+  on the PR: `.github/workflows/spellcheck-allow.yml` commits them to the
+  branch and runs the check again. CSpell is not a project dependency:
+  `npx cspell@10 --no-progress <file>` to run it locally
 - **Example hostnames**: placeholder hostnames in docs are `*.example.com` 
   (`sourcegraph.example.com` for the reader's instance, 
   `github.example.com` for a code host, 
@@ -115,7 +118,8 @@ PR: a summary comment per check, plus an inline review comment with a
 `suggestion` block on each flagged line. After pushing, read them and follow
 the instructions they give (fix the spelling, the link, the redirect, or the
 hostname); do not work around a finding, and add a word to
-`cspell-allow-list.txt` only when it is correct.
+`cspell-allow-list.txt` only when it is correct (`/spell <words>` in a PR
+comment does that for you).
 
 ```sh
 gh pr checks <pr>

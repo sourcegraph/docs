@@ -1,0 +1,135 @@
+name: Spell check allow list
+
+# Adds words to cspell-allow-list.txt when someone with write access comments
+# `/spell <words>` (or `/spell allow <words>`) on a pull request, in the
+# conversation or on a review comment. The words are committed to the pull
+# request's branch and the command comment gets a 👍. Words CSpell already
+# accepts are left out, and the comment gets a reply instead when nothing was
+# added.
+#
+# A push made with GITHUB_TOKEN creates the pull_request runs for the new
+# revision in an approval-required state, so this workflow approves them and
+# the spell check (and the other checks) report on the new revision.
+#
+# GITHUB_TOKEN cannot push to a fork, so on a fork's pull request the command
+# replies that the words must be added by hand. Any other problem is replied
+# with a link to the job log.
+
+on:
+    issue_comment:
+        types: [created]
+    pull_request_review_comment:
+        types: [created]
+
+permissions:
+    actions: write # approves the pull_request runs the push creates
+    contents: write
+    pull-requests: write
+
+# Commands on the same pull request run one after another, so their pushes do
+# not race each other
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.issue.number || github.event.pull_request.number }}
+
+jobs:
+    allow:
+        name: Add words to the allow list
+        # issue_comment fires for issues too; only pull requests have the
+        # pull_request key
+        if: >-
+            (github.event.issue.pull_request || github.event.pull_request)
+            && (startsWith(github.event.comment.body, '/spell ') || github.event.comment.body == '/spell')
+        runs-on: ubuntu-latest
+        env:
+            GH_TOKEN: ${{ github.token }}
+            PR_NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+            RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        steps:
+            - name: Check out the pull request head
+              uses: actions/checkout@v4
+              with:
+                  ref: refs/pull/${{ env.PR_NUMBER }}/head
+
+            # Node 24 is pre-cached on ubuntu-latest, avoiding the download
+            # incurred by node-version: latest.
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+
+            # dev/allow-spelling-words.mjs asks CSpell which words it already accepts
+            - name: Install CSpell
+              run: npm install --global cspell@10
+
+            - name: Add the words, push them, and approve the checks on the new revision
+              # The comment comes in through env, never inline in the script,
+              # so a crafted comment cannot inject shell commands
+              env:
+                  COMMENTER: ${{ github.event.comment.user.login }}
+                  COMMENT_BODY: ${{ github.event.comment.body }}
+                  # Reactions on conversation and review comments have different routes
+                  REACTIONS_ROUTE: >-
+                      ${{ github.event_name == 'issue_comment'
+                      && format('issues/comments/{0}/reactions', github.event.comment.id)
+                      || format('pulls/comments/{0}/reactions', github.event.comment.id) }}
+              run: |
+                  reply() {
+                      gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" -f body="$1" --silent
+                  }
+
+                  permission=$(gh api "repos/$GITHUB_REPOSITORY/collaborators/$COMMENTER/permission" --jq .permission)
+                  if [ "$permission" != admin ] && [ "$permission" != write ]; then
+                      reply "@$COMMENTER \`/spell\` needs write access to this repository."
+                      exit 0
+                  fi
+
+                  head_ref=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" --jq .head.ref)
+                  head_repo=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" --jq .head.repo.full_name)
+                  if [ "$head_repo" != "$GITHUB_REPOSITORY" ]; then
+                      reply "This pull request is from a fork, which \`/spell\` cannot push to. Please add the words to \`cspell-allow-list.txt\` yourself."
+                      exit 0
+                  fi
+
+                  report=$(node dev/allow-spelling-words.mjs "$COMMENT_BODY")
+                  echo "$report"
+                  if git diff --quiet -- cspell-allow-list.txt; then
+                      reply "$report"
+                      exit 0
+                  fi
+
+                  added=$(printf '%s\n' "$report" | sed -n 's/^Added: //p' | tr -d '`')
+                  git config user.name 'github-actions[bot]'
+                  git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+                  git commit --quiet -m "Add $added to cspell-allow-list.txt" -- cspell-allow-list.txt
+                  # The author may have pushed since the checkout
+                  git pull --quiet --rebase origin "$head_ref"
+                  git push --quiet origin "HEAD:refs/heads/$head_ref"
+                  gh api --method POST "repos/$GITHUB_REPOSITORY/$REACTIONS_ROUTE" -f content=+1 --silent
+
+                  # The runs appear a few seconds after the push, each needing
+                  # its own approval. Keep looking until a sweep after the
+                  # first approval finds nothing more.
+                  approved=
+                  for _ in 1 2 3 4 5 6 7 8 9; do
+                      sleep 10
+                      runs=$(gh run list --repo "$GITHUB_REPOSITORY" --commit "$(git rev-parse HEAD)" \
+                          --status action_required --json databaseId --jq '.[].databaseId')
+                      found=
+                      for run in $runs; do
+                          case " $approved " in *" $run "*) continue ;; esac
+                          echo "Approving run $run"
+                          gh api --method POST "repos/$GITHUB_REPOSITORY/actions/runs/$run/approve" --silent
+                          approved="$approved $run"
+                          found=1
+                      done
+                      [ -n "$approved" ] && [ -z "$found" ] && break
+                  done
+                  if [ -z "$approved" ]; then
+                      echo "::warning::No run to approve appeared, so the checks have not run on the new revision"
+                  fi
+
+            - name: Report the failure on the pull request
+              if: failure()
+              run: |
+                  gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" --silent \
+                      -f body="The \`/spell\` command failed; see the [job log]($RUN_URL)."
