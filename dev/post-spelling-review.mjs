@@ -166,9 +166,9 @@ function summaryBody(findings) {
 		lines.push('');
 	}
 	lines.push(
-		`Please correct the spelling, or add words which are correct to ${ALLOW_LIST_LINK}: comment \`/spell <words>\` on this PR, separated by spaces or commas, and they are committed to this branch.`,
+		`Please correct the spelling, or add words which are correct to ${ALLOW_LIST_LINK}.`,
 		'',
-		"Run `npx cspell@10 --no-progress --dot '**/*'` locally to check the full repository."
+		`Comment on this PR with \`/spell <list of words>\`, and a bot will push a commit to your branch adding your comment's list of words to ${ALLOW_LIST_LINK} for you.`
 	);
 	return lines.join('\n') + '\n';
 }
@@ -264,7 +264,8 @@ function inlineBody(finding) {
 				`\`${finding.word}\` is not in the dictionary.`,
 				'',
 				...suggestionBlock(finding),
-				`Please correct the spelling, or add the word to ${ALLOW_LIST_LINK} if it is correct: comment \`/spell ${finding.word}\` on this PR, and it is committed to this branch.`
+				`Please correct the spelling, or add words which are correct to ${ALLOW_LIST_LINK}.`,
+				`Comment on this PR with \`/spell <list of words>\`, and a bot will push a commit to your branch adding your comment's list of words to ${ALLOW_LIST_LINK} for you.`
 			];
 	return [`${INLINE_MARKER} ${finding.word} -->`, ...explanation].join('\n');
 }
