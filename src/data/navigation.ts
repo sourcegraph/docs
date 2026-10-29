@@ -595,10 +595,6 @@ export const navigation: NavigationItem[] = [
 							{
 								title: 'Sourcegraph on Kubernetes with Helm',
 								href: '/self-hosted/deploy/kubernetes'
-							},
-							{
-								title: 'Sourcegraph machine images',
-								href: '/self-hosted/deploy/machine-images'
 							}
 						]
 					},
