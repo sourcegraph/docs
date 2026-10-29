@@ -36,6 +36,17 @@ All advanced configuration options and their default values are shown below.
 	// Enables microphone dictation in agent prompt editors instance-wide. Audio is sent to Sourcegraph's model gateway for transcription.
 	"agents.enableDictation": true,
 
+	// Maximum sizes, in bytes, of HTTP API request bodies. Larger requests are rejected with 413 Request Entity Too Large. Raise a limit if legitimate requests, such as large SCIP uploads, are rejected.
+	// Other example values:
+	// - {
+	//     "defaultBytes": 33554432,
+	//     "scipUploadBytes": 2147483648
+	//   }
+	"api.requestSizeLimits": {
+		"defaultBytes": 33554432,
+		"scipUploadBytes": 1073741824
+	},
+
 	// Enable/Disable attribution search for Cody-generated snippets
 	"attribution.enabled": false,
 
@@ -61,6 +72,13 @@ All advanced configuration options and their default values are shown below.
 
 	// Enables/disables buildImage steps for Agentic Batch Changes. When unset, buildImage steps are enabled on Sourcegraph Cloud and disabled otherwise.
 	"batchChanges.buildImage.enabled": false,
+
+	// The longest time Batch Changes waits between polls of a changeset's status on its code host. Changesets back off towards this interval the longer they go without changes. Raising it reduces code host API usage from old changesets that rarely change; configure code host webhooks so that changes are still picked up immediately. Defaults to 8h.
+	// Other example values:
+	// - "24h"
+	// - "72h"
+	// - "168h"
+	"batchChanges.changesetSyncMaxInterval": "8h",
 
 	// How long changesets will be retained after they have been detached from a batch change.
 	// Other example values:
@@ -318,6 +336,10 @@ All advanced configuration options and their default values are shown below.
 		"enableGithubInternalRepoVisibility": false,
 		"enablePermissionsWebhooks": false,
 		"eventLogging": "enabled",
+		"execd": {
+			"enrollmentPublicKeys": null,
+			"gatewayURL": null
+		},
 		"gitServerPinnedRepos": null,
 		"homepage": null,
 		"insightsBackfillerV2": true,
@@ -887,6 +909,7 @@ All advanced configuration options and their default values are shown below.
 	"encryption.keys": {
 		"batchChangesCredentialKey": null,
 		"cacheSize": 2048,
+		"connectorKey": null,
 		"enableCache": false,
 		"executorSecretKey": null,
 		"externalServiceKey": null,
