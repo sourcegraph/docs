@@ -14775,7 +14775,15 @@ To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100400` on 
 Query:
 
 ```
-max(src_codeintel_commit_graph_fast_path_affected_repositories{job=~"^worker.*"} and on(instance, job) (increase(src_codeintel_commit_graph_fast_path_reporter_total{job=~"^worker.*"}[15m]) > 0)) or on() vector(0)
+max(src_codeintel_commit_graph_fast_path_affected_repositories{job=~"^worker.*"} and on(instance, job) (
+		(
+			increase(src_codeintel_commit_graph_fast_path_reporter_total{job=~"^worker.*"}[15m]) > 0
+		)
+		or on(instance, job)
+		(
+			increase(src_codeintel_commit_graph_fast_path_reporter_errors_total{job=~"^worker.*"}[15m]) > 0
+		)
+	)) or on() vector(0)
 ```
 </details>
 
@@ -14799,7 +14807,15 @@ To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100401` on 
 Query:
 
 ```
-max(src_codeintel_commit_graph_fast_path_missing_uploads_total{job=~"^worker.*"} and on(instance, job) (increase(src_codeintel_commit_graph_fast_path_reporter_total{job=~"^worker.*"}[15m]) > 0)) or on() vector(0)
+max(src_codeintel_commit_graph_fast_path_missing_uploads_total{job=~"^worker.*"} and on(instance, job) (
+		(
+			increase(src_codeintel_commit_graph_fast_path_reporter_total{job=~"^worker.*"}[15m]) > 0
+		)
+		or on(instance, job)
+		(
+			increase(src_codeintel_commit_graph_fast_path_reporter_errors_total{job=~"^worker.*"}[15m]) > 0
+		)
+	)) or on() vector(0)
 ```
 </details>
 
@@ -14823,7 +14839,15 @@ To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100402` on 
 Query:
 
 ```
-max(src_codeintel_commit_graph_fast_path_max_missing_uploads_per_repository{job=~"^worker.*"} and on(instance, job) (increase(src_codeintel_commit_graph_fast_path_reporter_total{job=~"^worker.*"}[15m]) > 0)) or on() vector(0)
+max(src_codeintel_commit_graph_fast_path_max_missing_uploads_per_repository{job=~"^worker.*"} and on(instance, job) (
+		(
+			increase(src_codeintel_commit_graph_fast_path_reporter_total{job=~"^worker.*"}[15m]) > 0
+		)
+		or on(instance, job)
+		(
+			increase(src_codeintel_commit_graph_fast_path_reporter_errors_total{job=~"^worker.*"}[15m]) > 0
+		)
+	)) or on() vector(0)
 ```
 </details>
 
@@ -14847,7 +14871,15 @@ To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100410` on 
 Query:
 
 ```
-max(src_codeintel_commit_graph_fast_path_oldest_missing_upload_age_seconds{job=~"^worker.*"} and on(instance, job) (increase(src_codeintel_commit_graph_fast_path_reporter_total{job=~"^worker.*"}[15m]) > 0)) or on() vector(0)
+max(src_codeintel_commit_graph_fast_path_oldest_missing_upload_age_seconds{job=~"^worker.*"} and on(instance, job) (
+		(
+			increase(src_codeintel_commit_graph_fast_path_reporter_total{job=~"^worker.*"}[15m]) > 0
+		)
+		or on(instance, job)
+		(
+			increase(src_codeintel_commit_graph_fast_path_reporter_errors_total{job=~"^worker.*"}[15m]) > 0
+		)
+	)) or on() vector(0)
 ```
 </details>
 
@@ -14871,7 +14903,105 @@ To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100411` on 
 Query:
 
 ```
-max(src_codeintel_commit_graph_fast_path_newest_missing_upload_age_seconds{job=~"^worker.*"} and on(instance, job) (increase(src_codeintel_commit_graph_fast_path_reporter_total{job=~"^worker.*"}[15m]) > 0)) or on() vector(0)
+max(src_codeintel_commit_graph_fast_path_newest_missing_upload_age_seconds{job=~"^worker.*"} and on(instance, job) (
+		(
+			increase(src_codeintel_commit_graph_fast_path_reporter_total{job=~"^worker.*"}[15m]) > 0
+		)
+		or on(instance, job)
+		(
+			increase(src_codeintel_commit_graph_fast_path_reporter_errors_total{job=~"^worker.*"}[15m]) > 0
+		)
+	)) or on() vector(0)
+```
+</details>
+
+<br />
+
+### Worker: Codeintel: Commit graph fast path reporter
+
+#### worker: codeintel_commit_graph_fast_path_reporter_total
+
+<p class="subtitle">Commit graph fast path reporter operations every 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100500` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_codeintel_commit_graph_fast_path_reporter_total{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### worker: codeintel_commit_graph_fast_path_reporter_99th_percentile_duration
+
+<p class="subtitle">Aggregate successful commit graph fast path reporter operation duration distribution over 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100501` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum  by (le)(rate(src_codeintel_commit_graph_fast_path_reporter_duration_seconds_bucket{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### worker: codeintel_commit_graph_fast_path_reporter_errors_total
+
+<p class="subtitle">Commit graph fast path reporter operation errors every 30m</p>
+
+Refer to the [alerts reference](/self-hosted/observability/alerts#worker-codeintel_commit_graph_fast_path_reporter_errors_total) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100502` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_codeintel_commit_graph_fast_path_reporter_errors_total{job=~"^worker.*"}[30m]))
+```
+</details>
+
+<br />
+
+#### worker: codeintel_commit_graph_fast_path_reporter_error_rate
+
+<p class="subtitle">Commit graph fast path reporter operation error rate over 30m</p>
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100503` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_codeintel_commit_graph_fast_path_reporter_errors_total{job=~"^worker.*"}[30m])) / (sum(increase(src_codeintel_commit_graph_fast_path_reporter_total{job=~"^worker.*"}[30m])) + sum(increase(src_codeintel_commit_graph_fast_path_reporter_errors_total{job=~"^worker.*"}[30m]))) * 100
 ```
 </details>
 
@@ -14887,7 +15017,7 @@ Uploads in the writing state, which are hidden from code navigation until the de
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100500` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100600` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -14911,7 +15041,7 @@ Measured from when processing of the upload started, so it includes processing t
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-codeintel_uploads_writing_duration) for 2 alerts related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100501` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100601` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -14935,7 +15065,7 @@ max(src_codeintel_uploads_writing_max_age_seconds)
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100600` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100700` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -14957,7 +15087,7 @@ sum(increase(src_codeintel_commit_graph_processor_total{job=~"^worker.*"}[5m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100601` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100701` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -14979,7 +15109,7 @@ sum  by (le)(rate(src_codeintel_commit_graph_processor_duration_seconds_bucket{j
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100602` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100702` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15001,7 +15131,7 @@ sum(increase(src_codeintel_commit_graph_processor_errors_total{job=~"^worker.*"}
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100603` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100703` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15025,7 +15155,7 @@ sum(increase(src_codeintel_commit_graph_processor_errors_total{job=~"^worker.*"}
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100700` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100800` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15047,7 +15177,7 @@ sum(increase(src_codeintel_autoindexing_total{op='HandleIndexSchedule',job=~"^wo
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100701` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100801` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15069,7 +15199,7 @@ sum  by (le)(rate(src_codeintel_autoindexing_duration_seconds_bucket{op='HandleI
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100702` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100802` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15091,7 +15221,7 @@ sum(increase(src_codeintel_autoindexing_errors_total{op='HandleIndexSchedule',jo
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100703` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100803` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15115,7 +15245,7 @@ sum(increase(src_codeintel_autoindexing_errors_total{op='HandleIndexSchedule',jo
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100800` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100900` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15137,7 +15267,7 @@ sum(increase(src_codeintel_uploads_store_total{job=~"^worker.*"}[5m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100801` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100901` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15159,7 +15289,7 @@ sum  by (le)(rate(src_codeintel_uploads_store_duration_seconds_bucket{job=~"^wor
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100802` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100902` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15181,7 +15311,7 @@ sum(increase(src_codeintel_uploads_store_errors_total{job=~"^worker.*"}[5m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100803` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100903` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15203,7 +15333,7 @@ sum(increase(src_codeintel_uploads_store_errors_total{job=~"^worker.*"}[5m])) / 
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100810` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100910` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15225,7 +15355,7 @@ sum by (op)(increase(src_codeintel_uploads_store_total{job=~"^worker.*"}[5m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100811` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100911` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15247,7 +15377,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_codeintel_uploads_store_durati
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100812` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100912` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15269,7 +15399,7 @@ sum by (op)(increase(src_codeintel_uploads_store_errors_total{job=~"^worker.*"}[
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100813` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100913` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15293,7 +15423,7 @@ sum by (op)(increase(src_codeintel_uploads_store_errors_total{job=~"^worker.*"}[
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100900` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101000` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15315,7 +15445,7 @@ sum(increase(src_codeintel_uploads_lsifstore_total{job=~"^worker.*"}[5m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100901` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101001` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15337,7 +15467,7 @@ sum  by (le)(rate(src_codeintel_uploads_lsifstore_duration_seconds_bucket{job=~"
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100902` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101002` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15359,7 +15489,7 @@ sum(increase(src_codeintel_uploads_lsifstore_errors_total{job=~"^worker.*"}[5m])
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100903` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101003` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15381,7 +15511,7 @@ sum(increase(src_codeintel_uploads_lsifstore_errors_total{job=~"^worker.*"}[5m])
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100910` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101010` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15403,7 +15533,7 @@ sum by (op)(increase(src_codeintel_uploads_lsifstore_total{job=~"^worker.*"}[5m]
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100911` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101011` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15425,7 +15555,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_codeintel_uploads_lsifstore_du
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100912` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101012` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15447,7 +15577,7 @@ sum by (op)(increase(src_codeintel_uploads_lsifstore_errors_total{job=~"^worker.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=100913` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101013` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15471,7 +15601,7 @@ sum by (op)(increase(src_codeintel_uploads_lsifstore_errors_total{job=~"^worker.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101000` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101100` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15493,7 +15623,7 @@ sum(increase(src_gitserver_client_total{job=~"^worker.*"}[5m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101001` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101101` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15515,7 +15645,7 @@ sum  by (le)(rate(src_gitserver_client_duration_seconds_bucket{job=~"^worker.*"}
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101002` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101102` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15537,7 +15667,7 @@ sum(increase(src_gitserver_client_errors_total{job=~"^worker.*"}[5m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101003` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101103` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15559,7 +15689,7 @@ sum(increase(src_gitserver_client_errors_total{job=~"^worker.*"}[5m])) / (sum(in
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101010` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101110` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15581,7 +15711,7 @@ sum by (op)(increase(src_gitserver_client_total{job=~"^worker.*"}[5m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101011` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101111` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15603,7 +15733,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_gitserver_client_duration_seco
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101012` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101112` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15625,7 +15755,7 @@ sum by (op)(increase(src_gitserver_client_errors_total{job=~"^worker.*"}[5m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101013` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101113` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15649,7 +15779,7 @@ sum by (op)(increase(src_gitserver_client_errors_total{job=~"^worker.*"}[5m])) /
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101100` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101200` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15671,7 +15801,7 @@ sum(increase(src_sourcegraphobjects_symbol_indexes_total{job=~"^worker.*"}[5m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101101` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101201` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15693,7 +15823,7 @@ sum  by (le)(rate(src_sourcegraphobjects_symbol_indexes_duration_seconds_bucket{
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101102` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101202` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15715,7 +15845,7 @@ sum(increase(src_sourcegraphobjects_symbol_indexes_errors_total{job=~"^worker.*"
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101103` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101203` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15737,7 +15867,7 @@ sum(increase(src_sourcegraphobjects_symbol_indexes_errors_total{job=~"^worker.*"
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101110` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101210` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15759,7 +15889,7 @@ sum by (op)(increase(src_sourcegraphobjects_symbol_indexes_total{job=~"^worker.*
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101111` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101211` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15781,7 +15911,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_sourcegraphobjects_symbol_inde
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101112` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101212` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15803,7 +15933,7 @@ sum by (op)(increase(src_sourcegraphobjects_symbol_indexes_errors_total{job=~"^w
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101113` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101213` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -15830,7 +15960,7 @@ If the value is persistently high, make sure all external services have valid to
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101200` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101300` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -15852,7 +15982,7 @@ max(timestamp(vector(time()))) - max(src_repoupdater_syncer_sync_last_time)
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-src_repoupdater_max_sync_backoff) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101201` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101301` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -15874,7 +16004,7 @@ max(src_repoupdater_max_sync_backoff)
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-src_repoupdater_syncer_sync_errors_total) for 2 alerts related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101202` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101302` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -15896,7 +16026,7 @@ max by (family) (rate(src_repoupdater_syncer_sync_errors_total{owner!="user",rea
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-syncer_sync_start) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101210` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101310` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -15918,7 +16048,7 @@ max by (family) (rate(src_repoupdater_syncer_start_sync{family="Syncer.SyncExter
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-syncer_sync_duration) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101211` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101311` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -15940,7 +16070,7 @@ histogram_quantile(0.95, max by (le, family, success) (rate(src_repoupdater_sync
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-source_duration) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101212` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101312` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -15962,7 +16092,7 @@ histogram_quantile(0.95, max by (le) (rate(src_repoupdater_source_duration_secon
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-syncer_synced_repos) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101220` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101320` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -15984,7 +16114,7 @@ max(rate(src_repoupdater_syncer_synced_repos_total[1m]))
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-sourced_repos) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101221` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101321` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16006,7 +16136,7 @@ max(rate(src_repoupdater_source_repos_total[1m]))
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-sched_auto_fetch) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101230` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101330` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16031,7 +16161,7 @@ This does not indicate anything if there are no user added code hosts.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101231` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101331` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16053,7 +16183,7 @@ max(rate(src_repoupdater_sched_manual_fetch[1m]))
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-sched_loops) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101240` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101340` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16075,7 +16205,7 @@ max(rate(src_repoupdater_sched_loops[1m]))
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-src_repoupdater_stale_repos) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101241` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101341` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16097,7 +16227,7 @@ max(src_repoupdater_stale_repos)
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-sched_error) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101242` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101342` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16121,7 +16251,7 @@ Repository fetches that failed due to an externally classified code-host access 
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101243` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101343` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16143,7 +16273,7 @@ max(rate(src_repoupdater_sched_external_error[1m]))
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-src_repoupdater_cleanup_failed_repos) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101250` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101350` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16169,7 +16299,7 @@ max(src_repoupdater_cleanup_failed_repos)
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101300` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101400` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16197,7 +16327,7 @@ were correct.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101301` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101401` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16222,7 +16352,7 @@ Check the reasons for why they were deleted.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101302` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101402` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16247,7 +16377,7 @@ Check the reasons for why they were deleted.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101303` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101403` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16273,7 +16403,7 @@ The number of entitlement usage history events exported as telemetry over the la
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101400` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101500` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16298,7 +16428,7 @@ If the distribution trends to the maximum bucket, export throughput is at or app
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101401` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101501` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16322,7 +16452,7 @@ The number of already-exported entitlement usage history events pruned over the 
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101410` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101510` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16346,7 +16476,7 @@ The number of entitlement usage history events waiting to be exported as telemet
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101411` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101511` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16384,7 +16514,7 @@ The age in seconds of the oldest entitlement usage history event waiting to be e
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-entitlements_usage_history_telemetry_queue_oldest_age) for 2 alerts related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101420` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101520` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16422,7 +16552,7 @@ Query:
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-src_repoupdater_external_services_total) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101500` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101600` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16444,7 +16574,7 @@ max(src_repoupdater_external_services_total)
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-repoupdater_queued_sync_jobs_total) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101510` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101610` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16466,7 +16596,7 @@ max(src_repoupdater_queued_sync_jobs_total)
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-repoupdater_completed_sync_jobs_total) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101511` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101611` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16488,7 +16618,7 @@ max(src_repoupdater_completed_sync_jobs_total)
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-repoupdater_errored_sync_jobs_percentage) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101512` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101612` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16510,7 +16640,7 @@ max(src_repoupdater_errored_sync_jobs_percentage)
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-github_graphql_rate_limit_remaining) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101520` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101620` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16532,7 +16662,7 @@ max by (name) (src_github_rate_limit_remaining_v2{resource="graphql"})
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-github_rest_rate_limit_remaining) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101521` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101621` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16554,7 +16684,7 @@ max by (name) (src_github_rate_limit_remaining_v2{resource="rest"})
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-github_search_rate_limit_remaining) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101522` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101622` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16578,7 +16708,7 @@ Indicates how long we`re waiting on the rate limit once it has been exceeded
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101530` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101630` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16602,7 +16732,7 @@ Indicates how long we`re waiting on the rate limit once it has been exceeded
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101531` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101631` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16626,7 +16756,7 @@ Indicates how long we`re waiting on the rate limit once it has been exceeded
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101532` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101632` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16648,7 +16778,7 @@ max by(name) (rate(src_github_rate_limit_wait_duration_seconds{resource="search"
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-gitlab_rest_rate_limit_remaining) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101540` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101640` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16672,7 +16802,7 @@ Indicates how long we`re waiting on the rate limit once it has been exceeded
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101541` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101641` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16696,7 +16826,7 @@ Indicates how long we`re waiting on our internal rate limiter when communicating
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101550` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101650` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16720,7 +16850,7 @@ The rate at which we fail our internal rate limiter.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101551` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101651` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16746,7 +16876,7 @@ Indicates the total number of user permissions sync completed.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101600` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101700` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16770,7 +16900,7 @@ Indicates the number of users permissions syncs completed.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101601` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101701` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16794,7 +16924,7 @@ Indicates the number of permissions syncs done for the first time for the user.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101602` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101702` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16818,7 +16948,7 @@ Indicates the total number of repo permissions sync completed.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101610` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101710` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16842,7 +16972,7 @@ Indicates the number of repos permissions syncs completed.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101611` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101711` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16866,7 +16996,7 @@ Indicates the number of permissions syncs done for the first time for the repo.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101612` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101712` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16890,7 +17020,7 @@ Indicates the max delay between two consecutive permissions sync for a user duri
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101620` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101720` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16914,7 +17044,7 @@ Indicates the max delay between two consecutive permissions sync for a repo duri
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101621` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101721` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16938,7 +17068,7 @@ Indicates the max delay between user creation and their permissions sync
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101630` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101730` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16962,7 +17092,7 @@ Indicates the max delay between repo creation and their permissions sync
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101631` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101731` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16986,7 +17116,7 @@ Indicates the number permissions found during users/repos permissions sync.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101640` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101740` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -17010,7 +17140,7 @@ Indicates the average number permissions found during permissions sync per user/
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101641` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101741` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -17032,7 +17162,7 @@ avg by (type) (src_repo_perms_syncer_perms_found)
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-perms_syncer_outdated_perms) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101650` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101750` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -17054,7 +17184,7 @@ max by (type) (src_repo_perms_syncer_outdated_perms)
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-perms_syncer_sync_duration) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101660` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101760` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -17080,7 +17210,7 @@ Permissions sync errors are often transient and rarely actionable.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101670` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101770` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -17105,7 +17235,7 @@ More about repository permissions synchronization [here](https://sourcegraph.com
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101671` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101771` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -17129,7 +17259,7 @@ sum by (type) (increase(src_repo_perms_syncer_schedule_total[1m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101700` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101800` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -17151,7 +17281,7 @@ sum(increase(src_gitserver_client_total{job=~"^worker.*"}[5m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101701` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101801` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -17173,7 +17303,7 @@ sum  by (le)(rate(src_gitserver_client_duration_seconds_bucket{job=~"^worker.*"}
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101702` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101802` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -17195,7 +17325,7 @@ sum(increase(src_gitserver_client_errors_total{job=~"^worker.*"}[5m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101703` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101803` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -17217,7 +17347,7 @@ sum(increase(src_gitserver_client_errors_total{job=~"^worker.*"}[5m])) / (sum(in
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101710` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101810` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -17239,7 +17369,7 @@ sum by (op,scope)(increase(src_gitserver_client_total{job=~"^worker.*"}[5m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101711` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101811` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -17261,7 +17391,7 @@ histogram_quantile(0.99, sum  by (le,op,scope)(rate(src_gitserver_client_duratio
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101712` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101812` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -17283,7 +17413,7 @@ sum by (op,scope)(increase(src_gitserver_client_errors_total{job=~"^worker.*"}[5
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101713` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101813` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -17307,7 +17437,7 @@ sum by (op,scope)(increase(src_gitserver_client_errors_total{job=~"^worker.*"}[5
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101800` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101900` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -17329,7 +17459,7 @@ sum(increase(src_gitserver_repositoryservice_client_total{job=~"^worker.*"}[5m])
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101801` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101901` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -17351,7 +17481,7 @@ sum  by (le)(rate(src_gitserver_repositoryservice_client_duration_seconds_bucket
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101802` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101902` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -17373,7 +17503,7 @@ sum(increase(src_gitserver_repositoryservice_client_errors_total{job=~"^worker.*
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101803` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101903` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -17395,7 +17525,7 @@ sum(increase(src_gitserver_repositoryservice_client_errors_total{job=~"^worker.*
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101810` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101910` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -17417,7 +17547,7 @@ sum by (op,scope)(increase(src_gitserver_repositoryservice_client_total{job=~"^w
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101811` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101911` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -17439,7 +17569,7 @@ histogram_quantile(0.99, sum  by (le,op,scope)(rate(src_gitserver_repositoryserv
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101812` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101912` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -17461,7 +17591,7 @@ sum by (op,scope)(increase(src_gitserver_repositoryservice_client_errors_total{j
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101813` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101913` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -17485,7 +17615,7 @@ sum by (op,scope)(increase(src_gitserver_repositoryservice_client_errors_total{j
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101900` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102000` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -17507,7 +17637,7 @@ sum(increase(src_batches_dbstore_total{job=~"^worker.*"}[5m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101901` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102001` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -17529,7 +17659,7 @@ sum  by (le)(rate(src_batches_dbstore_duration_seconds_bucket{job=~"^worker.*"}[
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101902` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102002` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -17551,7 +17681,7 @@ sum(increase(src_batches_dbstore_errors_total{job=~"^worker.*"}[5m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101903` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102003` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -17573,7 +17703,7 @@ sum(increase(src_batches_dbstore_errors_total{job=~"^worker.*"}[5m])) / (sum(inc
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101910` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102010` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -17595,7 +17725,7 @@ sum by (op)(increase(src_batches_dbstore_total{job=~"^worker.*"}[5m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101911` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102011` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -17617,7 +17747,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_batches_dbstore_duration_secon
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101912` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102012` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -17639,7 +17769,7 @@ sum by (op)(increase(src_batches_dbstore_errors_total{job=~"^worker.*"}[5m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101913` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102013` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -17663,7 +17793,7 @@ sum by (op)(increase(src_batches_dbstore_errors_total{job=~"^worker.*"}[5m])) / 
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102000` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102100` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -17685,7 +17815,7 @@ sum(increase(src_batches_service_total{job=~"^worker.*"}[5m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102001` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102101` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -17707,7 +17837,7 @@ sum  by (le)(rate(src_batches_service_duration_seconds_bucket{job=~"^worker.*"}[
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102002` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102102` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -17729,7 +17859,7 @@ sum(increase(src_batches_service_errors_total{job=~"^worker.*"}[5m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102003` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102103` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -17751,7 +17881,7 @@ sum(increase(src_batches_service_errors_total{job=~"^worker.*"}[5m])) / (sum(inc
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102010` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102110` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -17773,7 +17903,7 @@ sum by (op)(increase(src_batches_service_total{job=~"^worker.*"}[5m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102011` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102111` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -17795,7 +17925,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_batches_service_duration_secon
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102012` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102112` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -17817,7 +17947,7 @@ sum by (op)(increase(src_batches_service_errors_total{job=~"^worker.*"}[5m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102013` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102113` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -17841,7 +17971,7 @@ sum by (op)(increase(src_batches_service_errors_total{job=~"^worker.*"}[5m])) / 
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102100` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102200` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -17863,7 +17993,7 @@ sum(src_query_runner_worker_processor_handlers{job=~"^worker.*"})
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102110` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102210` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -17885,7 +18015,7 @@ sum(increase(src_query_runner_worker_processor_total{job=~"^worker.*"}[5m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102111` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102211` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -17907,7 +18037,7 @@ sum  by (le)(rate(src_query_runner_worker_processor_duration_seconds_bucket{job=
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102112` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102212` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -17929,7 +18059,7 @@ sum(increase(src_query_runner_worker_processor_errors_total{job=~"^worker.*"}[5m
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102113` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102213` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -17953,7 +18083,7 @@ sum(increase(src_query_runner_worker_processor_errors_total{job=~"^worker.*"}[5m
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102200` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102300` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -17975,7 +18105,7 @@ sum(increase(src_workerutil_dbworker_store_total{domain='insights_query_runner_j
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102201` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102301` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -17997,7 +18127,7 @@ sum  by (le)(rate(src_workerutil_dbworker_store_duration_seconds_bucket{domain='
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102202` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102302` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -18019,7 +18149,7 @@ sum(increase(src_workerutil_dbworker_store_errors_total{domain='insights_query_r
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102203` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102303` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -18041,7 +18171,7 @@ sum(increase(src_workerutil_dbworker_store_errors_total{domain='insights_query_r
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102210` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102310` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -18063,7 +18193,7 @@ sum by (op)(increase(src_workerutil_dbworker_store_total{domain='insights_query_
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102211` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102311` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -18085,7 +18215,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_workerutil_dbworker_store_dura
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102212` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102312` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -18107,7 +18237,7 @@ sum by (op)(increase(src_workerutil_dbworker_store_errors_total{domain='insights
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102213` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102313` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -18134,7 +18264,7 @@ A value of 0 indicates the routine isn`t running currently, it awaits it`s next 
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102300` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102400` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -18159,7 +18289,7 @@ A low or zero value could indicate that a routine is stalled or encountering err
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102301` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102401` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -18184,7 +18314,7 @@ A sustained high error rate may indicate a problem with the routine`s configurat
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-goroutine_error_rate) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102310` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102410` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -18209,7 +18339,7 @@ A value above 5% indicates that a significant portion of routine executions are 
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-goroutine_error_percentage) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102311` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102411` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -18234,7 +18364,7 @@ Longer durations might indicate increased load or processing time.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102320` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102420` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -18259,7 +18389,7 @@ This represents how long a complete loop iteration takes before sleeping for the
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102321` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102421` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -18284,7 +18414,7 @@ Higher values indicate that tenant processing is taking longer and may affect ov
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102330` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102430` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -18309,7 +18439,7 @@ Consistently high values might indicate problematic tenants or inefficient proce
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102331` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102431` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -18334,7 +18464,7 @@ Unexpected changes can indicate tenant configuration issues or scaling events.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102340` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102440` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -18359,7 +18489,7 @@ A healthy routine should maintain a consistent processing rate.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102341` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102441` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -18384,7 +18514,7 @@ Consistent errors indicate problems with specific tenants.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102350` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102450` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -18409,7 +18539,7 @@ Values above 5% indicate significant tenant processing problems.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102351` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102451` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -18433,7 +18563,7 @@ Query:
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102400` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102500` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -18455,7 +18585,7 @@ sum by (app_name, db_name) (src_pgsql_conns_max_open{app_name="worker"})
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102401` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102501` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -18477,7 +18607,7 @@ sum by (app_name, db_name) (src_pgsql_conns_open{app_name="worker"})
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102410` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102510` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -18499,7 +18629,7 @@ sum by (app_name, db_name) (src_pgsql_conns_in_use{app_name="worker"})
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102411` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102511` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -18521,7 +18651,7 @@ sum by (app_name, db_name) (src_pgsql_conns_idle{app_name="worker"})
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-mean_blocked_seconds_per_conn_request) for 2 alerts related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102420` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102520` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -18543,7 +18673,7 @@ sum by (app_name, db_name) (increase(src_pgsql_conns_blocked_seconds{app_name="w
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102430` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102530` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -18565,7 +18695,7 @@ sum by (app_name, db_name) (increase(src_pgsql_conns_closed_max_idle{app_name="w
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102431` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102531` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -18587,7 +18717,7 @@ sum by (app_name, db_name) (increase(src_pgsql_conns_closed_max_lifetime{app_nam
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102432` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102532` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -18611,7 +18741,7 @@ sum by (app_name, db_name) (increase(src_pgsql_conns_closed_max_idle_time{app_na
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-cpu_usage_percentage) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102500` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102600` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -18635,7 +18765,7 @@ An estimate for the active memory in use, which includes anonymous memory, file 
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102501` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102601` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -18659,7 +18789,7 @@ An estimate for the active memory in use in bytes, which includes anonymous memo
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102502` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102602` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -18683,7 +18813,7 @@ The total anonymous memory in use by the application, which includes Go stack an
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-memory_rss) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102510` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102610` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -18707,7 +18837,7 @@ This metric shows the total active file-backed memory currently in use by the ap
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102511` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102611` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -18731,7 +18861,7 @@ The kernel usage metric shows the amount of memory used by the kernel on behalf 
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102512` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102612` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -18765,7 +18895,7 @@ value change independent of deployment events (such as an upgrade), it could ind
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102600` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102700` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -18787,7 +18917,7 @@ count by(name) ((time() - container_last_seen{name=~"^worker.*"}) > 60)
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-container_cpu_usage) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102601` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102701` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -18809,7 +18939,7 @@ cadvisor_container_cpu_usage_percentage_total{name=~"^worker.*"}
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-container_memory_usage) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102602` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102702` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -18834,7 +18964,7 @@ When extremely high, this can indicate a resource usage problem, or can cause pr
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102603` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102703` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -18858,7 +18988,7 @@ sum by(name) (rate(container_fs_reads_total{name=~"^worker.*"}[1h]) + rate(conta
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-provisioning_container_cpu_usage_long_term) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102700` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102800` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -18880,7 +19010,7 @@ quantile_over_time(0.9, cadvisor_container_cpu_usage_percentage_total{name=~"^wo
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-provisioning_container_memory_usage_long_term) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102701` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102801` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -18904,7 +19034,7 @@ Short CPU spikes are expected while the worker picks up a burst of jobs. Saturat
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102710` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102810` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -18928,7 +19058,7 @@ Short memory spikes are expected while the worker processes large jobs. Saturati
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102711` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102811` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -18953,7 +19083,7 @@ When it occurs frequently, it is an indicator of underprovisioning.
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-container_oomkill_events_total) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102712` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102812` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -18979,7 +19109,7 @@ A high value here indicates a possible goroutine leak.
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-go_goroutines) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102800` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102900` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -19003,7 +19133,7 @@ Long GC pauses usually mean the worker is under memory pressure. Read this with 
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102801` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102901` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -19027,7 +19157,7 @@ max by(instance) (go_gc_duration_seconds{job=~".*worker"})
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-pods_available_percentage) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=102900` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103000` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -19051,7 +19181,7 @@ sum by(app) (up{app=~".*worker"}) / count by (app) (up{app=~".*worker"}) * 100
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103000` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103100` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -19073,7 +19203,7 @@ sum(increase(src_workerutil_dbworker_store_total{domain='own_background_worker_s
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103001` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103101` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -19095,7 +19225,7 @@ sum  by (le)(rate(src_workerutil_dbworker_store_duration_seconds_bucket{domain='
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103002` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103102` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -19117,7 +19247,7 @@ sum(increase(src_workerutil_dbworker_store_errors_total{domain='own_background_w
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103003` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103103` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -19139,7 +19269,7 @@ sum(increase(src_workerutil_dbworker_store_errors_total{domain='own_background_w
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103010` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103110` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -19161,7 +19291,7 @@ sum by (op)(increase(src_workerutil_dbworker_store_total{domain='own_background_
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103011` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103111` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -19183,7 +19313,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_workerutil_dbworker_store_dura
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103012` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103112` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -19205,7 +19335,7 @@ sum by (op)(increase(src_workerutil_dbworker_store_errors_total{domain='own_back
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103013` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103113` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -19229,7 +19359,7 @@ sum by (op)(increase(src_workerutil_dbworker_store_errors_total{domain='own_back
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103100` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103200` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -19251,7 +19381,7 @@ sum(src_own_background_worker_processor_handlers{job=~"^worker.*"})
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103110` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103210` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -19273,7 +19403,7 @@ sum(increase(src_own_background_worker_processor_total{job=~"^worker.*"}[5m]))
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103111` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103211` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -19295,7 +19425,7 @@ sum  by (le)(rate(src_own_background_worker_processor_duration_seconds_bucket{jo
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103112` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103212` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -19317,7 +19447,7 @@ sum(increase(src_own_background_worker_processor_errors_total{job=~"^worker.*"}[
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103113` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103213` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Plane team.*</sub>
 
@@ -19341,7 +19471,7 @@ sum(increase(src_own_background_worker_processor_errors_total{job=~"^worker.*"}[
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103200` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103300` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -19363,7 +19493,7 @@ sum by (op)(increase(src_own_background_index_scheduler_total{job=~"^worker.*"}[
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103201` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103301` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -19385,7 +19515,7 @@ histogram_quantile(0.99, sum  by (le,op)(rate(src_own_background_index_scheduler
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103202` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103302` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -19407,7 +19537,7 @@ sum by (op)(increase(src_own_background_index_scheduler_errors_total{job=~"^work
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103203` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103303` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
 
@@ -19433,7 +19563,7 @@ The duration since the configuration client used by the "worker" service last su
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103300` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103400` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 
@@ -19455,7 +19585,7 @@ src_conf_client_time_since_last_successful_update_seconds{job=~`^worker.*`,insta
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-worker_site_configuration_duration_since_last_successful_update_by_instance) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103301` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103401` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Platform team.*</sub>
 

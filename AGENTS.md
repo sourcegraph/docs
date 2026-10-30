@@ -52,13 +52,16 @@
 - **Spell check**: `.github/workflows/spellcheck.yml` runs
   `dev/check-spelling.mjs` on the lines a PR adds plus its title and
   description, and comments the findings (advisory, never fails the PR).
-  Add product names and identifiers to `cspell-allow-list.txt`, in
-  alphabetical order; the check reports out-of-order entries. CSpell is not a
-  project dependency: `npx cspell@10 --no-progress <file>` to run it locally
-- **Example hostnames**: placeholder hostnames in docs are `*.example.com`
-  (`sourcegraph.example.com` for the reader's instance,
-  `github.example.com` for a code host,
-  `https://sourcegraph.example.com` where a whole URL is meant);
+  Add product names and identifiers to `cspell-allow-list.txt` with
+  `node dev/allow-spelling-words.mjs <words>`, which keeps it in alphabetical
+  order (the check reports out-of-order entries), or comment `/spell <words>`
+  on the PR: `.github/workflows/spellcheck-allow.yml` commits them to the
+  branch and runs the check again. CSpell is not a project dependency:
+  `npx cspell@10 --no-progress <file>` to run it locally
+- **Example hostnames**: placeholder hostnames in docs are `*.example.com` 
+  (`sourcegraph.example.com` for the reader's instance, 
+  `github.example.com` for a code host, 
+  `https://sourcegraph.example.com` where a whole URL is meant); 
   never `<URL>`, `[hostname]`, or a `$VARIABLE` the reader has to guess.
   Example URLs use `https://`, except where needed, eg. loopback,
   in-cluster, proxy, and XML-namespace addresses.
@@ -154,6 +157,9 @@ next run.
   Slack app's "failed to deploy" post in the `SLACK_CHANNEL_ID` channel
   and comments a link to it on the PR (see `dev/vercel-build-log.mjs`).
   The log itself never goes on the PR, since the repository is public.
+  A build that passed also lists the pages the PR changed in the Slack
+  reply, from the `preview-links.yml` comment: on the preview for an open
+  PR, in production for a merged one.
 - It reads Vercel with the `VERCEL_TOKEN` repo secret, a token scoped to the
   `sourcegraph-docs` project that expires 2026-12-10; mint a new one with
   `POST /v3/user/tokens?teamId=<team>` and `projectId` in the body.

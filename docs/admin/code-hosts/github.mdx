@@ -25,10 +25,11 @@ There are 2 ways to connect with GitHub:
 
 {/* <!-- NOTE: The instructions in the following sections closely mirror those in doc/admin/config/batch-changes under "Commit signing for GitHub". When making changes here, be sure to consider if those changes should also be made over there! --> */}
 
-There are two ways to connect a GitHub App:
+There are three ways to connect a GitHub App:
 
 1. **[Create a new GitHub App](#creating-a-new-github-app)** via Sourcegraph, which will set up all of the required permissions and automatically retrieve the credentials
-2. **[Add an existing GitHub App](#adding-an-existing-github-app)** by providing the details of an existing GitHub App (required when using GitHub Enterprise Apps)
+2. **[Use a GitHub Enterprise App](#using-a-github-enterprise-app)** to install one private App across the organizations in your GitHub Enterprise Cloud enterprise
+3. **[Add an existing GitHub App](#adding-an-existing-github-app)** by providing the details of a GitHub App created outside Sourcegraph
 
 ### Creating a new GitHub App
 
@@ -45,15 +46,7 @@ To create a GitHub App and connect it to Sourcegraph:
 
     You may also optionally set the App visibility to public. A GitHub App must be made public if you wish to install it on multiple organizations or user accounts. The default is private.
 
-    The GitHub App will require the following permissions:
-
-    ```
-    Contents (Repository contents, commits, branches, downloads, releases, and merges): read
-    Emails (Manage a user's email addresses): read
-    Members (Organization members and teams): read
-    Metadata (Search repositories, list collaborators, and access repository metadata): read
-    Administration (Repository creation, deletion, settings, teams, and collaborators): read (only required for groups caching)
-    ```
+    The GitHub App requests the permissions listed in [GitHub App settings](#github-app-settings).
 
 ![The GitHub App creation page on Sourcegraph, with the default values filled out](https://sourcegraphstatic.com/docs/images/administration/config/github-apps/github-apps-create-dark.png)
 
@@ -92,7 +85,7 @@ When creating a code host connection for a GitHub App with multiple installation
 
 The initial GitHub App setup will only install the App on the organization or user account that you registered it with. If your code is spread across multiple organizations or user accounts, you will need to create additional installations for each namespace that you want Sourcegraph to sync repositories from.
 
-By default, Sourcegraph creates a private GitHub App, which only allows the App to be installed on the same organization or user account that it was created in. If you did not set the App to public visibility during creation, you will need to [change the visibility](https://docs.github.com/en/apps/maintaining-github-apps/modifying-a-github-app#changing-the-visibility-of-a-github-app) to public before you can install it in other namespaces. For security considerations, see [GitHub's documentation on private vs public apps](https://docs.github.com/en/apps/creating-github-apps/setting-up-a-github-app/making-a-github-app-public-or-private).
+By default, Sourcegraph creates a private GitHub App, which only allows the App to be installed on the same organization or user account that it was created in. If you did not set the App to public visibility during creation, you will need to [change the visibility](https://docs.github.com/en/apps/maintaining-github-apps/modifying-a-github-app#changing-the-visibility-of-a-github-app) to public before you can install it in other namespaces. For security considerations, see [GitHub's documentation on private vs public apps](https://docs.github.com/en/apps/creating-github-apps/setting-up-a-github-app/making-a-github-app-public-or-private). On GitHub Enterprise Cloud, a [GitHub Enterprise App](#using-a-github-enterprise-app) can be installed across the organizations in your enterprise while staying private.
 
 Once public, App can be installed in additional namespaces either from Sourcegraph or from GitHub.
 
@@ -125,42 +118,83 @@ Once public, App can be installed in additional namespaces either from Sourcegra
 
 5. To sync repositories from this installation, click **Add connection** under your new installation.
 
+### Using a GitHub Enterprise App
+
+On GitHub Enterprise Cloud, you can register a GitHub App under your enterprise account. An App owned by an enterprise stays private and can be installed on any organization in the enterprise, but not on user accounts. One App can then sync repositories from all of your organizations, without making the App public or creating a separate App for each organization.
+
+The **Create GitHub App** flow in Sourcegraph can't register an App owned by an enterprise, so you create the App on GitHub and then add it to Sourcegraph:
+
+1. In your enterprise account settings on GitHub, register a new GitHub App (see [GitHub's documentation](https://docs.github.com/en/enterprise-cloud@latest/admin/managing-your-enterprise-account/creating-github-apps-for-your-enterprise)). Fill in the form with the values in [GitHub App settings](#github-app-settings).
+2. Follow [Adding an existing GitHub App](#adding-an-existing-github-app) to add the App to Sourcegraph, install it on each organization you want to sync repositories from, and set up sign-in and a webhook.
+
+> NOTE: When an enterprise owner changes the App's permissions, organizations in the enterprise accept the change automatically. When an App manager who isn't an enterprise owner makes the change, an owner of each organization must accept it.
+
 ### Adding an existing GitHub App
 
-If you have an existing GitHub App (such as a GitHub Enterprise App), you can connect it to Sourcegraph by providing its details manually. This is particularly useful for:
+Use these steps to connect a GitHub App that was created outside Sourcegraph, such as a [GitHub Enterprise App](#using-a-github-enterprise-app). First check that the App's settings match [GitHub App settings](#github-app-settings).
 
--   **GitHub Enterprise Apps**: Apps that can be installed across multiple organizations within an enterprise account while maintaining private visibility
--   **Existing GitHub Apps**: Apps that were created outside of Sourcegraph that you want to use for repository syncing
-
-To add an existing GitHub App:
-
-1. Go to **Administration > Repositories > Github Apps** on Sourcegraph.
-2. Click **Add an existing GitHub App**.
-3. Enter the following details of your existing GitHub App:
+1. On the App's settings page on GitHub, copy the **Client ID**.
+2. Under **Private keys**, click **Generate a private key**. GitHub downloads the key as a `.pem` file.
+3. To use the App for sign-in and repository permissions, under **Client secrets**, click **Generate a new client secret** and copy it. GitHub shows the secret only once.
+4. Go to **Administration > Repositories > Github Apps** on Sourcegraph.
+5. Click **Add an existing GitHub App**.
+6. Enter the following details of your existing GitHub App:
     - **GitHub URL**: The URL of your GitHub instance (e.g., `https://github.com` or `https://github.example.com`)
     - **Client ID**: The unique identifier for your GitHub App
-    - **Private Key**: The private key generated for your GitHub App (in PEM format)
-4. Click **Add GitHub App** to save the configuration.
-5. Once added, you can manage installations and create code host connections just like with apps created through Sourcegraph.
+    - **Private Key**: The contents of the private key file generated for your GitHub App (in PEM format)
+7. Click **Add GitHub App** to save the configuration. You'll be taken to the App details page.
+8. Install the App on each organization you want to sync repositories from. Sourcegraph syncs the App's existing installations in the background, and they appear on the App details page. To add an installation, click **Add installation**, pick the organization on GitHub, select the repositories the App can access, and click **Install**. Only [organization owners](https://docs.github.com/en/organizations/managing-peoples-access-to-your-organization-with-roles/roles-in-an-organization#organization-owners) can install GitHub Apps on an organization.
+9. To enforce [repository permissions](#repository-permissions), add the App as a GitHub auth provider in the `"auth.providers"` section of your advanced configuration. Sourcegraph doesn't store a client secret for an existing App, so use the one you generated in step 3. See [GitHub authentication](/admin/auth#github) for all available options:
 
-> NOTE: You'll still need to create a client secret on GitHub and [set up an auth provider](/admin/auth#github) if you would like to enable repository permissions.
+    ```json
+    {
+    	"auth.providers": [
+    		{
+    			"displayName": "GitHub App my-github-app",
+    			"type": "github",
+    			"clientID": "replace-with-the-github-app-client-id",
+    			"clientSecret": "replace-with-the-github-app-client-secret",
+    			"url": "https://github.com/"
+    		}
+    	]
+    }
+    ```
 
-When creating code host connections for your existing GitHub App, you can choose to sync repositories from a specific installation or from all installations by omitting the `installationID` field (see [Syncing repositories from all installations](#syncing-repositories-from-all-installations)).
+10. Click **Add connection** under an installation to sync repositories from that installation, or create a connection without an `installationID` to sync repositories from all installations (see [Syncing repositories from all installations](#syncing-repositories-from-all-installations)).
 
-> NOTE: For GitHub Enterprise Apps, this method allows you to use a single app across multiple organizations within your enterprise, avoiding the need to create separate public apps or multiple private apps for each organization.
+#### Setting up a webhook for an existing GitHub App
 
-> NOTE: Make sure your existing GitHub App has the required permissions listed in the [Creating a new GitHub App](#creating-a-new-github-app) section.
+Sourcegraph doesn't set up a webhook for an existing App. Without one, Sourcegraph still syncs repositories and installations on a schedule, but a webhook lets it pick up pushes and permission changes sooner. A GitHub App has only one webhook URL, so if the App already sends webhooks to another service, leave its webhook as it is. Otherwise, set one up after you've added a code host connection:
+
+1. [Add an incoming webhook](/admin/webhooks/incoming#adding-an-incoming-webhook) on Sourcegraph with **Code host type** set to GitHub and **Code host URN** set to the URL of your GitHub instance. Copy the **Webhook endpoint** and **Secret** from the incoming webhook page.
+2. On the App's settings page on GitHub, under **Webhook**, select **Active**. Paste the webhook endpoint you copied from Sourcegraph into **Webhook URL**, and the secret into **Secret**.
+3. Under **Subscribe to events**, select the events listed in [Configuring webhooks on GitHub](/admin/webhooks/incoming#github) for the features you use.
+4. Click **Save changes**.
+
+### GitHub App settings
+
+These are the settings Sourcegraph uses when it creates a GitHub App for you. When you register a GitHub App on GitHub yourself, fill in the registration form with these values. When you add an existing GitHub App, check that its settings match. Replace `https://sourcegraph.example.com` with your Sourcegraph `externalURL`.
+
+| Setting | Value |
+| --- | --- |
+| **GitHub App name** | Any name that's unique on your GitHub instance |
+| **Homepage URL** | `https://sourcegraph.example.com` |
+| **Redirect URI** | `https://sourcegraph.example.com/.auth/github/callback`. A GitHub App can have up to 10 redirect URIs, so add this one alongside any the App already uses. |
+| **Setup URL** | `https://sourcegraph.example.com/githubapp/setup`. When you install the App with **Add installation** in Sourcegraph, GitHub returns to this URL and Sourcegraph registers the installation immediately. Optional: if the App already uses its Setup URL for another service, leave it, and new installations appear in Sourcegraph after the next background sync. |
+| **Redirect on update** | Selected, if you set the Setup URL |
+| **Webhook** | When you register a new App, clear **Active**, then [set up the webhook](#setting-up-a-webhook-for-an-existing-github-app) after you add the App to Sourcegraph. |
+| **Repository permissions** | Administration: Read-only (only required for [groups caching](#teams-and-organizations-permissions-caching))<br/>Contents: Read-only<br/>Metadata: Read-only |
+| **Organization permissions** | Members: Read-only |
+| **Account permissions** | Email addresses: Read-only |
+| **Where can this GitHub App be installed?** | For a [GitHub Enterprise App](#using-a-github-enterprise-app), the option that allows only organizations owned by your enterprise. |
+
+The permissions are the minimum Sourcegraph needs. An existing App can have additional permissions.
 
 ### Configuring Multiple Private GitHub Apps for Sourcegraph
 
 If you prefer not to make your GitHub App public and instead create separate private GitHub Apps for each organizations, users will need to authorize each GitHub App individually to ensure proper repository access and permissions syncing. This is because GitHub Apps have narrowly scoped permissions and do not share authentication across multiple installations. To streamline this process, users can go to `User Settings` > `Account Security` in Sourcegraph and connect all necessary GitHub Apps from there. Once authorized, Sourcegraph will use the user's GitHub identity to determine access across all configured GitHub Apps.
 
-**GitHub Enterprise Apps**: For customers using GitHub Enterprise Cloud, we recommend creating a GitHub Enterprise App, which can be installed across multiple organizations within an enterprise account while maintaining private visibility. This eliminates the need to create separate apps for each organization or make your app public.
-
-To use a GitHub Enterprise App with Sourcegraph:
-
-1. Create the Enterprise App in your GitHub Enterprise settings (see [GitHub's documentation](https://docs.github.com/en/enterprise-cloud@latest/admin/managing-your-enterprise-account/creating-github-apps-for-your-enterprise))
-2. Use the [**Add an existing GitHub App**](#adding-an-existing-github-app) option in Sourcegraph to connect it
+On GitHub Enterprise Cloud, we recommend a [GitHub Enterprise App](#using-a-github-enterprise-app) instead: one private App that can be installed on every organization in your enterprise.
 
 If you get an error message similar to following error while adding a GitHub App connection :
 
