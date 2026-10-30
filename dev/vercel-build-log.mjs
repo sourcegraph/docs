@@ -24,7 +24,9 @@
  *    such as on an invalid vercel.json, has an error but no log lines), and
  *    redacted.
  * 3. The log is uploaded into the thread of the Vercel Slack app's post for
- *    the deployment in SLACK_CHANNEL_ID, with a comment linking the PR. The
+ *    the deployment in SLACK_CHANNEL_ID, with a comment linking the PR and,
+ *    for a preview deployment that built, the direct links to the docs pages
+ *    the PR changed, copied from the preview-links workflow's PR comment. The
  *    post is looked for a week back (so a re-run by hand still finds it) and
  *    for up to 5 minutes (the app can post after this runs). Skipped when
  *    SLACK_BOT_TOKEN or SLACK_CHANNEL_ID is unset; a Slack error is a
@@ -48,6 +50,10 @@ const DRY_RUN = process.argv.includes('--dry-run');
 const SLACK_HISTORY_DAYS = 7;
 const SLACK_WAIT_MINUTES = 5;
 const SLACK_POLL_SECONDS = 15;
+// The preview-links workflow comments on the PR when the same deployment
+// event arrives, so it can still be running when this looks for its comment
+const PREVIEW_LINKS_WAIT_MINUTES = 1;
+const PREVIEW_LINKS_POLL_SECONDS = 10;
 
 const API_URL = process.env.GITHUB_API_URL ?? 'https://api.github.com';
 const REPOSITORY = process.env.GITHUB_REPOSITORY;
@@ -57,6 +63,12 @@ const {DEPLOYMENT_ID, DEPLOYMENT_STATE, COMMIT_SHA, SLACK_CHANNEL_ID} =
 // Comments from before the log moved to Slack carry an artifact ID here
 const MARKER = '<!-- vercel-build-log -->';
 const MARKER_PATTERN = /^<!-- vercel-build-log(?: artifact=\d+)? -->/;
+// The comment .github/workflows/preview-links.yml leaves on a PR
+const PREVIEW_LINKS_MARKER = '<!-- preview-links-for-changed-pages -->';
+
+function sleep(seconds) {
+	return new Promise(resolve => setTimeout(resolve, seconds * 1000));
+}
 
 // ---------------------------------------------------------------- GitHub
 
@@ -313,9 +325,7 @@ async function findVercelPost() {
 		console.log(
 			`No Vercel post for ${DEPLOYMENT_ID} yet; checking again in ${SLACK_POLL_SECONDS}s`
 		);
-		await new Promise(resolve =>
-			setTimeout(resolve, SLACK_POLL_SECONDS * 1000)
-		);
+		await sleep(SLACK_POLL_SECONDS);
 	}
 }
 
@@ -339,18 +349,73 @@ function pullRequestLinks(pulls) {
 		.join(', ');
 }
 
+// The preview-links workflow's PR comment, which links each docs page the PR
+// changed on the preview, as Slack text: its `- [/path](url)` lines become
+// `• <url|/path>`, and the marker goes. Vercel's own post only links the
+// preview's root. That workflow is started by the same deployment event as
+// this one, so give it a minute to comment before going without.
+async function previewLinkLines(pull) {
+	const deadline = Date.now() + PREVIEW_LINKS_WAIT_MINUTES * 60_000;
+	for (;;) {
+		const comments = await githubList(
+			`/repos/${REPOSITORY}/issues/${pull.number}/comments`
+		);
+		const comment = comments.find(comment =>
+			comment.body.includes(PREVIEW_LINKS_MARKER)
+		);
+		if (comment) {
+			return comment.body
+				.split('\n')
+				.filter(line => line !== PREVIEW_LINKS_MARKER)
+				.map(line =>
+					line
+						.replace(/^- /, '• ')
+						.replace(
+							/\[([^\]]+)\]\((https:\/\/[^)\s]+)\)/,
+							(link, label, url) =>
+								`<${url}|${escapeSlackText(label)}>`
+						)
+				);
+		}
+		if (Date.now() >= deadline) {
+			console.log(
+				`PR #${pull.number} has no preview links comment; not listing its pages`
+			);
+			return [];
+		}
+		console.log(
+			`PR #${pull.number} has no preview links comment yet; checking again in ${PREVIEW_LINKS_POLL_SECONDS}s`
+		);
+		await sleep(PREVIEW_LINKS_POLL_SECONDS);
+	}
+}
+
+// Preview links for the open PRs of a deployment that built: a failed build
+// has no preview, and a merged PR's preview is behind production
+async function previewLinks(pulls) {
+	if (DEPLOYMENT_STATE !== 'success') {
+		return [];
+	}
+	const lines = [];
+	for (const pull of pulls.filter(pull => pull.state === 'open')) {
+		lines.push(...(await previewLinkLines(pull)));
+	}
+	return lines;
+}
+
 // Slack takes files in three steps: ask for an upload URL, POST the bytes to
 // it, then say which channel and thread to share the file in. The PR link
-// rides on the file's comment, which is the one message the bot can post
-// without chat:write. Returns the permalink of the reply carrying the file,
-// for the PR comment.
-async function uploadLogToThread(post, pulls, {log, error}) {
+// and preview links ride on the file's comment, which is the one message the
+// bot can post without chat:write. Returns the permalink of the reply
+// carrying the file, for the PR comment.
+async function uploadLogToThread(post, pulls, {log, error}, previewLines) {
 	const shortSha = COMMIT_SHA.slice(0, 7);
 	// .txt, so Slack shows it inline instead of offering a download
 	const filename = `vercel-build-${shortSha}.txt`;
 	const initialComment = [
 		error && `> ${error}`,
-		`Build log for PR ${pullRequestLinks(pulls)}`
+		`Build log for PR ${pullRequestLinks(pulls)}`,
+		...previewLines
 	]
 		.filter(Boolean)
 		.join('\n');
@@ -420,7 +485,18 @@ async function attachLogInSlack(pulls, buildLog) {
 		);
 	}
 	const post = await findVercelPost();
-	const permalink = post && (await uploadLogToThread(post, pulls, buildLog));
+	if (!post) {
+		return {channel};
+	}
+	// After the post is found, so the preview-links workflow has had that
+	// long to comment too
+	const previewLines = await previewLinks(pulls);
+	const permalink = await uploadLogToThread(
+		post,
+		pulls,
+		buildLog,
+		previewLines
+	);
 	return {channel, permalink};
 }
 
