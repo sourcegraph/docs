@@ -135,8 +135,9 @@ next run.
   Slack app's "failed to deploy" post in the `SLACK_CHANNEL_ID` channel
   and comments a link to it on the PR (see `dev/vercel-build-log.mjs`).
   The log itself never goes on the PR, since the repository is public.
-  A preview that built also gets the `preview-links.yml` comment's page
-  links in the Slack reply.
+  A build that passed also lists the pages the PR changed in the Slack
+  reply, from the `preview-links.yml` comment: on the preview for an open
+  PR, in production for a merged one.
 - It reads Vercel with the `VERCEL_TOKEN` repo secret, a token scoped to the
   `sourcegraph-docs` project that expires 2026-12-10; mint a new one with
   `POST /v3/user/tokens?teamId=<team>` and `projectId` in the body.
