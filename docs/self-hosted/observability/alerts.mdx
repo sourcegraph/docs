@@ -3237,6 +3237,7 @@ Generated query for critical alert: `(min((sum(src_worker_jobs{job=~"^worker.*",
 - Check whether the codeintel commit graph updater worker is running and healthy.
 - Check worker logs for commit graph update failures.
 - Inspect codeintel commit graph freshness and upload processing panels for related backlog or errors.
+- Check the commit graph fast path reporter error panel: while the reporter fails, these values are the last ones it computed successfully.
 - More help interpreting this metric is available in the [dashboards reference](/self-hosted/observability/dashboards#worker-codeintel_commit_graph_fast_path_oldest_missing_upload_age_seconds).
 - **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
 
@@ -3252,9 +3253,42 @@ Generated query for critical alert: `(min((sum(src_worker_jobs{job=~"^worker.*",
 <details>
 <summary>Technical details</summary>
 
-Generated query for warning alert: `max((max(src_codeintel_commit_graph_fast_path_oldest_missing_upload_age_seconds{job=~"^worker.*"\} and on (instance, job) (increase(src_codeintel_commit_graph_fast_path_reporter_total\{job=~"^worker.*"}[15m]) &gt; 0)) or on () vector(0)) &gt; 21600)`
+Generated query for warning alert: `max((max(src_codeintel_commit_graph_fast_path_oldest_missing_upload_age_seconds{job=~"^worker.*"\} and on (instance, job) ((increase(src_codeintel_commit_graph_fast_path_reporter_total\{job=~"^worker.*"\}[15m]) &gt; 0) or on (instance, job) (increase(src_codeintel_commit_graph_fast_path_reporter_errors_total\{job=~"^worker.*"}[15m]) &gt; 0))) or on () vector(0)) &gt; 21600)`
 
-Generated query for critical alert: `max((max(src_codeintel_commit_graph_fast_path_oldest_missing_upload_age_seconds{job=~"^worker.*"\} and on (instance, job) (increase(src_codeintel_commit_graph_fast_path_reporter_total\{job=~"^worker.*"}[15m]) &gt; 0)) or on () vector(0)) &gt; 259200)`
+Generated query for critical alert: `max((max(src_codeintel_commit_graph_fast_path_oldest_missing_upload_age_seconds{job=~"^worker.*"\} and on (instance, job) ((increase(src_codeintel_commit_graph_fast_path_reporter_total\{job=~"^worker.*"\}[15m]) &gt; 0) or on (instance, job) (increase(src_codeintel_commit_graph_fast_path_reporter_errors_total\{job=~"^worker.*"}[15m]) &gt; 0))) or on () vector(0)) &gt; 259200)`
+
+</details>
+
+<br />
+
+## worker: codeintel_commit_graph_fast_path_reporter_errors_total
+
+<p class="subtitle">commit graph fast path reporter operation errors every 30m</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> worker: 0+ commit graph fast path reporter operation errors every 30m
+
+**Next steps**
+
+- Failures mean the commit graph fast path panels and alerts above are not being refreshed and show the last successfully computed values.
+- Check worker logs for errors from the CodeIntel.CommitGraphFastPathReporter operation. The missing uploads query runs with a 60s statement timeout, so on large instances the most likely failure is the query timing out against the scip_uploads, scip_nearest_uploads and scip_nearest_uploads_links tables.
+- Check codeintel-db health and the commit graph updater, which writes the tables the reporter reads.
+- Learn more about the related dashboard panel in the [dashboards reference](/self-hosted/observability/dashboards#worker-codeintel_commit_graph_fast_path_reporter_errors_total).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_worker_codeintel_commit_graph_fast_path_reporter_errors_total"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((sum(increase(src_codeintel_commit_graph_fast_path_reporter_errors_total{job=~"^worker.*"}[30m]))) &gt; 0)`
 
 </details>
 
@@ -7965,9 +7999,9 @@ Generated query for warning alert: `max((sum by (domain) (increase(src_dbworker_
 <details>
 <summary>Technical details</summary>
 
-Generated query for warning alert: `max((sum(rate(rpc_server_duration_milliseconds_count{rpc_connect_error_code!=""}[5m])) / (sum(rate(rpc_server_duration_milliseconds_count[5m])) &gt; 0) * 100) &gt; 10)`
+Generated query for warning alert: `max((sum(rate(rpc_server_call_duration_seconds_count{rpc_response_status_code!="OK"}[5m])) / (sum(rate(rpc_server_call_duration_seconds_count[5m])) &gt; 0) * 100) &gt; 10)`
 
-Generated query for critical alert: `max((sum(rate(rpc_server_duration_milliseconds_count{rpc_connect_error_code!=""}[5m])) / (sum(rate(rpc_server_duration_milliseconds_count[5m])) &gt; 0) * 100) &gt; 25)`
+Generated query for critical alert: `max((sum(rate(rpc_server_call_duration_seconds_count{rpc_response_status_code!="OK"}[5m])) / (sum(rate(rpc_server_call_duration_seconds_count[5m])) &gt; 0) * 100) &gt; 25)`
 
 </details>
 

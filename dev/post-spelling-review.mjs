@@ -168,9 +168,30 @@ function summaryBody(findings) {
 	lines.push(
 		`Please correct the spelling, or add words which are correct to ${ALLOW_LIST_LINK}.`,
 		'',
-		"Run `npx cspell@10 --no-progress --dot '**/*'` locally to check the full repository."
+		`Comment on this PR with \`/spell <list of words>\`, and a bot will push a commit to your branch adding your comment's list of words to ${ALLOW_LIST_LINK} for you.`
 	);
+	const words = unknownWords(findings);
+	if (words.length > 0) {
+		lines.push(
+			'',
+			`To accept all of the words above as correct: \`/spell ${words.join(' ')}\``
+		);
+	}
 	return lines.join('\n') + '\n';
+}
+
+// The words not in the dictionary, each once, as a `/spell` command takes them
+function unknownWords(findings) {
+	const words = [];
+	for (const {word, message} of findings) {
+		if (
+			!message &&
+			!words.some(seen => seen.toLowerCase() === word.toLowerCase())
+		) {
+			words.push(word);
+		}
+	}
+	return words;
 }
 
 function crashedBody() {
@@ -264,7 +285,9 @@ function inlineBody(finding) {
 				`\`${finding.word}\` is not in the dictionary.`,
 				'',
 				...suggestionBlock(finding),
-				`Please correct the spelling, or add the word to ${ALLOW_LIST_LINK} if it is correct.`
+				`Please correct the spelling, or add words which are correct to ${ALLOW_LIST_LINK}.`,
+				'',
+				`Comment on this PR with \`/spell ${finding.word}\`, and a bot will push a commit to your branch adding it to ${ALLOW_LIST_LINK} for you.`
 			];
 	return [`${INLINE_MARKER} ${finding.word} -->`, ...explanation].join('\n');
 }
