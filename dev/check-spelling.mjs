@@ -3,41 +3,48 @@
 /**
  * Reports CSpell findings on lines added by a Git diff, and dictionary entries
  * added out of alphabetical order. Optionally also checks a pull request's
- * title and description.
+ * title and description. The pull request workflow
+ * (.github/workflows/spellcheck.yml) runs this on the lines a PR adds and
+ * comments the findings; it never fails the PR.
  *
- * Usage: node dev/check-spelling.mjs --base <revision>
- *            [--pull-request <file>] [--format text|json]
+ * Usage: node dev/check-spelling.mjs --diff <file> [options]
+ *   --diff <file>          Unified diff, e.g. from `git diff -U0 origin/main`;
+ *                          only added lines are checked
+ *   --pull-request <file>  `<title>\n\n<description>` of the pull request, as
+ *                          written by the workflow. Its findings carry `field`
+ *                          ("title" or "description") instead of a repository
+ *                          path, so they are reported in the summary only
+ *   --format <name>        Output as text (default), json, or markdown
+ *   --link-base <url>      Markdown output links each finding to <url>/<path>,
+ *                          e.g. https://github.com/sourcegraph/docs/blob/<branch>
+ *   --review <file>        Write a GitHub pull request review (JSON body for
+ *                          POST /repos/{owner}/{repo}/pulls/{n}/reviews) with
+ *                          one comment per finding in a file, up to 25
  *
- * --pull-request names a file holding `<title>\n\n<description>`, as written
- * by .github/workflows/spellcheck.yml. Its findings carry `field` ("title" or
- * "description") instead of a repository path, so they are reported in the
- * summary comment only.
- *
- * The json format feeds dev/post-spelling-review.mjs.
  * Exits 1 when spelling issues are found and 2 for operational errors.
  */
 
-import {execFileSync, spawnSync} from 'child_process';
-import {readFileSync} from 'fs';
+import {spawnSync} from 'child_process';
+import {readFileSync, writeFileSync} from 'fs';
 import path from 'path';
 import {fileURLToPath} from 'url';
 
 const args = process.argv.slice(2);
-const BASE = flagValue('--base');
+const DIFF_FILE = flagValue('--diff');
 const PULL_REQUEST_FILE = flagValue('--pull-request');
 const FORMAT = flagValue('--format') ?? 'text';
+const LINK_BASE = flagValue('--link-base')?.replace(/\/$/, '');
+const REVIEW_FILE = flagValue('--review');
+
+const ALLOW_LIST = 'cspell-allow-list.txt';
+const MAX_INLINE_COMMENTS = 25;
 
 function flagValue(name) {
 	const index = args.indexOf(name);
 	return index === -1 ? undefined : args[index + 1];
 }
 
-function addedLineRanges(base) {
-	const diff = execFileSync(
-		'git',
-		['diff', '--unified=0', '--no-color', '--find-renames', base, '--'],
-		{encoding: 'utf8', maxBuffer: 50 * 1024 * 1024}
-	);
+function addedLineRanges(diff) {
 	const ranges = new Map();
 	let file;
 
@@ -126,7 +133,7 @@ function pullRequestFindings(file) {
 // Entries in the dictionary files must be sorted, so duplicates stand out and
 // merges are clean. Sorted the way CSpell matches: case- and accent-insensitive.
 // Blank lines and comments start a new sorted run, so the lists can be sectioned.
-const DICTIONARY_FILES = ['cspell-allow-list.txt', 'cspell-block-list.txt'];
+const DICTIONARY_FILES = [ALLOW_LIST, 'cspell-block-list.txt'];
 const collator = new Intl.Collator('en', {sensitivity: 'base'});
 
 function unsortedDictionaryEntries(files) {
@@ -172,6 +179,17 @@ function findingsOnAddedLines(ranges, issues) {
 	);
 }
 
+function groupByFile(findings) {
+	const byFile = new Map();
+	for (const finding of findings) {
+		if (!byFile.has(finding.file)) {
+			byFile.set(finding.file, []);
+		}
+		byFile.get(finding.file).push(finding);
+	}
+	return byFile;
+}
+
 function formatText(findings) {
 	if (findings.length === 0) {
 		return 'No issues found.\n';
@@ -187,15 +205,191 @@ function formatText(findings) {
 	return lines.join('\n') + '\n';
 }
 
-async function main() {
-	if (!BASE) {
-		throw new Error('Missing required --base <revision>');
+function linkTo(text, url) {
+	return url ? `[${text}](${url})` : text;
+}
+
+// ?plain=1 opens GitHub's code view, where #L<n> anchors work; the rendered
+// Markdown preview ignores them
+function fileUrl(file) {
+	return LINK_BASE && `${LINK_BASE}/${file}?plain=1`;
+}
+
+// Without ?plain=1, so GitHub's edit button works from it
+const ALLOW_LIST_LINK = linkTo(
+	`\`${ALLOW_LIST}\``,
+	LINK_BASE && `${LINK_BASE}/${ALLOW_LIST}`
+);
+
+// Where the finding is, linked to the source view with the word highlighted
+// when it is in a file
+function locationText({file, line, column, word, field}) {
+	if (field === 'title') {
+		return `column ${column}`;
 	}
-	if (!['text', 'json'].includes(FORMAT)) {
-		throw new Error(`Unknown --format "${FORMAT}"; use text or json`);
+	const location = `line ${line}, column ${column}`;
+	const url = fileUrl(file);
+	return field || !url
+		? location
+		: `[${location}](${url}#L${line}C${column}-L${line}C${column + word.length})`;
+}
+
+// A non-spelling finding's own message, e.g. an unsorted dictionary entry,
+// pointing at its `relatedLine` when it has one
+function messageText({file, message, relatedLine}) {
+	if (!relatedLine) {
+		return `${message}.`;
+	}
+	const url = fileUrl(file);
+	return `${message} on ${linkTo(`line ${relatedLine}`, url && `${url}#L${relatedLine}`)}.`;
+}
+
+// CSpell suggests case-insensitively, so prefer a suggestion whose first
+// letter matches the case of the flagged word.
+function bestSuggestion({word, suggestions}) {
+	const isUpper = letter => letter === letter.toUpperCase();
+	return (
+		suggestions.find(
+			suggestion => isUpper(suggestion[0]) === isUpper(word[0])
+		) ?? suggestions[0]
+	);
+}
+
+// `word` → `suggestion`, or the finding's own message
+function summaryItem(finding) {
+	if (finding.message) {
+		return messageText(finding);
+	}
+	const suggestion = bestSuggestion(finding);
+	return `\`${finding.word}\`${suggestion ? ` → \`${suggestion}\`` : ''}`;
+}
+
+// The words not in the dictionary, each once, as a `/spell` command takes them
+function unknownWords(findings) {
+	const words = [];
+	for (const {word, message} of findings) {
+		if (!message && !words.includes(word)) {
+			words.push(word);
+		}
+	}
+	return words;
+}
+
+// Body for a pull request comment
+function formatMarkdown(findings) {
+	if (findings.length === 0) {
+		return '### ✅ This revision introduces no spelling errors\n';
+	}
+	const lines = [
+		`### ⚠️ Spell check found ${findings.length} issue(s) in this PR`,
+		'',
+		'Only findings on lines added by this PR, and in its title and description, are shown.',
+		...(findings.length > MAX_INLINE_COMMENTS
+			? [
+					`Up to ${MAX_INLINE_COMMENTS} of them are also commented inline.`
+				]
+			: []),
+		''
+	];
+	for (const [file, fileFindings] of groupByFile(findings)) {
+		lines.push(fileFindings[0].field ? `**${file}**` : `**\`${file}\`**`);
+		for (const finding of fileFindings) {
+			lines.push(
+				`- ${locationText(finding)}`,
+				`  - ${summaryItem(finding)}`
+			);
+		}
+		lines.push('');
+	}
+	lines.push(
+		`Please correct the spelling, or add words which are correct to ${ALLOW_LIST_LINK}.`,
+		'',
+		`Comment on this PR with \`/spell <list of words>\`, and a bot will push a commit to your branch adding your comment's list of words to ${ALLOW_LIST_LINK} for you.`
+	);
+	const words = unknownWords(findings);
+	if (words.length > 0) {
+		lines.push(
+			'',
+			`To accept all of the words above as correct: \`/spell ${words.join(' ')}\``
+		);
+	}
+	return lines.join('\n') + '\n';
+}
+
+// First line of a review comment, so the workflow can match the comments it
+// posted earlier to the findings still present and delete the rest
+const REVIEW_MARKER = '<!-- cspell-finding:';
+
+// One GitHub suggestion block with an apply button. A four-backtick fence so
+// lines containing ``` cannot break out of the block.
+function suggestionBlock(finding) {
+	const suggestion = bestSuggestion(finding);
+	if (!suggestion) {
+		return [];
+	}
+	const {text, column, word} = finding;
+	const start = column - 1;
+	return [
+		`Did you mean \`${suggestion}\`?`,
+		'',
+		'````suggestion',
+		text.slice(0, start) + suggestion + text.slice(start + word.length),
+		'````',
+		''
+	];
+}
+
+function reviewComment(finding) {
+	const explanation = finding.message
+		? [messageText(finding)]
+		: [
+				`\`${finding.word}\` is not in the dictionary.`,
+				'',
+				...suggestionBlock(finding),
+				`Please correct the spelling, or add words which are correct to ${ALLOW_LIST_LINK}.`,
+				'',
+				`Comment on this PR with \`/spell ${finding.word}\`, and a bot will push a commit to your branch adding it to ${ALLOW_LIST_LINK} for you.`
+			];
+	return {
+		path: finding.file,
+		line: finding.line,
+		side: 'RIGHT',
+		body: [`${REVIEW_MARKER} ${finding.word} -->`, ...explanation].join(
+			'\n'
+		)
+	};
+}
+
+// Body for POST /repos/{owner}/{repo}/pulls/{n}/reviews: one comment per
+// finding in a file; title and description findings have no line to comment
+// on. No review body: a submitted review cannot be deleted, so a body would
+// outlive the comments once the words are fixed.
+function reviewRequest(findings) {
+	const comments = findings
+		.filter(finding => !finding.field)
+		.slice(0, MAX_INLINE_COMMENTS)
+		.map(reviewComment);
+	return {event: 'COMMENT', body: '', comments};
+}
+
+const FORMATTERS = {
+	text: formatText,
+	json: findings => JSON.stringify(findings, null, '\t') + '\n',
+	markdown: formatMarkdown
+};
+
+function main() {
+	if (!DIFF_FILE) {
+		throw new Error('Missing required --diff <file>');
+	}
+	const format = FORMATTERS[FORMAT];
+	if (!format) {
+		throw new Error(
+			`Unknown --format "${FORMAT}"; use text, json, or markdown`
+		);
 	}
 
-	const ranges = addedLineRanges(BASE);
+	const ranges = addedLineRanges(readFileSync(DIFF_FILE, 'utf8'));
 	const files = [...ranges.keys()];
 	const findings = [
 		...findingsOnAddedLines(ranges, [
@@ -204,15 +398,19 @@ async function main() {
 		]),
 		...(PULL_REQUEST_FILE ? pullRequestFindings(PULL_REQUEST_FILE) : [])
 	];
-	process.stdout.write(
-		FORMAT === 'json'
-			? JSON.stringify(findings, null, '\t') + '\n'
-			: formatText(findings)
-	);
+	if (REVIEW_FILE) {
+		writeFileSync(
+			REVIEW_FILE,
+			JSON.stringify(reviewRequest(findings), null, '\t') + '\n'
+		);
+	}
+	process.stdout.write(format(findings));
 	process.exit(findings.length === 0 ? 0 : 1);
 }
 
-main().catch(error => {
+try {
+	main();
+} catch (error) {
 	console.error(error);
 	process.exit(2);
-});
+}

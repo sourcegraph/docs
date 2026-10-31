@@ -18,7 +18,6 @@ exec git diff --quiet HEAD^ HEAD -- . \
 	':(exclude)dev/check-spelling.mjs' \
 	':(exclude)dev/example-hostnames.json' \
 	':(exclude)dev/post-check-comment.sh' \
-	':(exclude)dev/post-spelling-review.mjs' \
 	':(exclude)dev/sync-review-comments.sh' \
 	':(exclude)dev/vercel-build-log-slack-app-manifest.json' \
 	':(exclude)dev/vercel-build-log.mjs' \

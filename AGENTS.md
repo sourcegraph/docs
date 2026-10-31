@@ -57,7 +57,9 @@
   order (the check reports out-of-order entries), or comment `/spell <words>`
   on the PR: `.github/workflows/spellcheck-allow.yml` commits them to the
   branch and runs the check again. CSpell is not a project dependency:
-  `npx cspell@10 --no-progress <file>` to run it locally
+  `npm install --global cspell@10`, then
+  `node dev/check-spelling.mjs --diff <(git diff -U0 origin/main)` runs the
+  check on your branch
 - **Example hostnames**: placeholder hostnames in docs are `*.example.com` 
   (`sourcegraph.example.com` for the reader's instance, 
   `github.example.com` for a code host, 
