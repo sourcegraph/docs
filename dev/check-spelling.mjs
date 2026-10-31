@@ -266,7 +266,7 @@ function formatMarkdown(findings) {
 
 // First line of a review comment, so the workflow can match the comments it
 // posted earlier to the findings still present and delete the rest
-const REVIEW_MARKER = '<!-- cspell-finding:';
+const REVIEW_MARKER = '<!-- check-spelling-finding:';
 
 // One GitHub suggestion block with an apply button. A four-backtick fence so
 // lines containing ``` cannot break out of the block.

@@ -2,7 +2,7 @@ name: PR check
 description: >-
     Runs one dev/check-<name>.mjs on the lines a pull request adds and reports
     its findings on the PR: a summary comment plus a review comment on each
-    flagged line (dev/report-check.sh). The job must check out the repository
+    flagged line (dev/check-report.sh). The job must check out the repository
     first, with fetch-depth 0; the default ref, the merge commit, is right.
 
 inputs:
@@ -12,7 +12,7 @@ inputs:
     name:
         description: >-
             Marks the comments the check posts, e.g. check-links; see
-            dev/report-check.sh
+            dev/check-report.sh
         required: true
     arguments:
         description: Flags for every run of the script
@@ -129,7 +129,7 @@ runs:
               RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
               NAME: ${{ inputs.name }}
               RESULT: ${{ steps.check.outputs.result }}
-          run: dev/report-check.sh "$NAME" "$RESULT" "$RUNNER_TEMP/report.md" "$RUNNER_TEMP/review.json"
+          run: dev/check-report.sh "$NAME" "$RESULT" "$RUNNER_TEMP/report.md" "$RUNNER_TEMP/review.json"
 
         - name: Fail when this PR introduces findings
           if: inputs.fail-on-findings == 'true' && steps.check.outputs.result == 'found'

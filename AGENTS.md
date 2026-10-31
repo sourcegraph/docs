@@ -159,7 +159,7 @@ A check script parses its flags and the diff, lists files, drops baseline
 findings, and formats the report with `dev/check-shared.mjs`; it writes a
 Markdown report and a review JSON for the lines a PR adds, exits 1 with
 findings, and leaves the report empty when it crashes. The action turns that
-into `result=clean|found|crashed` and `dev/report-check.sh` posts the summary
+into `result=clean|found|crashed` and `dev/check-report.sh` posts the summary
 and the inline comments. The action and scripts run from the merge commit,
 like the workflow file itself, so a branch that predates a check still gets
 checked. Each workflow sets only what differs: the script, the comment

@@ -4,7 +4,7 @@
 # run by the marker on their first line, so each run leaves the PR showing
 # the findings of the current revision and nothing else.
 #
-# Usage: dev/report-check.sh <name> <clean|found|crashed> report.md review.json
+# Usage: dev/check-report.sh <name> <clean|found|crashed> report.md review.json
 #   name    the marker prefix: `check-links` marks the summary
 #           `<!-- check-links-report -->` and each review comment
 #           `<!-- check-links-finding: ... -->`
