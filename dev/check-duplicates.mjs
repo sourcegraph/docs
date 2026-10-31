@@ -41,20 +41,23 @@
 import fs from 'fs';
 import path from 'path';
 import {fileURLToPath} from 'url';
+import {
+	fileUrl,
+	flagValue,
+	linkTo,
+	listDocsFiles,
+	parseDiff,
+	report
+} from './check-shared.mjs';
 
-const args = process.argv.slice(2);
 const ROOT_DIR = path.resolve(
 	flagValue('--root') ??
 		path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 );
-const DOCS_DIR = path.join(ROOT_DIR, 'docs');
 const THRESHOLD = Number(flagValue('--threshold') ?? 0.5);
 const MIN_WORDS = Number(flagValue('--min-words') ?? 20);
-const FORMAT = flagValue('--format') ?? 'text';
 const BASELINE_FILE = flagValue('--baseline');
 const DIFF = parseDiff(flagValue('--diff'));
-const LINK_BASE = flagValue('--link-base')?.replace(/\/$/, '');
-const REVIEW_FILE = flagValue('--review');
 
 // Pages the `🤖 Sync generated docs` PRs overwrite whole (see AGENTS.md); their
 // repetition is the generator's, and is fixed in sourcegraph/sourcegraph
@@ -73,56 +76,15 @@ const SHINGLE_SIZE = 3;
 const MAX_POSTINGS = 50;
 const SNIPPET_LENGTH = 90;
 
-if (REVIEW_FILE && !DIFF) {
+if (flagValue('--review') && !DIFF) {
 	throw new Error('--review needs --diff, to know which lines were added');
 }
 
-function flagValue(name) {
-	const index = args.indexOf(name);
-	return index === -1 ? undefined : args[index + 1];
-}
-
-// Added lines of a unified diff, by path relative to the repository:
-// Map<'docs/foo.mdx', Set<lineNumber>>
-function parseDiff(file) {
-	if (!file) return undefined;
-	const addedLines = new Map();
-	let currentFile;
-	let lineNumber;
-	for (const line of fs.readFileSync(file, 'utf-8').split('\n')) {
-		if (line.startsWith('diff --git ')) {
-			currentFile = undefined;
-		} else if (line.startsWith('+++ ') && !currentFile) {
-			// `+++ /dev/null` is a deleted file, which has no added lines
-			currentFile = line.slice(4).replace(/^b\//, '');
-			if (currentFile === '/dev/null') continue;
-			addedLines.set(currentFile, new Set());
-		} else if (line.startsWith('@@ ')) {
-			lineNumber = Number(line.match(/^@@ -\S+ \+(\d+)/)[1]);
-		} else if (line.startsWith('+') && currentFile) {
-			addedLines.get(currentFile).add(lineNumber++);
-		} else if (line.startsWith(' ')) {
-			lineNumber++;
-		}
-	}
-	return addedLines;
-}
-
-// Sorted relative paths of the .md and .mdx files under docs/ that are
-// written by hand
-function listDocsFiles(dir = DOCS_DIR) {
-	return fs
-		.readdirSync(dir, {withFileTypes: true})
-		.sort((a, b) => a.name.localeCompare(b.name))
-		.flatMap(entry => {
-			const full = path.join(dir, entry.name);
-			if (entry.isDirectory()) return listDocsFiles(full);
-			const file = path.relative(ROOT_DIR, full);
-			return /\.mdx?$/.test(entry.name) &&
-				!GENERATED_PAGES.some(prefix => file.startsWith(prefix))
-				? [file]
-				: [];
-		});
+// The .md and .mdx files under docs/ that are written by hand
+function handWrittenDocsFiles() {
+	return listDocsFiles(ROOT_DIR).filter(
+		file => !GENERATED_PAGES.some(prefix => file.startsWith(prefix))
+	);
 }
 
 // The words of a passage, lowercased, without Markdown, JSX, MDX comments,
@@ -410,19 +372,11 @@ function formatText(pairs) {
 	return lines.join('\n') + '\n';
 }
 
-function linkTo(text, url) {
-	return url ? `[${text}](${url})` : text;
-}
-
-// ?plain=1 opens GitHub's code view, where #L<n> anchors work; the rendered
-// Markdown preview ignores them
 function passageLink(passage) {
 	const {file, line, endLine} = passage;
 	const anchor = endLine > line ? `#L${line}-L${endLine}` : `#L${line}`;
-	return linkTo(
-		`\`${location(passage)}\``,
-		LINK_BASE && `${LINK_BASE}/${file}?plain=1${anchor}`
-	);
+	const url = fileUrl(file);
+	return linkTo(`\`${location(passage)}\``, url && url + anchor);
 }
 
 const CONVENTION =
@@ -526,58 +480,22 @@ function reviewRequest(pairs) {
 	return {event: 'COMMENT', body: '', comments};
 }
 
-const FORMATTERS = {
-	text: formatText,
-	json: pairs =>
-		JSON.stringify(
-			pairs.map(({similarity, a, b}) => ({
-				similarity,
-				a: describe(a),
-				b: describe(b)
-			})),
-			null,
-			'\t'
-		) + '\n',
-	markdown: formatMarkdown
-};
-
-function main() {
-	const format = FORMATTERS[FORMAT];
-	if (!format) {
-		throw new Error(
-			`Unknown --format "${FORMAT}"; use text, json, or markdown`
-		);
-	}
-
-	const passages = listDocsFiles().flatMap(file =>
-		extractPassages(
-			file,
-			fs.readFileSync(path.join(ROOT_DIR, file), 'utf-8')
-		)
-	);
-	let pairs = findDuplicatePairs(passages);
-	if (BASELINE_FILE) {
-		pairs = markPreexisting(pairs, BASELINE_FILE);
-	}
-	// With a diff, a pre-existing pair the change edited is still reported, so
-	// the author hears about the other copy; without one, nothing says which
-	// pre-existing pairs matter, so they are all left out
-	pairs = DIFF
-		? pairs.filter(
-				({a, b}) =>
-					addedLineIn(a) !== undefined || addedLineIn(b) !== undefined
-			)
-		: pairs.filter(pair => !pair.preexisting);
-	if (REVIEW_FILE) {
-		fs.writeFileSync(
-			REVIEW_FILE,
-			JSON.stringify(reviewRequest(pairs), null, '\t') + '\n'
-		);
-	}
-
-	// Not process.exit(): that can truncate stdout when it is a pipe
-	process.stdout.write(format(pairs));
-	process.exitCode = pairs.length === 0 ? 0 : 1;
+const passages = handWrittenDocsFiles().flatMap(file =>
+	extractPassages(file, fs.readFileSync(path.join(ROOT_DIR, file), 'utf-8'))
+);
+let pairs = findDuplicatePairs(passages);
+if (BASELINE_FILE) {
+	pairs = markPreexisting(pairs, BASELINE_FILE);
 }
-
-main();
+// With a diff, a pre-existing pair the change edited is still reported, so
+// the author hears about the other copy; without one, nothing says which
+// pre-existing pairs matter, so they are all left out
+pairs = DIFF
+	? pairs.filter(
+			({a, b}) =>
+				addedLineIn(a) !== undefined || addedLineIn(b) !== undefined
+		)
+	: pairs.filter(pair => !pair.preexisting);
+report(pairs, {text: formatText, markdown: formatMarkdown}, () =>
+	reviewRequest(pairs)
+);

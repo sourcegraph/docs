@@ -22,87 +22,16 @@ jobs:
     check-redirects:
         name: Broken redirects introduced by this PR
         runs-on: ubuntu-latest
-        env:
-            GH_TOKEN: ${{ github.token }}
-            PR_NUMBER: ${{ github.event.pull_request.number }}
-            BASE_SHA: ${{ github.event.pull_request.base.sha }}
-            # Line links in the report open redirects.ts on the PR branch
-            LINK_BASE: ${{ github.event.pull_request.head.repo.html_url }}/blob/${{ github.event.pull_request.head.ref }}
-            RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         steps:
-            - name: Check out pull request head
-              uses: actions/checkout@v7
+            - uses: actions/checkout@v7
               with:
-                  ref: ${{ github.event.pull_request.head.sha }}
                   fetch-depth: 0
 
-            # The workflow file is read from the merge commit, so run the scripts
-            # from there too: a branch that predates a check has no script for it,
-            # and the merge commit also has this PR's changes to them
-            - name: Check out the check scripts from the merge commit
-              run: git fetch --quiet origin "$GITHUB_SHA" && git checkout --quiet "$GITHUB_SHA" -- dev
-
-            - name: Install github-slugger, the only dependency of dev/check-redirects.mjs
-              # Into a scratch prefix, not the repo: `npm install <pkg>` next to
-              # package.json would install every dependency of the site
-              run: |
-                  npm install --prefix "$RUNNER_TEMP/deps" --no-package-lock --no-audit --no-fund \
-                      "github-slugger@$(node -p 'require("./package.json").dependencies["github-slugger"]')"
-                  ln -s "$RUNNER_TEMP/deps/node_modules" node_modules
-
-            - name: Check out merge base
-              run: |
-                  merge_base=$(git merge-base "$BASE_SHA" HEAD)
-                  git worktree add "$RUNNER_TEMP/base" "$merge_base"
-                  git diff -U0 "$merge_base" HEAD -- src/data/redirects.ts > "$RUNNER_TEMP/changes.diff"
-
-            # The script exits 1 both with findings and when it crashes, e.g. because
-            # this PR's copy of it cannot read the base branch's redirects.ts. It
-            # writes its output in one go at the end, so a crash leaves it empty.
-            # A crash does not fail the check, since it says nothing about the PR;
-            # the comment step reports it instead of posting the empty report.
-            - name: Record broken redirects already present on the base branch
-              run: |
-                  node dev/check-redirects.mjs --format json \
-                      --root "$RUNNER_TEMP/base" > "$RUNNER_TEMP/base-redirects.json" || true
-
-            - name: Find redirects broken by this PR
-              id: check
-              run: |
-                  if ! [ -s "$RUNNER_TEMP/base-redirects.json" ]; then
-                      echo "::warning::check-redirects crashed on the base branch, so this PR was not checked"
-                      echo "result=crashed" >> "$GITHUB_OUTPUT"
-                      exit 0
-                  fi
-                  if node dev/check-redirects.mjs --format markdown \
-                      --baseline "$RUNNER_TEMP/base-redirects.json" \
-                      --diff "$RUNNER_TEMP/changes.diff" \
-                      --review "$RUNNER_TEMP/review.json" \
-                      --link-base "$LINK_BASE" > "$RUNNER_TEMP/report.md"; then
-                      echo "result=clean" >> "$GITHUB_OUTPUT"
-                  elif [ -s "$RUNNER_TEMP/report.md" ]; then
-                      echo "result=found" >> "$GITHUB_OUTPUT"
-                  else
-                      echo "::warning::check-redirects crashed, so this PR was not checked"
-                      echo "result=crashed" >> "$GITHUB_OUTPUT"
-                  fi
-                  cat "$RUNNER_TEMP/report.md"
-
-            - name: Comment on the pull request
-              # Fork PRs get a read-only token; the report is still in the job log
-              if: github.event.pull_request.head.repo.full_name == github.repository
-              env:
-                  RESULT: ${{ steps.check.outputs.result }}
-              run: dev/post-check-comment.sh '<!-- check-redirects-report -->' "$RESULT" "$RUNNER_TEMP/report.md"
-
-            - name: Suggest fixes as review comments
-              # One suggested change per fixable entry this PR added, kept in sync
-              # with the findings; see dev/sync-review-comments.sh
-              if: >-
-                  github.event.pull_request.head.repo.full_name == github.repository
-                  && contains(fromJSON('["clean", "found"]'), steps.check.outputs.result)
-              run: dev/sync-review-comments.sh '<!-- check-redirects-finding:' "$RUNNER_TEMP/review.json"
-
-            - name: Fail when this PR breaks redirects
-              if: steps.check.outputs.result == 'found'
-              run: exit 1
+            - uses: ./.github/actions/pr-check
+              with:
+                  script: dev/check-redirects.mjs
+                  name: check-redirects
+                  diff-paths: src/data/redirects.ts
+                  baseline: true
+                  dependency: github-slugger
+                  fail-on-findings: true

@@ -25,51 +25,24 @@
  */
 
 import {spawnSync} from 'child_process';
-import {readFileSync, writeFileSync} from 'fs';
+import {readFileSync} from 'fs';
 import path from 'path';
 import {fileURLToPath} from 'url';
+import {
+	LINK_BASE,
+	fileUrl,
+	flagValue,
+	groupByFile,
+	linkTo,
+	parseDiff,
+	report
+} from './check-shared.mjs';
 
-const args = process.argv.slice(2);
-const DIFF_FILE = flagValue('--diff');
+const DIFF = parseDiff(flagValue('--diff'));
 const PULL_REQUEST_FILE = flagValue('--pull-request');
-const FORMAT = flagValue('--format') ?? 'text';
-const LINK_BASE = flagValue('--link-base')?.replace(/\/$/, '');
-const REVIEW_FILE = flagValue('--review');
 
 const ALLOW_LIST = 'cspell-allow-list.txt';
 const MAX_INLINE_COMMENTS = 25;
-
-function flagValue(name) {
-	const index = args.indexOf(name);
-	return index === -1 ? undefined : args[index + 1];
-}
-
-function addedLineRanges(diff) {
-	const ranges = new Map();
-	let file;
-
-	for (const line of diff.split('\n')) {
-		const fileMatch = line.match(/^\+\+\+ b\/(.+)$/);
-		if (fileMatch) {
-			file = fileMatch[1];
-			if (!ranges.has(file)) {
-				ranges.set(file, []);
-			}
-			continue;
-		}
-
-		const hunkMatch = line.match(/^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@/);
-		if (file && hunkMatch) {
-			const start = Number(hunkMatch[1]);
-			const count = hunkMatch[2] === undefined ? 1 : Number(hunkMatch[2]);
-			if (count > 0) {
-				ranges.get(file).push([start, start + count - 1]);
-			}
-		}
-	}
-
-	return ranges;
-}
 
 // `input` is checked as a document named `stdin://<file>`, so the repository's
 // cspell.json still applies to text that is not in the repository
@@ -171,23 +144,8 @@ function unsortedDictionaryEntries(files) {
 	return findings;
 }
 
-function findingsOnAddedLines(ranges, issues) {
-	return issues.filter(issue =>
-		(ranges.get(issue.file) ?? []).some(
-			([start, end]) => issue.line >= start && issue.line <= end
-		)
-	);
-}
-
-function groupByFile(findings) {
-	const byFile = new Map();
-	for (const finding of findings) {
-		if (!byFile.has(finding.file)) {
-			byFile.set(finding.file, []);
-		}
-		byFile.get(finding.file).push(finding);
-	}
-	return byFile;
+function findingsOnAddedLines(issues) {
+	return issues.filter(issue => DIFF.get(issue.file)?.has(issue.line));
 }
 
 function formatText(findings) {
@@ -203,16 +161,6 @@ function formatText(findings) {
 		lines.push(`${file}:${line}:${column} - ${detail}`);
 	}
 	return lines.join('\n') + '\n';
-}
-
-function linkTo(text, url) {
-	return url ? `[${text}](${url})` : text;
-}
-
-// ?plain=1 opens GitHub's code view, where #L<n> anchors work; the rendered
-// Markdown preview ignores them
-function fileUrl(file) {
-	return LINK_BASE && `${LINK_BASE}/${file}?plain=1`;
 }
 
 // Without ?plain=1, so GitHub's edit button works from it
@@ -372,40 +320,21 @@ function reviewRequest(findings) {
 	return {event: 'COMMENT', body: '', comments};
 }
 
-const FORMATTERS = {
-	text: formatText,
-	json: findings => JSON.stringify(findings, null, '\t') + '\n',
-	markdown: formatMarkdown
-};
-
 function main() {
-	if (!DIFF_FILE) {
+	if (!DIFF) {
 		throw new Error('Missing required --diff <file>');
 	}
-	const format = FORMATTERS[FORMAT];
-	if (!format) {
-		throw new Error(
-			`Unknown --format "${FORMAT}"; use text, json, or markdown`
-		);
-	}
-
-	const ranges = addedLineRanges(readFileSync(DIFF_FILE, 'utf8'));
-	const files = [...ranges.keys()];
+	const files = [...DIFF.keys()];
 	const findings = [
-		...findingsOnAddedLines(ranges, [
+		...findingsOnAddedLines([
 			...runCSpell(files),
 			...unsortedDictionaryEntries(files)
 		]),
 		...(PULL_REQUEST_FILE ? pullRequestFindings(PULL_REQUEST_FILE) : [])
 	];
-	if (REVIEW_FILE) {
-		writeFileSync(
-			REVIEW_FILE,
-			JSON.stringify(reviewRequest(findings), null, '\t') + '\n'
-		);
-	}
-	process.stdout.write(format(findings));
-	process.exit(findings.length === 0 ? 0 : 1);
+	report(findings, {text: formatText, markdown: formatMarkdown}, () =>
+		reviewRequest(findings)
+	);
 }
 
 try {

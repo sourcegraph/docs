@@ -24,25 +24,10 @@ jobs:
     spellcheck:
         name: Spelling errors introduced by this PR (advisory)
         runs-on: ubuntu-latest
-        env:
-            GH_TOKEN: ${{ github.token }}
-            PR_NUMBER: ${{ github.event.pull_request.number }}
-            BASE_SHA: ${{ github.event.pull_request.base.sha }}
-            # File links in the report open the file on the PR branch
-            LINK_BASE: ${{ github.event.pull_request.head.repo.html_url }}/blob/${{ github.event.pull_request.head.ref }}
-            RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         steps:
-            - name: Check out pull request head
-              uses: actions/checkout@v7
+            - uses: actions/checkout@v7
               with:
-                  ref: ${{ github.event.pull_request.head.sha }}
                   fetch-depth: 0
-
-            # The workflow file is read from the merge commit, so run the scripts
-            # from there too: a branch that predates a check has no script for it,
-            # and the merge commit also has this PR's changes to them
-            - name: Check out the check scripts from the merge commit
-              run: git fetch --quiet origin "$GITHUB_SHA" && git checkout --quiet "$GITHUB_SHA" -- dev
 
             # Node 24 is pre-cached on ubuntu-latest, avoiding the download
             # incurred by node-version: latest.
@@ -55,45 +40,16 @@ jobs:
             - name: Install CSpell
               run: npm install --global cspell@10
 
-            - name: Find spelling errors introduced by this PR
-              id: check
-              # Title and description come in through env, never inline in the
-              # script, so a crafted pull request cannot inject shell commands
+            - name: Write the pull request title and description to a file
+              # They come in through env, never inline in the script, so a
+              # crafted pull request cannot inject shell commands
               env:
                   PR_TITLE: ${{ github.event.pull_request.title }}
                   PR_BODY: ${{ github.event.pull_request.body }}
-              # The script exits 1 both with findings and when it crashes. It writes
-              # its output in one go at the end, so a crash leaves it empty. A crash
-              # does not fail the check, since it says nothing about the PR; the
-              # comment step reports it instead of posting the empty report.
-              run: |
-                  git diff -U0 "$(git merge-base "$BASE_SHA" HEAD)" HEAD > "$RUNNER_TEMP/changes.diff"
-                  printf '%s\n\n%s\n' "$PR_TITLE" "$PR_BODY" > "$RUNNER_TEMP/pull-request.md"
-                  if node dev/check-spelling.mjs --format markdown \
-                      --diff "$RUNNER_TEMP/changes.diff" \
-                      --pull-request "$RUNNER_TEMP/pull-request.md" \
-                      --review "$RUNNER_TEMP/review.json" \
-                      --link-base "$LINK_BASE" > "$RUNNER_TEMP/report.md"; then
-                      echo "result=clean" >> "$GITHUB_OUTPUT"
-                  elif [ -s "$RUNNER_TEMP/report.md" ]; then
-                      echo "result=found" >> "$GITHUB_OUTPUT"
-                  else
-                      echo "::warning::check-spelling crashed, so this PR was not checked"
-                      echo "result=crashed" >> "$GITHUB_OUTPUT"
-                  fi
-                  cat "$RUNNER_TEMP/report.md"
+              run: printf '%s\n\n%s\n' "$PR_TITLE" "$PR_BODY" > "$RUNNER_TEMP/pull-request.md"
 
-            - name: Comment on the pull request
-              # Fork PRs get a read-only token; the report is still in the job log
-              if: github.event.pull_request.head.repo.full_name == github.repository
-              env:
-                  RESULT: ${{ steps.check.outputs.result }}
-              run: dev/post-check-comment.sh '<!-- cspell-report -->' "$RESULT" "$RUNNER_TEMP/report.md"
-
-            - name: Suggest fixes as review comments
-              # One suggested change per flagged line, kept in sync with the
-              # findings; see dev/sync-review-comments.sh
-              if: >-
-                  github.event.pull_request.head.repo.full_name == github.repository
-                  && contains(fromJSON('["clean", "found"]'), steps.check.outputs.result)
-              run: dev/sync-review-comments.sh '<!-- cspell-finding:' "$RUNNER_TEMP/review.json"
+            - uses: ./.github/actions/pr-check
+              with:
+                  script: dev/check-spelling.mjs
+                  name: cspell
+                  head-only-arguments: --pull-request ${{ runner.temp }}/pull-request.md

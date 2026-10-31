@@ -38,50 +38,23 @@
 import fs from 'fs';
 import path from 'path';
 import {fileURLToPath} from 'url';
+import {
+	fileUrl,
+	flagValue,
+	groupByFile,
+	linkTo,
+	listDocsFiles,
+	parseDiff,
+	report
+} from './check-shared.mjs';
 
 const ROOT_DIR = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
-const DOCS_DIR = path.join(ROOT_DIR, 'docs');
 const MAPPING_FILE = 'dev/example-hostnames.json';
 
-const args = process.argv.slice(2);
 const DIFF = parseDiff(flagValue('--diff'));
-const FORMAT = flagValue('--format') ?? 'text';
-const LINK_BASE = flagValue('--link-base')?.replace(/\/$/, '');
-const REVIEW_FILE = flagValue('--review');
 
-if (REVIEW_FILE && !DIFF) {
+if (flagValue('--review') && !DIFF) {
 	throw new Error('--review needs --diff, to know which lines were added');
-}
-
-function flagValue(name) {
-	const index = args.indexOf(name);
-	return index === -1 ? undefined : args[index + 1];
-}
-
-// Added lines of a unified diff, by path relative to the repository:
-// Map<'docs/foo.mdx', Set<lineNumber>>
-function parseDiff(file) {
-	if (!file) return undefined;
-	const addedLines = new Map();
-	let currentFile;
-	let lineNumber;
-	for (const line of fs.readFileSync(file, 'utf-8').split('\n')) {
-		if (line.startsWith('diff --git ')) {
-			currentFile = undefined;
-		} else if (line.startsWith('+++ ') && !currentFile) {
-			// `+++ /dev/null` is a deleted file, which has no added lines
-			currentFile = line.slice(4).replace(/^b\//, '');
-			if (currentFile === '/dev/null') continue;
-			addedLines.set(currentFile, new Set());
-		} else if (line.startsWith('@@ ')) {
-			lineNumber = Number(line.match(/^@@ -\S+ \+(\d+)/)[1]);
-		} else if (line.startsWith('+') && currentFile) {
-			addedLines.get(currentFile).add(lineNumber++);
-		} else if (line.startsWith(' ')) {
-			lineNumber++;
-		}
-	}
-	return addedLines;
 }
 
 // In a literal or glob entry, each separator matches any separator. Space is
@@ -175,20 +148,6 @@ function checkLine(file, line, text) {
 	return {findings, fixed: fixed + text.slice(end)};
 }
 
-// Sorted relative paths of the .md and .mdx files under docs/
-function listDocsFiles(dir = DOCS_DIR) {
-	return fs
-		.readdirSync(dir, {withFileTypes: true})
-		.sort((a, b) => a.name.localeCompare(b.name))
-		.flatMap(entry => {
-			const full = path.join(dir, entry.name);
-			if (entry.isDirectory()) return listDocsFiles(full);
-			return /\.mdx?$/.test(entry.name)
-				? [path.relative(ROOT_DIR, full)]
-				: [];
-		});
-}
-
 // Every finding in the checked files, and the fixed text of each flagged line
 // ({file, line} → fixed), for the review
 function findPlaceholders() {
@@ -196,7 +155,7 @@ function findPlaceholders() {
 		? [...DIFF.keys()].filter(
 				file => file.startsWith('docs/') && /\.mdx?$/.test(file)
 			)
-		: listDocsFiles();
+		: listDocsFiles(ROOT_DIR);
 	const findings = [];
 	const fixedLines = new Map();
 	for (const file of files) {
@@ -220,17 +179,6 @@ function findPlaceholders() {
 	return {findings, fixedLines};
 }
 
-function groupByFile(findings) {
-	const byFile = new Map();
-	for (const finding of findings) {
-		if (!byFile.has(finding.file)) {
-			byFile.set(finding.file, []);
-		}
-		byFile.get(finding.file).push(finding);
-	}
-	return byFile;
-}
-
 function formatText(findings) {
 	if (findings.length === 0) {
 		return 'No issues found.\n';
@@ -242,10 +190,6 @@ function formatText(findings) {
 		);
 	}
 	return lines.join('\n') + '\n';
-}
-
-function linkTo(text, url) {
-	return url ? `[${text}](${url})` : text;
 }
 
 const CONVENTION =
@@ -268,13 +212,11 @@ function formatMarkdown(findings) {
 		''
 	];
 	for (const [file, fileFindings] of groupByFile(findings)) {
-		// ?plain=1 opens GitHub's code view, where #L<n> anchors work; the rendered
-		// Markdown preview ignores them
-		const fileUrl = LINK_BASE && `${LINK_BASE}/${file}?plain=1`;
-		lines.push(linkTo(`**\`${file}\`**`, fileUrl));
+		const url = fileUrl(file);
+		lines.push(linkTo(`**\`${file}\`**`, url));
 		for (const {line, placeholder, recommended} of fileFindings) {
 			lines.push(
-				`- ${linkTo(`line ${line}`, fileUrl && `${fileUrl}#L${line}`)}: ` +
+				`- ${linkTo(`line ${line}`, url && `${url}#L${line}`)}: ` +
 					`\`${placeholder}\` → \`${recommended}\``
 			);
 		}
@@ -326,29 +268,7 @@ function reviewRequest(findings, fixedLines) {
 	return {event: 'COMMENT', body: '', comments};
 }
 
-const FORMATTERS = {
-	text: formatText,
-	json: findings => JSON.stringify(findings, null, '\t') + '\n',
-	markdown: formatMarkdown
-};
-
-function main() {
-	const format = FORMATTERS[FORMAT];
-	if (!format) {
-		throw new Error(
-			`Unknown --format "${FORMAT}"; use text, json, or markdown`
-		);
-	}
-	const {findings, fixedLines} = findPlaceholders();
-	if (REVIEW_FILE) {
-		fs.writeFileSync(
-			REVIEW_FILE,
-			JSON.stringify(reviewRequest(findings, fixedLines), null, '\t') +
-				'\n'
-		);
-	}
-	process.stdout.write(format(findings));
-	process.exit(findings.length === 0 ? 0 : 1);
-}
-
-main();
+const {findings, fixedLines} = findPlaceholders();
+report(findings, {text: formatText, markdown: formatMarkdown}, () =>
+	reviewRequest(findings, fixedLines)
+);

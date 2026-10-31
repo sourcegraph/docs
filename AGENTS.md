@@ -153,14 +153,19 @@ Fork PRs get no comments; the findings are in the job log
 next run: the summary is minimized and the inline comments are deleted. A PR
 that never had findings never gets a comment.
 
-The five check workflows share one shape, so keep them in step:
-`dev/check-<name>.mjs` writes a Markdown report and a review JSON for the
-lines a PR adds, exits 1 with findings, and leaves the report empty when it
-crashes; the workflow turns that into `result=clean|found|crashed`,
-`dev/post-check-comment.sh` posts the summary, and
-`dev/sync-review-comments.sh` posts the inline comments. The scripts run from
-the merge commit, like the workflow file itself, so a branch that predates a
-check still gets checked.
+The five check workflows are one `actions/checkout` step plus
+`.github/actions/pr-check`, which runs `dev/check-<name>.mjs` and comments.
+A check script parses its flags and the diff, lists files, drops baseline
+findings, and formats the report with `dev/check-shared.mjs`; it writes a
+Markdown report and a review JSON for the lines a PR adds, exits 1 with
+findings, and leaves the report empty when it crashes. The action turns that
+into `result=clean|found|crashed` and `dev/report-check.sh` posts the summary
+and the inline comments. The action and scripts run from the merge commit,
+like the workflow file itself, so a branch that predates a check still gets
+checked. Each workflow sets only what differs: the script, the comment
+marker, extra arguments, which paths to diff, whether to compare against a
+baseline of the base branch, an npm dependency to install, and whether
+findings fail the check.
 
 ### Vercel build failures
 

@@ -47,6 +47,7 @@ import fs from 'fs';
 import path from 'path';
 import GithubSlugger from 'github-slugger';
 import { fileURLToPath, pathToFileURL } from 'url';
+import { fileUrl, flagValue, groupByFile, linkTo, listFiles, parseDiff, report, withoutBaseline } from './check-shared.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -58,42 +59,11 @@ const CHECK_SELF_LINKS = args.includes('--check-self-links');
 const ROOT_DIR = path.resolve(flagValue('--root') ?? path.dirname(__dirname));
 const FORMAT = flagValue('--format') ?? 'text';
 const BASELINE_FILE = flagValue('--baseline');
-const LINK_BASE = flagValue('--link-base')?.replace(/\/$/, '');
 const DIFF = parseDiff(flagValue('--diff'));
 const CHECK_EXTERNAL = args.includes('--check-external');
-const REVIEW_FILE = flagValue('--review');
 
 if (CHECK_EXTERNAL && !DIFF) {
 	throw new Error('--check-external needs --diff, to know which lines were added');
-}
-
-// Files and added lines of a unified diff, with paths relative to the repository:
-// { files: Set<'docs/foo.mdx'>, addedLines: Map<'docs/foo.mdx', Set<lineNumber>> }.
-// Works with any amount of context, so `git diff` and `git diff -U0` both do.
-function parseDiff(file) {
-	if (!file) return undefined;
-	const files = new Set();
-	const addedLines = new Map();
-	let currentFile;
-	let lineNumber;
-	for (const line of fs.readFileSync(file, 'utf-8').split('\n')) {
-		if (line.startsWith('diff --git ')) {
-			currentFile = undefined;
-		} else if (line.startsWith('+++ ') && !currentFile) {
-			// `+++ /dev/null` is a deleted file, which has no added lines
-			currentFile = line.slice(4).replace(/^b\//, '');
-			if (currentFile === '/dev/null') continue;
-			files.add(currentFile);
-			addedLines.set(currentFile, new Set());
-		} else if (line.startsWith('@@ ')) {
-			lineNumber = Number(line.match(/^@@ -\S+ \+(\d+)/)[1]);
-		} else if (line.startsWith('+') && currentFile) {
-			addedLines.get(currentFile).add(lineNumber++);
-		} else if (line.startsWith(' ')) {
-			lineNumber++;
-		}
-	}
-	return { files, addedLines };
 }
 
 const DOCS_DIR = path.join(ROOT_DIR, 'docs');
@@ -101,23 +71,6 @@ const DOCS_DIR = path.join(ROOT_DIR, 'docs');
 // `filePathPattern` in contentlayer.config.ts.
 const SOURCE_EXTENSIONS = ['.md', '.mdx'];
 const ROUTE_EXTENSIONS = ['.mdx'];
-
-function flagValue(name) {
-	const index = args.indexOf(name);
-	return index === -1 ? undefined : args[index + 1];
-}
-
-// Sorted relative paths of every file under dir, optionally limited to some
-// extensions. Sorted so foo.mdx precedes foo/index.mdx; when both exist the
-// site serves the first match (allPosts.find), so the first file owns the route.
-export function listFiles(dir, extensions) {
-	if (!fs.existsSync(dir)) return [];
-	return fs
-		.readdirSync(dir, { recursive: true, withFileTypes: true })
-		.filter(entry => entry.isFile() && (!extensions || extensions.includes(path.extname(entry.name))))
-		.map(entry => path.relative(dir, path.join(entry.parentPath, entry.name)))
-		.sort();
-}
 
 // Regex patterns for extracting links
 const MARKDOWN_LINK_REGEX = /\[([^\]]*)\]\(([^)]+)\)/g;
@@ -434,7 +387,7 @@ function validateLink(link, currentFile, maps) {
 }
 
 function isAddedLine(file, line) {
-	return DIFF?.addedLines.get(file)?.has(line) ?? false;
+	return DIFF?.get(file)?.has(line) ?? false;
 }
 
 // Find every broken link: [{ file, line, url, error, fix? }]
@@ -522,24 +475,6 @@ function findingKey({ file, url, error }) {
 	return `${file}\n${url}\n${error}`;
 }
 
-function withoutBaseline(findings, baselineFile) {
-	const baseline = new Set(
-		JSON.parse(fs.readFileSync(baselineFile, 'utf-8')).map(findingKey)
-	);
-	return findings.filter(finding => !baseline.has(findingKey(finding)));
-}
-
-function groupByFile(findings) {
-	const byFile = new Map();
-	for (const finding of findings) {
-		if (!byFile.has(finding.file)) {
-			byFile.set(finding.file, []);
-		}
-		byFile.get(finding.file).push(finding);
-	}
-	return byFile;
-}
-
 function formatText(findings) {
 	const scope = BASELINE_FILE ? 'new ' : '';
 	if (findings.length === 0) {
@@ -560,22 +495,16 @@ function formatText(findings) {
 	return lines.join('\n') + '\n';
 }
 
-function linkTo(text, url) {
-	return url ? `[${text}](${url})` : text;
-}
-
 // Markdown list of findings grouped by file, one line per fact, linked to the
 // source when --link-base is set
 function markdownFindingList(findings) {
 	const lines = [];
 	for (const [file, fileFindings] of groupByFile(findings)) {
-		// ?plain=1 opens GitHub's code view, where #L<n> anchors work; the rendered
-		// Markdown preview ignores them
-		const fileUrl = LINK_BASE && `${LINK_BASE}/${file}?plain=1`;
-		lines.push(linkTo(`**\`${file}\`**`, fileUrl));
+		const sourceUrl = fileUrl(file);
+		lines.push(linkTo(`**\`${file}\`**`, sourceUrl));
 		for (const { line, url, error, fix } of fileFindings) {
 			lines.push(
-				`- ${linkTo(`line ${line}`, fileUrl && `${fileUrl}#L${line}`)}`,
+				`- ${linkTo(`line ${line}`, sourceUrl && `${sourceUrl}#L${line}`)}`,
 				`  - Link: \`${url}\``,
 				`  - Problem: ${error}`,
 				...(fix ? [`  - Fix: \`${fix}\``] : [])
@@ -608,8 +537,8 @@ function formatMarkdown(findings) {
 	};
 	if (DIFF) {
 		const absolute = findings.filter(finding => isSelfLink(finding.url));
-		const outbound = findings.filter(finding => !isSelfLink(finding.url) && DIFF.files.has(finding.file));
-		const inbound = findings.filter(finding => !isSelfLink(finding.url) && !DIFF.files.has(finding.file));
+		const outbound = findings.filter(finding => !isSelfLink(finding.url) && DIFF.has(finding.file));
+		const inbound = findings.filter(finding => !isSelfLink(finding.url) && !DIFF.has(finding.file));
 		section('Outbound', 'Your PR includes links to pages or anchors that do not exist.', outbound);
 		section('Absolute links', ABSOLUTE_LINKS_ADVICE, absolute);
 		section(
@@ -661,32 +590,16 @@ function reviewRequest(findings) {
 	return { event: 'COMMENT', body: '', comments };
 }
 
-const FORMATTERS = {
-	text: formatText,
-	json: findings => JSON.stringify(findings, null, '\t') + '\n',
-	markdown: formatMarkdown
-};
-
 async function main() {
-	const format = FORMATTERS[FORMAT];
-	if (!format) {
-		throw new Error(`Unknown --format "${FORMAT}"; use text, json, or markdown`);
-	}
-	
 	if (FORMAT === 'text') {
 		console.log('🔍 Checking for dead links in MDX files...\n');
 	}
 
 	let findings = await findBrokenLinks();
 	if (BASELINE_FILE) {
-		findings = withoutBaseline(findings, BASELINE_FILE);
+		findings = withoutBaseline(findings, BASELINE_FILE, findingKey);
 	}
-
-	if (REVIEW_FILE) {
-		fs.writeFileSync(REVIEW_FILE, JSON.stringify(reviewRequest(findings), null, '\t') + '\n');
-	}
-	process.stdout.write(format(findings));
-	process.exit(findings.length === 0 ? 0 : 1);
+	report(findings, { text: formatText, markdown: formatMarkdown }, () => reviewRequest(findings));
 }
 
 // Only run when executed directly; dev/verify-links-live.mjs and dev/check-redirects.mjs
