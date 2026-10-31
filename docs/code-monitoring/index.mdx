@@ -200,3 +200,22 @@ Code monitors have been designed to be performant even for large Sourcegraph ins
 ## Architecture
 
 Learn about how Code Monitoring fits into Sourcegraph in the [architecture overview](/admin/architecture#code-monitoring).
+
+## Advanced
+
+### Result limit and timeout
+
+Each run of a code monitor is a regular search, with the same result limit and timeout as a search from the search bar. When a run reaches either limit, it stops and notifies you about the results found so far; commits it did not reach are not searched again on the next run. Set these in the monitor's query:
+
+-   [`count:`](/code-search/queries/language#count): the maximum number of results per run. Default: 10,000.
+-   [`timeout:`](/code-search/queries/language#timeout): how long a run may search. Default: 20 seconds. A query with `count:` but no `timeout:` uses the maximum timeout.
+
+For example, `repo:^github\.example\.com/ type:diff TODO count:50000 timeout:120s`.
+
+Email and Slack notifications show the total number of new results and the first 5; webhook notifications include every result.
+
+### Site configuration
+
+The `codeMonitors` object in [advanced configuration](/admin/config/site-config#reference) controls the worker that runs code monitors: `pollInterval` is how often each monitor runs, `concurrency` is how many monitor jobs run at once, and `maxRuntime` is how long a job may run before it is stopped. Raise `maxRuntime` with `timeout:`, so the job is not stopped before its search finishes.
+
+`timeout:` cannot exceed the instance's [maximum search timeout](/admin/search#maximum-timeout).
