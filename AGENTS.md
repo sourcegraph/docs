@@ -49,7 +49,7 @@
 - **Prove changed links resolve on a deploy**:
   `node dev/verify-links-live.mjs --site <vercel-preview-url>` prints a
   Markdown table for the PR description
-- **Spell check**: `.github/workflows/spellcheck.yml` runs
+- **Spell check**: `.github/workflows/check-spelling.yml` runs
   `dev/check-spelling.mjs` on the lines a PR adds plus its title and
   description, and comments the findings (advisory, never fails the PR).
   Add product names and identifiers to `cspell-allow-list.txt` with
@@ -57,7 +57,9 @@
   order (the check reports out-of-order entries), or comment `/spell <words>`
   on the PR: `.github/workflows/spellcheck-allow.yml` commits them to the
   branch and runs the check again. CSpell is not a project dependency:
-  `npx cspell@10 --no-progress <file>` to run it locally
+  `npm install --global cspell@10`, then
+  `node dev/check-spelling.mjs --diff <(git diff -U0 origin/main)` runs the
+  check on your branch
 - **Example hostnames**: placeholder hostnames in docs are `*.example.com` 
   (`sourcegraph.example.com` for the reader's instance, 
   `github.example.com` for a code host, 
@@ -148,7 +150,22 @@ gh api repos/sourcegraph/docs/pulls/<pr>/comments --paginate \
 
 Fork PRs get no comments; the findings are in the job log
 (`gh run view <run-id> --log`). The checks resolve their own comments on the
-next run.
+next run: the summary is minimized and the inline comments are deleted. A PR
+that never had findings never gets a comment.
+
+The five check workflows are one `actions/checkout` step plus
+`.github/actions/pr-check`, which runs `dev/check-<name>.mjs` and comments.
+A check script parses its flags and the diff, lists files, drops baseline
+findings, and formats the report with `dev/check-shared.mjs`; it writes a
+Markdown report and a review JSON for the lines a PR adds, exits 1 with
+findings, and leaves the report empty when it crashes. The action turns that
+into `result=clean|found|crashed` and `dev/check-report.sh` posts the summary
+and the inline comments. The action and scripts run from the merge commit,
+like the workflow file itself, so a branch that predates a check still gets
+checked. Each workflow sets only what differs: the script, the comment
+marker, extra arguments, which paths to diff, whether to compare against a
+baseline of the base branch, an npm dependency to install, and whether
+findings fail the check.
 
 ### Vercel build failures
 
