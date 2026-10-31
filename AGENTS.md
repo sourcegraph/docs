@@ -49,7 +49,7 @@
 - **Prove changed links resolve on a deploy**:
   `node dev/verify-links-live.mjs --site <vercel-preview-url>` prints a
   Markdown table for the PR description
-- **Spell check**: `.github/workflows/spellcheck.yml` runs
+- **Spell check**: `.github/workflows/check-spelling.yml` runs
   `dev/check-spelling.mjs` on the lines a PR adds plus its title and
   description, and comments the findings (advisory, never fails the PR).
   Add product names and identifiers to `cspell-allow-list.txt` with

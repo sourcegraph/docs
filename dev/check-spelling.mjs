@@ -4,7 +4,7 @@
  * Reports CSpell findings on lines added by a Git diff, and dictionary entries
  * added out of alphabetical order. Optionally also checks a pull request's
  * title and description. The pull request workflow
- * (.github/workflows/spellcheck.yml) runs this on the lines a PR adds and
+ * (.github/workflows/check-spelling.yml) runs this on the lines a PR adds and
  * comments the findings; it never fails the PR.
  *
  * Usage: node dev/check-spelling.mjs --diff <file> [options]
