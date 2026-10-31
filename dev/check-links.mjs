@@ -597,7 +597,7 @@ const ABSOLUTE_LINKS_ADVICE =
 // the PR renamed or removed a link target).
 function formatMarkdown(findings) {
 	if (findings.length === 0) {
-		return '### ✅ This PR introduces no broken links\n';
+		return '### ✅ This revision introduces no broken links\n';
 	}
 	
 	const lines = [`### ❌ This PR introduces ${findings.length} broken link(s)`, ''];

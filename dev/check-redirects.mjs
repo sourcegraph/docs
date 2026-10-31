@@ -342,7 +342,7 @@ function groupByProblem(findings) {
 // Body for a pull request comment
 function formatMarkdown(findings) {
 	if (findings.length === 0) {
-		return '### ✅ This PR breaks no redirects\n';
+		return '### ✅ This revision breaks no redirects\n';
 	}
 
 	// ?plain=1 opens GitHub's code view, where #L<n> anchors work

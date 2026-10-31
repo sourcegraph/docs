@@ -148,7 +148,17 @@ gh api repos/sourcegraph/docs/pulls/<pr>/comments --paginate \
 
 Fork PRs get no comments; the findings are in the job log
 (`gh run view <run-id> --log`). The checks resolve their own comments on the
-next run.
+next run: the summary is minimized and the inline comments are deleted. A PR
+that never had findings never gets a comment.
+
+The five check workflows share one shape, so keep them in step:
+`dev/check-<name>.mjs` writes a Markdown report and a review JSON for the
+lines a PR adds, exits 1 with findings, and leaves the report empty when it
+crashes; the workflow turns that into `result=clean|found|crashed`,
+`dev/post-check-comment.sh` posts the summary, and
+`dev/sync-review-comments.sh` posts the inline comments. The scripts run from
+the merge commit, like the workflow file itself, so a branch that predates a
+check still gets checked.
 
 ### Vercel build failures
 

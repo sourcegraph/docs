@@ -10,6 +10,7 @@ on:
         paths:
             - 'docs/**'
             - 'dev/check-duplicates.mjs'
+            - 'dev/post-check-comment.sh'
             - 'dev/sync-review-comments.sh'
             - '.github/workflows/check-duplicates.yml'
 
@@ -26,6 +27,13 @@ jobs:
     check-duplicates:
         name: Duplicated content introduced by this PR (advisory)
         runs-on: ubuntu-latest
+        env:
+            GH_TOKEN: ${{ github.token }}
+            PR_NUMBER: ${{ github.event.pull_request.number }}
+            BASE_SHA: ${{ github.event.pull_request.base.sha }}
+            # File links in the report open the file on the PR branch
+            LINK_BASE: ${{ github.event.pull_request.head.repo.html_url }}/blob/${{ github.event.pull_request.head.ref }}
+            RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         steps:
             - name: Check out pull request head
               uses: actions/checkout@v7
@@ -33,9 +41,13 @@ jobs:
                   ref: ${{ github.event.pull_request.head.sha }}
                   fetch-depth: 0
 
+            # The workflow file is read from the merge commit, so run the scripts
+            # from there too: a branch that predates a check has no script for it,
+            # and the merge commit also has this PR's changes to them
+            - name: Check out the check scripts from the merge commit
+              run: git fetch --quiet origin "$GITHUB_SHA" && git checkout --quiet "$GITHUB_SHA" -- dev
+
             - name: Check out merge base
-              env:
-                  BASE_SHA: ${{ github.event.pull_request.base.sha }}
               run: |
                   merge_base=$(git merge-base "$BASE_SHA" HEAD)
                   git worktree add "$RUNNER_TEMP/base" "$merge_base"
@@ -52,9 +64,6 @@ jobs:
 
             - name: Find duplicated passages introduced by this PR
               id: check
-              env:
-                  # File links in the report open the file on the PR branch
-                  LINK_BASE: ${{ github.event.pull_request.head.repo.html_url }}/blob/${{ github.event.pull_request.head.ref }}
               run: |
                   if ! [ -s "$RUNNER_TEMP/base-duplicates.json" ]; then
                       echo "::warning::check-duplicates crashed on the base branch, so this PR was not checked"
@@ -79,33 +88,8 @@ jobs:
               # Fork PRs get a read-only token; the report is still in the job log
               if: github.event.pull_request.head.repo.full_name == github.repository
               env:
-                  GH_TOKEN: ${{ github.token }}
-                  PR_NUMBER: ${{ github.event.pull_request.number }}
                   RESULT: ${{ steps.check.outputs.result }}
-                  RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-              run: |
-                  marker='<!-- check-duplicates-report -->'
-                  existing_comment=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
-                      --paginate --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n 1)
-
-                  # Comment when there is something to report, or an earlier report to resolve
-                  case "$RESULT" in
-                      found)
-                          { echo "$marker"; cat "$RUNNER_TEMP/report.md"; } > "$RUNNER_TEMP/comment.md" ;;
-                      crashed)
-                          printf '%s\n### ⚠️ The duplicated content check could not run on this revision\n\nThis is a problem with the check, not with this PR; see the [job log](%s).\n' \
-                              "$marker" "$RUN_URL" > "$RUNNER_TEMP/comment.md" ;;
-                      *)
-                          [ -n "$existing_comment" ] || exit 0
-                          { echo "$marker"; cat "$RUNNER_TEMP/report.md"; } > "$RUNNER_TEMP/comment.md" ;;
-                  esac
-
-                  if [ -n "$existing_comment" ]; then
-                      gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$existing_comment" \
-                          --field body=@"$RUNNER_TEMP/comment.md"
-                  else
-                      gh pr comment "$PR_NUMBER" --body-file "$RUNNER_TEMP/comment.md"
-                  fi
+              run: dev/post-check-comment.sh '<!-- check-duplicates-report -->' "$RESULT" "$RUNNER_TEMP/report.md"
 
             - name: Point out the duplicates as review comments
               # One comment per added passage, kept in sync with the findings;
@@ -113,7 +97,4 @@ jobs:
               if: >-
                   github.event.pull_request.head.repo.full_name == github.repository
                   && contains(fromJSON('["clean", "found"]'), steps.check.outputs.result)
-              env:
-                  GH_TOKEN: ${{ github.token }}
-                  PR_NUMBER: ${{ github.event.pull_request.number }}
               run: dev/sync-review-comments.sh '<!-- check-duplicates-finding:' "$RUNNER_TEMP/review.json"
