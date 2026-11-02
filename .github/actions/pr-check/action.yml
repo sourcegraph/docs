@@ -1,0 +1,137 @@
+name: PR check
+description: >-
+    Runs one dev/check-<name>.mjs on the lines a pull request adds and reports
+    its findings on the PR: a summary comment plus a review comment on each
+    flagged line (dev/check-report.sh). The job must check out the repository
+    first, with fetch-depth 0; the default ref, the merge commit, is right.
+
+inputs:
+    script:
+        description: The check script, e.g. dev/check-links.mjs
+        required: true
+    name:
+        description: >-
+            Marks the comments the check posts, e.g. check-links; see
+            dev/check-report.sh
+        required: true
+    arguments:
+        description: Flags for every run of the script
+        default: ''
+    head-only-arguments:
+        description: >-
+            Flags for the run on the pull request only, not for recording the
+            baseline on the merge base
+        default: ''
+    diff-paths:
+        description: Paths the diff of the pull request is limited to; all by default
+        default: ''
+    baseline:
+        description: >-
+            Record the script's findings on the merge base too (--format json
+            --root) and pass them as --baseline, so only the findings this PR
+            introduces are reported
+        default: 'false'
+    dependency:
+        description: >-
+            An npm package the script imports, installed at the version in
+            package.json without the rest of the site's dependencies
+        default: ''
+    fail-on-findings:
+        description: Fail the job when the script reports findings; advisory otherwise
+        default: 'false'
+
+outputs:
+    result:
+        description: clean, found, or crashed
+        value: ${{ steps.check.outputs.result }}
+
+runs:
+    using: composite
+    steps:
+        # The workflow and this action are read from the merge commit, so run
+        # the scripts from there too: a branch that predates a check has no
+        # script for it, and the merge commit also has this PR's changes to
+        # them. Everything else is checked as the PR branch has it.
+        - name: Check out the pull request head, with the check scripts from the merge commit
+          shell: bash
+          env:
+              HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          run: |
+              git checkout --quiet "$HEAD_SHA"
+              git checkout --quiet "$GITHUB_SHA" -- dev
+
+        - name: Install ${{ inputs.dependency }}
+          if: inputs.dependency != ''
+          shell: bash
+          env:
+              DEPENDENCY: ${{ inputs.dependency }}
+          # Into a scratch prefix, not the repo: `npm install <pkg>` next to
+          # package.json would install every dependency of the site
+          run: |
+              npm install --prefix "$RUNNER_TEMP/deps" --no-package-lock --no-audit --no-fund \
+                  "$DEPENDENCY@$(node -p "require('./package.json').dependencies['$DEPENDENCY']")"
+              ln -s "$RUNNER_TEMP/deps/node_modules" node_modules
+
+        # The script exits 1 both with findings and when it crashes. It writes
+        # its output in one go at the end, so a crash leaves it empty. A crash
+        # does not fail the check, since it says nothing about the PR; the
+        # report step says so instead of posting the empty report.
+        - name: Run ${{ inputs.script }} on the lines this PR adds
+          id: check
+          shell: bash
+          env:
+              SCRIPT: ${{ inputs.script }}
+              ARGUMENTS: ${{ inputs.arguments }}
+              HEAD_ONLY_ARGUMENTS: ${{ inputs.head-only-arguments }}
+              DIFF_PATHS: ${{ inputs.diff-paths }}
+              BASELINE: ${{ inputs.baseline }}
+              BASE_SHA: ${{ github.event.pull_request.base.sha }}
+              # File links in the report open the file on the PR branch
+              LINK_BASE: ${{ github.event.pull_request.head.repo.html_url }}/blob/${{ github.event.pull_request.head.ref }}
+          run: |
+              # The arguments are lists, so they are left unquoted on purpose
+              # shellcheck disable=SC2086
+              merge_base=$(git merge-base "$BASE_SHA" HEAD)
+              git diff -U0 "$merge_base" HEAD -- $DIFF_PATHS > "$RUNNER_TEMP/changes.diff"
+
+              baseline_flag=
+              if [ "$BASELINE" = true ]; then
+                  git worktree add --quiet "$RUNNER_TEMP/base" "$merge_base"
+                  node "$SCRIPT" $ARGUMENTS --format json --root "$RUNNER_TEMP/base" > "$RUNNER_TEMP/baseline.json" || true
+                  if ! [ -s "$RUNNER_TEMP/baseline.json" ]; then
+                      echo "::warning::$SCRIPT crashed on the base branch, so this PR was not checked"
+                      echo "result=crashed" >> "$GITHUB_OUTPUT"
+                      exit 0
+                  fi
+                  baseline_flag="--baseline $RUNNER_TEMP/baseline.json"
+              fi
+
+              if node "$SCRIPT" $ARGUMENTS $HEAD_ONLY_ARGUMENTS --format markdown $baseline_flag \
+                  --diff "$RUNNER_TEMP/changes.diff" \
+                  --review "$RUNNER_TEMP/review.json" \
+                  --link-base "$LINK_BASE" > "$RUNNER_TEMP/report.md"; then
+                  echo "result=clean" >> "$GITHUB_OUTPUT"
+              elif [ -s "$RUNNER_TEMP/report.md" ]; then
+                  echo "result=found" >> "$GITHUB_OUTPUT"
+              else
+                  echo "::warning::$SCRIPT crashed, so this PR was not checked"
+                  echo "result=crashed" >> "$GITHUB_OUTPUT"
+              fi
+              cat "$RUNNER_TEMP/report.md"
+
+        - name: Report on the pull request
+          # Fork PRs get a read-only token; the report is still in the job log
+          if: github.event.pull_request.head.repo.full_name == github.repository
+          shell: bash
+          env:
+              GH_TOKEN: ${{ github.token }}
+              PR_NUMBER: ${{ github.event.pull_request.number }}
+              RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+              NAME: ${{ inputs.name }}
+              RESULT: ${{ steps.check.outputs.result }}
+          run: dev/check-report.sh "$NAME" "$RESULT" "$RUNNER_TEMP/report.md" "$RUNNER_TEMP/review.json"
+
+        - name: Fail when this PR introduces findings
+          if: inputs.fail-on-findings == 'true' && steps.check.outputs.result == 'found'
+          shell: bash
+          run: exit 1
