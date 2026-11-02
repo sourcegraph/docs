@@ -38,6 +38,10 @@ export const navigation: NavigationItem[] = [
 					{
 						title: 'Configuration and administration',
 						href: '/agentic-batch-changes/configuration'
+					},
+					{
+						title: 'Connectors',
+						href: '/agentic-batch-changes/connectors'
 					}
 				]
 			},
