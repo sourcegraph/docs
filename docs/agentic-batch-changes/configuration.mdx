@@ -125,7 +125,41 @@ Both halves of a pair are required. All four are part of the built-in User role,
 
 ### Ownership
 
-Each agentic batch change has one owner, the user who created it, and only the owner can send messages, approve actions, and publish. Others can follow along through a shared read link, which lets any user on the instance read the conversation, the plan, and the results without changing anything. There is no co-ownership and no transfer. If the owner is unavailable, start a new agentic batch change to continue the work. Because the agent acts as its owner, the owner's repository permissions bound what it can touch.
+Each agentic batch change has one owner, the user who created it, and only the owner can send messages, approve actions, and publish. Other users can read the conversation, the plan, and the results, but they cannot change anything; see [Sharing and visibility](#sharing-and-visibility). There is no co-ownership and no transfer. If the owner is unavailable, start a new agentic batch change to continue the work. Because the agent acts as its owner, the owner's repository permissions bound what it can touch.
+
+### Sharing and visibility
+
+By default, each user sees only their own agents. To let other users read an agent, the owner opens **Share** on the agent page and copies the link. Any user with [access](#access) to Agentic Batch Changes can open the link.
+
+Administrators can also enable a global list. Set `batchChanges.agenticBatchChanges.sharing` in the `experimentalFeatures` block of the [site configuration](/admin/config/site-config). The key is hidden in the schema, so add it by hand:
+
+```json
+{
+  "experimentalFeatures": {
+    "batchChanges.agenticBatchChanges.sharing": "global"
+  }
+}
+```
+
+- `link-only` (default): users see their own agents. They see other agents only through a share link.
+- `global`: the list at `/batch-change-agents` shows the agents of all users on the instance. The list opens with an owner filter set to the viewer. Clear the filter to see all owners.
+
+With `global`, owners select who can find each agent in the share popover, under **Who can find this agent**:
+
+- **Anyone on this instance** lists the agent for all users who can use Agentic Batch Changes.
+- **Only people with the link** removes the agent from the global list. The share link continues to work.
+
+The site setting is the upper limit. An agent the owner has not changed follows the site setting. If an administrator sets the setting back to `link-only`, all agents leave the global list immediately, and owners cannot select **Anyone on this instance** until the setting is `global` again.
+
+#### What a viewer sees
+
+A viewer who can open an agent sees the full transcript: messages, tool calls, and Deep Search results. This follows the model of [Deep Search conversation sharing](/deep-search#conversation-sharing): the person who shares is responsible for the audience. With `global`, all users with access to Agentic Batch Changes can read all listed transcripts. Consider this before you enable `global`.
+
+Workspaces, changesets, and diffs keep the [repository permissions of Batch Changes](/batch-changes/permissions-in-batch-changes#repository-permissions-for-batch-changes). A workspace in a repository the viewer cannot read shows as **Hidden repository**, without the repository name, the diff, or the changeset details.
+
+A viewer who is not the owner cannot act on the agent: no messages, approvals, runs, or publishing.
+
+Agents of deleted users stay in the list, with **Deleted user** as the owner. See also [Access control for Batch Changes](/admin/access-control/batch-changes).
 
 ### Code hosts
 
