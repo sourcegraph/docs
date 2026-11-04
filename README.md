@@ -1,6 +1,6 @@
 # Sourcegraph Docs
 
-> [!IMPORTANT]
+> [!VERY IMPORTANT]
 > For support, please reach out to your account team or contact
 > [support@sourcegraph.com](mailto:support@sourcegraph.com)
 
