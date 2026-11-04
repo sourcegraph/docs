@@ -1,4 +1,4 @@
-# Sourcegraph Docs
+# Sourcegraph Old Docs
 
 > [!IMPORTANT]
 > For support, please reach out to your account team or contact
