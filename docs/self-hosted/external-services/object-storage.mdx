@@ -21,9 +21,9 @@ On S3 or GCS, the Sourcegraph bucket is the single bucket for Sourcegraph featur
 
 Set the `SOURCEGRAPH_UPLOAD_*` environment variables described below on the `frontend` service. Frontend distributes this configuration to the other services that use the bucket: `worker`, precise Code Intel (`precise-code-intel-worker`), syntactic Code Intel (`syntactic-code-intel-worker`), `gitserver`, and `searcher`.
 
-- A service that sets `SOURCEGRAPH_UPLOAD_BACKEND` reads all `SOURCEGRAPH_UPLOAD_*` variables from its own environment instead of using frontend's configuration. A service that doesn't set `SOURCEGRAPH_UPLOAD_BACKEND` ignores its other `SOURCEGRAPH_UPLOAD_*` variables.
+- A service that sets `SOURCEGRAPH_UPLOAD_BACKEND` reads all `SOURCEGRAPH_UPLOAD_*` variables from its own environment instead of using frontend's configuration, so configuration set on each service keeps working. To use frontend's configuration, remove the `SOURCEGRAPH_UPLOAD_*` variables from the other services. A service that doesn't set `SOURCEGRAPH_UPLOAD_BACKEND` ignores its other `SOURCEGRAPH_UPLOAD_*` variables.
 - Frontend distributes only static credentials: AWS access keys and GCS credentials file contents. Every service that uses the bucket resolves other credentials itself, as described for [GCS](#using-gcs-for-the-sourcegraph-bucket) and [S3](#using-s3-for-the-sourcegraph-bucket).
-- Services that use frontend's configuration restart when it changes, including while frontend replicas are upgraded from a release that doesn't distribute it. While connected to such a frontend, services read their own environment, so keep their `SOURCEGRAPH_UPLOAD_*` variables until every frontend replica is upgraded, then remove them to use frontend's configuration.
+- When frontend's configuration changes, the services that use it restart on their own to apply it.
 
 ### Using GCS for the Sourcegraph bucket
 
