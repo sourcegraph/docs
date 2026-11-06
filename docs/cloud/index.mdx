@@ -118,11 +118,13 @@ For unsupported private connectivity methods, Sourcegraph offers connectivity vi
 
 - [Private Resources exposed via alternate public load balancers](/cloud/private-connectivity-public-lb)
 
+The Cloud-managed executors that run [precise auto-indexing](/code-navigation/auto-indexing) and [server-side Batch Changes](/batch-changes/server-side) use the same connections, so their jobs can pull from internal package and container registries such as Nexus, Artifactory, npm, or private Docker registries. Expose the registry through one of the methods above, and tell your account team the hostname that jobs pull from and the ports the registry uses. The Sourcegraph Cloud team configures routing for it as it does for a private code host.
+
 ### Customer-managed executors
 
 Sourcegraph Cloud runs the [executors](/admin/executors) for [server-side Batch Changes](/batch-changes/server-side) and [precise auto-indexing](/code-navigation/auto-indexing) for you, in your instance's dedicated network. You don't need to deploy or configure executor infrastructure.
 
-If your organization needs to run executors in its own Google Cloud or AWS account instead, ask your Sourcegraph account team about customer-managed executors. The Sourcegraph Cloud team reviews each request with you before enabling it. Customer-managed executors are separate from [Private Connectivity](#private-connectivity), which connects your instance to private code hosts and other resources.
+If your organization needs to run executors in its own Google Cloud or AWS account instead, ask your Sourcegraph account team about customer-managed executors. The Sourcegraph Cloud team reviews each request with you before enabling it. Customer-managed executors are separate from [Private Connectivity](#private-connectivity). If your executor jobs only need to reach internal package or container registries, Private Connectivity usually covers that with Cloud-managed executors.
 
 Customer-managed executors use the same Terraform modules as self-hosted Sourcegraph instances. Follow the deployment guide for [Google Cloud](/self-hosted/executors/deploy-executors-terraform-gcp) or [AWS](/self-hosted/executors/deploy-executors-terraform-aws).
 
