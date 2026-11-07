@@ -4385,6 +4385,12 @@ const redirectsData = [
 		source: '/dotcom/indexing_open_source_code',
 		destination: '/'
 	},
+	// Product and generated links use the path from the docs rewrite in
+	// sourcegraph/sourcegraph; keeps them working until that site replaces this one
+	{
+		source: '/self-hosted/deploy/search-performance',
+		destination: '/admin/search'
+	},
 ];
 
 const updatedRedirectsData = redirectsData.map(redirect => {
