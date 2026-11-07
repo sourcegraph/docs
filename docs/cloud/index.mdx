@@ -118,6 +118,24 @@ For unsupported private connectivity methods, Sourcegraph offers connectivity vi
 
 - [Private Resources exposed via alternate public load balancers](/cloud/private-connectivity-public-lb)
 
+### Customer-managed executors
+
+Sourcegraph Cloud runs the [executors](/admin/executors) for [server-side Batch Changes](/batch-changes/server-side) and [precise auto-indexing](/code-navigation/auto-indexing) for you, in your instance's dedicated network. You don't need to deploy or configure executor infrastructure.
+
+If your organization needs to run executors in its own Google Cloud or AWS account instead, ask your Sourcegraph account team about customer-managed executors. The Sourcegraph Cloud team reviews each request with you before enabling it. Customer-managed executors are separate from [Private Connectivity](#private-connectivity), which connects your instance to private code hosts and other resources.
+
+Customer-managed executors use the same Terraform modules as self-hosted Sourcegraph instances. Follow the deployment guide for [Google Cloud](/self-hosted/executors/deploy-executors-terraform-gcp) or [AWS](/self-hosted/executors/deploy-executors-terraform-aws).
+
+When customer-managed executors are enabled:
+
+- Sourcegraph exposes a dedicated executor hostname for your instance behind an external load balancer. The load balancer denies all traffic by default and accepts only your executors' egress IP addresses. It routes only the executor API (`/.executors/`) on port 443 and the executor container registry on port 5000.
+- Sourcegraph emails your administrator the values to use for the `executor_sourcegraph_external_url` and `executor_sourcegraph_executor_proxy_password` Terraform variables. Use these values instead of changing your instance's advanced configuration as the deployment guides describe.
+
+Availability of customer-managed executors is a shared responsibility. Your organization:
+
+- Deploys, upgrades, and maintains the executors, keeping them [compatible with your instance's version](/self-hosted/executors#prepare-to-deploy-executors).
+- Provides Sourcegraph with the executors' static egress IP addresses, and contacts [Sourcegraph Support](mailto:support@sourcegraph.com) before those addresses change.
+
 ### Health monitoring, support, and SLAs
 
 - Our on-call engineers monitor instance performance and health.
@@ -132,19 +150,6 @@ Backup and restore capability is provided via automated snapshots.
 
 - Frequency: Snapshots are produced daily.
 - Retention period: Snapshots are kept for 5 days.
-
-### Training, feedback, and engagement
-
-As with any Sourcegraph enterprise customer, you will also receive support from us with:
-
-- [Installing code host and code review integrations](/integration/)
-- Monitoring and aggregating user feedback
-- Understanding usage statistics of your deployment
-- Internal rollout programs including:
-    - Holding company-wide or team-by-team training sessions ([contact us](https://about.sourcegraph.com/contact/sales) for details)
-    - Helping the maintainers of your internal engineer onboarding add a session on Sourcegraph
-    - Holding ongoing brown bag lunches to introduce new feature releases
-    - Advice and templates on how to introduce Sourcegraph to your engineering organization
 
 ### Managed SMTP
 
