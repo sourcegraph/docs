@@ -30,9 +30,23 @@ Existing bucket configuration for [code graph indexes](#code-graph-indexes) and 
 
 New instances deployed using [Sourcegraph 7.2](https://sourcegraph.com/changelog/releases/7.2) or later can choose to _only_ provision the Sourcegraph bucket: this bucket can be used for both [code graph indexes](#code-graph-indexes) and [search jobs](#search-job-results), if not explicit configuration is provided for those features.
 
+### Configure the Sourcegraph bucket
+
+Set the `SOURCEGRAPH_UPLOAD_*` environment variables on every `frontend` container, with identical values across all replicas. Frontend distributes this configuration to the services that use the shared bucket; you do not need to repeat these variables on those services.
+
+<Callout type="warning">
+	The frontend configuration takes precedence over `SOURCEGRAPH_UPLOAD_*`
+	variables on other services. Configuring S3 or GCS only on those services
+	does not override frontend's default `sourcegraph/blobstore` configuration.
+</Callout>
+
+Restart the frontend containers after changing these environment variables or the contents of a configured GCS credentials file. Services using the shared bucket exit when they detect a configuration change and rely on their container supervisor to restart them with the updated settings. Plan for these restarts to interrupt in-flight work.
+
+Separate buckets configured with `PRECISE_CODE_INTEL_UPLOAD_*` or `SEARCH_JOBS_UPLOAD_*` still use the per-service settings described below. Changing the shared bucket configuration does not migrate objects between buckets.
+
 ### Using GCS for the Sourcegraph bucket
 
-Set the following environment variables to target a GCS bucket for shared Sourcegraph uploads.
+Set the following environment variables [on every `frontend` container](#configure-the-sourcegraph-bucket) to target a GCS bucket for shared Sourcegraph uploads.
 
 - `SOURCEGRAPH_UPLOAD_BACKEND=GCS`
 - `SOURCEGRAPH_UPLOAD_BUCKET=<my bucket name>`
@@ -40,16 +54,18 @@ Set the following environment variables to target a GCS bucket for shared Source
 - `SOURCEGRAPH_UPLOAD_GOOGLE_APPLICATION_CREDENTIALS_FILE=</path/to/file>` (optional)
 - `SOURCEGRAPH_UPLOAD_GOOGLE_APPLICATION_CREDENTIALS_FILE_CONTENT=<{"my": "content"}>` (optional)
 
+When using an explicit credentials file, mount it on every frontend and make it readable at startup. Frontend reads and distributes its contents, so other services do not need the file mounted for the shared bucket. If both credentials variables are set, the file takes precedence over the inline contents.
+
 If you are running on GKE with Workload Identity, or otherwise relying on
 Application Default Credentials, you can omit the GCS credentials file
-variables. Grant the `roles/storage.objectAdmin` role to the service accounts used by
+variables. Each service still needs its own access to these credentials; frontend does not distribute them. Grant the `roles/storage.objectAdmin` role to the service accounts used by
 the `frontend`, `worker`, precise Code Intel (`precise-code-intel-worker`),
 syntactic Code Intel (`syntactic-code-intel-worker`), `gitserver`, and `searcher`
 services in a GKE environment.
 
 ### Using S3 for the Sourcegraph bucket
 
-Set the following environment variables to target an S3 bucket for shared Sourcegraph uploads.
+Set the following environment variables [on every `frontend` container](#configure-the-sourcegraph-bucket) to target an S3 bucket for shared Sourcegraph uploads.
 
 - `SOURCEGRAPH_UPLOAD_BACKEND=S3`
 - `SOURCEGRAPH_UPLOAD_BUCKET=<my bucket name>`
@@ -66,9 +82,11 @@ Set the following environment variables to target an S3 bucket for shared Source
 	endpoint URL (_the `AWS_ENDPOINT` value_) matches the target region.
 </Callout>
 
+Frontend distributes explicitly configured access keys, secret keys, and session tokens to services using the shared bucket. Store these values in your deployment's secret management system rather than committing them to Git.
+
 You don't need to set the `SOURCEGRAPH_UPLOAD_AWS_ACCESS_KEY_ID` environment
 variable when using `SOURCEGRAPH_UPLOAD_AWS_USE_EC2_ROLE_CREDENTIALS=true`
-because role credentials will be automatically resolved. Attach the IAM role
+because role credentials are resolved independently by each service. Attach the IAM role
 to the EC2 instances hosting the `frontend`, `worker`, precise Code Intel
 (`precise-code-intel-worker`), syntactic Code Intel
 (`syntactic-code-intel-worker`), `gitserver`, and `searcher` containers in a
@@ -76,11 +94,12 @@ multi-node environment.
 
 ### Automatically provision the Sourcegraph bucket
 
-Most deployments should provision this bucket directly in their cloud provider and leave this disabled. If you would like to allow your Sourcegraph instance to manage the target bucket configuration, set the following environment variable:
+Most deployments should provision this bucket directly in their cloud provider and leave this disabled. If you would like to allow your Sourcegraph instance to manage the target bucket configuration, set the following environment variable [on every `frontend` container](#configure-the-sourcegraph-bucket):
 
 <Callout type="note">
-	This requires additional bucket-management permissions from your configured
-	storage vendor (AWS or GCP).
+	Services using the shared bucket perform the bucket-management operations.
+	Their credentials require additional bucket-management permissions from your
+	configured storage vendor (AWS or GCP).
 </Callout>
 
 - `SOURCEGRAPH_UPLOAD_MANAGE_BUCKET=true`
