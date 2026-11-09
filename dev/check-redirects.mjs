@@ -38,17 +38,22 @@ import fs from 'fs';
 import path from 'path';
 import vm from 'vm';
 import {fileURLToPath} from 'url';
-import {extractHeadings, listFiles, routeFor} from './check-links.mjs';
+import {extractHeadings, routeFor} from './check-links.mjs';
+import {
+	fileUrl,
+	flagValue,
+	linkTo,
+	listFiles,
+	parseDiff,
+	report,
+	withoutBaseline
+} from './check-shared.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const args = process.argv.slice(2);
 const ROOT_DIR = path.resolve(flagValue('--root') ?? path.dirname(__dirname));
-const FORMAT = flagValue('--format') ?? 'text';
 const BASELINE_FILE = flagValue('--baseline');
-const LINK_BASE = flagValue('--link-base')?.replace(/\/$/, '');
-const DIFF_FILE = flagValue('--diff');
-const REVIEW_FILE = flagValue('--review');
+const DIFF = parseDiff(flagValue('--diff'));
 
 const REDIRECTS_PATH = 'src/data/redirects.ts';
 const REDIRECTS_FILE = path.join(ROOT_DIR, REDIRECTS_PATH);
@@ -103,11 +108,6 @@ const PROBLEM = {
 		fix: "Use the heading's correct anchor, or drop the #fragment to land the customer at the top of the page."
 	}
 };
-
-function flagValue(name) {
-	const index = args.indexOf(name);
-	return index === -1 ? undefined : args[index + 1];
-}
 
 // Load redirects.ts without a TypeScript toolchain. The file is plain data
 // plus one import, so strip the module syntax and evaluate it.
@@ -284,13 +284,6 @@ function findingKey(finding) {
 	return `${finding.source}\u0000${finding.destination}\u0000${finding.problem}`;
 }
 
-function withoutBaseline(findings, baselineFile) {
-	const baseline = new Set(
-		JSON.parse(fs.readFileSync(baselineFile, 'utf-8')).map(findingKey)
-	);
-	return findings.filter(finding => !baseline.has(findingKey(finding)));
-}
-
 // 'remove this entry', or which of source and destination to change to what
 function describeFix({source, destination, fix}) {
 	if (fix.remove) return 'remove this entry';
@@ -322,10 +315,6 @@ function formatText(findings) {
 	return lines.join('\n');
 }
 
-function linkTo(text, url) {
-	return url ? `[${text}](${url})` : text;
-}
-
 // Map of problem heading -> its findings in line order, sections in PROBLEM order
 function groupByProblem(findings) {
 	const groups = new Map(
@@ -342,11 +331,10 @@ function groupByProblem(findings) {
 // Body for a pull request comment
 function formatMarkdown(findings) {
 	if (findings.length === 0) {
-		return '### ✅ This PR breaks no redirects\n';
+		return '### ✅ This revision breaks no redirects\n';
 	}
 
-	// ?plain=1 opens GitHub's code view, where #L<n> anchors work
-	const fileUrl = LINK_BASE && `${LINK_BASE}/${REDIRECTS_PATH}?plain=1`;
+	const url = fileUrl(REDIRECTS_PATH);
 	const lines = [
 		`### ❌ This PR breaks ${findings.length} redirect(s)`,
 		'',
@@ -369,7 +357,7 @@ function formatMarkdown(findings) {
 			'properly to tame the tech debt snowball no one wants to deal with; the ' +
 			'"Check links" PR check comment lists the links this PR broke, if any.',
 		'',
-		linkTo(`**\`${REDIRECTS_PATH}\`**`, fileUrl)
+		linkTo(`**\`${REDIRECTS_PATH}\`**`, url)
 	];
 	// One section per problem with its fix. Each entry is shown as it appears
 	// in the redirects file, so it is easy to find there.
@@ -381,7 +369,7 @@ function formatMarkdown(findings) {
 		for (const finding of entries) {
 			const {source, destination, line, detail, fix} = finding;
 			const where = line
-				? linkTo(`line ${line}`, fileUrl && `${fileUrl}#L${line}`)
+				? linkTo(`line ${line}`, url && `${url}#L${line}`)
 				: 'entry';
 			lines.push(
 				`- ${where}`,
@@ -399,25 +387,6 @@ function formatMarkdown(findings) {
 		'Reproduce locally with `node dev/check-redirects.mjs`'
 	);
 	return lines.join('\n') + '\n';
-}
-
-// Line numbers `git diff` output added to redirects.ts
-function addedLines(diffFile) {
-	const added = new Set();
-	let inRedirects = false;
-	let lineNumber;
-	for (const line of fs.readFileSync(diffFile, 'utf-8').split('\n')) {
-		if (line.startsWith('+++ ')) {
-			inRedirects = line === `+++ b/${REDIRECTS_PATH}`;
-		} else if (line.startsWith('@@ ')) {
-			lineNumber = Number(line.match(/^@@ -\S+ \+(\d+)/)[1]);
-		} else if (inRedirects && line.startsWith('+')) {
-			added.add(lineNumber++);
-		} else if (inRedirects && line.startsWith(' ')) {
-			lineNumber++;
-		}
-	}
-	return added;
 }
 
 // First line of a review comment, so the workflow can match the comments it
@@ -469,36 +438,10 @@ function reviewRequest(findings, added) {
 	return {event: 'COMMENT', body: '', comments};
 }
 
-const FORMATTERS = {
-	text: formatText,
-	json: findings => JSON.stringify(findings, null, '\t') + '\n',
-	markdown: formatMarkdown
-};
-
-function main() {
-	const format = FORMATTERS[FORMAT];
-	if (!format) {
-		throw new Error(
-			`Unknown --format "${FORMAT}"; use text, json, or markdown`
-		);
-	}
-
-	let findings = findBrokenRedirects(loadRedirects(), buildHeadingsByRoute());
-	if (BASELINE_FILE) {
-		findings = withoutBaseline(findings, BASELINE_FILE);
-	}
-
-	if (REVIEW_FILE) {
-		const added = DIFF_FILE ? addedLines(DIFF_FILE) : new Set();
-		fs.writeFileSync(
-			REVIEW_FILE,
-			JSON.stringify(reviewRequest(findings, added), null, '\t') + '\n'
-		);
-	}
-
-	// Not process.exit(): that can truncate stdout when it is a pipe
-	process.stdout.write(format(findings));
-	process.exitCode = findings.length === 0 ? 0 : 1;
+let findings = findBrokenRedirects(loadRedirects(), buildHeadingsByRoute());
+if (BASELINE_FILE) {
+	findings = withoutBaseline(findings, BASELINE_FILE, findingKey);
 }
-
-main();
+report(findings, {text: formatText, markdown: formatMarkdown}, () =>
+	reviewRequest(findings, DIFF?.get(REDIRECTS_PATH) ?? new Set())
+);
