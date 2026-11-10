@@ -257,8 +257,9 @@ GitHub Actions comment on your PR with anything it introduces:
 - **Spelling**: CSpell on the lines you added, plus the PR title and
   description. Advisory only. Add product names and identifiers to
   `cspell-allow-list.txt`, in alphabetical order.
-- **Preview links**: direct links to the pages you changed on the Vercel
-  preview deployment, once it finishes.
+- **Before and after links**: a table of the pages you changed, each on
+  production (before) and on the Vercel preview (after), opened at the first
+  section you changed.
 
 Thank you for contributing to Sourcegraph documentation! Your efforts help us
 provide top-notch learning experiences for our users. If you have any questions
