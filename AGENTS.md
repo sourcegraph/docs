@@ -49,29 +49,34 @@
 - **Prove changed links resolve on a deploy**:
   `node dev/verify-links-live.mjs --site <vercel-preview-url>` prints a
   Markdown table for the PR description
-- **Spell check**: `.github/workflows/spellcheck.yml` runs
+- **Spell check**: `.github/workflows/check-spelling.yml` runs
   `dev/check-spelling.mjs` on the lines a PR adds plus its title and
   description, and comments the findings (advisory, never fails the PR).
-  Add product names and identifiers to `cspell-allow-list.txt`, in
-  alphabetical order; the check reports out-of-order entries. CSpell is not a
-  project dependency: `npx cspell@10 --no-progress <file>` to run it locally
+  Add product names and identifiers to `cspell-allow-list.txt` with
+  `node dev/allow-spelling-words.mjs <words>`, which keeps it in alphabetical
+  order (the check reports out-of-order entries), or comment `/spell <words>`
+  on the PR: `.github/workflows/spellcheck-allow.yml` commits them to the
+  branch and runs the check again. CSpell is not a project dependency:
+  `npm install --global cspell@10`, then
+  `node dev/check-spelling.mjs --diff <(git diff -U0 origin/main)` runs the
+  check on your branch
 - **Example hostnames**: placeholder hostnames in docs are `*.example.com` 
   (`sourcegraph.example.com` for the reader's instance, 
   `github.example.com` for a code host, 
   `https://sourcegraph.example.com` where a whole URL is meant); 
   never `<URL>`, `[hostname]`, or a `$VARIABLE` the reader has to guess.
-  Example URLs use `https://`, except where needed, eg. loopback, 
-  in-cluster, proxy, and XML-namespace addresses. 
-  In a shell snippet a `$VARIABLE` is fine only when the same snippet 
-  exports it with an example value. 
+  Example URLs use `https://`, except where needed, eg. loopback,
+  in-cluster, proxy, and XML-namespace addresses.
+  In a shell snippet a `$VARIABLE` is fine only when the same snippet
+  exports it with an example value.
   `.github/workflows/check-hostnames.yml` runs `dev/check-hostnames.mjs`
   on the lines a PR adds and comments the findings with suggested changes
-  (advisory, never fails the PR). 
-  `dev/example-hostnames.json` maps each recommended hostname to the 
-  placeholders seen in its place, 
-  as either literal text,  a `*` glob, or a `/regex/`, 
-  matched case-insensitively with `-`, `_`, and `.` interchangeable; 
-  add to it when the check misses one, keeping keys and lists sorted. 
+  (advisory, never fails the PR).
+  `dev/example-hostnames.json` maps each recommended hostname to the
+  placeholders seen in its place,
+  as either literal text,  a `*` glob, or a `/regex/`,
+  matched case-insensitively with `-`, `_`, and `.` interchangeable;
+  add to it when the check misses one, keeping keys and lists sorted.
   `node dev/check-hostnames.mjs` checks all of `docs/`
   The `🤖 Sync generated docs` PRs overwrite the
   `SCHEMA_SYNC_START`…`SCHEMA_SYNC_END` blocks and whole pages
@@ -79,6 +84,24 @@
   `ai/models.mdx`, `cody/capabilities/supported-models.mdx`,
   `admin/telemetry/`); fix those in sourcegraph/sourcegraph instead.
   `git log --author=sourcegraph-buildkite -- <file>` shows whether a page is one
+- **Duplicated content**: `.github/workflows/check-duplicates.yml` runs
+  `dev/check-duplicates.mjs` and comments the passages a PR adds that say the
+  same thing as a passage elsewhere under `docs/`, paraphrased or verbatim,
+  and the passages a PR edits that were already duplicated, so the author can
+  pick the home and replace the other copy with a link (advisory, never fails
+  the PR). Not part of `pnpm run check`: main has hundreds of pre-existing
+  findings, and CI only reports the ones a PR adds or edits.
+  `node dev/check-duplicates.mjs --diff <(git diff -U0 origin/main)` runs it
+  on your branch; without `--diff` it lists every duplicate in `docs/`
+
+### One home per fact
+
+- Each fact has one home. Link to it instead of copying it, so the copies
+  cannot drift apart.
+- Before writing a config snippet, `rg` the key under `docs/` and link to the
+  existing one.
+- The `SCHEMA_SYNC_START`…`SCHEMA_SYNC_END` blocks are the home for every
+  setting's default. Never restate a default elsewhere.
 
 ### Links
 
@@ -110,12 +133,13 @@ git diff -U0 "$base" | pnpm run check links --check-anchors --check-self-links \
 
 ### PR check comments
 
-The spelling, links, redirects, and example hostnames checks comment on the
-PR: a summary comment per check, plus an inline review comment with a
-`suggestion` block on each flagged line. After pushing, read them and follow
-the instructions they give (fix the spelling, the link, the redirect, or the
-hostname); do not work around a finding, and add a word to
-`cspell-allow-list.txt` only when it is correct.
+The spelling, links, redirects, example hostnames, and duplicated content
+checks comment on the PR: a summary comment per check, plus an inline review
+comment on each flagged line, with a `suggestion` block where the fix is
+mechanical. After pushing, read them and follow the instructions they give
+(fix the spelling, the link, the redirect, or the hostname; replace the
+duplicated passage with a link to its home); do not work around a finding,
+and add a word to `cspell-allow-list.txt` only when it is correct.
 
 ```sh
 gh pr checks <pr>
@@ -126,7 +150,22 @@ gh api repos/sourcegraph/docs/pulls/<pr>/comments --paginate \
 
 Fork PRs get no comments; the findings are in the job log
 (`gh run view <run-id> --log`). The checks resolve their own comments on the
-next run.
+next run: the summary is minimized and the inline comments are deleted. A PR
+that never had findings never gets a comment.
+
+The five check workflows are one `actions/checkout` step plus
+`.github/actions/pr-check`, which runs `dev/check-<name>.mjs` and comments.
+A check script parses its flags and the diff, lists files, drops baseline
+findings, and formats the report with `dev/check-shared.mjs`; it writes a
+Markdown report and a review JSON for the lines a PR adds, exits 1 with
+findings, and leaves the report empty when it crashes. The action turns that
+into `result=clean|found|crashed` and `dev/check-report.sh` posts the summary
+and the inline comments. The action and scripts run from the merge commit,
+like the workflow file itself, so a branch that predates a check still gets
+checked. Each workflow sets only what differs: the script, the comment
+marker, extra arguments, which paths to diff, whether to compare against a
+baseline of the base branch, an npm dependency to install, and whether
+findings fail the check.
 
 ### Vercel build failures
 
@@ -135,6 +174,9 @@ next run.
   Slack app's "failed to deploy" post in the `SLACK_CHANNEL_ID` channel
   and comments a link to it on the PR (see `dev/vercel-build-log.mjs`).
   The log itself never goes on the PR, since the repository is public.
+  A build that passed also lists the pages the PR changed in the Slack
+  reply, from the `preview-links.yml` comment: on the preview for an open
+  PR, in production for a merged one.
 - It reads Vercel with the `VERCEL_TOKEN` repo secret, a token scoped to the
   `sourcegraph-docs` project that expires 2026-12-10; mint a new one with
   `POST /v3/user/tokens?teamId=<team>` and `projectId` in the body.

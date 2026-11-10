@@ -38,6 +38,10 @@ export const navigation: NavigationItem[] = [
 					{
 						title: 'Configuration and administration',
 						href: '/agentic-batch-changes/configuration'
+					},
+					{
+						title: 'Connectors',
+						href: '/agentic-batch-changes/connectors'
 					}
 				]
 			},
@@ -595,10 +599,6 @@ export const navigation: NavigationItem[] = [
 							{
 								title: 'Sourcegraph on Kubernetes with Helm',
 								href: '/self-hosted/deploy/kubernetes'
-							},
-							{
-								title: 'Sourcegraph machine images',
-								href: '/self-hosted/deploy/machine-images'
 							}
 						]
 					},

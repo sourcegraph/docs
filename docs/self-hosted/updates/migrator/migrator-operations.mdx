@@ -27,9 +27,8 @@ Whenever a `docker-compose` or `kubernetes` based deployment is started `migrato
 
 Some notes on `migrator`:
 
--   The `migrator` service was introduced in `v3.37.0`.
--   `migrator`'s `upgrade` command was introduced in `v4.0.0` and is intended to be used to upgrade versions as old as `3.20.x`. **Always check your deployment types [upgrade notes](/self-hosted/updates/#upgrades-index) before a multiversion upgrade.**
--   Commands such as `downgrade`, `drift`, `run-out-of-band-migrations`, and `upgrade`, all work against Sourcegraph versions as old as `v3.20.x`.
+-   The `upgrade` and `downgrade` commands in the latest `migrator` image work across all [supported releases](/releases).
+-   **Always check your deployment types [upgrade notes](/self-hosted/updates/#upgrades-index) before a multiversion upgrade.**
 
 ## Migrator environment variables
 
@@ -84,8 +83,8 @@ upgrade \
 
 **Required arguments**:
 
--   `--from`: The current Sourcegraph release version (_without the patch_; e.g., `v3.36`)
--   `--to`: The target Sourcegraph release version (_without the patch_; e.g., `v4.0`)
+-   `--from`: The current Sourcegraph release version (_without the patch_; e.g., `v7.5`)
+-   `--to`: The target Sourcegraph release version (_without the patch_; e.g., `v8.1`)
 
 **Optional arguments**:
 
@@ -122,7 +121,7 @@ drift \
 
 Exactly one of `--version` and `--file` must be supplied.
 
--   `--version`: The instance's current Sourcegraph release version _including a patch_ (e.g., `v3.42.1`).
+-   `--version`: The instance's current Sourcegraph release version _including a patch_ (e.g., `v8.1.1335`).
 -   `--file`: The filepath to a local schema description file. This is useful for airgapped instances that do not have access to the public Sourcegraph GitHub repository or the public GCS bucket where old revisions have been backfilled.
 -   `--ignore-migrator-update`: Controls whether to hard- or soft-fail if a newer migrator version is available. It is recommended to use the latest migrator version.
 
@@ -142,8 +141,8 @@ downgrade \
 
 **Required arguments**:
 
--   `--from`: The current Sourcegraph release version (_without the patch_; e.g., `v3.36`)
--   `--to`: The target Sourcegraph release version (_without the patch_; e.g., `v4.0`)
+-   `--from`: The current Sourcegraph release version (_without the patch_; e.g., `v8.1`)
+-   `--to`: The target Sourcegraph release version (_without the patch_; e.g., `v8.0`)
 
 **Optional arguments**:
 
@@ -298,8 +297,8 @@ For example here the `upgrade` command:
 ```yaml
 containers:
     - name: migrator
-      image: 'index.docker.io/sourcegraph/migrator:5.0.3'
-      args: ['upgrade', '--from=v3.41.0', '--to=v4.5.1']
+      image: 'index.docker.io/sourcegraph/migrator:{CURRENT_VERSION_NO_V}'
+      args: ['upgrade', '--from=v7.5', '--to=v8.1']
       envFrom:
 ```
 
@@ -326,10 +325,10 @@ Running migrator operations in helm takes advantage of the [sourcegraph-migrator
 Generally the migrator is run via the `helm upgrade`, for example:
 
 ```
-$ helm upgrade --install -n sourcegraph --set "migrator.args={drift,--db=frontend,--version=v3.39.1}" sourcegraph-migrator sourcegraph/sourcegraph-migrator --version 4.4.2
+$ helm upgrade --install -n sourcegraph --set "migrator.args={drift,--db=frontend,--version=v8.1.1335}" sourcegraph-migrator sourcegraph/sourcegraph-migrator --version {CURRENT_VERSION_NO_V}
 ```
 
-In the example above the `drift` operation is run with flags `--db` and `--version`. The migrator is run using image version `v4.4.2`.
+In the example above the `drift` operation is run with flags `--db` and `--version`. The migrator is run using the chart version for the latest Sourcegraph release.
 
 Arguments are set with the `--set "migrator.args={operation-arg,flag-arg-1,flag-arg-2}` portion of the command. Just like you would run commands in terminal, these are the args you are telling the migrator to run on initialization.
 
@@ -354,10 +353,10 @@ For example here the `upgrade` command:
 ```yaml
 migrator:
     container_name: migrator
-    image: 'index.docker.io/sourcegraph/migrator:5.0.3'
+    image: 'index.docker.io/sourcegraph/migrator:{CURRENT_VERSION_NO_V}'
     cpus: 0.5
     mem_limit: '500m'
-    command: ['upgrade', '--from=v3.41.0', '--to=v4.5.1']
+    command: ['upgrade', '--from=v7.5', '--to=v8.1']
     environment:
 ```
 
@@ -417,7 +416,7 @@ Observe the output of the `migrator` container via:
 $ docker logs migrator_$SOURCEGRAPH_VERSION
 ```
 
-The log output of the `migrator` should include `INFO`-level logs and successfully terminate with `migrator exited with code 0`. If you see an error message or any of the databases have been flagged as "dirty", please follow ["How to troubleshoot a dirty database"](/self-hosted/how-to/dirty-database). A dirty database will not affect your ability to use Sourcegraph however it will need to be resolved to upgrade further. If you are unable to resolve the issues, contact support at `mailto:support@sourcegraph.com` for further assistance. Otherwise, you are now safe to upgrade Sourcegraph.
+The log output of the `migrator` should include `INFO`-level logs and successfully terminate with `migrator exited with code 0`. If you see an error message or any of the databases have been flagged as "dirty", please follow ["How to troubleshoot a dirty database"](/self-hosted/how-to/dirty-database). A dirty database will not affect your ability to use Sourcegraph however it will need to be resolved to upgrade further. If you are unable to resolve the issues, contact support at [support@sourcegraph.com](mailto:support@sourcegraph.com) for further assistance. Otherwise, you are now safe to upgrade Sourcegraph.
 
 ### Local development
 
