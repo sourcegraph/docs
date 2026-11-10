@@ -33,7 +33,8 @@
  *    merged one. It is a Slack table block, or a line of text per row when
  *    the pages are not one table Slack takes. The
  *    post is looked for a week back (so a re-run by hand still finds it) and
- *    for up to 5 minutes (the app can post after this runs). Skipped when
+ *    for up to 5 minutes when the build failed, or 20 when it passed (the
+ *    app can post after this runs, sometimes minutes after). Skipped when
  *    SLACK_BOT_TOKEN or SLACK_CHANNEL_ID is unset; a Slack error is a
  *    warning, so the PR still hears about a failed build.
  * 5. When the build failed, each open PR gets a comment linking the Slack
@@ -53,7 +54,11 @@ const DRY_RUN = process.argv.includes('--dry-run');
 // A week, so a re-run by hand finds the post; the deployment ID match is
 // exact, so the wider window cannot pick a wrong post
 const SLACK_HISTORY_DAYS = 7;
-const SLACK_WAIT_MINUTES = 5;
+// How long to look for the Vercel app's post, by DEPLOYMENT_STATE. The app
+// has posted 12 minutes after a deployment was ready. A failed build's PR
+// comment waits for the post, so that wait stays short; nothing waits on a
+// build that passed
+const SLACK_WAIT_MINUTES = {failed: 5, success: 20};
 const SLACK_POLL_SECONDS = 15;
 // The preview-links workflow comments on the PR when the same deployment
 // event arrives, so it can still be running when this looks for its comment
@@ -298,7 +303,7 @@ function slackMessageText(message) {
 async function findVercelPost() {
 	const deploymentId = DEPLOYMENT_ID.replace(/^dpl_/, '');
 	const oldest = Date.now() / 1000 - SLACK_HISTORY_DAYS * 24 * 60 * 60;
-	const deadline = Date.now() + SLACK_WAIT_MINUTES * 60_000;
+	const deadline = Date.now() + SLACK_WAIT_MINUTES[DEPLOYMENT_STATE] * 60_000;
 	for (;;) {
 		// Newest first, a page at a time
 		const seen = [];
