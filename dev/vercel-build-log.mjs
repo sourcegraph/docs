@@ -28,8 +28,8 @@
  *    when the build passed, the table of docs pages the PR changed, copied
  *    from the preview-links workflow's PR comment: each page before, after,
  *    and its diff for an open PR; each page in production and its diff for a
- *    merged one. It is a Slack table when Slack takes it, else a line of
- *    text per row. The
+ *    merged one. It is a Slack table block, or a line of text per row when
+ *    the pages are not one table Slack takes. The
  *    post is looked for a week back (so a re-run by hand still finds it) and
  *    for up to 5 minutes (the app can post after this runs). Skipped when
  *    SLACK_BOT_TOKEN or SLACK_CHANNEL_ID is unset; a Slack error is a
@@ -520,30 +520,29 @@ async function changedPageRowsOf(pulls) {
 	return rows;
 }
 
-// The messages a file can be shared with, best first: the PR link, and the
-// changed pages as a table block, then as lines of text, which is all there
-// is when the pages are not one table Slack takes
-function fileMessages(pulls, error, changedPages) {
+// The message a file is shared with: the PR link, and the changed pages as
+// a table block, or as lines of text when they are not one table Slack takes
+function fileMessage(pulls, error, changedPages) {
 	const text = [
 		error && `> ${error}`,
 		`Build log for PR ${pullRequestLinks(pulls)}`
 	]
 		.filter(Boolean)
 		.join('\n');
-	const asText = {
-		initial_comment: [text, ...changedPages.map(slackTextRow)].join('\n')
-	};
 	const table = slackTable(changedPages);
 	if (!table) {
-		return [asText];
+		return {
+			initial_comment: [text, ...changedPages.map(slackTextRow)].join(
+				'\n'
+			)
+		};
 	}
-	const asTable = {
+	return {
 		blocks: JSON.stringify([
 			{type: 'section', text: {type: 'mrkdwn', text}},
 			table
 		])
 	};
-	return [asTable, asText];
 }
 
 // Slack takes files in three steps: ask for an upload URL, POST the bytes to
@@ -555,11 +554,11 @@ async function uploadLogToThread(post, pulls, {log, error}, changedPages) {
 	const shortSha = COMMIT_SHA.slice(0, 7);
 	// .txt, so Slack shows it inline instead of offering a download
 	const filename = `vercel-build-${shortSha}.txt`;
-	const messages = fileMessages(pulls, error, changedPages);
+	const message = fileMessage(pulls, error, changedPages);
 
 	if (DRY_RUN) {
 		console.log(
-			`[dry-run] would upload ${filename} (${log.length} bytes) to thread ${post.ts} in ${SLACK_CHANNEL_ID}:\n${messages.map(message => message.blocks ?? message.initial_comment).join('\nor, if Slack rejects that:\n')}`
+			`[dry-run] would upload ${filename} (${log.length} bytes) to thread ${post.ts} in ${SLACK_CHANNEL_ID}:\n${message.blocks ?? message.initial_comment}`
 		);
 		return undefined;
 	}
@@ -573,37 +572,25 @@ async function uploadLogToThread(post, pulls, {log, error}, changedPages) {
 			`Uploading ${filename} to Slack failed: ${upload.status} ${await upload.text()}`
 		);
 	}
-	// The log matters more than the table: when Slack rejects a message,
-	// share the file with the next one
-	for (const [index, message] of messages.entries()) {
-		try {
-			await slackApi('files.completeUploadExternal', {
-				files: JSON.stringify([
-					{id: fileId, title: `Vercel build log for ${shortSha}`}
-				]),
-				channel_id: SLACK_CHANNEL_ID,
-				thread_ts: post.ts,
-				...message
-			});
-			break;
-		} catch (error) {
-			if (index === messages.length - 1) {
-				throw error;
-			}
-			console.log(`${error.message}; sharing the file with text instead`);
-		}
-	}
+	await slackApi('files.completeUploadExternal', {
+		files: JSON.stringify([
+			{id: fileId, title: `Vercel build log for ${shortSha}`}
+		]),
+		channel_id: SLACK_CHANNEL_ID,
+		thread_ts: post.ts,
+		...message
+	});
 	console.log(
 		`Uploaded ${filename} to thread ${post.ts} in ${SLACK_CHANNEL_ID}`
 	);
 
 	// The upload response names only the file, so find the reply it made;
 	// fall back to the post itself rather than leave the PR without a link
-	const {messages: replies} = await slackApi('conversations.replies', {
+	const {messages} = await slackApi('conversations.replies', {
 		channel: SLACK_CHANNEL_ID,
 		ts: post.ts
 	});
-	const reply = replies.find(message =>
+	const reply = messages.find(message =>
 		message.files?.some(file => file.id === fileId)
 	);
 	const {permalink} = await slackApi('chat.getPermalink', {
