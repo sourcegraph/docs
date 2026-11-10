@@ -172,8 +172,9 @@ findings fail the check.
 `.github/workflows/preview-links.yml` runs `dev/preview-links.mjs`, which
 comments a table of the pages a PR changes: each page on production (before)
 and on the Vercel preview (after), opened at the first section the PR
-changes, and its diff on GitHub. `dev/vercel-build-log.mjs` reads that table;
-change the two together. To print the comment for a PR without posting it:
+changes, and its diff on GitHub. `dev/vercel-build-log.mjs` copies that table
+into Slack; change the two together. To print the comment for a PR without
+posting it:
 
 ```sh
 GH_TOKEN=$(gh auth token) GITHUB_REPOSITORY=sourcegraph/docs \
@@ -187,9 +188,10 @@ GH_TOKEN=$(gh auth token) GITHUB_REPOSITORY=sourcegraph/docs \
   Slack app's "failed to deploy" post in the `SLACK_CHANNEL_ID` channel
   and comments a link to it on the PR (see `dev/vercel-build-log.mjs`).
   The log itself never goes on the PR, since the repository is public.
-  A build that passed also lists the pages the PR changed in the Slack
-  reply, from the `preview-links.yml` comment: on the preview for an open
-  PR, in production for a merged one.
+  A build that passed also copies the table of changed pages from the
+  `preview-links.yml` comment into the Slack reply, one line per row: each
+  page before, after, and its diff for an open PR; each page in production
+  and its diff for a merged one.
 - It reads Vercel with the `VERCEL_TOKEN` repo secret, a token scoped to the
   `sourcegraph-docs` project that expires 2026-12-10; mint a new one with
   `POST /v3/user/tokens?teamId=<team>` and `projectId` in the body.

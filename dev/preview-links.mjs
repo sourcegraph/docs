@@ -7,8 +7,8 @@
  * PR, updated on each run; .github/workflows/preview-links.yml says when it
  * runs.
  *
- * dev/vercel-build-log.mjs reads the table (changedPageLines); change the
- * two together.
+ * dev/vercel-build-log.mjs copies the table into Slack (changedPageLines);
+ * change the two together.
  *
  * With --dry-run, the comment is printed instead of posted:
  *   GH_TOKEN=$(gh auth token) GITHUB_REPOSITORY=sourcegraph/docs \
@@ -246,17 +246,8 @@ async function commentBody(pull, previewUrl, pages) {
 	if (pages.length > MAX_PAGES) {
 		rows.push(`| …and ${pages.length - MAX_PAGES} more | | | |`);
 	}
-	const counts = ['modified', 'added', 'renamed', 'removed']
-		.map(kind => [pages.filter(page => kindOf(page) === kind).length, kind])
-		.filter(([count]) => count > 0)
-		.map(([count, kind]) => `${count} ${kind}`)
-		.join(', ');
 	return [
 		MARKER,
-		`Pages changed in this PR: ${pages.length} (${counts}). ` +
-			`Before is production, after is the preview of this PR; ` +
-			`both open at the first section this PR changes.`,
-		'',
 		'| Page | Before | After | Diff |',
 		'|---|---|---|---|',
 		...rows

@@ -25,9 +25,10 @@
  *    redacted.
  * 3. The log is uploaded into the thread of the Vercel Slack app's post for
  *    the deployment in SLACK_CHANNEL_ID, with a comment linking the PR and,
- *    when the build passed, the docs pages the PR changed, taken from the
- *    preview-links workflow's PR comment: on the preview for an open PR, in
- *    production for a merged one. The
+ *    when the build passed, the table of docs pages the PR changed, copied
+ *    from the preview-links workflow's PR comment: each page before, after,
+ *    and its diff for an open PR; each page in production and its diff for a
+ *    merged one. The
  *    post is looked for a week back (so a re-run by hand still finds it) and
  *    for up to 5 minutes (the app can post after this runs). Skipped when
  *    SLACK_BOT_TOKEN or SLACK_CHANNEL_ID is unset; a Slack error is a
@@ -352,37 +353,69 @@ function pullRequestLinks(pulls) {
 		.join(', ');
 }
 
-// The pages the PR changed, from the table in the preview-links workflow's PR
-// comment (dev/preview-links.mjs), as Slack links: each
-// `| \`/path\` | [prod](url) | [preview](url) | [diff](url) |` row becomes
-// `• <url|/path>`, pointing at the preview for an open PR and at production
-// for a merged one, where the pages now are, opened at the first section the
-// PR changed. A page the PR removed has no preview link and is left out. The
-// table's `…and N more` row is kept. Comments from before the table list
-// the pages as `- [/path](preview url)`.
-function changedPageLines(pull, commentBody) {
-	const production = Boolean(pull.merged_at);
-	const lines = [];
-	for (const line of commentBody.split('\n')) {
-		const link =
-			line.match(/^\| `(\/[^`]*)`.*\[preview\]\((https:\/\/[^)\s]+)\)/) ??
-			line.match(/^- \[([^\]]+)\]\((https:\/\/[^)\s]+)\)$/);
-		const more = line.match(/…and \d+ more/);
-		if (link) {
-			const [, path, previewUrl] = link;
-			const url = production
-				? `${PRODUCTION_SITE}${path}${new URL(previewUrl).hash}`
-				: previewUrl;
-			lines.push(`• <${url}|${escapeSlackText(path)}>`);
-		} else if (more) {
-			lines.push(`• ${more[0]}`);
+// GitHub Markdown `[text](url)` links as Slack's `<url|text>`
+function slackLinks(markdown) {
+	return escapeSlackText(markdown).replace(
+		/\[([^\]]+)\]\((https:\/\/[^)\s]+)\)/g,
+		'<$2|$1>'
+	);
+}
+
+// A link to a page on the preview, as the same page and section in
+// production. The table labels it `preview`; the list from before the table
+// labels it with the page's path
+function inProduction(markdown) {
+	return markdown.replace(
+		/\[(preview|\/[^\]]*)\]\((https:\/\/[^)\s]+)\)/,
+		(_, text, previewUrl) => {
+			const {pathname, hash} = new URL(previewUrl);
+			return `[${text === 'preview' ? 'prod' : text}](${PRODUCTION_SITE}${pathname}${hash})`;
 		}
+	);
+}
+
+// The table in the preview-links workflow's PR comment (dev/preview-links.mjs)
+// as Slack text, which has no tables: one line per row, its cells still
+// separated by ` | `, so
+// `| \`/path\` | [prod](url) | [preview](url) | [−1 +2](url) |` becomes
+// `\`/path\` | <url|prod> | <url|preview> | <url|−1 +2>`.
+//
+// A merged PR has no before to open: production is the after. Its rows lose
+// the Before column, and the After link points at production.
+//
+// Comments from before the table list the pages as `- [/path](preview url)`.
+function changedPageLines(pull, commentBody) {
+	const merged = Boolean(pull.merged_at);
+	const whereNow = markdown =>
+		slackLinks(merged ? inProduction(markdown) : markdown);
+	const lines = [];
+	let beforeColumn;
+	for (const line of commentBody.split('\n')) {
+		if (line.startsWith('- ')) {
+			lines.push(`• ${whereNow(line.slice(2))}`);
+			continue;
+		}
+		// Not a table row, or the `|---|---|` under the header
+		if (!line.startsWith('|') || /^[|\s:-]+$/.test(line)) {
+			continue;
+		}
+		const cells = line
+			.split('|')
+			.slice(1, -1)
+			.map(cell => cell.trim());
+		const header = cells[0] === 'Page';
+		if (header) {
+			beforeColumn = cells.indexOf('Before');
+		}
+		const row = cells
+			.filter(
+				(cell, column) => cell && !(merged && column === beforeColumn)
+			)
+			.map(whereNow)
+			.join(' | ');
+		lines.push(header ? `*${row}*` : row);
 	}
-	if (lines.length === 0) {
-		return [];
-	}
-	const where = production ? 'in production' : 'on the preview';
-	return [`Pages changed in this PR, ${where}:`, ...lines];
+	return lines;
 }
 
 // The preview-links workflow is started by the same deployment event as this
