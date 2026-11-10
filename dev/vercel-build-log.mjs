@@ -373,18 +373,29 @@ function inProduction(markdown) {
 	);
 }
 
+// A Diff link compares the PR's branches by name, and a merged PR's branch is
+// deleted: the same comparison, of the commits the PR merged at
+function ofMergedCommits(markdown, pull) {
+	return markdown.replace(
+		/(\/-\/compare\/)[^#)\s]+/,
+		`$1${pull.base.sha}...${pull.head.sha}`
+	);
+}
+
 // The rows of the table in the preview-links workflow's PR comment
 // (dev/preview-links.mjs), each a list of its cells, still Markdown:
 // `| \`/path\` | [prod](url) | [preview](url) | [−1 +2](url) |`.
 //
 // A merged PR has no before to open: production is the after. Its rows lose
-// the Before column, and the After link points at production.
+// the Before column, the After link points at production, and the Diff link
+// compares commits.
 //
 // Comments from before the table list the pages as `- [/path](preview url)`;
 // each is a row of one cell.
 function changedPageRows(pull, commentBody) {
 	const merged = Boolean(pull.merged_at);
-	const whereNow = markdown => (merged ? inProduction(markdown) : markdown);
+	const whereNow = markdown =>
+		merged ? ofMergedCommits(inProduction(markdown), pull) : markdown;
 	const rows = [];
 	let beforeColumn;
 	for (const line of commentBody.split('\n')) {

@@ -2,7 +2,8 @@
 /**
  * Comments on a pull request with a table of the docs pages it changes, so a
  * reviewer can compare them without reading the diff: each page before (on
- * production) and after (on the PR's Vercel preview), and its diff on GitHub.
+ * production) and after (on the PR's Vercel preview), and its diff on
+ * Sourcegraph.
  * Both page links open at the first section the PR changes. One comment per
  * PR, updated on each run; .github/workflows/preview-links.yml says when it
  * runs.
@@ -19,7 +20,6 @@
  * finished deployment; the PR is looked up from the commit).
  */
 
-import crypto from 'crypto';
 import {headingIds, routeFor} from './check-links.mjs';
 
 const DRY_RUN = process.argv.includes('--dry-run');
@@ -30,6 +30,9 @@ const MARKER = '<!-- preview-links-for-changed-pages -->';
 // Where the pages are before the PR merges (basePath in next.config.js);
 // preview deployments have no basePath
 const PRODUCTION_SITE = 'https://sourcegraph.com/docs';
+// The repository on Sourcegraph, whose compare page opens at one file of a
+// diff
+const SOURCEGRAPH_REPOSITORY = `https://sourcegraph.sourcegraph.com/r/github.com/${GITHUB_REPOSITORY}`;
 const MAX_PAGES = 40;
 // Vercel comments a few seconds after the PR opens
 const VERCEL_COMMENT_ATTEMPTS = 6;
@@ -208,19 +211,20 @@ function pageLabel(page) {
 	}
 }
 
-// GitHub anchors each file of a PR's diff with the SHA-256 of its path
+// A branch name or file path in a URL, with its slashes left readable
+const urlPath = text => encodeURIComponent(text).replaceAll('%2F', '/');
+
+// The file in Sourcegraph's comparison of the PR's branches. Neither trigger
+// of the workflow reaches a fork's PR, whose branch is not in this repository
 function diffLink(page, pull) {
-	const anchor = crypto
-		.createHash('sha256')
-		.update(page.filename)
-		.digest('hex');
+	const range = `${urlPath(pull.base.ref)}...${urlPath(pull.head.ref)}`;
 	const size = [
 		page.deletions && `−${page.deletions}`,
 		page.additions && `+${page.additions}`
 	]
 		.filter(Boolean)
 		.join(' ');
-	return `[${size || 'diff'}](${pull.html_url}/files#diff-${anchor})`;
+	return `[${size || 'diff'}](${SOURCEGRAPH_REPOSITORY}/-/compare/${range}#${urlPath(page.filename)})`;
 }
 
 async function commentBody(pull, previewUrl, pages) {

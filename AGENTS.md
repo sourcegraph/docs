@@ -172,9 +172,9 @@ findings fail the check.
 `.github/workflows/preview-links.yml` runs `dev/preview-links.mjs`, which
 comments a table of the pages a PR changes: each page on production (before)
 and on the Vercel preview (after), opened at the first section the PR
-changes, and its diff on GitHub. `dev/vercel-build-log.mjs` copies that table
-into Slack; change the two together. To print the comment for a PR without
-posting it:
+changes, and its diff on Sourcegraph. `dev/vercel-build-log.mjs` copies that
+table into Slack; change the two together. To print the comment for a PR
+without posting it:
 
 ```sh
 GH_TOKEN=$(gh auth token) GITHUB_REPOSITORY=sourcegraph/docs \
