@@ -23,7 +23,9 @@
  *    message when it recorded one (a build that fails before its first step,
  *    such as on an invalid vercel.json, has an error but no log lines), and
  *    redacted.
- * 3. The log is uploaded into the thread of the Vercel Slack app's post for
+ * 3. When the build passed, an earlier failure comment on each open PR is
+ *    updated to say so. This is before Slack, which it takes nothing from.
+ * 4. The log is uploaded into the thread of the Vercel Slack app's post for
  *    the deployment in SLACK_CHANNEL_ID, with a message linking the PR and,
  *    when the build passed, the table of docs pages the PR changed, copied
  *    from the preview-links workflow's PR comment: each page before, after,
@@ -34,9 +36,9 @@
  *    for up to 5 minutes (the app can post after this runs). Skipped when
  *    SLACK_BOT_TOKEN or SLACK_CHANNEL_ID is unset; a Slack error is a
  *    warning, so the PR still hears about a failed build.
- * 4. When the build failed, each open PR gets a comment linking the Slack
- *    reply, or just saying Slack when the upload did not happen. When it
- *    passed, an earlier failure comment is updated to say so.
+ * 5. When the build failed, each open PR gets a comment linking the Slack
+ *    reply, or just saying Slack when the upload did not happen. This is
+ *    after Slack, so the link is in the email GitHub sends for the comment.
  *
  * With --dry-run, steps 1 and 2 run, the Slack post is found, and what would
  * be uploaded and commented is printed instead.
@@ -741,6 +743,20 @@ async function main() {
 	const pulls = built.length > 0 ? built : linked;
 	const buildLog = await fetchBuildLog(deployment);
 
+	// Only open PRs get a comment: a production deployment's merged PR is
+	// linked from Slack, not commented on
+	const commentOnPullRequests = async slack => {
+		for (const pull of pulls.filter(pull => pull.state === 'open')) {
+			await commentOnPullRequest(pull, slack);
+		}
+	};
+
+	// Saying an earlier failure is resolved takes nothing from Slack, so it
+	// does not wait for the Vercel app's post
+	if (DEPLOYMENT_STATE === 'success') {
+		await commentOnPullRequests();
+	}
+
 	// A Slack problem is a warning: the PR should still hear about a failure
 	let slack = {};
 	try {
@@ -749,10 +765,10 @@ async function main() {
 		console.log(`::warning::${error.message}`);
 	}
 
-	// Only open PRs get a comment: a production deployment's merged PR is
-	// linked from Slack, not commented on
-	for (const pull of pulls.filter(pull => pull.state === 'open')) {
-		await commentOnPullRequest(pull, slack);
+	// A failure comment waits for the Slack reply: GitHub emails a comment
+	// when it is created, so a link added by a later edit is in no email
+	if (DEPLOYMENT_STATE === 'failed') {
+		await commentOnPullRequests(slack);
 	}
 }
 
