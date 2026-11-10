@@ -107,24 +107,32 @@ function stripFencedCodeBlocks(content) {
 	}).join('\n');
 }
 
+// The id the site gives each heading of MDX content, in page order, with the
+// index of the heading's line
+export function headingIds(content) {
+	const slugger = new GithubSlugger();
+	const headingRegex = /^#{1,6}\s+(.+)$/gm;
+	const contentWithoutCode = stripFencedCodeBlocks(content);
+	return [...contentWithoutCode.matchAll(headingRegex)].map(match => {
+		// rehype-slug slugs the heading's full text, with links reduced to their text:
+		// "How can I use [GitHub expression syntax](url) literally" -> "How can I use GitHub expression syntax literally"
+		const title = match[1].replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+		return {
+			id: slugger.slug(title.trim()),
+			line: contentWithoutCode.slice(0, match.index).split('\n').length - 1
+		};
+	});
+}
+
 // Extract anchor targets from MDX content: heading slugs, plus explicit
 // <a name="..."> and id="..." attributes
 export function extractHeadings(content) {
-	const slugger = new GithubSlugger();
-	const headingRegex = /^#{1,6}\s+(.+)$/gm;
 	const explicitAnchorRegex = /<[a-zA-Z][^>]*\s(?:id|name)=["']([^"']+)["']/g;
-	const headings = new Set();
+	const headings = new Set(headingIds(content).map(heading => heading.id));
 	
 	const contentWithoutCode = stripFencedCodeBlocks(content);
 	
 	let match;
-	while ((match = headingRegex.exec(contentWithoutCode)) !== null) {
-		// rehype-slug slugs the heading's full text, with links reduced to their text:
-		// "How can I use [GitHub expression syntax](url) literally" -> "How can I use GitHub expression syntax literally"
-		const title = match[1].replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
-		headings.add(slugger.slug(title.trim()));
-	}
-	
 	while ((match = explicitAnchorRegex.exec(contentWithoutCode)) !== null) {
 		headings.add(match[1]);
 	}

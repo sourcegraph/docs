@@ -352,21 +352,30 @@ function pullRequestLinks(pulls) {
 		.join(', ');
 }
 
-// The pages the PR changed, from the preview-links workflow's PR comment, as
-// Slack links: its `- [/path](preview url)` lines become `• <url|/path>`,
-// pointing at the preview for an open PR and at production for a merged one,
-// where the pages now are. The comment's `- …and N more` line is kept.
+// The pages the PR changed, from the table in the preview-links workflow's PR
+// comment (dev/preview-links.mjs), as Slack links: each
+// `| \`/path\` | [prod](url) | [preview](url) | [diff](url) |` row becomes
+// `• <url|/path>`, pointing at the preview for an open PR and at production
+// for a merged one, where the pages now are, opened at the first section the
+// PR changed. A page the PR removed has no preview link and is left out. The
+// table's `…and N more` row is kept. Comments from before the table list
+// the pages as `- [/path](preview url)`.
 function changedPageLines(pull, commentBody) {
 	const production = Boolean(pull.merged_at);
 	const lines = [];
 	for (const line of commentBody.split('\n')) {
-		const link = line.match(/^- \[([^\]]+)\]\((https:\/\/[^)\s]+)\)$/);
+		const link =
+			line.match(/^\| `(\/[^`]*)`.*\[preview\]\((https:\/\/[^)\s]+)\)/) ??
+			line.match(/^- \[([^\]]+)\]\((https:\/\/[^)\s]+)\)$/);
+		const more = line.match(/…and \d+ more/);
 		if (link) {
 			const [, path, previewUrl] = link;
-			const url = production ? `${PRODUCTION_SITE}${path}` : previewUrl;
+			const url = production
+				? `${PRODUCTION_SITE}${path}${new URL(previewUrl).hash}`
+				: previewUrl;
 			lines.push(`• <${url}|${escapeSlackText(path)}>`);
-		} else if (line.startsWith('- ')) {
-			lines.push(line.replace('- ', '• '));
+		} else if (more) {
+			lines.push(`• ${more[0]}`);
 		}
 	}
 	if (lines.length === 0) {

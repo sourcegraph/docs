@@ -167,6 +167,19 @@ marker, extra arguments, which paths to diff, whether to compare against a
 baseline of the base branch, an npm dependency to install, and whether
 findings fail the check.
 
+### Before and after links
+
+`.github/workflows/preview-links.yml` runs `dev/preview-links.mjs`, which
+comments a table of the pages a PR changes: each page on production (before)
+and on the Vercel preview (after), opened at the first section the PR
+changes, and its diff on GitHub. `dev/vercel-build-log.mjs` reads that table;
+change the two together. To print the comment for a PR without posting it:
+
+```sh
+GH_TOKEN=$(gh auth token) GITHUB_REPOSITORY=sourcegraph/docs \
+    PR_NUMBER=<pr> node dev/preview-links.mjs --dry-run
+```
+
 ### Vercel build failures
 
 - Vercel shows build logs only to its team members, so
