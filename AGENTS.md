@@ -189,9 +189,10 @@ GH_TOKEN=$(gh auth token) GITHUB_REPOSITORY=sourcegraph/docs \
   and comments a link to it on the PR (see `dev/vercel-build-log.mjs`).
   The log itself never goes on the PR, since the repository is public.
   A build that passed also copies the table of changed pages from the
-  `preview-links.yml` comment into the Slack reply, one line per row: each
-  page before, after, and its diff for an open PR; each page in production
-  and its diff for a merged one.
+  `preview-links.yml` comment into the Slack reply: each page before, after,
+  and its diff for an open PR; each page in production and its diff for a
+  merged one. It is a Slack table block, or a line of text per row when the
+  table is over Slack's 10,000 characters or Slack rejects it.
 - It reads Vercel with the `VERCEL_TOKEN` repo secret, a token scoped to the
   `sourcegraph-docs` project that expires 2026-12-10; mint a new one with
   `POST /v3/user/tokens?teamId=<team>` and `projectId` in the body.

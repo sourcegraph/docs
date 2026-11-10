@@ -24,11 +24,12 @@
  *    such as on an invalid vercel.json, has an error but no log lines), and
  *    redacted.
  * 3. The log is uploaded into the thread of the Vercel Slack app's post for
- *    the deployment in SLACK_CHANNEL_ID, with a comment linking the PR and,
+ *    the deployment in SLACK_CHANNEL_ID, with a message linking the PR and,
  *    when the build passed, the table of docs pages the PR changed, copied
  *    from the preview-links workflow's PR comment: each page before, after,
  *    and its diff for an open PR; each page in production and its diff for a
- *    merged one. The
+ *    merged one. It is a Slack table when Slack takes it, else a line of
+ *    text per row. The
  *    post is looked for a week back (so a re-run by hand still finds it) and
  *    for up to 5 minutes (the app can post after this runs). Skipped when
  *    SLACK_BOT_TOKEN or SLACK_CHANNEL_ID is unset; a Slack error is a
@@ -56,6 +57,8 @@ const SLACK_POLL_SECONDS = 15;
 // event arrives, so it can still be running when this looks for its comment
 const PREVIEW_LINKS_WAIT_MINUTES = 1;
 const PREVIEW_LINKS_POLL_SECONDS = 10;
+// What the cells of a Slack table block can hold in all
+const SLACK_TABLE_CHARACTERS = 10_000;
 
 const API_URL = process.env.GITHUB_API_URL ?? 'https://api.github.com';
 const REPOSITORY = process.env.GITHUB_REPOSITORY;
@@ -257,7 +260,11 @@ async function slackApi(method, parameters) {
 	});
 	const result = await response.json();
 	if (!result.ok) {
-		throw new Error(`Slack ${method} failed: ${result.error}`);
+		// What is wrong with the blocks, when it is them
+		const details = result.response_metadata?.messages?.join('; ');
+		throw new Error(
+			`Slack ${method} failed: ${result.error}${details ? ` (${details})` : ''}`
+		);
 	}
 	return result;
 }
@@ -353,14 +360,6 @@ function pullRequestLinks(pulls) {
 		.join(', ');
 }
 
-// GitHub Markdown `[text](url)` links as Slack's `<url|text>`
-function slackLinks(markdown) {
-	return escapeSlackText(markdown).replace(
-		/\[([^\]]+)\]\((https:\/\/[^)\s]+)\)/g,
-		'<$2|$1>'
-	);
-}
-
 // A link to a page on the preview, as the same page and section in
 // production. The table labels it `preview`; the list from before the table
 // labels it with the page's path
@@ -374,25 +373,23 @@ function inProduction(markdown) {
 	);
 }
 
-// The table in the preview-links workflow's PR comment (dev/preview-links.mjs)
-// as Slack text, which has no tables: one line per row, its cells still
-// separated by ` | `, so
-// `| \`/path\` | [prod](url) | [preview](url) | [−1 +2](url) |` becomes
-// `\`/path\` | <url|prod> | <url|preview> | <url|−1 +2>`.
+// The rows of the table in the preview-links workflow's PR comment
+// (dev/preview-links.mjs), each a list of its cells, still Markdown:
+// `| \`/path\` | [prod](url) | [preview](url) | [−1 +2](url) |`.
 //
 // A merged PR has no before to open: production is the after. Its rows lose
 // the Before column, and the After link points at production.
 //
-// Comments from before the table list the pages as `- [/path](preview url)`.
-function changedPageLines(pull, commentBody) {
+// Comments from before the table list the pages as `- [/path](preview url)`;
+// each is a row of one cell.
+function changedPageRows(pull, commentBody) {
 	const merged = Boolean(pull.merged_at);
-	const whereNow = markdown =>
-		slackLinks(merged ? inProduction(markdown) : markdown);
-	const lines = [];
+	const whereNow = markdown => (merged ? inProduction(markdown) : markdown);
+	const rows = [];
 	let beforeColumn;
 	for (const line of commentBody.split('\n')) {
 		if (line.startsWith('- ')) {
-			lines.push(`• ${whereNow(line.slice(2))}`);
+			rows.push([`• ${whereNow(line.slice(2))}`]);
 			continue;
 		}
 		// Not a table row, or the `|---|---|` under the header
@@ -403,25 +400,88 @@ function changedPageLines(pull, commentBody) {
 			.split('|')
 			.slice(1, -1)
 			.map(cell => cell.trim());
-		const header = cells[0] === 'Page';
-		if (header) {
+		if (cells[0] === 'Page') {
 			beforeColumn = cells.indexOf('Before');
 		}
-		const row = cells
-			.filter(
-				(cell, column) => cell && !(merged && column === beforeColumn)
-			)
-			.map(whereNow)
-			.join(' | ');
-		lines.push(header ? `*${row}*` : row);
+		rows.push(
+			cells
+				.filter((_, column) => !(merged && column === beforeColumn))
+				.map(whereNow)
+		);
 	}
-	return lines;
+	return rows;
+}
+
+const isHeader = cells => cells[0] === 'Page';
+
+// A row as a line of Slack message text, which has no tables: its cells
+// separated by ` | `, with `[text](url)` links as Slack's `<url|text>`
+function slackTextRow(cells) {
+	const line = cells
+		.filter(Boolean)
+		.map(cell =>
+			escapeSlackText(cell).replace(
+				/\[([^\]]+)\]\((https:\/\/[^)\s]+)\)/g,
+				'<$2|$1>'
+			)
+		)
+		.join(' | ');
+	return isHeader(cells) ? `*${line}*` : line;
+}
+
+// A Markdown cell as a cell of a Slack table block: `code`, `[text](url)`
+// links, and the text between them. An empty cell gets the dash a page with
+// no before or after has
+function slackTableCell(markdown) {
+	const elements = [];
+	let end = 0;
+	for (const match of markdown.matchAll(
+		/`([^`]+)`|\[([^\]]+)\]\((https:\/\/[^)\s]+)\)/g
+	)) {
+		const [whole, code, text, url] = match;
+		if (match.index > end) {
+			elements.push({
+				type: 'text',
+				text: markdown.slice(end, match.index)
+			});
+		}
+		elements.push(
+			code
+				? {type: 'text', text: code, style: {code: true}}
+				: {type: 'link', url, text}
+		);
+		end = match.index + whole.length;
+	}
+	if (end < markdown.length || elements.length === 0) {
+		elements.push({type: 'text', text: markdown.slice(end) || '—'});
+	}
+	return {
+		type: 'rich_text',
+		elements: [{type: 'rich_text_section', elements}]
+	};
+}
+
+// The rows as a Slack table block, or nothing when they are not one table
+// Slack takes: a message holds one table (two PRs at one commit have one
+// each), its rows have the same number of cells (the list from before the
+// table has no header), and its cells hold SLACK_TABLE_CHARACTERS in all.
+// The Markdown is counted, which is longer than the text and URLs in it
+function slackTable(rows) {
+	const oneTable =
+		rows.length > 0 &&
+		rows.filter(isHeader).length === 1 &&
+		isHeader(rows[0]) &&
+		rows.every(cells => cells.length === rows[0].length);
+	if (!oneTable || rows.flat().join('').length > SLACK_TABLE_CHARACTERS) {
+		return undefined;
+	}
+	return {type: 'table', rows: rows.map(cells => cells.map(slackTableCell))};
 }
 
 // The preview-links workflow is started by the same deployment event as this
 // one, so an open PR gets a minute to be commented on. A merged PR's comment
 // is either there already or never coming.
-async function findChangedPageLines(pull) {
+async function findChangedPageRows(pull) {
 	const wait = pull.state === 'open' ? PREVIEW_LINKS_WAIT_MINUTES : 0;
 	const deadline = Date.now() + wait * 60_000;
 	for (;;) {
@@ -432,7 +492,7 @@ async function findChangedPageLines(pull) {
 			comment.body.includes(PREVIEW_LINKS_MARKER)
 		);
 		if (comment) {
-			return changedPageLines(pull, comment.body);
+			return changedPageRows(pull, comment.body);
 		}
 		if (Date.now() >= deadline) {
 			console.log(
@@ -447,39 +507,59 @@ async function findChangedPageLines(pull) {
 	}
 }
 
-// Links to the changed pages for a deployment that built; a failed build
+// The table of changed pages for a deployment that built; a failed build
 // changed nothing anyone can open
-async function changedPageLinks(pulls) {
+async function changedPageRowsOf(pulls) {
 	if (DEPLOYMENT_STATE !== 'success') {
 		return [];
 	}
-	const lines = [];
+	const rows = [];
 	for (const pull of pulls) {
-		lines.push(...(await findChangedPageLines(pull)));
+		rows.push(...(await findChangedPageRows(pull)));
 	}
-	return lines;
+	return rows;
+}
+
+// The messages a file can be shared with, best first: the PR link, and the
+// changed pages as a table block, then as lines of text, which is all there
+// is when the pages are not one table Slack takes
+function fileMessages(pulls, error, changedPages) {
+	const text = [
+		error && `> ${error}`,
+		`Build log for PR ${pullRequestLinks(pulls)}`
+	]
+		.filter(Boolean)
+		.join('\n');
+	const asText = {
+		initial_comment: [text, ...changedPages.map(slackTextRow)].join('\n')
+	};
+	const table = slackTable(changedPages);
+	if (!table) {
+		return [asText];
+	}
+	const asTable = {
+		blocks: JSON.stringify([
+			{type: 'section', text: {type: 'mrkdwn', text}},
+			table
+		])
+	};
+	return [asTable, asText];
 }
 
 // Slack takes files in three steps: ask for an upload URL, POST the bytes to
 // it, then say which channel and thread to share the file in. The PR link
-// and page links ride on the file's comment, which is the one message the
+// and changed pages ride on the file's message, which is the one message the
 // bot can post without chat:write. Returns the permalink of the reply
 // carrying the file, for the PR comment.
 async function uploadLogToThread(post, pulls, {log, error}, changedPages) {
 	const shortSha = COMMIT_SHA.slice(0, 7);
 	// .txt, so Slack shows it inline instead of offering a download
 	const filename = `vercel-build-${shortSha}.txt`;
-	const initialComment = [
-		error && `> ${error}`,
-		`Build log for PR ${pullRequestLinks(pulls)}`,
-		...changedPages
-	]
-		.filter(Boolean)
-		.join('\n');
+	const messages = fileMessages(pulls, error, changedPages);
 
 	if (DRY_RUN) {
 		console.log(
-			`[dry-run] would upload ${filename} (${log.length} bytes) to thread ${post.ts} in ${SLACK_CHANNEL_ID}:\n${initialComment}`
+			`[dry-run] would upload ${filename} (${log.length} bytes) to thread ${post.ts} in ${SLACK_CHANNEL_ID}:\n${messages.map(message => message.blocks ?? message.initial_comment).join('\nor, if Slack rejects that:\n')}`
 		);
 		return undefined;
 	}
@@ -493,25 +573,37 @@ async function uploadLogToThread(post, pulls, {log, error}, changedPages) {
 			`Uploading ${filename} to Slack failed: ${upload.status} ${await upload.text()}`
 		);
 	}
-	await slackApi('files.completeUploadExternal', {
-		files: JSON.stringify([
-			{id: fileId, title: `Vercel build log for ${shortSha}`}
-		]),
-		channel_id: SLACK_CHANNEL_ID,
-		thread_ts: post.ts,
-		initial_comment: initialComment
-	});
+	// The log matters more than the table: when Slack rejects a message,
+	// share the file with the next one
+	for (const [index, message] of messages.entries()) {
+		try {
+			await slackApi('files.completeUploadExternal', {
+				files: JSON.stringify([
+					{id: fileId, title: `Vercel build log for ${shortSha}`}
+				]),
+				channel_id: SLACK_CHANNEL_ID,
+				thread_ts: post.ts,
+				...message
+			});
+			break;
+		} catch (error) {
+			if (index === messages.length - 1) {
+				throw error;
+			}
+			console.log(`${error.message}; sharing the file with text instead`);
+		}
+	}
 	console.log(
 		`Uploaded ${filename} to thread ${post.ts} in ${SLACK_CHANNEL_ID}`
 	);
 
 	// The upload response names only the file, so find the reply it made;
 	// fall back to the post itself rather than leave the PR without a link
-	const {messages} = await slackApi('conversations.replies', {
+	const {messages: replies} = await slackApi('conversations.replies', {
 		channel: SLACK_CHANNEL_ID,
 		ts: post.ts
 	});
-	const reply = messages.find(message =>
+	const reply = replies.find(message =>
 		message.files?.some(file => file.id === fileId)
 	);
 	const {permalink} = await slackApi('chat.getPermalink', {
@@ -547,7 +639,7 @@ async function attachLogInSlack(pulls, buildLog) {
 	}
 	// After the post is found, so the preview-links workflow has had that
 	// long to comment too
-	const changedPages = await changedPageLinks(pulls);
+	const changedPages = await changedPageRowsOf(pulls);
 	const permalink = await uploadLogToThread(
 		post,
 		pulls,

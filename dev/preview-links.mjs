@@ -7,7 +7,7 @@
  * PR, updated on each run; .github/workflows/preview-links.yml says when it
  * runs.
  *
- * dev/vercel-build-log.mjs copies the table into Slack (changedPageLines);
+ * dev/vercel-build-log.mjs copies the table into Slack (changedPageRows);
  * change the two together.
  *
  * With --dry-run, the comment is printed instead of posted:
