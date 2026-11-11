@@ -134,6 +134,9 @@ git diff -U0 "$base" | pnpm run check links --check-anchors --check-self-links \
   `docs/`, about 1,400 URLs in a minute. stderr counts, by host, the URLs it
   could not verify; expect HTTP 429 from sourcegraph.com, which rate limits
   `/search` links
+- `SRC_ACCESS_TOKEN`, when set, authenticates `--check-external` requests to
+  `SRC_ENDPOINT` (default `https://sourcegraph.com`) and to no other host. A
+  token the instance rejects turns its links into unverified HTTP 401s
 
 ### PR check comments
 

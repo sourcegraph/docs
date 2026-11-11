@@ -36,7 +36,9 @@
  *   --check-external       Request every external link, or with --diff only those on
  *                          an added line, and report 404s and 410s. Follows redirects
  *                          and ignores #anchors. Other statuses and network errors
- *                          are not findings; stderr counts them, by host
+ *                          are not findings; stderr counts them, by host.
+ *                          SRC_ACCESS_TOKEN, when set, authenticates requests to
+ *                          SRC_ENDPOINT (default https://sourcegraph.com)
  *   --review <file>        Write a GitHub pull request review (JSON body for
  *                          POST /repos/{owner}/{repo}/pulls/{n}/reviews) with one
  *                          suggested-change comment per added line that has a fix
@@ -433,6 +435,19 @@ function isExternalLink(url) {
 	}
 }
 
+// The Sourcegraph instance and access token that src-cli reads from the environment.
+// The token is sent to that instance only; fetch drops it on a redirect to another origin.
+const SOURCEGRAPH_ORIGIN = (process.env.SRC_ENDPOINT || 'https://sourcegraph.com').replace(/\/+$/, '');
+const SOURCEGRAPH_ACCESS_TOKEN = process.env.SRC_ACCESS_TOKEN;
+
+function requestHeaders(url) {
+	const headers = { 'user-agent': 'sourcegraph-docs-check-links (+https://github.com/sourcegraph/docs)' };
+	if (SOURCEGRAPH_ACCESS_TOKEN && new URL(url).origin === SOURCEGRAPH_ORIGIN) {
+		headers.authorization = `token ${SOURCEGRAPH_ACCESS_TOKEN}`;
+	}
+	return headers;
+}
+
 // HTTP status of url after redirects, or Node's code for a network error or timeout.
 // HEAD first; some servers refuse or misreport HEAD, so an error status is
 // confirmed with a GET whose body is not read.
@@ -442,7 +457,7 @@ async function probeUrl(url) {
 			method,
 			redirect: 'follow',
 			signal: AbortSignal.timeout(15_000),
-			headers: { 'user-agent': 'sourcegraph-docs-check-links (+https://github.com/sourcegraph/docs)' }
+			headers: requestHeaders(url)
 		});
 	try {
 		let response = await request('HEAD');
