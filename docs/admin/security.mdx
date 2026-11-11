@@ -9,16 +9,16 @@ This page lists the settings that strengthen the security posture of a Sourcegra
 Most settings on this page are in the advanced configuration. See [how to view and edit the advanced configuration](/admin/config/site-config#view-and-edit-site-configuration), and the [advanced configuration reference](/admin/config/site-config#reference) for every setting's description and default.
 
 <Callout type="note">
-	On [Sourcegraph Cloud](/cloud/), Sourcegraph operates the deployment, so the
-	steps that involve the reverse proxy, environment variables, or the deployment
-	itself don't apply. The advanced configuration settings do.
+	Items tagged <Badge variant="outline">Self-hosted</Badge> apply only to
+	self-hosted instances. On [Sourcegraph Cloud](/cloud/), Sourcegraph manages
+	them for you.
 </Callout>
 
 ## Before you expose the instance
 
-1. **Create the first administrator account right away.** The first account created on a new instance becomes a site administrator, whatever the sign-up settings are. Create it before the instance is reachable by anyone else.
-2. **Serve Sourcegraph over HTTPS only.** Terminate TLS at the reverse proxy in front of Sourcegraph, redirect HTTP to HTTPS, and send an HSTS header. See [HTTP and HTTPS configuration](/self-hosted/http-https-configuration).
-3. **Set `externalURL` to the `https://` URL of the instance**, such as `https://sourcegraph.example.com`. Sourcegraph sets the `Secure` attribute on its session cookie when `externalURL` uses `https`, so browsers never send the cookie over plain HTTP.
+1. <Badge variant="outline">Self-hosted</Badge> **Create the first administrator account before anyone else can reach the instance.** Until an account exists, every visitor sees the setup page, and the first account created there becomes a site administrator, whatever the sign-up settings are. Complete the setup page while the instance is reachable only by you.
+2. <Badge variant="outline">Self-hosted</Badge> **Serve Sourcegraph over HTTPS only.** Terminate TLS at the reverse proxy in front of Sourcegraph, redirect HTTP to HTTPS, and send an HSTS header. See [HTTP and HTTPS configuration](/self-hosted/http-https-configuration).
+3. <Badge variant="outline">Self-hosted</Badge> **Set `externalURL` to the `https://` URL of the instance**, such as `https://sourcegraph.example.com`. Sourcegraph sets the `Secure` attribute on its session cookie when `externalURL` uses `https`, so browsers never send the cookie over plain HTTP.
 
 ## Control who can sign in
 
@@ -59,7 +59,7 @@ If you keep the `builtin` provider:
 
 ### Allow only known IP addresses
 
-`auth.allowedIpAddress` rejects every request whose address is not on the allowlist. It runs before authentication, so it also covers the sign-in page and the API.
+<Badge variant="outline">Self-hosted</Badge> `auth.allowedIpAddress` rejects every request whose address is not on the allowlist. It runs before authentication, so it also covers the sign-in page and the API.
 
 ```json
 {
@@ -87,7 +87,7 @@ Before you enable it:
 
 1. **Keep `corsOrigin` limited** to the origins of the code host integrations you use. Each origin listed can send cross-origin requests with users' cookies.
 2. **Leave `auth.allowEmbeddedAuth` off** unless an internal application must embed the sign-in page. It protects the sign-in and sign-up pages from clickjacking.
-3. **Filter outbound connections.** `EXTERNAL_DENY_LIST` and `UNTRUSTED_EXTERNAL_ALLOW_LIST` limit which hosts Sourcegraph and user-supplied URLs can reach. See [outgoing connection filtering](/self-hosted/network-filtering).
+3. <Badge variant="outline">Self-hosted</Badge> **Filter outbound connections.** `EXTERNAL_DENY_LIST` and `UNTRUSTED_EXTERNAL_ALLOW_LIST` limit which hosts Sourcegraph and user-supplied URLs can reach. See [outgoing connection filtering](/self-hosted/network-filtering).
 4. **Verify TLS to internal services.** Add your internal root CA to `tls.external.certificates` instead of setting `insecureSkipVerify`. See [trusting TLS certificates using internal PKI](/self-hosted/private-network#trusting-tls-certificates-using-internal-pki).
 
 ## Protect code and data
@@ -95,14 +95,14 @@ Before you enable it:
 1. **Enforce repository permissions on every code host connection.** A new code host connection doesn't enforce repository permissions: every user can see every repository it syncs, including repositories that are private on the code host. Add `authorization` to each connection's configuration (`enforcePermissions` for Azure DevOps) and configure the matching authentication provider. See [getting started with repository permissions](/admin/permissions/#getting-started).
 2. **Decide whether administrators bypass permissions.** By default, site administrators can see every repository. Set `authz.enforceForSiteAdmins` to `true` to apply repository permissions to them as well. See [administrators and repository permissions](/admin/permissions/#administrators).
 3. **Grant features by role.** Use [access control](/admin/access-control/) to limit features such as Batch Changes to the users who need them.
-4. **Encrypt secrets at rest.** `encryption.keys` encrypts code host tokens, user OAuth tokens, webhook secrets, executor secrets, and other sensitive database columns with a key in Cloud KMS, AWS KMS, or a mounted file. See [on-disk database encryption](/self-hosted/encryption).
+4. <Badge variant="outline">Self-hosted</Badge> **Encrypt secrets at rest.** `encryption.keys` encrypts code host tokens, user OAuth tokens, webhook secrets, executor secrets, and other sensitive database columns with a key in Cloud KMS, AWS KMS, or a mounted file. See [on-disk database encryption](/self-hosted/encryption).
 5. **Keep sensitive code away from agents.** [Agent context filters](/context-filters) hide the repositories and files you list from the Deep Search and Agentic Batch Changes agents, so that they never reach a model provider.
 
 ## Reduce the attack surface
 
 1. **Turn off features you don't use**, such as `deepSearch.enabled`, `batchChanges.enabled`, and `mcp.enabled`. When `mcp.enabled` is `false`, the MCP endpoints return 404.
 2. **Limit MCP access.** Disable individual tools with `mcp.tools.disabled`. Once your MCP clients use pre-registered OAuth clients, [disable Dynamic Client Registration](/api/mcp/authentication#disable-dynamic-client-registration).
-3. **Don't enable HTML injection.** The `htmlHeadTop`, `htmlHeadBottom`, `htmlBodyTop`, and `htmlBodyBottom` settings add raw HTML and scripts to every page, and take effect only when the `ENABLE_INJECT_HTML` environment variable is `true`. Leave that variable unset so that the advanced configuration cannot run scripts in users' browsers.
+3. <Badge variant="outline">Self-hosted</Badge> **Don't enable HTML injection.** The `htmlHeadTop`, `htmlHeadBottom`, `htmlBodyTop`, and `htmlBodyBottom` settings add raw HTML and scripts to every page, and take effect only when the `ENABLE_INJECT_HTML` environment variable is `true`. Leave that variable unset so that the advanced configuration cannot run scripts in users' browsers.
 4. **Require proof of code host access for SCIP uploads.** With `lsifEnforceAuth` set to `true`, users without the upload permission must show a code host token with write access to the repository. See [indexing a Go repository](/code-navigation/how-to/index-a-go-repository) for the token the upload needs.
 5. **Isolate executors.** Use a long random `executors.accessToken`, run jobs in [Firecracker](/admin/executors#sandboxing-model) where you can, and store credentials as [executor secrets](/admin/executors/executor-secrets).
 6. **Restrict Batch Changes.** `batchChanges.containerRegistryAllowlist` limits which registries batch change steps pull images from, and `batchChanges.restrictMergeToAdmins` lets only site administrators merge changesets.
@@ -110,6 +110,6 @@ Before you enable it:
 
 ## Monitor the instance
 
-1. **Send audit logs to your SIEM.** The [audit log](/admin/audit-log) records authentication, user management, and configuration changes, and [security event logs](/admin/security-event-logs) record security-relevant actions.
+1. **Send audit logs to your SIEM.** The [audit log](/admin/audit-log) records authentication, user management, and configuration changes, and [security event logs](/admin/security-event-logs) record security-relevant actions. On Sourcegraph Cloud, see [Cloud audit logs](/cloud/#audit-logs).
 2. **Review outbound requests.** The [outbound request log](/admin/outbound-request-log) shows the requests Sourcegraph makes to code hosts and other services.
-3. **Stay up to date.** Security fixes ship in regular releases. See [updating Sourcegraph](/self-hosted/updates).
+3. <Badge variant="outline">Self-hosted</Badge> **Stay up to date.** Security fixes ship in regular releases. See [updating Sourcegraph](/self-hosted/updates).
