@@ -1,0 +1,115 @@
+# Setting Up Sourcegraph Securely
+
+<TierCallout>
+	Supported on [Enterprise](/pricing/plans/enterprise) plans.
+</TierCallout>
+
+This page lists the settings that strengthen the security posture of a Sourcegraph instance and what each one protects against. Work through it when you deploy a new instance, and review it after major changes to authentication, code hosts, or network topology.
+
+Most settings on this page are in the advanced configuration. See [how to view and edit the advanced configuration](/admin/config/site-config#view-and-edit-site-configuration), and the [advanced configuration reference](/admin/config/site-config#reference) for every setting's description and default.
+
+<Callout type="note">
+	On [Sourcegraph Cloud](/cloud/), Sourcegraph operates the deployment, so the
+	steps that involve the reverse proxy, environment variables, or the deployment
+	itself don't apply. The advanced configuration settings do.
+</Callout>
+
+## Before you expose the instance
+
+1. **Create the first administrator account right away.** The first account created on a new instance becomes a site administrator, whatever the sign-up settings are. Create it before the instance is reachable by anyone else.
+2. **Serve Sourcegraph over HTTPS only.** Terminate TLS at the reverse proxy in front of Sourcegraph, redirect HTTP to HTTPS, and send an HSTS header. See [HTTP and HTTPS configuration](/self-hosted/http-https-configuration).
+3. **Set `externalURL` to the `https://` URL of the instance**, such as `https://sourcegraph.example.com`. Sourcegraph sets the `Secure` attribute on its session cookie when `externalURL` uses `https`, so browsers never send the cookie over plain HTTP.
+
+## Control who can sign in
+
+1. **Use your identity provider.** Sign-in through [SAML](/admin/auth/saml/), [OpenID Connect](/admin/auth/#openid-connect), or your code host's OAuth applies your organization's MFA and offboarding to Sourcegraph. See [choosing an authentication provider](/admin/auth/#recommendations).
+2. **Remove the `builtin` provider, or turn off self sign-up.** Once SSO works, remove `builtin` from `auth.providers` so that no local passwords exist. If you keep `builtin`, set `allowSignup` to `false` on it explicitly, so that administrators create every account. See [builtin password authentication](/admin/auth/builtin).
+3. **Turn off account requests if you don't review them.** With sign-up off, the sign-in page lets anyone request an account unless `auth.accessRequest.enabled` is `false`. See [disable account requests](/admin/auth/builtin#disable-account-requests-from-users).
+4. **Secure organization invitations.** Any member of an [organization](/admin/organizations) can invite other users to it. Invitations can't create accounts: they only add existing users. There is no setting that turns invitations off, so set `organizationInvitations.signingKey` to a random base64-encoded key, such as the output of `openssl rand -base64 32`. Without a key, Sourcegraph signs invitation links with an empty key, which doesn't protect them.
+5. **Restrict sign-up through other providers too.** `allowSignup` on `builtin` doesn't apply to other providers. Set `allowSignup` on each provider, and limit code host OAuth to your organization, such as with `allowOrgs` for [GitHub](/admin/auth/#how-to-control-user-sign-up-and-sign-in-with-github-auth-provider) or `allowGroups` for [GitLab](/admin/auth/#how-to-control-user-sign-up-and-sign-in-with-gitlab-auth-provider). With github.com and open sign-up, anyone with a GitHub account can sign in.
+6. **Require verified email addresses from OpenID Connect.** Sourcegraph links an OpenID Connect identity to the account with the same email address. Set `requireEmailVerified` to `true` on each `openidconnect` provider, so that Sourcegraph rejects a sign-in unless the provider returns `email_verified: true`, and no one can claim an email address they don't own. Microsoft Entra ID doesn't send the `email_verified` claim by default, so with this setting on, Entra ID users cannot sign in. For Entra ID, leave it off, or use [SAML](/admin/auth/saml/) instead.
+7. **Deprovision users automatically.** [SCIM](/admin/scim) deactivates Sourcegraph users when they are removed in your identity provider. Use a long random value for `scim.authToken`, since it grants user management.
+8. **Keep `auth.enableUsernameChanges` off** when you sync repository permissions or sign in with SSO. A user who renames their account could take a username that maps to another person's permissions. See [Authentication and authorization](/admin/config/authorization-and-authentication#authentication).
+
+### Strengthen local passwords
+
+If you keep the `builtin` provider:
+
+1. **Require strong passwords.** Raise `auth.minPasswordLength`, and enable `auth.passwordPolicy` to require numbers, mixed case, and special characters.
+2. **Tune account lockout.** `auth.lockout` locks an account after repeated failed sign-in attempts. To let users unlock their account by email, set `auth.unlockAccountLinkSigningKey`. See [account lockout](/admin/auth/builtin#account-lockout).
+3. **Keep password reset links short-lived** with `auth.passwordResetLinkExpiry`.
+
+## Limit sessions and tokens
+
+1. **Shorten sessions.** `auth.sessionExpiry` limits how long a session lasts, and `auth.maxSessionIdleDuration` signs out sessions that make no requests. Both accept Go durations of at least one hour:
+
+    ```json
+    {
+    	"auth.sessionExpiry": "168h",
+    	"auth.maxSessionIdleDuration": "8h"
+    }
+    ```
+
+2. **Restrict access tokens.** In `auth.accessTokens`, set `allow` to `site-admin-create` or `none` if regular users don't need tokens. Set `allowNoExpiration` to `false` explicitly, so that no one can create a token that never expires, and shorten `expirationOptionDays` and `defaultExpirationDays` to match your policy. See [managing access tokens](/cli/how-tos/managing-access-tokens).
+3. **Require OAuth for the src CLI.** Set `srcCli.allowAccessTokenAuth` to `false` to reject access tokens sent by the src CLI, so that users sign in with [`src login`](/cli/quickstart#oauth-login) instead of storing a long-lived token. The src CLI is identified by its `User-Agent`, so treat this as a policy nudge, not a hard boundary.
+4. **Use service accounts for automation.** Give CI and integrations a [service account](/admin/service-accounts) with only the roles it needs, instead of a person's token.
+5. **Review OAuth apps.** Remove [OAuth apps](/admin/oauth-apps) that are no longer used.
+
+## Restrict network access
+
+### Allow only known IP addresses
+
+`auth.allowedIpAddress` rejects every request whose address is not on the allowlist. It runs before authentication, so it also covers the sign-in page and the API.
+
+```json
+{
+	"auth.allowedIpAddress": {
+		"enabled": true,
+		// Addresses that may open connections to Sourcegraph, such as your load balancer.
+		"clientIpAddress": ["10.0.0.0/24"],
+		// Addresses of end users, read from userIpRequestHeaders.
+		"userIpAddress": ["203.0.113.0/24"],
+		"userIpRequestHeaders": ["X-Forwarded-For"],
+		// Internal services that skip the user check, such as the Kubernetes pod range.
+		"trustedClientIpAddress": ["10.8.0.0/14"],
+		"errorMessageTemplate": "Access from {{.UserIP}} is not allowed. Contact your Sourcegraph administrator."
+	}
+}
+```
+
+Before you enable it:
+
+1. **Include the addresses of Sourcegraph's own services** in `trustedClientIpAddress`, such as the pod range on Kubernetes, and the addresses of [executors](/admin/executors). Otherwise, services cannot reach the frontend. Sourcegraph always allows `127.0.0.1`.
+2. **Only read the user address from a header your proxy controls.** Sourcegraph takes the first address in the first `userIpRequestHeaders` header that is present, and a client can send any value in that header. Configure your proxy to replace the header with the client's address, not append to it, and set `clientIpAddress` to the proxy's addresses so that clients cannot bypass it.
+3. **Know how to recover.** If you block your own address, [edit the advanced configuration without the web UI](/admin/config/site-config#editing-your-site-configuration-if-you-cannot-access-the-web-ui).
+
+### Other network settings
+
+1. **Keep `corsOrigin` limited** to the origins of the code host integrations you use. Each origin listed can send cross-origin requests with users' cookies.
+2. **Leave `auth.allowEmbeddedAuth` off** unless an internal application must embed the sign-in page. It protects the sign-in and sign-up pages from clickjacking.
+3. **Filter outbound connections.** `EXTERNAL_DENY_LIST` and `UNTRUSTED_EXTERNAL_ALLOW_LIST` limit which hosts Sourcegraph and user-supplied URLs can reach. See [outgoing connection filtering](/self-hosted/network-filtering).
+4. **Verify TLS to internal services.** Add your internal root CA to `tls.external.certificates` instead of setting `insecureSkipVerify`. See [trusting TLS certificates using internal PKI](/self-hosted/private-network#trusting-tls-certificates-using-internal-pki).
+
+## Protect code and data
+
+1. **Enforce repository permissions on every code host connection.** A new code host connection doesn't enforce repository permissions: every user can see every repository it syncs, including repositories that are private on the code host. Add `authorization` to each connection's configuration (`enforcePermissions` for Azure DevOps) and configure the matching authentication provider. See [getting started with repository permissions](/admin/permissions/#getting-started).
+2. **Decide whether administrators bypass permissions.** By default, site administrators can see every repository. Set `authz.enforceForSiteAdmins` to `true` to apply repository permissions to them as well. See [administrators and repository permissions](/admin/permissions/#administrators).
+3. **Grant features by role.** Use [access control](/admin/access-control/) to limit features such as Batch Changes to the users who need them.
+4. **Encrypt secrets at rest.** `encryption.keys` encrypts code host tokens, user OAuth tokens, webhook secrets, executor secrets, and other sensitive database columns with a key in Cloud KMS, AWS KMS, or a mounted file. See [on-disk database encryption](/self-hosted/encryption).
+5. **Keep sensitive code away from agents.** [Agent context filters](/context-filters) hide the repositories and files you list from the Deep Search and Agentic Batch Changes agents, so that they never reach a model provider.
+
+## Reduce the attack surface
+
+1. **Turn off features you don't use**, such as `deepSearch.enabled`, `batchChanges.enabled`, and `mcp.enabled`. When `mcp.enabled` is `false`, the MCP endpoints return 404.
+2. **Limit MCP access.** Disable individual tools with `mcp.tools.disabled`. Once your MCP clients use pre-registered OAuth clients, [disable Dynamic Client Registration](/api/mcp/authentication#disable-dynamic-client-registration).
+3. **Don't enable HTML injection.** The `htmlHeadTop`, `htmlHeadBottom`, `htmlBodyTop`, and `htmlBodyBottom` settings add raw HTML and scripts to every page, and take effect only when the `ENABLE_INJECT_HTML` environment variable is `true`. Leave that variable unset so that the advanced configuration cannot run scripts in users' browsers.
+4. **Require proof of code host access for SCIP uploads.** With `lsifEnforceAuth` set to `true`, users without the upload permission must show a code host token with write access to the repository. See [indexing a Go repository](/code-navigation/how-to/index-a-go-repository) for the token the upload needs.
+5. **Isolate executors.** Use a long random `executors.accessToken`, run jobs in [Firecracker](/admin/executors#sandboxing-model) where you can, and store credentials as [executor secrets](/admin/executors/executor-secrets).
+6. **Restrict Batch Changes.** `batchChanges.containerRegistryAllowlist` limits which registries batch change steps pull images from, and `batchChanges.restrictMergeToAdmins` lets only site administrators merge changesets.
+7. **Set a secret on every incoming webhook**, so that Sourcegraph rejects payloads the code host did not sign. See [incoming webhooks](/admin/webhooks/incoming).
+
+## Monitor the instance
+
+1. **Send audit logs to your SIEM.** The [audit log](/admin/audit-log) records authentication, user management, and configuration changes, and [security event logs](/admin/security-event-logs) record security-relevant actions.
+2. **Review outbound requests.** The [outbound request log](/admin/outbound-request-log) shows the requests Sourcegraph makes to code hosts and other services.
+3. **Stay up to date.** Security fixes ship in regular releases. See [updating Sourcegraph](/self-hosted/updates).
