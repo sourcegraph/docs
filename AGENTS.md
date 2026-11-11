@@ -134,13 +134,16 @@ git diff -U0 "$base" | pnpm run check links --check-anchors --check-self-links \
   `docs/`, about 1,400 URLs in a minute. stderr counts, by host, the URLs it
   could not verify. A 429 with a `Retry-After` header is retried after that
   wait, for up to 5 minutes per host
-- A `https://sourcegraph.com/search?q=…` link is run as a search through the
-  GraphQL API, which needs no token. It is a finding when no repository
-  matches its `repo:` filters; a search without matches is only counted on
-  stderr, since it can be right (`after:"1 week ago"`)
-- Expect HTTP 429 from sourcegraph.com repository and file pages
-  (`/github.com/…`): a burst of requests gets a Cloudflare challenge that
-  sends no `Retry-After` and lasts over 40 minutes
+- sourcegraph.com answers a burst of page requests with a Cloudflare challenge
+  (HTTP 429, no `Retry-After`, over 40 minutes), so `--check-external` looks
+  up its search, repository, directory, and file links through its GraphQL
+  API, which needs no token:
+  - A `/search?q=…` link is a finding when no repository matches its `repo:`
+    filters; a search without matches is only counted on stderr, since it can
+    be right (`after:"1 week ago"`)
+  - A `/github.com/…` link, with or without `@revision` and `/-/blob/` or
+    `/-/tree/`, is a finding when sourcegraph.com does not have the
+    repository, the revision, or the path
 - `SRC_ACCESS_TOKEN`, when set, authenticates `--check-external` requests to
   `SRC_ENDPOINT` (default `https://sourcegraph.com`) and to no other host. A
   token the instance rejects turns its links into unverified HTTP 401s. It

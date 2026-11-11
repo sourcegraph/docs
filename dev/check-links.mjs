@@ -16,7 +16,8 @@
  *   the legacy https://docs.sourcegraph.com/... host, http://, //, www.), which
  *   should be relative links; the finding proposes one, following src/data/redirects.ts
  * - With --check-external, external links that return 404 or 410, and
- *   sourcegraph.com search links whose repo: filters match no repository
+ *   sourcegraph.com links to a search whose repo: filters match no repository,
+ *   or to a repository, revision, or path that it does not have
  *
  * The pull request workflow (.github/workflows/check-links.yml) runs this with
  * the flags below; `pnpm run build` does not run it, so findings never fail a deploy.
@@ -36,9 +37,9 @@
  *                          inbound (elsewhere); the added lines scope the two flags below
  *   --check-external       Request every external link, or with --diff only those on
  *                          an added line, and report 404s and 410s. Follows redirects
- *                          and ignores #anchors. A sourcegraph.com search link is
- *                          run through the GraphQL API instead, and reported when
- *                          no repository matches it. Other statuses, searches
+ *                          and ignores #anchors. sourcegraph.com search,
+ *                          repository, directory, and file links are looked up
+ *                          through its GraphQL API instead. Other statuses, searches
  *                          without matches, and network errors are not findings;
  *                          stderr counts them, by host. A 429
  *                          with a Retry-After header is retried after that wait,
@@ -500,11 +501,28 @@ async function request(url, options, timeoutMilliseconds = 15_000) {
 	}
 }
 
-// A search link's page answers 200 whatever the query, and sourcegraph.com puts a
-// Cloudflare challenge in front of a burst of them. So the search itself is run,
-// through the GraphQL API, which needs no access token.
-const SEARCH_ORIGIN = 'https://sourcegraph.com';
-const SEARCH_REQUEST = `query ($query: String!, $patternType: SearchPatternType) {
+// sourcegraph.com puts a Cloudflare challenge (HTTP 429 without Retry-After) in
+// front of a burst of page requests, and its search page answers 200 whatever the
+// query. So links to its search, repository, directory, and file pages are checked
+// through its GraphQL API, which is not behind the challenge and needs no access token.
+const DOTCOM_ORIGIN = 'https://sourcegraph.com';
+
+// { data } of a GraphQL query, or { unverified } with the reason there is none
+async function queryDotcom(query, variables) {
+	const response = await request(
+		`${DOTCOM_ORIGIN}/.api/graphql`,
+		{ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ query, variables }) },
+		30_000
+	);
+	if (!response.ok) {
+		await response.body?.cancel();
+		return { unverified: `GraphQL API returns HTTP ${response.status}` };
+	}
+	const { data, errors } = await response.json();
+	return errors ? { unverified: `GraphQL API error: ${errors[0].message.split('\n')[0]}` } : { data };
+}
+
+const SEARCH_QUERY = `query ($query: String!, $patternType: SearchPatternType) {
 	search(version: V3, patternType: $patternType, query: $query) {
 		results { matchCount alert { title } }
 	}
@@ -514,30 +532,42 @@ const SEARCH_REQUEST = `query ($query: String!, $patternType: SearchPatternType)
 // search that no repository matches is dead: a search without matches can be
 // right, such as one for last week's commits.
 async function probeSearchLink(searchParams) {
-	const response = await request(
-		`${SEARCH_ORIGIN}/.api/graphql`,
-		{
-			method: 'POST',
-			headers: { 'content-type': 'application/json' },
-			body: JSON.stringify({
-				query: SEARCH_REQUEST,
-				// The search page defaults to keyword search
-				variables: { query: searchParams.get('q'), patternType: searchParams.get('patternType') ?? 'keyword' }
-			})
-		},
-		30_000
-	);
-	if (!response.ok) {
-		await response.body?.cancel();
-		return { unverified: `search API returns HTTP ${response.status}` };
-	}
-	const { data, errors } = await response.json();
-	const results = data?.search?.results;
-	if (!results) return { unverified: `search API error: ${errors?.[0]?.message.split('\n')[0]}` };
-	if (results.matchCount > 0) return {};
-	const title = results.alert?.title;
-	if (title?.startsWith('No repositories found')) return { error: `Search link returns "${title}"` };
-	return { unverified: title ? `search alert: ${title}` : 'search has no matches' };
+	const { data, unverified } = await queryDotcom(SEARCH_QUERY, {
+		query: searchParams.get('q'),
+		// The search page defaults to keyword search
+		patternType: searchParams.get('patternType') ?? 'keyword'
+	});
+	if (unverified) return { unverified };
+	const { matchCount, alert } = data.search.results;
+	if (matchCount > 0) return {};
+	if (alert?.title.startsWith('No repositories found')) return { error: `Search link returns "${alert.title}"` };
+	return { unverified: alert ? `search alert: ${alert.title}` : 'search has no matches' };
+}
+
+// The repository, revision, and path that a repository, directory, or file page
+// shows (/github.com/gorilla/mux@v1.8.0/-/blob/mux.go); undefined for other pages
+function repositoryPage(pathname) {
+	const [repository, ...routes] = decodeURIComponent(pathname.slice(1)).split('/-/');
+	const route = routes.join('/-/');
+	const filePath = route.match(/^(?:blob|tree)\/(.*)/)?.[1];
+	// A repository name starts with its code host
+	if (!/^[\w-]+(\.[\w-]+)+\/./.test(repository) || (route && filePath === undefined)) return undefined;
+	const [name, revision = 'HEAD'] = repository.replace(/\/+$/, '').split('@');
+	return { name, revision, path: filePath ?? '' };
+}
+
+const REPOSITORY_PAGE_QUERY = `query ($name: String!, $revision: String!, $path: String!) {
+	repository(name: $name) { commit(rev: $revision) { path(path: $path) { __typename } } }
+}`;
+
+// Outcome of looking up what a repository page shows, in the shape probeUrl returns
+async function probeRepositoryPage({ name, revision, path }) {
+	const { data, unverified } = await queryDotcom(REPOSITORY_PAGE_QUERY, { name, revision, path });
+	if (unverified) return { unverified };
+	if (!data.repository) return { error: `sourcegraph.com has no repository ${name}` };
+	if (!data.repository.commit) return { error: `${name} has no revision ${revision}` };
+	if (!data.repository.commit.path) return { error: `${name} has no path ${path} at ${revision}` };
+	return {};
 }
 
 // HTTP status of url after redirects. HEAD first; some servers refuse or misreport
@@ -557,8 +587,10 @@ async function httpStatus(url) {
 async function probeUrl(url) {
 	try {
 		const { origin, pathname, searchParams } = new URL(url);
-		if (origin === SEARCH_ORIGIN && pathname === '/search' && searchParams.get('q')) {
-			return await probeSearchLink(searchParams);
+		if (origin === DOTCOM_ORIGIN) {
+			if (pathname === '/search' && searchParams.get('q')) return await probeSearchLink(searchParams);
+			const page = repositoryPage(pathname);
+			if (page) return await probeRepositoryPage(page);
 		}
 		const status = await httpStatus(url);
 		if (status === 404 || status === 410) return { error: `External link returns HTTP ${status}` };
@@ -585,8 +617,9 @@ function warnAboutUnverifiedUrls(outcomeByUrl) {
 	}
 }
 
-// Findings for external links whose target is gone: a 404 or 410, or a search that
-// no repository matches. Rate limits, bot blocks, server errors, and network
+// Findings for external links whose target is gone: a 404 or 410, or on
+// sourcegraph.com a search that no repository matches or a missing repository,
+// revision, or path. Rate limits, bot blocks, server errors, and network
 // failures are not the PR's fault.
 async function findDeadExternalLinks(links) {
 	const urls = [...new Set(links.map(link => link.url.split('#')[0]))];
