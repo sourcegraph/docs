@@ -1046,7 +1046,7 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/install/docker-compose/migrate',
-		destination: '/admin/deploy/docker-compose/migrate'
+		destination: '/self-hosted/deploy/docker-compose'
 	},
 	{
 		source: '/admin/install/docker-compose/operations',
@@ -3191,7 +3191,7 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/deploy/docker-compose/migrate',
-		destination: '/self-hosted/deploy/docker-compose/migrate'
+		destination: '/self-hosted/deploy/docker-compose'
 	},
 	{
 		source: '/admin/deploy/docker-compose/operations',
@@ -3568,11 +3568,11 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/sourcegraph-nginx-mermaid',
-		destination: '/self-hosted/sourcegraph-nginx-mermaid'
+		destination: '/self-hosted/http-https-configuration'
 	},
 	{
 		source: '/admin/ssl_https_self_signed_cert_nginx',
-		destination: '/self-hosted/ssl_https_self_signed_cert_nginx'
+		destination: '/self-hosted/http-https-configuration'
 	},
 	{
 		source: '/admin/updates/automatic',
@@ -4244,7 +4244,19 @@ const redirectsData = [
 	},
 	{
 		source: '/self-hosted/ssl_https_self_signed_cert_nginx',
-		destination: '/self-hosted/ssl-https-self-signed-cert-nginx'
+		destination: '/self-hosted/http-https-configuration'
+	},
+	{
+		source: '/self-hosted/ssl-https-self-signed-cert-nginx',
+		destination: '/self-hosted/http-https-configuration'
+	},
+	{
+		source: '/self-hosted/sourcegraph-nginx-mermaid',
+		destination: '/self-hosted/http-https-configuration'
+	},
+	{
+		source: '/self-hosted/deploy/docker-compose/migrate',
+		destination: '/self-hosted/deploy/docker-compose'
 	},
 	{
 		source: '/self-hosted/updates/docker_compose',
