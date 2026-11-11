@@ -15,7 +15,8 @@
  * - With --check-self-links, absolute links to this site (https://sourcegraph.com/docs/...,
  *   the legacy https://docs.sourcegraph.com/... host, http://, //, www.), which
  *   should be relative links; the finding proposes one, following src/data/redirects.ts
- * - With --check-external, external links that return 404 or 410
+ * - With --check-external, external links that return 404 or 410, and
+ *   sourcegraph.com search links whose repo: filters match no repository
  *
  * The pull request workflow (.github/workflows/check-links.yml) runs this with
  * the flags below; `pnpm run build` does not run it, so findings never fail a deploy.
@@ -35,8 +36,11 @@
  *                          inbound (elsewhere); the added lines scope the two flags below
  *   --check-external       Request every external link, or with --diff only those on
  *                          an added line, and report 404s and 410s. Follows redirects
- *                          and ignores #anchors. Other statuses and network errors
- *                          are not findings; stderr counts them, by host. A 429
+ *                          and ignores #anchors. A sourcegraph.com search link is
+ *                          run through the GraphQL API instead, and reported when
+ *                          no repository matches it. Other statuses, searches
+ *                          without matches, and network errors are not findings;
+ *                          stderr counts them, by host. A 429
  *                          with a Retry-After header is retried after that wait,
  *                          for up to 5 minutes per host.
  *                          SRC_ACCESS_TOKEN, when set, authenticates requests to
@@ -470,17 +474,17 @@ const rateLimitByHost = new Map();
 // Requests url once its host allows it, and again after each 429 that says how
 // long to wait. Every request to a rate-limited host waits, not only the one that
 // was refused.
-async function request(url, method) {
+async function request(url, options, timeoutMilliseconds = 15_000) {
 	const { host } = new URL(url);
 	for (;;) {
 		while (rateLimitByHost.get(host)?.retryAt > Date.now()) {
 			await sleep(rateLimitByHost.get(host).retryAt - Date.now());
 		}
 		const response = await fetch(url, {
-			method,
 			redirect: 'follow',
-			signal: AbortSignal.timeout(15_000),
-			headers: requestHeaders(url)
+			signal: AbortSignal.timeout(timeoutMilliseconds),
+			...options,
+			headers: { ...requestHeaders(url), ...options.headers }
 		});
 		const wait = response.status === 429 ? retryAfterMilliseconds(response) : undefined;
 		if (wait === undefined) return response;
@@ -496,58 +500,109 @@ async function request(url, method) {
 	}
 }
 
-// HTTP status of url after redirects, or Node's code for a network error or timeout.
-// HEAD first; some servers refuse or misreport HEAD, so an error status is
-// confirmed with a GET whose body is not read.
+// A search link's page answers 200 whatever the query, and sourcegraph.com puts a
+// Cloudflare challenge in front of a burst of them. So the search itself is run,
+// through the GraphQL API, which needs no access token.
+const SEARCH_ORIGIN = 'https://sourcegraph.com';
+const SEARCH_REQUEST = `query ($query: String!, $patternType: SearchPatternType) {
+	search(version: V3, patternType: $patternType, query: $query) {
+		results { matchCount alert { title } }
+	}
+}`;
+
+// Outcome of running a search link's query, in the shape probeUrl returns. Only a
+// search that no repository matches is dead: a search without matches can be
+// right, such as one for last week's commits.
+async function probeSearchLink(searchParams) {
+	const response = await request(
+		`${SEARCH_ORIGIN}/.api/graphql`,
+		{
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({
+				query: SEARCH_REQUEST,
+				// The search page defaults to keyword search
+				variables: { query: searchParams.get('q'), patternType: searchParams.get('patternType') ?? 'keyword' }
+			})
+		},
+		30_000
+	);
+	if (!response.ok) {
+		await response.body?.cancel();
+		return { unverified: `search API returns HTTP ${response.status}` };
+	}
+	const { data, errors } = await response.json();
+	const results = data?.search?.results;
+	if (!results) return { unverified: `search API error: ${errors?.[0]?.message.split('\n')[0]}` };
+	if (results.matchCount > 0) return {};
+	const title = results.alert?.title;
+	if (title?.startsWith('No repositories found')) return { error: `Search link returns "${title}"` };
+	return { unverified: title ? `search alert: ${title}` : 'search has no matches' };
+}
+
+// HTTP status of url after redirects. HEAD first; some servers refuse or misreport
+// HEAD, so an error status is confirmed with a GET whose body is not read.
+async function httpStatus(url) {
+	let response = await request(url, { method: 'HEAD' });
+	if (response.status >= 400) {
+		response = await request(url, { method: 'GET' });
+		await response.body?.cancel();
+	}
+	return response.status;
+}
+
+// What became of url: { error } when its target is gone, { unverified } with the
+// reason when that could not be told (an HTTP status, or Node's code for a network
+// error or timeout), {} when it is live
 async function probeUrl(url) {
 	try {
-		let response = await request(url, 'HEAD');
-		if (response.status >= 400) {
-			response = await request(url, 'GET');
-			await response.body?.cancel();
+		const { origin, pathname, searchParams } = new URL(url);
+		if (origin === SEARCH_ORIGIN && pathname === '/search' && searchParams.get('q')) {
+			return await probeSearchLink(searchParams);
 		}
-		return response.status;
+		const status = await httpStatus(url);
+		if (status === 404 || status === 410) return { error: `External link returns HTTP ${status}` };
+		return status >= 400 ? { unverified: `HTTP ${status}` } : {};
 	} catch (error) {
-		return error.cause?.code ?? error.name;
+		return { unverified: error.cause?.code ?? error.name };
 	}
 }
 
-const isDeadStatus = status => status === 404 || status === 410;
-
 // Counts on stderr, by host and reason, the URLs that could be confirmed neither
 // live nor dead, so a scan shows what it did not verify
-function warnAboutUnverifiedUrls(statusByUrl) {
+function warnAboutUnverifiedUrls(outcomeByUrl) {
 	const countByReason = new Map();
-	for (const [url, status] of statusByUrl) {
-		if (isDeadStatus(status) || status < 400) continue;
-		const reason = `${new URL(url).host}: ${typeof status === 'number' ? `HTTP ${status}` : status}`;
+	for (const [url, { unverified }] of outcomeByUrl) {
+		if (!unverified) continue;
+		const reason = `${new URL(url).host}: ${unverified}`;
 		countByReason.set(reason, (countByReason.get(reason) ?? 0) + 1);
 	}
 	if (countByReason.size === 0) return;
 	const unverified = [...countByReason.values()].reduce((sum, count) => sum + count);
-	console.error(`⚠️ ${unverified} of ${statusByUrl.size} external URL(s) could not be verified, and are not reported as dead:`);
+	console.error(`⚠️ ${unverified} of ${outcomeByUrl.size} external URL(s) could not be verified, and are not reported as dead:`);
 	for (const [reason, count] of countByReason) {
 		console.error(`   ${count} × ${reason}`);
 	}
 }
 
-// Findings for external links whose target is gone. Only 404 and 410 count: rate
-// limits, bot blocks, server errors, and network failures are not the PR's fault.
+// Findings for external links whose target is gone: a 404 or 410, or a search that
+// no repository matches. Rate limits, bot blocks, server errors, and network
+// failures are not the PR's fault.
 async function findDeadExternalLinks(links) {
 	const urls = [...new Set(links.map(link => link.url.split('#')[0]))];
-	const statusByUrl = new Map();
+	const outcomeByUrl = new Map();
 	const queue = [...urls];
 	const worker = async () => {
 		for (let url = queue.shift(); url !== undefined; url = queue.shift()) {
-			statusByUrl.set(url, await probeUrl(url));
+			outcomeByUrl.set(url, await probeUrl(url));
 		}
 	};
 	await Promise.all(Array.from({ length: 8 }, worker));
-	warnAboutUnverifiedUrls(statusByUrl);
+	warnAboutUnverifiedUrls(outcomeByUrl);
 
 	return links.flatMap(link => {
-		const status = statusByUrl.get(link.url.split('#')[0]);
-		return isDeadStatus(status) ? [{ ...link, error: `External link returns HTTP ${status}` }] : [];
+		const { error } = outcomeByUrl.get(link.url.split('#')[0]);
+		return error ? [{ ...link, error }] : [];
 	});
 }
 
