@@ -15,7 +15,7 @@
  * - With --check-self-links, absolute links to this site (https://sourcegraph.com/docs/...,
  *   the legacy https://docs.sourcegraph.com/... host, http://, //, www.), which
  *   should be relative links; the finding proposes one, following src/data/redirects.ts
- * - With --check-external, external links on added lines that return 404 or 410
+ * - With --check-external, external links that return 404 or 410
  *
  * The pull request workflow (.github/workflows/check-links.yml) runs this with
  * the flags below; `pnpm run build` does not run it, so findings never fail a deploy.
@@ -33,9 +33,10 @@
  *                          `git diff -U0 origin/main`. Markdown output splits
  *                          findings into outbound (in a file the diff touches) and
  *                          inbound (elsewhere); the added lines scope the two flags below
- *   --check-external       Request every external link on an added line and report
- *                          404s and 410s. Follows redirects; ignores #anchors, other
- *                          statuses, and network errors. Requires --diff
+ *   --check-external       Request every external link, or with --diff only those on
+ *                          an added line, and report 404s and 410s. Follows redirects
+ *                          and ignores #anchors. Other statuses and network errors
+ *                          are not findings; stderr counts them, by host
  *   --review <file>        Write a GitHub pull request review (JSON body for
  *                          POST /repos/{owner}/{repo}/pulls/{n}/reviews) with one
  *                          suggested-change comment per added line that has a fix
@@ -61,10 +62,6 @@ const FORMAT = flagValue('--format') ?? 'text';
 const BASELINE_FILE = flagValue('--baseline');
 const DIFF = parseDiff(flagValue('--diff'));
 const CHECK_EXTERNAL = args.includes('--check-external');
-
-if (CHECK_EXTERNAL && !DIFF) {
-	throw new Error('--check-external needs --diff, to know which lines were added');
-}
 
 const DOCS_DIR = path.join(ROOT_DIR, 'docs');
 // Files whose links are checked. Only .mdx files become site routes; see
@@ -413,7 +410,7 @@ async function findBrokenLinks() {
 			const problem = validateLink(link, fullPath, maps);
 			if (problem) {
 				findings.push({ ...location, ...(typeof problem === 'string' ? { error: problem } : problem) });
-			} else if (CHECK_EXTERNAL && isExternalLink(link.url) && isAddedLine(location.file, location.line)) {
+			} else if (CHECK_EXTERNAL && isExternalLink(link.url) && (!DIFF || isAddedLine(location.file, location.line))) {
 				externalLinks.push(location);
 			}
 		}
@@ -436,7 +433,7 @@ function isExternalLink(url) {
 	}
 }
 
-// HTTP status of url after redirects, or undefined on a network error or timeout.
+// HTTP status of url after redirects, or Node's code for a network error or timeout.
 // HEAD first; some servers refuse or misreport HEAD, so an error status is
 // confirmed with a GET whose body is not read.
 async function probeUrl(url) {
@@ -454,8 +451,27 @@ async function probeUrl(url) {
 			await response.body?.cancel();
 		}
 		return response.status;
-	} catch {
-		return undefined;
+	} catch (error) {
+		return error.cause?.code ?? error.name;
+	}
+}
+
+const isDeadStatus = status => status === 404 || status === 410;
+
+// Counts on stderr, by host and reason, the URLs that could be confirmed neither
+// live nor dead, so a scan shows what it did not verify
+function warnAboutUnverifiedUrls(statusByUrl) {
+	const countByReason = new Map();
+	for (const [url, status] of statusByUrl) {
+		if (isDeadStatus(status) || status < 400) continue;
+		const reason = `${new URL(url).host}: ${typeof status === 'number' ? `HTTP ${status}` : status}`;
+		countByReason.set(reason, (countByReason.get(reason) ?? 0) + 1);
+	}
+	if (countByReason.size === 0) return;
+	const unverified = [...countByReason.values()].reduce((sum, count) => sum + count);
+	console.error(`⚠️ ${unverified} of ${statusByUrl.size} external URL(s) could not be verified, and are not reported as dead:`);
+	for (const [reason, count] of countByReason) {
+		console.error(`   ${count} × ${reason}`);
 	}
 }
 
@@ -471,10 +487,11 @@ async function findDeadExternalLinks(links) {
 		}
 	};
 	await Promise.all(Array.from({ length: 8 }, worker));
+	warnAboutUnverifiedUrls(statusByUrl);
 
 	return links.flatMap(link => {
 		const status = statusByUrl.get(link.url.split('#')[0]);
-		return status === 404 || status === 410 ? [{ ...link, error: `External link returns HTTP ${status}` }] : [];
+		return isDeadStatus(status) ? [{ ...link, error: `External link returns HTTP ${status}` }] : [];
 	});
 }
 

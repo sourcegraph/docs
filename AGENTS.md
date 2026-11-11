@@ -130,6 +130,10 @@ git diff -U0 "$base" | pnpm run check links --check-anchors --check-self-links \
 - Pipe the diff to `--diff /dev/stdin`, not `--diff <(git diff ...)`:
   `dev/checks.mjs` spawns the check with only stdin/stdout/stderr, so the
   process-substitution descriptor is gone and the check fails with `EBADF`
+- `--check-external` without `--diff` requests every external link in
+  `docs/`, about 1,400 URLs in a minute. stderr counts, by host, the URLs it
+  could not verify; expect HTTP 429 from sourcegraph.com, which rate limits
+  `/search` links
 
 ### PR check comments
 
