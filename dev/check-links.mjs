@@ -36,7 +36,9 @@
  *   --check-external       Request every external link, or with --diff only those on
  *                          an added line, and report 404s and 410s. Follows redirects
  *                          and ignores #anchors. Other statuses and network errors
- *                          are not findings; stderr counts them, by host.
+ *                          are not findings; stderr counts them, by host. A 429
+ *                          with a Retry-After header is retried after that wait,
+ *                          for up to 5 minutes per host.
  *                          SRC_ACCESS_TOKEN, when set, authenticates requests to
  *                          SRC_ENDPOINT (default https://sourcegraph.com)
  *   --review <file>        Write a GitHub pull request review (JSON body for
@@ -49,6 +51,7 @@
 import fs from 'fs';
 import path from 'path';
 import GithubSlugger from 'github-slugger';
+import { setTimeout as sleep } from 'timers/promises';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { fileUrl, flagValue, groupByFile, linkTo, listFiles, parseDiff, report, withoutBaseline } from './check-shared.mjs';
 
@@ -448,21 +451,59 @@ function requestHeaders(url) {
 	return headers;
 }
 
-// HTTP status of url after redirects, or Node's code for a network error or timeout.
-// HEAD first; some servers refuse or misreport HEAD, so an error status is
-// confirmed with a GET whose body is not read.
-async function probeUrl(url) {
-	const request = method =>
-		fetch(url, {
+// Milliseconds a response's Retry-After header asks to wait, given as seconds or
+// as an HTTP date; undefined without a usable header
+function retryAfterMilliseconds(response) {
+	const value = response.headers.get('retry-after')?.trim();
+	if (!value) return undefined;
+	const milliseconds = /^\d+$/.test(value) ? Number(value) * 1000 : Date.parse(value) - Date.now();
+	return Number.isNaN(milliseconds) ? undefined : Math.max(milliseconds, 0);
+}
+
+// How long the scan keeps honoring a host's Retry-After headers, from its first
+// wait on that host. Later 429s from the host are left unverified, so a host that
+// never lets up cannot stall the scan.
+const RETRY_WINDOW_MILLISECONDS = 5 * 60_000;
+// Per host that answered 429: { retryAt, giveUpAt }, both in epoch milliseconds
+const rateLimitByHost = new Map();
+
+// Requests url once its host allows it, and again after each 429 that says how
+// long to wait. Every request to a rate-limited host waits, not only the one that
+// was refused.
+async function request(url, method) {
+	const { host } = new URL(url);
+	for (;;) {
+		while (rateLimitByHost.get(host)?.retryAt > Date.now()) {
+			await sleep(rateLimitByHost.get(host).retryAt - Date.now());
+		}
+		const response = await fetch(url, {
 			method,
 			redirect: 'follow',
 			signal: AbortSignal.timeout(15_000),
 			headers: requestHeaders(url)
 		});
+		const wait = response.status === 429 ? retryAfterMilliseconds(response) : undefined;
+		if (wait === undefined) return response;
+
+		const now = Date.now();
+		const limit = rateLimitByHost.get(host) ?? { retryAt: 0, giveUpAt: now + RETRY_WINDOW_MILLISECONDS };
+		if (now + wait > limit.giveUpAt) return response;
+		await response.body?.cancel();
+		if (limit.retryAt <= now) {
+			console.error(`⏳ ${host} returned HTTP 429; retrying in ${Math.ceil(wait / 1000)} s`);
+		}
+		rateLimitByHost.set(host, { ...limit, retryAt: Math.max(limit.retryAt, now + wait) });
+	}
+}
+
+// HTTP status of url after redirects, or Node's code for a network error or timeout.
+// HEAD first; some servers refuse or misreport HEAD, so an error status is
+// confirmed with a GET whose body is not read.
+async function probeUrl(url) {
 	try {
-		let response = await request('HEAD');
+		let response = await request(url, 'HEAD');
 		if (response.status >= 400) {
-			response = await request('GET');
+			response = await request(url, 'GET');
 			await response.body?.cancel();
 		}
 		return response.status;

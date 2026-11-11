@@ -132,8 +132,10 @@ git diff -U0 "$base" | pnpm run check links --check-anchors --check-self-links \
   process-substitution descriptor is gone and the check fails with `EBADF`
 - `--check-external` without `--diff` requests every external link in
   `docs/`, about 1,400 URLs in a minute. stderr counts, by host, the URLs it
-  could not verify; expect HTTP 429 from sourcegraph.com, which rate limits
-  `/search` links
+  could not verify. A 429 with a `Retry-After` header is retried after that
+  wait, for up to 5 minutes per host. Expect HTTP 429 from sourcegraph.com all
+  the same: a burst of `/search` requests gets a Cloudflare challenge, which
+  sends no `Retry-After`
 - `SRC_ACCESS_TOKEN`, when set, authenticates `--check-external` requests to
   `SRC_ENDPOINT` (default `https://sourcegraph.com`) and to no other host. A
   token the instance rejects turns its links into unverified HTTP 401s
