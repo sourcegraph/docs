@@ -93,73 +93,13 @@ docker exec codeinsights-db sh -c 'pg_dump -C --clean --if-exists --username pos
 
 6\. Ensure the `sourcegraph_db.out`, `codeintel_db.out` and `codeinsights_db.out` files are moved to a safe and secure location.
 
-### Restore Sourcegraph databases into a new environment
+### Restore Sourcegraph databases
 
-The following instructions apply **only if you are restoring your databases into a new deployment** of Sourcegraph ie: a new virtual machine. If you are restoring a previously running environment, see the instructions for [restoring a previously running deployment](#restoring-sourcegraph-databases-into-an-existing-environment)
+These instructions apply to both a new deployment and an existing one.
 
-1\. Copy the database dump files into the `deploy-sourcegraph-docker/docker-compose` directory.
+1\. Copy the database dump files into the `deploy-sourcegraph-docker/docker-compose` directory, and `cd` to it.
 
-2\. Start the database services
-
-```bash
-docker-compose -f db-only-migrate.docker-compose.yaml up -d
-```
-
-3\. Copy the database files into the containers
-
-```bash
-docker cp sourcegraph_db.out pgsql:/tmp/sourcegraph_db.out
-docker cp codeintel_db.out codeintel-db:/tmp/codeintel_db.out
-docker cp codeinsights_db.out codeinsights-db:/tmp/codeinsights_db.out
-```
-
-4\. Restore the databases
-
-```bash
-docker exec pgsql sh -c 'psql -v ON_ERROR_STOP=1 --username sg -f /tmp/sourcegraph_db.out postgres'
-docker exec codeintel-db sh -c 'psql -v ON_ERROR_STOP=1 --username sg -f /tmp/codeintel_db.out postgres'
-docker exec codeinsights-db sh -c 'psql -v ON_ERROR_STOP=1 --username postgres -f /tmp/codeinsights_db.out template1'
-```
-
-5\. Start the remaining Sourcegraph services
-
-```bash
-docker-compose up -d
-```
-
-6\. Verify the deployment has started
-
-```bash
-docker-compose ps
-          Name                         Command                       State                                                           Ports
--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-caddy                       caddy run --config /etc/ca ...   Up                      2019/tcp, 0.0.0.0:443->443/tcp, 0.0.0.0:80->80/tcp
-cadvisor                    /usr/bin/cadvisor -logtost ...   Up (health: starting)   8080/tcp
-codeinsights-db             docker-entrypoint.sh postgres    Up                      5432/tcp
-codeintel-db                /postgres.sh                     Up (healthy)            5432/tcp
-gitserver-0                 /sbin/tini -- /usr/local/b ...   Up
-grafana                     /entry.sh                        Up                      3000/tcp, 0.0.0.0:3370->3370/tcp
-jaeger                      /go/bin/all-in-one-linux - ...   Up                      0.0.0.0:14250->14250/tcp, 14268/tcp, 0.0.0.0:16686->16686/tcp, 5775/udp, 0.0.0.0:5778->5778/tcp,
-                                                                                     0.0.0.0:6831->6831/tcp, 6831/udp, 0.0.0.0:6832->6832/tcp, 6832/udp
-blobstore                   /usr/bin/docker-entrypoint ...   Up (healthy)            9000/tcp
-pgsql                       /postgres.sh                     Up (healthy)            5432/tcp
-precise-code-intel-worker   /sbin/tini -- /usr/local/b ...   Up (health: starting)   3188/tcp
-prometheus                  /bin/prom-wrapper                Up                      0.0.0.0:9090->9090/tcp
-query-runner                /sbin/tini -- /usr/local/b ...   Up
-redis-cache                 /sbin/tini -- redis-server ...   Up                      6379/tcp
-redis-store                 /sbin/tini -- redis-server ...   Up                      6379/tcp
-searcher-0                  /sbin/tini -- /usr/local/b ...   Up (healthy)
-syntect-server              sh -c /http-server-stabili ...   Up (healthy)            9238/tcp
-worker                      /sbin/tini -- /usr/local/b ...   Up                      3189/tcp
-zoekt-indexserver-0         /sbin/tini -- zoekt-source ...   Up
-zoekt-webserver-0           /sbin/tini -- /bin/sh -c z ...   Up (healthy)> docker-compose ps
-```
-
-7\. Browse to your Sourcegraph deployment, login and verify your existing configuration has been restored
-
-### Restore Sourcegraph databases into an existing environment
-
-1\. `cd` to the `deploy-sourcegraph-docker/docker-compose` and stop the previous deployment and remove any existing volumes
+2\. If you are restoring into an existing deployment, stop it and remove the database volumes
 
 ```bash
 docker-compose down
@@ -170,13 +110,13 @@ docker volume rm docker-compose_codeinsights-db
 
 The volume names start with the Compose project name, which defaults to the directory name, `docker-compose`. If you set a different project name, find the volume names with `docker volume ls`.
 
-2\. Start the databases services only
+3\. Start the database services
 
 ```bash
 docker-compose -f db-only-migrate.docker-compose.yaml up -d
 ```
 
-3\. Copy the database files into the containers
+4\. Copy the database files into the containers
 
 ```bash
 docker cp sourcegraph_db.out pgsql:/tmp/sourcegraph_db.out
@@ -184,7 +124,7 @@ docker cp codeintel_db.out codeintel-db:/tmp/codeintel_db.out
 docker cp codeinsights_db.out codeinsights-db:/tmp/codeinsights_db.out
 ```
 
-4\. Restore the databases
+5\. Restore the databases
 
 ```bash
 docker exec pgsql sh -c 'psql -v ON_ERROR_STOP=1 --username sg -f /tmp/sourcegraph_db.out postgres'
@@ -192,41 +132,19 @@ docker exec codeintel-db sh -c 'psql -v ON_ERROR_STOP=1 --username sg -f /tmp/co
 docker exec codeinsights-db sh -c 'psql -v ON_ERROR_STOP=1 --username postgres -f /tmp/codeinsights_db.out template1'
 ```
 
-5\. Start the remaining Sourcegraph services
+6\. Start the remaining Sourcegraph services
 
 ```bash
 docker-compose up -d
 ```
 
-6\. Verify the deployment has started
+7\. Verify the deployment has started
 
 ```bash
 docker-compose ps
-          Name                         Command                       State                                                           Ports
--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-caddy                       caddy run --config /etc/ca ...   Up                      2019/tcp, 0.0.0.0:443->443/tcp, 0.0.0.0:80->80/tcp
-cadvisor                    /usr/bin/cadvisor -logtost ...   Up (health: starting)   8080/tcp
-codeinsights-db             docker-entrypoint.sh postgres    Up                      5432/tcp
-codeintel-db                /postgres.sh                     Up (healthy)            5432/tcp
-gitserver-0                 /sbin/tini -- /usr/local/b ...   Up
-grafana                     /entry.sh                        Up                      3000/tcp, 0.0.0.0:3370->3370/tcp
-jaeger                      /go/bin/all-in-one-linux - ...   Up                      0.0.0.0:14250->14250/tcp, 14268/tcp, 0.0.0.0:16686->16686/tcp, 5775/udp, 0.0.0.0:5778->5778/tcp,
-                                                                                     0.0.0.0:6831->6831/tcp, 6831/udp, 0.0.0.0:6832->6832/tcp, 6832/udp
-blobstore                   /usr/bin/docker-entrypoint ...   Up (healthy)            9000/tcp
-pgsql                       /postgres.sh                     Up (healthy)            5432/tcp
-precise-code-intel-worker   /sbin/tini -- /usr/local/b ...   Up (health: starting)   3188/tcp
-prometheus                  /bin/prom-wrapper                Up                      0.0.0.0:9090->9090/tcp
-query-runner                /sbin/tini -- /usr/local/b ...   Up
-redis-cache                 /sbin/tini -- redis-server ...   Up                      6379/tcp
-redis-store                 /sbin/tini -- redis-server ...   Up                      6379/tcp
-searcher-0                  /sbin/tini -- /usr/local/b ...   Up (healthy)
-syntect-server              sh -c /http-server-stabili ...   Up (healthy)            9238/tcp
-worker                      /sbin/tini -- /usr/local/b ...   Up                      3189/tcp
-zoekt-indexserver-0         /sbin/tini -- zoekt-source ...   Up
-zoekt-webserver-0           /sbin/tini -- /bin/sh -c z ...   Up (healthy)> docker-compose ps
 ```
 
-7\. Browse to your Sourcegraph deployment, login and verify your existing configuration has been restored
+8\. Browse to your Sourcegraph deployment, login and verify your existing configuration has been restored
 
 ## Monitoring
 

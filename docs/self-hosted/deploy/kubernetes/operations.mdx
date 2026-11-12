@@ -286,65 +286,7 @@ Ensure the `sourcegraph_db.out`, `codeintel_db.out` and `codeinsights_db.out` fi
 
 ### Restore Sourcegraph databases
 
-#### Restoring Sourcegraph databases into a new environment
-
-The following instructions apply only if you are restoring your databases into a new deployment of Sourcegraph ie: a new virtual machine
-
-If you are restoring a previously running environment, see the instructions for [restoring a previously running deployment](#restoring-sourcegraph-databases-into-an-existing-environment)
-
-A. On the machine where you run `kubectl`, `cd` to the directory with the database dump files: `sourcegraph_db.out`, `codeintel_db.out` and `codeinsights_db.out`
-
-B. Stop every Sourcegraph service except the databases, so nothing writes to the databases during the restore
-
-```bash
-$ kubectl scale deployment,statefulset -l 'deploy=sourcegraph,app.kubernetes.io/component notin (pgsql,codeintel-db,codeinsights-db)' --replicas=0
-```
-
-Wait until `kubectl get pods` shows no Sourcegraph pods other than `pgsql`, `codeintel-db`, and `codeinsights-db`.
-
-C. Copy the database files into the pods
-
-```bash
-$ kubectl cp sourcegraph_db.out $NAMESPACE/$pgsql_POD_NAME:/data/sourcegraph_db.out
-$ kubectl cp codeintel_db.out $NAMESPACE/$codeintel-db_POD_NAME:/data/codeintel_db.out
-$ kubectl cp codeinsights_db.out $NAMESPACE/$codeinsights-db_POD_NAME:/var/lib/postgresql/data/codeinsights_db.out
-```
-
-The database containers have a read-only root filesystem, so copy the files into the database volumes. The restore commands delete them after a successful restore.
-
-D. Restore the databases
-
-`DROP DATABASE ... WITH (FORCE)` disconnects the other sessions on each database, such as the `pgsql-exporter` sidecar, and drops it, so the dump can recreate it. `ON_ERROR_STOP=1` stops the restore at the first error; if a restore fails, fix the cause and run it again.
-
-```bash
-$ kubectl exec -it $pgsql_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "DROP DATABASE IF EXISTS sg WITH (FORCE)" -f /data/sourcegraph_db.out postgres && rm /data/sourcegraph_db.out'
-$ kubectl exec -it $codeintel-db_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "DROP DATABASE IF EXISTS sg WITH (FORCE)" -f /data/codeintel_db.out postgres && rm /data/codeintel_db.out'
-$ kubectl exec -it $codeinsights-db_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username postgres -c "DROP DATABASE IF EXISTS postgres WITH (FORCE)" -f /var/lib/postgresql/data/codeinsights_db.out template1 && rm /var/lib/postgresql/data/codeinsights_db.out'
-```
-
-E. Check for corrupt database indexes. If amcheck returns errors, please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
-
-```sql
-create extension amcheck;
-
-select bt_index_parent_check(c.oid, true), c.relname, c.relpages
-from pg_index i
-join pg_opclass op ON i.indclass[0] = op.oid
-join pg_am am ON op.opcmethod = am.oid
-join pg_class c ON i.indexrelid = c.oid
-join pg_namespace n ON c.relnamespace = n.oid
-where am.amname = 'btree'
--- Don't check temp tables, which may be from another session:
-and c.relpersistence != 't'
--- Function may throw an error when this is omitted:
-and i.indisready AND i.indisvalid;
-```
-
-F. Start the remaining Sourcegraph services by following the steps in [applying manifests](#applying-manifests).
-
-#### Restoring Sourcegraph databases into an existing environment
-
-You don't need to delete the database volumes: the restore drops and recreates each database.
+These instructions apply to both a new deployment and an existing one. You don't need to delete the database volumes: the restore drops and recreates each database.
 
 A. On the machine where you run `kubectl`, `cd` to the directory with the database dump files: `sourcegraph_db.out`, `codeintel_db.out` and `codeinsights_db.out`
 
