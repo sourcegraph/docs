@@ -14,7 +14,7 @@ Two site configuration keys hold the rules, and both have the same shape:
 
 ## Why use context filters
 
-- **Keep sensitive repositories out of the agent's context.** The agent's tools do not return code from excluded repositories, so the agent does not read it, quote it, or send it to a model provider.
+- **Keep secrets out of the agent's context.** Excluded content is never returned by the agent's tools, so the agent cannot quote it, summarize it, or forward it to a third-party model provider.
 - **Reduce noise.** Vendored dependencies, generated code, and archived repositories can be hidden so the agent spends its research on code that matters.
 
 ## How context filters work
@@ -34,13 +34,13 @@ To keep code away from users, and from agents acting for them, use [repository p
 
 ## Configuring context filters
 
-An administrator configures filters under **Administration → Configuration → Advanced configuration**, inside the `experimentalFeatures` block of the advanced configuration. Each entry in `exclude` is an independent rule, and a repository is hidden if it matches any rule.
+An administrator configures filters under **Administration → Configuration → Advanced configuration**, inside the `experimentalFeatures` block of the advanced configuration. Each entry in `exclude` is an independent rule, and content is hidden if it matches any rule.
 
 ```jsonc
 "experimentalFeatures": {
   "agents.contextFilters": {
     "exclude": [
-      // Hide one repository.
+      // Hide an entire repository.
       { "repoNamePatterns": ["^github\\.com/acme/secrets$"] },
       // Hide every repository in an organization.
       { "repoNamePatterns": ["^github\\.com/acme-internal/"] }
