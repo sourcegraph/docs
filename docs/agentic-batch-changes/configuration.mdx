@@ -128,7 +128,39 @@ Both halves of a pair are required. All four are part of the built-in User role,
 
 ### Ownership
 
-Each agentic batch change has one owner, the user who created it, and only the owner can send messages, approve actions, and publish. Other users can read the conversation, the plan, and the results, but they cannot change anything; see [Sharing and visibility](#sharing-and-visibility). There is no co-ownership and no transfer. If the owner is unavailable, start a new agentic batch change to continue the work. Because the agent acts as its owner, the owner's repository permissions bound what it can touch.
+Each agentic batch change has one owner: the user who created it, until it is [handed over](#handing-over-an-agent). Only the owner can send messages, approve actions, run workspaces, and publish. Other users can read the conversation, the plan, and the results, but they cannot change anything; see [Sharing and visibility](#sharing-and-visibility). There is no co-ownership. Because the agent acts as its owner, the owner's repository permissions and Batch Changes credentials bound what it can touch.
+
+### Handing over an agent
+
+A handover makes another user the owner of an agent and its batch change. Use it when the owner leaves the team, is on leave, or when the work moves to someone else.
+
+Who can hand over an agent:
+
+- The owner, from **Share** > **Hand over** on the agent page.
+- An administrator, for any agent, including agents of deleted users. They use **Share** > **Hand over** on the agent page, or **...** > **Hand over…** in the row on the [Threads page](#threads-page).
+
+To hand over, find the new owner by username or display name, then confirm. Any user on the instance can become the new owner. Before you confirm, Sourcegraph checks the new owner's repository permissions and warns you when the new owner cannot read some of the agent's workspaces.
+
+A handover changes the following:
+
+- The new owner can message the agent, run workspaces, and publish changesets. The agent acts with the new owner's repository permissions and Batch Changes credentials from then on. Changesets the agent publishes or updates after the handover use the new owner's credentials.
+- The batch change moves to the new owner's namespace. Its URL changes to `/users/<new-owner>/batch-changes/<name>`.
+- The previous owner keeps read access to the agent, also with the `link-only` site setting, but cannot act on it. The agent page shows who created the agent and who owns it now.
+- The share link stays the same.
+- Workspaces in repositories the new owner cannot read are hidden from the new owner and from the agent. The agent gets a note about the handover and the hidden workspaces. The agent cannot update changesets in those repositories. Changesets that were already published there stay open on the code host.
+- The new owner gets a notification in Sourcegraph. If the agent is waiting for an answer, the open question moves to the new owner.
+- The [audit log](#audit-log) records the handover with the action `ownershipTransferred`, the previous owner, the new owner, and the user who did the handover. `forced` is `true` when an administrator handed over an agent they do not own.
+
+A handover is refused when:
+
+- The agent is still working: a message is processing, workspaces are running, or changesets are being published or updated. Wait until the agent is idle or waiting for input, then try again.
+- The new owner already has a batch change with the same name. One of the two batch changes needs another name first.
+
+A handover moves one agent at a time. To get an agent back, ask the new owner or an administrator to hand it over to you.
+
+### Threads page
+
+Administrators see every agent on the instance under **Administration > Batch Changes > Threads**, independent of the [sharing setting](#sharing-and-visibility). The page lists each agent with its owner and status. Filter by owner, status, or title, open an agent, or hand it over from the **...** menu in its row.
 
 ### Sharing and visibility
 
@@ -138,9 +170,9 @@ Administrators can also enable a global list. Set `batchChanges.agenticBatchChan
 
 ```json
 {
-  "experimentalFeatures": {
-    "batchChanges.agenticBatchChanges.sharing": "global"
-  }
+	"experimentalFeatures": {
+		"batchChanges.agenticBatchChanges.sharing": "global"
+	}
 }
 ```
 
@@ -162,7 +194,7 @@ Workspaces, changesets, and diffs keep the [repository permissions of Batch Chan
 
 A viewer who is not the owner cannot act on the agent.
 
-Agents of deleted users stay in the list, with **Deleted user** as the owner. See also [Access control for Batch Changes](/admin/access-control/batch-changes).
+Agents of deleted users stay in the list, with **Deleted user** as the owner. An administrator can [hand them over](#handing-over-an-agent) to another user. See also [Access control for Batch Changes](/admin/access-control/batch-changes).
 
 ### Code hosts
 

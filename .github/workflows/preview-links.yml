@@ -1,9 +1,12 @@
 name: Preview links for changed pages
 
-# Comments on the PR with direct links to the docs pages it changed, since the
-# Vercel bot's own comment only links to the root of the preview deployment.
+# Comments on the PR with a table of the docs pages it changes, so a reviewer
+# can compare them without reading the diff: each page before (production)
+# and after (the preview deployment), opened at the first section the PR
+# changes, and its diff on Sourcegraph. The Vercel bot's own comment only links to
+# the root of the preview deployment.
 #
-# Two triggers, one script:
+# Two triggers, one script (dev/preview-links.mjs):
 # - pull_request: reads the preview URL from the Vercel bot's comment, which
 #   links the branch alias (…-git-<branch>-….vercel.app). The alias always
 #   serves the branch's latest deployment, so the links stay right after each
@@ -50,94 +53,26 @@ jobs:
           || github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v9
+      - name: Check out dev/preview-links.mjs
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: |
+            /dev/
+            /package.json
+          sparse-checkout-cone-mode: false
+
+      - name: Install github-slugger, the only dependency of dev/preview-links.mjs
+        # Into a scratch prefix, not the repo: `npm install <pkg>` next to
+        # package.json would install every dependency of the site
+        run: |
+          npm install --prefix "$RUNNER_TEMP/deps" --no-package-lock --no-audit --no-fund \
+              "github-slugger@$(node -p "require('./package.json').dependencies['github-slugger']")"
+          ln -s "$RUNNER_TEMP/deps/node_modules" node_modules
+
+      - name: Comment the changed pages, before and after
         env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
           PREVIEW_URL: ${{ github.event.client_payload.url || inputs.url }}
           COMMIT_SHA: ${{ github.event.client_payload.git.sha || inputs.sha }}
-        with:
-          script: |
-            const {owner, repo} = context.repo;
-            const sleep = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
-
-            async function listComments(pullNumber) {
-              return github.paginate(github.rest.issues.listComments, {
-                owner, repo, issue_number: pullNumber, per_page: 100
-              });
-            }
-
-            // The Vercel bot's comment has a `[Preview](<branch alias>)` link per
-            // project; this repository deploys one project.
-            async function previewUrlFromVercelComment(pullNumber) {
-              for (let attempt = 1; attempt <= 6; attempt++) {
-                if (attempt > 1) await sleep(10_000);
-                const vercelComment = (await listComments(pullNumber)).find(c => c.user?.login === 'vercel[bot]');
-                const match = vercelComment?.body?.match(/\[Preview\]\((https:\/\/[^)\s]+)\)/);
-                if (match) return match[1];
-                core.info(`Vercel has not commented a preview URL on PR #${pullNumber} yet (attempt ${attempt}).`);
-              }
-              return null;
-            }
-
-            let pr, previewUrl;
-            if (context.eventName === 'pull_request') {
-              pr = context.payload.pull_request;
-              previewUrl = await previewUrlFromVercelComment(pr.number);
-              if (!previewUrl) {
-                core.info(`Giving up; the vercel.deployment.success dispatch will comment when the deployment finishes.`);
-                return;
-              }
-            } else {
-              const {PREVIEW_URL, COMMIT_SHA} = process.env;
-              if (!PREVIEW_URL || !/^[0-9a-f]{40}$/i.test(COMMIT_SHA ?? '')) {
-                core.setFailed(`Need a preview URL and a full commit SHA; got url=${JSON.stringify(PREVIEW_URL)} sha=${JSON.stringify(COMMIT_SHA)}. `
-                  + `Vercel sends these as client_payload.url and client_payload.git.sha; workflow_dispatch takes them as the url and sha inputs.`);
-                return;
-              }
-              previewUrl = PREVIEW_URL;
-
-              // The dispatch payload has no PR number; look it up from the commit.
-              const {data: prs} = await github.rest.repos.listPullRequestsAssociatedWithCommit({
-                owner, repo, commit_sha: COMMIT_SHA
-              });
-              pr = prs.find(p => p.state === 'open' && p.head.sha === COMMIT_SHA);
-              if (!pr) {
-                core.info(`No open PR with head ${COMMIT_SHA}; nothing to do.`);
-                return;
-              }
-            }
-            previewUrl = previewUrl.replace(/\/$/, '');
-
-            const files = await github.paginate(github.rest.pulls.listFiles, {
-              owner, repo, pull_number: pr.number, per_page: 100
-            });
-
-            // Mirror contentlayer's flattenedPath: docs/<path>.mdx -> /<path>,
-            // with a trailing /index dropped. Preview deployments have no basePath.
-            const pages = files
-              .filter(f => f.filename.startsWith('docs/') && f.filename.endsWith('.mdx') && f.status !== 'removed')
-              .map(f => f.filename.slice('docs/'.length, -'.mdx'.length).replace(/^index$/, '').replace(/\/index$/, ''))
-              .map(path => ({path, url: `${previewUrl}/${path}`}));
-
-            if (pages.length === 0) {
-              core.info(`PR #${pr.number} changes no docs pages; not commenting.`);
-              return;
-            }
-
-            const marker = '<!-- preview-links-for-changed-pages -->';
-            const max = 40;
-            const lines = pages.slice(0, max).map(p => `- [/${p.path}](${p.url})`);
-            if (pages.length > max) lines.push(`- …and ${pages.length - max} more`);
-
-            const body = [
-              marker,
-              `Direct preview links to pages changed in this PR:`,
-              ...lines
-            ].join('\n');
-
-            // Update our previous comment instead of adding a new one per push.
-            const existing = (await listComments(pr.number)).find(c => c.body?.includes(marker));
-            if (existing) {
-              await github.rest.issues.updateComment({owner, repo, comment_id: existing.id, body});
-            } else {
-              await github.rest.issues.createComment({owner, repo, issue_number: pr.number, body});
-            }
+        run: node dev/preview-links.mjs
