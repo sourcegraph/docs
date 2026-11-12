@@ -311,9 +311,9 @@ $ kubectl cp codeinsights_db.out $NAMESPACE/$codeinsights-db_POD_NAME:/tmp/codei
 D. Restore the databases
 
 ```bash
-$ kubectl exec -it $pgsql_POD_NAME -- bash -c 'psql -v ERROR_ON_STOP=1 --username sg -f /tmp/sourcegraph_db.out sg'
-$ kubectl exec -it $codeintel-db_POD_NAME -- bash -c 'psql -v ERROR_ON_STOP=1 --username sg -f /tmp/codeintel_db.out sg'
-$ kubectl exec -it $codeinsights-db_POD_NAME -- bash -c 'psql -v ERROR_ON_STOP=1 --username postgres -f /tmp/codeinsights_db.out postgres'
+$ kubectl exec -it $pgsql_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /tmp/sourcegraph_db.out postgres'
+$ kubectl exec -it $codeintel-db_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /tmp/codeintel_db.out postgres'
+$ kubectl exec -it $codeinsights-db_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /tmp/codeinsights_db.out template1'
 ```
 
 E. Check for corrupt database indexes. If amcheck returns errors, please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
@@ -378,9 +378,9 @@ $ kubectl cp codeinsights_db.out $NAMESPACE/$codeinsights-db_POD_NAME:/tmp/codei
 F. Restore the databases
 
 ```bash
-$ kubectl exec -it $pgsql_POD_NAME -- bash -c 'psql -v ERROR_ON_STOP=1 --username sg -f /tmp/sourcegraph_db.out sg'
-$ kubectl exec -it $codeintel-db_POD_NAME -- bash -c 'psql -v ERROR_ON_STOP=1 --username sg -f /tmp/codeintel_db.out sg'
-$ kubectl exec -it $codeinsights-db_POD_NAME -- bash -c 'psql -v ERROR_ON_STOP=1 --username postgres -f /tmp/codeinsights_db.out postgres'
+$ kubectl exec -it $pgsql_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /tmp/sourcegraph_db.out postgres'
+$ kubectl exec -it $codeintel-db_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /tmp/codeintel_db.out postgres'
+$ kubectl exec -it $codeinsights-db_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /tmp/codeinsights_db.out template1'
 ```
 
 G. Check for corrupt database indexes. If amcheck returns errors, please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
