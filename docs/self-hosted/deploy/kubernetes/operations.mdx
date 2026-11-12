@@ -292,17 +292,17 @@ The following instructions apply only if you are restoring your databases into a
 
 If you are restoring a previously running environment, see the instructions for [restoring a previously running deployment](#restoring-sourcegraph-databases-into-an-existing-environment)
 
-A. Copy the database dump files (eg. `sourcegraph_db.out`, `codeintel_db.out` and `codeinsights_db.out`) into your deployment directory
+A. On the machine where you run `kubectl`, `cd` to the directory with the database dump files: `sourcegraph_db.out`, `codeintel_db.out` and `codeinsights_db.out`
 
-B. Start the database services by running the following command from your deployment directory:
+B. Stop every Sourcegraph service except the databases, so nothing writes to the databases during the restore
 
 ```bash
-$ kubectl rollout restart statefulset pgsql
-$ kubectl rollout restart statefulset codeintel-db
-$ kubectl rollout restart statefulset codeinsights-db
+$ kubectl scale deployment,statefulset -l 'deploy=sourcegraph,app.kubernetes.io/component notin (pgsql,codeintel-db,codeinsights-db)' --replicas=0
 ```
 
-C. Copy the database files into the pods by running the following commands:
+Wait until `kubectl get pods` shows no Sourcegraph pods other than `pgsql`, `codeintel-db`, and `codeinsights-db`.
+
+C. Copy the database files into the pods
 
 ```bash
 $ kubectl cp sourcegraph_db.out $NAMESPACE/$pgsql_POD_NAME:/data/sourcegraph_db.out
@@ -314,12 +314,12 @@ The database containers have a read-only root filesystem, so copy the files into
 
 D. Restore the databases
 
-The `pg_terminate_backend` query disconnects the other sessions on each database server, such as the `pgsql-exporter` sidecar and the `worker`, so the dump can drop and recreate the database. `ON_ERROR_STOP=1` stops the restore at the first error; if a restore fails, fix the cause and run it again.
+`DROP DATABASE ... WITH (FORCE)` disconnects the other sessions on each database, such as the `pgsql-exporter` sidecar, and drops it, so the dump can recreate it. `ON_ERROR_STOP=1` stops the restore at the first error; if a restore fails, fix the cause and run it again.
 
 ```bash
-$ kubectl exec -it $pgsql_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /data/sourcegraph_db.out postgres && rm /data/sourcegraph_db.out'
-$ kubectl exec -it $codeintel-db_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /data/codeintel_db.out postgres && rm /data/codeintel_db.out'
-$ kubectl exec -it $codeinsights-db_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /var/lib/postgresql/data/codeinsights_db.out template1 && rm /var/lib/postgresql/data/codeinsights_db.out'
+$ kubectl exec -it $pgsql_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "DROP DATABASE IF EXISTS sg WITH (FORCE)" -f /data/sourcegraph_db.out postgres && rm /data/sourcegraph_db.out'
+$ kubectl exec -it $codeintel-db_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "DROP DATABASE IF EXISTS sg WITH (FORCE)" -f /data/codeintel_db.out postgres && rm /data/codeintel_db.out'
+$ kubectl exec -it $codeinsights-db_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username postgres -c "DROP DATABASE IF EXISTS postgres WITH (FORCE)" -f /var/lib/postgresql/data/codeinsights_db.out template1 && rm /var/lib/postgresql/data/codeinsights_db.out'
 ```
 
 E. Check for corrupt database indexes. If amcheck returns errors, please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
@@ -344,27 +344,19 @@ F. Start the remaining Sourcegraph services by following the steps in [applying 
 
 #### Restoring Sourcegraph databases into an existing environment
 
-A. Stop the existing deployment by removing the frontend deployment
-
-```bash
-$ kubectl scale --replicas=0 deployment/sourcegraph-frontend
-# or
-$ kubectl delete deployment sourcegraph-frontend
-```
-
 You don't need to delete the database volumes: the restore drops and recreates each database.
 
-B. Copy the database dump files (eg. `sourcegraph_db.out`, `codeintel_db.out` and `codeinsights_db.out`) into your deployment directory
+A. On the machine where you run `kubectl`, `cd` to the directory with the database dump files: `sourcegraph_db.out`, `codeintel_db.out` and `codeinsights_db.out`
 
-C. Start the database services only
+B. Stop every Sourcegraph service except the databases, so nothing writes to the databases during the restore
 
 ```bash
-$ kubectl rollout restart statefulset pgsql
-$ kubectl rollout restart statefulset codeintel-db
-$ kubectl rollout restart statefulset codeinsights-db
+$ kubectl scale deployment,statefulset -l 'deploy=sourcegraph,app.kubernetes.io/component notin (pgsql,codeintel-db,codeinsights-db)' --replicas=0
 ```
 
-D. Copy the database files into the pods by running the following commands:
+Wait until `kubectl get pods` shows no Sourcegraph pods other than `pgsql`, `codeintel-db`, and `codeinsights-db`.
+
+C. Copy the database files into the pods
 
 ```bash
 $ kubectl cp sourcegraph_db.out $NAMESPACE/$pgsql_POD_NAME:/data/sourcegraph_db.out
@@ -374,17 +366,17 @@ $ kubectl cp codeinsights_db.out $NAMESPACE/$codeinsights-db_POD_NAME:/var/lib/p
 
 The database containers have a read-only root filesystem, so copy the files into the database volumes. The restore commands delete them after a successful restore.
 
-E. Restore the databases
+D. Restore the databases
 
-The `pg_terminate_backend` query disconnects the other sessions on each database server, such as the `pgsql-exporter` sidecar and the `worker`, so the dump can drop and recreate the database. `ON_ERROR_STOP=1` stops the restore at the first error; if a restore fails, fix the cause and run it again.
+`DROP DATABASE ... WITH (FORCE)` disconnects the other sessions on each database, such as the `pgsql-exporter` sidecar, and drops it, so the dump can recreate it. `ON_ERROR_STOP=1` stops the restore at the first error; if a restore fails, fix the cause and run it again.
 
 ```bash
-$ kubectl exec -it $pgsql_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /data/sourcegraph_db.out postgres && rm /data/sourcegraph_db.out'
-$ kubectl exec -it $codeintel-db_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /data/codeintel_db.out postgres && rm /data/codeintel_db.out'
-$ kubectl exec -it $codeinsights-db_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /var/lib/postgresql/data/codeinsights_db.out template1 && rm /var/lib/postgresql/data/codeinsights_db.out'
+$ kubectl exec -it $pgsql_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "DROP DATABASE IF EXISTS sg WITH (FORCE)" -f /data/sourcegraph_db.out postgres && rm /data/sourcegraph_db.out'
+$ kubectl exec -it $codeintel-db_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "DROP DATABASE IF EXISTS sg WITH (FORCE)" -f /data/codeintel_db.out postgres && rm /data/codeintel_db.out'
+$ kubectl exec -it $codeinsights-db_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username postgres -c "DROP DATABASE IF EXISTS postgres WITH (FORCE)" -f /var/lib/postgresql/data/codeinsights_db.out template1 && rm /var/lib/postgresql/data/codeinsights_db.out'
 ```
 
-F. Check for corrupt database indexes. If amcheck returns errors, please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
+E. Check for corrupt database indexes. If amcheck returns errors, please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
 
 ```sql
 create extension amcheck;
@@ -402,7 +394,7 @@ and c.relpersistence != 't'
 and i.indisready AND i.indisvalid;
 ```
 
-G. Start the remaining Sourcegraph services by following the steps in [applying manifests](#applying-manifests).
+F. Start the remaining Sourcegraph services by following the steps in [applying manifests](#applying-manifests).
 
 ## List of ports
 
