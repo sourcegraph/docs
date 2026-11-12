@@ -5,7 +5,7 @@
 	<user>Available via the Web app.</user>
 </TierCallout>
 
-Administrators can sync Git repositories hosted on [Azure DevOps](https://dev.azure.com) with Sourcegraph so that users can search and navigate the repositories.
+Administrators can sync Git repositories hosted on [Azure DevOps Services](https://dev.azure.com) or a self-hosted Azure DevOps Server with Sourcegraph so that users can search and navigate the repositories. The steps below are for Azure DevOps Services; see [Azure DevOps Server](#azure-devops-server) for the differences on a self-hosted server.
 
 To connect Azure DevOps to Sourcegraph, create a personal access token from your user settings page by following the below steps:
 
@@ -49,6 +49,30 @@ Next, configure the code host connection by following the next steps:
 
 1. Select **Add repositories**.
 
+## Azure DevOps Server
+
+Search, code navigation, and repository syncing work the same on Azure DevOps Server as with Azure DevOps Services. [Permissions syncing](#permissions-syncing), [Batch Changes](/batch-changes/requirements), and signing in to Sourcegraph with Azure DevOps are only available for Azure DevOps Services.
+
+A connection to Azure DevOps Server differs from one to Azure DevOps Services in these ways:
+
+- `url` is the server's public URL, including its virtual directory.
+- Project collections take the place of organizations. List collection names in `orgs`, and use `collection/project` in `projects`.
+- Sourcegraph authenticates with either a personal access token or a Windows account:
+    - With `token`, Sourcegraph uses a personal access token created on the server, with the scopes listed above, for both API requests and cloning.
+    - With `windowsPassword`, set `username` to `DOMAIN\username` (written `"DOMAIN\\username"` in JSON). Sourcegraph authenticates API requests with NTLM and clones with the Windows account. A connection sets either `token` or `windowsPassword`, not both.
+
+For example, this connection syncs every repository in the `DefaultCollection` collection and in the `project1` project of `OtherCollection`:
+
+```json
+{
+	"url": "https://azuredevops.example.com/tfs/",
+	"username": "<username>",
+	"token": "<personal access token>",
+	"orgs": ["DefaultCollection"],
+	"projects": ["OtherCollection/project1"]
+}
+```
+
 ## Repository syncing
 
 All repositories within the configured organizations/projects are synced by default, but you can also choose to sync either all repositories or only specific repositories from those organizations/projects.
@@ -57,7 +81,7 @@ In addition, you may exclude one or more repositories by setting the [`exclude`]
 
 ### HTTPS cloning
 
-Sourcegraph clones repositories from Azure DevOps via HTTP(S), using the [`username`](/admin/code-hosts/azuredevops#configuration) and [`token`](/admin/code-hosts/azuredevops#configuration) required fields you provide in the configuration.
+Sourcegraph clones repositories from Azure DevOps via HTTP(S), using the [`username`](/admin/code-hosts/azuredevops#configuration) and [`token`](/admin/code-hosts/azuredevops#configuration) required fields you provide in the configuration. On Azure DevOps Server, a connection with [`windowsPassword`](#azure-devops-server) clones with the Windows account instead.
 
 ## Configuration
 
@@ -183,7 +207,7 @@ Please consult [this page](/admin/webhooks/incoming) in order to configure webho
 
 ## Permissions syncing
 
-[User-level permissions](/admin/permissions/syncing#permission-syncing) syncing is supported for Azure DevOps code host connections. Here is the list of prerequisites:
+[User-level permissions](/admin/permissions/syncing#permission-syncing) syncing is supported for Azure DevOps Services code host connections. It isn't available for Azure DevOps Server. Here is the list of prerequisites:
 
 1. Configure Azure DevOps as an OAuth provider by consulting [this page](/admin/config/authorization-and-authentication#azure-devops-services)
 2. Next verify that users can now sign up / login to your Sourcegraph instance with your Azure DevOps OAuth provider
