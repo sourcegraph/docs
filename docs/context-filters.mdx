@@ -19,18 +19,9 @@ Two site configuration keys hold the rules, and both have the same shape:
 
 ## How context filters work
 
-Filtering happens in the tools the agent uses to read repositories, before their results reach the LLM, and does not rely on prompting.
+Filtering happens in the tools the agent uses to read repositories, before any content reaches the LLM, and does not rely on prompting, so the model cannot reason its way around the filters.
 
-Agentic Batch Changes adds one check on top of this: a [coding agent step](#coding-agent-steps) works on a full checkout and therefore cannot run at all in an excluded repository. Other batch change steps, such as `run` steps, are not affected; see [Agentic Batch Changes](#agentic-batch-changes).
-
-## Limitations
-
-Context filters limit what the agents' tools return. They are not an access control or security boundary:
-
-- They do not change repository permissions or restrict ordinary search, GraphQL, or file APIs. Anyone who can access a repository can still read it.
-- They hide excluded repositories, not every trace of them. Code in other repositories, such as imports, configuration, or documentation that mentions an excluded repository, stays visible to the agent.
-
-To keep code away from users, and from agents acting for them, use [repository permissions](/admin/permissions).
+To the agent, excluded content is indistinguishable from content that does not exist. Agentic Batch Changes adds one check on top of this: a [coding agent step](#coding-agent-steps) works on a full checkout and therefore cannot run at all in a repository that contains excluded content. Other batch change steps, such as `run` steps, execute on an unfiltered checkout; see [Agentic Batch Changes](#agentic-batch-changes).
 
 ## Configuring context filters
 
