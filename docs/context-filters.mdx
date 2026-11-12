@@ -42,8 +42,6 @@ An administrator configures filters under **Administration → Configuration →
 
 Config changes apply to the next agent run; no restart is required. `exclude` must contain at least one rule, and each rule must list at least one pattern. To turn filtering off, remove the key; an empty `exclude` list is rejected. Saving an invalid pattern through the site admin UI is rejected. If an invalid pattern reaches the running configuration another way, for example through `SITE_CONFIG_FILE`, the agents block every repository until it is fixed rather than running with no filters.
 
-Rules can also set `filePathPatterns` to hide individual files, but file rules are not robust: an agent can still learn what an excluded file contains through search. Don't rely on them to keep sensitive files from agents; exclude the whole repository instead.
-
 ### Which key to use
 
 Rules from `agents.contextFilters` and `deepSearch.contextFilters` are combined into one list, and every agent applies the whole list. A rule in either key hides the same repositories from Deep Search, from the Agentic Batch Changes agent, and from its coding agent steps. There is no way to exclude a repository from one agent only.
@@ -88,3 +86,7 @@ A blocked repository fails its execution with this message, which the agent sees
 Ask Deep Search a question that would require code from the excluded repository, and @-mention the repository directly. A working filter produces an answer that does not reference the repository's code, and the [list of sources](/deep-search) contains none of it. If you @-mention an excluded repository, Deep Search reports it as not found rather than acknowledging that it was excluded.
 
 To see the coding agent step check, run a batch spec you wrote yourself with a `codingAgent` step against the excluded repository. The execution fails with the message above. A batch change that the agent manages cannot show the message, because the agent drops the excluded repository's workspace before anything executes.
+
+## File path rules
+
+Rules can also set `filePathPatterns` to hide individual files, but file rules are currently not robust. Don't rely on them to keep sensitive files from agents; exclude the whole repository instead.
