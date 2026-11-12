@@ -15,7 +15,7 @@ Context filters are an admin-defined exclusion list for the agents that run insi
 Two site configuration keys hold the rules, and both have the same shape:
 
 - `experimentalFeatures.agents.contextFilters` applies to both agents. Put new rules here.
-- `experimentalFeatures.deepSearch.contextFilters` is the older key that predates Agentic Batch Changes. It stays effective, and its rules also apply to both agents, so you do not need to move existing rules. See [Which key to use](#which-key-to-use).
+- `experimentalFeatures.deepSearch.contextFilters` is the older key that predates Agentic Batch Changes. See [Which key to use](#which-key-to-use).
 
 ## Why use context filters
 
@@ -26,7 +26,7 @@ Two site configuration keys hold the rules, and both have the same shape:
 
 Filtering happens in the tools the agent uses to read repositories, before any content reaches the LLM, and does not rely on prompting, so the model cannot reason its way around the filters.
 
-To the agent, an excluded repository is indistinguishable from one that does not exist. Agentic Batch Changes adds one check on top of this: a [coding agent step](#coding-agent-steps) works on a full checkout and therefore cannot run at all in an excluded repository. Other batch change steps, such as `run` steps, execute on an unfiltered checkout; see [Agentic Batch Changes](#agentic-batch-changes).
+To the agent, an excluded repository is indistinguishable from one that does not exist. Agentic Batch Changes also refuses to run [coding agent steps](#coding-agent-steps) in an excluded repository.
 
 ## Configuring context filters
 
@@ -57,14 +57,12 @@ Add new rules to `agents.contextFilters`. Rules you already have in `deepSearch.
 
 `repoNamePatterns` takes a list of Go [RE2](https://github.com/google/re2/wiki/Syntax) regular expressions, matched against the full repository name, including the code host: `github.com/acme/backend`.
 
-- **Patterns are unanchored.** `internal` matches `github.com/acme/internal-tools`. Use `^...$` when you mean the whole string.
+- **Patterns are unanchored.** `internal` matches `github.com/acme/internal-tools`. Use `^...$` when you mean the whole string: `^github\.com/acme/secrets$` leaves `github.com/acme/secrets-docs` visible, while `acme/secrets` hides both.
 - **`.` matches any character except a newline, including `/`.** Escape it as `github\.com`. The pattern `a.b` also matches the repository `a/b`.
 - **Backslashes must be doubled in JSON.** The regex `github\.com` is written `"github\\.com"`.
 - **Repository names match case-insensitively.** `acme/Secrets` excludes `github.com/acme/secrets`.
 - **RE2 does not support backreferences or lookaround assertions.** Patterns like `(a)\1` are rejected.
 - **Patterns in a list are combined with OR.** `["^a$", "^b$"]` matches either.
-
-Anchoring matters. `^github\.com/acme/secrets$` leaves `github.com/acme/secrets-docs` visible, while the unanchored `acme/secrets` hides both.
 
 ## Agentic Batch Changes
 
@@ -72,11 +70,9 @@ The [Agentic Batch Changes](/agentic-batch-changes) agent applies the combined r
 
 Workspace filtering applies only to batch specs the agent manages. A batch spec you write and run yourself keeps every workspace, including those in excluded repositories, but its coding agent steps are still subject to the check below.
 
-Steps run on a full checkout of the repository in an executor container. Context filters do not apply to `run` steps, whose scripts can read the whole checkout. Coding agent steps are the exception: because a coding agent reads the checkout freely, Sourcegraph refuses to start it in an excluded repository.
-
 ### Coding agent steps
 
-A [coding agent step](/agentic-batch-changes/configuration#coding-agent-steps) runs a coding agent on a full checkout of the repository. Sourcegraph refuses to run coding agent steps in a repository that matches a rule.
+A [coding agent step](/agentic-batch-changes/configuration#coding-agent-steps) runs a coding agent on a full checkout of the repository, which the agent reads freely, so Sourcegraph refuses to run coding agent steps in an excluded repository. Context filters do not apply to `run` steps, whose scripts can read the whole checkout.
 
 The check runs before the executor job for the repository starts, and only when a coding agent step would actually run: an execution whose coding agent steps are all skipped by an `if:` condition or served from the execution cache does not trigger it. When the check blocks an execution, the executor job never starts, so the `run` steps in that job do not run either. Coding agent steps in [changeset hooks](/agentic-batch-changes/configuration#changeset-hooks) are checked the same way.
 
@@ -86,4 +82,4 @@ A blocked repository fails its execution with this message, which the agent sees
 
 Ask Deep Search a question that would require code from the excluded repository, and @-mention the repository directly. A working filter produces an answer that does not reference the repository's code, and the [list of sources](/deep-search) contains none of it. If you @-mention an excluded repository, Deep Search reports it as not found rather than acknowledging that it was excluded.
 
-To see the coding agent step check, run a batch spec you wrote yourself with a `codingAgent` step against the excluded repository. The execution fails with the message above. A batch change that the agent manages cannot show the message, because the agent drops the excluded repository's workspace before anything executes.
+To see the coding agent step check, run a batch spec you wrote yourself, not one the agent manages, with a `codingAgent` step against the excluded repository. The execution fails with the message above.
