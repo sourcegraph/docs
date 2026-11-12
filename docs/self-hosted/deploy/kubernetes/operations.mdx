@@ -275,10 +275,12 @@ and i.indisready AND i.indisvalid;
 D. Generate the database dumps
 
 ```bash
-$ kubectl exec -it $pgsql_POD_NAME -- bash -c 'pg_dump -C --clean --if-exists --username sg sg' > sourcegraph_db.out
-$ kubectl exec -it $codeintel-db_POD_NAME -- bash -c 'pg_dump -C --clean --if-exists --username sg sg' > codeintel_db.out
-$ kubectl exec -it $codeinsights-db_POD_NAME -- bash -c 'pg_dump -C --clean --if-exists --username postgres postgres' > codeinsights_db.out
+$ kubectl exec $pgsql_POD_NAME -- bash -c 'pg_dump -C --clean --if-exists --username sg sg' > sourcegraph_db.out
+$ kubectl exec $codeintel-db_POD_NAME -- bash -c 'pg_dump -C --clean --if-exists --username sg sg' > codeintel_db.out
+$ kubectl exec $codeinsights-db_POD_NAME -- bash -c 'pg_dump -C --clean --if-exists --username postgres postgres' > codeinsights_db.out
 ```
+
+Run these commands without `-it`: with a terminal attached, every line of the dump ends with a carriage return.
 
 Ensure the `sourcegraph_db.out`, `codeintel_db.out` and `codeinsights_db.out` files are moved to a safe and secure location.
 
@@ -295,25 +297,29 @@ A. Copy the database dump files (eg. `sourcegraph_db.out`, `codeintel_db.out` an
 B. Start the database services by running the following command from your deployment directory:
 
 ```bash
-$ kubectl rollout restart deployment pgsql
-$ kubectl rollout restart deployment codeintel-db
-$ kubectl rollout restart deployment codeinsights-db
+$ kubectl rollout restart statefulset pgsql
+$ kubectl rollout restart statefulset codeintel-db
+$ kubectl rollout restart statefulset codeinsights-db
 ```
 
 C. Copy the database files into the pods by running the following commands:
 
 ```bash
-$ kubectl cp sourcegraph_db.out $NAMESPACE/$pgsql_POD_NAME:/tmp/sourcegraph_db.out
-$ kubectl cp codeintel_db.out $NAMESPACE/$codeintel-db_POD_NAME:/tmp/codeintel_db.out
-$ kubectl cp codeinsights_db.out $NAMESPACE/$codeinsights-db_POD_NAME:/tmp/codeinsights_db.out
+$ kubectl cp sourcegraph_db.out $NAMESPACE/$pgsql_POD_NAME:/data/sourcegraph_db.out
+$ kubectl cp codeintel_db.out $NAMESPACE/$codeintel-db_POD_NAME:/data/codeintel_db.out
+$ kubectl cp codeinsights_db.out $NAMESPACE/$codeinsights-db_POD_NAME:/var/lib/postgresql/data/codeinsights_db.out
 ```
+
+The database containers have a read-only root filesystem, so copy the files into the database volumes. The restore commands delete them after a successful restore.
 
 D. Restore the databases
 
+The `pg_terminate_backend` query disconnects the other sessions on each database server, such as the `pgsql-exporter` sidecar and the `worker`, so the dump can drop and recreate the database. `ON_ERROR_STOP=1` stops the restore at the first error; if a restore fails, fix the cause and run it again.
+
 ```bash
-$ kubectl exec -it $pgsql_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /tmp/sourcegraph_db.out postgres'
-$ kubectl exec -it $codeintel-db_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /tmp/codeintel_db.out postgres'
-$ kubectl exec -it $codeinsights-db_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /tmp/codeinsights_db.out template1'
+$ kubectl exec -it $pgsql_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /data/sourcegraph_db.out postgres && rm /data/sourcegraph_db.out'
+$ kubectl exec -it $codeintel-db_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /data/codeintel_db.out postgres && rm /data/codeintel_db.out'
+$ kubectl exec -it $codeinsights-db_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /var/lib/postgresql/data/codeinsights_db.out template1 && rm /var/lib/postgresql/data/codeinsights_db.out'
 ```
 
 E. Check for corrupt database indexes. If amcheck returns errors, please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
@@ -346,44 +352,39 @@ $ kubectl scale --replicas=0 deployment/sourcegraph-frontend
 $ kubectl delete deployment sourcegraph-frontend
 ```
 
-B. Remove any existing volumes for the databases in the existing deployment
+You don't need to delete the database volumes: the restore drops and recreates each database.
+
+B. Copy the database dump files (eg. `sourcegraph_db.out`, `codeintel_db.out` and `codeinsights_db.out`) into your deployment directory
+
+C. Start the database services only
 
 ```bash
-$ kubectl delete pvc pgsql
-$ kubectl delete pvc codeintel-db
-$ kubectl delete pvc codeinsights-db
-$ kubectl delete pv $pgsql_PV_NAME --force
-$ kubectl delete pv $codeintel-db_PV_NAME --force
-$ kubectl delete pv $codeinsights-db_PV_NAME --force
+$ kubectl rollout restart statefulset pgsql
+$ kubectl rollout restart statefulset codeintel-db
+$ kubectl rollout restart statefulset codeinsights-db
 ```
 
-C. Copy the database dump files (eg. `sourcegraph_db.out`, `codeintel_db.out` and `codeinsights_db.out`) into your deployment directory
-
-D. Start the database services only
+D. Copy the database files into the pods by running the following commands:
 
 ```bash
-$ kubectl rollout restart deployment pgsql
-$ kubectl rollout restart deployment codeintel-db
-$ kubectl rollout restart deployment codeinsights-db
+$ kubectl cp sourcegraph_db.out $NAMESPACE/$pgsql_POD_NAME:/data/sourcegraph_db.out
+$ kubectl cp codeintel_db.out $NAMESPACE/$codeintel-db_POD_NAME:/data/codeintel_db.out
+$ kubectl cp codeinsights_db.out $NAMESPACE/$codeinsights-db_POD_NAME:/var/lib/postgresql/data/codeinsights_db.out
 ```
 
-E. Copy the database files into the pods by running the following commands:
+The database containers have a read-only root filesystem, so copy the files into the database volumes. The restore commands delete them after a successful restore.
+
+E. Restore the databases
+
+The `pg_terminate_backend` query disconnects the other sessions on each database server, such as the `pgsql-exporter` sidecar and the `worker`, so the dump can drop and recreate the database. `ON_ERROR_STOP=1` stops the restore at the first error; if a restore fails, fix the cause and run it again.
 
 ```bash
-$ kubectl cp sourcegraph_db.out $NAMESPACE/$pgsql_POD_NAME:/tmp/sourcegraph_db.out
-$ kubectl cp codeintel_db.out $NAMESPACE/$codeintel-db_POD_NAME:/tmp/codeintel_db.out
-$ kubectl cp codeinsights_db.out $NAMESPACE/$codeinsights-db_POD_NAME:/tmp/codeinsights_db.out
+$ kubectl exec -it $pgsql_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /data/sourcegraph_db.out postgres && rm /data/sourcegraph_db.out'
+$ kubectl exec -it $codeintel-db_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /data/codeintel_db.out postgres && rm /data/codeintel_db.out'
+$ kubectl exec -it $codeinsights-db_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /var/lib/postgresql/data/codeinsights_db.out template1 && rm /var/lib/postgresql/data/codeinsights_db.out'
 ```
 
-F. Restore the databases
-
-```bash
-$ kubectl exec -it $pgsql_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /tmp/sourcegraph_db.out postgres'
-$ kubectl exec -it $codeintel-db_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /tmp/codeintel_db.out postgres'
-$ kubectl exec -it $codeinsights-db_POD_NAME -- bash -c 'psql -v ON_ERROR_STOP=1 --username postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname <> current_database()" -f /tmp/codeinsights_db.out template1'
-```
-
-G. Check for corrupt database indexes. If amcheck returns errors, please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
+F. Check for corrupt database indexes. If amcheck returns errors, please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
 
 ```sql
 create extension amcheck;
@@ -401,7 +402,7 @@ and c.relpersistence != 't'
 and i.indisready AND i.indisvalid;
 ```
 
-H. Start the remaining Sourcegraph services by following the steps in [applying manifests](#applying-manifests).
+G. Start the remaining Sourcegraph services by following the steps in [applying manifests](#applying-manifests).
 
 ## List of ports
 
