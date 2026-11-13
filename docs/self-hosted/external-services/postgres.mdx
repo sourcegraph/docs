@@ -49,25 +49,6 @@ To externalize the _code navigation database_, use the following prefixed `CODEI
 	on the same host.
 </Callout>
 
-### sourcegraph/server
-
-Add the following to your `docker run` command:
-
-```shell
-docker run [...]
--e PGHOST=psql1.example.com
--e PGUSER=sourcegraph
--e PGPASSWORD=secret
--e PGDATABASE=sourcegraph
--e PGSSLMODE=require
--e CODEINTEL_PGHOST=psql2.example.com
--e CODEINTEL_PGUSER=sourcegraph
--e CODEINTEL_PGPASSWORD=secret
--e CODEINTEL_PGDATABASE=sourcegraph-codeintel
--e CODEINTEL_PGSSLMODE=require
-sourcegraph/server:{CURRENT_VERSION_NO_V}
-```
-
 ### Docker Compose
 
 1. Add/modify the following environment variables to all of the `sourcegraph-frontend-*` services, the `sourcegraph-frontend-internal` service, and the `migrator` service (for Sourcegraph versions 3.37+) in [docker-compose.yaml](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/3.37/docker-compose/docker-compose.yaml):
@@ -170,18 +151,6 @@ Configure the following environment variables for the **`sourcegraph-frontend`**
 [PgBouncer] is a lightweight connections pooler for PostgreSQL. It allows more clients to connect with the PostgreSQL database without running into connection limits.
 
 When [PgBouncer] is used, we need to include `statement_cache_mode=describe` in the PostgreSQL connection url. This can be done by configuring the `PGDATASOURCE` and `CODEINSIGHTS_PGDATASOURCE` environment variables to `postgres://username:password@pgbouncer.example.com:5432/sg?statement_cache_mode=describe`
-
-### sourcegraph/server
-
-Add the following to your `docker run` command:
-
-<pre class="pre-wrap start-sourcegraph-command">
-	<code>
-		docker run [...]<span class="virtual-br"></span> -e PGDATASOURCE="postgres://username:password@sourcegraph-pgbouncer.example.com:5432/sg?statement_cache_mode=describe"
-		<span class="virtual-br"></span> -e CODEINSIGHTS_PGDATASOURCE="postgres://username:password@sourcegraph-codeintel-pgbouncer.example.com:5432/sg?statement_cache_mode=describe"
-		<span class="virtual-br"></span> sourcegraph/server:<CURRENT_VERSION_STRING_NO_V />
-	</code>
-</pre>
 
 ### Docker Compose
 
