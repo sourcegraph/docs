@@ -273,9 +273,17 @@ and i.indisready AND i.indisvalid;
 D. Generate the database dumps
 
 ```bash
-$ kubectl exec pgsql-0 -- bash -c 'pg_dump -C --clean --if-exists --username sg sg' > sourcegraph_db.out
-$ kubectl exec codeintel-db-0 -- bash -c 'pg_dump -C --clean --if-exists --username sg sg' > codeintel_db.out
-$ kubectl exec codeinsights-db-0 -- bash -c 'pg_dump -C --clean --if-exists --username postgres postgres' > codeinsights_db.out
+$ kubectl exec pgsql-0 -- bash -c \
+    'pg_dump -C --clean --if-exists --username sg sg' \
+    > sourcegraph_db.out
+
+$ kubectl exec codeintel-db-0 -- bash -c \
+    'pg_dump -C --clean --if-exists --username sg sg' \
+    > codeintel_db.out
+
+$ kubectl exec codeinsights-db-0 -- bash -c \
+    'pg_dump -C --clean --if-exists --username postgres postgres' \
+    > codeinsights_db.out
 ```
 
 Run these commands without `-it`: with a terminal attached, every line of the dump ends with a carriage return.
@@ -291,7 +299,10 @@ A. On the machine where you run `kubectl`, `cd` to the directory with the databa
 B. Stop every Sourcegraph service except the databases, so nothing writes to the databases during the restore
 
 ```bash
-$ kubectl scale deployment,statefulset -l 'deploy=sourcegraph,app.kubernetes.io/component notin (pgsql,codeintel-db,codeinsights-db)' --replicas=0
+$ kubectl scale deployment,statefulset --replicas=0 -l '
+    deploy=sourcegraph,
+    app.kubernetes.io/component notin
+        (pgsql,codeintel-db,codeinsights-db)'
 ```
 
 Wait until `kubectl get pods` shows no Sourcegraph pods other than `pgsql`, `codeintel-db`, and `codeinsights-db`.
@@ -301,7 +312,8 @@ C. Copy the database files into the pods
 ```bash
 $ kubectl cp sourcegraph_db.out pgsql-0:/data/sourcegraph_db.out
 $ kubectl cp codeintel_db.out codeintel-db-0:/data/codeintel_db.out
-$ kubectl cp codeinsights_db.out codeinsights-db-0:/var/lib/postgresql/data/codeinsights_db.out
+$ kubectl cp codeinsights_db.out \
+    codeinsights-db-0:/var/lib/postgresql/data/codeinsights_db.out
 ```
 
 The database containers have a read-only root filesystem, so copy the files into the database volumes. The restore commands delete them after a successful restore.
@@ -311,9 +323,23 @@ D. Restore the databases
 `DROP DATABASE ... WITH (FORCE)` disconnects the other sessions on each database, such as the `pgsql-exporter` sidecar, and drops it, so the dump can recreate it. `ON_ERROR_STOP=1` stops the restore at the first error; if a restore fails, fix the cause and run it again.
 
 ```bash
-$ kubectl exec -it pgsql-0 -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "DROP DATABASE IF EXISTS sg WITH (FORCE)" -f /data/sourcegraph_db.out postgres && rm /data/sourcegraph_db.out'
-$ kubectl exec -it codeintel-db-0 -- bash -c 'psql -v ON_ERROR_STOP=1 --username sg -c "DROP DATABASE IF EXISTS sg WITH (FORCE)" -f /data/codeintel_db.out postgres && rm /data/codeintel_db.out'
-$ kubectl exec -it codeinsights-db-0 -- bash -c 'psql -v ON_ERROR_STOP=1 --username postgres -c "DROP DATABASE IF EXISTS postgres WITH (FORCE)" -f /var/lib/postgresql/data/codeinsights_db.out template1 && rm /var/lib/postgresql/data/codeinsights_db.out'
+$ kubectl exec -it pgsql-0 -- bash -c '
+    psql -v ON_ERROR_STOP=1 --username sg \
+        -c "DROP DATABASE IF EXISTS sg WITH (FORCE)" \
+        -f /data/sourcegraph_db.out postgres \
+    && rm /data/sourcegraph_db.out'
+
+$ kubectl exec -it codeintel-db-0 -- bash -c '
+    psql -v ON_ERROR_STOP=1 --username sg \
+        -c "DROP DATABASE IF EXISTS sg WITH (FORCE)" \
+        -f /data/codeintel_db.out postgres \
+    && rm /data/codeintel_db.out'
+
+$ kubectl exec -it codeinsights-db-0 -- bash -c '
+    psql -v ON_ERROR_STOP=1 --username postgres \
+        -c "DROP DATABASE IF EXISTS postgres WITH (FORCE)" \
+        -f /var/lib/postgresql/data/codeinsights_db.out template1 \
+    && rm /var/lib/postgresql/data/codeinsights_db.out'
 ```
 
 E. Check for corrupt database indexes. If amcheck returns errors, please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
