@@ -42,6 +42,10 @@ export const navigation: NavigationItem[] = [
 					{
 						title: 'Connectors',
 						href: '/agentic-batch-changes/connectors'
+					},
+					{
+						title: 'MCP',
+						href: '/agentic-batch-changes/mcp'
 					}
 				]
 			},
