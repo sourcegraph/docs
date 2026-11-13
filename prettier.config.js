@@ -9,6 +9,9 @@ module.exports = {
 	tabWidth: 4,
 	semi: true,
 	plugins: ['prettier-plugin-tailwindcss'],
-	// Nested Markdown bullets are indented 2 spaces (.markdownlint-cli2.jsonc)
-	overrides: [{files: ['*.md', '*.mdx'], options: {tabWidth: 2}}]
+	// Markdown and YAML are indented 2 spaces, which nests Markdown bullets
+	// 2 spaces (.markdownlint-cli2.jsonc)
+	overrides: [
+		{files: ['*.md', '*.mdx', '*.yml', '*.yaml'], options: {tabWidth: 2}}
+	]
 };
