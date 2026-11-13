@@ -10,9 +10,9 @@ Mismatched collation versions can lead to database index corruption if left unch
 
 # Affected Services
 
--   `pgsql` container
--   `codeintel-db` container
--   `codeinsights-db` container
+- `pgsql` container
+- `codeintel-db` container
+- `codeinsights-db` container
 
 Only self-hosted customers using the Sourcegraph provided PostgreSQL container images are affected.
 
@@ -64,28 +64,28 @@ FROM pg_database;
 
 1. Stop all Sourcegraph containers
 
-```
-docker compose down
-```
+   ```
+   docker compose down
+   ```
 
 2. Start only the database containers
 
-```
-docker compose up pgsql codeinsights-db codeintel-db -d
-```
+   ```
+   docker compose up pgsql codeinsights-db codeintel-db -d
+   ```
 
 3. Access each database container
 
-```
-docker exec -it <database-container-name> bash
-```
+   ```
+   docker exec -it <database-container-name> bash
+   ```
 
 4. Reindex the databases in the container
 
-```
-reindexdb --no-password --username sg --verbose --echo --system
-reindexdb --no-password --username sg --verbose --echo --all
-```
+   ```
+   reindexdb --no-password --username sg --verbose --echo --system
+   reindexdb --no-password --username sg --verbose --echo --all
+   ```
 
 5. Refresh the collation version for each database
 
@@ -98,9 +98,9 @@ psql --no-password --username "sg" --tuples-only -c "SELECT 'ALTER DATABASE ' ||
 
 Repeat steps 3 through 5 with all containers:
 
--   `pgsql` container
--   `codeintel-db` container
--   `codeinsights-db` container
+- `pgsql` container
+- `codeintel-db` container
+- `codeinsights-db` container
 
 Once this is complete, you may start your Sourcegraph deployment
 
@@ -112,26 +112,26 @@ docker compose up -d --remove-orphans
 
 1. Stop all non-database Sourcegraph pods (assuming a namespace of `sourcegraph`)
 
-```
-kubectl get -n sourcegraph deploy --no-headers | awk '{print $1}' | xargs -n 1 -P 8 -I % kubectl -n sourcegraph scale deployment % --replicas=0
-```
+   ```
+   kubectl get -n sourcegraph deploy --no-headers | awk '{print $1}' | xargs -n 1 -P 8 -I % kubectl -n sourcegraph scale deployment % --replicas=0
+   ```
 
-```
-kubectl -n sourcegraph get sts --selector 'app.kubernetes.io/component!=codeinsights-db,app.kubernetes.io/component!=codeintel-db,app.kubernetes.io/component!=pgsql' --no-headers | awk '{print $1}' | xargs -n 1 -P 8 -I % kubectl -n sourcegraph scale sts % --replicas=0
-```
+   ```
+   kubectl -n sourcegraph get sts --selector 'app.kubernetes.io/component!=codeinsights-db,app.kubernetes.io/component!=codeintel-db,app.kubernetes.io/component!=pgsql' --no-headers | awk '{print $1}' | xargs -n 1 -P 8 -I % kubectl -n sourcegraph scale sts % --replicas=0
+   ```
 
 2. Access each database pod
 
-```
-kubectl exec -it <database-pod-name> -n sourcegraph -- /bin/sh
-```
+   ```
+   kubectl exec -it <database-pod-name> -n sourcegraph -- /bin/sh
+   ```
 
 3. Reindex the databases in the container
 
-```
-reindexdb --no-password --username sg --verbose --echo --system
-reindexdb --no-password --username sg --verbose --echo --all
-```
+   ```
+   reindexdb --no-password --username sg --verbose --echo --system
+   reindexdb --no-password --username sg --verbose --echo --all
+   ```
 
 4. Refresh the collation version for each database
 
@@ -144,9 +144,9 @@ psql --no-password --username "sg" --tuples-only -c "SELECT 'ALTER DATABASE ' ||
 
 Repeat steps 2 through 4 with all pods:
 
--   `pgsql-0` pod
--   `codeintel-db-0` pod
--   `codeinsights-db-0` pod
+- `pgsql-0` pod
+- `codeintel-db-0` pod
+- `codeinsights-db-0` pod
 
 Once this is complete, you may start your Sourcegraph deployment, for example
 
@@ -158,32 +158,32 @@ helm upgrade -n sourcegraph <your-helm-charts>
 
 1. Stop all non-database Sourcegraph pods (assuming a namespace of `sourcegraph`). In your cluster Kustomization file (`instances/my-sourcegraph/kustomize.yaml`), uncomment the [multi-version-upgrade util](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/instances/template/kustomization.template.yaml#L155). This will scale down all non-database deployments and statefulSets replicas to 0\.
 
-```
-  # - ../../components/utils/uid # -- Run all Postgres database with valid users on host
-  - ../../components/utils/multi-version-upgrade # -- Scale down non-database pods to 0 for multi-version upgrade
-  # - ../../components/utils/migrate-to-nonprivileged # -- Component for migrating from privileged to non-privileged
-  #
-```
+   ```
+     # - ../../components/utils/uid # -- Run all Postgres database with valid users on host
+     - ../../components/utils/multi-version-upgrade # -- Scale down non-database pods to 0 for multi-version upgrade
+     # - ../../components/utils/migrate-to-nonprivileged # -- Component for migrating from privileged to non-privileged
+     #
+   ```
 
 2. Generate and apply a new \`cluster.yaml\` file
 
-```
-kubectl kustomize instances/my-sourcegraph -o cluster.yaml
-kubectl apply --prune -l deploy=sourcegraph -f cluster.yaml
-```
+   ```
+   kubectl kustomize instances/my-sourcegraph -o cluster.yaml
+   kubectl apply --prune -l deploy=sourcegraph -f cluster.yaml
+   ```
 
 3. Access each database pod
 
-```
-kubectl exec -it <database-pod-name> -n sourcegraph -- /bin/sh
-```
+   ```
+   kubectl exec -it <database-pod-name> -n sourcegraph -- /bin/sh
+   ```
 
 4. Reindex the databases in the container
 
-```
-reindexdb --no-password --username sg --verbose --echo --system
-reindexdb --no-password --username sg --verbose --echo --all
-```
+   ```
+   reindexdb --no-password --username sg --verbose --echo --system
+   reindexdb --no-password --username sg --verbose --echo --all
+   ```
 
 5. Refresh the collation version for each database
 
@@ -196,9 +196,9 @@ psql --no-password --username "sg" --tuples-only -c "SELECT 'ALTER DATABASE ' ||
 
 Repeat steps 3 through 5 with all pods:
 
--   `pgsql-0` pod
--   `codeintel-db-0` pod
--   `codeinsights-db-0` pod
+- `pgsql-0` pod
+- `codeintel-db-0` pod
+- `codeinsights-db-0` pod
 
 Once this is complete, you may start your Sourcegraph deployment.
 
@@ -219,8 +219,8 @@ kubectl apply --prune -l deploy=sourcegraph -f cluster.yaml
 
 # Expected Downtime
 
--   Reindexing may take 15-60 minutes in most cases, but depends on the database size, disk speed, and available CPU/RAM
--   For customers with larger databases \- greater than 100Gb \- or low resource allocation, reindexing may take longer
+- Reindexing may take 15-60 minutes in most cases, but depends on the database size, disk speed, and available CPU/RAM
+- For customers with larger databases \- greater than 100Gb \- or low resource allocation, reindexing may take longer
 
 # Verification
 

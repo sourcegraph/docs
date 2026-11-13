@@ -12,8 +12,11 @@
   comparisons in upgrade notes rather than permanent feature docs. Retain
   version-specific guidance only when readers still need it to use or upgrade
   supported releases.
-- Number ordered Markdown lists sequentially (`1.`, `2.`, `3.`), rather than
-  writing every item as `1.`.
+- Write bullets with `- ` (one space after every list marker), indent nested
+  bullets 2 spaces, and number ordered lists sequentially (`1.`, `2.`, `3.`),
+  rather than writing every item as `1.`. Indent a code block, image, or note
+  between steps to the step's text, or the list restarts there (see **List
+  style** below).
 
 ## Build Commands
 
@@ -93,6 +96,16 @@
   findings, and CI only reports the ones a PR adds or edits.
   `node dev/check-duplicates.mjs --diff <(git diff -U0 origin/main)` runs it
   on your branch; without `--diff` it lists every duplicate in `docs/`
+- **List style**: `.github/workflows/check-markdownlint.yml` runs
+  `dev/check-markdownlint.mjs`, which runs markdownlint rules MD004, MD007,
+  MD029, and MD030 (`.markdownlint-cli2.jsonc`, which editor markdownlint
+  extensions also read) on the pages a PR changes and comments the issues the
+  base branch does not have (advisory, never fails the PR). markdownlint-cli2
+  is not a project dependency: `npm install --global markdownlint-cli2@0.24`,
+  then `markdownlint-cli2` checks all of `docs/`, and `--fix` fixes them,
+  except a list that restarts after an unindented block, which it renumbers;
+  indent the block instead. Its fix moves only the marker line, so re-indent
+  the text and blocks under a moved bullet to match
 
 ### One home per fact
 
@@ -133,13 +146,14 @@ git diff -U0 "$base" | pnpm run check links --check-anchors --check-self-links \
 
 ### PR check comments
 
-The spelling, links, redirects, example hostnames, and duplicated content
-checks comment on the PR: a summary comment per check, plus an inline review
-comment on each flagged line, with a `suggestion` block where the fix is
-mechanical. After pushing, read them and follow the instructions they give
-(fix the spelling, the link, the redirect, or the hostname; replace the
-duplicated passage with a link to its home); do not work around a finding,
-and add a word to `cspell-allow-list.txt` only when it is correct.
+The spelling, links, redirects, example hostnames, duplicated content, and
+list style checks comment on the PR: a summary comment per check, plus an
+inline review comment on each flagged line, with a `suggestion` block where
+the fix is mechanical. After pushing, read them and follow the instructions
+they give (fix the spelling, the link, the redirect, the hostname, or the
+list; replace the duplicated passage with a link to its home); do not work
+around a finding, and add a word to `cspell-allow-list.txt` only when it is
+correct.
 
 ```sh
 gh pr checks <pr>
@@ -153,7 +167,7 @@ Fork PRs get no comments; the findings are in the job log
 next run: the summary is minimized and the inline comments are deleted. A PR
 that never had findings never gets a comment.
 
-The five check workflows are one `actions/checkout` step plus
+The six check workflows are one `actions/checkout` step plus
 `.github/actions/pr-check`, which runs `dev/check-<name>.mjs` and comments.
 A check script parses its flags and the diff, lists files, drops baseline
 findings, and formats the report with `dev/check-shared.mjs`; it writes a

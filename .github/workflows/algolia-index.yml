@@ -10,52 +10,52 @@ name: Algolia index
 # and browse ACLs, restricted to indices `sourcegraph_docs*`.
 
 on:
-    push:
-        branches: [main]
-        paths:
-            - 'docs/**'
-            - 'src/data/navigation.ts'
-            - 'contentlayer.config.ts'
-            - 'dev/algolia-index.mjs'
-            - '.github/workflows/algolia-index.yml'
-    workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'src/data/navigation.ts'
+      - 'contentlayer.config.ts'
+      - 'dev/algolia-index.mjs'
+      - '.github/workflows/algolia-index.yml'
+  workflow_dispatch:
 
 permissions:
-    contents: read
+  contents: read
 
 concurrency:
-    group: algolia-index
-    cancel-in-progress: true
+  group: algolia-index
+  cancel-in-progress: true
 
 jobs:
-    index:
-        name: Build and push index
-        runs-on: ubuntu-latest
-        steps:
-            - name: Check out main
-              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+  index:
+    name: Build and push index
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-            - name: Set up pnpm
-              uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - name: Set up pnpm
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
 
-            # Node 24 is pre-cached on ubuntu-latest.
-            - name: Set up Node.js
-              uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-              with:
-                  node-version: 24
-                  cache: pnpm
+      # Node 24 is pre-cached on ubuntu-latest.
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: pnpm
 
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-            # The indexer reads .contentlayer/generated, so build it first.
-            - name: Build contentlayer
-              run: pnpm exec contentlayer2 build
+      # The indexer reads .contentlayer/generated, so build it first.
+      - name: Build contentlayer
+        run: pnpm exec contentlayer2 build
 
-            - name: Build records (dry run, prints per-product counts)
-              run: node dev/algolia-index.mjs --dry-run --stats
+      - name: Build records (dry run, prints per-product counts)
+        run: node dev/algolia-index.mjs --dry-run --stats
 
-            - name: Push index
-              env:
-                  ALGOLIA_ADMIN_API_KEY: ${{ secrets.ALGOLIA_ADMIN_API_KEY }}
-              run: node dev/algolia-index.mjs
+      - name: Push index
+        env:
+          ALGOLIA_ADMIN_API_KEY: ${{ secrets.ALGOLIA_ADMIN_API_KEY }}
+        run: node dev/algolia-index.mjs

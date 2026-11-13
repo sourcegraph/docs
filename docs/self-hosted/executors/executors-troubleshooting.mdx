@@ -9,9 +9,9 @@ To debug problems you might face with an executor instance, you can apply the fo
 First, prepare the instance:
 
 1. `ssh` into the host VM (see [Connecting to cloud provider executor instances](#connecting-to-cloud-provider-executor-instances))
-1. `sudo su` to become the `root` user
-1. `systemctl stop executor` to stop the `executor` service
-1. `export $(cat /etc/systemd/system/executor.env | xargs)` to load the executor environment into your shell
+2. `sudo su` to become the `root` user
+3. `systemctl stop executor` to stop the `executor` service
+4. `export $(cat /etc/systemd/system/executor.env | xargs)` to load the executor environment into your shell
 
 ### Validating the executor configuration
 
@@ -49,8 +49,8 @@ Execute the generated `ignite attach <vm>` command to gain a shell to the Firecr
 The Executor host VMs are configured to automatically tear themselves down once all jobs in the queue are completed. While this is desired behaviour under regular circumstances, it complicates debugging issues in the executor configuration or connections. To prevent the VMs from automatically stopping:
 
 1. `ssh` into the VM
-1. `sudo su` to become the `root` user
-1. Remove (or rename) the `/shutdown_executor.sh` file
+2. `sudo su` to become the `root` user
+3. Remove (or rename) the `/shutdown_executor.sh` file
 
 The VM should now persist after all jobs are satisfied.
 
@@ -61,18 +61,18 @@ If a server-side batch change fails unexpectedly, it's possible to recreate the 
 > NOTE: if the host VM is provisioned with the [Sourcegraph terraform modules](/self-hosted/executors/deploy-executors-terraform), the VMs may be configured to stop automatically. Refer to [Disabling the auto-deletion of Executor VMs](#disabling-the-auto-deletion-of-executor-vms) for information to prevent this.
 
 1. Navigate to the failed execution page of the Batch Change
-1. Select a failed Workspace on the left and click the `Diagnostics` link on the right pane
-1. In the modal, expand the `Setup` step by clicking the text or the expansion arrow on the right
-1. Copy the command from the final step of `Setup` starting with `ignite run`
+2. Select a failed Workspace on the left and click the `Diagnostics` link on the right pane
+3. In the modal, expand the `Setup` step by clicking the text or the expansion arrow on the right
+4. Copy the command from the final step of `Setup` starting with `ignite run`
 
-1. `ssh` into the host VM
-1. `sudo su` to become the `root` user
-1. `systemctl stop executor` to stop the `executor` service
-1. `export $(cat /etc/systemd/system/executor.env | xargs)` to load the executor environment into your shell
-1. Paste in the command copied from the batch change. You may need to remove the `--copy-files` and `--volumes` directives as those volumes and files may not exist on the VM any longer. Surround the `--kernel-args` arguments in quotes as well
-1. Execute the command and wait for the VM to start
-1. Run `ignite ps` to list all currently running VMs
-1. Run `ignite attach <vm id>` to get a shell to the running VM
+5. `ssh` into the host VM
+6. `sudo su` to become the `root` user
+7. `systemctl stop executor` to stop the `executor` service
+8. `export $(cat /etc/systemd/system/executor.env | xargs)` to load the executor environment into your shell
+9. Paste in the command copied from the batch change. You may need to remove the `--copy-files` and `--volumes` directives as those volumes and files may not exist on the VM any longer. Surround the `--kernel-args` arguments in quotes as well
+10. Execute the command and wait for the VM to start
+11. Run `ignite ps` to list all currently running VMs
+12. Run `ignite attach <vm id>` to get a shell to the running VM
 
 ## List preferred Linux distros
 
@@ -94,11 +94,11 @@ aws ec2 describe-instances --filters architecture=x86_64
 
 The log level of executors are set using the environment variable `SRC_LOG_LEVEL`. The following values are allowed:
 
--   `dbug`
--   `info`
--   `warn` (default)
--   `error`
--   `crit`
+- `dbug`
+- `info`
+- `warn` (default)
+- `error`
+- `crit`
 
 Update or set this value in the shell profile or environment file of the instance, then run `executor run` to restart the instance.
 
@@ -195,7 +195,7 @@ The VM instance must [support KVM](/self-hosted/executors/firecracker#how-to-use
 Nested virtualization must be enabled on the machine.
 
 1. SSH into the executor instance (see [Connecting to cloud provider executor instances](#connecting-to-cloud-provider-executor-instances))
-1. Run the following command. If it outputs anything other than `0`, nested virtualization is enabled:
+2. Run the following command. If it outputs anything other than `0`, nested virtualization is enabled:
     ```shell
     grep -cw vmx /proc/cpuinfo
     ```

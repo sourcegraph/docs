@@ -10,9 +10,9 @@ This guide is **not for use with Helm**. Please refer to the [Upgrading Sourcegr
 
 > **_⚠️ Attention:_**
 >
-> -   **_Always consult the [release notes](https://sourcegraph.com/changelog/self-hosted/kubernetes) for the versions your upgrade will pass over and end on._**
-> -   _This guide assumes you have created a `release` branch following the [reference repositories docs](/self-hosted/deploy/repositories)_
-> -   **\*please see our [cautionary note](/self-hosted/updates/#best-practices) on upgrades**, if you have any concerns about running a multiversion upgrade, please reach out to us at [support@sourcegraph.com](mailto:support@sourcegraph.com) for advisement.\*
+> - **_Always consult the [release notes](https://sourcegraph.com/changelog/self-hosted/kubernetes) for the versions your upgrade will pass over and end on._**
+> - _This guide assumes you have created a `release` branch following the [reference repositories docs](/self-hosted/deploy/repositories)_
+> - **\*please see our [cautionary note](/self-hosted/updates/#best-practices) on upgrades**, if you have any concerns about running a multiversion upgrade, please reach out to us at [support@sourcegraph.com](mailto:support@sourcegraph.com) for advisement.\*
 
 ## Standard upgrades
 
@@ -86,16 +86,16 @@ To perform a multi-version upgrade via migrators [upgrade](/self-hosted/updates/
 
 1. **Check Upgrade Readiness**:
 
-    - Check the [upgrade notes](https://sourcegraph.com/changelog/self-hosted/kubernetes) for the version range you're passing through.
-    - Check the `Administration > Updates` page to determine [upgrade readiness](/self-hosted/updates/#upgrade-readiness).
+   - Check the [upgrade notes](https://sourcegraph.com/changelog/self-hosted/kubernetes) for the version range you're passing through.
+   - Check the `Administration > Updates` page to determine [upgrade readiness](/self-hosted/updates/#upgrade-readiness).
 
 2. **Pull and merge upstream changes**:
 
-    - Follow the [standard upgrade procedure](#upgrade-with-kubernetes-kustomize) to pull and merge upstream changes from the version you are upgrading to your `release` branch.
+   - Follow the [standard upgrade procedure](#upgrade-with-kubernetes-kustomize) to pull and merge upstream changes from the version you are upgrading to your `release` branch.
 
 3. **Update cluster.yaml and scale down non-database deployments and replicas**:
 
-    - In your cluster kustomization file (`instances/my-sourcegraph/kustomize.yaml`), uncomment the [multi-version-upgrade util](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/instances/template/kustomization.template.yaml#L155). This will scale down all non-database deployments and statefulSets replicas to 0.
+   - In your cluster kustomization file (`instances/my-sourcegraph/kustomize.yaml`), uncomment the [multi-version-upgrade util](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/instances/template/kustomization.template.yaml#L155). This will scale down all non-database deployments and statefulSets replicas to 0.
 
     ```yaml
     # - ../../components/utils/uid # -- Run all Postgres database with valid users on host
@@ -104,7 +104,7 @@ To perform a multi-version upgrade via migrators [upgrade](/self-hosted/updates/
     #
     ```
 
-    - Generate and apply a new cluster.yaml file.
+   - Generate and apply a new cluster.yaml file.
 
     ```sh
     kubectl kustomize instances/my-sourcegraph -o cluster.yaml
@@ -115,11 +115,11 @@ To perform a multi-version upgrade via migrators [upgrade](/self-hosted/updates/
 
 4. **Run Migrator with the `upgrade` command**:
 
-    - _For more detailed instructions and available command flags see our [migrator docs](/self-hosted/updates/migrator/migrator-operations#upgrade)._
+   - _For more detailed instructions and available command flags see our [migrator docs](/self-hosted/updates/migrator/migrator-operations#upgrade)._
 
-        1. In the `configure/migrator/migrator.Job.yaml` [manifest](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/components/utils/migrator/resources/migrator.Job.yaml):
-            - set the `image:` to the **latest** release of `migrator`
-            - set the `args:` value to `upgrade`. **Example:**
+     1. In the `configure/migrator/migrator.Job.yaml` [manifest](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/components/utils/migrator/resources/migrator.Job.yaml):
+        - set the `image:` to the **latest** release of `migrator`
+        - set the `args:` value to `upgrade`. **Example:**
 
         ```yaml
          - name: migrator
@@ -132,8 +132,8 @@ To perform a multi-version upgrade via migrators [upgrade](/self-hosted/updates/
         >
         > - _Always use the latest image version of migrator for migrator commands, except the startup command `up`_
         > - _You may add the `--dry-run` flag to the `command:` to test things out before altering the dbs_
-        >
-        > 2. Run the following commands to schedule the migrator job with the upgrade command and monitor its progress:
+
+     2. Run the following commands to schedule the migrator job with the upgrade command and monitor its progress:
 
         ```sh
         # To ensure no previous job invocations will conflict with our current invocation
@@ -171,13 +171,13 @@ To perform a multi-version upgrade via migrators [upgrade](/self-hosted/updates/
         ```
 
 5. **Generate and apply a new cluster.yaml file**:
-    1. Comment out the [multi-version-upgrade util](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/instances/template/kustomization.template.yaml#L155) in your cluster kustomization file (`instances/my-sourcegraph/kustomize.yaml`).
-    ```yaml
-    # - ../../components/utils/uid # -- Run all Postgres database with valid users on host
-    # - ../../components/utils/multi-version-upgrade # -- Scale down non-database pods to 0 for multi-version upgrade
-    # - ../../components/utils/migrate-to-nonprivileged # -- Component for migrating from privileged to non-privileged
-    ```
-    2. Generate and apply a new cluster.yaml with the new images from Step 2.
+   1. Comment out the [multi-version-upgrade util](https://github.com/sourcegraph/deploy-sourcegraph-k8s/blob/main/instances/template/kustomization.template.yaml#L155) in your cluster kustomization file (`instances/my-sourcegraph/kustomize.yaml`).
+      ```yaml
+      # - ../../components/utils/uid # -- Run all Postgres database with valid users on host
+      # - ../../components/utils/multi-version-upgrade # -- Scale down non-database pods to 0 for multi-version upgrade
+      # - ../../components/utils/migrate-to-nonprivileged # -- Component for migrating from privileged to non-privileged
+      ```
+   2. Generate and apply a new cluster.yaml with the new images from Step 2.
     ```sh
     kubectl kustomize instances/my-sourcegraph -o cluster.yaml
     kubectl apply --prune -l deploy=sourcegraph -f cluster.yaml
@@ -226,10 +226,10 @@ CPU/memory).
 
 If this happens, do the following:
 
--   Use `kubectl drain $NODE` to drain a node of existing pods, so it has enough allocation for the larger
-    service.
--   Run `watch kubectl get pods -o wide` and wait until the node has been drained. Run `kubectl get pods` to check that all pods except for the resource-hungry one(s) have been assigned to a node.
--   Run `kubectl uncordon $NODE` to enable the larger pod(s) to be scheduled on the drained node.
+- Use `kubectl drain $NODE` to drain a node of existing pods, so it has enough allocation for the larger
+  service.
+- Run `watch kubectl get pods -o wide` and wait until the node has been drained. Run `kubectl get pods` to check that all pods except for the resource-hungry one(s) have been assigned to a node.
+- Run `kubectl uncordon $NODE` to enable the larger pod(s) to be scheduled on the drained node.
 
 Note that the need to run the above steps can be prevented altogether with [node
 selectors](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector), which
@@ -244,16 +244,16 @@ window. If you need zero-downtime upgrades, please contact us. Services employ h
 of newly updated components before switching live traffic over to them by default. HA-enabling features include
 the following:
 
--   Replication: nearly all of the critical services within Sourcegraph are replicated. If a single instance of a
-    service fails, that instance is restarted and removed from operation until it comes online again.
--   Updates are applied in a rolling fashion to each service such that a subset of instances are updated first while
-    traffic continues to flow to the old instances. Once the health check determines the set of new instances is
-    healthy, traffic is directed to the new set and the old set is terminated. By default, some database operations
-    may fail during this time as migrations occur so a scheduled 10m downtime window is required.
--   Each service includes a health check that detects whether the service is in a healthy state. This check is specific to
-    the service. These are used to check the health of new instances after an update and during regular operation to
-    determine if an instance goes down.
--   Database migrations are handled automatically on update when they are necessary.
+- Replication: nearly all of the critical services within Sourcegraph are replicated. If a single instance of a
+  service fails, that instance is restarted and removed from operation until it comes online again.
+- Updates are applied in a rolling fashion to each service such that a subset of instances are updated first while
+  traffic continues to flow to the old instances. Once the health check determines the set of new instances is
+  healthy, traffic is directed to the new set and the old set is terminated. By default, some database operations
+  may fail during this time as migrations occur so a scheduled 10m downtime window is required.
+- Each service includes a health check that detects whether the service is in a healthy state. This check is specific to
+  the service. These are used to check the health of new instances after an update and during regular operation to
+  determine if an instance goes down.
+- Database migrations are handled automatically on update when they are necessary.
 
 ---
 

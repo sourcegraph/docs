@@ -7,32 +7,32 @@ name: Check links
 # Fails the PR.
 
 on:
-    pull_request:
+  pull_request:
 
 # A new push supersedes the run for the previous one
 concurrency:
-    group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
-    cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 permissions:
-    contents: read
-    pull-requests: write
+  contents: read
+  pull-requests: write
 
 jobs:
-    check-links:
-        name: Broken links introduced by this PR
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-              with:
-                  fetch-depth: 0
+  check-links:
+    name: Broken links introduced by this PR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
 
-            - uses: ./.github/actions/pr-check
-              with:
-                  script: dev/check-links.mjs
-                  name: check-links
-                  arguments: --check-anchors --check-self-links
-                  head-only-arguments: --check-external
-                  baseline: true
-                  dependency: github-slugger
-                  fail-on-findings: true
+      - uses: ./.github/actions/pr-check
+        with:
+          script: dev/check-links.mjs
+          name: check-links
+          arguments: --check-anchors --check-self-links
+          head-only-arguments: --check-external
+          baseline: true
+          dependency: github-slugger
+          fail-on-findings: true

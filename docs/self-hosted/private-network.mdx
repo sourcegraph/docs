@@ -11,18 +11,18 @@ additional configuration may be required to ensure all networking features funct
 
 The following [Sourcegraph services](/admin/architecture) initiate outbound connections to external services:
 
--   **executor**: Sourcegraph [Executor](/self-hosted/executors/) batch change or precise indexing jobs may need to connect to
-    services hosted within an organization's private network
--   **frontend**: The frontend service communicates externally when connecting to:
-    -   External [auth providers](/admin/auth/)
-    -   Sending [telemetry data](/admin/pings)
-    -   Testing [code host connections](/admin/code-hosts/)
-    -   Connecting to [externally hosted](/self-hosted/external-services/) Sourcegraph services
-    -   Connecting to external [LLM providers](/cody/capabilities/supported-models) with Cody
--   **gitserver**: Executes git commands against externally hosted [code hosts](/admin/code-hosts/)
--   **migrator**: Connects to Postgres instances (which may be [externally hosted](/self-hosted/postgres)) to process database migrations
--   **worker**: Sourcegraph Worker background jobs that may require establishing connections to
-    services hosted within an organization's private network
+- **executor**: Sourcegraph [Executor](/self-hosted/executors/) batch change or precise indexing jobs may need to connect to
+  services hosted within an organization's private network
+- **frontend**: The frontend service communicates externally when connecting to:
+  - External [auth providers](/admin/auth/)
+  - Sending [telemetry data](/admin/pings)
+  - Testing [code host connections](/admin/code-hosts/)
+  - Connecting to [externally hosted](/self-hosted/external-services/) Sourcegraph services
+  - Connecting to external [LLM providers](/cody/capabilities/supported-models) with Cody
+- **gitserver**: Executes git commands against externally hosted [code hosts](/admin/code-hosts/)
+- **migrator**: Connects to Postgres instances (which may be [externally hosted](/self-hosted/postgres)) to process database migrations
+- **worker**: Sourcegraph Worker background jobs that may require establishing connections to
+  services hosted within an organization's private network
 
 ## Outbound access to Sourcegraph services
 
@@ -44,8 +44,8 @@ range in the docker-compose override file.
 
 Additional information on docker networking can be found here:
 
--   [Docker networking overview](https://docs.docker.com/network/)
--   [Networking in Compose](https://docs.docker.com/compose/how-tos/networking/)
+- [Docker networking overview](https://docs.docker.com/network/)
+- [Networking in Compose](https://docs.docker.com/compose/how-tos/networking/)
 
 ## Trusting TLS certificates using internal PKI
 
@@ -55,18 +55,18 @@ services, ex. code hosts, authentication providers, etc.
 
 This method offers several advantages:
 
--   Works consistently across both Cloud and self-hosted deployments
--   Requires minimal configuration changes
--   Can be managed entirely through the web UI
--   Maintains certificates in a centralized location
--   Aligns with enterprise PKI best practices
+- Works consistently across both Cloud and self-hosted deployments
+- Requires minimal configuration changes
+- Can be managed entirely through the web UI
+- Maintains certificates in a centralized location
+- Aligns with enterprise PKI best practices
 
 The configuration process involves identifying and adding the public key of your organization's root Certificate
 Authority (CA) to Sourcegraph's advanced configuration. This approach is particularly efficient because:
 
--   Root CA certificates typically have long expiration periods (often measured in years)
--   A single root CA certificate usually covers multiple internal services
--   The configuration can be managed without container modifications or filesystem changes
+- Root CA certificates typically have long expiration periods (often measured in years)
+- A single root CA certificate usually covers multiple internal services
+- The configuration can be managed without container modifications or filesystem changes
 
 ### Obtain the certificate chain
 
@@ -84,14 +84,14 @@ In the generated `certs.log` file, locate the root CA certificate:
 
 Certificate chains typically include 3 certificates:
 
--   Root certificate authority (depth=2)
--   Intermediate certificate authority (depth=1)
--   Server (leaf) certificate (depth=0)
+- Root certificate authority (depth=2)
+- Intermediate certificate authority (depth=1)
+- Server (leaf) certificate (depth=0)
 
 The last certificate in the chain will be the root CA certificate and will typically have:
 
--   A long expiration period (years)
--   A descriptive common name (e.g., "Enterprise Root CA 2023")
+- A long expiration period (years)
+- A descriptive common name (e.g., "Enterprise Root CA 2023")
 
 Example root CA certificate for github.com:
 
@@ -119,11 +119,11 @@ MII...c=
 
 Once you've identified the root CA certificate:
 
--   Extract the certificate content including the BEGIN and END markers.
--   Format the certificate for the advanced configuration:
-    -   Replace newlines with \n characters
-    -   Enclose the entire certificate in double quotes
-    -   Add a trailing comma
+- Extract the certificate content including the BEGIN and END markers.
+- Format the certificate for the advanced configuration:
+  - Replace newlines with \n characters
+  - Enclose the entire certificate in double quotes
+  - Add a trailing comma
 
 The following command can be used to easily obtain, extract, and format the root certificate from a 3 certificate chain.
 Be sure to adjust the hostname and port to match your internal code host. If your certificate chain is of a different
@@ -183,7 +183,7 @@ Sourcegraph operations that require secure connections to internal services.
         <Callout type="info">Executed by: gitserver service</Callout>
 
     3. **Permission synchronization**
-       -  Verify user-centric permission sync jobs
+       - Verify user-centric permission sync jobs
         <Callout type="info">Executed by: worker service</Callout>
 
 <Callout type="note">
@@ -193,9 +193,9 @@ Sourcegraph operations that require secure connections to internal services.
 
 ### Recommended best practices
 
--   Only include root CA certificates, not intermediate or server certificates.
--   Avoid using `insecureSkipVerify: true` and add TLS certificates if needed, as it bypasses important security checks.
--   Document certificate sources and expiration dates in your organization's runbooks.
--   Plan for certificate rotation well before root CA expiration.
--   Most enterprises use a single root CA, so adding one certificate often covers all internal services.
--   Keep the certificate list minimal and well-maintained.
+- Only include root CA certificates, not intermediate or server certificates.
+- Avoid using `insecureSkipVerify: true` and add TLS certificates if needed, as it bypasses important security checks.
+- Document certificate sources and expiration dates in your organization's runbooks.
+- Plan for certificate rotation well before root CA expiration.
+- Most enterprises use a single root CA, so adding one certificate often covers all internal services.
+- Keep the certificate list minimal and well-maintained.
