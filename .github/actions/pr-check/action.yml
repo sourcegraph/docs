@@ -51,14 +51,16 @@ runs:
         # The workflow and this action are read from the merge commit, so run
         # the scripts from there too: a branch that predates a check has no
         # script for it, and the merge commit also has this PR's changes to
-        # them. Everything else is checked as the PR branch has it.
+        # them. The same goes for the markdownlint rules dev/check-markdownlint.mjs
+        # reads, which live at the root for editors. Everything else is checked
+        # as the PR branch has it.
         - name: Check out the pull request head, with the check scripts from the merge commit
           shell: bash
           env:
               HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           run: |
               git checkout --quiet "$HEAD_SHA"
-              git checkout --quiet "$GITHUB_SHA" -- dev
+              git checkout --quiet "$GITHUB_SHA" -- dev .markdownlint-cli2.jsonc
 
         - name: Install ${{ inputs.dependency }}
           if: inputs.dependency != ''
