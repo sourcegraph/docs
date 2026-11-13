@@ -61,7 +61,6 @@ DEPLOY_SOURCEGRAPH_DOCKER_FORK_REVISION={CURRENT_VERSION}
 ##################### NO CHANGES REQUIRED BELOW THIS LINE #####################
 DEPLOY_SOURCEGRAPH_DOCKER_CHECKOUT='/root/deploy-sourcegraph-docker'
 DOCKER_DATA_ROOT='/mnt/docker-data'
-DOCKER_COMPOSE_VERSION='1.29.2'
 DOCKER_DAEMON_CONFIG_FILE='/etc/docker/daemon.json'
 PERSISTENT_DISK_DEVICE_NAME='/dev/sda'
 # Install git
@@ -89,7 +88,7 @@ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 sudo apt-get update -y
 apt-cache policy docker-ce
-apt-get install -y docker-ce docker-ce-cli containerd.io
+apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 ## Enable Docker at startup
 sudo systemctl enable --now docker
 # Install jq for scripting
@@ -108,13 +107,9 @@ sudo cat "${DOCKER_DAEMON_CONFIG_FILE}" | sudo jq --arg DATA_ROOT "${DOCKER_DATA
 sudo cat "${tmp_config}" > "${DOCKER_DAEMON_CONFIG_FILE}"
 ## Restart Docker daemon to pick up new changes
 sudo systemctl restart --now docker
-# Install Docker Compose
-curl -L "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-chmod +x /usr/local/bin/docker-compose
-curl -L "https://raw.githubusercontent.com/docker/compose/${DOCKER_COMPOSE_VERSION}/contrib/completion/bash/docker-compose" -o /etc/bash_completion.d/docker-compose
 # Start Sourcegraph with Docker Compose
 cd "${DEPLOY_SOURCEGRAPH_DOCKER_CHECKOUT}"/docker-compose
-docker-compose up -d --remove-orphans
+docker compose up -d --remove-orphans
 ```
 
 > NOTE: If you're deploying a production instance, we recommend [forking the deployment configuration repository](/self-hosted/deploy/docker-compose/#step-1-fork-the-deployment-repository) to track any customizations you make to the deployment config. If you do so, you'll want to update the _startup script_ you pasted from above to refer to the clone URL and revision of your fork:
