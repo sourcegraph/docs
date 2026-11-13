@@ -1,0 +1,375 @@
+# Migrating from the legacy src CLI
+
+<p className="subtitle">
+	Update your setup and scripts for the rebuilt src CLI.
+</p>
+
+The `src` CLI has been rebuilt. The legacy CLI, built from the [`sourcegraph/src-cli`](https://github.com/sourcegraph/src-cli) repository, is replaced by a CLI with the same name and nearly the same commands. Most interactive use keeps working. Scripts need changes if they:
+
+- Rely on `SRC_ENDPOINT` defaulting to Sourcegraph.com, or read settings from `~/src-config.json`.
+- Parse output with `-f` Go templates, `-json`, or `-c`.
+- Check exit statuses other than 0 and 1.
+- Use a command that was removed, such as `src repos delete` or `src teams`.
+- Use `-insecure-skip-verify`, `SRC_HEADERS`, or `SRC_PROXY`.
+
+This page covers each of these changes, then lists the changes to each command. Run `src <command> --help` for the full usage of any command.
+
+## Install the CLI
+
+Install the CLI as described in the [quickstart](/cli/quickstart#installation). Then work through the sections below to update your environment, flags, and scripts.
+
+## Connect to your instance
+
+### Set `SRC_ENDPOINT`
+
+`SRC_ENDPOINT` is required. The legacy CLI used `https://sourcegraph.com` when it was unset; `src` fails with `no Sourcegraph endpoint configured` and exit status 2 instead.
+
+```sh
+export SRC_ENDPOINT=https://sourcegraph.example.com
+```
+
+The CLI no longer reads a config file. `~/src-config.json`, the `--config` flag, and the `--endpoint` flag are all gone; the legacy CLI had already deprecated them. The legacy CLI read `~/src-config.json` whenever it existed but only warned about it in `src login`, so check whether you have one:
+
+```sh
+cat ~/src-config.json
+```
+
+If it exists, or if your scripts pass `--config`, move the file's values to environment variables. Delete the file once you no longer use the legacy CLI.
+
+| Config file key     | Replacement                                                                                 |
+| ------------------- | ------------------------------------------------------------------------------------------- |
+| `endpoint`          | `SRC_ENDPOINT`                                                                              |
+| `accessToken`       | `SRC_ACCESS_TOKEN`, or credentials saved by `src auth login`                                |
+| `additionalHeaders` | `SRC_HEADER_AUTHORIZATION` for the `Authorization` header. Other headers are not supported. |
+| `proxy`             | Not supported                                                                               |
+
+An invalid `SRC_ENDPOINT`, such as one with stray quotes or a missing `https://`, fails with exit status 2 and quotes the value so you can spot the problem.
+
+### Sign in
+
+`src login` is now `src auth login`. `src login` still works, but prints a deprecation warning.
+
+```sh
+src auth login                 # OAuth device authorization (default)
+src auth login --method token  # prompt for an access token
+src auth status                # show the signed-in user
+src auth logout                # remove saved credentials
+```
+
+- `src auth login` takes the instance only from `SRC_ENDPOINT`. The deprecated `src login SOURCEGRAPH_URL` still accepts the URL as an argument.
+- Credentials from either method are validated and saved in the OS credential store (macOS Keychain, Windows Credential Manager, or the Linux Secret Service).
+- `SRC_ACCESS_TOKEN`, when set, takes precedence over saved credentials. `src auth login` uses it unless you pass `--method oauth`.
+- `src auth status` and `src auth logout` are new.
+
+### Run in CI and scripts
+
+In CI, set `SRC_ENDPOINT` and `SRC_ACCESS_TOKEN` (see [Creating an access token](/cli/how-tos/creating-an-access-token)). When the `CI` environment variable is true, or when you pass `--non-interactive`, `src`:
+
+- Authenticates only with `SRC_ACCESS_TOKEN` or `SRC_HEADER_AUTHORIZATION`, never with saved credentials.
+- Never prompts, opens a browser, or reads the OS credential store.
+- Prints no color or other terminal styling.
+
+A command that needs a person, such as `src users prune` without `--force`, fails with exit status 3 instead of waiting for input.
+
+### Authenticating proxies and custom headers
+
+`SRC_HEADER_AUTHORIZATION` works as before: `src` sends its value as the `Authorization` header instead of an access token or saved credentials. It cannot be combined with `SRC_ACCESS_TOKEN`.
+
+These are not supported:
+
+- `SRC_HEADER_*` variables other than `SRC_HEADER_AUTHORIZATION`.
+- `SRC_HEADERS`.
+- `SRC_PROXY` and the config file's `proxy` key.
+
+### TLS certificates
+
+`src` always verifies the instance's TLS certificate. `-insecure-skip-verify` is rejected with exit status 2. To trust a private certificate authority, pass its certificate with `--ca-bundle`:
+
+```sh
+src --ca-bundle corporate-ca.pem auth login
+```
+
+`--client-cert` and `--client-key` are new, and present a client certificate for mutual TLS. These three flags work with every command and accept a PEM file or an HTTPS URL; `--client-cert` and `--ca-bundle` also accept a `keychain:` source. Pass them on each invocation; `src auth login` does not save them.
+
+### Instance policy and telemetry
+
+Before a command contacts your instance, `src` fetches the instance's CLI policy and applies it. For example, an instance can block access tokens from the CLI. When the instance is unreachable, `src` applies the last policy it fetched and adds a warning. `src auth`, `src login`, `src schema`, and `src version` don't fetch the policy.
+
+Each command that authenticates records one usage event on your instance. `--user-agent-telemetry` has no effect and `SRC_DISABLE_USER_AGENT_TELEMETRY` is ignored, since `src` never sends your operating system or architecture in its `User-Agent`.
+
+## Update flags
+
+Flags follow GNU conventions. Long flags take two dashes, such as `--name abc-org` or `--name=abc-org`, and one dash is for single-letter shorthands, such as `-o json`.
+
+Flags that the legacy command had also work with one dash, but print a deprecation warning. Several such flags share one warning:
+
+```text
+Warning: -first and -indexed are deprecated and will be removed in a future version; use --first and --indexed respectively instead.
+```
+
+Flags that are new in the rebuilt CLI work only with two dashes. Help is `--help` or `-h`, not `-help`. As before, a flag must come after the command that defines it.
+
+Every command accepts these global flags:
+
+| Flag                                           | Purpose                                                                  |
+| ---------------------------------------------- | ------------------------------------------------------------------------ |
+| `-o`, `--output`                               | Output format: `human` (default), `json`, or `jsonl`                     |
+| `-v`, `--verbose`                              | Print extra diagnostic output                                            |
+| `--quiet`                                      | Hide non-essential output, such as progress bars                         |
+| `--non-interactive`                            | Never prompt, open a browser, read the OS credential store, or use color |
+| `--ca-bundle`, `--client-cert`, `--client-key` | TLS settings; see [TLS certificates](#tls-certificates)                  |
+
+Since `-o` is the global `--output` flag, `src debug` names its archive with `--archive` instead.
+
+To pass an argument that starts with a dash, such as a search query, put it after `--`:
+
+```sh
+src search -- '-file:test error'
+```
+
+`src help` prints the same help as `src --help`. For a command's help, run `src <command> --help`. `src completion bash`, `zsh`, `fish`, or `powershell` prints a shell completion script.
+
+## Update scripts
+
+### Use `--output json` instead of templates
+
+The `-f` Go template flag, `-json`, and `-c` are removed. Use `--output json` and a JSON tool such as [`jq`](https://jqlang.org/). With `--output json`, every command prints one JSON document to stdout, whether it succeeds or fails. For example, `src orgs delete --id T3JnOjE= --output json` prints:
+
+```json
+{
+	"data": {"id": "T3JnOjE=", "deleted": true},
+	"warnings": [],
+	"error": null
+}
+```
+
+- `data` holds the result, so read fields from `.data`. It is `null` when a failure has no result.
+- `warnings` lists non-fatal warnings, each with a stable `code`, such as `DEPRECATED` or `PARTIAL_RESULT`, and a `message`.
+- `error` is `null` on success. On failure, it has a `code`, `message`, `retryable`, and, when there is one, a `remediation`.
+
+`--output jsonl` prints the same document on one line. Run `src schema <command>` to list a command's output fields, or `src schema <command> --output json` for its JSON Schema.
+
+Field names in the JSON are camel-cased, unlike the template fields. For example, `{{.DisplayName}}` becomes `.displayName`, and `{{.DefaultBranch.Name}}` becomes `.defaultBranch.name`. Common conversions:
+
+```sh
+# Legacy: src users get -f '{{.ID}}' -username=alice
+src users get --username alice --output json | jq -r .data.id
+
+# Legacy: src repos get -name=github.com/my/repo   (printed only the ID)
+src repos get --name github.com/my/repo --output json | jq -r .data.id
+
+# Legacy: src users delete -id=$(src users get -f='{{.ID}}' -username=alice)
+src users delete --id "$(src users get --username alice --output json | jq -r .data.id)"
+
+# Legacy: src repos list -f '{{.ID}}: {{.Name}}'
+src repos list --output json | jq -r '.data.repositories[] | "\(.id): \(.name)"'
+
+# Legacy: src extsvc list -f '{{.config}}'
+src extsvc list --output json | jq -r '.data.externalServices[].config'
+
+# Legacy: src config list -f '{{range .Subjects}}{{.ID}}{{end}}'
+src config list --output json | jq -r '.data.subjects[].id'
+
+# Legacy: src search-jobs get ID -json
+src search-jobs get ID --output json | jq -r .data.state
+```
+
+Without `--output`, list commands print one name per line, matching the legacy default templates. `src repos get` is an exception: it prints the repository's details instead of only its ID.
+
+### Check exit statuses
+
+The legacy CLI exited with status 1 for most failures. `src` exits with a status for each kind of failure:
+
+| Exit status | Error code            | Meaning                                                                                        |
+| ----------- | --------------------- | ---------------------------------------------------------------------------------------------- |
+| 0           |                       | Success                                                                                        |
+| 1           | `INTERNAL`, `UNKNOWN` | Unexpected failure                                                                             |
+| 2           | `INVALID_ARGUMENT`    | Invalid flags, arguments, or `SRC_ENDPOINT`                                                    |
+| 3           | `FAILED_PRECONDITION` | The environment or the instance's state prevents the command, such as no terminal for a prompt |
+| 4           | `UNAUTHENTICATED`     | Missing or rejected credentials                                                                |
+| 5           | `PERMISSION_DENIED`   | Signed in, but not allowed, including by the instance's CLI policy                             |
+| 6           | `NOT_FOUND`           | A named resource, such as a user or repository, does not exist                                 |
+| 7           | `RATE_LIMITED`        | Rate limited; retry later                                                                      |
+| 8           | `UNAVAILABLE`         | Network failure, timeout, or the instance is unavailable; retry later                          |
+| 9           | `UNSUPPORTED_VERSION` | The instance does not support the request                                                      |
+| 130         | `CANCELED`            | Interrupted, for example with Ctrl-C                                                           |
+
+In human output, the error and a suggested fix go to stderr. Run `src schema error` for the full error format.
+
+Several commands that printed nothing, printed `null`, or exited with status 0 when something was missing now fail. For example, `src repos get` and `src users get` fail with `NOT_FOUND` for a missing repository or user. Commands also check flags and IDs before contacting the instance, so invalid input fails with exit status 2 instead of an error from the instance. An empty list is still a success.
+
+### stdout and stderr
+
+Command results go to stdout, and warnings, progress, and errors go to stderr. Some success messages moved from stderr to stdout:
+
+- `src batch validate`: `✅ Batch spec successfully validated.`
+- `src batch preview`, `src batch apply`, and `src batch remote`: the final lines with the URL.
+- `src search-jobs cancel` and `src search-jobs delete`: the confirmation.
+
+Deprecation notices and other warnings are written to stderr as `Warning:` lines in human output, and to `warnings` with `--output json`.
+
+### Debug requests
+
+`--get-curl`, `--trace`, and `--dump-requests` work with the commands that had them, with these changes:
+
+- `--get-curl` first checks your credentials, and fails with exit status 4 when they are missing or rejected. It then prints the command's first API request as a `curl` command and exits with status 0.
+- `--trace` and `--dump-requests` write to stderr, so they work with `--output json`. `--dump-requests` doesn't print headers or credentials.
+
+## Removed commands and flags
+
+These commands and flags aren't available in the rebuilt CLI.
+
+| Legacy command or flag                                                  | Reason and replacement                                                                                                                                                               |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src abc`                                                               | Agentic batch change commands aren't available in the CLI.                                                                                                                           |
+| `src codeowners`                                                        | Sourcegraph 7.0 removed uploaded `CODEOWNERS` files. `CODEOWNERS` files checked into repositories still work.                                                                        |
+| `src teams`                                                             | Sourcegraph 7.0 removed teams.                                                                                                                                                       |
+| `src debug server`                                                      | Sourcegraph 7.0 removed single-container deployments. `src debug kube` and `src debug compose` remain.                                                                               |
+| `src repos delete`                                                      | Sourcegraph no longer deletes repositories through the API. Exclude the repository in its code host connection, for example with `exclude`; Sourcegraph deletes it on the next sync. |
+| `src repos add-kvp`, `update-kvp`, `delete-kvp`                         | Use `src repos add-metadata`, `update-metadata`, and `delete-metadata`.                                                                                                              |
+| `src users tag`, `src users list --tag`                                 | Sourcegraph 5.1 removed user tags.                                                                                                                                                   |
+| `src sbom fetch`, `src signature verify`                                | Sourcegraph stopped publishing SBOMs and image signatures in 7.1.0.                                                                                                                  |
+| `src extensions`, `src gateway`                                         | Listed in the legacy help, but never implemented.                                                                                                                                    |
+| `src auth token`                                                        | Not available. Set `SRC_ACCESS_TOKEN` and pass it to other tools directly.                                                                                                           |
+| `-f` (Go templates), `-json`, `-c`                                      | Use `--output json`. See [Use `--output json` instead of templates](#use---output-json-instead-of-templates).                                                                        |
+| `--config`, `--endpoint`                                                | Set `SRC_ENDPOINT` and `SRC_ACCESS_TOKEN`.                                                                                                                                           |
+| `-insecure-skip-verify`                                                 | Use `--ca-bundle`. See [TLS certificates](#tls-certificates).                                                                                                                        |
+| `-skip-errors` on `batch new`, `repositories`, `validate`, and `remote` | It skipped a version check that is no longer needed. `src batch preview` and `src batch apply` keep `--skip-errors`.                                                                 |
+
+An unknown command or flag fails with exit status 2. When you mistype a command, the error suggests the closest match.
+
+## Renamed commands and flags
+
+| Legacy                                  | Rebuilt                                               |
+| --------------------------------------- | ----------------------------------------------------- |
+| `src login`                             | `src auth login` (`src login` is deprecated)          |
+| `src config edit`                       | `src config update` (`src config edit` is deprecated) |
+| `src debug kube -o FILE`                | `src debug kube --archive FILE`                       |
+| `src debug compose -o FILE`             | `src debug compose --archive FILE`                    |
+| `src code-intel upload -indexerVersion` | `src code-intel upload --indexer-version`             |
+| `src search -explain-json`              | `src schema search`                                   |
+| `src version --client-only`             | `src version`                                         |
+
+## Changes by command
+
+Each command below keeps its legacy aliases, such as `src repo` and `src batches`, unless noted.
+
+### `src api`
+
+- Requests require authentication. The legacy CLI sent the request without credentials when none were configured.
+- When the response has GraphQL errors, the command prints the response and fails. A query the instance rejects exits with status 2, as before. Other errors exit with status 4, 5, or 8 when they report an authentication, permission, or availability problem, and 1 otherwise.
+- With `--output json`, `data` is the response's `data`, and GraphQL errors are in `error.details.graphqlErrors`.
+- Numbers in `--vars` are sent exactly as written. The legacy CLI rounded integers larger than 2^53.
+
+### `src batch`
+
+- `src batch exec` is not available.
+- Reading a batch spec from a terminal is an error. Pipe the batch spec in or pass its file.
+- An invalid batch spec fails with exit status 2 before `src` authenticates.
+- `src batch validate` accepts the batch spec as a `FILE` argument, as its legacy help showed. It no longer accepts `-allow-unsupported`, `-force-override-ignore`, or `-skip-errors`, which had no effect.
+- `src batch preview` and `src batch apply` no longer accept `-apply` or `-text-only`; use `--output json` or `--output jsonl` for machine-readable output. `--skip-errors` only lets the batch spec be created when steps fail in some workspaces, and reports each failure as a warning.
+- `--workspace` accepts only `auto`, `bind`, or `volume`. The legacy CLI treated other values as `auto`.
+- A batch spec with `version: 3` fails in `src batch preview` and `src batch apply`; run it with `src batch remote`.
+- A batch spec that only imports changesets doesn't need Docker or Git.
+- `src batch remote` uploads files whose names start with a dot, such as `.github`, to the right path. The legacy CLI dropped the leading dot.
+
+### `src code-intel upload`
+
+- `-indexerVersion` is now `--indexer-version`. `--indexerVersion` still works, but is deprecated.
+- `-json` is replaced by `--output json`, with the same fields.
+- `src` validates your credentials before uploading. With `--ignore-upload-failure`, rejected credentials and invalid flags still fail; only a failed upload exits with status 0, with an `UPLOAD_FAILED` warning.
+- `uploadUrl` links to the upload's page under `/-/code-graph/indexes/`.
+- `-trace` and `-insecure-skip-verify` are not available.
+
+### `src config`
+
+- `src config edit` is now `src config update`, and prints `Settings updated:` followed by the subject's ID.
+- `src config update` requires exactly one of `--property` and `--overwrite`, and exactly one of `--value` and `--value-file`. The value must be valid JSON. The legacy CLI silently preferred one flag when both were given.
+- An empty `--subject` fails with exit status 2. The legacy CLI used your own settings.
+- `src config list` shows each subject's full settings URL, and labels the instance's defaults `# Default settings:`.
+
+### `src debug`
+
+- `-o FILE` is now `--archive FILE`. A legacy `-o debug.zip` fails and points to `--archive`.
+- The commands no longer ask for confirmation. They never overwrite an existing archive.
+- They fetch the site configuration and code host connections from `SRC_ENDPOINT` with your credentials, so you must be signed in. A file the instance refuses, for example because you aren't an administrator, is left out with a warning. Pass `--no-configs` to skip both files and not contact the instance at all.
+- A file that can't be collected is left out of the archive with a warning, instead of failing the command.
+- The archive is readable only by its owner.
+- `src debug server` is removed.
+
+### `src extsvc`
+
+- `src extsvc create` requires `--name` and `--kind`, and is also available as `src extsvc add`. When given both a file and piped input, it reads the file.
+- `src extsvc edit` requires exactly one of `--id` and `--name`. `--name` fails when several external services share the name; the legacy CLI edited the first.
+- With `--rename` or `--exclude-repos` and no `CONFIG_FILE`, `src extsvc edit` no longer reads piped input. To read a configuration from stdin, pass `-`, for example `cat github.json | src extsvc edit --id ID --rename NEW_NAME -`.
+- `--exclude-repos` keeps the existing `exclude` entries and their comments.
+
+### `src lsp`
+
+- The server authenticates when it starts and exits with status 4 when credentials are missing or rejected. The legacy server started anyway.
+- Starting outside a Git checkout, or without `origin/HEAD`, exits with status 3. To set `origin/HEAD`, run `git remote set-head origin --auto`.
+- `--output json`, `--get-curl`, and the other API flags are not accepted.
+
+### `src orgs`
+
+- `src orgs list` doesn't include members. Use `src orgs get` for an organization's members.
+- `src orgs get` requires `--name`, and `src orgs delete` requires `--id`.
+- `src orgs members remove` works. The legacy command always failed.
+- `--org-id` and `--user-id` must be GraphQL IDs of an organization and a user.
+
+### `src repos`
+
+- `src repos get` prints the repository's details instead of only its ID. Use `--output json | jq -r .data.id` for the ID.
+- `src repos list --first` returns up to the number you ask for. The legacy CLI stopped at 1,000.
+- In JSON, `keyValuePairs` is now `metadata`, `updatedAt` is gone, `url` is absolute, and `defaultBranch` is `null` when there is none.
+- The metadata commands require exactly one of `--repo` and `--repo-name`. They print what changed, such as `Added team=search to github.com/my/repo`. `add-metadata` fails for a key the repository already has, and `update-metadata` for a key it doesn't have.
+
+### `src search`
+
+- Queries use the same syntax as the Sourcegraph web app. The legacy default treated patterns as regular expressions; add `patterntype:regexp` to keep that behavior.
+- `--query-file FILE` reads the query from a file, and `src search -` reads it from stdin. To search for a literal `-`, quote it: `src search '"-"'`.
+- `-json` is replaced by `--output json`, with a different shape. Line numbers are 1-based, URLs are absolute, file results don't include file contents, `ResultCount` is now `matchCount`, and each result has a `type` of `file`, `commit`, or `repository`.
+- `-stream`, `-display`, and `-less` are not available. Results are shown when the search completes; pipe them to a pager, and add `count:N` to the query to limit them.
+- Output is colored only on a terminal. `COLOR` and `COLORDIFF` are ignored, and `NO_COLOR` still disables color.
+
+### `src search-jobs`
+
+- `src search-jobs get` and `create` print the job's fields one per line instead of a tab-separated line.
+- `src search-jobs list` returns up to `--limit` jobs. The legacy CLI stopped at 100. With no jobs, it succeeds with empty output.
+- `src search-jobs logs` and `results` with `--output json` require `--out`. They download from `SRC_ENDPOINT`, so they work when the instance's external URL isn't reachable from your machine.
+- An ID that isn't a search job's GraphQL ID fails with exit status 2.
+
+### `src serve-git`
+
+- Repositories nested inside another repository's directory are not served.
+- Interrupting the server exits with status 0 instead of 130.
+
+### `src snapshot`
+
+- The commands are no longer experimental. `summary.json` has the same format, so summaries recorded by either CLI work with both.
+- `src snapshot databases`, `restore`, and `upload` don't contact the instance and need no credentials.
+- Without `--run`, `databases` and `restore` print a shell script to stdout that you can save or pipe to `sh`.
+- Failed database commands, and a failed `src snapshot test`, exit with status 3 instead of 1.
+- `src snapshot test` no longer queries monitoring alerts, which fixes it against Sourcegraph 5.11.0 and later. It counts `ERRORED` permissions sync jobs as failures.
+- `src snapshot upload` requires a Google service account key for `--credentials`, and fails when Cloud Storage rejects an upload.
+
+### `src users`
+
+- `src users list` returns each user's `id`, `username`, and `displayName` only, and non-administrators can run it. Use `src users get` for emails and organizations.
+- `src users get` requires exactly one of `--username` and `--email`, and doesn't return `siteAdmin`.
+- `src users delete` requires `--id`.
+- `src users prune` rejects `--days` below 60 with exit status 2. In CI or with `--non-interactive`, it requires `--force`.
+- `src users create` labels the reset link `Reset password URL`. With `--output json`, `resetPasswordURL` is `null` unless you pass `--reset-password-url`.
+
+### `src version`
+
+`src version` prints only the CLI's version, like the legacy `--client-only`, and doesn't accept `--client-only`. It doesn't show the version your instance recommends.
+
+## Commands with no legacy equivalent
+
+| Command                  | Description                                                   |
+| ------------------------ | ------------------------------------------------------------- |
+| `src auth status`        | Shows the signed-in user and which credentials `src` used     |
+| `src auth logout`        | Removes saved credentials for the instance                    |
+| `src schema <command>`   | Describes a command's JSON output, or prints its JSON Schema  |
+| `src completion <shell>` | Prints a completion script for bash, zsh, fish, or PowerShell |
