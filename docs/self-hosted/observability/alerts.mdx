@@ -7468,16 +7468,16 @@ Custom query for critical alert: `max(((sum(increase(src_deepsearch_question_pro
 
 ## deepsearch: deepsearch_slow_questions
 
-<p class="subtitle">questions taking longer than 5 minutes over 15m</p>
+<p class="subtitle">share of questions taking longer than 5 minutes over 1h</p>
 
 **Descriptions**
 
-- <span class="badge badge-warning">warning</span> deepsearch: 3+ questions taking longer than 5 minutes over 15m for 10m0s
+- <span class="badge badge-warning">warning</span> deepsearch: 25%+ share of questions taking longer than 5 minutes over 1h for 15m0s
 
 **Next steps**
 
-- Search worker logs for questionIDs with long processing times.
-- Check `deepsearch_turn_p95_duration` to see if individual turns are slow.
+- Check `deepsearch_turn_p95_duration` to see if individual turns are slow. If they are, compare per-model stream duration (`sum by (model) (rate(src_completions_stream_duration_seconds_sum[10m])) / sum by (model) (rate(src_completions_stream_duration_seconds_count[10m]))`) with the hours before, and check the model provider status page.
+- Check whether a Deep Search model, reasoning effort, or prompt change, or a deploy, landed shortly before the alert started.
 - Check `deepsearch_question_outcome_by_reason` for elevated truncation or error rates.
 - More help interpreting this metric is available in the [dashboards reference](/self-hosted/observability/dashboards#deepsearch-deepsearch_slow_questions).
 - **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
@@ -7493,7 +7493,7 @@ Custom query for critical alert: `max(((sum(increase(src_deepsearch_question_pro
 <details>
 <summary>Technical details</summary>
 
-Generated query for warning alert: `max((sum(increase(src_deepsearch_question_processing_duration_seconds_count{operation="question"\}[15m])) - sum(increase(src_deepsearch_question_processing_duration_seconds_bucket\{le=~"300([.]0)?",operation="question"}[15m]))) &gt; 3)`
+Custom query for warning alert: `max((((sum(increase(src_deepsearch_question_processing_duration_seconds_count{operation="question"\}[1h])) - sum(increase(src_deepsearch_question_processing_duration_seconds_bucket\{le=~"300([.]0)?",operation="question"\}[1h]))) / sum(increase(src_deepsearch_question_processing_duration_seconds_count\{operation="question"\}[1h])) * 100) and (sum(increase(src_deepsearch_question_processing_duration_seconds_count\{operation="question"}[1h])) &gt;= 30)) &gt; 25)`
 
 </details>
 
@@ -7543,20 +7543,21 @@ Custom query for critical alert: `max(((sum by (workload, agent) (increase(src_a
 
 **Descriptions**
 
-- <span class="badge badge-critical">critical</span> deepsearch: 5+ truncated questions with no answer produced over 15m for 10m0s
+- <span class="badge badge-warning">warning</span> deepsearch: 5+ truncated questions with no answer produced over 15m for 10m0s
 
 **Next steps**
 
-- Search worker logs for: "answer truncated due to output token limit with no response generated" to find affected questionIDs.
 - The output token budget was consumed before any answer text was produced, usually by reasoning tokens, so affected users got nothing back.
-- Check if a recent model change or reasoning effort change caused increased thinking token usage.
+- Check whether a Deep Search model, reasoning effort, or output token limit change, or a deploy, landed shortly before the alert started. If one did, it is the likely cause: roll it back.
+- Otherwise, search worker logs for: "answer truncated due to output token limit with no response generated" and group by the logged userID. Bursts so far have come from one user or API client sending a batch of questions, cleared on their own within about 20 minutes, and needed no action.
+- If affected users are spread out, check for an upstream model problem: compare per-model stream duration (`sum by (model) (rate(src_completions_stream_duration_seconds_sum[10m])) / sum by (model) (rate(src_completions_stream_duration_seconds_count[10m]))`) with the hours before, and check the model provider status page.
 - Compare against `deepsearch_response_truncated`: elevated truncations alone are usually users requesting very large outputs and are not a regression.
 - More help interpreting this metric is available in the [dashboards reference](/self-hosted/observability/dashboards#deepsearch-deepsearch_response_truncated_no_answer).
 - **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
 
 ```json
 "observability.silenceAlerts": [
-  "critical_deepsearch_deepsearch_response_truncated_no_answer"
+  "warning_deepsearch_deepsearch_response_truncated_no_answer"
 ]
 ```
 
@@ -7565,7 +7566,7 @@ Custom query for critical alert: `max(((sum by (workload, agent) (increase(src_a
 <details>
 <summary>Technical details</summary>
 
-Custom query for critical alert: `max(((sum(increase(src_deepsearch_question_outcome_total{outcome="response_truncated_no_answer"\}[15m]))) and (sum(increase(src_deepsearch_question_outcome_total\{outcome="response_truncated_no_answer"\}[5m])) &gt;= 2) and (sum(increase(src_deepsearch_question_outcome_total\{outcome="response_truncated_no_answer"}[15m])) / sum(increase(src_deepsearch_question_outcome_total[15m])) &gt;= 0.05) and (sum(increase(src_deepsearch_question_outcome_total[15m])) &gt;= 20)) &gt;= 5)`
+Custom query for warning alert: `max(((sum(increase(src_deepsearch_question_outcome_total{outcome="response_truncated_no_answer"\}[15m]))) and (sum(increase(src_deepsearch_question_outcome_total\{outcome="response_truncated_no_answer"\}[5m])) &gt;= 2) and (sum(increase(src_deepsearch_question_outcome_total\{outcome="response_truncated_no_answer"}[15m])) / sum(increase(src_deepsearch_question_outcome_total[15m])) &gt;= 0.05) and (sum(increase(src_deepsearch_question_outcome_total[15m])) &gt;= 20)) &gt;= 5)`
 
 </details>
 

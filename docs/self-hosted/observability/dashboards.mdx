@@ -15951,6 +15951,36 @@ sum by (op)(increase(src_sourcegraphobjects_symbol_indexes_errors_total{job=~"^w
 
 ### Worker: Repositories
 
+#### worker: repo_statistics
+
+<p class="subtitle">Repositories by clone state</p>
+
+The number of repositories in each clone state, read from the repo_statistics table by the repo-updater job.
+These are the same counts shown on the site admin repositories page (RepositoryStats).
+The counts are instance-wide and are read every 5 minutes.
+
+- **failed_fetch** counts repositories whose last fetch attempt failed.
+- **corrupted** repositories are scheduled for an immediate re-clone by the fetch scheduler; a persistently non-zero value means those re-clones keep failing.
+- Repositories in **not_cloned** and **cloning** are listed at https://sourcegraph.example.com/admin/repositories?filter=not-cloned
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101300` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max by (state) (src_repoupdater_repo_statistics)
+```
+</details>
+
+<br />
+
 #### worker: syncer_sync_last_time
 
 <p class="subtitle">Time since last sync</p>
@@ -15960,7 +15990,7 @@ If the value is persistently high, make sure all external services have valid to
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101300` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101310` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -15982,7 +16012,7 @@ max(timestamp(vector(time()))) - max(src_repoupdater_syncer_sync_last_time)
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-src_repoupdater_max_sync_backoff) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101301` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101311` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16004,7 +16034,7 @@ max(src_repoupdater_max_sync_backoff)
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-src_repoupdater_syncer_sync_errors_total) for 2 alerts related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101302` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101312` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16026,7 +16056,7 @@ max by (family) (rate(src_repoupdater_syncer_sync_errors_total{owner!="user",rea
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-syncer_sync_start) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101310` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101320` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16048,7 +16078,7 @@ max by (family) (rate(src_repoupdater_syncer_start_sync{family="Syncer.SyncExter
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-syncer_sync_duration) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101311` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101321` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16070,7 +16100,7 @@ histogram_quantile(0.95, max by (le, family, success) (rate(src_repoupdater_sync
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-source_duration) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101312` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101322` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16092,7 +16122,7 @@ histogram_quantile(0.95, max by (le) (rate(src_repoupdater_source_duration_secon
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-syncer_synced_repos) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101320` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101330` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16114,7 +16144,7 @@ max(rate(src_repoupdater_syncer_synced_repos_total[1m]))
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-sourced_repos) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101321` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101331` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16136,7 +16166,7 @@ max(rate(src_repoupdater_source_repos_total[1m]))
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-sched_auto_fetch) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101330` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101340` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16161,7 +16191,7 @@ This does not indicate anything if there are no user added code hosts.
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101331` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101341` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16183,7 +16213,7 @@ max(rate(src_repoupdater_sched_manual_fetch[1m]))
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-sched_loops) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101340` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101350` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16205,7 +16235,7 @@ max(rate(src_repoupdater_sched_loops[1m]))
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-src_repoupdater_stale_repos) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101341` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101351` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16227,7 +16257,7 @@ max(src_repoupdater_stale_repos)
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-sched_error) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101342` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101352` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16251,7 +16281,7 @@ Repository fetches that failed due to an externally classified code-host access 
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101343` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101353` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16273,7 +16303,7 @@ max(rate(src_repoupdater_sched_external_error[1m]))
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-src_repoupdater_cleanup_failed_repos) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101350` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101360` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -37607,9 +37637,9 @@ sum by (entitlement) (increase(src_deepsearch_question_usage_limited_total[15m])
 
 #### deepsearch: deepsearch_slow_questions
 
-<p class="subtitle">Questions taking longer than 5 minutes over 15m</p>
+<p class="subtitle">Share of questions taking longer than 5 minutes over 1h</p>
 
-Number of deep search questions that took longer than 5 minutes in the last 15 minutes.
+Percentage of deep search questions completed in the last hour that took longer than 5 minutes. A few percent is normal, and the share stays well below the alert threshold when traffic peaks or a customer sends a batch of questions. The alert requires at least 30 completed questions in the hour.
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#deepsearch-deepsearch_slow_questions) for 1 alert related to this panel.
 
@@ -37623,7 +37653,7 @@ To see this panel, visit `/-/debug/grafana/d/deepsearch/deepsearch?viewPanel=100
 Query:
 
 ```
-sum(increase(src_deepsearch_question_processing_duration_seconds_count{operation="question"}[15m])) - sum(increase(src_deepsearch_question_processing_duration_seconds_bucket{le=~"300([.]0)?",operation="question"}[15m]))
+(sum(increase(src_deepsearch_question_processing_duration_seconds_count{operation="question"}[1h])) - sum(increase(src_deepsearch_question_processing_duration_seconds_bucket{le=~"300([.]0)?",operation="question"}[1h]))) / sum(increase(src_deepsearch_question_processing_duration_seconds_count{operation="question"}[1h])) * 100
 ```
 </details>
 
@@ -38051,7 +38081,7 @@ sum by (outcome) (increase(src_deepsearch_question_outcome_total{billable="true"
 
 <p class="subtitle">Truncated questions with no answer produced over 15m</p>
 
-Number of deep search questions that hit the output token limit before producing any answer text in the last 15 minutes. Affected users received nothing, so this is the class that indicates a model or prompt regression rather than an oversized user request.
+Number of deep search questions that hit the output token limit before producing any answer text in the last 15 minutes. Affected users received nothing. A rise that persists after a model, reasoning effort, or prompt change points to a regression; short bursts from one user sending a batch of questions have so far needed no action.
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#deepsearch-deepsearch_response_truncated_no_answer) for 1 alert related to this panel.
 
