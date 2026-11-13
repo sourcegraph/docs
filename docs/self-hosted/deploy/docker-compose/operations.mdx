@@ -94,20 +94,15 @@ docker exec codeinsights-db \
 
 ### Restore Sourcegraph databases
 
-These instructions apply to both a new deployment and an existing one.
+These instructions apply to both a new deployment and an existing one. You don't need to delete the database volumes: the restore drops and recreates each database.
 
 1. Copy the database dump files into the `deploy-sourcegraph-docker/docker-compose` directory, and `cd` to it.
 
-2. If you are restoring into an existing deployment, stop it and remove the database volumes
+2. If you are restoring into an existing deployment, stop it, so nothing writes to the databases during the restore
 
 ```bash
 docker compose down
-docker volume rm docker-compose_pgsql
-docker volume rm docker-compose_codeintel-db
-docker volume rm docker-compose_codeinsights-db
 ```
-
-The volume names start with the Compose project name, which defaults to the directory name, `docker-compose`. If you set a different project name, find the volume names with `docker volume ls`.
 
 3. Start the database services
 
