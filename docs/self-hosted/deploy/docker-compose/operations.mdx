@@ -44,11 +44,11 @@ The following instructions are specific to backing up and restoring the Sourcegr
 
 These instructions will back up the primary `sourcegraph` database, the [codeintel](/code-navigation/) database, and the [codeinsights](/code-insights/) database.
 
-1\. `ssh` from your local machine into the machine hosting the `sourcegraph` deployment
+1. `ssh` from your local machine into the machine hosting the `sourcegraph` deployment
 
-2\. `cd` to the `deploy-sourcegraph-docker/docker-compose` directory on the host
+2. `cd` to the `deploy-sourcegraph-docker/docker-compose` directory on the host
 
-3\. Verify the deployment is running:
+3. Verify the deployment is running:
 
 ```bash
 docker compose ps
@@ -76,7 +76,7 @@ zoekt-indexserver-0         /sbin/tini -- zoekt-source ...   Up
 zoekt-webserver-0           /sbin/tini -- /bin/sh -c z ...   Up (healthy)
 ```
 
-4\. Generate the database dumps
+4. Generate the database dumps
 
 ```bash
 docker exec pgsql sh -c \
@@ -92,15 +92,15 @@ docker exec codeinsights-db sh -c \
     > codeinsights_db.out
 ```
 
-5\. Ensure the `sourcegraph_db.out`, `codeintel_db.out` and `codeinsights_db.out` files are moved to a safe and secure location.
+5. Ensure the `sourcegraph_db.out`, `codeintel_db.out` and `codeinsights_db.out` files are moved to a safe and secure location.
 
 ### Restore Sourcegraph databases
 
 These instructions apply to both a new deployment and an existing one.
 
-1\. Copy the database dump files into the `deploy-sourcegraph-docker/docker-compose` directory, and `cd` to it.
+1. Copy the database dump files into the `deploy-sourcegraph-docker/docker-compose` directory, and `cd` to it.
 
-2\. If you are restoring into an existing deployment, stop it and remove the database volumes
+2. If you are restoring into an existing deployment, stop it and remove the database volumes
 
 ```bash
 docker compose down
@@ -111,13 +111,13 @@ docker volume rm docker-compose_codeinsights-db
 
 The volume names start with the Compose project name, which defaults to the directory name, `docker-compose`. If you set a different project name, find the volume names with `docker volume ls`.
 
-3\. Start the database services
+3. Start the database services
 
 ```bash
 docker compose -f db-only-migrate.docker-compose.yaml up -d
 ```
 
-4\. Copy the database files into the containers
+4. Copy the database files into the containers
 
 ```bash
 docker cp sourcegraph_db.out pgsql:/tmp/sourcegraph_db.out
@@ -125,7 +125,7 @@ docker cp codeintel_db.out codeintel-db:/tmp/codeintel_db.out
 docker cp codeinsights_db.out codeinsights-db:/tmp/codeinsights_db.out
 ```
 
-5\. Restore the databases
+5. Restore the databases
 
 ```bash
 docker exec pgsql sh -c '
@@ -141,19 +141,19 @@ docker exec codeinsights-db sh -c '
         -f /tmp/codeinsights_db.out template1'
 ```
 
-6\. Start the remaining Sourcegraph services
+6. Start the remaining Sourcegraph services
 
 ```bash
 docker compose up -d
 ```
 
-7\. Verify the deployment has started
+7. Verify the deployment has started
 
 ```bash
 docker compose ps
 ```
 
-8\. Browse to your Sourcegraph deployment, login and verify your existing configuration has been restored
+8. Browse to your Sourcegraph deployment, login and verify your existing configuration has been restored
 
 ## Monitoring
 

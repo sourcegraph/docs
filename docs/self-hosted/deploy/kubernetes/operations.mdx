@@ -240,13 +240,13 @@ The following instructions are specific to backing up and restoring the sourcegr
 
 These instructions will back up the primary `sourcegraph` database, the [codeintel](/code-navigation/) database, and the [codeinsights](/code-insights/) database.
 
-A. Verify your Sourcegraph pods are running / healthy, especially the 3 database pods
+1. Verify your Sourcegraph pods are running / healthy, especially the 3 database pods
 
 ```bash
 $ kubectl get pods
 ```
 
-B. Check for corrupt database indexes. The check blocks writes to each table while it checks that table's indexes. If amcheck returns errors, please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
+2. Check for corrupt database indexes. The check blocks writes to each table while it checks that table's indexes. If amcheck returns errors, please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
 
 Save this query in a file named `amcheck.sql`:
 
@@ -284,7 +284,7 @@ $ kubectl exec -i codeinsights-db-0 -- \
     < amcheck.sql > /dev/null
 ```
 
-C. Generate the database dumps
+3. Generate the database dumps
 
 ```bash
 $ kubectl exec pgsql-0 -- \
@@ -308,9 +308,9 @@ Ensure the `sourcegraph_db.out`, `codeintel_db.out` and `codeinsights_db.out` fi
 
 These instructions apply to both a new deployment and an existing one. You don't need to delete the database volumes: the restore drops and recreates each database.
 
-A. On the machine where you run `kubectl`, `cd` to the directory with the database dump files: `sourcegraph_db.out`, `codeintel_db.out` and `codeinsights_db.out`
+1. On the machine where you run `kubectl`, `cd` to the directory with the database dump files: `sourcegraph_db.out`, `codeintel_db.out` and `codeinsights_db.out`
 
-B. Stop every Sourcegraph service except the databases, so nothing writes to the databases during the restore
+2. Stop every Sourcegraph service except the databases, so nothing writes to the databases during the restore
 
 ```bash
 $ kubectl scale deployment,statefulset --replicas=0 -l '
@@ -321,7 +321,7 @@ $ kubectl scale deployment,statefulset --replicas=0 -l '
 
 Wait until `kubectl get pods` shows no Sourcegraph pods other than `pgsql-0`, `codeintel-db-0`, and `codeinsights-db-0`.
 
-C. Copy the database files into the pods
+3. Copy the database files into the pods
 
 ```bash
 $ kubectl cp sourcegraph_db.out pgsql-0:/data/sourcegraph_db.out
@@ -330,9 +330,9 @@ $ kubectl cp codeinsights_db.out \
     codeinsights-db-0:/var/lib/postgresql/data/codeinsights_db.out
 ```
 
-The database containers have a read-only root filesystem, so copy the files into the database volumes. Step E deletes them after the restore.
+The database containers have a read-only root filesystem, so copy the files into the database volumes. Step 5 deletes them after the restore.
 
-D. Restore the databases
+4. Restore the databases
 
 `DROP DATABASE ... WITH (FORCE)` disconnects the other sessions on each database, such as the `pgsql-exporter` sidecar, and drops it, so the dump can recreate it. `ON_ERROR_STOP=1` stops the restore at the first error; if a restore fails, fix the cause and run it again.
 
@@ -353,7 +353,7 @@ $ kubectl exec -it codeinsights-db-0 -- \
     -f /var/lib/postgresql/data/codeinsights_db.out template1
 ```
 
-E. After all three restores succeed, delete the backup files from the pods
+5. After all three restores succeed, delete the backup files from the pods
 
 ```bash
 $ kubectl exec pgsql-0 -- rm /data/sourcegraph_db.out
@@ -362,9 +362,9 @@ $ kubectl exec codeinsights-db-0 -- \
     rm /var/lib/postgresql/data/codeinsights_db.out
 ```
 
-F. Check for corrupt database indexes, with the commands in step B of [Back up Sourcegraph databases](#back-up-sourcegraph-databases). If amcheck returns errors, please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
+6. Check for corrupt database indexes, with the commands in step 2 of [Back up Sourcegraph databases](#back-up-sourcegraph-databases). If amcheck returns errors, please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
 
-G. Start the remaining Sourcegraph services, by running `helm upgrade` with the chart version and values file of your deployment (`helm list` shows the chart version). It sets every service back to the number of replicas in your values.
+7. Start the remaining Sourcegraph services, by running `helm upgrade` with the chart version and values file of your deployment (`helm list` shows the chart version). It sets every service back to the number of replicas in your values.
 
 ```bash
 $ helm upgrade --install --values ./override.yaml \
@@ -373,6 +373,8 @@ $ helm upgrade --install --values ./override.yaml \
 ```
 
 If you deployed with Kustomize, follow the steps in [applying manifests](#applying-manifests) instead.
+
+8. Browse to your Sourcegraph deployment, log in, and verify your existing configuration has been restored
 
 ## List of ports
 
