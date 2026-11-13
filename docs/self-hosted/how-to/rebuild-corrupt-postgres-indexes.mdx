@@ -57,7 +57,7 @@ After deleting duplicates, just re-run the above statement. Repeat the process u
 At the end of the index rebuilding process, as a last sanity check, we use the amcheck extension to verify there are no corrupt indexes — an error is raised if there are (you should expect to see some output from this command).
 
 ```sql
-create extension amcheck;
+create extension if not exists amcheck;
 
 select bt_index_parent_check(c.oid, true), c.relname, c.relpages
 from pg_index i
@@ -68,6 +68,8 @@ join pg_namespace n ON c.relnamespace = n.oid
 where am.amname = 'btree'
 -- Don't check temp tables, which may be from another session:
 and c.relpersistence != 't'
+-- Skip partitioned indexes; the indexes of their partitions are checked:
+and c.relkind = 'i'
 -- Function may throw an error when this is omitted:
 and i.indisready AND i.indisvalid;
 ```
