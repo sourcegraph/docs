@@ -41,12 +41,15 @@ To enable a backend, it must be adding to both the `exporters` block and the `se
 receivers:
     otlp:
         protocols:
+            # The collector listens on localhost by default, which other containers cannot reach
             grpc:
+                endpoint: '0.0.0.0:4317'
             http:
+                endpoint: '0.0.0.0:4318'
 
 exporters:
-    logging: # Export traces as log events
-        loglevel: warn
+    debug: # Export traces as log events
+        verbosity: basic
         sampling_initial: 5
         sampling_thereafter: 200
 
@@ -56,7 +59,7 @@ service:
             receivers:
                 - otlp
             exporters:
-                - logging # The exporter name must be added here to enable it
+                - debug # The exporter name must be added here to enable it
 ```
 
 ## Sampling traces

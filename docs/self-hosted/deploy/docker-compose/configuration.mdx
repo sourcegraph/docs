@@ -130,14 +130,14 @@ When adding replicas for `gitserver`, `searcher`, `zoekt-indexserver`, or `zoekt
 services:
     sourcegraph-frontend-0:
         environment:
-            - 'INDEXED_SEARCH_INDEXERS=1'
+            - 'INDEXED_SEARCH_INDEXER=1'
             - 'INDEXED_SEARCH_SERVERS=1'
             - 'SEARCHER_URL=1'
             - 'SRC_GIT_SERVERS=1'
 
     sourcegraph-frontend-internal:
         environment:
-            - 'INDEXED_SEARCH_INDEXERS=1'
+            - 'INDEXED_SEARCH_INDEXER=1'
             - 'INDEXED_SEARCH_SERVERS=1'
             - 'SEARCHER_URL=1'
             - 'SRC_GIT_SERVERS=1'
@@ -179,15 +179,11 @@ services:
         cpus: 6
         mem_limit: '6g'
         # Set the following environment variables to generate the replica endpoints
-        environment: &env_gitserver
+        environment:
             - 'SRC_GIT_SERVERS=2'
     # Use the same override values as sourcegraph-frontend-0 above
     sourcegraph-frontend-internal:
         <<: *frontend
-    # Add the updated environment for gitserver from frontend to worker using anchor
-    worker:
-        environment:
-            - *env_gitserver
 # Add a new volume assigned to the new gitserver replica
 volumes:
     gitserver-1:
