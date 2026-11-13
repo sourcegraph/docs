@@ -25,7 +25,7 @@ docker exec -it codeinsights-db psql -U postgres #access codeinsights-db contain
 
 The `frontend` container in the `docker-compose.yaml` file will automatically run on startup and migrate the databases if any changes are required, however administrators may wish to migrate their databases before upgrading the rest of the system when working with large databases. Sourcegraph guarantees database backward compatibility to the most recent minor point release so the database can safely be upgraded before the application code.
 
-To execute the database migrations independently, follow the [docker-compose instructions on how to manually run database migrations](/self-hosted/updates/migrator/migrator-operations#docker-compose). Running the `up` (default) command on the `migrator` of the _version you are upgrading to_ will apply all migrations required by the next version of Sourcegraph.
+To execute the database migrations independently, follow the [Docker Compose instructions on how to manually run database migrations](/self-hosted/updates/migrator/migrator-operations#docker-compose). Running the `up` (default) command on the `migrator` of the _version you are upgrading to_ will apply all migrations required by the next version of Sourcegraph.
 
 ## Backup and restore
 
@@ -51,7 +51,7 @@ These instructions will back up the primary `sourcegraph` database, the [codeint
 3\. Verify the deployment is running:
 
 ```bash
-docker-compose ps
+docker compose ps
           Name                         Command                       State                                                           Ports
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 caddy                       caddy run --config /etc/ca ...   Up                      2019/tcp, 0.0.0.0:443->443/tcp, 0.0.0.0:80->80/tcp
@@ -76,14 +76,7 @@ zoekt-indexserver-0         /sbin/tini -- zoekt-source ...   Up
 zoekt-webserver-0           /sbin/tini -- /bin/sh -c z ...   Up (healthy)
 ```
 
-4\. Stop the deployment, and restart the databases service only to ensure there are no other connections during backup and restore.
-
-```bash
-docker-compose down
-docker-compose -f db-only-migrate.docker-compose.yaml up -d
-```
-
-5\. Generate the database dumps
+4\. Generate the database dumps
 
 ```bash
 docker exec pgsql sh -c \
@@ -99,7 +92,7 @@ docker exec codeinsights-db sh -c \
     > codeinsights_db.out
 ```
 
-6\. Ensure the `sourcegraph_db.out`, `codeintel_db.out` and `codeinsights_db.out` files are moved to a safe and secure location.
+5\. Ensure the `sourcegraph_db.out`, `codeintel_db.out` and `codeinsights_db.out` files are moved to a safe and secure location.
 
 ### Restore Sourcegraph databases
 
@@ -110,7 +103,7 @@ These instructions apply to both a new deployment and an existing one.
 2\. If you are restoring into an existing deployment, stop it and remove the database volumes
 
 ```bash
-docker-compose down
+docker compose down
 docker volume rm docker-compose_pgsql
 docker volume rm docker-compose_codeintel-db
 docker volume rm docker-compose_codeinsights-db
@@ -121,7 +114,7 @@ The volume names start with the Compose project name, which defaults to the dire
 3\. Start the database services
 
 ```bash
-docker-compose -f db-only-migrate.docker-compose.yaml up -d
+docker compose -f db-only-migrate.docker-compose.yaml up -d
 ```
 
 4\. Copy the database files into the containers
@@ -151,13 +144,13 @@ docker exec codeinsights-db sh -c '
 6\. Start the remaining Sourcegraph services
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 7\. Verify the deployment has started
 
 ```bash
-docker-compose ps
+docker compose ps
 ```
 
 8\. Browse to your Sourcegraph deployment, login and verify your existing configuration has been restored
