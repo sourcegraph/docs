@@ -240,19 +240,13 @@ The following instructions are specific to backing up and restoring the sourcegr
 
 These instructions will back up the primary `sourcegraph` database, the [codeintel](/code-navigation/) database, and the [codeinsights](/code-insights/) database.
 
-A. Verify deployment running
+A. Get a baseline understanding of which Sourcegraph pods are running / healthy, and how many replicas of each
 
 ```bash
-$ kubectl get pods -A
+$ kubectl get pods
 ```
 
-B. Stop all connections to the database by scaling down the frontend deployment
-
-```bash
-$ kubectl scale --replicas=0 deployment/sourcegraph-frontend
-```
-
-C. Check for corrupt database indexes. If amcheck returns errors, please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
+B. Check for corrupt database indexes. The check blocks writes to each table while it checks that table's indexes. If amcheck returns errors, please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
 
 ```sql
 create extension amcheck;
@@ -270,19 +264,19 @@ and c.relpersistence != 't'
 and i.indisready AND i.indisvalid;
 ```
 
-D. Generate the database dumps
+C. Generate the database dumps
 
 ```bash
-$ kubectl exec pgsql-0 -- bash -c \
-    'pg_dump -C --clean --if-exists --username sg sg' \
+$ kubectl exec pgsql-0 -- \
+    pg_dump -C --clean --if-exists --username sg sg \
     > sourcegraph_db.out
 
-$ kubectl exec codeintel-db-0 -- bash -c \
-    'pg_dump -C --clean --if-exists --username sg sg' \
+$ kubectl exec codeintel-db-0 -- \
+    pg_dump -C --clean --if-exists --username sg sg \
     > codeintel_db.out
 
-$ kubectl exec codeinsights-db-0 -- bash -c \
-    'pg_dump -C --clean --if-exists --username postgres postgres' \
+$ kubectl exec codeinsights-db-0 -- \
+    pg_dump -C --clean --if-exists --username postgres postgres \
     > codeinsights_db.out
 ```
 
@@ -316,33 +310,39 @@ $ kubectl cp codeinsights_db.out \
     codeinsights-db-0:/var/lib/postgresql/data/codeinsights_db.out
 ```
 
-The database containers have a read-only root filesystem, so copy the files into the database volumes. The restore commands delete them after a successful restore.
+The database containers have a read-only root filesystem, so copy the files into the database volumes. Step E deletes them after the restore.
 
 D. Restore the databases
 
 `DROP DATABASE ... WITH (FORCE)` disconnects the other sessions on each database, such as the `pgsql-exporter` sidecar, and drops it, so the dump can recreate it. `ON_ERROR_STOP=1` stops the restore at the first error; if a restore fails, fix the cause and run it again.
 
 ```bash
-$ kubectl exec -it pgsql-0 -- bash -c '
+$ kubectl exec -it pgsql-0 -- \
     psql -v ON_ERROR_STOP=1 --username sg \
-        -c "DROP DATABASE IF EXISTS sg WITH (FORCE)" \
-        -f /data/sourcegraph_db.out postgres \
-    && rm /data/sourcegraph_db.out'
+    -c "DROP DATABASE IF EXISTS sg WITH (FORCE)" \
+    -f /data/sourcegraph_db.out postgres
 
-$ kubectl exec -it codeintel-db-0 -- bash -c '
+$ kubectl exec -it codeintel-db-0 -- \
     psql -v ON_ERROR_STOP=1 --username sg \
-        -c "DROP DATABASE IF EXISTS sg WITH (FORCE)" \
-        -f /data/codeintel_db.out postgres \
-    && rm /data/codeintel_db.out'
+    -c "DROP DATABASE IF EXISTS sg WITH (FORCE)" \
+    -f /data/codeintel_db.out postgres
 
-$ kubectl exec -it codeinsights-db-0 -- bash -c '
+$ kubectl exec -it codeinsights-db-0 -- \
     psql -v ON_ERROR_STOP=1 --username postgres \
-        -c "DROP DATABASE IF EXISTS postgres WITH (FORCE)" \
-        -f /var/lib/postgresql/data/codeinsights_db.out template1 \
-    && rm /var/lib/postgresql/data/codeinsights_db.out'
+    -c "DROP DATABASE IF EXISTS postgres WITH (FORCE)" \
+    -f /var/lib/postgresql/data/codeinsights_db.out template1
 ```
 
-E. Check for corrupt database indexes. If amcheck returns errors, please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
+E. After all three restores succeed, delete the database files from the pods
+
+```bash
+$ kubectl exec pgsql-0 -- rm /data/sourcegraph_db.out
+$ kubectl exec codeintel-db-0 -- rm /data/codeintel_db.out
+$ kubectl exec codeinsights-db-0 -- \
+    rm /var/lib/postgresql/data/codeinsights_db.out
+```
+
+F. Check for corrupt database indexes. If amcheck returns errors, please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
 
 ```sql
 create extension amcheck;
@@ -360,7 +360,15 @@ and c.relpersistence != 't'
 and i.indisready AND i.indisvalid;
 ```
 
-F. Start the remaining Sourcegraph services by following the steps in [applying manifests](#applying-manifests).
+G. Start the remaining Sourcegraph services, by running `helm upgrade` with the chart version and values file of your deployment (`helm list` shows the chart version). It sets every service back to the number of replicas in your values.
+
+```bash
+$ helm upgrade --install --values ./override.yaml \
+    --version <chart_version> \
+    sourcegraph sourcegraph/sourcegraph
+```
+
+If you deployed with Kustomize, follow the steps in [applying manifests](#applying-manifests) instead.
 
 ## List of ports
 
