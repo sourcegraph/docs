@@ -240,7 +240,7 @@ The following instructions are specific to backing up and restoring the sourcegr
 
 These instructions will back up the primary `sourcegraph` database, the [codeintel](/code-navigation/) database, and the [codeinsights](/code-insights/) database.
 
-A. Get a baseline understanding of which Sourcegraph pods are running / healthy, and how many replicas of each
+A. Verify your Sourcegraph pods are running / healthy, especially the 3 database pods
 
 ```bash
 $ kubectl get pods
@@ -248,8 +248,10 @@ $ kubectl get pods
 
 B. Check for corrupt database indexes. The check blocks writes to each table while it checks that table's indexes. If amcheck returns errors, please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
 
+Save this query in a file named `amcheck.sql`:
+
 ```sql
-create extension amcheck;
+create extension if not exists amcheck;
 
 select bt_index_parent_check(c.oid, true), c.relname, c.relpages
 from pg_index i
@@ -260,8 +262,26 @@ join pg_namespace n ON c.relnamespace = n.oid
 where am.amname = 'btree'
 -- Don't check temp tables, which may be from another session:
 and c.relpersistence != 't'
+-- Skip partitioned indexes; the indexes of their partitions are checked:
+and c.relkind = 'i'
 -- Function may throw an error when this is omitted:
 and i.indisready AND i.indisvalid;
+```
+
+Run it on each database. Each command prints any errors, and exits 0 when every index is intact:
+
+```bash
+$ kubectl exec -i pgsql-0 -- \
+    psql -v ON_ERROR_STOP=1 --username sg sg \
+    < amcheck.sql > /dev/null
+
+$ kubectl exec -i codeintel-db-0 -- \
+    psql -v ON_ERROR_STOP=1 --username sg sg \
+    < amcheck.sql > /dev/null
+
+$ kubectl exec -i codeinsights-db-0 -- \
+    psql -v ON_ERROR_STOP=1 --username postgres postgres \
+    < amcheck.sql > /dev/null
 ```
 
 C. Generate the database dumps
@@ -342,23 +362,7 @@ $ kubectl exec codeinsights-db-0 -- \
     rm /var/lib/postgresql/data/codeinsights_db.out
 ```
 
-F. Check for corrupt database indexes. If amcheck returns errors, please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
-
-```sql
-create extension amcheck;
-
-select bt_index_parent_check(c.oid, true), c.relname, c.relpages
-from pg_index i
-join pg_opclass op ON i.indclass[0] = op.oid
-join pg_am am ON op.opcmethod = am.oid
-join pg_class c ON i.indexrelid = c.oid
-join pg_namespace n ON c.relnamespace = n.oid
-where am.amname = 'btree'
--- Don't check temp tables, which may be from another session:
-and c.relpersistence != 't'
--- Function may throw an error when this is omitted:
-and i.indisready AND i.indisvalid;
-```
+F. Check for corrupt database indexes, with the commands in step B of [Back up Sourcegraph databases](#back-up-sourcegraph-databases). If amcheck returns errors, please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
 
 G. Start the remaining Sourcegraph services, by running `helm upgrade` with the chart version and values file of your deployment (`helm list` shows the chart version). It sets every service back to the number of replicas in your values.
 
