@@ -117,40 +117,52 @@ docker compose -f db-only-migrate.docker-compose.yaml up -d
 4. Copy the database files into the containers
 
 ```bash
-docker cp sourcegraph_db.out pgsql:/tmp/sourcegraph_db.out
-docker cp codeintel_db.out codeintel-db:/tmp/codeintel_db.out
-docker cp codeinsights_db.out codeinsights-db:/tmp/codeinsights_db.out
+docker cp sourcegraph_db.out pgsql:/data/sourcegraph_db.out
+docker cp codeintel_db.out codeintel-db:/data/codeintel_db.out
+docker cp codeinsights_db.out \
+    codeinsights-db:/var/lib/postgresql/data/codeinsights_db.out
 ```
+
+The database containers have a read-only root filesystem, so copy the files into the database volumes. Step 6 deletes them after the restore.
 
 5. Restore the databases
 
 ```bash
 docker exec pgsql \
     psql -v ON_ERROR_STOP=1 --username sg \
-    -f /tmp/sourcegraph_db.out postgres
+    -f /data/sourcegraph_db.out postgres
 
 docker exec codeintel-db \
     psql -v ON_ERROR_STOP=1 --username sg \
-    -f /tmp/codeintel_db.out postgres
+    -f /data/codeintel_db.out postgres
 
 docker exec codeinsights-db \
     psql -v ON_ERROR_STOP=1 --username postgres \
-    -f /tmp/codeinsights_db.out template1
+    -f /var/lib/postgresql/data/codeinsights_db.out template1
 ```
 
-6. Start the remaining Sourcegraph services
+6. After all three restores succeed, delete the backup files from the containers
+
+```bash
+docker exec pgsql rm /data/sourcegraph_db.out
+docker exec codeintel-db rm /data/codeintel_db.out
+docker exec codeinsights-db \
+    rm /var/lib/postgresql/data/codeinsights_db.out
+```
+
+7. Start the remaining Sourcegraph services
 
 ```bash
 docker compose up -d --remove-orphans
 ```
 
-7. Verify the deployment has started
+8. Verify the deployment has started
 
 ```bash
 docker compose ps
 ```
 
-8. Browse to your Sourcegraph deployment, login and verify your existing configuration has been restored
+9. Browse to your Sourcegraph deployment, login and verify your existing configuration has been restored
 
 ## Monitoring
 
