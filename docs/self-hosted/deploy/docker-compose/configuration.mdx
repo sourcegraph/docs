@@ -113,7 +113,17 @@ services:
             - '~/sg/volume-maps/gitserver/.ssh:/home/sourcegraph/.ssh'
 ```
 
-> WARNING: The permissions on your SSH / Git configuration must be set to be readable by the user in the `gitserver` container. For example, run `chmod -v -R 600 ~/sg/volume-maps/gitserver/.ssh` in the folder on the host machine.
+> WARNING: The `gitserver` container runs as user ID `100` and group ID `101`. SSH ignores or rejects the configuration unless that user owns the directory and its files, the directory has mode `700`, and the files have mode `600`.
+
+Set the owner and the modes on the host machine:
+
+```bash
+chmod 700 ~/sg/volume-maps/gitserver/.ssh
+chmod 600 ~/sg/volume-maps/gitserver/.ssh/*
+sudo chown -R 100:101 ~/sg/volume-maps/gitserver/.ssh
+```
+
+After the `chown`, your host user can no longer read the directory, so later changes to these files need `sudo`.
 
 ### Git HTTP(S) basic username + password authentication
 
@@ -130,14 +140,14 @@ When adding replicas for `gitserver`, `searcher`, `zoekt-indexserver`, or `zoekt
 services:
     sourcegraph-frontend-0:
         environment:
-            - 'INDEXED_SEARCH_INDEXERS=1'
+            - 'INDEXED_SEARCH_INDEXER=1'
             - 'INDEXED_SEARCH_SERVERS=1'
             - 'SEARCHER_URL=1'
             - 'SRC_GIT_SERVERS=1'
 
     sourcegraph-frontend-internal:
         environment:
-            - 'INDEXED_SEARCH_INDEXERS=1'
+            - 'INDEXED_SEARCH_INDEXER=1'
             - 'INDEXED_SEARCH_SERVERS=1'
             - 'SEARCHER_URL=1'
             - 'SRC_GIT_SERVERS=1'
@@ -179,15 +189,11 @@ services:
         cpus: 6
         mem_limit: '6g'
         # Set the following environment variables to generate the replica endpoints
-        environment: &env_gitserver
+        environment:
             - 'SRC_GIT_SERVERS=2'
     # Use the same override values as sourcegraph-frontend-0 above
     sourcegraph-frontend-internal:
         <<: *frontend
-    # Add the updated environment for gitserver from frontend to worker using anchor
-    worker:
-        environment:
-            - *env_gitserver
 # Add a new volume assigned to the new gitserver replica
 volumes:
     gitserver-1:
@@ -197,7 +203,9 @@ volumes:
 
 You can disable services by assigning them to one or more [profiles](https://docs.docker.com/compose/profiles/), so that when running the `docker compose up` command, services assigned to profiles will not be started unless explicitly specified in the command (e.g., `docker compose --profile disabled up`).
 
-For example, when you need to disable the bundled databases to use external databases, you can assign the bundled database containers to a profile called `disabled`:
+Services which list the disabled service under `depends_on` fail to start with `depends on undefined service`, unless you mark that dependency as not required.
+
+For example, to disable the bundled `codeintel-db` container, assign it to a profile called `disabled`, and mark it as not required on the two services which depend on it:
 
 ```yaml
 # docker-compose.override.yaml
@@ -205,7 +213,19 @@ services:
     codeintel-db:
         profiles:
             - disabled
+    migrator:
+        depends_on:
+            codeintel-db:
+                condition: service_healthy
+                required: false
+    sourcegraph-frontend-internal:
+        depends_on:
+            codeintel-db:
+                condition: service_healthy
+                required: false
 ```
+
+To replace the bundled databases with external ones, see [using your own PostgreSQL server](/self-hosted/external-services/postgres).
 
 ## Expose debug port
 

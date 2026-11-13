@@ -81,16 +81,25 @@ kubectl port-forward svc/grafana 3370:30070
 
 Grafana will be available http://localhost:3370/-/debug/grafana.
 
-If you are using the [Docker Compose deployment option](/self-hosted/deploy/), Grafana is available locally at http://localhost:3370/-/debug/grafana without any additional setup.
+If you are using the [Docker Compose deployment option](/self-hosted/deploy/docker-compose/), publish Grafana's port on the host's loopback address in your override file, then redeploy:
 
-If Sourcegraph is deployed to a remote server, then access via an SSH tunnel using a tool such as [sshuttle](https://github.com/sshuttle/sshuttle) is required to establish a secure connection to Grafana.
-To access the remote server using `sshuttle` from your local machine:
-
-```bash
-sshuttle -r user@sourcegraph.example.com 0/0
+```yaml
+# docker-compose.override.yaml
+services:
+    grafana:
+        ports:
+            - '127.0.0.1:3370:3370'
 ```
 
-Grafana will be available at http://sourcegraph.example.com:3370/-/debug/grafana.
+Grafana will be available on the host at http://localhost:3370/-/debug/grafana.
+
+If Sourcegraph is deployed to a remote server, forward the port over SSH from your local machine:
+
+```bash
+ssh -N -L 3370:localhost:3370 user@sourcegraph.example.com
+```
+
+Grafana will be available on your local machine at http://localhost:3370/-/debug/grafana.
 
 ### Grafana security
 
@@ -127,8 +136,11 @@ grafana:
             value: 'custom-admin-username'
         GF_SECURITY_ADMIN_PASSWORD:
             value: 'custom-admin-password'
+```
 
-    # Docker Compose override
+```yaml
+# Docker Compose override
+services:
     grafana:
         environment:
             - 'GF_AUTH_ANONYMOUS_ENABLED=false'

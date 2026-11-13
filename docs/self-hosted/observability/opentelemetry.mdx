@@ -41,12 +41,15 @@ To enable a backend, it must be adding to both the `exporters` block and the `se
 receivers:
     otlp:
         protocols:
+            # The collector listens on localhost by default, which other containers cannot reach
             grpc:
+                endpoint: '0.0.0.0:4317'
             http:
+                endpoint: '0.0.0.0:4318'
 
 exporters:
-    logging: # Export traces as log events
-        loglevel: warn
+    debug: # Export traces as log events
+        verbosity: basic
         sampling_initial: 5
         sampling_thereafter: 200
 
@@ -56,7 +59,7 @@ service:
             receivers:
                 - otlp
             exporters:
-                - logging # The exporter name must be added here to enable it
+                - debug # The exporter name must be added here to enable it
 ```
 
 ## Sampling traces
@@ -209,18 +212,18 @@ If you're looking for information about Sourcegraph's bundled Jaeger instance, h
 
 Refer to the [Jaeger](https://opentelemetry.io/docs/languages/js/exporters/#jaeger) documentation for options.
 
-If you must use your own Jaeger instance, and if the bundled otel-collector's basic configuration with the Jaeger OTLP exporter enabled meets your needs, configure the otel-collector's startup command to `/usr/bin/otelcol-sourcegraph --config=/etc/otel-collector/configs/jaeger.yaml`. Note that this requires the environment variable `$JAEGER_HOST` to be set on the otel-collector service / container:
+If you must use your own Jaeger instance, and if the bundled otel-collector's basic configuration with the Jaeger OTLP exporter enabled meets your needs, configure the otel-collector's startup command to `/usr/bin/otelcol-sourcegraph --config=/etc/otel-collector/configs/jaeger.yaml`. This requires the environment variables `JAEGER_HOST` and `JAEGER_OTLP_GRPC_PORT` to be set on the otel-collector service / container. In your own config file, the equivalent exporter is:
 
 ```yaml
 # otel-collector config.yaml
 exporters:
     otlp/jaeger:
-        endpoint: '$JAEGER_HOST:4317'
+        endpoint: '${env:JAEGER_HOST}:4317'
         tls:
             insecure: true
 ```
 
-The Sourcegraph frontend automatically proxies Jaeger's web UI to make it available at `/-/debug/jaeger`. You can proxy your own Jaeger instance instead by configuring the `JAEGER_SERVER_URL` environment variable on the `frontend` containers, and the `QUERY_BASE_PATH='/-/debug/jaeger'` environment variable on your `jaeger` container.
+The Sourcegraph frontend automatically proxies Jaeger's web UI to make it available at `/-/debug/jaeger`. You can proxy your own Jaeger instance instead by configuring the `JAEGER_SERVER_URL` environment variable on the `frontend` containers, and serving your Jaeger instance's web UI under the base path `/-/debug/jaeger`.
 
 ### Google Cloud
 
@@ -231,6 +234,4 @@ exporters:
     googlecloud:
         # See docs
         project: project-name # Project name can also be fetched from secrets
-        retry_on_failure:
-            enabled: false
 ```
