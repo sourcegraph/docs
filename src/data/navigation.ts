@@ -155,6 +155,10 @@ export const navigation: NavigationItem[] = [
 						href: '/code-navigation/features'
 					},
 					{
+						title: 'Language support',
+						href: '/code-navigation/language-support'
+					},
+					{
 						title: 'Search-based Code Navigation',
 						href: '/code-navigation/search-based-code-navigation'
 					},
