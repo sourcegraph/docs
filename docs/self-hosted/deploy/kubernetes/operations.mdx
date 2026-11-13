@@ -196,12 +196,12 @@ $ kubectl rollout restart deployment sourcegraph-frontend
 
 ## Access the database
 
-Get the id of one `pgsql` Pod:
+Check that the `pgsql` pod is running:
 
 ```bash
 $ kubectl get pods -l app=pgsql
-NAME                     READY     STATUS    RESTARTS   AGE
-pgsql-76a4bfcd64-rt4cn   2/2       Running   0          19m
+NAME      READY   STATUS    RESTARTS   AGE
+pgsql-0   2/2     Running   0          19m
 ```
 
 Make sure you are operating under the correct namespace (i.e. add `-n prod` if your pod is under the `prod` namespace).
@@ -209,7 +209,7 @@ Make sure you are operating under the correct namespace (i.e. add `-n prod` if y
 Open a PostgreSQL interactive terminal:
 
 ```bash
-$ kubectl exec -it pgsql-76a4bfcd64-rt4cn -- psql -U sg
+$ kubectl exec -it pgsql-0 -- psql -U sg
 ```
 
 Run your SQL query:
@@ -299,7 +299,7 @@ $ kubectl scale deployment,statefulset --replicas=0 -l '
         (pgsql,codeintel-db,codeinsights-db)'
 ```
 
-Wait until `kubectl get pods` shows no Sourcegraph pods other than `pgsql`, `codeintel-db`, and `codeinsights-db`.
+Wait until `kubectl get pods` shows no Sourcegraph pods other than `pgsql-0`, `codeintel-db-0`, and `codeinsights-db-0`.
 
 C. Copy the database files into the pods
 
@@ -404,15 +404,6 @@ sourcegraph-frontend-internal   ClusterIP   10.72.9.155    <none>        80/TCP 
 syntect-server                  ClusterIP   10.72.14.49    <none>        9238/TCP,6060/TCP            25h
 worker                          ClusterIP   10.72.7.72     <none>        3189/TCP,6060/TCP            25h
 ```
-
-## Migrate to Kustomize
-
-See the [migration docs for Kustomize](/self-hosted/deploy/kubernetes/kustomize/migrate) for more information.
-
-## Upgrade
-
--   See the [Updating Sourcegraph docs](/self-hosted/updates/) on how to upgrade.<br/>
--   See the [Updating a Kubernetes Sourcegraph instance docs](/self-hosted/deploy/kubernetes/upgrade) for details on changes in each version to determine if manual migration steps are necessary.
 
 ## Troubleshoot
 
