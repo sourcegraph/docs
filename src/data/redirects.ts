@@ -3435,7 +3435,11 @@ const redirectsData = [
 	},
 	{
 		source: '/admin/how-to/postgres14-index-corruption',
-		destination: '/self-hosted/how-to/postgres14-index-corruption'
+		destination: '/self-hosted/how-to/rebuild-corrupt-postgres-indexes'
+	},
+	{
+		source: '/self-hosted/how-to/postgres14-index-corruption',
+		destination: '/self-hosted/how-to/rebuild-corrupt-postgres-indexes'
 	},
 	{
 		source: '/admin/how-to/postgres_12_to_16_drift',
