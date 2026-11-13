@@ -32,7 +32,38 @@ To ensure a smooth experience, instances must allow **outbound TCP port `443` to
 
 ## HTTP proxy configuration
 
-Sourcegraph services use the conventional `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY` environment variables. Set them on the `frontend` and `worker` services, using the example override file for your deployment method:
+### Dedicated proxy for Sourcegraph services
+
+Set `SERVICES_GATEWAY_PROXY` to route pings, telemetry, and licensing traffic through a dedicated proxy, independently of code-host traffic and model inference. This applies to the clients described in [outbound access to Sourcegraph services](#outbound-access-to-sourcegraph-services), including their endpoint overrides.
+
+1. Set the following environment variable on **every `frontend` replica**, with the same value on each replica:
+
+    ```sh
+    SERVICES_GATEWAY_PROXY=http://proxy.example.com:3128
+    ```
+
+2. Restart the `frontend` replicas. Frontend validates the URL and distributes it to consumers through `ServiceConnections`, not site configuration. Do not set this variable on other services: consumers ignore their local `SERVICES_GATEWAY_PROXY` and use the value distributed by frontend.
+3. Expect consuming services to restart when the distributed value changes, including when you remove the proxy or change its credentials. Consumers exit so their process supervisor can restart them and recreate cached HTTP clients and gRPC connections with the updated route.
+
+The dedicated proxy supports **HTTP CONNECT**, with optional Basic authentication in the URL, for example `http://username:password@proxy.example.com:3128`. URL-encode special characters in credentials. Use an `http://` proxy URL with no query or fragment and no path other than an optional trailing slash. HTTPS-to-proxy and SOCKS proxies are not supported.
+
+HTTPS and gRPC connections retain TLS to the destination through the CONNECT tunnel. The connection to the proxy itself is not TLS-encrypted, so protect that network path, especially when using Basic authentication. The proxy must allow CONNECT to the destination and carry HTTP/2 gRPC traffic through the tunnel.
+
+`SERVICES_GATEWAY_PROXY` takes precedence over all [standard proxy settings](#standard-process-local-proxy-settings), including `NO_PROXY`, for these clients. This also applies to endpoint overrides, including localhost overrides. If the proxy is unreachable or rejects a connection, the request fails; it does not fall back to a direct connection. Other outbound clients do not use this dedicated proxy.
+
+### Standard process-local proxy settings
+
+When `SERVICES_GATEWAY_PROXY` is unset or empty, gateway clients use standard Go HTTP/gRPC proxy selection from the environment of **each process making the request**:
+
+- `HTTPS_PROXY` selects a proxy for HTTPS requests and gRPC connections. Its value can be an `http://` URL for an HTTP CONNECT proxy.
+- `HTTP_PROXY` selects a proxy for HTTP requests. Setting it alone does **not** proxy HTTPS or gRPC traffic.
+- `NO_PROXY` excludes matching destinations from standard proxy routing.
+
+The lowercase forms (`https_proxy`, `http_proxy`, and `no_proxy`) are also supported; the uppercase value takes precedence when both are set. These variables are process-local and are not distributed by frontend. Set them on each service that needs them, including `frontend` and `worker`, and restart the affected services after changes.
+
+Without the dedicated proxy, gateway HTTP clients use the internal HTTP client for endpoint hostnames `localhost` and `127.0.0.1`, including pings endpoint overrides. Standard proxy selection also retains Go/gRPC's localhost and loopback exclusions; do not rely on `HTTPS_PROXY` to proxy those destinations.
+
+Use the example override file for your deployment method to configure standard proxy variables:
 
 - [Kubernetes Helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/blob/main/charts/sourcegraph/examples/outbound-http-proxy/override.yaml)
 - [Docker Compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/main/docker-compose/examples/outbound-http-proxy/docker-compose.override.yaml)
