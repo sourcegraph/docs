@@ -47,31 +47,33 @@ These instructions will back up the primary `sourcegraph` database, the [codeint
 ```bash
 docker compose ps --format 'table {{.Name}}\t{{.Status}}'
 NAME                            STATUS
-blobstore                       Up 49 seconds (healthy)
-caddy                           Up 46 seconds
-cadvisor                        Up 48 seconds
-codeinsights-db                 Up 44 seconds (healthy)
-codeinsights-db-exporter        Up 44 seconds
-codeintel-db                    Up 46 seconds (healthy)
-codeintel-db-exporter           Up 46 seconds
-gitserver-0                     Up 48 seconds
-grafana                         Up 48 seconds
-node-exporter                   Up 48 seconds
-otel-collector                  Up 48 seconds
-pgsql                           Up 47 seconds (healthy)
-pgsql-exporter                  Up 47 seconds
-precise-code-intel-worker       Up 45 seconds (healthy)
-prometheus                      Up 47 seconds
-redis-cache                     Up 45 seconds
-redis-store                     Up 44 seconds
-searcher-0                      Up 47 seconds (healthy)
-sourcegraph-frontend-0          Up 20 seconds (healthy)
-sourcegraph-frontend-internal   Up 30 seconds (healthy)
-syntactic-code-intel-worker     Up 46 seconds (healthy)
-syntect-server                  Up 45 seconds (healthy)
-worker                          Up 45 seconds
-zoekt-indexserver-0             Up 45 seconds
-zoekt-webserver-0               Up 49 seconds (healthy)
+blobstore                       Up About a minute (healthy)
+caddy                           Up About a minute
+cadvisor                        Up About a minute
+codeinsights-db                 Up About a minute (healthy)
+codeinsights-db-exporter        Up About a minute
+codeintel-db                    Up About a minute (healthy)
+codeintel-db-exporter           Up About a minute
+executor                        Up About a minute
+gitserver-0                     Up About a minute
+grafana                         Up About a minute
+jaeger                          Up About a minute
+node-exporter                   Up About a minute
+otel-collector                  Up About a minute
+pgsql                           Up About a minute (healthy)
+pgsql-exporter                  Up About a minute
+precise-code-intel-worker       Up About a minute (healthy)
+prometheus                      Up About a minute
+redis-cache                     Up About a minute
+redis-store                     Up About a minute
+searcher-0                      Up About a minute (healthy)
+sourcegraph-frontend-0          Up About a minute (healthy)
+sourcegraph-frontend-internal   Up About a minute (healthy)
+syntactic-code-intel-worker     Up About a minute (healthy)
+syntect-server                  Up About a minute (healthy)
+worker                          Up About a minute
+zoekt-indexserver-0             Up About a minute
+zoekt-webserver-0               Up About a minute (healthy)
 ```
 
 4. Generate the database dumps
@@ -95,6 +97,8 @@ docker exec codeinsights-db \
 ### Restore Sourcegraph databases
 
 These instructions apply to both a new deployment and an existing one. You don't need to delete the database volumes: the restore drops and recreates each database.
+
+If you started Sourcegraph with more Compose files, such as `jaeger/docker-compose.yaml` or `executors/executor.docker-compose.yaml`, pass the same `-f` options to `docker compose down` and `docker compose up -d`. Otherwise those containers keep running during the restore, and Sourcegraph restarts without their settings.
 
 1. Copy the database dump files into the `deploy-sourcegraph-docker/docker-compose` directory, and `cd` to it.
 
