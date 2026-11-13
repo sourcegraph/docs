@@ -81,27 +81,27 @@ You can set up code monitors to send notifications about new matching search res
 #### Usage
 
 1. In Sourcegraph, click on the "Code Monitoring" nav item at the top of the page.
-1. Create a new code monitor or edit an existing monitor by clicking on the "Edit" button next to it.
-1. Under actions, select **Send Slack message to channel**.
-1. Paste your webhook URL into the "Webhook URL" field. (See "[Creating a Slack incoming webhook URL](#creating-a-slack-incoming-webhook-url)" below for detailed instructions.)
-1. Click on the "Continue" button, and then the "Save" button.
+2. Create a new code monitor or edit an existing monitor by clicking on the "Edit" button next to it.
+3. Under actions, select **Send Slack message to channel**.
+4. Paste your webhook URL into the "Webhook URL" field. (See "[Creating a Slack incoming webhook URL](#creating-a-slack-incoming-webhook-url)" below for detailed instructions.)
+5. Click on the "Continue" button, and then the "Save" button.
 
 ##### Creating a Slack incoming webhook URL
 
 1. You must have permission to create apps in your organization's Slack workspace.
-1. Go to https://api.slack.com/apps and sign in to your Slack account if necessary.
-1. Click on the "Create an app" button.
-1. Create your app "From scratch".
-1. Give your app a name and select the workplace you want notifications sent to.
+2. Go to https://api.slack.com/apps and sign in to your Slack account if necessary.
+3. Click on the "Create an app" button.
+4. Create your app "From scratch".
+5. Give your app a name and select the workplace you want notifications sent to.
     <video
     	src="https://storage.googleapis.com/sourcegraph-assets/search/code-monitoring/slack-tutorial/1-create-app.mp4"
     	controls
     />
-1. Once your app is created, click on the "Incoming Webhooks" in the sidebar, under "Features".
-1. Click the toggle button to activate incoming webhooks.
-1. Scroll to the bottom of the page and click on "Add New Webhook to Workspace".
-1. Select the channel you want notifications sent to, then click on the "Allow" button.
-1. Your webhook URL is now created! Click the copy button to copy it to your clipboard.
+6. Once your app is created, click on the "Incoming Webhooks" in the sidebar, under "Features".
+7. Click the toggle button to activate incoming webhooks.
+8. Scroll to the bottom of the page and click on "Add New Webhook to Workspace".
+9. Select the channel you want notifications sent to, then click on the "Allow" button.
+10. Your webhook URL is now created! Click the copy button to copy it to your clipboard.
     <video
     	src="https://storage.googleapis.com/sourcegraph-assets/search/code-monitoring/slack-tutorial/2-create-webhook.mp4"
     	controls
@@ -115,7 +115,7 @@ by Sourcegraph, and contains all the information available about the cause of th
 
 #### Prerequisites
 
--   You must have a service running that can accept the POST request triggered by the webhook notification
+- You must have a service running that can accept the POST request triggered by the webhook notification
 
 #### Creating a webhook receiver
 
@@ -124,16 +124,16 @@ The receiver must be reachable from the Sourcegraph cluster using the URL that i
 
 The HTTP POST request sent to the receiver will have a JSON-encoded body with the following fields:
 
--   `monitorDescription`: The description of the monitor as configured in the UI
--   `monitorURL`: A link to the monitor configuration page
--   `query`: The query that generated `results`
--   `results`: The list of results that triggered this notification. Contains the following sub-fields
-    -   `repository`: The name of the repository the commit belongs to
-    -   `commit`: The commit hash for the matched commit.
-    -   `diff`: The matching diff in unified diff format. Only set if the result is a diff match.
-    -   `matchedDiffRanges`: The character ranges of `diff` that matched `query`. Only set if the result is a diff match.
-    -   `message`: The matching commit message. Only set if the result is a commit match.
-    -   `matchedMessageRanges`: The character ranges of `message` that matched `query`. Only set if the result is a commit match.
+- `monitorDescription`: The description of the monitor as configured in the UI
+- `monitorURL`: A link to the monitor configuration page
+- `query`: The query that generated `results`
+- `results`: The list of results that triggered this notification. Contains the following sub-fields
+  - `repository`: The name of the repository the commit belongs to
+  - `commit`: The commit hash for the matched commit.
+  - `diff`: The matching diff in unified diff format. Only set if the result is a diff match.
+  - `matchedDiffRanges`: The character ranges of `diff` that matched `query`. Only set if the result is a diff match.
+  - `message`: The matching commit message. Only set if the result is a commit match.
+  - `matchedMessageRanges`: The character ranges of `message` that matched `query`. Only set if the result is a commit match.
 
 <Accordion title="Example payload">
 
@@ -170,9 +170,9 @@ To put it all together, a code monitor has a flow similar to the following:
 
 A user creates a code monitor, which consists of:
 
--   a name for the monitor
--   a trigger, which consists of a search query to run periodically,
--   and an action, which is sending an email, sending a Slack message, or sending a webhook event
+- a name for the monitor
+- a trigger, which consists of a search query to run periodically,
+- and an action, which is sending an email, sending a Slack message, or sending a webhook event
 
 Sourcegraph runs the query periodically over new commits. When new results are detected, a notification will be sent with the configured action. It will either contain a link to the search that provided new results, or if the "Include results" setting is enabled, it will include the result contents.
 
@@ -207,8 +207,8 @@ Learn about how Code Monitoring fits into Sourcegraph in the [architecture overv
 
 Each run of a code monitor is a regular search, with the same result limit and timeout as a search from the search bar. When a run reaches either limit, it stops and notifies you about the results found so far; commits it did not reach are not searched again on the next run. Set these in the monitor's query:
 
--   [`count:`](/code-search/queries/language#count): the maximum number of results per run. Default: 10,000.
--   [`timeout:`](/code-search/queries/language#timeout): how long a run may search. Default: 20 seconds. A query with `count:` but no `timeout:` uses the maximum timeout.
+- [`count:`](/code-search/queries/language#count): the maximum number of results per run. Default: 10,000.
+- [`timeout:`](/code-search/queries/language#timeout): how long a run may search. Default: 20 seconds. A query with `count:` but no `timeout:` uses the maximum timeout.
 
 For example, `repo:^github\.example\.com/ type:diff TODO count:50000 timeout:120s`.
 

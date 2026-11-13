@@ -25,21 +25,21 @@ We also recommend having backups for the _codeintel-db_ as a best practice. The 
 
 The addition of `PG*` environment variables to your Sourcegraph deployment files will instruct Sourcegraph to target an external PostgreSQL server. To externalize the _frontend database_, use the following standard `PG*` variables:
 
--   `PGHOST`
--   `PGPORT`
--   `PGUSER`
--   `PGPASSWORD`
--   `PGDATABASE`
--   `PGSSLMODE`
+- `PGHOST`
+- `PGPORT`
+- `PGUSER`
+- `PGPASSWORD`
+- `PGDATABASE`
+- `PGSSLMODE`
 
 To externalize the _code navigation database_, use the following prefixed `CODEINTEL_PG*` variables:
 
--   `CODEINTEL_PGHOST`
--   `CODEINTEL_PGPORT`
--   `CODEINTEL_PGUSER`
--   `CODEINTEL_PGPASSWORD`
--   `CODEINTEL_PGDATABASE`
--   `CODEINTEL_PGSSLMODE`
+- `CODEINTEL_PGHOST`
+- `CODEINTEL_PGPORT`
+- `CODEINTEL_PGUSER`
+- `CODEINTEL_PGPASSWORD`
+- `CODEINTEL_PGDATABASE`
+- `CODEINTEL_PGSSLMODE`
 
 <Callout type="note">
 	If you have configured both the frontend (pgsql) and code navigation
@@ -115,36 +115,36 @@ For AWS RDS for Postgres, you have the option to use IAM database authentication
 
 In order to enable IAM Auth, you first need to:
 
--   enabled [IAM authentication on the RDS instance](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.Enabling.html)
--   created [the database account using IAM authentication](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.DBAccounts.html#UsingWithRDS.IAMDBAuth.DBAccounts.PostgreSQL)
--   created [IAM policy for IAM database access](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.IAMPolicy.html)
--   created IAM roles for your compute workload and grant the role with the above policy
--   ensured your compute resources can assume those IAM roles
-    -   For EKS (k8s deployment), use [IAM roles for service accounts](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html)
-    -   For EC2 (docker-compose deployment), use [IAM roles for Amazon EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html)
+- enabled [IAM authentication on the RDS instance](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.Enabling.html)
+- created [the database account using IAM authentication](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.DBAccounts.html#UsingWithRDS.IAMDBAuth.DBAccounts.PostgreSQL)
+- created [IAM policy for IAM database access](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.IAMPolicy.html)
+- created IAM roles for your compute workload and grant the role with the above policy
+- ensured your compute resources can assume those IAM roles
+  - For EKS (k8s deployment), use [IAM roles for service accounts](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html)
+  - For EC2 (docker-compose deployment), use [IAM roles for Amazon EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html)
 
 Configure the following environment variables for the **`sourcegraph-frontend`** service (or all `sourcegraph-frontend-*` services and the migrator service in Docker Compose deployments):
 
--   `PG_CONNECTION_UPDATER=EC2_ROLE_CREDENTIALS`
--   `PGSSLMODE=require`
--   `PGHOST=<>`
--   `PGPORT=<>`
--   `PGUSER=<>` - this should be the database accounts created above
--   `PGDATABASE=<>`
--   `CODEINTEL_PGSSLMODE=require`
--   `CODEINTEL_PGHOST=<>`
--   `CODEINTEL_PGPORT=<>`
--   `CODEINTEL_PGUSER=<>` - this should be the database accounts created above
--   `CODEINTEL_PGDATABASE=<>`
--   `CODEINSIGHTS_PGSSLMODE=require`
--   `CODEINSIGHTS_PGHOST=<>`
--   `CODEINSIGHTS_PGPORT=<>`
--   `CODEINSIGHTS_PGUSER=<>` - this should be the database accounts created above
--   `CODEINSIGHTS_PGDATABASE=<>`
+- `PG_CONNECTION_UPDATER=EC2_ROLE_CREDENTIALS`
+- `PGSSLMODE=require`
+- `PGHOST=<>`
+- `PGPORT=<>`
+- `PGUSER=<>` - this should be the database accounts created above
+- `PGDATABASE=<>`
+- `CODEINTEL_PGSSLMODE=require`
+- `CODEINTEL_PGHOST=<>`
+- `CODEINTEL_PGPORT=<>`
+- `CODEINTEL_PGUSER=<>` - this should be the database accounts created above
+- `CODEINTEL_PGDATABASE=<>`
+- `CODEINSIGHTS_PGSSLMODE=require`
+- `CODEINSIGHTS_PGHOST=<>`
+- `CODEINSIGHTS_PGPORT=<>`
+- `CODEINSIGHTS_PGUSER=<>` - this should be the database accounts created above
+- `CODEINSIGHTS_PGDATABASE=<>`
 
 **Optional:** If your workloads are in a specific AWS Region and you want to use regional STS endpoints for improved latency and resiliency, also set:
 
--   `AWS_STS_REGIONAL_ENDPOINTS=regional` - This configures the AWS SDK to use regional STS endpoints (e.g., `sts.us-west-2.amazonaws.com`) instead of the global endpoint (`sts.amazonaws.com`). This is recommended for better performance and resilience. See [AWS documentation](https://docs.aws.amazon.com/sdkref/latest/guide/feature-sts-regionalized-endpoints.html) for more details.
+- `AWS_STS_REGIONAL_ENDPOINTS=regional` - This configures the AWS SDK to use regional STS endpoints (e.g., `sts.us-west-2.amazonaws.com`) instead of the global endpoint (`sts.amazonaws.com`). This is recommended for better performance and resilience. See [AWS documentation](https://docs.aws.amazon.com/sdkref/latest/guide/feature-sts-regionalized-endpoints.html) for more details.
 
 ## Usage with PgBouncer
 
@@ -256,18 +256,18 @@ This may not be acceptable in all environments. At minimum we expect that the `P
 
 `ALL` privileges on the [Database object](https://www.postgresql.org/docs/current/sql-grant.html) include:
 
--   `SELECT`
--   `INSERT`
--   `UPDATE`
--   `DELETE`
--   `TRUNCATE`
--   `REFERENCES`
--   `TRIGGER`
--   `CREATE`
--   `CONNECT`
--   `TEMPORARY`
--   `EXECUTE`
--   `USAGE`
+- `SELECT`
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `TRUNCATE`
+- `REFERENCES`
+- `TRIGGER`
+- `CREATE`
+- `CONNECT`
+- `TEMPORARY`
+- `EXECUTE`
+- `USAGE`
 
 ### Using restricted permissions for pgsql (frontend DB)
 

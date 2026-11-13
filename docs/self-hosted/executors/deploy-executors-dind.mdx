@@ -37,8 +37,8 @@ The executor and a Docker-in-Docker daemon run as containers in the same Kuberne
 
 Ensure you have the following tools installed:
 
--   [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
--   [Helm](https://helm.sh/) if you're installing Sourcegraph with `helm`.
+- [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
+- [Helm](https://helm.sh/) if you're installing Sourcegraph with `helm`.
 
 #### Deployment via Helm
 
@@ -62,10 +62,10 @@ To specifically deploy Executors,
 
     For additional configuration options:
 
-    1. See [details on configurations](/self-hosted/deploy/kubernetes#configuration)
-    2. See the [full values reference](https://github.com/sourcegraph/deploy-sourcegraph-helm/blob/main/charts/sourcegraph-executor/dind/README.md) for all available Helm fields
-    3. See [executor environment variables](/self-hosted/executors/executors-config) for the complete configuration reference
-    4. See the [GCP example override](https://github.com/sourcegraph/deploy-sourcegraph-helm/blob/main/charts/sourcegraph-executor/dind/examples/gcp/values.yaml) for a more complete example including storage, replica count, and gVisor configuration
+   1. See [details on configurations](/self-hosted/deploy/kubernetes#configuration)
+   2. See the [full values reference](https://github.com/sourcegraph/deploy-sourcegraph-helm/blob/main/charts/sourcegraph-executor/dind/README.md) for all available Helm fields
+   3. See [executor environment variables](/self-hosted/executors/executors-config) for the complete configuration reference
+   4. See the [GCP example override](https://github.com/sourcegraph/deploy-sourcegraph-helm/blob/main/charts/sourcegraph-executor/dind/examples/gcp/values.yaml) for a more complete example including storage, replica count, and gVisor configuration
 
 2. Run the following command:
     ```bash
@@ -124,8 +124,8 @@ Every executor deployment method exists to run **arbitrary, untrusted code**. Au
 
 This means the risk of a malicious job attempting to break out of its sandbox, consume excessive compute, or exfiltrate code and credentials is inherent to running executors. It is not unique to Docker-in-Docker:
 
--   **Firecracker** provides the strongest per-job isolation (a MicroVM boundary), but it is not a complete security control on its own. Even with Firecracker, Sourcegraph additionally configures `iptables` to stop jobs from reaching [private IP ranges](/self-hosted/executors/firecracker#known-caveats) and the cloud metadata service.
--   **Native Kubernetes** and **Docker-in-Docker** run jobs as containers without a MicroVM boundary, so they rely more heavily on the surrounding isolation and network controls.
+- **Firecracker** provides the strongest per-job isolation (a MicroVM boundary), but it is not a complete security control on its own. Even with Firecracker, Sourcegraph additionally configures `iptables` to stop jobs from reaching [private IP ranges](/self-hosted/executors/firecracker#known-caveats) and the cloud metadata service.
+- **Native Kubernetes** and **Docker-in-Docker** run jobs as containers without a MicroVM boundary, so they rely more heavily on the surrounding isolation and network controls.
 
 The runtime you choose changes the isolation boundary, but they do not negate the need for additional controls to further limit the blast radius.
 
@@ -140,8 +140,8 @@ We strongly recommend applying the following controls when running docker-in-doc
 2. **Sandbox the executor nodes where supported.** Run the executor node pool on a sandboxed runtime such as [gVisor](https://gvisor.dev/) (for example, [GKE Sandbox](https://cloud.google.com/kubernetes-engine/docs/concepts/sandbox-pods)). We offer built-in support for `gVisor` in the docker-in-docker helm chart. Learn more from the documentation.
 
 3. **Restrict network access.** Apply Kubernetes [NetworkPolicies](https://kubernetes.io/docs/concepts/services-networking/network-policies/) and/or cloud firewall rules to the executor node pool to:
-    - Block access to internal and private resources and services.
-    - Block access to the cloud instance metadata service at `169.254.169.254` (AWS / GCP).
+   - Block access to internal and private resources and services.
+   - Block access to the cloud instance metadata service at `169.254.169.254` (AWS / GCP).
 
 ## Related configuration
 
