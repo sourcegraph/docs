@@ -20,6 +20,14 @@ export const CustomLink: React.FC<CustomLinkProps> = ({
 }) => {
 	if (!href) return null; // Safeguard against undefined href
 
+	// Generated pages (CLI reference, dashboards, telemetry) link to the docs
+	// by absolute URL; keep those links on the host being viewed, which is not
+	// always sourcegraph.com (ms-docs.sg.dev serves the same deployment).
+	href = href.replace(
+		/^https:\/\/sourcegraph\.com\/docs(\/|(?=[?#]|$))/,
+		'/'
+	);
+
 	// Cleaning and potentially versioning the href
 	let cleanedHref = href.replace(/\.mdx?$/, '');
 	if (cleanedHref.startsWith('/') && version) {
