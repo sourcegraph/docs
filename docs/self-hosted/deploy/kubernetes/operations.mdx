@@ -59,19 +59,19 @@ $ kubectl apply --prune -l deploy=sourcegraph -f cluster.yaml
 
 Once you have applied your changes:
 
--   _Watch_ - verify your deployment has started:
+- _Watch_ - verify your deployment has started:
 
     ```bash
     $ kubectl get pods -A -o wide --watch
     ```
 
--   _Port-forward_ - verify Sourcegraph is running by temporarily making the frontend port accessible:
+- _Port-forward_ - verify Sourcegraph is running by temporarily making the frontend port accessible:
 
     ```sh
     $ kubectl port-forward svc/sourcegraph-frontend 3080:30080
     ```
 
--   _Log in_ - browse to your Sourcegraph deployment, login, and verify the instance is working as expected.
+- _Log in_ - browse to your Sourcegraph deployment, login, and verify the instance is working as expected.
 
 ## Compare overlays
 
@@ -228,8 +228,8 @@ The following instructions are specific to backing up and restoring the sourcegr
 >
 > These instructions will only back up core data including user accounts, configuration, repository-metadata, etc. Other data will be regenerated automatically:
 >
-> -   Repositories will be re-cloned
-> -   Search indexes will be rebuilt from scratch
+> - Repositories will be re-cloned
+> - Search indexes will be rebuilt from scratch
 >
 > The above may take a while if you have a lot of repositories. In the meantime, searches may be slow or return incomplete results. This process rarely takes longer than 6 hours and is usually **much** faster.
 
@@ -242,47 +242,47 @@ These instructions will back up the primary `sourcegraph` database, the [codeint
 
 1. Verify your Sourcegraph pods are running / healthy, especially the 3 database pods
 
-```bash
-$ kubectl get pods
-```
+   ```bash
+   $ kubectl get pods
+   ```
 
 2. Check for corrupt database indexes. The check blocks writes to each table while it checks that table's indexes. If amcheck returns errors, please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
 
-Save this query in a file named `amcheck.sql`:
+   Save this query in a file named `amcheck.sql`:
 
-```sql
-create extension if not exists amcheck;
+   ```sql
+   create extension if not exists amcheck;
 
-select bt_index_parent_check(c.oid, true), c.relname, c.relpages
-from pg_index i
-join pg_opclass op ON i.indclass[0] = op.oid
-join pg_am am ON op.opcmethod = am.oid
-join pg_class c ON i.indexrelid = c.oid
-join pg_namespace n ON c.relnamespace = n.oid
-where am.amname = 'btree'
--- Don't check temp tables, which may be from another session:
-and c.relpersistence != 't'
--- Skip partitioned indexes; the indexes of their partitions are checked:
-and c.relkind = 'i'
--- Function may throw an error when this is omitted:
-and i.indisready AND i.indisvalid;
-```
+   select bt_index_parent_check(c.oid, true), c.relname, c.relpages
+   from pg_index i
+   join pg_opclass op ON i.indclass[0] = op.oid
+   join pg_am am ON op.opcmethod = am.oid
+   join pg_class c ON i.indexrelid = c.oid
+   join pg_namespace n ON c.relnamespace = n.oid
+   where am.amname = 'btree'
+   -- Don't check temp tables, which may be from another session:
+   and c.relpersistence != 't'
+   -- Skip partitioned indexes; the indexes of their partitions are checked:
+   and c.relkind = 'i'
+   -- Function may throw an error when this is omitted:
+   and i.indisready AND i.indisvalid;
+   ```
 
-Run it on each database. Each command prints any errors, and exits 0 when every index is intact:
+   Run it on each database. Each command prints any errors, and exits 0 when every index is intact:
 
-```bash
-$ kubectl exec -i pgsql-0 -- \
-    psql -v ON_ERROR_STOP=1 --username sg sg \
-    < amcheck.sql > /dev/null
+   ```bash
+   $ kubectl exec -i pgsql-0 -- \
+       psql -v ON_ERROR_STOP=1 --username sg sg \
+       < amcheck.sql > /dev/null
 
-$ kubectl exec -i codeintel-db-0 -- \
-    psql -v ON_ERROR_STOP=1 --username sg sg \
-    < amcheck.sql > /dev/null
+   $ kubectl exec -i codeintel-db-0 -- \
+       psql -v ON_ERROR_STOP=1 --username sg sg \
+       < amcheck.sql > /dev/null
 
-$ kubectl exec -i codeinsights-db-0 -- \
-    psql -v ON_ERROR_STOP=1 --username postgres postgres \
-    < amcheck.sql > /dev/null
-```
+   $ kubectl exec -i codeinsights-db-0 -- \
+       psql -v ON_ERROR_STOP=1 --username postgres postgres \
+       < amcheck.sql > /dev/null
+   ```
 
 3. Generate the database dumps
 
@@ -312,67 +312,67 @@ These instructions apply to both a new deployment and an existing one. You don't
 
 2. Stop every Sourcegraph service except the databases, so nothing writes to the databases during the restore
 
-```bash
-$ kubectl scale deployment,statefulset --replicas=0 -l '
-    deploy=sourcegraph,
-    app.kubernetes.io/component notin
-        (pgsql,codeintel-db,codeinsights-db)'
-```
+   ```bash
+   $ kubectl scale deployment,statefulset --replicas=0 -l '
+       deploy=sourcegraph,
+       app.kubernetes.io/component notin
+           (pgsql,codeintel-db,codeinsights-db)'
+   ```
 
-Wait until `kubectl get pods` shows no Sourcegraph pods other than `pgsql-0`, `codeintel-db-0`, and `codeinsights-db-0`.
+   Wait until `kubectl get pods` shows no Sourcegraph pods other than `pgsql-0`, `codeintel-db-0`, and `codeinsights-db-0`.
 
 3. Copy the database files into the pods
 
-```bash
-$ kubectl cp sourcegraph_db.out pgsql-0:/data/sourcegraph_db.out
-$ kubectl cp codeintel_db.out codeintel-db-0:/data/codeintel_db.out
-$ kubectl cp codeinsights_db.out \
-    codeinsights-db-0:/var/lib/postgresql/data/codeinsights_db.out
-```
+   ```bash
+   $ kubectl cp sourcegraph_db.out pgsql-0:/data/sourcegraph_db.out
+   $ kubectl cp codeintel_db.out codeintel-db-0:/data/codeintel_db.out
+   $ kubectl cp codeinsights_db.out \
+       codeinsights-db-0:/var/lib/postgresql/data/codeinsights_db.out
+   ```
 
-The database containers have a read-only root filesystem, so copy the files into the database volumes. Step 5 deletes them after the restore.
+   The database containers have a read-only root filesystem, so copy the files into the database volumes. Step 5 deletes them after the restore.
 
 4. Restore the databases
 
-`DROP DATABASE ... WITH (FORCE)` disconnects the other sessions on each database, such as the `pgsql-exporter` sidecar, and drops it, so the dump can recreate it. `ON_ERROR_STOP=1` stops the restore at the first error; if a restore fails, fix the cause and run it again.
+   `DROP DATABASE ... WITH (FORCE)` disconnects the other sessions on each database, such as the `pgsql-exporter` sidecar, and drops it, so the dump can recreate it. `ON_ERROR_STOP=1` stops the restore at the first error; if a restore fails, fix the cause and run it again.
 
-```bash
-$ kubectl exec -it pgsql-0 -- \
-    psql -v ON_ERROR_STOP=1 --username sg \
-    -c "DROP DATABASE IF EXISTS sg WITH (FORCE)" \
-    -f /data/sourcegraph_db.out postgres
+   ```bash
+   $ kubectl exec -it pgsql-0 -- \
+       psql -v ON_ERROR_STOP=1 --username sg \
+       -c "DROP DATABASE IF EXISTS sg WITH (FORCE)" \
+       -f /data/sourcegraph_db.out postgres
 
-$ kubectl exec -it codeintel-db-0 -- \
-    psql -v ON_ERROR_STOP=1 --username sg \
-    -c "DROP DATABASE IF EXISTS sg WITH (FORCE)" \
-    -f /data/codeintel_db.out postgres
+   $ kubectl exec -it codeintel-db-0 -- \
+       psql -v ON_ERROR_STOP=1 --username sg \
+       -c "DROP DATABASE IF EXISTS sg WITH (FORCE)" \
+       -f /data/codeintel_db.out postgres
 
-$ kubectl exec -it codeinsights-db-0 -- \
-    psql -v ON_ERROR_STOP=1 --username postgres \
-    -c "DROP DATABASE IF EXISTS postgres WITH (FORCE)" \
-    -f /var/lib/postgresql/data/codeinsights_db.out template1
-```
+   $ kubectl exec -it codeinsights-db-0 -- \
+       psql -v ON_ERROR_STOP=1 --username postgres \
+       -c "DROP DATABASE IF EXISTS postgres WITH (FORCE)" \
+       -f /var/lib/postgresql/data/codeinsights_db.out template1
+   ```
 
 5. After all three restores succeed, delete the backup files from the pods
 
-```bash
-$ kubectl exec pgsql-0 -- rm /data/sourcegraph_db.out
-$ kubectl exec codeintel-db-0 -- rm /data/codeintel_db.out
-$ kubectl exec codeinsights-db-0 -- \
-    rm /var/lib/postgresql/data/codeinsights_db.out
-```
+   ```bash
+   $ kubectl exec pgsql-0 -- rm /data/sourcegraph_db.out
+   $ kubectl exec codeintel-db-0 -- rm /data/codeintel_db.out
+   $ kubectl exec codeinsights-db-0 -- \
+       rm /var/lib/postgresql/data/codeinsights_db.out
+   ```
 
 6. Check for corrupt database indexes, with the commands in step 2 of [Back up Sourcegraph databases](#back-up-sourcegraph-databases). If amcheck returns errors, please reach out to [support@sourcegraph.com](mailto:support@sourcegraph.com)
 
 7. Start the remaining Sourcegraph services, by running `helm upgrade` with the chart version and values file of your deployment (`helm list` shows the chart version). It sets every service back to the number of replicas in your values.
 
-```bash
-$ helm upgrade --install --values ./override.yaml \
-    --version <chart_version> \
-    sourcegraph sourcegraph/sourcegraph
-```
+   ```bash
+   $ helm upgrade --install --values ./override.yaml \
+       --version <chart_version> \
+       sourcegraph sourcegraph/sourcegraph
+   ```
 
-If you deployed with Kustomize, follow the steps in [applying manifests](#applying-manifests) instead.
+   If you deployed with Kustomize, follow the steps in [applying manifests](#applying-manifests) instead.
 
 8. Browse to your Sourcegraph deployment, log in, and verify your existing configuration has been restored
 

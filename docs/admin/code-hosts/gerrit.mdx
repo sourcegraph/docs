@@ -11,13 +11,13 @@
 
 A Gerrit instance can be connected to Sourcegraph as follows:
 
--   [Gerrit](#gerrit)
-    -   [Configure Gerrit as a code host connection](#configure-gerrit-as-a-code-host-connection)
-        -   [Clone using SSH](#clone-using-ssh)
-    -   [Add Gerrit as an authentication provider](#add-gerrit-as-an-authentication-provider)
-    -   [Have users authenticate their Sourcegraph accounts using their Gerrit HTTP credentials](#have-users-authenticate-their-sourcegraph-accounts-using-their-gerrit-http-credentials)
-    -   [Configuration](#configuration)
-        -   [admin/code_hosts/gerrit.schema.json](#admincode_hostsgerritschemajson)
+- [Gerrit](#gerrit)
+  - [Configure Gerrit as a code host connection](#configure-gerrit-as-a-code-host-connection)
+    - [Clone using SSH](#clone-using-ssh)
+  - [Add Gerrit as an authentication provider](#add-gerrit-as-an-authentication-provider)
+  - [Have users authenticate their Sourcegraph accounts using their Gerrit HTTP credentials](#have-users-authenticate-their-sourcegraph-accounts-using-their-gerrit-http-credentials)
+  - [Configuration](#configuration)
+    - [admin/code_hosts/gerrit.schema.json](#admincode_hostsgerritschemajson)
 
 ## Configure Gerrit as a code host connection
 
@@ -27,23 +27,23 @@ A Gerrit instance can be connected to Sourcegraph as follows:
    ![Gerrit as a code host option in the list](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/gerrit/gerrit-select.png)
 3. Next you will have to provide a [configuration](#configuration) for the Gerrit code host connection. Here is an example configuration:
 
-```json
-{
-	"url": "https://gerrit.example.com/", // Be sure to add a trailing slash
-	"username": "<username>",
-	"password": "<password>",
-	"projects": [
-		// If not set, all projects on the Gerrit instance will be mirrored
-		"docs",
-		"kubernetes/kubernetes"
-	],
-	"exclude": [
-		// If not set, no repositories will be excluded. Takes precedence over the `projects` option
-		{"name": "docs"} // Despite "docs" being specified in "projects", this setting will override it and exclude the "docs" project
-	],
-	"authorization": {} // Marks all repositories as private. Users will be required to present valid Gerrit HTTP credentials in order to view repositories
-}
-```
+   ```json
+   {
+   	"url": "https://gerrit.example.com/", // Be sure to add a trailing slash
+   	"username": "<username>",
+   	"password": "<password>",
+   	"projects": [
+   		// If not set, all projects on the Gerrit instance will be mirrored
+   		"docs",
+   		"kubernetes/kubernetes"
+   	],
+   	"exclude": [
+   		// If not set, no repositories will be excluded. Takes precedence over the `projects` option
+   		{"name": "docs"} // Despite "docs" being specified in "projects", this setting will override it and exclude the "docs" project
+   	],
+   	"authorization": {} // Marks all repositories as private. Users will be required to present valid Gerrit HTTP credentials in order to view repositories
+   }
+   ```
 
 4. The provided `username` and `password` must be the HTTP credentials of an account on Gerrit that has access to all the repositories that need to be cloned. See [the Gerrit HTTP documentation](https://gerrit-documentation.storage.googleapis.com/Documentation/2.14.2/user-upload.html#http) for details on how to generate HTTP credentials.
 5. Select **Add Repositories** to create the connection. Sourcegraph will start mirroring the specified projects.
@@ -79,12 +79,12 @@ If the `"authorization": {}` option has been set on a Gerrit code host connectio
    ![Add a Gerrit configuration to the list of configured authentication providers](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/gerrit/gerrit-auth.png)
 3. Here is an example configuration:
 
-```json
-{
-	"type": "gerrit",
-	"url": "https://gerrit.example.com/" // This must match the URL of the code host connection. Be sure to add a trailing slash
-}
-```
+   ```json
+   {
+   	"type": "gerrit",
+   	"url": "https://gerrit.example.com/" // This must match the URL of the code host connection. Be sure to add a trailing slash
+   }
+   ```
 
 4. Save the configuration. If there was a warning at the top of the page, it should now disappear.
 
@@ -98,10 +98,10 @@ As a user:
 
 1. Visit your user settings page and select **Account security** from the options on the left.
    ![A user's Account security page](https://storage.googleapis.com/sourcegraph-assets/docs/images/administration/config/external-services/gerrit/gerrit-account-security.png)
-1. Gerrit should appear in the list of accounts you are able to connect. If it does not appear, try refreshing the page.
-1. Select the **Add** option next to Gerrit.
-1. Provide your Gerrit username and HTTP password. If you are unsure of how to generate an HTTP password, see [the Gerrit HTTP documentation](https://gerrit-documentation.storage.googleapis.com/Documentation/2.14.2/user-upload.html#http).
-1. Once your Gerrit credentials are verified, you'll be able to view your private Gerrit projects within Sourcegraph! If you cannot immediately see any projects you should have access to, try giving it some time, as it can take a while for your Gerrit permissions to reflect on Sourcegraph if there is a high volume of users on the system.
+2. Gerrit should appear in the list of accounts you are able to connect. If it does not appear, try refreshing the page.
+3. Select the **Add** option next to Gerrit.
+4. Provide your Gerrit username and HTTP password. If you are unsure of how to generate an HTTP password, see [the Gerrit HTTP documentation](https://gerrit-documentation.storage.googleapis.com/Documentation/2.14.2/user-upload.html#http).
+5. Once your Gerrit credentials are verified, you'll be able to view your private Gerrit projects within Sourcegraph! If you cannot immediately see any projects you should have access to, try giving it some time, as it can take a while for your Gerrit permissions to reflect on Sourcegraph if there is a high volume of users on the system.
 
 ## Configuration
 

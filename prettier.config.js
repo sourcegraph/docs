@@ -8,5 +8,10 @@ module.exports = {
 	useTabs: true,
 	tabWidth: 4,
 	semi: true,
-	plugins: ['prettier-plugin-tailwindcss']
+	plugins: ['prettier-plugin-tailwindcss'],
+	// Markdown and YAML are indented 2 spaces, which nests Markdown bullets
+	// 2 spaces (.markdownlint-cli2.jsonc)
+	overrides: [
+		{files: ['*.md', '*.mdx', '*.yml', '*.yaml'], options: {tabWidth: 2}}
+	]
 };

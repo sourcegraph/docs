@@ -72,37 +72,37 @@ To perform a multi-version upgrade via migrators [upgrade](/self-hosted/updates/
 
 1. **Check Upgrade Readiness**:
 
-    - Check the [upgrade notes](https://sourcegraph.com/changelog/self-hosted/docker-compose) for the version range you're passing through.
-    - Check the `Administration > Updates` page to determine [upgrade readiness](/self-hosted/updates/#upgrade-readiness).
+   - Check the [upgrade notes](https://sourcegraph.com/changelog/self-hosted/docker-compose) for the version range you're passing through.
+   - Check the `Administration > Updates` page to determine [upgrade readiness](/self-hosted/updates/#upgrade-readiness).
 
 2. **Pull and merge upstream changes**:
 
-    - Follow the [standard upgrade procedure](#standard-upgrades) to pull and merge upstream changes from the version you are upgrading to your `release` branch.
+   - Follow the [standard upgrade procedure](#standard-upgrades) to pull and merge upstream changes from the version you are upgrading to your `release` branch.
 
 3. **Disable Connections to the Database**:
 
-    - Stop running containers connected to the databases and the databases:
+   - Stop running containers connected to the databases and the databases:
 
     ```
     $ docker compose down --remove-orphans
     ```
 
 4. **Run Migrator with the `upgrade` command**:
-    - _For more detailed instructions and available command flags see our [migrator docs](/self-hosted/updates/migrator/migrator-operations#upgrade)._
-    1. If the migrator `image:` in your `docker-compose.yaml` wasn't updated to in the **latest** release of `migrator` in step 2 set migrator's image to the latest release.
-       **Example:**
-    ```yaml
-    migrator:
-        container_name: migrator
-        image: 'index.docker.io/sourcegraph/migrator:{CURRENT_VERSION_NO_V}'
-    ```
-    2. Set the migrator `command:` to `upgrade` you'll need to supply a `--to=` argument to the version you're upgrading to.
-       **Example:**
+   - _For more detailed instructions and available command flags see our [migrator docs](/self-hosted/updates/migrator/migrator-operations#upgrade)._
+   1. If the migrator `image:` in your `docker-compose.yaml` wasn't updated to in the **latest** release of `migrator` in step 2 set migrator's image to the latest release.
+      **Example:**
+      ```yaml
+      migrator:
+          container_name: migrator
+          image: 'index.docker.io/sourcegraph/migrator:{CURRENT_VERSION_NO_V}'
+      ```
+   2. Set the migrator `command:` to `upgrade` you'll need to supply a `--to=` argument to the version you're upgrading to.
+      **Example:**
     ```yaml
     command: ['upgrade', '--from=v7.5.0', '--to=v8.1.0']
     ```
     > _Note: you may add the `--dry-run` flag to the `command:` to test things out before altering the dbs_ 3. Run migrator with `docker compose up migrator`
-    - Migrator `depends_on:` will ensure the databases are ready before attempting to run the migrator. Ensuring that database entry point scripts are run before the migrator attempts to connect to the databases.
+   - Migrator `depends_on:` will ensure the databases are ready before attempting to run the migrator. Ensuring that database entry point scripts are run before the migrator attempts to connect to the databases.
     **Example:**
     ```sh
     $ docker compose up migrator
@@ -122,9 +122,9 @@ To perform a multi-version upgrade via migrators [upgrade](/self-hosted/updates/
     ```
 5. **Run Migrator with the `up` command**
 
-    - Set your migrator `command:` to `up`
-        > _Note: If you aren't upgrading to the latest release remember to set the migrator image back to the version you are upgrading to._
-        > **Example:**
+   - Set your migrator `command:` to `up`
+       > _Note: If you aren't upgrading to the latest release remember to set the migrator image back to the version you are upgrading to._
+       > **Example:**
 
     ```yaml
     migrator:
@@ -136,7 +136,7 @@ To perform a multi-version upgrade via migrators [upgrade](/self-hosted/updates/
     ```
 
 6. **Start your containers again**:
-    - run `docker compose up -d --remove-orphans` in the folder containing your `docker-compose.yaml` file.
+   - run `docker compose up -d --remove-orphans` in the folder containing your `docker-compose.yaml` file.
     ```sh
     $ docker compose up -d --remove-orphans
     ```

@@ -12,9 +12,9 @@ issue or generating a high-quality issue report.
 
 1. Scan through [Specific scenarios](#specific-scenarios) to see if any of these applies to you. If
    any do, follow the instructions in the subsection.
-1. Scan through [General scenarios](#general-scenarios) to find which scenario(s) applies to you. If any do,
+2. Scan through [General scenarios](#general-scenarios) to find which scenario(s) applies to you. If any do,
    follow the instructions to update your instance or collect information for the issue report.
-1. If you cannot resolve the issue on your own, [contact us](https://help.sourcegraph.com/inbox/new) with the collected
+3. If you cannot resolve the issue on your own, [contact us](https://help.sourcegraph.com/inbox/new) with the collected
    information. Enterprise customers may alternatively file a support ticket or email
    `support@sourcegraph.com`.
 
@@ -28,14 +28,14 @@ issue or generating a high-quality issue report.
 If this is the case, this could indicate high gitserver load. To confirm, take the following steps:
 
 1. [Open Grafana](/self-hosted/observability/metrics#grafana) and go to the **Git Server** dashboard.
-1. Check whether the [`gitserver: echo_command_duration_test`](/self-hosted/observability/alerts#gitserver-echo_command_duration_test)
+2. Check whether the [`gitserver: echo_command_duration_test`](/self-hosted/observability/alerts#gitserver-echo_command_duration_test)
    alert is firing. The **Echo test command duration** panel tracks the
    `src_gitserver_echo_duration_seconds` metric; on a healthy node it stays below 5ms, and the alert
    fires when it stays at 20ms or more for 30 seconds.
-1. Check the **Git commands running on each gitserver instance** panel, which tracks the
+3. Check the **Git commands running on each gitserver instance** panel, which tracks the
    `src_gitserver_exec_running` metric. A consistently high value indicates gitserver is under
    heavy load and likely the bottleneck.
-1. Confirm your gitserver is not under-provisioned, by e.g. comparing its allocated resources with what the [resource estimator](/self-hosted/deploy/resource-estimator) shows.
+4. Confirm your gitserver is not under-provisioned, by e.g. comparing its allocated resources with what the [resource estimator](/self-hosted/deploy/resource-estimator) shows.
 
 If gitserver is overloaded, follow the next steps for the
 [`echo_command_duration_test`](/self-hosted/observability/alerts#gitserver-echo_command_duration_test)
@@ -67,11 +67,11 @@ slow requests.
 Record the following information in the issue report:
 
 1. Reproduction steps
-1. A screenshot of the error page or error message
-1. The [output of the browser developer console](#check-browser-console)
-1. [Log output](#examine-logs) while reproducing the issue
-1. [Sourcegraph configuration](#copy-configuration)
-1. When was the most recent update or deployment change applied?
+2. A screenshot of the error page or error message
+3. The [output of the browser developer console](#check-browser-console)
+4. [Log output](#examine-logs) while reproducing the issue
+5. [Sourcegraph configuration](#copy-configuration)
+6. When was the most recent update or deployment change applied?
 
 #### Scenario: the issue is NOT performance-related, but it is hard to reproduce.
 
@@ -79,38 +79,38 @@ Without a consistent reproduction, the issue will be harder to diagnose, so we r
 find a repro if possible. If that isn't possible, file an issue with the following information:
 
 1. Steps the user took before encountering the issue, including as much detail as possible.
-1. Bad example: "User encountered a 502 error when trying to search for something."
-1. Good example: "User encountered a 502 error on the search results page when trying to conduct a
+2. Bad example: "User encountered a 502 error when trying to search for something."
+3. Good example: "User encountered a 502 error on the search results page when trying to conduct a
    global search for the following query. On refresh, the search worked with no error. The desired
    result appears in our main repository, which is rather large (takes about a minute to fully
    clone). The issue doesn't reproduce consistently, but we saw two other reports like this around
    2pm PT yesterday, during peak usage hours."
-1. [Examine the error rates](#check-error-rates) for any anomalies.
-1. If you know the approximate time the issue occurred or if there is a spike in error rate around a
+4. [Examine the error rates](#check-error-rates) for any anomalies.
+5. If you know the approximate time the issue occurred or if there is a spike in error rate around a
    certain time, [copy the logs](#examine-logs) around that time.
-1. Note any pattern in the issue reports. E.g., did users encountering the issue all visit the same
+6. Note any pattern in the issue reports. E.g., did users encountering the issue all visit the same
    repository or belong to the same organization. Do administrators encounter the issue or only
    non-admin users?
-1. [Sourcegraph configuration](#copy-configuration)
-1. When was the most recent update or deployment change applied?
+7. [Sourcegraph configuration](#copy-configuration)
+8. When was the most recent update or deployment change applied?
 
 #### Scenario: the issue is performance-related and there is a consistent reproduction
 
 1. Include the reproduction steps in the error report, along with relevant context (e.g., repository
    size).
-    1. Bad example: "User did a search and it timed out."
-    1. Good example: "User issued the following search query in the following repository. The
-       repository is one of our larger repositories (takes about 1 minute to fully clone and the size
-       of the `.git` directory is 5GB). The results page took about 60 seconds to load and when it
-       finally did, the results was an error message that said 'timeout'".
-1. Open the [browser developer network panel](#check-browser-network-panel) and identify slow
+   1. Bad example: "User did a search and it timed out."
+   2. Good example: "User issued the following search query in the following repository. The
+      repository is one of our larger repositories (takes about 1 minute to fully clone and the size
+      of the `.git` directory is 5GB). The results page took about 60 seconds to load and when it
+      finally did, the results was an error message that said 'timeout'".
+2. Open the [browser developer network panel](#check-browser-network-panel) and identify slow
    requests.
-1. [Use Jaeger](#collect-a-jaeger-trace) to drill down into slow requests and understand which
+3. [Use Jaeger](#collect-a-jaeger-trace) to drill down into slow requests and understand which
    components of the request are slow. Sourcegraph returns the trace ID in the `x-trace` HTTP
    response header and, when a tracing backend is configured, a link to the trace in the
    `x-trace-url` header, which makes it easy to look up the trace corresponding to a particular
    request.
-1. Copy the [Sourcegraph configuration](#copy-configuration) to the error report.
+4. Copy the [Sourcegraph configuration](#copy-configuration) to the error report.
 
 #### Scenario: the issue is performance-related and there is NOT a consistent reproduction
 
@@ -119,14 +119,14 @@ find a repro if possible. If that isn't possible, try the following:
 
 1. Examine [resource usage](#check-resource-usage), [usage stats](#check-end-user-stats), and [error
    rates](#check-error-rates) over time in Grafana and Prometheus.
-1. Are there spikes in latencies or error rate over time?
-1. Are there spikes in usage or traffic over time that correlate with when the issue is reported.
-1. Are there spikes in memory usage, CPU, or disk usage over time?
-1. If you know the approximate time the issue occurred or if there is a suspicious spike in metrics
+2. Are there spikes in latencies or error rate over time?
+3. Are there spikes in usage or traffic over time that correlate with when the issue is reported.
+4. Are there spikes in memory usage, CPU, or disk usage over time?
+5. If you know the approximate time the issue occurred or if there is a suspicious spike in metrics
    around a certain time, [check the logs](#examine-logs) around that time.
-1. If the issue is ongoing or if you know the time during which the issue occurred, [search
+6. If the issue is ongoing or if you know the time during which the issue occurred, [search
    Jaeger](#collect-a-jaeger-trace) for long-running request traces in the appropriate time window.
-1. If tracing points to a specific service as the source of high latency, [examine the
+7. If tracing points to a specific service as the source of high latency, [examine the
    logs](#examine-logs) for that service.
 
 #### Scenario: multiple actions are slow or Sourcegraph as a whole feels sluggish
@@ -137,29 +137,29 @@ If Sourcegraph feels sluggish overall, the likely culprit is resource allocation
 > services. This is only possible when Sourcegraph is deployed into a Kubernetes cluster.
 
 1. [Examine memory, CPU, and disk usage metrics](#check-resource-usage).
-1. If the metrics indicate high resource consumption, adjust the resource allocation higher.
-1. If metrics are unavailable or inaccessible, here is a rough correspondence between end-user
+2. If the metrics indicate high resource consumption, adjust the resource allocation higher.
+3. If metrics are unavailable or inaccessible, here is a rough correspondence between end-user
    slowness and the services that are usually the culprit:
-    1. Global search (i.e., no repository scope is specified) results page takes a long time to load.
-    1. Increase indexed-search memory limit or CPU limit. The number of indexed-search
-       shards can also be increased if using Sourcegraph on Kubernetes.
-    1. Search results show up quickly, but code snippets take awhile to populate. File contents take
-       awhile to load.
-    1. Increase gitserver memory usage. Gitserver memory may be the bottleneck, especially if there
-       are many repositories or repositories are large.
-    1. Increase number of gitserver shards. This can help if memory is the bottleneck. It can also
-       help if there are too many repositories per shard. Gitserver "shells out" to `git` for every
-       repository data request, so a high volume of user traffic that generates many simultaneous
-       requests for many repositories can lead to a spike in Linux process exec latency.
-    1. Increase memory and CPU limit of syntect-server. This helps if syntax highlighting is the
-       bottleneck.
-    1. Multiple UI pages take awhile to load.
-    1. Increase frontend CPU and memory limit.
-    1. Searches show intermittent HTTP 502 errors or timeouts, possibly concurrent with frontend
-       container restarts.
-    1. Increase frontend memory and CPU. This may indicate the frontend is running out of memory
+   1. Global search (i.e., no repository scope is specified) results page takes a long time to load.
+   2. Increase indexed-search memory limit or CPU limit. The number of indexed-search
+      shards can also be increased if using Sourcegraph on Kubernetes.
+   3. Search results show up quickly, but code snippets take awhile to populate. File contents take
+      awhile to load.
+   4. Increase gitserver memory usage. Gitserver memory may be the bottleneck, especially if there
+      are many repositories or repositories are large.
+   5. Increase number of gitserver shards. This can help if memory is the bottleneck. It can also
+      help if there are too many repositories per shard. Gitserver "shells out" to `git` for every
+      repository data request, so a high volume of user traffic that generates many simultaneous
+      requests for many repositories can lead to a spike in Linux process exec latency.
+   6. Increase memory and CPU limit of syntect-server. This helps if syntax highlighting is the
+      bottleneck.
+   7. Multiple UI pages take awhile to load.
+   8. Increase frontend CPU and memory limit.
+   9. Searches show intermittent HTTP 502 errors or timeouts, possibly concurrent with frontend
+      container restarts.
+   10. Increase frontend memory and CPU. This may indicate the frontend is running out of memory
        when loading search results. This can be a problem when dealing with large monorepos.
-1. If it is unclear which service is underallocated, [examine Jaeger](#collect-a-jaeger-trace) to
+4. If it is unclear which service is underallocated, [examine Jaeger](#collect-a-jaeger-trace) to
    identify long-running traces and see which services take up the most time.
 
 #### Scenario: Prometheus scraping metrics outside Sourcegraph Kubernetes namespace
@@ -175,9 +175,9 @@ If you are seeing cAdvisor metrics from a namespace outside of the one Sourcegra
 If your users are experiencing search timeouts or search performance issues, please perform the following steps:
 
 1. Try appending variations of `index:only`, `timeout:60s` and `count:all` to the search query to see if it is still slow.
-1. [Trace the search query](/self-hosted/observability/tracing#trace-a-search-query) and include the trace in the issue report.
-1. [Open Grafana](/self-hosted/observability/metrics#grafana) and include screenshots of the **Frontend** dashboard's **Search at a glance** section and of the **Zoekt** dashboard in the issue report.
-1. Include the [logs](#examine-logs) of the `zoekt-webserver` container in the `indexed-search` pods (Kubernetes) or the `zoekt-webserver-0` container (Docker Compose).
+2. [Trace the search query](/self-hosted/observability/tracing#trace-a-search-query) and include the trace in the issue report.
+3. [Open Grafana](/self-hosted/observability/metrics#grafana) and include screenshots of the **Frontend** dashboard's **Search at a glance** section and of the **Zoekt** dashboard in the issue report.
+4. Include the [logs](#examine-logs) of the `zoekt-webserver` container in the `indexed-search` pods (Kubernetes) or the `zoekt-webserver-0` container (Docker Compose).
 
 #### Scenario: zoekt-webserver is in a `CrashloopBackOff` and `err cannot allocate memory`
 
@@ -199,15 +199,15 @@ $ sysctl -n vm.max_map_count
 65530
 ```
 
-1.  Calculate the number of repos in your deployment divided by the number of `indexed-search` replicas. For example:
+1. Calculate the number of repos in your deployment divided by the number of `indexed-search` replicas. For example:
 
-    - 250,000 repositories / 2 indexed-search replicas = 125,000 repos to index per replica.
+   - 250,000 repositories / 2 indexed-search replicas = 125,000 repos to index per replica.
 
-1.  If the `vm.max_map_count` is lower than twice the result of the above calculation (250,000 in this example), raise the `vm.max_map_count` to at least that value, for example:
+2. If the `vm.max_map_count` is lower than twice the result of the above calculation (250,000 in this example), raise the `vm.max_map_count` to at least that value, for example:
 
-        sudo sysctl -w vm.max_map_count=262144
+       sudo sysctl -w vm.max_map_count=262144
 
-1.  Verify the change.
+3. Verify the change.
 
 ```
 $ sudo sysctl -n vm.max_map_count
@@ -229,19 +229,19 @@ By default the watchdog runs every 30s. If the watchdog fails 3 consecutive time
 
 You can configure the watchdog via environment variables:
 
--   `ZOEKT_WATCHDOG_TICK` :: Duration of how often it runs. (default 30s)
--   `ZOEKT_WATCHDOG_ERRORS` :: Consecutive error count before exit. (default 3)
+- `ZOEKT_WATCHDOG_TICK` :: Duration of how often it runs. (default 30s)
+- `ZOEKT_WATCHDOG_ERRORS` :: Consecutive error count before exit. (default 3)
 
 If either is 0 the watchdog is disabled.
 
 You can further diagnose an overloaded zoekt-webserver via watchdog logs or metrics. See log messages mentioning watchdog, or view the following metrics in grafana:
 
--   `zoekt_webserver_watchdog_errors` :: The current error count for zoekt
-    watchdog.
--   `zoekt_webserver_watchdog_total` :: The total number of requests done by
-    zoekt watchdog.
--   `zoekt_webserver_watchdog_errors_total` :: The total number of errors from
-    zoekt watchdog.
+- `zoekt_webserver_watchdog_errors` :: The current error count for zoekt
+  watchdog.
+- `zoekt_webserver_watchdog_total` :: The total number of requests done by
+  zoekt watchdog.
+- `zoekt_webserver_watchdog_errors_total` :: The total number of errors from
+  zoekt watchdog.
 
 ## Actions
 
@@ -263,13 +263,13 @@ then click the `Network` tab).
 If you are new to the network page, check out this [great introduction to the Chrome developer tools
 Network panel](https://developers.google.com/web/tools/chrome-devtools/network).
 
--   Check the waterfall diagram at the top and the Waterfall column in the list of network requests to
-    quickly identify high-latency requests.
--   Clicking on a request will open up a panel that provides additional details about the request.
-    -   If a request is taking a long time, inspect the Headers tab of this panel and find the
-        `x-trace` response header (the trace ID) or the `x-trace-url` response header (a link to the
-        trace). Once you've obtained the trace ID, [look it up in Jaeger](#collect-a-jaeger-trace).
--   You can check `Preserve log` to preserve the list of requests across page loads and reloads.
+- Check the waterfall diagram at the top and the Waterfall column in the list of network requests to
+  quickly identify high-latency requests.
+- Clicking on a request will open up a panel that provides additional details about the request.
+  - If a request is taking a long time, inspect the Headers tab of this panel and find the
+    `x-trace` response header (the trace ID) or the `x-trace-url` response header (a link to the
+    trace). Once you've obtained the trace ID, [look it up in Jaeger](#collect-a-jaeger-trace).
+- You can check `Preserve log` to preserve the list of requests across page loads and reloads.
 
 ### Check diagnostics
 
@@ -283,10 +283,10 @@ report.
 [Open Grafana](/self-hosted/observability/metrics#grafana). Most service dashboards (for example
 **Frontend**, **Git Server**, and **Searcher**) have these sections:
 
--   **Container monitoring**: CPU and memory usage, filesystem I/O, and containers that went missing
-    (for example, because they were OOM killed).
--   **Provisioning indicators**: short-term and long-term CPU and memory usage compared with the
-    container's limits, which shows whether a service is under-provisioned.
+- **Container monitoring**: CPU and memory usage, filesystem I/O, and containers that went missing
+  (for example, because they were OOM killed).
+- **Provisioning indicators**: short-term and long-term CPU and memory usage compared with the
+  container's limits, which shows whether a service is under-provisioned.
 
 **Disk:** the **Git Server** dashboard's **Disk space remaining** panel tracks free disk space on
 gitserver, from the `src_gitserver_disk_space_available` and `src_gitserver_disk_space_total` metrics.
@@ -310,23 +310,23 @@ title > Edit > copying the expression in the Metrics field.
 
 [Open Grafana](/self-hosted/observability/metrics#grafana) and view the following dashboards:
 
--   **Overview**: a summary of alert events across all Sourcegraph services.
--   **Frontend**: the **Search at a glance** section shows search timeouts and errors for end-user
-    requests.
--   Each service dashboard (for example **Git Server**, **Searcher**, and **Zoekt**) shows
-    high-level metrics important to the health of that service, along with its alert events.
+- **Overview**: a summary of alert events across all Sourcegraph services.
+- **Frontend**: the **Search at a glance** section shows search timeouts and errors for end-user
+  requests.
+- Each service dashboard (for example **Git Server**, **Searcher**, and **Zoekt**) shows
+  high-level metrics important to the health of that service, along with its alert events.
 
 ### Collect a Jaeger trace
 
 If you are looking for the trace associated with a specific request,
 
--   [Find the trace ID in the HTTP response in the browser developer tools "Network" tab](#check-browser-network-panel).
--   [Open Jaeger](/self-hosted/observability/tracing#jaeger) and look up the trace ID.
+- [Find the trace ID in the HTTP response in the browser developer tools "Network" tab](#check-browser-network-panel).
+- [Open Jaeger](/self-hosted/observability/tracing#jaeger) and look up the trace ID.
 
 If you do not have a specific request or cannot find the trace ID,
 
--   [Open Jaeger](/self-hosted/observability/tracing#jaeger).
--   Search for a matching span by setting the appropriate fields in the sidebar.
+- [Open Jaeger](/self-hosted/observability/tracing#jaeger).
+- Search for a matching span by setting the appropriate fields in the sidebar.
 
 See [How to use traces](/self-hosted/observability/tracing#how-to-use-traces) for how to request a
 trace for a search query or GraphQL request.
@@ -339,11 +339,11 @@ or use your infrastructure provider's standard log viewing mechanism.
 
 If you are using Kubernetes,
 
--   Retrieve logs with `kubectl logs $POD_ID`.
--   Tail logs with `kubectl logs -f $POD_ID`.
--   If a pod container died, you can access the previous container logs with `kubectl logs -p
+- Retrieve logs with `kubectl logs $POD_ID`.
+- Tail logs with `kubectl logs -f $POD_ID`.
+- If a pod container died, you can access the previous container logs with `kubectl logs -p
 $POD_ID`. This can be useful for diagnosing why a container crashed.
--   You can tail logs for all pods associated with a given deployment: `kubectl logs -f
+- You can tail logs for all pods associated with a given deployment: `kubectl logs -f
 deployment/sourcegraph-frontend --container=frontend --since=10m`
 
 See [Logs](/self-hosted/observability/logs) to change the log level or format.
@@ -359,6 +359,6 @@ report (NOTE: remember to redact any secrets).
 
 The following statistics are useful background context when reporting a performance issue:
 
--   Number of repositories (shown at the top of the **Site admin > Repositories** page, `/admin/repositories`)
--   Size distribution of repositories (e.g., are there one or more large "monorepos" that contain most of the code?)
--   Number of users and usage stats from [Sourcegraph Analytics](/analytics)
+- Number of repositories (shown at the top of the **Site admin > Repositories** page, `/admin/repositories`)
+- Size distribution of repositories (e.g., are there one or more large "monorepos" that contain most of the code?)
+- Number of users and usage stats from [Sourcegraph Analytics](/analytics)

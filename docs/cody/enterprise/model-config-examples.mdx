@@ -6,19 +6,19 @@
 	use the following:
 </p>
 
--   [Minimal configuration](/cody/enterprise/model-configuration#configure-sourcegraph-provided-models)
--   [Using model filters](/cody/enterprise/model-configuration#model-filters)
--   [Change default models](/cody/enterprise/model-configuration#default-models)
+- [Minimal configuration](/cody/enterprise/model-configuration#configure-sourcegraph-provided-models)
+- [Using model filters](/cody/enterprise/model-configuration#model-filters)
+- [Change default models](/cody/enterprise/model-configuration#default-models)
 
 ## Sourcegraph-provided models and BYOK (Bring Your Own Key)
 
 By default, Sourcegraph is fully aware of several models from the following providers:
 
--   "anthropic"
--   "google"
--   "fireworks"
--   "mistral"
--   "openai"
+- "anthropic"
+- "google"
+- "fireworks"
+- "mistral"
+- "openai"
 
 ### Override configuration of a model provider
 
@@ -50,9 +50,9 @@ Instead of Sourcegraph using its own servers to make LLM requests, it is possibl
 
 In the configuration above:
 
--   Enable Sourcegraph-provided models and do not set any overrides (note that `"modelConfiguration.modelOverrides"` is not specified)
--   Route requests for Anthropic models directly to the Anthropic API (via the provider override specified for "anthropic")
--   Route requests for other models (such as the Fireworks model for "autocomplete") through Cody Gateway
+- Enable Sourcegraph-provided models and do not set any overrides (note that `"modelConfiguration.modelOverrides"` is not specified)
+- Route requests for Anthropic models directly to the Anthropic API (via the provider override specified for "anthropic")
+- Route requests for other models (such as the Fireworks model for "autocomplete") through Cody Gateway
 
 ### Partially override provider config in the namespace
 
@@ -100,18 +100,18 @@ Example configuration
 
 In the configuration above, we:
 
--   Enable Sourcegraph-supplied models (the `sourcegraph` field is not empty or `null`)
--   Define a new provider with the ID `"anthropic-byok"` and configure it to use the Anthropic API
--   Since this provider is unknown to Sourcegraph, no Sourcegraph-supplied models are available. Therefore, we add a custom model in the `"modelOverrides"` section
--   Use the custom model configured in the previous step (`"anthropic-byok::2024-10-22::claude-3.5-sonnet"`) for `"chat"`. Requests are sent directly to the Anthropic API as set in the provider override
--   For `"fastChat"` and `"codeCompletion"`, we use Sourcegraph-provided models via Cody Gateway
+- Enable Sourcegraph-supplied models (the `sourcegraph` field is not empty or `null`)
+- Define a new provider with the ID `"anthropic-byok"` and configure it to use the Anthropic API
+- Since this provider is unknown to Sourcegraph, no Sourcegraph-supplied models are available. Therefore, we add a custom model in the `"modelOverrides"` section
+- Use the custom model configured in the previous step (`"anthropic-byok::2024-10-22::claude-3.5-sonnet"`) for `"chat"`. Requests are sent directly to the Anthropic API as set in the provider override
+- For `"fastChat"` and `"codeCompletion"`, we use Sourcegraph-provided models via Cody Gateway
 
 ## Config examples for various LLM providers
 
 Below are configuration examples for setting up various LLM providers using BYOK. These examples are applicable whether or not you are using Sourcegraph-supported models.
 
--   In this section, all configuration examples have Sourcegraph-provided models disabled. Please refer to the previous section to use a combination of Sourcegraph-provided models and BYOK.
--   Ensure that at least one model is available for each Cody feature ("chat" and "autocomplete"), regardless of the provider and model overrides configured. To verify this, [view the configuration](/cody/enterprise/model-configuration#view-configuration) and confirm that appropriate models are listed in the `"defaultModels"` section.
+- In this section, all configuration examples have Sourcegraph-provided models disabled. Please refer to the previous section to use a combination of Sourcegraph-provided models and BYOK.
+- Ensure that at least one model is available for each Cody feature ("chat" and "autocomplete"), regardless of the provider and model overrides configured. To verify this, [view the configuration](/cody/enterprise/model-configuration#view-configuration) and confirm that appropriate models are listed in the `"defaultModels"` section.
 
 <Accordion title="Anthropic">
 
@@ -180,12 +180,12 @@ Below are configuration examples for setting up various LLM providers using BYOK
 
 In the configuration above,
 
--   Set up a provider override for Anthropic, routing requests for this provider directly to the specified Anthropic endpoint (bypassing Cody Gateway)
--   Add three Anthropic models:
-    -   `"anthropic::2024-10-22::claude-3-7-sonnet-latest"` with chat, vision, and tools capabilities
-    -   `"anthropic::2024-10-22::claude-3-7-sonnet-extended-thinking"` with chat and reasoning capabilities (note: to enable [Claude's extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking) model override should include "reasoning" capability and have "reasoningEffort" defined)
-    -   `"anthropic::2024-10-22::claude-3-5-haiku-latest"` with autocomplete, edit, chat, and tools capabilities
--   Set the configured models as default models for Cody features in the `"defaultModels"` field
+- Set up a provider override for Anthropic, routing requests for this provider directly to the specified Anthropic endpoint (bypassing Cody Gateway)
+- Add three Anthropic models:
+  - `"anthropic::2024-10-22::claude-3-7-sonnet-latest"` with chat, vision, and tools capabilities
+  - `"anthropic::2024-10-22::claude-3-7-sonnet-extended-thinking"` with chat and reasoning capabilities (note: to enable [Claude's extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking) model override should include "reasoning" capability and have "reasoningEffort" defined)
+  - `"anthropic::2024-10-22::claude-3-5-haiku-latest"` with autocomplete, edit, chat, and tools capabilities
+- Set the configured models as default models for Cody features in the `"defaultModels"` field
 
 </Accordion>
 
@@ -241,10 +241,10 @@ In the configuration above,
 
 In the configuration above,
 
--   Set up a provider override for Fireworks, routing requests for this provider directly to the specified Fireworks endpoint (bypassing Cody Gateway)
--   Add two Fireworks models:
-    -   `"fireworks::v1::mixtral-8x7b-instruct"` with "chat" capability - used for "chat" and "fastChat"
-    -   `"fireworks::v1::starcoder-16b"` with "autocomplete" capability - used for "codeCompletion"
+- Set up a provider override for Fireworks, routing requests for this provider directly to the specified Fireworks endpoint (bypassing Cody Gateway)
+- Add two Fireworks models:
+  - `"fireworks::v1::mixtral-8x7b-instruct"` with "chat" capability - used for "chat" and "fastChat"
+  - `"fireworks::v1::starcoder-16b"` with "autocomplete" capability - used for "codeCompletion"
 
 </Accordion>
 
@@ -315,11 +315,11 @@ In the configuration above,
 
 In the configuration above,
 
--   Set up a provider override for OpenAI, routing requests for this provider directly to the specified OpenAI endpoint (bypassing Cody Gateway)
--   Add three OpenAI models:
-    -   `"openai::2024-02-01::gpt-4o"` with chat capability - used as a default model for chat
-    -   `"openai::unknown::gpt-4.1-nano"` with chat, edit and autocomplete capabilities - used as a default model for fast chat and autocomplete
-    -   `"openai::unknown::o3"` with chat and reasoning capabilities - o-series model that supports thinking, can be used for chat (note: to enable thinking, model override should include "reasoning" capability and have "reasoningEffort" defined).
+- Set up a provider override for OpenAI, routing requests for this provider directly to the specified OpenAI endpoint (bypassing Cody Gateway)
+- Add three OpenAI models:
+  - `"openai::2024-02-01::gpt-4o"` with chat capability - used as a default model for chat
+  - `"openai::unknown::gpt-4.1-nano"` with chat, edit and autocomplete capabilities - used as a default model for fast chat and autocomplete
+  - `"openai::unknown::o3"` with chat and reasoning capabilities - o-series model that supports thinking, can be used for chat (note: to enable thinking, model override should include "reasoning" capability and have "reasoningEffort" defined).
 
 </Accordion>
 
@@ -405,14 +405,14 @@ In the configuration above,
 
 In the configuration above,
 
--   Set up a provider override for Azure OpenAI, routing requests for this provider directly to the specified Azure OpenAI endpoint (bypassing Cody Gateway).
-    **Note:** For Azure OpenAI, ensure that the `modelName` matches the name defined in your Azure portal configuration for the model.
--   Add four OpenAI models:
-    -   `"azure-openai::unknown::gpt-4o"` with chat capability - used as a default model for chat
-    -   `"azure-openai::unknown::gpt-4.1-nano"` with chat, edit and autocomplete capabilities - used as a default model for fast chat and autocomplete
-    -   `"azure-openai::unknown::o3-mini"` with chat and reasoning capabilities - o-series model that supports thinking, can be used for chat (note: to enable thinking, model override should include "reasoning" capability and have "reasoningEffort" defined)
-    -   `"azure-openai::unknown::gpt-35-turbo-instruct-test"` with "autocomplete" capability - included as an alternative model
--   Since `"azure-openai::unknown::gpt-35-turbo-instruct-test"` is not supported on the newer OpenAI `"v1/chat/completions"` endpoint, we set `"useDeprecatedCompletionsAPI"` to `true` to route requests to the legacy `"v1/completions"` endpoint. This setting is unnecessary if you are using a model supported on the `"v1/chat/completions"` endpoint.
+- Set up a provider override for Azure OpenAI, routing requests for this provider directly to the specified Azure OpenAI endpoint (bypassing Cody Gateway).
+  **Note:** For Azure OpenAI, ensure that the `modelName` matches the name defined in your Azure portal configuration for the model.
+- Add four OpenAI models:
+  - `"azure-openai::unknown::gpt-4o"` with chat capability - used as a default model for chat
+  - `"azure-openai::unknown::gpt-4.1-nano"` with chat, edit and autocomplete capabilities - used as a default model for fast chat and autocomplete
+  - `"azure-openai::unknown::o3-mini"` with chat and reasoning capabilities - o-series model that supports thinking, can be used for chat (note: to enable thinking, model override should include "reasoning" capability and have "reasoningEffort" defined)
+  - `"azure-openai::unknown::gpt-35-turbo-instruct-test"` with "autocomplete" capability - included as an alternative model
+- Since `"azure-openai::unknown::gpt-35-turbo-instruct-test"` is not supported on the newer OpenAI `"v1/chat/completions"` endpoint, we set `"useDeprecatedCompletionsAPI"` to `true` to route requests to the legacy `"v1/completions"` endpoint. This setting is unnecessary if you are using a model supported on the `"v1/chat/completions"` endpoint.
 
 </Accordion>
 
@@ -500,10 +500,10 @@ In the configuration above,
 
 In the configuration above,
 
--   Configure two OpenAI-compatible providers: `"fireworks"` and `"huggingface-codellama"`
--   Add two OpenAI-compatible models: `"fireworks::v1::llama-v3p1-70b-instruct"` and `"huggingface-codellama::v1::CodeLlama-7b-hf"`. Additionally:
-    -   Set `clientSideConfig.openaicompatible` to `{}` to indicate to Cody clients that these models are OpenAI-compatible, ensuring the appropriate code paths are utilized
-    -   Designate these models as the default choices for chat and autocomplete, respectively
+- Configure two OpenAI-compatible providers: `"fireworks"` and `"huggingface-codellama"`
+- Add two OpenAI-compatible models: `"fireworks::v1::llama-v3p1-70b-instruct"` and `"huggingface-codellama::v1::CodeLlama-7b-hf"`. Additionally:
+  - Set `clientSideConfig.openaicompatible` to `{}` to indicate to Cody clients that these models are OpenAI-compatible, ensuring the appropriate code paths are utilized
+  - Designate these models as the default choices for chat and autocomplete, respectively
 
 ## Disabling legacy completions
 
@@ -591,8 +591,8 @@ By default, Cody will only send an `Authorization: Bearer <accessToken>` header 
 
 In the configuration above,
 
--   Set up a provider override for Google Gemini, routing requests for this provider directly to the specified endpoint (bypassing Cody Gateway)
--   Add the `"google::v1::gemini-1.5-pro"` model, which is used for all Cody features. We do not add other models for simplicity, as adding multiple models is already covered in the examples above
+- Set up a provider override for Google Gemini, routing requests for this provider directly to the specified endpoint (bypassing Cody Gateway)
+- Add the `"google::v1::gemini-1.5-pro"` model, which is used for all Cody features. We do not add other models for simplicity, as adding multiple models is already covered in the examples above
 
 </Accordion>
 
@@ -662,12 +662,12 @@ In the configuration above,
 
 In the configuration above,
 
--   Set up a provider override for Google Anthropic, routing requests for this provider directly to the specified endpoint (bypassing Cody Gateway)
--   Add three Anthropic models:
-    -   `"google::unknown::claude-3-7-sonnet"` with chat, vision, and tools capabilities
-    -   `"google::unknown::claude-3-7-sonnet-extended-thinking"` with chat and reasoning capabilities (note: to enable [Claude's extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking) model override should include "reasoning" capability and have "reasoningEffort" defined)
-    -   `"google::unknown::claude-3-5-haiku"` with autocomplete, edit, chat, and tools capabilities
--   Set the configured models as default models for Cody features in the `"defaultModels"` field
+- Set up a provider override for Google Anthropic, routing requests for this provider directly to the specified endpoint (bypassing Cody Gateway)
+- Add three Anthropic models:
+  - `"google::unknown::claude-3-7-sonnet"` with chat, vision, and tools capabilities
+  - `"google::unknown::claude-3-7-sonnet-extended-thinking"` with chat and reasoning capabilities (note: to enable [Claude's extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking) model override should include "reasoning" capability and have "reasoningEffort" defined)
+  - `"google::unknown::claude-3-5-haiku"` with autocomplete, edit, chat, and tools capabilities
+- Set the configured models as default models for Cody features in the `"defaultModels"` field
 
 </Accordion>
 
@@ -723,9 +723,9 @@ In the configuration above,
 
 In the configuration described above,
 
--   Set up a provider override for Amazon Bedrock, routing requests for this provider directly to the specified endpoint, bypassing Cody Gateway
--   Add the `"aws-bedrock::2024-02-29::claude-3-sonnet"` model, which is used for all Cody features. We do not add other models for simplicity, as adding multiple models is already covered in the examples above
--   Since the model in the example uses [Amazon Bedrock provisioned throughput](https://docs.aws.amazon.com/bedrock/latest/userguide/prov-throughput.html), specify the ARN in the `serverSideConfig.arn` field of the model override.
+- Set up a provider override for Amazon Bedrock, routing requests for this provider directly to the specified endpoint, bypassing Cody Gateway
+- Add the `"aws-bedrock::2024-02-29::claude-3-sonnet"` model, which is used for all Cody features. We do not add other models for simplicity, as adding multiple models is already covered in the examples above
+- Since the model in the example uses [Amazon Bedrock provisioned throughput](https://docs.aws.amazon.com/bedrock/latest/userguide/prov-throughput.html), specify the ARN in the `serverSideConfig.arn` field of the model override.
 
 Provider override `serverSideConfig` fields:
 
@@ -840,7 +840,7 @@ This can be helpful to get a feel for the latency of particular models, or model
 
 Few important considerations:
 
--   Debug commands are only available to administrators and have no effect when used by regular users.
--   Sourcegraph's built-in Grafana monitoring also has a full `Completions` dashboard for monitoring LLM requests, performance, etc.
+- Debug commands are only available to administrators and have no effect when used by regular users.
+- Sourcegraph's built-in Grafana monitoring also has a full `Completions` dashboard for monitoring LLM requests, performance, etc.
 
 </Accordion>

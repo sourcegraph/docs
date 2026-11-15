@@ -6,10 +6,10 @@ The Sourcegraph Docker Compose yaml file uses [Docker volumes](https://docs.dock
 
 Guides for managing cloud storage and backups are available in our cloud-specific installation guides:
 
--   [Storage and backups for Amazon Web Services](/self-hosted/deploy/docker-compose/aws#storage-and-backups)
--   [Storage and backups for Azure](/self-hosted/deploy/docker-compose/aws#storage-and-backups)
--   [Storage and backups for Google Cloud](/self-hosted/deploy/docker-compose/google-cloud#storage-and-backups)
--   [Storage and backups for Digital Ocean](/self-hosted/deploy/docker-compose/digitalocean#storage-and-backups)
+- [Storage and backups for Amazon Web Services](/self-hosted/deploy/docker-compose/aws#storage-and-backups)
+- [Storage and backups for Azure](/self-hosted/deploy/docker-compose/aws#storage-and-backups)
+- [Storage and backups for Google Cloud](/self-hosted/deploy/docker-compose/google-cloud#storage-and-backups)
+- [Storage and backups for Digital Ocean](/self-hosted/deploy/docker-compose/digitalocean#storage-and-backups)
 
 ## Access the database
 
@@ -29,8 +29,8 @@ The following instructions are specific to backing up and restoring the Sourcegr
 >
 > These instructions will only back up core data including user accounts, configuration, repository-metadata, etc. Other data will be regenerated automatically:
 >
-> -   Repositories will be re-cloned
-> -   Search indexes will be rebuilt from scratch
+> - Repositories will be re-cloned
+> - Search indexes will be rebuilt from scratch
 >
 > The above may take a while if you have a lot of repositories. In the meantime, searches may be slow or return incomplete results. This process rarely takes longer than 6 hours and is usually **much** faster.
 
@@ -44,53 +44,53 @@ These instructions will back up the primary `sourcegraph` database, the [codeint
 
 3. Verify the deployment is running:
 
-```bash
-docker compose ps --format 'table {{.Name}}\t{{.Status}}'
-NAME                            STATUS
-blobstore                       Up About a minute (healthy)
-caddy                           Up About a minute
-cadvisor                        Up About a minute
-codeinsights-db                 Up About a minute (healthy)
-codeinsights-db-exporter        Up About a minute
-codeintel-db                    Up About a minute (healthy)
-codeintel-db-exporter           Up About a minute
-executor                        Up About a minute
-gitserver-0                     Up About a minute
-grafana                         Up About a minute
-jaeger                          Up About a minute
-node-exporter                   Up About a minute
-otel-collector                  Up About a minute
-pgsql                           Up About a minute (healthy)
-pgsql-exporter                  Up About a minute
-precise-code-intel-worker       Up About a minute (healthy)
-prometheus                      Up About a minute
-redis-cache                     Up About a minute
-redis-store                     Up About a minute
-searcher-0                      Up About a minute (healthy)
-sourcegraph-frontend-0          Up About a minute (healthy)
-sourcegraph-frontend-internal   Up About a minute (healthy)
-syntactic-code-intel-worker     Up About a minute (healthy)
-syntect-server                  Up About a minute (healthy)
-worker                          Up About a minute
-zoekt-indexserver-0             Up About a minute
-zoekt-webserver-0               Up About a minute (healthy)
-```
+   ```bash
+   docker compose ps --format 'table {{.Name}}\t{{.Status}}'
+   NAME                            STATUS
+   blobstore                       Up About a minute (healthy)
+   caddy                           Up About a minute
+   cadvisor                        Up About a minute
+   codeinsights-db                 Up About a minute (healthy)
+   codeinsights-db-exporter        Up About a minute
+   codeintel-db                    Up About a minute (healthy)
+   codeintel-db-exporter           Up About a minute
+   executor                        Up About a minute
+   gitserver-0                     Up About a minute
+   grafana                         Up About a minute
+   jaeger                          Up About a minute
+   node-exporter                   Up About a minute
+   otel-collector                  Up About a minute
+   pgsql                           Up About a minute (healthy)
+   pgsql-exporter                  Up About a minute
+   precise-code-intel-worker       Up About a minute (healthy)
+   prometheus                      Up About a minute
+   redis-cache                     Up About a minute
+   redis-store                     Up About a minute
+   searcher-0                      Up About a minute (healthy)
+   sourcegraph-frontend-0          Up About a minute (healthy)
+   sourcegraph-frontend-internal   Up About a minute (healthy)
+   syntactic-code-intel-worker     Up About a minute (healthy)
+   syntect-server                  Up About a minute (healthy)
+   worker                          Up About a minute
+   zoekt-indexserver-0             Up About a minute
+   zoekt-webserver-0               Up About a minute (healthy)
+   ```
 
 4. Generate the database dumps
 
-```bash
-docker exec pgsql \
-    pg_dump -C --clean --if-exists --username sg sg \
-    > sourcegraph_db.out
+   ```bash
+   docker exec pgsql \
+       pg_dump -C --clean --if-exists --username sg sg \
+       > sourcegraph_db.out
 
-docker exec codeintel-db \
-    pg_dump -C --clean --if-exists --username sg sg \
-    > codeintel_db.out
+   docker exec codeintel-db \
+       pg_dump -C --clean --if-exists --username sg sg \
+       > codeintel_db.out
 
-docker exec codeinsights-db \
-    pg_dump -C --clean --if-exists --username postgres postgres \
-    > codeinsights_db.out
-```
+   docker exec codeinsights-db \
+       pg_dump -C --clean --if-exists --username postgres postgres \
+       > codeinsights_db.out
+   ```
 
 5. Ensure the `sourcegraph_db.out`, `codeintel_db.out` and `codeinsights_db.out` files are moved to a safe and secure location.
 
@@ -104,63 +104,63 @@ If you started Sourcegraph with more Compose files, such as `jaeger/docker-compo
 
 2. If you are restoring into an existing deployment, stop it, so nothing writes to the databases during the restore
 
-```bash
-docker compose down
-```
+   ```bash
+   docker compose down
+   ```
 
 3. Start the database services
 
-```bash
-docker compose -f db-only-migrate.docker-compose.yaml up -d
-```
+   ```bash
+   docker compose -f db-only-migrate.docker-compose.yaml up -d
+   ```
 
 4. Copy the database files into the containers
 
-```bash
-docker cp sourcegraph_db.out pgsql:/data/sourcegraph_db.out
-docker cp codeintel_db.out codeintel-db:/data/codeintel_db.out
-docker cp codeinsights_db.out \
-    codeinsights-db:/var/lib/postgresql/data/codeinsights_db.out
-```
+   ```bash
+   docker cp sourcegraph_db.out pgsql:/data/sourcegraph_db.out
+   docker cp codeintel_db.out codeintel-db:/data/codeintel_db.out
+   docker cp codeinsights_db.out \
+       codeinsights-db:/var/lib/postgresql/data/codeinsights_db.out
+   ```
 
-The database containers have a read-only root filesystem, so copy the files into the database volumes. Step 6 deletes them after the restore.
+   The database containers have a read-only root filesystem, so copy the files into the database volumes. Step 6 deletes them after the restore.
 
 5. Restore the databases
 
-```bash
-docker exec pgsql \
-    psql -v ON_ERROR_STOP=1 --username sg \
-    -f /data/sourcegraph_db.out postgres
+   ```bash
+   docker exec pgsql \
+       psql -v ON_ERROR_STOP=1 --username sg \
+       -f /data/sourcegraph_db.out postgres
 
-docker exec codeintel-db \
-    psql -v ON_ERROR_STOP=1 --username sg \
-    -f /data/codeintel_db.out postgres
+   docker exec codeintel-db \
+       psql -v ON_ERROR_STOP=1 --username sg \
+       -f /data/codeintel_db.out postgres
 
-docker exec codeinsights-db \
-    psql -v ON_ERROR_STOP=1 --username postgres \
-    -f /var/lib/postgresql/data/codeinsights_db.out template1
-```
+   docker exec codeinsights-db \
+       psql -v ON_ERROR_STOP=1 --username postgres \
+       -f /var/lib/postgresql/data/codeinsights_db.out template1
+   ```
 
 6. After all three restores succeed, delete the backup files from the containers
 
-```bash
-docker exec pgsql rm /data/sourcegraph_db.out
-docker exec codeintel-db rm /data/codeintel_db.out
-docker exec codeinsights-db \
-    rm /var/lib/postgresql/data/codeinsights_db.out
-```
+   ```bash
+   docker exec pgsql rm /data/sourcegraph_db.out
+   docker exec codeintel-db rm /data/codeintel_db.out
+   docker exec codeinsights-db \
+       rm /var/lib/postgresql/data/codeinsights_db.out
+   ```
 
 7. Start the remaining Sourcegraph services
 
-```bash
-docker compose up -d --remove-orphans
-```
+   ```bash
+   docker compose up -d --remove-orphans
+   ```
 
 8. Verify the deployment has started
 
-```bash
-docker compose ps
-```
+   ```bash
+   docker compose ps
+   ```
 
 9. Browse to your Sourcegraph deployment, login and verify your existing configuration has been restored
 
@@ -168,6 +168,6 @@ docker compose ps
 
 You can monitor the health of a deployment in several ways:
 
--   Using [Sourcegraph's built-in observability suite](/self-hosted/observability/), which includes dashboards and alerting for Sourcegraph services.
--   Using [`docker ps`](https://docs.docker.com/engine/reference/commandline/ps/) to check on the status of containers within the deployment (any tooling designed to work with Docker containers and/or Docker Compose will work too).
-    -   This requires direct access to your instance's host machine.
+- Using [Sourcegraph's built-in observability suite](/self-hosted/observability/), which includes dashboards and alerting for Sourcegraph services.
+- Using [`docker ps`](https://docs.docker.com/engine/reference/commandline/ps/) to check on the status of containers within the deployment (any tooling designed to work with Docker containers and/or Docker Compose will work too).
+  - This requires direct access to your instance's host machine.

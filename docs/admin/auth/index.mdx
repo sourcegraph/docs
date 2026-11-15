@@ -22,17 +22,17 @@ For that, various authentication providers can be configured. Multiple options c
 
 The following methods are supported for sign up and sign in:
 
--   [Builtin password authentication](/admin/auth/builtin)
--   [GitHub OAuth](#github)
--   [GitLab OAuth](#gitlab)
--   [Bitbucket Cloud OAuth](#bitbucket-cloud)
--   [Bitbucket Server OAuth](#bitbucket-server)
--   [Gerrit](#gerrit) (Beta)
--   [SAML](/admin/auth/saml)
--   [OpenID Connect](#openid-connect)
-    -   [Google Workspace (Google accounts)](#google-workspace-google-accounts)
--   [HTTP authentication proxies](#http-authentication-proxies)
-    -   [Username header prefixes](#username-header-prefixes)
+- [Builtin password authentication](/admin/auth/builtin)
+- [GitHub OAuth](#github)
+- [GitLab OAuth](#gitlab)
+- [Bitbucket Cloud OAuth](#bitbucket-cloud)
+- [Bitbucket Server OAuth](#bitbucket-server)
+- [Gerrit](#gerrit) (Beta)
+- [SAML](/admin/auth/saml)
+- [OpenID Connect](#openid-connect)
+  - [Google Workspace (Google accounts)](#google-workspace-google-accounts)
+- [HTTP authentication proxies](#http-authentication-proxies)
+  - [Username header prefixes](#username-header-prefixes)
 
 The authentication providers are configured in the [`auth.providers`](/admin/config/site-config#authentication-providers) advanced configuration option.
 
@@ -49,25 +49,25 @@ To configure the presentation of the login form, see the [login form configurati
 If you are unsure which auth provider is right for you, we recommend applying the following rules in
 order:
 
--   If you have no external identity providers (i.e., not SSO) or are just trying to spin Sourcegraph
-    up as quickly as possible to try, use [`builtin`](#builtin-password-authentication) authentication. You can
-    always change the auth configuration later, and user identities from external providers will be
-    linked automatically to existing Sourcegraph accounts using verified email addresses.
--   If you are deploying Sourcegraph behind a HTTP authentication proxy service, use the
-    [`http-header`](#http-authentication-proxies) provider type. The proxy service should handle
-    authentication and session management and, in turn, set a HTTP header that indicates the user
-    identity to Sourcegraph.
--   If you are configuring Sourcegraph to index a GitHub or GitLab instance, we recommend using the
-    OAuth provider for that code host. This applies even if the code host itself uses an external
-    identity provider (e.g., SAML, OpenID Connect, LDAP, etc.). Sourcegraph will redirect to your code
-    host on sign-in and the code host will perform the required sign-in flow before redirecting to
-    Sourcegraph on success.
--   If you are using an identity provider that supports SAML, use the [SAML auth provider](/admin/auth/saml).
--   If you are using an identity provider that supports OpenID Connect (including Google accounts),
-    use the [OpenID Connect provider](#openid-connect).
--   If you wish to use LDAP and cannot use the GitHub/GitLab OAuth provider as described above, or if
-    you wish to use another authentication mechanism that is not yet supported, please [contact
-    us](https://sourcegraph.com/contact)
+- If you have no external identity providers (i.e., not SSO) or are just trying to spin Sourcegraph
+  up as quickly as possible to try, use [`builtin`](#builtin-password-authentication) authentication. You can
+  always change the auth configuration later, and user identities from external providers will be
+  linked automatically to existing Sourcegraph accounts using verified email addresses.
+- If you are deploying Sourcegraph behind a HTTP authentication proxy service, use the
+  [`http-header`](#http-authentication-proxies) provider type. The proxy service should handle
+  authentication and session management and, in turn, set a HTTP header that indicates the user
+  identity to Sourcegraph.
+- If you are configuring Sourcegraph to index a GitHub or GitLab instance, we recommend using the
+  OAuth provider for that code host. This applies even if the code host itself uses an external
+  identity provider (e.g., SAML, OpenID Connect, LDAP, etc.). Sourcegraph will redirect to your code
+  host on sign-in and the code host will perform the required sign-in flow before redirecting to
+  Sourcegraph on success.
+- If you are using an identity provider that supports SAML, use the [SAML auth provider](/admin/auth/saml).
+- If you are using an identity provider that supports OpenID Connect (including Google accounts),
+  use the [OpenID Connect provider](#openid-connect).
+- If you wish to use LDAP and cannot use the GitHub/GitLab OAuth provider as described above, or if
+  you wish to use another authentication mechanism that is not yet supported, please [contact
+  us](https://sourcegraph.com/contact)
 
 Most users will use only one auth provider, but you can use multiple auth providers if desired to
 enable sign-in via multiple services. Identities from different providers will be mapped to a
@@ -83,8 +83,8 @@ application](https://developer.github.com/apps/building-oauth-apps/creating-an-o
 GitHub Enterprise, create one on your instance, not GitHub.com). Set the following values, replacing
 `sourcegraph.example.com` with the IP or hostname of your Sourcegraph instance:
 
--   Homepage URL: `https://sourcegraph.example.com`
--   Authorization callback URL: `https://sourcegraph.example.com/.auth/github/callback`
+- Homepage URL: `https://sourcegraph.example.com`
+- Authorization callback URL: `https://sourcegraph.example.com/.auth/github/callback`
 
 > NOTE: If you want to enable repository permissions, you should grant your OAuth app permission to
 > your GitHub organization(s). You can do that either by creating the OAuth app under your GitHub
@@ -188,8 +188,8 @@ Requires that users have SAML SSO authorization for specific GitHub organization
 
 This setting accepts one of two values:
 
--   A list of **GitHub organization IDs** (numeric strings), not organization names.
--   A list with a single entry: ["all"], which means **all** organizations need to be authorized.
+- A list of **GitHub organization IDs** (numeric strings), not organization names.
+- A list with a single entry: ["all"], which means **all** organizations need to be authorized.
 
 **Finding your GitHub organization ID:**
 
@@ -221,8 +221,8 @@ The response will include an `id` field with your organization's numeric ID.
 [Create a GitLab OAuth application](https://docs.gitlab.com/ee/integration/oauth_provider.html). Set the following values, replacing `sourcegraph.example.com` with the IP or hostname of your
 Sourcegraph instance:
 
--   Authorization callback URL: `https://sourcegraph.example.com/.auth/gitlab/callback`
--   Scopes: `read_user`, `api`
+- Authorization callback URL: `https://sourcegraph.example.com/.auth/gitlab/callback`
+- Scopes: `read_user`, `api`
 
 Write access is required for Batch Changes.
 
@@ -329,10 +329,10 @@ If your organization has a lot of internal repositories that should be accessibl
 [Create a Bitbucket Cloud OAuth consumer](https://support.atlassian.com/bitbucket-cloud/docs/use-oauth-on-bitbucket-cloud/). Set the following values, replacing `sourcegraph.example.com` with the IP or hostname of your
 Sourcegraph instance:
 
--   Callback URL: `https://sourcegraph.example.com/.auth/bitbucketcloud/callback`
--   Permissions:
-    -   `Account`: `Read`
-    -   `Repositories`: `Read` (more information in [repository permissions section](/admin/permissions))
+- Callback URL: `https://sourcegraph.example.com/.auth/bitbucketcloud/callback`
+- Permissions:
+  - `Account`: `Read`
+  - `Repositories`: `Read` (more information in [repository permissions section](/admin/permissions))
 
 After the consumer is created, you will need the `Key` and the `Secret`, which can be found by expanding OAuth consumer in the list.
 Then add the following lines to your [advanced configuration](/admin/config/site-config):
@@ -358,9 +358,9 @@ Replace the `clientKey` and `clientSecret` values with the values from your Bitb
 [Configure a Bitbucket Server incoming link](https://confluence.atlassian.com/bitbucketserver0720/configure-an-incoming-link-1116282013.html). Set the following values, replacing `sourcegraph.example.com` with the IP or hostname of your
 Sourcegraph instance:
 
--   Redirect URL: `https://sourcegraph.example.com/.auth/bitbucketserver/callback`
--   Permissions:
-    -   `Repositories`: `Read` (more information in [repository permissions section](/admin/permissions))
+- Redirect URL: `https://sourcegraph.example.com/.auth/bitbucketserver/callback`
+- Permissions:
+  - `Repositories`: `Read` (more information in [repository permissions section](/admin/permissions))
 
 After the link is created, you will need to copy the `Client ID` and the `Client Secret`.
 Then add the following lines to your [advanced configuration](/admin/config/site-config):
@@ -407,25 +407,25 @@ Users can then add Gerrit credentials by visiting their **Settings** > **Account
 
 The [`openidconnect` auth provider](/admin/config/site-config#openid-connect-including-google-workspace) authenticates users via OpenID Connect, which is supported by many external services, including:
 
--   [Google Workspace (Google accounts)](#google-workspace-google-accounts)
--   [Okta](https://developer.okta.com/docs/api/resources/oidc.html)
--   [Ping Identity](https://www.pingidentity.com/en/resources/client-library/articles/openid-connect.html)
--   [Auth0](https://auth0.com/docs/protocols/oidc)
--   [Salesforce Identity](https://developer.salesforce.com/page/Inside_OpenID_Connect_on_Force.com)
--   [Microsoft Entra ID (Azure Active Directory)](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-protocols-openid-connect-code)
--   [Google Identity Platform](https://developers.google.com/identity/)
+- [Google Workspace (Google accounts)](#google-workspace-google-accounts)
+- [Okta](https://developer.okta.com/docs/api/resources/oidc.html)
+- [Ping Identity](https://www.pingidentity.com/en/resources/client-library/articles/openid-connect.html)
+- [Auth0](https://auth0.com/docs/authenticate/protocols/openid-connect-protocol)
+- [Salesforce Identity](https://developer.salesforce.com/page/Inside_OpenID_Connect_on_Force.com)
+- [Microsoft Entra ID (Azure Active Directory)](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-protocols-openid-connect-code)
+- [Google Identity Platform](https://developers.google.com/identity/)
 If the OpenID Connect provider requires specifying scopes, the following scopes are required:
 
--   `openid`
--   `email`
--   `profile`
+- `openid`
+- `email`
+- `profile`
 
 To configure Sourcegraph to authenticate users via OpenID Connect:
 
 1. Create a new OpenID Connect client in the external service (such as one of those listed above).
-    - **Redirect/callback URI:** `https://sourcegraph.example.com/.auth/callback` (replace `https://sourcegraph.example.com` with the value of the `externalURL` property in your config)
-1. Provide the OpenID Connect client's issuer, client ID, and client secret in the Sourcegraph advanced configuration shown below.
-1. (Optional) Require users to have a specific email domain name to authenticate (e.g., to limit users to only those from your organization).
+   - **Redirect/callback URI:** `https://sourcegraph.example.com/.auth/callback` (replace `https://sourcegraph.example.com` with the value of the `externalURL` property in your config)
+2. Provide the OpenID Connect client's issuer, client ID, and client secret in the Sourcegraph advanced configuration shown below.
+3. (Optional) Require users to have a specific email domain name to authenticate (e.g., to limit users to only those from your organization).
 
 Example [`openidconnect` auth provider](/admin/config/site-config#openid-connect-including-google-workspace) configuration:
 
@@ -471,12 +471,12 @@ When `false`, sign-up won't be available and an administrator should create new 
 Google's Workspace (formerly known as G Suite) supports OpenID Connect, which is the best way to enable Sourcegraph authentication using Google accounts. To set it up:
 
 1. Create an **OAuth client ID** and client secret in the [Google API credentials console](https://console.developers.google.com/apis/credentials). [Google's interactive OpenID Connect documentation page](https://developers.google.com/identity/protocols/OpenIDConnect#getcredentials):
-    - **Application type:** Web application
-    - **Name:** Sourcegraph (or any other name your users will recognize)
-    - **Authorized JavaScript origins:** (leave blank)
-    - **Authorized redirect URIs:** `https://sourcegraph.example.com/.auth/callback` (replace `https://sourcegraph.example.com` with the value of the `externalURL` property in your config)
-1. Use the **client ID** and **client secret** values in Sourcegraph advanced configuration (as shown in the example below).
-1. Set your Google Workspace domain in `requireEmailDomain` to prevent users outside your organization from signing in.
+   - **Application type:** Web application
+   - **Name:** Sourcegraph (or any other name your users will recognize)
+   - **Authorized JavaScript origins:** (leave blank)
+   - **Authorized redirect URIs:** `https://sourcegraph.example.com/.auth/callback` (replace `https://sourcegraph.example.com` with the value of the `externalURL` property in your config)
+2. Use the **client ID** and **client secret** values in Sourcegraph advanced configuration (as shown in the example below).
+3. Set your Google Workspace domain in `requireEmailDomain` to prevent users outside your organization from signing in.
 
 Example [`openidconnect` auth provider](/admin/config/site-config#openid-connect-including-google-workspace) configuration for Google Workspace:
 
@@ -562,12 +562,12 @@ At the time of signing in with the new account, any of the email addresses confi
 
 Usernames provided from external authentication providers are normalized in Sourcegraph according to the following rules:
 
--   Any characters not in `[a-zA-Z0-9-._]` are replaced with `-`
--   Usernames with exactly one `@` character are interpreted as an email address, so the username will be extracted by truncating at the `@` character.
--   Usernames with two or more `@` characters are not considered an email address, so the `@` will be treated as a non-standard character and be replaced with `-`
--   Usernames with consecutive `-` or `.` characters are not allowed, so they are replaced with a single `-` or `.`
--   Usernames that start with `.` or `-` are not allowed, starting periods and dashes are removed
--   Usernames that end with `.` are not allowed, ending periods are removed
+- Any characters not in `[a-zA-Z0-9-._]` are replaced with `-`
+- Usernames with exactly one `@` character are interpreted as an email address, so the username will be extracted by truncating at the `@` character.
+- Usernames with two or more `@` characters are not considered an email address, so the `@` will be treated as a non-standard character and be replaced with `-`
+- Usernames with consecutive `-` or `.` characters are not allowed, so they are replaced with a single `-` or `.`
+- Usernames that start with `.` or `-` are not allowed, starting periods and dashes are removed
+- Usernames that end with `.` are not allowed, ending periods are removed
 
 Usernames from authentication providers are normalized before being used in Sourcegraph. Usernames chosen by users are rejected if they do not meet these criteria.
 

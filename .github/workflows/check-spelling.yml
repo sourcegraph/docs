@@ -7,49 +7,49 @@ name: Spell check
 # never fails the PR.
 
 on:
-    pull_request:
-        # `edited` fires when the title or description changes
-        types: [opened, synchronize, reopened, edited]
+  pull_request:
+    # `edited` fires when the title or description changes
+    types: [opened, synchronize, reopened, edited]
 
 # A new push supersedes the run for the previous one
 concurrency:
-    group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
-    cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 permissions:
-    contents: read
-    pull-requests: write
+  contents: read
+  pull-requests: write
 
 jobs:
-    spellcheck:
-        name: Spelling errors introduced by this PR (advisory)
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-              with:
-                  fetch-depth: 0
+  spellcheck:
+    name: Spelling errors introduced by this PR (advisory)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
 
-            # Node 24 is pre-cached on ubuntu-latest, avoiding the download
-            # incurred by node-version: latest.
-            - name: Set up Node.js
-              uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-              with:
-                  node-version: 24
+      # Node 24 is pre-cached on ubuntu-latest, avoiding the download
+      # incurred by node-version: latest.
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
 
-            # Install only CSpell instead of the site's full dependency tree.
-            - name: Install CSpell
-              run: npm install --global cspell@10
+      # Install only CSpell instead of the site's full dependency tree.
+      - name: Install CSpell
+        run: npm install --global cspell@10
 
-            - name: Write the pull request title and description to a file
-              # They come in through env, never inline in the script, so a
-              # crafted pull request cannot inject shell commands
-              env:
-                  PR_TITLE: ${{ github.event.pull_request.title }}
-                  PR_BODY: ${{ github.event.pull_request.body }}
-              run: printf '%s\n\n%s\n' "$PR_TITLE" "$PR_BODY" > "$RUNNER_TEMP/pull-request.md"
+      - name: Write the pull request title and description to a file
+        # They come in through env, never inline in the script, so a
+        # crafted pull request cannot inject shell commands
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: printf '%s\n\n%s\n' "$PR_TITLE" "$PR_BODY" > "$RUNNER_TEMP/pull-request.md"
 
-            - uses: ./.github/actions/pr-check
-              with:
-                  script: dev/check-spelling.mjs
-                  name: check-spelling
-                  head-only-arguments: --pull-request ${{ runner.temp }}/pull-request.md
+      - uses: ./.github/actions/pr-check
+        with:
+          script: dev/check-spelling.mjs
+          name: check-spelling
+          head-only-arguments: --pull-request ${{ runner.temp }}/pull-request.md

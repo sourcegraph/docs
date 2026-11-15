@@ -65,35 +65,35 @@ To configure:
 To set up user provisioning in [Okta](https://help.okta.com/en-us/Content/Topics/Apps/Apps_App_Integration_Wizard_SCIM.htm), you must first set up a new app integration of the "SAML 2.0" type, then configure it to use SCIM. Here are the steps to do this:
 
 <Callout type="note">
-  Please note: Okta offers two different provisioning configuration UIs depending on the
-  integration type: **SCIM Connection** (used with standard integrations) and
-  **Connector Configuration** (used with custom connectors via the Okta
-  provisioning agent). The steps below apply to both, but the way the
-  `Authorization` header is entered differs slightly:
+Please note: Okta offers two different provisioning configuration UIs depending on the
+integration type: **SCIM Connection** (used with standard integrations) and
+**Connector Configuration** (used with custom connectors via the Okta
+provisioning agent). The steps below apply to both, but the way the
+`Authorization` header is entered differs slightly:
 
-  - In the **SCIM Connection** UI, there is a dedicated `Bearer` prefix field
-    alongside the token input — enter only the raw token in the token field.
-  - In the **Connector Configuration** UI, there is a single text field for the
-    full header value — you must enter the full string `Bearer {your token}`
-    (including the `Bearer ` prefix) in that field.
+- In the **SCIM Connection** UI, there is a dedicated `Bearer` prefix field
+  alongside the token input — enter only the raw token in the token field.
+- In the **Connector Configuration** UI, there is a single text field for the
+  full header value — you must enter the full string `Bearer {your token}`
+  (including the `Bearer ` prefix) in that field.
 
-  In both cases, the Sourcegraph SCIM server requires the `Authorization` header
-  to be in the format `Bearer {your token}`. Omitting the `Bearer ` prefix will
-  result in a `401 Unauthorized` error.
+In both cases, the Sourcegraph SCIM server requires the `Authorization` header
+to be in the format `Bearer {your token}`. Omitting the `Bearer ` prefix will
+result in a `401 Unauthorized` error.
 </Callout>
 
 1. Follow our [SAML guide](/admin/auth/saml/okta) to set up a new app integration with SAML, then open the integration you just created.
-    - If you already have the integration, just open your existing app integration.
-1. Go to the "General" tab and click "Edit" in the "App Settings" section.
-1. Set "Provisioning" to "SCIM". This creates a new tab called "Provisioning".
-1. Go to the "Provisioning" tab, and click "Edit"
-1. Set "SCIM connector base URL" to `{yourSourcegraphUrl}/.api/scim/v2/`
-1. Set "Unique identifier field for users" to `userName`
-1. Check the first three items in `Supported provisioning actions`: "Import New Users and Profile Updates", "Push New Users", and "Push Profile Updates".
-1. Set "Authentication mode" to "HTTP Header"
-1. Under "HTTP Header", paste the same alphanumeric bearer token you used in your advanced configuration.
-1. Click "Test Connection Configuration" (first four items should be green—the user-related ones), then "Save".
-1. Switch to "Provisioning" → "To App" and click "Edit". Enable "Create Users", "Update User Attributes" and "Deactivate Users".
+   - If you already have the integration, just open your existing app integration.
+2. Go to the "General" tab and click "Edit" in the "App Settings" section.
+3. Set "Provisioning" to "SCIM". This creates a new tab called "Provisioning".
+4. Go to the "Provisioning" tab, and click "Edit"
+5. Set "SCIM connector base URL" to `{yourSourcegraphUrl}/.api/scim/v2/`
+6. Set "Unique identifier field for users" to `userName`
+7. Check the first three items in `Supported provisioning actions`: "Import New Users and Profile Updates", "Push New Users", and "Push Profile Updates".
+8. Set "Authentication mode" to "HTTP Header"
+9. Under "HTTP Header", paste the same alphanumeric bearer token you used in your advanced configuration.
+10. Click "Test Connection Configuration" (first four items should be green—the user-related ones), then "Save".
+11. Switch to "Provisioning" → "To App" and click "Edit". Enable "Create Users", "Update User Attributes" and "Deactivate Users".
 
 > NOTE: You can also use our [SAML](/admin/auth/saml/okta) and [OpenID Connect](/admin/auth#openid-connect) integrations with Okta.
 
@@ -105,33 +105,33 @@ The User endpoint only synchronizes attributes needed to create a Sourcegraph ac
 
 We sync the following attributes:
 
--   preferred username
--   name
--   email addresses
+- preferred username
+- name
+- email addresses
 
 ### REST methods
 
 We support REST API calls for:
 
--   Creating users (POST)
--   Updating users (PATCH)
--   Replacing users (PUT)
--   Deleting users (DELETE)
--   Listing users (GET)
--   Getting users (GET)
+- Creating users (POST)
+- Updating users (PATCH)
+- Replacing users (PUT)
+- Deleting users (DELETE)
+- Listing users (GET)
+- Getting users (GET)
 
 ### Feature support
 
 We support the following SCIM 2.0 features:
 
--   ✅ Updating users (PATCH)
--   ✅ Pagination for listing users
--   ✅ Filtering for listing users
+- ✅ Updating users (PATCH)
+- ✅ Pagination for listing users
+- ✅ Filtering for listing users
 
 ### Limitations
 
--   ❌ Bulk operations – need to add users one by one
--   ❌ Sorting – when listing users
--   ❌ Entity tags (ETags)
--   ❌ Multi-tenancy – you can only have 1 SCIM client configured at a time.
--   ❌ Tests with many IdPs – we’ve only validated the endpoint with Okta and Microsoft Entra ID.
+- ❌ Bulk operations – need to add users one by one
+- ❌ Sorting – when listing users
+- ❌ Entity tags (ETags)
+- ❌ Multi-tenancy – you can only have 1 SCIM client configured at a time.
+- ❌ Tests with many IdPs – we’ve only validated the endpoint with Okta and Microsoft Entra ID.
