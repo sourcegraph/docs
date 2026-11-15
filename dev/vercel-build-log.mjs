@@ -64,6 +64,8 @@ const PREVIEW_LINKS_WAIT_MINUTES = 1;
 const PREVIEW_LINKS_POLL_SECONDS = 10;
 // What the cells of a Slack table block can hold in all
 const SLACK_TABLE_CHARACTERS = 10_000;
+// What Slack posts as one message: it splits longer text at line breaks
+const SLACK_TEXT_CHARACTERS = 4_000;
 
 const API_URL = process.env.GITHUB_API_URL ?? 'https://api.github.com';
 const REPOSITORY = process.env.GITHUB_REPOSITORY;
@@ -565,7 +567,9 @@ async function changedPageRowsOf(pulls) {
 }
 
 // The message a file is shared with: the PR link, and the changed pages as
-// a table block, or as lines of text when they are not one table Slack takes
+// a table block, or as lines of text when they are not one table Slack takes.
+// Slack splits text over SLACK_TEXT_CHARACTERS into messages that each carry
+// the file again, so the lines past that are counted in a last line
 function fileMessage(pulls, error, changedPages) {
 	const text = [
 		error && `> ${error}`,
@@ -575,11 +579,20 @@ function fileMessage(pulls, error, changedPages) {
 		.join('\n');
 	const table = slackTable(changedPages);
 	if (!table) {
-		return {
-			initial_comment: [text, ...changedPages.map(slackTextRow)].join(
-				'\n'
-			)
-		};
+		const lines = changedPages.map(slackTextRow);
+		let shown = lines.length;
+		const comment = () =>
+			[
+				text,
+				...lines.slice(0, shown),
+				...(shown < lines.length
+					? [`…and ${lines.length - shown} more in the PR comments`]
+					: [])
+			].join('\n');
+		while (comment().length > SLACK_TEXT_CHARACTERS) {
+			shown--;
+		}
+		return {initial_comment: comment()};
 	}
 	return {
 		blocks: JSON.stringify([
