@@ -13975,6 +13975,54 @@ redis_up{app="redis-store"}
 
 <br />
 
+#### redis: redis-store_oom_rejected_commands
+
+<p class="subtitle">Redis-store commands rejected because it is out of memory</p>
+
+redis-store uses the noeviction policy, so once it reaches maxmemory every command that would use more memory fails with an OOM error.
+
+Refer to the [alerts reference](/self-hosted/observability/alerts#redis-redis-store_oom_rejected_commands) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/redis/redis?viewPanel=100010` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(redis_errors_total{app="redis-store",err="OOM"}[5m]))
+```
+</details>
+
+<br />
+
+#### redis: redis-store_memory_used_percentage
+
+<p class="subtitle">Redis-store memory used, as a percentage of maxmemory</p>
+
+redis-store does not evict keys, so its memory only shrinks when keys expire or are deleted. Instances without a maxmemory setting show no data.
+
+Refer to the [alerts reference](/self-hosted/observability/alerts#redis-redis-store_memory_used_percentage) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/redis/redis?viewPanel=100011` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max(redis_memory_used_bytes{app="redis-store"} / (redis_memory_max_bytes{app="redis-store"} > 0)) * 100
+```
+</details>
+
+<br />
+
 ### Redis: Redis Cache
 
 #### redis: redis-cache_up
@@ -16211,6 +16259,9 @@ max(rate(src_repoupdater_sched_manual_fetch[1m]))
 
 <p class="subtitle">Scheduler loops</p>
 
+The update scheduler runs every 30 seconds, whether or not any code hosts are configured.
+When it stops, no repository is scheduled for fetching, so every repository goes stale.
+
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-sched_loops) for 1 alert related to this panel.
 
 To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101350` on your Sourcegraph instance.
@@ -16231,7 +16282,11 @@ max(rate(src_repoupdater_sched_loops[1m]))
 
 #### worker: src_repoupdater_stale_repos
 
-<p class="subtitle">Repos that haven't been fetched in more than 8 hours</p>
+<p class="subtitle">Repos without a fetch attempt in more than 12 hours</p>
+
+The scheduler attempts to fetch every repository at least every 8 hours, including repositories whose fetches fail.
+Repositories without an attempt in 12 hours are not being scheduled or fetched at all.
+This is always 0 when automatic git updates are disabled.
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-src_repoupdater_stale_repos) for 1 alert related to this panel.
 
