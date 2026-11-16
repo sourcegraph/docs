@@ -2691,6 +2691,71 @@ Generated query for critical alert: `min((redis_up{app="redis-store"}) &lt; 1)`
 
 <br />
 
+## redis: redis-store_oom_rejected_commands
+
+<p class="subtitle">redis-store commands rejected because it is out of memory</p>
+
+**Descriptions**
+
+- <span class="badge badge-critical">critical</span> redis: 0reqps+ redis-store commands rejected because it is out of memory for 5m0s
+
+**Next steps**
+
+- redis-store reached its `maxmemory` and rejects writes, because it does not evict keys. Sessions, locks, and background jobs that write to it fail until memory is freed.
+- Increase the redis-store memory limit, which raises `maxmemory`, to recover.
+- Find what fills redis-store with `redis-cli --bigkeys` or `MEMORY USAGE &lt;key&gt;` in the redis-store container.
+- More help interpreting this metric is available in the [dashboards reference](/self-hosted/observability/dashboards#redis-redis-store_oom_rejected_commands).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "critical_redis_redis-store_oom_rejected_commands"
+]
+```
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for critical alert: `max((sum(rate(redis_errors_total{app="redis-store",err="OOM"}[5m]))) &gt; 0)`
+
+</details>
+
+<br />
+
+## redis: redis-store_memory_used_percentage
+
+<p class="subtitle">redis-store memory used, as a percentage of maxmemory</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> redis: 90%+ redis-store memory used, as a percentage of maxmemory for 15m0s
+
+**Next steps**
+
+- redis-store rejects writes once it reaches `maxmemory`. Increase the redis-store memory limit, which raises `maxmemory`, before it does.
+- Find what fills redis-store with `redis-cli --bigkeys` or `MEMORY USAGE &lt;key&gt;` in the redis-store container.
+- More help interpreting this metric is available in the [dashboards reference](/self-hosted/observability/dashboards#redis-redis-store_memory_used_percentage).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_redis_redis-store_memory_used_percentage"
+]
+```
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((max(redis_memory_used_bytes{app="redis-store"\} / (redis_memory_max_bytes\{app="redis-store"} &gt; 0)) * 100) &gt;= 90)`
+
+</details>
+
+<br />
+
 ## redis: redis-cache_up
 
 <p class="subtitle">redis-cache availability</p>
@@ -3600,17 +3665,18 @@ Generated query for warning alert: `min((max(rate(src_repoupdater_sched_auto_fet
 
 **Descriptions**
 
-- <span class="badge badge-warning">warning</span> worker: less than 0 scheduler loops for 9h0m0s
+- <span class="badge badge-critical">critical</span> worker: less than 0 scheduler loops for 1h0m0s
 
 **Next steps**
 
-- Check worker logs for errors. This is expected to fire if there are no user added code hosts
-- Learn more about the related dashboard panel in the [dashboards reference](/self-hosted/observability/dashboards#worker-sched_loops).
+- Check worker logs for errors from the `repo-updater.update-scheduler` routine.
+- The scheduler takes a lock in redis-store before each run, so check that redis-store is up and not out of memory.
+- More help interpreting this metric is available in the [dashboards reference](/self-hosted/observability/dashboards#worker-sched_loops).
 - **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
 
 ```json
 "observability.silenceAlerts": [
-  "warning_worker_sched_loops"
+  "critical_worker_sched_loops"
 ]
 ```
 
@@ -3619,7 +3685,7 @@ Generated query for warning alert: `min((max(rate(src_repoupdater_sched_auto_fet
 <details>
 <summary>Technical details</summary>
 
-Generated query for warning alert: `min((max(rate(src_repoupdater_sched_loops[1m]))) &lt;= 0)`
+Generated query for critical alert: `min((max(rate(src_repoupdater_sched_loops[1m]))) &lt;= 0)`
 
 </details>
 
@@ -3627,17 +3693,17 @@ Generated query for warning alert: `min((max(rate(src_repoupdater_sched_loops[1m
 
 ## worker: src_repoupdater_stale_repos
 
-<p class="subtitle">repos that haven't been fetched in more than 8 hours</p>
+<p class="subtitle">repos without a fetch attempt in more than 12 hours</p>
 
 **Descriptions**
 
-- <span class="badge badge-warning">warning</span> worker: 1+ repos that haven't been fetched in more than 8 hours for 25m0s
+- <span class="badge badge-warning">warning</span> worker: 1+ repos without a fetch attempt in more than 12 hours for 1h0m0s
 
 **Next steps**
 
-- 							Check worker logs for errors.
-							Check for rows in gitserver_repos where LastError is not an empty string.
-- Learn more about the related dashboard panel in the [dashboards reference](/self-hosted/observability/dashboards#worker-src_repoupdater_stale_repos).
+- Check whether the `sched_loops` alert is also firing.
+- Check worker logs for errors from the repo update workers, and the size of the repo_update_jobs queue.
+- More help interpreting this metric is available in the [dashboards reference](/self-hosted/observability/dashboards#worker-src_repoupdater_stale_repos).
 - **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
 
 ```json
