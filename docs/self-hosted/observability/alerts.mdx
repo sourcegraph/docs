@@ -4512,7 +4512,7 @@ Generated query for warning alert: `max((max by (instance) (go_goroutines{job=~"
 ]
 ```
 
-<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
 
 <details>
 <summary>Technical details</summary>
@@ -6695,6 +6695,82 @@ Custom query for warning alert: `max(((sum(increase(src_executor_processor_maxim
 <summary>Technical details</summary>
 
 Custom query for warning alert: `max(((sum(increase(src_workerutil_dbworker_store_total{domain="codeintel_index",op=~"MarkErrored\\|MarkFailed"\}[1d])) / sum(increase(src_workerutil_dbworker_store_total\{domain="codeintel_index",op=~"MarkComplete\\|MarkErrored\\|MarkFailed"\}[1d])) * 100) and on () (sum(increase(src_workerutil_dbworker_store_total\{domain="codeintel_index",op=~"MarkComplete\\|MarkErrored\\|MarkFailed"}[1d])) &gt;= 20)) &gt;= 99)`
+
+</details>
+
+<br />
+
+## codeintel-autoindexing: codeintel_indexing_agent_error_rate
+
+<p class="subtitle">agent run handler error rate over 1h</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> codeintel-autoindexing: 20%+ agent run handler error rate over 1h for 30m0s
+- <span class="badge badge-critical">critical</span> codeintel-autoindexing: 50%+ agent run handler error rate over 1h for 30m0s
+
+**Next steps**
+
+- Check worker logs for "indexing agent failed" to find the failing run IDs and underlying errors. The run`s steps are also visible in the repository`s code graph dashboard.
+- An error is a handler failure (LLM provider error or timeout, gitserver or database error, quota check failure), not an agent verdict: runs that end in needs_intervention or gave_up count as successes here.
+- Check for upstream LLM provider issues or timeouts.
+- A spike that correlates with resets in the "Stalled job resetters" group points at worker crashes rather than per-run failures.
+- More help interpreting this metric is available in the [dashboards reference](/self-hosted/observability/dashboards#codeintel-autoindexing-codeintel_indexing_agent_error_rate).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_codeintel-autoindexing_codeintel_indexing_agent_error_rate",
+  "critical_codeintel-autoindexing_codeintel_indexing_agent_error_rate"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Custom query for warning alert: `max(((sum(increase(src_codeintel_indexing_agent_errors_total{op="Handle"\}[3h])) / (sum(increase(src_codeintel_indexing_agent_total\{op="Handle"\}[3h])) + sum(increase(src_codeintel_indexing_agent_errors_total\{op="Handle"\}[3h]))) * 100) and ((sum(increase(src_codeintel_indexing_agent_total\{op="Handle"\}[3h])) + sum(increase(src_codeintel_indexing_agent_errors_total\{op="Handle"}[3h]))) &gt;= 5)) &gt; 20)`
+
+Custom query for critical alert: `max(((sum(increase(src_codeintel_indexing_agent_errors_total{op="Handle"\}[3h])) / (sum(increase(src_codeintel_indexing_agent_total\{op="Handle"\}[3h])) + sum(increase(src_codeintel_indexing_agent_errors_total\{op="Handle"\}[3h]))) * 100) and ((sum(increase(src_codeintel_indexing_agent_total\{op="Handle"\}[3h])) + sum(increase(src_codeintel_indexing_agent_errors_total\{op="Handle"}[3h]))) &gt;= 5)) &gt; 50)`
+
+</details>
+
+<br />
+
+## codeintel-autoindexing: codeintel_indexing_agent_subagent_context_limit_rate
+
+<p class="subtitle">subagent runs that hit the context limit by agent</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> codeintel-autoindexing: more than 10% of a subagent's runs hit the context limit over 1h
+- <span class="badge badge-critical">critical</span> codeintel-autoindexing: more than 25% of a subagent's runs hit the context limit over 1h
+
+**Next steps**
+
+- Subagents have no compaction. When the task plus accumulated tool results outgrow the input token budget of the subagent model, the subagent stops early. Usually it returns a summary of partial findings with a note that they may be incomplete (max_input_tokens_summarized); if even that summary does not fit or fails, the parent gets "sub-agent exceeded maximum input tokens; retry with a narrower task" instead (max_input_tokens). Either way the parent answers with incomplete findings or spends extra turns retrying.
+- Check the "Agent tool calls" group for the same agent: a tool whose output grew recently, or a jump in its call rate, is the usual cause.
+- A rise that starts at a deploy points at a changed subagent prompt, tool, or model input token budget.
+- If the results of one tool dominate, tighten its result limits or the subagent instructions so it reads less per turn.
+- More help interpreting this metric is available in the [dashboards reference](/self-hosted/observability/dashboards#codeintel-autoindexing-codeintel_indexing_agent_subagent_context_limit_rate).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_codeintel-autoindexing_codeintel_indexing_agent_subagent_context_limit_rate",
+  "critical_codeintel-autoindexing_codeintel_indexing_agent_subagent_context_limit_rate"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Custom query for warning alert: `max(((sum by (workload, agent) (increase(src_agent_runs_total{agent!="main",stop_reason=~"max_input_tokens\\|max_input_tokens_summarized",workload=~"code_intel_indexing_agent"\}[1h])) / sum by (workload, agent) (increase(src_agent_runs_total\{agent!="main",workload=~"code_intel_indexing_agent"\}[1h])) * 100) and (sum by (workload, agent) (increase(src_agent_runs_total\{agent!="main",workload=~"code_intel_indexing_agent"}[1h])) &gt;= 10)) &gt; 10)`
+
+Custom query for critical alert: `max(((sum by (workload, agent) (increase(src_agent_runs_total{agent!="main",stop_reason=~"max_input_tokens\\|max_input_tokens_summarized",workload=~"code_intel_indexing_agent"\}[1h])) / sum by (workload, agent) (increase(src_agent_runs_total\{agent!="main",workload=~"code_intel_indexing_agent"\}[1h])) * 100) and (sum by (workload, agent) (increase(src_agent_runs_total\{agent!="main",workload=~"code_intel_indexing_agent"}[1h])) &gt;= 10)) &gt; 25)`
 
 </details>
 
