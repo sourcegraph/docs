@@ -1431,7 +1431,6 @@ Generated query for critical alert: `min(((src_gitserver_disk_space_available / 
 
 **Next steps**
 
-- **Single container deployments (removed in 7.0.0):** The single-container deployment mode has been sunset. [Migrate to Docker Compose](/self-hosted/deploy/docker-compose/migrate).
 - **Kubernetes and Docker Compose:** Check that you are running a similar number of git server replicas and that their CPU/memory limits are allocated according to what is shown in the [Sourcegraph resource estimator](/self-hosted/deploy/resource-estimator).
 - If your persistent volume is slow, you may want to provision more IOPS, usually by increasing the volume size.
 - More help interpreting this metric is available in the [dashboards reference](/self-hosted/observability/dashboards#gitserver-echo_command_duration_test).
@@ -2692,6 +2691,71 @@ Generated query for critical alert: `min((redis_up{app="redis-store"}) &lt; 1)`
 
 <br />
 
+## redis: redis-store_oom_rejected_commands
+
+<p class="subtitle">redis-store commands rejected because it is out of memory</p>
+
+**Descriptions**
+
+- <span class="badge badge-critical">critical</span> redis: 0reqps+ redis-store commands rejected because it is out of memory for 5m0s
+
+**Next steps**
+
+- redis-store reached its `maxmemory` and rejects writes, because it does not evict keys. Sessions, locks, and background jobs that write to it fail until memory is freed.
+- Increase the redis-store memory limit, which raises `maxmemory`, to recover.
+- Find what fills redis-store with `redis-cli --bigkeys` or `MEMORY USAGE &lt;key&gt;` in the redis-store container.
+- More help interpreting this metric is available in the [dashboards reference](/self-hosted/observability/dashboards#redis-redis-store_oom_rejected_commands).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "critical_redis_redis-store_oom_rejected_commands"
+]
+```
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for critical alert: `max((sum(rate(redis_errors_total{app="redis-store",err="OOM"}[5m]))) &gt; 0)`
+
+</details>
+
+<br />
+
+## redis: redis-store_memory_used_percentage
+
+<p class="subtitle">redis-store memory used, as a percentage of maxmemory</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> redis: 90%+ redis-store memory used, as a percentage of maxmemory for 15m0s
+
+**Next steps**
+
+- redis-store rejects writes once it reaches `maxmemory`. Increase the redis-store memory limit, which raises `maxmemory`, before it does.
+- Find what fills redis-store with `redis-cli --bigkeys` or `MEMORY USAGE &lt;key&gt;` in the redis-store container.
+- More help interpreting this metric is available in the [dashboards reference](/self-hosted/observability/dashboards#redis-redis-store_memory_used_percentage).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_redis_redis-store_memory_used_percentage"
+]
+```
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((max(redis_memory_used_bytes{app="redis-store"\} / (redis_memory_max_bytes\{app="redis-store"} &gt; 0)) * 100) &gt;= 90)`
+
+</details>
+
+<br />
+
 ## redis: redis-cache_up
 
 <p class="subtitle">redis-cache availability</p>
@@ -3601,17 +3665,18 @@ Generated query for warning alert: `min((max(rate(src_repoupdater_sched_auto_fet
 
 **Descriptions**
 
-- <span class="badge badge-warning">warning</span> worker: less than 0 scheduler loops for 9h0m0s
+- <span class="badge badge-critical">critical</span> worker: less than 0 scheduler loops for 1h0m0s
 
 **Next steps**
 
-- Check worker logs for errors. This is expected to fire if there are no user added code hosts
-- Learn more about the related dashboard panel in the [dashboards reference](/self-hosted/observability/dashboards#worker-sched_loops).
+- Check worker logs for errors from the `repo-updater.update-scheduler` routine.
+- The scheduler takes a lock in redis-store before each run, so check that redis-store is up and not out of memory.
+- More help interpreting this metric is available in the [dashboards reference](/self-hosted/observability/dashboards#worker-sched_loops).
 - **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
 
 ```json
 "observability.silenceAlerts": [
-  "warning_worker_sched_loops"
+  "critical_worker_sched_loops"
 ]
 ```
 
@@ -3620,7 +3685,7 @@ Generated query for warning alert: `min((max(rate(src_repoupdater_sched_auto_fet
 <details>
 <summary>Technical details</summary>
 
-Generated query for warning alert: `min((max(rate(src_repoupdater_sched_loops[1m]))) &lt;= 0)`
+Generated query for critical alert: `min((max(rate(src_repoupdater_sched_loops[1m]))) &lt;= 0)`
 
 </details>
 
@@ -3628,17 +3693,17 @@ Generated query for warning alert: `min((max(rate(src_repoupdater_sched_loops[1m
 
 ## worker: src_repoupdater_stale_repos
 
-<p class="subtitle">repos that haven't been fetched in more than 8 hours</p>
+<p class="subtitle">repos without a fetch attempt in more than 12 hours</p>
 
 **Descriptions**
 
-- <span class="badge badge-warning">warning</span> worker: 1+ repos that haven't been fetched in more than 8 hours for 25m0s
+- <span class="badge badge-warning">warning</span> worker: 1+ repos without a fetch attempt in more than 12 hours for 1h0m0s
 
 **Next steps**
 
-- 							Check worker logs for errors.
-							Check for rows in gitserver_repos where LastError is not an empty string.
-- Learn more about the related dashboard panel in the [dashboards reference](/self-hosted/observability/dashboards#worker-src_repoupdater_stale_repos).
+- Check whether the `sched_loops` alert is also firing.
+- Check worker logs for errors from the repo update workers, and the size of the repo_update_jobs queue.
+- More help interpreting this metric is available in the [dashboards reference](/self-hosted/observability/dashboards#worker-src_repoupdater_stale_repos).
 - **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
 
 ```json
@@ -4447,7 +4512,7 @@ Generated query for warning alert: `max((max by (instance) (go_goroutines{job=~"
 ]
 ```
 
-<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
 
 <details>
 <summary>Technical details</summary>
@@ -6635,6 +6700,82 @@ Custom query for warning alert: `max(((sum(increase(src_workerutil_dbworker_stor
 
 <br />
 
+## codeintel-autoindexing: codeintel_indexing_agent_error_rate
+
+<p class="subtitle">agent run handler error rate over 1h</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> codeintel-autoindexing: 20%+ agent run handler error rate over 1h for 30m0s
+- <span class="badge badge-critical">critical</span> codeintel-autoindexing: 50%+ agent run handler error rate over 1h for 30m0s
+
+**Next steps**
+
+- Check worker logs for "indexing agent failed" to find the failing run IDs and underlying errors. The run`s steps are also visible in the repository`s code graph dashboard.
+- An error is a handler failure (LLM provider error or timeout, gitserver or database error, quota check failure), not an agent verdict: runs that end in needs_intervention or gave_up count as successes here.
+- Check for upstream LLM provider issues or timeouts.
+- A spike that correlates with resets in the "Stalled job resetters" group points at worker crashes rather than per-run failures.
+- More help interpreting this metric is available in the [dashboards reference](/self-hosted/observability/dashboards#codeintel-autoindexing-codeintel_indexing_agent_error_rate).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_codeintel-autoindexing_codeintel_indexing_agent_error_rate",
+  "critical_codeintel-autoindexing_codeintel_indexing_agent_error_rate"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Custom query for warning alert: `max(((sum(increase(src_codeintel_indexing_agent_errors_total{op="Handle"\}[3h])) / (sum(increase(src_codeintel_indexing_agent_total\{op="Handle"\}[3h])) + sum(increase(src_codeintel_indexing_agent_errors_total\{op="Handle"\}[3h]))) * 100) and ((sum(increase(src_codeintel_indexing_agent_total\{op="Handle"\}[3h])) + sum(increase(src_codeintel_indexing_agent_errors_total\{op="Handle"}[3h]))) &gt;= 5)) &gt; 20)`
+
+Custom query for critical alert: `max(((sum(increase(src_codeintel_indexing_agent_errors_total{op="Handle"\}[3h])) / (sum(increase(src_codeintel_indexing_agent_total\{op="Handle"\}[3h])) + sum(increase(src_codeintel_indexing_agent_errors_total\{op="Handle"\}[3h]))) * 100) and ((sum(increase(src_codeintel_indexing_agent_total\{op="Handle"\}[3h])) + sum(increase(src_codeintel_indexing_agent_errors_total\{op="Handle"}[3h]))) &gt;= 5)) &gt; 50)`
+
+</details>
+
+<br />
+
+## codeintel-autoindexing: codeintel_indexing_agent_subagent_context_limit_rate
+
+<p class="subtitle">subagent runs that hit the context limit by agent</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> codeintel-autoindexing: more than 10% of a subagent's runs hit the context limit over 1h
+- <span class="badge badge-critical">critical</span> codeintel-autoindexing: more than 25% of a subagent's runs hit the context limit over 1h
+
+**Next steps**
+
+- Subagents have no compaction. When the task plus accumulated tool results outgrow the input token budget of the subagent model, the subagent stops early. Usually it returns a summary of partial findings with a note that they may be incomplete (max_input_tokens_summarized); if even that summary does not fit or fails, the parent gets "sub-agent exceeded maximum input tokens; retry with a narrower task" instead (max_input_tokens). Either way the parent answers with incomplete findings or spends extra turns retrying.
+- Check the "Agent tool calls" group for the same agent: a tool whose output grew recently, or a jump in its call rate, is the usual cause.
+- A rise that starts at a deploy points at a changed subagent prompt, tool, or model input token budget.
+- If the results of one tool dominate, tighten its result limits or the subagent instructions so it reads less per turn.
+- More help interpreting this metric is available in the [dashboards reference](/self-hosted/observability/dashboards#codeintel-autoindexing-codeintel_indexing_agent_subagent_context_limit_rate).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_codeintel-autoindexing_codeintel_indexing_agent_subagent_context_limit_rate",
+  "critical_codeintel-autoindexing_codeintel_indexing_agent_subagent_context_limit_rate"
+]
+```
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Custom query for warning alert: `max(((sum by (workload, agent) (increase(src_agent_runs_total{agent!="main",stop_reason=~"max_input_tokens\\|max_input_tokens_summarized",workload=~"code_intel_indexing_agent"\}[1h])) / sum by (workload, agent) (increase(src_agent_runs_total\{agent!="main",workload=~"code_intel_indexing_agent"\}[1h])) * 100) and (sum by (workload, agent) (increase(src_agent_runs_total\{agent!="main",workload=~"code_intel_indexing_agent"}[1h])) &gt;= 10)) &gt; 10)`
+
+Custom query for critical alert: `max(((sum by (workload, agent) (increase(src_agent_runs_total{agent!="main",stop_reason=~"max_input_tokens\\|max_input_tokens_summarized",workload=~"code_intel_indexing_agent"\}[1h])) / sum by (workload, agent) (increase(src_agent_runs_total\{agent!="main",workload=~"code_intel_indexing_agent"\}[1h])) * 100) and (sum by (workload, agent) (increase(src_agent_runs_total\{agent!="main",workload=~"code_intel_indexing_agent"}[1h])) &gt;= 10)) &gt; 25)`
+
+</details>
+
+<br />
+
 ## codeintel-uploads: codeintel_uploads_janitor_scip_documents_oldest_dereference_log_age
 
 <p class="subtitle">approximate age of the oldest SCIP document dereference log record, based on the lowest-ID record</p>
@@ -7469,16 +7610,16 @@ Custom query for critical alert: `max(((sum(increase(src_deepsearch_question_pro
 
 ## deepsearch: deepsearch_slow_questions
 
-<p class="subtitle">questions taking longer than 5 minutes over 15m</p>
+<p class="subtitle">share of questions taking longer than 5 minutes over 1h</p>
 
 **Descriptions**
 
-- <span class="badge badge-warning">warning</span> deepsearch: 3+ questions taking longer than 5 minutes over 15m for 10m0s
+- <span class="badge badge-warning">warning</span> deepsearch: 25%+ share of questions taking longer than 5 minutes over 1h for 15m0s
 
 **Next steps**
 
-- Search worker logs for questionIDs with long processing times.
-- Check `deepsearch_turn_p95_duration` to see if individual turns are slow.
+- Check `deepsearch_turn_p95_duration` to see if individual turns are slow. If they are, compare per-model stream duration (`sum by (model) (rate(src_completions_stream_duration_seconds_sum[10m])) / sum by (model) (rate(src_completions_stream_duration_seconds_count[10m]))`) with the hours before, and check the model provider status page.
+- Check whether a Deep Search model, reasoning effort, or prompt change, or a deploy, landed shortly before the alert started.
 - Check `deepsearch_question_outcome_by_reason` for elevated truncation or error rates.
 - More help interpreting this metric is available in the [dashboards reference](/self-hosted/observability/dashboards#deepsearch-deepsearch_slow_questions).
 - **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
@@ -7494,7 +7635,7 @@ Custom query for critical alert: `max(((sum(increase(src_deepsearch_question_pro
 <details>
 <summary>Technical details</summary>
 
-Generated query for warning alert: `max((sum(increase(src_deepsearch_question_processing_duration_seconds_count{operation="question"\}[15m])) - sum(increase(src_deepsearch_question_processing_duration_seconds_bucket\{le=~"300([.]0)?",operation="question"}[15m]))) &gt; 3)`
+Custom query for warning alert: `max((((sum(increase(src_deepsearch_question_processing_duration_seconds_count{operation="question"\}[1h])) - sum(increase(src_deepsearch_question_processing_duration_seconds_bucket\{le=~"300([.]0)?",operation="question"\}[1h]))) / sum(increase(src_deepsearch_question_processing_duration_seconds_count\{operation="question"\}[1h])) * 100) and (sum(increase(src_deepsearch_question_processing_duration_seconds_count\{operation="question"}[1h])) &gt;= 30)) &gt; 25)`
 
 </details>
 
@@ -7544,20 +7685,21 @@ Custom query for critical alert: `max(((sum by (workload, agent) (increase(src_a
 
 **Descriptions**
 
-- <span class="badge badge-critical">critical</span> deepsearch: 5+ truncated questions with no answer produced over 15m for 10m0s
+- <span class="badge badge-warning">warning</span> deepsearch: 5+ truncated questions with no answer produced over 15m for 10m0s
 
 **Next steps**
 
-- Search worker logs for: "answer truncated due to output token limit with no response generated" to find affected questionIDs.
 - The output token budget was consumed before any answer text was produced, usually by reasoning tokens, so affected users got nothing back.
-- Check if a recent model change or reasoning effort change caused increased thinking token usage.
+- Check whether a Deep Search model, reasoning effort, or output token limit change, or a deploy, landed shortly before the alert started. If one did, it is the likely cause: roll it back.
+- Otherwise, search worker logs for: "answer truncated due to output token limit with no response generated" and group by the logged userID. Bursts so far have come from one user or API client sending a batch of questions, cleared on their own within about 20 minutes, and needed no action.
+- If affected users are spread out, check for an upstream model problem: compare per-model stream duration (`sum by (model) (rate(src_completions_stream_duration_seconds_sum[10m])) / sum by (model) (rate(src_completions_stream_duration_seconds_count[10m]))`) with the hours before, and check the model provider status page.
 - Compare against `deepsearch_response_truncated`: elevated truncations alone are usually users requesting very large outputs and are not a regression.
 - More help interpreting this metric is available in the [dashboards reference](/self-hosted/observability/dashboards#deepsearch-deepsearch_response_truncated_no_answer).
 - **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
 
 ```json
 "observability.silenceAlerts": [
-  "critical_deepsearch_deepsearch_response_truncated_no_answer"
+  "warning_deepsearch_deepsearch_response_truncated_no_answer"
 ]
 ```
 
@@ -7566,7 +7708,7 @@ Custom query for critical alert: `max(((sum by (workload, agent) (increase(src_a
 <details>
 <summary>Technical details</summary>
 
-Custom query for critical alert: `max(((sum(increase(src_deepsearch_question_outcome_total{outcome="response_truncated_no_answer"\}[15m]))) and (sum(increase(src_deepsearch_question_outcome_total\{outcome="response_truncated_no_answer"\}[5m])) &gt;= 2) and (sum(increase(src_deepsearch_question_outcome_total\{outcome="response_truncated_no_answer"}[15m])) / sum(increase(src_deepsearch_question_outcome_total[15m])) &gt;= 0.05) and (sum(increase(src_deepsearch_question_outcome_total[15m])) &gt;= 20)) &gt;= 5)`
+Custom query for warning alert: `max(((sum(increase(src_deepsearch_question_outcome_total{outcome="response_truncated_no_answer"\}[15m]))) and (sum(increase(src_deepsearch_question_outcome_total\{outcome="response_truncated_no_answer"\}[5m])) &gt;= 2) and (sum(increase(src_deepsearch_question_outcome_total\{outcome="response_truncated_no_answer"}[15m])) / sum(increase(src_deepsearch_question_outcome_total[15m])) &gt;= 0.05) and (sum(increase(src_deepsearch_question_outcome_total[15m])) &gt;= 20)) &gt;= 5)`
 
 </details>
 

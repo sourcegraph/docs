@@ -30,12 +30,31 @@ Sourcegraph makes requests to `https://services.sourcegraph.com` for [key produc
 
 To ensure a smooth experience, instances must allow **outbound TCP port `443` to `34.36.231.254`**, with **HTTPS and HTTP/2 gRPC** support through your firewall or proxy. For hostname-based filtering, allow `services.sourcegraph.com`. Keep the hostname for TLS; do not replace it with the IP address. No inbound firewall rule is required.
 
+### Dedicated proxy
+
+To route this traffic through a separate proxy, set `SERVICES_GATEWAY_PROXY` to the same value on every `frontend` replica, then restart them:
+
+```sh
+SERVICES_GATEWAY_PROXY=http://username:password@proxy.example.com:3128
+```
+
+Do not set it on other services: they receive the value from `frontend` and restart when it changes.
+
+- Only `http://` proxies that support HTTP CONNECT are supported. Basic authentication is optional; URL-encode special characters in credentials.
+- TLS to the destination is preserved, but the connection to the proxy is not encrypted.
+- It takes precedence over `HTTPS_PROXY` and `NO_PROXY`, and also applies to `localhost` endpoint overrides.
+- If the proxy is unreachable, requests fail instead of connecting directly.
+
+To proxy other outbound traffic, see [HTTP proxy configuration](#http-proxy-configuration).
+
 ## HTTP proxy configuration
 
 Sourcegraph services use the conventional `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY` environment variables. Set them on the `frontend` and `worker` services, using the example override file for your deployment method:
 
 - [Kubernetes Helm](https://github.com/sourcegraph/deploy-sourcegraph-helm/blob/main/charts/sourcegraph/examples/outbound-http-proxy/override.yaml)
 - [Docker Compose](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/main/docker-compose/examples/outbound-http-proxy/docker-compose.override.yaml)
+
+Traffic to Sourcegraph services can use a [dedicated proxy](#dedicated-proxy) instead.
 
 ## Docker networking configuration
 
