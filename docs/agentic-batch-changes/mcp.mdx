@@ -28,6 +28,8 @@ You can see and act only on agents you own. Agents shared with you do not appear
 
 Tools that start or change an agent need a Sourcegraph access token with an agent scope. OAuth tokens cannot carry these scopes, so a client connected through OAuth gets the read tools only.
 
+Follow least privilege: select only the scopes needed for your client's workflow.
+
 | Scope                                | Tools on `/.api/mcp/abc`                         |
 | ------------------------------------ | ------------------------------------------------ |
 | `mcp` or `user:all`                  | Read tools only                                  |
@@ -36,20 +38,26 @@ Tools that start or change an agent need a Sourcegraph access token with an agen
 
 The read tools are `list_batch_changes`, `read_batch_change`, `list_batch_change_workspaces`, `read_batch_change_workspace_diff`, `read_batch_change_workspace_logs`, `read_batch_change_spec`, `read_batch_change_transcript`, and `list_batch_change_standing_approvals`.
 
-- The two agent scopes do not include each other. A pipeline that starts unattended agents and also answers or stops them needs both.
-- The agent scopes work only on `/.api/mcp/abc`. Add `mcp` to the token if the same client also uses the [other MCP endpoints](/api/mcp#server-endpoints).
+- For attended workflows, use `mcp:batch-change-agents`. Add `mcp:batch-change-agents:unattended` only if the client needs to start unattended agents. The two scopes do not include each other: a client that starts unattended agents and also answers or stops them needs both.
+- One token can combine the scopes needed by the same client. The agent scopes work only on `/.api/mcp/abc`. Add `mcp` to that token if the client also uses the [other MCP endpoints](/api/mcp#server-endpoints).
 - A tool that needs an agent scope is listed only when the token has that scope and you have the write permissions. Calling it without the scope returns `INSUFFICIENT_SCOPE`, and the refusal is recorded in the audit log.
+
+Token scopes cannot be edited. If an existing token lacks a required scope, create a replacement or an additional token with the scopes your client needs.
 
 To create a token:
 
 1. Open **Settings > Access tokens** and create a new token.
 2. Enter a **Token description**.
-3. Under **Token scope**, check `mcp:batch-change-agents`, `mcp:batch-change-agents:unattended`, or both. These checkboxes appear only while the `abc-mcp` flag is on for you. Checking one clears the default `user:all`, unless `site-admin:sudo` is checked. Leave `user:all` cleared: it adds nothing on this endpoint and grants full API access elsewhere.
+3. Under **Token scope**, select the agent scopes for your workflow as described above. These checkboxes appear only while the `abc-mcp` flag is on for you. Checking one clears the default `user:all`, unless `site-admin:sudo` is checked. Leave `user:all` cleared: it adds nothing on this endpoint and grants full API access elsewhere.
 4. Click **Generate token** and copy it. The page shows a `curl` command that lists the tools on `/.api/mcp/abc`.
 
 Creating a token with an agent scope fails while the `abc-mcp` flag is off for the token's user. A token created earlier keeps its scopes and works again when the flag is turned back on.
 
-Treat a token with `mcp:batch-change-agents:unattended` like a deploy key: it can open changesets as you without a person approving them. Create it only for pipelines that need it.
+<Callout type="warning">
+	**Unattended access allows publication without another approval.** An agent
+	can push branches or open changesets within the repositories and publication
+	mode selected at start.
+</Callout>
 
 ## Connect a client
 
