@@ -7,9 +7,14 @@ import clsx from 'clsx';
 import {usePathname} from 'next/navigation';
 import {Fragment, useEffect, useState} from 'react';
 
+// The production build (basePath /docs) is the source of the shared list, so it
+// keeps its bundled copy instead of fetching it from sourcegraph.com, which is
+// blocked for some visitors of ms-docs.sg.dev and would link "latest" there.
 const versionsUrl =
 	process.env.NEXT_PUBLIC_DOCS_VERSIONS_URL ??
-	'https://sourcegraph.com/docs/api/versions';
+	(process.env.NEXT_PUBLIC_DOCS_BASE_PATH
+		? null
+		: 'https://sourcegraph.com/docs/api/versions');
 
 function isVersion(value: unknown): value is VersionI {
 	if (typeof value !== 'object' || value === null) return false;
@@ -39,6 +44,7 @@ export default function VersionSelector() {
 		) ?? latestVersion;
 
 	useEffect(() => {
+		if (!versionsUrl) return;
 		const controller = new AbortController();
 
 		void fetch(versionsUrl, {signal: controller.signal})

@@ -13975,6 +13975,54 @@ redis_up{app="redis-store"}
 
 <br />
 
+#### redis: redis-store_oom_rejected_commands
+
+<p class="subtitle">Redis-store commands rejected because it is out of memory</p>
+
+redis-store uses the noeviction policy, so once it reaches maxmemory every command that would use more memory fails with an OOM error.
+
+Refer to the [alerts reference](/self-hosted/observability/alerts#redis-redis-store_oom_rejected_commands) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/redis/redis?viewPanel=100010` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(redis_errors_total{app="redis-store",err="OOM"}[5m]))
+```
+</details>
+
+<br />
+
+#### redis: redis-store_memory_used_percentage
+
+<p class="subtitle">Redis-store memory used, as a percentage of maxmemory</p>
+
+redis-store does not evict keys, so its memory only shrinks when keys expire or are deleted. Instances without a maxmemory setting show no data.
+
+Refer to the [alerts reference](/self-hosted/observability/alerts#redis-redis-store_memory_used_percentage) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/redis/redis?viewPanel=100011` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max(redis_memory_used_bytes{app="redis-store"} / (redis_memory_max_bytes{app="redis-store"} > 0)) * 100
+```
+</details>
+
+<br />
+
 ### Redis: Redis Cache
 
 #### redis: redis-cache_up
@@ -16211,6 +16259,9 @@ max(rate(src_repoupdater_sched_manual_fetch[1m]))
 
 <p class="subtitle">Scheduler loops</p>
 
+The update scheduler runs every 30 seconds, whether or not any code hosts are configured.
+When it stops, no repository is scheduled for fetching, so every repository goes stale.
+
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-sched_loops) for 1 alert related to this panel.
 
 To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101350` on your Sourcegraph instance.
@@ -16231,7 +16282,11 @@ max(rate(src_repoupdater_sched_loops[1m]))
 
 #### worker: src_repoupdater_stale_repos
 
-<p class="subtitle">Repos that haven't been fetched in more than 8 hours</p>
+<p class="subtitle">Repos without a fetch attempt in more than 12 hours</p>
+
+The scheduler attempts to fetch every repository at least every 8 hours, including repositories whose fetches fail.
+Repositories without an attempt in 12 hours are not being scheduled or fetched at all.
+This is always 0 when automatic git updates are disabled.
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-src_repoupdater_stale_repos) for 1 alert related to this panel.
 
@@ -19189,7 +19244,7 @@ Refer to the [alerts reference](/self-hosted/observability/alerts#worker-pods_av
 
 To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=103000` on your Sourcegraph instance.
 
-<sub>*Managed by the Sourcegraph Code Plane team.*</sub>
+<sub>*Managed by the Sourcegraph Platform team.*</sub>
 
 <details>
 <summary>Technical details</summary>
@@ -25095,7 +25150,7 @@ sum by (code)(increase(src_zoekt_request_duration_seconds_count{code!~"2.."}[5m]
 
 <p class="subtitle">Replicas missing from indexed searches by reason over 5m</p>
 
-The rate at which a Zoekt replica could not be searched as part of a search, by reason. "overloaded" means the replica shed the search because it could not schedule it in time. The other reasons ("unavailable", "dns-not-found", "dial-timeout", "dial-refused" and "read-failed") mean the replica was unreachable, which is expected briefly during rollouts. Either way the search continues without that replica and users see a warning that results may be incomplete.
+The rate at which a Zoekt replica could not be searched as part of a search, by reason. "overloaded" means the replica shed the search because it could not schedule it in time. "internal" means the replica failed while searching, such as by panicking. The other reasons ("unavailable", "dns-not-found", "dial-timeout", "dial-refused" and "read-failed") mean the replica was unreachable, which is expected briefly during rollouts. Either way the search continues without that replica and users see a warning that results may be incomplete.
 
 This panel has no related alerts.
 
@@ -31578,6 +31633,446 @@ Query:
 
 ```
 sum by (op)(increase(src_codeintel_autoindexing_janitor_expired_errors_total{job=~"^${source:regex}.*"}[5m])) / (sum by (op)(increase(src_codeintel_autoindexing_janitor_expired_total{job=~"^${source:regex}.*"}[5m])) + sum by (op)(increase(src_codeintel_autoindexing_janitor_expired_errors_total{job=~"^${source:regex}.*"}[5m]))) * 100
+```
+</details>
+
+<br />
+
+### Code Intelligence &gt; Autoindexing: Auto-indexing agent: worker
+
+#### codeintel-autoindexing: codeintel_indexing_agent_active_handlers
+
+<p class="subtitle">Agent runs in progress</p>
+
+Number of agent runs executing concurrently. The ceiling is the codeIntelAutoIndexing.agent.maxConcurrentRuns site setting (default 2), read when the worker starts; sustained values at the ceiling mean queued runs are waiting for a slot. Each run holds its slot while its index jobs execute on executors.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/codeintel-autoindexing/codeintel-autoindexing?viewPanel=101000` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(src_codeintel_indexing_agent_handlers)
+```
+</details>
+
+<br />
+
+#### codeintel-autoindexing: codeintel_indexing_agent_processing_rate
+
+<p class="subtitle">Agent runs completed per hour</p>
+
+Rate of agent runs whose handler finished without an error, whatever verdict the agent reached (see the outcomes panel). Handler errors appear in the error rate panel instead.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/codeintel-autoindexing/codeintel-autoindexing?viewPanel=101001` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(src_codeintel_indexing_agent_total{op="Handle"}[30m])) * 3600
+```
+</details>
+
+<br />
+
+#### codeintel-autoindexing: codeintel_indexing_agent_p95_duration
+
+<p class="subtitle">95th percentile agent run duration</p>
+
+95th percentile wall-clock time of a run: the agent loop including every LLM request and every index job it waited for on executors. A run executes at most codeIntelAutoIndexing.agent.maxIndexAttempts index jobs (default 4) of up to 20 minutes each, so runs over an hour are expected for slow builds.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/codeintel-autoindexing/codeintel-autoindexing?viewPanel=101010` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.95, sum(rate(src_codeintel_indexing_agent_duration_seconds_bucket{op="Handle"}[1h])) by (le))
+```
+</details>
+
+<br />
+
+#### codeintel-autoindexing: codeintel_indexing_agent_p50_duration
+
+<p class="subtitle">50th percentile agent run duration</p>
+
+Median wall-clock time of a run. A shift here without a change in outcomes usually means executor queue wait or build time changed, not the agent.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/codeintel-autoindexing/codeintel-autoindexing?viewPanel=101011` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.50, sum(rate(src_codeintel_indexing_agent_duration_seconds_bucket{op="Handle"}[1h])) by (le))
+```
+</details>
+
+<br />
+
+#### codeintel-autoindexing: codeintel_indexing_agent_error_rate
+
+<p class="subtitle">Agent run handler error rate over 1h</p>
+
+Percentage of handler invocations that ended in an error. The alerts evaluate the rate over 3h and are gated on at least 5 attempts in that window, so they stay quiet during idle periods.
+
+Refer to the [alerts reference](/self-hosted/observability/alerts#codeintel-autoindexing-codeintel_indexing_agent_error_rate) for 2 alerts related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/codeintel-autoindexing/codeintel-autoindexing?viewPanel=101020` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(increase(src_codeintel_indexing_agent_errors_total{op="Handle"}[1h])) / (sum(increase(src_codeintel_indexing_agent_total{op="Handle"}[1h])) + sum(increase(src_codeintel_indexing_agent_errors_total{op="Handle"}[1h]))) * 100
+```
+</details>
+
+<br />
+
+### Code Intelligence &gt; Autoindexing: Auto-indexing agent: queue and outcomes
+
+#### codeintel-autoindexing: codeintel_indexing_agent_queue_depth
+
+<p class="subtitle">Agent runs waiting in the queue</p>
+
+Number of runs enqueued (by an administrator from the repository`s code graph dashboard) but not yet picked up by a handler. Each repository has at most one live run, so this is bounded by the number of repositories administrators have triggered.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/codeintel-autoindexing/codeintel-autoindexing?viewPanel=101100` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max(src_workerutil_queue_depth{domain="codeintel_indexing_agent_worker"})
+```
+</details>
+
+<br />
+
+#### codeintel-autoindexing: codeintel_indexing_agent_queue_wait
+
+<p class="subtitle">Oldest queued agent run wait time</p>
+
+How long the oldest queued run has been waiting for a handler; this is the delay an administrator sees between clicking the button and the agent starting. Zero when the queue is empty. Long waits with active handlers at the ceiling mean codeIntelAutoIndexing.agent.maxConcurrentRuns is too low for the number of repositories being onboarded.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/codeintel-autoindexing/codeintel-autoindexing?viewPanel=101101` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+max(src_workerutil_queue_duration_seconds{domain="codeintel_indexing_agent_worker"})
+```
+</details>
+
+<br />
+
+#### codeintel-autoindexing: codeintel_indexing_agent_outcomes
+
+<p class="subtitle">Finished agent runs per hour by outcome</p>
+
+What finished runs concluded. configured means a proven configuration was saved to the repository; needs_intervention means an administrator must act, broken down by kind (missing_secrets, unsupported_project, indexer_failure, other); gave_up means the attempt budget ran out without a clear next step. A rising share of gave_up or indexer_failure across many repositories points at the prompt, the index attempt budget, or an indexer image rather than at the repositories.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/codeintel-autoindexing/codeintel-autoindexing?viewPanel=101110` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (outcome, intervention_kind) (rate(src_codeintel_indexing_agent_run_outcomes_total[1h])) * 3600
+```
+</details>
+
+<br />
+
+#### codeintel-autoindexing: codeintel_indexing_agent_index_jobs
+
+<p class="subtitle">Index jobs executed by the agent per hour</p>
+
+Index jobs the agent enqueued on the codeintel executor queue to test candidate configurations. This is the agent`s load on executors; compare with the Executor dashboard`s codeintel queue size. Divide by the runs completed per hour to get the average attempts a run needs; values near codeIntelAutoIndexing.agent.maxIndexAttempts mean most runs exhaust their budget.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/codeintel-autoindexing/codeintel-autoindexing?viewPanel=101111` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum(rate(src_codeintel_indexing_agent_index_jobs_total[1h])) * 3600
+```
+</details>
+
+<br />
+
+### Code Intelligence &gt; Autoindexing: Agent runs
+
+#### codeintel-autoindexing: codeintel_indexing_agent_runs_by_stop_reason
+
+<p class="subtitle">Agent runs per minute by agent and stop reason</p>
+
+Why agent loop runs ended. no_tool_calls is a normal answer, awaiting_tool_result is a pause on an external tool result such as ask_user, max_input_tokens means the prompt did not fit even after compaction, max_input_tokens_summarized means a subagent ran out of context and stopped with a summary of partial findings, and error or context_done are runs that failed or were canceled. Agent is main for the top-level loop or the name of the subagent tool whose loop ran.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/codeintel-autoindexing/codeintel-autoindexing?viewPanel=101200` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (workload, agent, stop_reason) (rate(src_agent_runs_total{workload=~"code_intel_indexing_agent"}[5m])) * 60
+```
+</details>
+
+<br />
+
+#### codeintel-autoindexing: codeintel_indexing_agent_subagent_context_limit_rate
+
+<p class="subtitle">Subagent runs that hit the context limit by agent</p>
+
+Percentage of subagent loop runs that ran out of context, per subagent: stop reason max_input_tokens_summarized (stopped with partial findings) or max_input_tokens (stopped with an error). The panel uses a 5m window; the alerts use a 1h window per subagent and require at least 10 runs in it, so an isolated oversized task does not fire them.
+
+Refer to the [alerts reference](/self-hosted/observability/alerts#codeintel-autoindexing-codeintel_indexing_agent_subagent_context_limit_rate) for 2 alerts related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/codeintel-autoindexing/codeintel-autoindexing?viewPanel=101210` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+(sum by (workload, agent) (rate(src_agent_runs_total{workload=~"code_intel_indexing_agent",agent!="main",stop_reason=~"max_input_tokens|max_input_tokens_summarized"}[5m])) or (0 * sum by (workload, agent) (rate(src_agent_runs_total{workload=~"code_intel_indexing_agent",agent!="main"}[5m])))) / (sum by (workload, agent) (rate(src_agent_runs_total{workload=~"code_intel_indexing_agent",agent!="main"}[5m])) > 0) * 100
+```
+</details>
+
+<br />
+
+### Code Intelligence &gt; Autoindexing: Agent tool calls
+
+#### codeintel-autoindexing: codeintel_indexing_agent_tool_call_rate
+
+<p class="subtitle">Tool calls per minute by agent, tool, and status</p>
+
+Executions of registered agent tools. Agent is main for the top-level loop or the subagent tool whose loop made the call.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/codeintel-autoindexing/codeintel-autoindexing?viewPanel=101300` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (workload, agent, tool, status) (rate(src_agent_tool_calls_total{workload=~"code_intel_indexing_agent"}[5m])) * 60
+```
+</details>
+
+<br />
+
+#### codeintel-autoindexing: codeintel_indexing_agent_tool_error_rate
+
+<p class="subtitle">Tool call error rate over 5m by agent and tool</p>
+
+Percentage of tool calls ending in an execution error, timeout, or unavailable backend. Invalid requests and caller cancellations are shown separately as workload-quality signals and do not indicate server reliability.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/codeintel-autoindexing/codeintel-autoindexing?viewPanel=101301` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+(sum by (workload, agent, tool) (rate(src_agent_tool_calls_total{workload=~"code_intel_indexing_agent",status=~"error|timeout|unavailable"}[5m])) or (0 * sum by (workload, agent, tool) (rate(src_agent_tool_calls_total{workload=~"code_intel_indexing_agent",status=~"success|error|timeout|unavailable"}[5m])))) / (sum by (workload, agent, tool) (rate(src_agent_tool_calls_total{workload=~"code_intel_indexing_agent",status=~"success|error|timeout|unavailable"}[5m])) > 0) * 100
+```
+</details>
+
+<br />
+
+#### codeintel-autoindexing: codeintel_indexing_agent_tool_p50_duration
+
+<p class="subtitle">Median tool call duration over 5m by agent, tool, and status</p>
+
+Typical tool execution time.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/codeintel-autoindexing/codeintel-autoindexing?viewPanel=101310` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.50, sum by (le, workload, agent, tool, status) (rate(src_agent_tool_call_duration_seconds_bucket{workload=~"code_intel_indexing_agent"}[5m])))
+```
+</details>
+
+<br />
+
+#### codeintel-autoindexing: codeintel_indexing_agent_tool_p95_duration
+
+<p class="subtitle">95th percentile tool call duration over 5m by agent, tool, and status</p>
+
+Tail tool execution time. A sharp step near a round number usually marks a tool or upstream timeout.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/codeintel-autoindexing/codeintel-autoindexing?viewPanel=101311` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.95, sum by (le, workload, agent, tool, status) (rate(src_agent_tool_call_duration_seconds_bucket{workload=~"code_intel_indexing_agent"}[5m])))
+```
+</details>
+
+<br />
+
+#### codeintel-autoindexing: codeintel_indexing_agent_tool_timeout_count
+
+<p class="subtitle">Tool calls timing out every 5m</p>
+
+Timeout means the tool observed a deadline exceeded error and is included in the server-reliability error rate.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/codeintel-autoindexing/codeintel-autoindexing?viewPanel=101320` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (workload, agent, tool) (increase(src_agent_tool_calls_total{workload=~"code_intel_indexing_agent",status="timeout"}[5m]))
+```
+</details>
+
+<br />
+
+#### codeintel-autoindexing: codeintel_indexing_agent_tool_invalid_request_rate
+
+<p class="subtitle">Invalid tool requests per minute by agent and tool</p>
+
+Requests rejected before useful tool execution because their arguments were invalid. A rise indicates the model or caller is producing arguments that do not match the tool schema or validation rules, not a server-reliability failure.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/codeintel-autoindexing/codeintel-autoindexing?viewPanel=101330` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (workload, agent, tool) (rate(src_agent_tool_calls_total{workload=~"code_intel_indexing_agent",status="invalid_request"}[5m])) * 60
+```
+</details>
+
+<br />
+
+#### codeintel-autoindexing: codeintel_indexing_agent_tool_canceled_rate
+
+<p class="subtitle">Canceled tool calls per minute by agent and tool</p>
+
+Calls whose caller context ended before completion. A rise can indicate abandoned or superseded agent work and wasted workload, but is not a server-reliability failure.
+
+This panel has no related alerts.
+
+To see this panel, visit `/-/debug/grafana/d/codeintel-autoindexing/codeintel-autoindexing?viewPanel=101331` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Code Understanding team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+sum by (workload, agent, tool) (rate(src_agent_tool_calls_total{workload=~"code_intel_indexing_agent",status="canceled"}[5m])) * 60
 ```
 </details>
 
