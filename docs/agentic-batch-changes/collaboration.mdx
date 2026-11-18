@@ -16,25 +16,19 @@ Each action runs as the user who does it, not as the owner. See [Whose credentia
     - Answer the agent's questions and approve tool calls, except publish approvals.
     - Cancel and retry turns.
     - Run workspaces, publish, and clean up changesets that the current plan no longer produces.
-- **Administrator** with the `BATCH_CHANGE_AGENT_ADMINISTRATION#MANAGE` [permission](/admin/access-control/batch-changes): sees every agent on the [Threads page](/agentic-batch-changes/configuration#threads-page), can hand over any agent, and can invite, extend, and remove collaborators. An administrator who is not a collaborator cannot send messages or act on the agent.
-- **Previous owner**: after a handover, the previous owner keeps read access to the agent. This access does not expire, and the previous owner cannot act on the agent.
+- **Administrator**: sees every agent on the [Threads page](/agentic-batch-changes/configuration#threads-page), can hand over any agent, and can invite, extend, and remove collaborators. An administrator who is not a collaborator cannot send messages or act on the agent.
+- **Previous owner**: after a handover, the previous owner keeps read access to the agent.
 - **Viewer**: a user who opens the agent through its [share link](/agentic-batch-changes/configuration#sharing-and-visibility). A viewer can read the transcript but cannot act on the agent or see the collaborator list.
 
 ## Inviting collaborators
 
-The owner or an administrator invites collaborators from the collaborators panel on the agent page. To be invited, a user must:
+The owner or an administrator invites collaborators from the collaborators panel on the agent page. To be invited, a user must have the `Batch Changes: Write` and `Batch Changes: Agent Write` [permissions](/agentic-batch-changes/configuration#access).
 
-- Be a user on the instance other than the owner.
-- Have the `Batch Changes: Write` and `Batch Changes: Agent Write` [permissions](/agentic-batch-changes/configuration#access). Sourcegraph refuses the invite otherwise.
-
-Sourcegraph does not check the collaborator's repository permissions when they are invited. The collaborator's own repository permissions apply when they act. See [Whose credentials an action uses](#whose-credentials-an-action-uses).
+Sourcegraph does not block the invite if the collaborator's repository permissions are not sufficient. The collaborator's own repository permissions apply when they act and they only see repos and changesets that they have permission for. See [Whose credentials an action uses](#whose-credentials-an-action-uses).
 
 Every collaborator access expires. Select 1 hour, 24 hours, or 7 days when you invite. There is no access without an expiry and no limit on the number of collaborators. The invited user gets a notification in Sourcegraph, and the access starts immediately.
 
 To extend access, select a new duration. The access then ends that long from now, not from the old end time. After access expires or is removed, invite the user again.
-
-A collaborator cannot leave an agent. Access ends when it expires or when the owner or an administrator removes it. Removing a user's `Batch Changes: Agent Write` permission also stops them from acting on the agent.
-
 The [audit log](/agentic-batch-changes/configuration#audit-log) records `collaboratorInvited`, `collaboratorExtended`, and `collaboratorRevoked` with the owner, the collaborator, the user who made the change, and the expiry. Conversation and workspace actions record both the owner and the user who acted.
 
 ## Whose credentials an action uses
@@ -46,7 +40,7 @@ The user who sends the message, answers the question, approves the tool call, or
 - Workspaces and coding agent steps run as that user, with that user's secrets, connectors, and Sourcegraph MCP identity. Coding agent step runs count against that user's [entitlement](/admin/entitlements).
 - Tool approvals belong to the user who gave them. An approval from one user does not count for a turn that runs as another user, also when the approval was for this agent or for all agents.
 
-When an action cannot run as that user, it is refused with a reason. It does not fall back to the owner. For example, a publish is refused when the user has no valid Batch Changes credential for a code host and there is no global credential, and a workspace fails when a secret it needs is not available to that user.
+When an action cannot run as that user, it is refused with a reason. It does not fall back to the owner. For example, a publish is refused when the user has no valid Batch Changes credential for a code host and there is no global credential. A workspace fails when a secret it needs is not available to that user.
 
 ### Exceptions
 
@@ -58,7 +52,6 @@ In these cases, the user an action runs as or is charged to is not the user who 
 - **Answers and approvals**: when a turn is waiting for an answer or an approval, any owner or collaborator can answer. The turn then continues as the user who answered.
 - **Publish approvals**: before the agent publishes, it shows an approval card. A publish approval covers specific repositories and a mode, such as draft. Only the owner can give a publish approval. A collaborator can publish only to repositories and in a mode that the owner already approved for this agent.
 - **Code host pushes and syncs**: Sourcegraph pushes and syncs all changesets of the agent with the Batch Changes credential of the user who published most recently, or the global credential when that user has none. This also applies to changesets that another user published.
-- **Published changesets entitlement**: when a collaborator publishes, the published changeset counts against the collaborator's entitlement. When the owner publishes, it counts against the owner's.
 - **Billing**: merged changesets are [billed](/agentic-batch-changes/configuration#billing) to the subscription and recorded for the owner, no matter who published or merged them.
 - **Uploaded files**: files are stored with the agent under the owner, no matter who uploaded them. Every user who can open the agent can download them.
 - **Repository visibility at publish**: Sourcegraph checks that the owner can read the target repositories before it publishes, in addition to the publishing user's own permissions.
