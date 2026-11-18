@@ -140,6 +140,20 @@ All advanced configuration options and their default values are shown below.
 	// Maximum number of batch spec templates to display in the template library UI. Default is 20.
 	"batchChanges.templateLibrary.displayLimit": 20,
 
+	// Enables/disables the AI agent that configures auto-indexing for a repository on behalf of administrators. Disabled by default. The agent is available only if auto-indexing is enabled and the license includes AI Terms 2025.
+	"codeIntelAutoIndexing.agent.enabled": false,
+
+	// The maximum number of auto-indexing configuration agent runs that may execute concurrently. Default is 2.
+	"codeIntelAutoIndexing.agent.maxConcurrentRuns": 2,
+
+	// The maximum number of index jobs a single auto-indexing configuration agent run may execute before giving up. Default is 4.
+	"codeIntelAutoIndexing.agent.maxIndexAttempts": 4,
+
+	// The model the auto-indexing configuration agent runs with, as a model reference such as "anthropic::2024-10-22::claude-sonnet-5-5". Only the agent's default model and the alternatives declared for it in internal/inference/models are accepted; saving any other value is rejected, and a stored value that is no longer supported after an upgrade falls back to the default model. Leave unset to use the default model.
+	// Other example values:
+	// - "anthropic::2024-10-22::claude-sonnet-5-5"
+	"codeIntelAutoIndexing.agent.model": null,
+
 	// Whether auto-indexing policies may apply to all repositories on the Sourcegraph instance. Default is false. The policyRepositoryMatchLimit setting still applies to such auto-indexing policies.
 	"codeIntelAutoIndexing.allowGlobalPolicies": false,
 
@@ -194,11 +208,6 @@ All advanced configuration options and their default values are shown below.
 		"chatVision": false,
 		"commands": false
 	},
-
-	// Enables the computation of contributor statistics per author and repository. Will all commits of each repository initially, and then work on deltas.
-	// Other example values:
-	// - true
-	"contributorsDataEnabled": true,
 
 	// Required when using any of the native code host integrations for Phabricator, GitLab, or Bitbucket Server. It is a space-separated list of allowed origins for cross-origin HTTP requests which should be the base URL for your Phabricator, GitLab, or Bitbucket Server instance.
 	// Other example values:
@@ -309,6 +318,9 @@ All advanced configuration options and their default values are shown below.
 		"setPassword": null
 	},
 
+	// Allow code, diff, and snippet views under /embed/ to load. Set to false to block new embed page loads without restarting the server. This does not stop already-loaded embeds or disable their API access.
+	"embeds.enabled": true,
+
 	// Experimental features and settings.
 	"experimentalFeatures": {
 		"agents.contextFilters": null,
@@ -337,6 +349,8 @@ All advanced configuration options and their default values are shown below.
 		"enablePermissionsWebhooks": false,
 		"eventLogging": "enabled",
 		"execd": {
+			"codeIntel": false,
+			"codeIntelConcurrency": 16,
 			"enrollmentPublicKeys": null,
 			"gatewayURL": null
 		},
@@ -700,9 +714,6 @@ All advanced configuration options and their default values are shown below.
 		"languages": {
 			"extensions": null,
 			"patterns": null
-		},
-		"symbols": {
-			"engine": null
 		}
 	},
 
@@ -1240,7 +1251,7 @@ All advanced configuration options and their default values are shown below.
 
 If you are having trouble accessing the web UI, you can make edits to your advanced configuration by editing the configuration directly.
 
-### Sourcegraph with Docker Compose and single-server Sourcegraph with Docker
+### Sourcegraph with Docker Compose
 
 Set `FRONTEND_CONTAINER` to:
 

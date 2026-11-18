@@ -65,12 +65,17 @@ export function proxy(request: NextRequest) {
 		);
 	}
 
-	// Handle latest version without path - redirect to main docs
-	const latestVersionOnlyMatch = pathWithoutBase.match(
-		`^\/(?:v\/|@)${docsConfig.DOCS_LATEST_VERSION}\/?$`
+	// Handle latest version - drop the version and stay on this host, which
+	// is not always sourcegraph.com (ms-docs.sg.dev serves the same deployment)
+	const latestVersionMatch = pathWithoutBase.match(
+		`^\/(?:v\/|@)${docsConfig.DOCS_LATEST_VERSION}(?:\/(.*))?$`
 	);
-	if (latestVersionOnlyMatch) {
-		return NextResponse.redirect(`https://sourcegraph.com/docs`);
+	if (latestVersionMatch) {
+		const {origin, basePath} = request.nextUrl;
+		const slug = latestVersionMatch[1];
+		return NextResponse.redirect(
+			`${origin}${basePath}${slug ? `/${slug}` : ''}`
+		);
 	}
 
 	// Handle version without slug - both /v/X.Y and @X.Y formats (for non-latest versions)
@@ -87,24 +92,6 @@ export function proxy(request: NextRequest) {
 	}
 
 	// Handle version-specific redirects
-	if (pathWithoutBase.startsWith(`/v/${docsConfig.DOCS_LATEST_VERSION}/`)) {
-		return NextResponse.redirect(
-			createRedirectUrl(
-				request,
-				`https://sourcegraph.com/docs/:slug*`,
-				pathWithoutBase
-			)
-		);
-	}
-	if (pathWithoutBase.startsWith(`/@${docsConfig.DOCS_LATEST_VERSION}/`)) {
-		return NextResponse.redirect(
-			createRedirectUrl(
-				request,
-				`https://sourcegraph.com/docs/:slug*`,
-				pathWithoutBase
-			)
-		);
-	}
 	const versionMatch = pathWithoutBase.match(/^\/v\/(\d+\.\d+)\/(.*)/);
 	if (versionMatch) {
 		return NextResponse.redirect(
