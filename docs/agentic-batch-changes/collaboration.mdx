@@ -2,7 +2,7 @@
 
 Collaboration lets the owner of an agentic batch change invite other users to work on it. A collaborator can talk to the agent, answer its questions, run workspaces, and publish, for a fixed time. For example, a platform engineer who owns a framework migration invites a service team member for 24 hours to answer the agent's questions about that team's repositories and fix their CI failures.
 
-Each action runs as the user who does it, not as the owner. See [Whose credentials an action uses](#whose-credentials-an-action-uses).
+Each turn runs as the user who wrote the message, and each action runs as the user who does it, not as the owner. See [Whose credentials an action uses](#whose-credentials-an-action-uses).
 
 ## Roles
 
@@ -13,8 +13,8 @@ Each action runs as the user who does it, not as the owner. See [Whose credentia
     - Rename, share, stop, and delete the agent, and start new threads.
 - **Collaborator**: a user the owner invited. A collaborator sees the full transcript and the list of collaborators, and can:
     - Send messages and upload files.
-    - Answer the agent's questions and approve tool calls, except publish approvals.
-    - Cancel and retry turns.
+    - Answer the agent's questions, and approve secret and merge approvals in their own turns.
+    - Cancel turns, and retry their own messages.
     - Run workspaces, publish, and clean up changesets that the current plan no longer produces.
     - Ask the agent to merge changesets, and approve the merge.
 - **Administrator**: sees every agent on the [Threads page](/agentic-batch-changes/configuration#threads-page), can hand over any agent, and can invite, extend, and remove collaborators. An administrator who is not a collaborator cannot send messages or act on the agent.
@@ -37,11 +37,12 @@ The [audit log](/agentic-batch-changes/configuration#audit-log) records `collabo
 
 ## Whose credentials an action uses
 
-The user who sends the message, answers the question, approves the tool call, or clicks the action is the user it runs as. That user's repository permissions, Batch Changes credentials, secrets, connectors, guidance, and usage limits apply:
+A turn runs as the user who sent the message. An action outside a turn, such as a click on **Run** or **Publish**, runs as the user who clicks it. That user's repository permissions, Batch Changes credentials, secrets, connectors, guidance, and usage limits apply:
 
 - The agent researches and runs Deep Search as that user. Repository names the agent sees are limited to repositories that both the owner and that user can read.
 - Guidance and skills come from that user's settings and from the site and organization settings that apply to them.
 - Workspaces and coding agent steps run as that user, with that user's secrets, connectors, and Sourcegraph MCP identity. Coding agent step runs count against that user's [entitlement](/admin/entitlements).
+- A turn keeps running as the author of its message when someone else answers a question or gives a publish approval in it. Only the author retries the message and decides its secret and merge approvals.
 - Tool approvals belong to the user who gave them. An approval from one user does not count for a turn that runs as another user, also when the approval was for this agent or for all agents.
 - Before a step uses a secret, the agent asks the user whose secret it is. A step that has not changed since the previous plan is not asked about again, but only when the same user prepared that plan.
 - To run workspaces of a plan that another user prepared, a user needs an approval for this agent or for all agents for every secret the steps use. Otherwise the run is refused, and the agent can prepare the plan again to ask that user.
@@ -54,10 +55,9 @@ In these cases, the user an action runs as or is charged to is not the user who 
 
 - **Automatic turns**: when the agent wakes up on its own, for example after a run finishes or CI reports a result, the turn runs as the current owner.
 - **Changeset hooks**: CI and merge conflict automations run as the user whose turn prepared the current plan. When a collaborator's turn prepared it, hooks use that collaborator's permissions, secrets, and connectors.
-- **Retry**: a retried turn runs as the user who clicks **Retry**, not as the author of the original message.
-- **Answers and approvals**: when a turn is waiting for an answer or an approval, any owner or collaborator can answer. The turn then continues as the user who answered.
+- **Handovers**: after a [handover](#handovers), the new owner continues and retries the previous owner's turns as the new owner.
 - **Publish approvals**: before the agent publishes, it shows an approval card. A publish approval covers specific repositories and a mode, such as draft. Only the owner can give a publish approval. A collaborator can publish only to repositories and in a mode that the owner already approved for this agent.
-- **Code host pushes and syncs**: Sourcegraph pushes and syncs all changesets of the agent with the Batch Changes credential of the user who published most recently, or the global credential when that user has none. This also applies to changesets that another user published. A merge uses the credential of the user the turn runs as. When another user approves the merge, the turn continues as that user.
+- **Code host pushes and syncs**: Sourcegraph pushes and syncs all changesets of the agent with the Batch Changes credential of the user who published most recently, or the global credential when that user has none. This also applies to changesets that another user published. A merge uses the credential of the user the turn runs as.
 - **Billing**: merged changesets are [billed](/agentic-batch-changes/configuration#billing) to the subscription and recorded for the owner, no matter who published or merged them.
 - **Uploaded files**: files are stored with the agent under the owner, no matter who uploaded them. Every user who can open the agent can download them.
 - **Repository visibility at publish**: Sourcegraph checks that the owner can read the target repositories before it publishes, in addition to the publishing user's own permissions.
@@ -66,9 +66,9 @@ In these cases, the user an action runs as or is charged to is not the user who 
 
 When a collaborator's access expires or is removed:
 
-- A turn of theirs that has not started yet fails with a message that the author no longer has write access. The owner or another collaborator can retry it. The retry runs as the user who retries.
+- A turn of theirs that has not started yet fails with a message that the author no longer has write access. Nobody else can retry it.
 - A turn of theirs that is running is not stopped. The agent can continue to read and research, but it cannot run workspaces, publish, prune, or merge as that user.
-- Questions and approvals that wait in their turn stay open. The owner or another collaborator can answer them, and the turn continues as that user.
+- Questions and approvals that wait in their turn stay open. The owner or another collaborator can answer them, but the turn still runs as its author, so it then fails.
 - Their approvals for secrets stay saved but apply only to their own turns.
 - They can still read the transcript and download files through the agent's link, if they kept it. The agent page URL is that link. To stop this, the owner uses **Share** > **Reset link**. Links already shared then stop working for everyone.
 
@@ -79,4 +79,4 @@ A [handover](/agentic-batch-changes/configuration#handing-over-an-agent) is refu
 - Collaborators keep their access, except the new owner, who becomes the owner.
 - The previous owner keeps read access.
 - All publish approvals are removed. The new owner gives publish approvals again.
-- Questions and approvals that wait stay open. The new owner or a collaborator can answer them, and the turn continues as that user.
+- Questions and approvals that wait stay open. When the new owner answers, a turn of the previous owner continues as the new owner. A collaborator's turn continues as that collaborator.
