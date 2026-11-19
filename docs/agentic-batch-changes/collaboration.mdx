@@ -43,7 +43,8 @@ The user who sends the message, answers the question, approves the tool call, or
 - Guidance and skills come from that user's settings and from the site and organization settings that apply to them.
 - Workspaces and coding agent steps run as that user, with that user's secrets, connectors, and Sourcegraph MCP identity. Coding agent step runs count against that user's [entitlement](/admin/entitlements).
 - Tool approvals belong to the user who gave them. An approval from one user does not count for a turn that runs as another user, also when the approval was for this agent or for all agents.
-- The agent asks for approval to use a secret only when a step that uses it is new or changed. When a collaborator runs workspaces that the agent already prepared, the steps use the collaborator's secrets without asking the collaborator again.
+- Before a step uses a secret, the agent asks the user whose secret it is. A step that has not changed since the previous plan is not asked about again, but only when the same user prepared that plan.
+- To run workspaces of a plan that another user prepared, a user needs an approval for this agent or for all agents for every secret the steps use. Otherwise the run is refused, and the agent can prepare the plan again to ask that user.
 
 When an action cannot run as that user, it is refused with a reason. It does not fall back to the owner. For example, a publish is refused when the user has no valid Batch Changes credential for a code host and there is no global credential. A workspace fails when a secret it needs is not available to that user.
 
