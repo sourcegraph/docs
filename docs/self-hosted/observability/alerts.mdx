@@ -3653,7 +3653,39 @@ Generated query for warning alert: `min((max(rate(src_repoupdater_source_repos_t
 <details>
 <summary>Technical details</summary>
 
-Generated query for warning alert: `min((max(rate(src_repoupdater_sched_auto_fetch[1m]))) &lt;= 0)`
+Generated query for warning alert: `min((max(rate(src_repoupdater_sched_auto_fetch{job=~"^worker.*"}[5m]))) &lt;= 0)`
+
+</details>
+
+<br />
+
+## worker: ensure_revision_queue_wait
+
+<p class="subtitle">95th percentile wait for fetches of missing revisions to start</p>
+
+**Descriptions**
+
+- <span class="badge badge-warning">warning</span> worker: 30s+ 95th percentile wait for fetches of missing revisions to start for 15m0s
+
+**Next steps**
+
+- Check that the worker is running and that its logs show no errors from `repo-ensure-revision-loop`.
+- If all handlers of that pool are busy with slow fetches, raise `gitMaxConcurrentClones` in site configuration; it sets the handler count of each repo update pool.
+- More help interpreting this metric is available in the [dashboards reference](/self-hosted/observability/dashboards#worker-ensure_revision_queue_wait).
+- **Silence this alert:** If you are aware of this alert and want to silence notifications for it, add the following to your site configuration and set a reminder to re-evaluate the alert:
+
+```json
+"observability.silenceAlerts": [
+  "warning_worker_ensure_revision_queue_wait"
+]
+```
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Generated query for warning alert: `max((histogram_quantile(0.95, sum by (le) (rate(src_repoupdater_ensure_revision_queue_wait_seconds_bucket[5m])))) &gt;= 30)`
 
 </details>
 
@@ -3685,7 +3717,7 @@ Generated query for warning alert: `min((max(rate(src_repoupdater_sched_auto_fet
 <details>
 <summary>Technical details</summary>
 
-Generated query for critical alert: `min((max(rate(src_repoupdater_sched_loops[1m]))) &lt;= 0)`
+Generated query for critical alert: `min((max(rate(src_repoupdater_sched_loops{job=~"^worker.*"}[5m]))) &lt;= 0)`
 
 </details>
 
@@ -3748,7 +3780,7 @@ Generated query for warning alert: `max((max(src_repoupdater_stale_repos)) &gt;=
 <details>
 <summary>Technical details</summary>
 
-Generated query for critical alert: `max((max(rate(src_repoupdater_sched_error[1m]))) &gt;= 1)`
+Generated query for critical alert: `max((max(rate(src_repoupdater_sched_error{job=~"^worker.*"}[5m]))) &gt;= 1)`
 
 </details>
 
