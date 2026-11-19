@@ -27,6 +27,8 @@ The owner or an administrator invites collaborators from the collaborators panel
 
 Sourcegraph does not block the invite if the collaborator's repository permissions are not sufficient. The collaborator's own repository permissions apply when they act and they only see repos and changesets that they have permission for. See [Whose credentials an action uses](#whose-credentials-an-action-uses).
 
+Repository permissions do not limit the transcript. A collaborator sees the full conversation and the uploaded files, including content from repositories they cannot read.
+
 Every collaborator access expires. Select 1 hour, 24 hours, or 7 days when you invite. There is no access without an expiry and no limit on the number of collaborators. The invited user gets a notification in Sourcegraph, and the access starts immediately.
 
 To extend access, select a new duration. The access then ends that long from now, not from the old end time. After access expires or is removed, invite the user again.
@@ -41,6 +43,7 @@ The user who sends the message, answers the question, approves the tool call, or
 - Guidance and skills come from that user's settings and from the site and organization settings that apply to them.
 - Workspaces and coding agent steps run as that user, with that user's secrets, connectors, and Sourcegraph MCP identity. Coding agent step runs count against that user's [entitlement](/admin/entitlements).
 - Tool approvals belong to the user who gave them. An approval from one user does not count for a turn that runs as another user, also when the approval was for this agent or for all agents.
+- The agent asks for approval to use a secret only when a step that uses it is new or changed. When a collaborator runs workspaces that the agent already prepared, the steps use the collaborator's secrets without asking the collaborator again.
 
 When an action cannot run as that user, it is refused with a reason. It does not fall back to the owner. For example, a publish is refused when the user has no valid Batch Changes credential for a code host and there is no global credential. A workspace fails when a secret it needs is not available to that user.
 
@@ -53,7 +56,7 @@ In these cases, the user an action runs as or is charged to is not the user who 
 - **Retry**: a retried turn runs as the user who clicks **Retry**, not as the author of the original message.
 - **Answers and approvals**: when a turn is waiting for an answer or an approval, any owner or collaborator can answer. The turn then continues as the user who answered.
 - **Publish approvals**: before the agent publishes, it shows an approval card. A publish approval covers specific repositories and a mode, such as draft. Only the owner can give a publish approval. A collaborator can publish only to repositories and in a mode that the owner already approved for this agent.
-- **Code host pushes and syncs**: Sourcegraph pushes and syncs all changesets of the agent with the Batch Changes credential of the user who published most recently, or the global credential when that user has none. This also applies to changesets that another user published. A merge uses the credential of the user whose turn asked for it.
+- **Code host pushes and syncs**: Sourcegraph pushes and syncs all changesets of the agent with the Batch Changes credential of the user who published most recently, or the global credential when that user has none. This also applies to changesets that another user published. A merge uses the credential of the user the turn runs as. When another user approves the merge, the turn continues as that user.
 - **Billing**: merged changesets are [billed](/agentic-batch-changes/configuration#billing) to the subscription and recorded for the owner, no matter who published or merged them.
 - **Uploaded files**: files are stored with the agent under the owner, no matter who uploaded them. Every user who can open the agent can download them.
 - **Repository visibility at publish**: Sourcegraph checks that the owner can read the target repositories before it publishes, in addition to the publishing user's own permissions.
@@ -66,6 +69,7 @@ When a collaborator's access expires or is removed:
 - A turn of theirs that is running is not stopped. The agent can continue to read and research, but it cannot run workspaces, publish, prune, or merge as that user.
 - Questions and approvals that wait in their turn stay open. The owner or another collaborator can answer them, and the turn continues as that user.
 - Their approvals for secrets stay saved but apply only to their own turns.
+- They can still read the transcript and download files through the agent's link, if they kept it. The agent page URL is that link. To stop this, the owner uses **Share** > **Reset link**. Links already shared then stop working for everyone.
 
 ## Handovers
 
