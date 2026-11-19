@@ -16224,7 +16224,7 @@ To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101340` on 
 Query:
 
 ```
-max(rate(src_repoupdater_sched_auto_fetch[1m]))
+max(rate(src_repoupdater_sched_auto_fetch{job=~"^worker.*"}[5m]))
 ```
 </details>
 
@@ -16249,7 +16249,34 @@ To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101341` on 
 Query:
 
 ```
-max(rate(src_repoupdater_sched_manual_fetch[1m]))
+max(rate(src_repoupdater_sched_manual_fetch{job=~"^worker.*"}[5m]))
+```
+</details>
+
+<br />
+
+#### worker: ensure_revision_queue_wait
+
+<p class="subtitle">95th percentile wait for fetches of missing revisions to start</p>
+
+When a request needs a revision that the repository does not have yet, such as a newly pushed commit, it enqueues a fetch in repo_update_jobs and waits for the worker to start it.
+The `repo-ensure-revision-loop` pool in the worker checks for these fetches every 500ms, so waits are normally under a second.
+Requests that give up before the fetch starts record how long they waited, so this also rises when the worker is down.
+The time the fetch itself takes is not included.
+
+Refer to the [alerts reference](/self-hosted/observability/alerts#worker-ensure_revision_queue_wait) for 1 alert related to this panel.
+
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101350` on your Sourcegraph instance.
+
+<sub>*Managed by the Sourcegraph Services team.*</sub>
+
+<details>
+<summary>Technical details</summary>
+
+Query:
+
+```
+histogram_quantile(0.95, sum by (le) (rate(src_repoupdater_ensure_revision_queue_wait_seconds_bucket[5m])))
 ```
 </details>
 
@@ -16264,7 +16291,7 @@ When it stops, no repository is scheduled for fetching, so every repository goes
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-sched_loops) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101350` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101360` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16274,7 +16301,7 @@ To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101350` on 
 Query:
 
 ```
-max(rate(src_repoupdater_sched_loops[1m]))
+max(rate(src_repoupdater_sched_loops{job=~"^worker.*"}[5m]))
 ```
 </details>
 
@@ -16290,7 +16317,7 @@ This is always 0 when automatic git updates are disabled.
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-src_repoupdater_stale_repos) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101351` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101361` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16312,7 +16339,7 @@ max(src_repoupdater_stale_repos)
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-sched_error) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101352` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101362` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16322,7 +16349,7 @@ To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101352` on 
 Query:
 
 ```
-max(rate(src_repoupdater_sched_error[1m]))
+max(rate(src_repoupdater_sched_error{job=~"^worker.*"}[5m]))
 ```
 </details>
 
@@ -16336,7 +16363,7 @@ Repository fetches that failed due to an externally classified code-host access 
 
 This panel has no related alerts.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101353` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101363` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
@@ -16346,7 +16373,7 @@ To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101353` on 
 Query:
 
 ```
-max(rate(src_repoupdater_sched_external_error[1m]))
+max(rate(src_repoupdater_sched_external_error{job=~"^worker.*"}[5m]))
 ```
 </details>
 
@@ -16358,7 +16385,7 @@ max(rate(src_repoupdater_sched_external_error[1m]))
 
 Refer to the [alerts reference](/self-hosted/observability/alerts#worker-src_repoupdater_cleanup_failed_repos) for 1 alert related to this panel.
 
-To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101360` on your Sourcegraph instance.
+To see this panel, visit `/-/debug/grafana/d/worker/worker?viewPanel=101370` on your Sourcegraph instance.
 
 <sub>*Managed by the Sourcegraph Services team.*</sub>
 
