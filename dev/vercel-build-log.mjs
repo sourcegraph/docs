@@ -30,8 +30,9 @@
  *    when the build passed, the table of docs pages the PR changed, copied
  *    from the preview-links workflow's PR comment: each page before, after,
  *    and its diff for an open PR; each page in production and its diff for a
- *    merged one. It is a Slack table block, or a line of text per row when
- *    the pages are not one table Slack takes. The
+ *    merged one. It is a Slack table block, ending in a count of the pages
+ *    past its 10,000 characters, or a line of text per row when the pages
+ *    are not one table Slack takes. The
  *    post is looked for a week back (so a re-run by hand still finds it) and
  *    for up to 30 minutes (the app can post minutes after this runs). Skipped
  *    when SLACK_BOT_TOKEN or SLACK_CHANNEL_ID is unset; a Slack error is a
@@ -63,6 +64,8 @@ const PREVIEW_LINKS_WAIT_MINUTES = 1;
 const PREVIEW_LINKS_POLL_SECONDS = 10;
 // What the cells of a Slack table block can hold in all
 const SLACK_TABLE_CHARACTERS = 10_000;
+// What Slack posts as one message: it splits longer text at line breaks
+const SLACK_TEXT_CHARACTERS = 4_000;
 
 const API_URL = process.env.GITHUB_API_URL ?? 'https://api.github.com';
 const REPOSITORY = process.env.GITHUB_REPOSITORY;
@@ -478,8 +481,11 @@ function slackTableCell(markdown) {
 
 // The rows as a Slack table block, or nothing when they are not one table
 // Slack takes: a message holds one table (two PRs at one commit have one
-// each), its rows have the same number of cells (the list from before the
-// table has no header), and its cells hold SLACK_TABLE_CHARACTERS in all.
+// each), and its rows have the same number of cells (the list from before
+// the table has no header).
+//
+// Its cells hold SLACK_TABLE_CHARACTERS in all, so the pages past that are
+// counted in a last row, with the pages past the PR comment's own limit.
 // The Markdown is counted, which is longer than the text and URLs in it
 function slackTable(rows) {
 	const oneTable =
@@ -487,10 +493,35 @@ function slackTable(rows) {
 		rows.filter(isHeader).length === 1 &&
 		isHeader(rows[0]) &&
 		rows.every(cells => cells.length === rows[0].length);
-	if (!oneTable || rows.flat().join('').length > SLACK_TABLE_CHARACTERS) {
+	if (!oneTable) {
 		return undefined;
 	}
-	return {type: 'table', rows: rows.map(cells => cells.map(slackTableCell))};
+	const [header, ...pages] = rows;
+	let more = Number(pages.at(-1)?.[0].match(/^…and (\d+) more$/)?.[1] ?? 0);
+	if (more > 0) {
+		pages.pop();
+	}
+	const shown = () => [
+		header,
+		...pages,
+		...(more > 0
+			? [
+					header.map((_, column) =>
+						column === 0
+							? `…and ${more} more in the PR comment`
+							: ''
+					)
+				]
+			: [])
+	];
+	while (shown().flat().join('').length > SLACK_TABLE_CHARACTERS) {
+		pages.pop();
+		more++;
+	}
+	return {
+		type: 'table',
+		rows: shown().map(cells => cells.map(slackTableCell))
+	};
 }
 
 // The preview-links workflow is started by the same deployment event as this
@@ -536,7 +567,9 @@ async function changedPageRowsOf(pulls) {
 }
 
 // The message a file is shared with: the PR link, and the changed pages as
-// a table block, or as lines of text when they are not one table Slack takes
+// a table block, or as lines of text when they are not one table Slack takes.
+// Slack splits text over SLACK_TEXT_CHARACTERS into messages that each carry
+// the file again, so the lines past that are counted in a last line
 function fileMessage(pulls, error, changedPages) {
 	const text = [
 		error && `> ${error}`,
@@ -546,11 +579,20 @@ function fileMessage(pulls, error, changedPages) {
 		.join('\n');
 	const table = slackTable(changedPages);
 	if (!table) {
-		return {
-			initial_comment: [text, ...changedPages.map(slackTextRow)].join(
-				'\n'
-			)
-		};
+		const lines = changedPages.map(slackTextRow);
+		let shown = lines.length;
+		const comment = () =>
+			[
+				text,
+				...lines.slice(0, shown),
+				...(shown < lines.length
+					? [`…and ${lines.length - shown} more in the PR comments`]
+					: [])
+			].join('\n');
+		while (comment().length > SLACK_TEXT_CHARACTERS) {
+			shown--;
+		}
+		return {initial_comment: comment()};
 	}
 	return {
 		blocks: JSON.stringify([
