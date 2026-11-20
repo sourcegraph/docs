@@ -41,6 +41,15 @@ To externalize the _code navigation database_, use the following prefixed `CODEI
 -   `CODEINTEL_PGDATABASE`
 -   `CODEINTEL_PGSSLMODE`
 
+To externalize the _code insights database_, use the following prefixed `CODEINSIGHTS_PG*` variables:
+
+-   `CODEINSIGHTS_PGHOST`
+-   `CODEINSIGHTS_PGPORT`
+-   `CODEINSIGHTS_PGUSER`
+-   `CODEINSIGHTS_PGPASSWORD`
+-   `CODEINSIGHTS_PGDATABASE`
+-   `CODEINSIGHTS_PGSSLMODE`
+
 <Callout type="note">
 	If you have configured both the frontend (pgsql) and code navigation
 	(codeintel-db) databases with the same values, the Sourcegraph instance will
@@ -51,26 +60,15 @@ To externalize the _code navigation database_, use the following prefixed `CODEI
 
 ### Docker Compose
 
-1. Add/modify the following environment variables to all of the `sourcegraph-frontend-*` services, the `sourcegraph-frontend-internal` service, and the `migrator` service (for Sourcegraph versions 3.37+) in [docker-compose.yaml](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/3.37/docker-compose/docker-compose.yaml):
+1. Copy the [external databases example](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/main/docker-compose/examples/external-databases/docker-compose.override.yaml) into your `docker-compose.override.yaml` file, and set the values for your databases. The example sets the variables on the `migrator`, `sourcegraph-frontend-0`, and `sourcegraph-frontend-internal` services, and removes the built-in database services and their dependencies.
 
-```yaml
-sourcegraph-frontend-0:
-    environment:
-        - 'PGHOST=psql1.example.com'
-        - 'PGUSER=sourcegraph'
-        - 'PGPASSWORD=secret'
-        - 'PGDATABASE=sourcegraph'
-        - 'PGSSLMODE=require'
-        - 'CODEINTEL_PGHOST=psql2.example.com'
-        - 'CODEINTEL_PGUSER=sourcegraph'
-        - 'CODEINTEL_PGPASSWORD=secret'
-        - 'CODEINTEL_PGDATABASE=sourcegraph-codeintel'
-        - 'CODEINTEL_PGSSLMODE=require'
+2. Apply the override file:
+
+```bash
+docker compose -f docker-compose.yaml -f docker-compose.override.yaml up -d --remove-orphans
 ```
 
 See [Environment variables in Compose](https://docs.docker.com/compose/environment-variables/) for other ways to pass these environment variables to the relevant services (including from the command line, a `.env` file, etc.).
-
-1. Comment out / remove the internal `pgsql` and `codeintel-db` services in [docker-compose.yaml](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/3.37/docker-compose/docker-compose.yaml) since Sourcegraph is using the external one now.
 
 ### Kubernetes
 
@@ -142,9 +140,7 @@ Configure the following environment variables for the **`sourcegraph-frontend`**
 -   `CODEINSIGHTS_PGUSER=<>` - this should be the database accounts created above
 -   `CODEINSIGHTS_PGDATABASE=<>`
 
-**Optional:** If your workloads are in a specific AWS Region and you want to use regional STS endpoints for improved latency and resiliency, also set:
-
--   `AWS_STS_REGIONAL_ENDPOINTS=regional` - This configures the AWS SDK to use regional STS endpoints (e.g., `sts.us-west-2.amazonaws.com`) instead of the global endpoint (`sts.amazonaws.com`). This is recommended for better performance and resilience. See [AWS documentation](https://docs.aws.amazon.com/sdkref/latest/guide/feature-sts-regionalized-endpoints.html) for more details.
+For Docker Compose, start from the [AWS RDS example](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/main/docker-compose/examples/aws-rds-databases/docker-compose.override.yaml) override file.
 
 ## Usage with PgBouncer
 
@@ -154,7 +150,7 @@ When [PgBouncer] is used, we need to include `statement_cache_mode=describe` in 
 
 ### Docker Compose
 
-1. Add/modify the following environment variables to all of the `sourcegraph-frontend-*` services, the `sourcegraph-frontend-internal` service, and the `migrator` service (for Sourcegraph versions 3.37+) in [docker-compose.yaml](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/3.37/docker-compose/docker-compose.yaml):
+1. Set the following environment variables on the `migrator`, `sourcegraph-frontend-0`, and `sourcegraph-frontend-internal` services in your `docker-compose.override.yaml` file:
 
 ```yaml
 sourcegraph-frontend-0:
@@ -165,7 +161,7 @@ sourcegraph-frontend-0:
 
 See ["Environment variables in Compose"](https://docs.docker.com/compose/environment-variables/) for other ways to pass these environment variables to the relevant services (including from the command line, a `.env` file, etc.).
 
-1. Comment out / remove the internal `pgsql` and `codeintel-db` services in [docker-compose.yaml](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/3.37/docker-compose/docker-compose.yaml) since Sourcegraph is using the external one now.
+2. Remove the built-in database services and their dependencies, as the [external databases example](https://github.com/sourcegraph/deploy-sourcegraph-docker/blob/main/docker-compose/examples/external-databases/docker-compose.override.yaml) does.
 
 ### Kubernetes
 
