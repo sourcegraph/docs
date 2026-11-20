@@ -489,6 +489,10 @@ export const navigation: NavigationItem[] = [
 				href: '/cli',
 				sections: [
 					{title: 'Quickstart', href: '/cli/quickstart'},
+					{
+						title: 'Migrating from the legacy CLI',
+						href: '/cli/migration'
+					},
 					{title: 'Explanations', href: '/cli/explanations'},
 					{title: 'How-tos', href: '/cli/how-tos'},
 					{title: 'References', href: '/cli/references'}
