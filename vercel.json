@@ -2,13 +2,21 @@
 	"$schema": "https://openapi.vercel.sh/vercel.json",
 	"fluid": true,
 	"ignoreCommand": "sh dev/vercel-ignore-build.sh",
+	"redirects": [
+		{
+			"source": "/((?!docs(?:/|$)).+)",
+			"has": [{"type": "host", "value": "docs-legacy.sourcegraph.com"}],
+			"destination": "https://sourcegraph.com/docs/$1",
+			"permanent": false
+		}
+	],
 	"headers": [
 		{
 			"source": "/(.*)",
 			"has": [
 				{
 					"type": "host",
-					"value": "^(\\d+\\.\\d+\\.sourcegraph\\.com|ms-docs\\.sg\\.dev)$"
+					"value": "^(\\d+\\.\\d+\\.sourcegraph\\.com|ms-docs\\.sg\\.dev|docs-legacy\\.sourcegraph\\.com)$"
 				}
 			],
 			"headers": [{"key": "X-Robots-Tag", "value": "noindex, nofollow"}]
