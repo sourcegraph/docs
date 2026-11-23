@@ -103,9 +103,33 @@ function Header() {
 	);
 }
 
+// Only on docs-legacy.sourcegraph.com. The same deployment also serves
+// sourcegraph.com/docs (until the new docs take over) and ms-docs.sg.dev.
+function LegacyBanner() {
+	const [show, setShow] = useState(false);
+	useEffect(() => {
+		setShow(window.location.hostname === 'docs-legacy.sourcegraph.com');
+	}, []);
+	if (!show) return null;
+	return (
+		<p className="bg-vermilion-11 px-4 py-2 text-center text-sm text-black dark:bg-vermilion-01 dark:text-dark-text-primary">
+			You’re viewing the legacy Sourcegraph documentation, which is no
+			longer updated. See the{' '}
+			<a
+				href="https://sourcegraph.com/docs"
+				className="font-semibold text-link-light underline dark:text-link"
+			>
+				new documentation
+			</a>
+			.
+		</p>
+	);
+}
+
 export function Layout({children}: {children: React.ReactNode}) {
 	return (
 		<div className="flex w-full flex-col">
+			<LegacyBanner />
 			<Header />
 
 			<div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-12">
