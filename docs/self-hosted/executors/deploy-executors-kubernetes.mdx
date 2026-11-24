@@ -166,6 +166,46 @@ Without additional scheduling configuration, the Kubernetes scheduler can place 
 
 For example, use `EXECUTOR_KUBERNETES_NODE_SELECTOR` to restrict Jobs to a dedicated node pool.
 
+With the Helm chart, set these under `executor.kubernetesJob` as plain YAML; the chart encodes lists and maps as the JSON the executor expects. For example, to run 40 jobs at once on a tainted node pool in a `restricted` namespace:
+
+```yaml
+executor:
+  replicas: 4
+  maximumNumJobs: 10
+  kubernetesClient:
+    qps: 50
+    burst: 100
+  kubernetesJob:
+    resources:
+      requests:
+        cpu: "1"
+        memory: 2Gi
+        ephemeralStorage: 5Gi
+      limits:
+        memory: 4Gi
+        ephemeralStorage: 10Gi
+    node:
+      selector: node-pool=executor-jobs
+      tolerations:
+        - key: dedicated
+          operator: Equal
+          value: executor-jobs
+          effect: NoSchedule
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+      seccompProfile:
+        type: RuntimeDefault
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: [ALL]
+```
+
+Quote YAML values such as `"y"`, `"n"`, `"on"`, and `"off"` in these lists, or YAML reads them as booleans and the executor rejects the value.
+
 When many jobs run at once, check these Kubernetes settings on the nodes that run job pods:
 
 -   **Pods per node:** the kubelet runs at most `maxPods` pods per node, 110 by default. Job pods over the limit stay `Pending` with the event `Too many pods` until a node frees up or the cluster autoscaler adds one. GKE and AKS set the limit when the node pool is created.
@@ -174,7 +214,7 @@ When many jobs run at once, check these Kubernetes settings on the nodes that ru
 -   **Image pulls:** by default the kubelet pulls one image at a time (`serializeImagePulls`; the Amazon EKS optimized AMIs turn it off), so many new job pods on one node wait for each other's pulls. Pre-pull or mirror the step images if job pods start slowly.
 -   **API server limits:** the Kubernetes API server's API Priority and Fairness can throttle a busy executor's service account. Check for HTTP 429 responses in the executor logs.
 -   **Quotas:** a `ResourceQuota` in the job namespace can cap pods, Secrets, Jobs, CPU, or memory. When a job pod would go over it, Kubernetes does not create the pod (event `exceeded quota`), and the Job controller retries with a growing delay while the job holds an executor slot. Keep the job pods' requests, times `EXECUTOR_MAXIMUM_NUM_JOBS`, times the number of executor pods, within the quota.
--   **Pod Security:** in a namespace that enforces the `restricted` Pod Security Standard, the API server rejects the executor pod and job pods without a restricted security context (event `violates PodSecurity "restricted:latest"`). Set the executor pod's with the Helm values `executor.podSecurityContext` and `executor.containerSecurityContext`. Run job pods as a non-root user with `KUBERNETES_RUN_AS_USER` and `KUBERNETES_RUN_AS_GROUP`, and set their containers' security context with `KUBERNETES_EXECUTOR_CONTAINER_SECURITY_CONTEXT`, for example `{"allowPrivilegeEscalation": false, "capabilities": {"drop": ["ALL"]}, "runAsNonRoot": true, "seccompProfile": {"type": "RuntimeDefault"}}`. Steps then run as that user, so steps that need root fail.
+-   **Pod Security:** in a namespace that enforces the `restricted` Pod Security Standard, the API server rejects the executor pod and job pods without a restricted security context (event `violates PodSecurity "restricted:latest"`). Set the executor pod's with the Helm values `executor.podSecurityContext` and `executor.containerSecurityContext`. Set the job pods' with the Helm values `executor.kubernetesJob.podSecurityContext` and `containerSecurityContext`, as in the example above, or the JSON environment variables `KUBERNETES_EXECUTOR_POD_SECURITY_CONTEXT` and `KUBERNETES_EXECUTOR_CONTAINER_SECURITY_CONTEXT`. Steps then run as that user, so steps that need root fail.
 
 Jobs left behind when an executor pod stops, such as during an upgrade, are deleted by Kubernetes one hour after they finish.
 
