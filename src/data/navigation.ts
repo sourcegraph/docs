@@ -40,6 +40,10 @@ export const navigation: NavigationItem[] = [
 						href: '/agentic-batch-changes/configuration'
 					},
 					{
+						title: 'Collaboration',
+						href: '/agentic-batch-changes/collaboration'
+					},
+					{
 						title: 'Connectors',
 						href: '/agentic-batch-changes/connectors'
 					}
