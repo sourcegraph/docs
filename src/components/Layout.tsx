@@ -120,6 +120,13 @@ function LegacyBanner() {
 				className="font-semibold text-link-light underline dark:text-link"
 			>
 				new documentation
+			</a>{' '}
+			and{' '}
+			<a
+				href="https://sourcegraph.com/changelog/sourcegraph-documentation"
+				className="font-semibold text-link-light underline dark:text-link"
+			>
+				what’s new
 			</a>
 			.
 		</p>
