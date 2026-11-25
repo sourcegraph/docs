@@ -92,7 +92,15 @@ For clients that do not support OAuth, include a [Sourcegraph access token](/cli
 Authorization: token YOUR_ACCESS_TOKEN
 ```
 
-Access tokens can use the `mcp` scope to restrict access to MCP endpoints only.
+Access tokens can use the `mcp` scope to restrict access to MCP endpoints only. That includes the Agentic Batch Changes tools below.
+
+## Agentic Batch Changes
+
+The `mcp` scope also covers the [Agentic Batch Changes MCP server](/agentic-batch-changes/mcp) at `/.api/mcp/abc`. A credential your client got for `/.api/mcp` works there too. Users with the Batch Changes and Agent write permissions can start agents and approve their publications through it.
+
+Unattended starts are off by default. Once a site admin sets `batchChanges.agenticBatchChanges.unattended.enabled` to `true`, those users can also start agents that publish without another approval. To keep a tool off, list it in [`mcp.tools.disabled`](/api/mcp#disabling-individual-tools).
+
+When you revoke an OAuth app or access token, the agents it started keep running and standing publication approvals stay. Stop the agents and revoke the approvals separately, as described in [Authentication and tool access](/agentic-batch-changes/mcp#authentication-and-tool-access).
 
 ## Troubleshooting
 
