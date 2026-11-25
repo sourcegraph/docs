@@ -1,5 +1,15 @@
 # Sourcegraph Docs
 
+> [!WARNING]
+> This repository holds the legacy Sourcegraph documentation, served at
+> [docs-legacy.sourcegraph.com](https://docs-legacy.sourcegraph.com/docs). It
+> only takes urgent fixes. The current docs at
+> [sourcegraph.com/docs](https://sourcegraph.com/docs) are written in
+> [`docs/`](https://github.com/sourcegraph/sourcegraph/tree/main/docs) in the
+> private sourcegraph/sourcegraph repository; to contribute, see its
+> [README](https://github.com/sourcegraph/sourcegraph/blob/main/docs/README.md).
+> Without access, use the feedback link on any docs page.
+
 > [!IMPORTANT]
 > For support, please reach out to your account team or contact
 > [support@sourcegraph.com](mailto:support@sourcegraph.com)
