@@ -10,53 +10,46 @@
 
 An MCP client, such as Claude Code, Codex, or Cursor, can do what you do on the page of an [agentic batch change](/agentic-batch-changes): start an agent, follow its progress, answer its questions and publication approvals, send follow-up messages, review workspaces, patches, and logs, and stop it. The agent runs on your Sourcegraph instance as you, with your repository permissions and your Batch Changes credentials. The client only sends requests and reads results; it does not edit a local checkout.
 
-You can see and act only on agents you own. Agents shared with you do not appear.
+You can see and act only on agents you own. Agents that others share with you or invite you to collaborate on do not appear; open them in Sourcegraph.
 
 ## Before you start
 
 - Agentic Batch Changes is available to you. The read tools need `Batch Changes: Read` and `Batch Changes: Agent Read`; tools that start or change an agent also need `Batch Changes: Write` and `Batch Changes: Agent Write`. See [Access](/agentic-batch-changes/configuration#access).
 - MCP is enabled and you have the `MCP#ACCESS` permission. See [Availability and access control](/api/mcp#availability-and-access-control).
-- The `abc-mcp` feature flag is on for you. A site admin creates it under **Administration > Configuration > Feature flags** and enables it for users or organizations. While it is off, the endpoint lists no tools and every call returns `FEATURE_DISABLED`.
+- The `abc-mcp` feature flag is on for you. While it is off, the endpoint lists no tools and every call returns `FEATURE_DISABLED`.
+    - On self-hosted instances, a site admin creates it under **Administration > Configuration > Feature flags** and enables it for users or organizations.
+    - On Sourcegraph Cloud, Sourcegraph manages feature flags. Ask your account team to enable it.
 
 <Callout type="note">
-	The feature flag controls rollout, not access: users can add a feature flag
-	override for themselves. To keep a user from using these tools, remove their
-	Agentic Batch Changes permissions.
+	The feature flag controls rollout, not access: on self-hosted instances,
+	users can add a feature flag override for themselves. To keep a user from
+	using these tools, remove their Agentic Batch Changes permissions.
 </Callout>
 
-## Access tokens and scopes
+## Authentication and tool access
 
-Tools that start or change an agent need a Sourcegraph access token with an agent scope. OAuth tokens cannot carry these scopes, so a client connected through OAuth gets the read tools only.
+The endpoint uses the same `mcp` permission as the other MCP endpoints. Sign in through OAuth, or use an access token with the `mcp` or `user:all` scope. See [MCP authentication](/api/mcp/authentication).
 
-Follow least privilege: select only the scopes needed for your client's workflow.
+Your permissions and the site configuration decide which tools the endpoint lists:
 
-| Scope                                | Tools on `/.api/mcp/abc`                         |
-| ------------------------------------ | ------------------------------------------------ |
-| `mcp` or `user:all`                  | Read tools only                                  |
-| `mcp:batch-change-agents`            | All tools except `start_batch_change_unattended` |
-| `mcp:batch-change-agents:unattended` | Read tools and `start_batch_change_unattended`   |
+- The read tools need the read permissions above. They are `list_batch_changes`, `read_batch_change`, `list_batch_change_workspaces`, `read_batch_change_workspace_diff`, `read_batch_change_workspace_logs`, `read_batch_change_spec`, `read_batch_change_transcript`, and `list_batch_change_standing_approvals`.
+- The tools that start or change an agent also need the write permissions.
+- `start_batch_change_unattended` is listed only after a site admin enables unattended starts in site configuration. They are off by default:
 
-The read tools are `list_batch_changes`, `read_batch_change`, `list_batch_change_workspaces`, `read_batch_change_workspace_diff`, `read_batch_change_workspace_logs`, `read_batch_change_spec`, `read_batch_change_transcript`, and `list_batch_change_standing_approvals`.
+```json
+{
+	"batchChanges.agenticBatchChanges.unattended.enabled": true
+}
+```
 
-- For attended workflows, use `mcp:batch-change-agents`. Add `mcp:batch-change-agents:unattended` only if the client needs to start unattended agents. The two scopes do not include each other: a client that starts unattended agents and also answers or stops them needs both.
-- One token can combine the scopes needed by the same client. The agent scopes work only on `/.api/mcp/abc`. Add `mcp` to that token if the client also uses the [other MCP endpoints](/api/mcp#server-endpoints).
-- A tool that needs an agent scope is listed only when the token has that scope and you have the write permissions. Calling it without the scope returns `INSUFFICIENT_SCOPE`, and the refusal is recorded in the audit log.
-
-Token scopes cannot be edited. If an existing token lacks a required scope, create a replacement or an additional token with the scopes your client needs.
-
-To create a token:
-
-1. Open **Settings > Access tokens** and create a new token.
-2. Enter a **Token description**.
-3. Under **Token scope**, select the agent scopes for your workflow as described above. These checkboxes appear only while the `abc-mcp` flag is on for you. Checking one clears the default `user:all`, unless `site-admin:sudo` is checked. Leave `user:all` cleared: it adds nothing on this endpoint and grants full API access elsewhere.
-4. Click **Generate token** and copy it. The page shows a `curl` command that lists the tools on `/.api/mcp/abc`.
-
-Creating a token with an agent scope fails while the `abc-mcp` flag is off for the token's user. A token created earlier keeps its scopes and works again when the flag is turned back on.
+With every permission, the endpoint lists 15 tools, or 16 with unattended starts enabled. A tool in [`mcp.tools.disabled`](/api/mcp#disabling-individual-tools) is not listed, even with unattended starts enabled, and calls to it return `FEATURE_DISABLED`.
 
 <Callout type="warning">
-	**Unattended access allows publication without another approval.** An agent
-	can push branches or open changesets within the repositories and publication
-	mode selected at start.
+	**Unattended agents publish without another approval.** An agent can push
+	branches or open changesets within the repositories and publication mode
+	selected at start. Turning unattended starts off blocks new starts; agents
+	already running keep publishing within their scope until their owner or a
+	site admin stops them.
 </Callout>
 
 ## Connect a client
@@ -69,14 +62,15 @@ https://sourcegraph.example.com/.api/mcp/abc
 
 A connection to `/.api/mcp` or `/.api/mcp/all` does not include them. Add a second server entry for this URL.
 
-In all examples, replace `sourcegraph.example.com` with your Sourcegraph instance URL and set `SOURCEGRAPH_ACCESS_TOKEN` in the client's environment. For other clients, follow [Client integrations](/api/mcp/client-integrations) with this URL and an access token header.
+In all examples, replace `sourcegraph.example.com` with your Sourcegraph instance URL. For other clients, or to use an access token, follow [Client integrations](/api/mcp/client-integrations) with this URL.
 
 ### Claude Code
 
 ```bash
-claude mcp add --transport http sourcegraph-abc https://sourcegraph.example.com/.api/mcp/abc \
-  --header "Authorization: token $SOURCEGRAPH_ACCESS_TOKEN"
+claude mcp add --transport http sourcegraph-abc https://sourcegraph.example.com/.api/mcp/abc
 ```
+
+Then run `/mcp` in Claude Code and follow the browser authentication flow.
 
 ### Codex
 
@@ -85,8 +79,10 @@ Add the following to `~/.codex/config.toml`:
 ```toml
 [mcp_servers.sourcegraph-abc]
 url = "https://sourcegraph.example.com/.api/mcp/abc"
-bearer_token_env_var = "SOURCEGRAPH_ACCESS_TOKEN"
+scopes = ["mcp"]
 ```
+
+Then authenticate with `codex mcp login sourcegraph-abc`.
 
 Five tools are marked destructive: `decide_batch_change_approval`, `message_batch_change`, `control_batch_change_turn`, `stop_batch_change`, and `revoke_batch_change_standing_approval`. Codex can ask for approval before calling them. With the approval policy `never`, as in `codex exec`, such a call fails with `MCP tool call requires approval`. To run a tool without asking, approve it:
 
@@ -119,14 +115,13 @@ Add the following to `~/.cursor/mcp.json`, or to `.cursor/mcp.json` for a projec
 {
 	"mcpServers": {
 		"sourcegraph-abc": {
-			"url": "https://sourcegraph.example.com/.api/mcp/abc",
-			"headers": {
-				"Authorization": "token ${env:SOURCEGRAPH_ACCESS_TOKEN}"
-			}
+			"url": "https://sourcegraph.example.com/.api/mcp/abc"
 		}
 	}
 }
 ```
+
+Enable the server from **Cursor Settings > Tools & MCP** and follow the OAuth prompt.
 
 ## Available tools
 
@@ -138,22 +133,22 @@ Add the following to `~/.cursor/mcp.json`, or to `.cursor/mcp.json` for a projec
 	with `[truncated; see url]`.
 </Callout>
 
-Admins can disable any of these tools by name with [`mcp.tools.disabled`](/api/mcp#disabling-individual-tools). A disabled tool is not listed, and calls to it return `FEATURE_DISABLED`.
-
 ### Start an agent
 
 #### `start_batch_change`
 
 <details>
-<summary>Start an attended agent. It plans and makes the change; publishing waits for your approval.</summary>
+<summary>Start an attended agent. It plans and makes the change, and publishes only with an approval from you.</summary>
 
 **Parameters:**
 
 - `message` - The change to make, with context, constraints, and what must not change (required, up to 32,768 characters)
 - `repositories` - Full repository names such as `github.com/org/repo` (optional, up to 1,000). Omit to let the agent find repositories.
-- `request_key` - A nonblank key you generate, such as a UUID (required, up to 200 characters). Reuse it with identical input on every retry; a retry returns the first agent instead of starting a second one.
+- `request_key` - A key you generate, such as a UUID (required, up to 200 characters). Reuse it with identical input on every retry; a retry returns the first agent instead of starting a second one.
 
 Names that do not exist or that you cannot see come back in `unresolved`. If none resolve, the call fails with `EMPTY_SCOPE`.
+
+The agent skips the approval when an approval you already gave covers the repositories and publication mode: an earlier one on the same agent, or a [standing approval](#list_batch_change_standing_approvals) for all your attended agents.
 
 </details>
 
@@ -165,7 +160,7 @@ Names that do not exist or that you cannot see come back in `unresolved`. If non
 **Parameters:**
 
 - `message` - The change to make, with everything the agent needs without a person present (required, up to 32,768 characters)
-- `repositories` - Repository names (optional, up to 1,000)
+- `repositories` - Full repository names (optional, up to 1,000)
 - `query` - A Sourcegraph search whose matching repositories join the scope (optional, up to 32,768 characters)
 - `mode` - How far the agent may publish without asking (required): `none` keeps edits in Sourcegraph, `branch` pushes branches, `draft` opens draft changesets, `ready` opens changesets ready for review
 - `max_repositories` - Refuse to start if the resolved scope is larger (optional; no limit when omitted)
@@ -173,7 +168,9 @@ Names that do not exist or that you cannot see come back in `unresolved`. If non
 - `ci_repair` - Fix failing checks on changesets this agent opened (optional, default `true`)
 - `request_key` - As for `start_batch_change` (required)
 
-The scope is fixed at start. Publishing outside the scope or above `mode` is refused and shows up as a `refusal` item in `attention`. The agent uses only secrets already allowed in Sourcegraph. If it needs a decision it cannot make, it asks and waits for an answer.
+Pass `repositories`, `query`, or both. Their union must resolve to at least one repository you can see, or the call fails with `EMPTY_SCOPE`; unlike `start_batch_change`, this agent cannot find repositories on its own.
+
+The endpoint lists this tool only after a site admin enables unattended starts; see [Authentication and tool access](#authentication-and-tool-access). The scope is fixed at start. Publishing outside the scope or above `mode` is refused and shows up as a `refusal` item in `attention`. The agent uses only secrets already allowed in Sourcegraph. If it needs a decision it cannot make, it asks and waits for an answer.
 
 </details>
 
@@ -222,7 +219,11 @@ A regular read shows up to five repository names per approval and may leave out 
 
 - `agent_id` - (required)
 - `decision_id` - From `read_batch_change` (required)
-- `answers` - One entry per question, 1 to 100 (required). Each has `question_id`, and either `option_id` or `text`. Omit both to skip that question.
+- `answers` - One entry per question, 1 to 100 (required). Each has `question_id` and one of these forms:
+    - `option_id` picks a choice.
+    - `option_id` with `text` picks a choice marked `freeform` and fills it in, for example `{"question_id":"q0","option_id":"other","text":"Only frontend repositories"}`. A freeform choice without `text` returns `INVALID_ANSWER`.
+    - `text` alone gives your own answer, also to a question with choices.
+    - Neither skips the question.
 
 Include every question ID, including skipped ones. After a timeout, repeat the call with identical answers in the same order; nothing is recorded twice.
 
@@ -245,6 +246,8 @@ Read every repository page of the decision first. Then pass one of:
 - `{"decision":"allow","publication":{"mode":"draft","scope":"this_agent"}}` sets both. `mode` must match the request, except that `ready` can be lowered to `draft`.
 - With `"scope":"all_attended_agents"`, allowing also saves standing draft authority over the reviewed repositories for all your attended agents.
 - `{"decision":"request_changes","note":"What to change"}` declines and gives the agent feedback.
+
+After a timeout, repeat the call with identical fields. Adding a field you left out, even with its default value, can return `ALREADY_DECIDED`.
 
 Allowing a secret approval returns `REFUSED`; decide those in Sourcegraph. Requesting changes on one works.
 
@@ -288,7 +291,7 @@ Approvals for a single agent and changesets already published stay in place.
 - `first` - Workspaces per page, 1 to 100 (optional, default 50)
 - `after` - `next_cursor` from the previous page, with the same filters (optional)
 
-Workspaces in repositories you cannot see, or excluded by [context filters](/context-filters), are left out. When a changeset has `publication_failed`, open the agent's page to see why, fix the cause, and send a message to retry.
+Workspaces in repositories you cannot see, or excluded by [context filters](/context-filters), are left out. When a changeset has `publication_failed`, publishing, updating, or closing it failed. Open the agent's page to see why, fix the cause, and send a message to retry. A stopped agent does not retry; see [`stop_batch_change`](#stop_batch_change).
 
 </details>
 
@@ -302,6 +305,8 @@ Workspaces in repositories you cannot see, or excluded by [context filters](/con
 - `agent_id` - (required)
 - `workspace_id` - From `list_batch_change_workspaces` (required)
 - `after` - `next_cursor` from the previous page (optional)
+
+Pages walk every branch patch the workspace produced, and `changeset_spec_id` names the patch a page belongs to. A workspace with no current result can return its previous run's patches; those pages have `source: "previous_run"`.
 
 A patch over 1 MiB returns `REFUSED`; read it on the agent's page.
 
@@ -392,13 +397,13 @@ A different active message is left alone.
 - `agent_id` - (required)
 - `close_changesets` - Also queue closing its open changesets (optional, default `false`)
 
-Stopping can take several minutes. Success means cleanup is queued, not that every changeset is closed. Pushed branches stay on the code host. A stopped agent cannot continue; start a new one.
+Stopping can take several minutes. Success means cleanup is queued, not that every changeset is closed. If cleanup does not finish, the `read_batch_change` summary says so; fix the cause and call `stop_batch_change` again. On an agent that is already stopped, `close_changesets` set to `true` still queues closing its open changesets. Pushed branches stay on the code host. A stopped agent cannot continue; start a new one.
 
 </details>
 
 ## Waiting for updates
 
-To wait for a change instead of polling, pass the `version` object from your last `read_batch_change` response back unchanged. The call returns once something changed, or after `wait_seconds`. An unchanged `version` means nothing changed; call again with it.
+To wait for a change instead of polling, pass the `version` object from your last `read_batch_change` response back unchanged. The call returns once something changed, or after `wait_seconds`. An unchanged `version` means nothing changed yet, not that the work is done; call again with it. After you start an agent or allow a publication, keep reading until the work succeeds, fails, or needs you. To confirm a publication and get pull request links, use `list_batch_change_workspaces`.
 
 `wait_seconds` tops out at 50 so the reply arrives before the 60-second timeout most clients use; pass a smaller value if your client's tool timeout is shorter. Each Sourcegraph server holds up to four waiting reads per user; an extra one returns the current state within about 5 seconds.
 
@@ -414,8 +419,7 @@ These codes usually need a change outside the client:
 
 | Code                 | What to do                                                                                                                               |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `FEATURE_DISABLED`   | Agentic Batch Changes or the `abc-mcp` flag is off for you, or the tool is disabled or not permitted. Ask a site admin.                  |
-| `INSUFFICIENT_SCOPE` | Use an access token with the scope the message names. See [Access tokens and scopes](#access-tokens-and-scopes).                         |
+| `FEATURE_DISABLED`   | Agentic Batch Changes, the `abc-mcp` flag, or unattended starts are off, or the tool is disabled or not permitted. Ask a site admin.     |
 | `FORBIDDEN`          | You are not signed in, lack a permission, or can no longer access every repository in a publication. For the last case, request changes. |
 | `CREDENTIAL_BLOCKED` | Add or update the [Batch Changes credential](/batch-changes/configuring-credentials) for the code hosts the message names.               |
 | `PUBLISH_BLOCKED`    | Publication is restricted for you. Resolve it in Sourcegraph.                                                                            |
@@ -427,7 +431,7 @@ Other codes, such as `AGENT_BUSY`, `ALREADY_DECIDED`, `STALE_SPEC`, or `INVALID_
 
 ## Limitations
 
-- There is no tool to publish selected workspaces, or to merge, close, comment on, or rebase changesets. Publishing goes through the agent: an approval for attended agents, or `mode` for unattended ones.
+- There is no tool to publish selected workspaces, or to merge, close, comment on, or rebase changesets. Publishing goes through the agent. An attended agent asks for an approval unless an earlier or standing approval covers the publication; an unattended agent publishes within its `mode`.
 - Secrets and credentials cannot be entered, approved, listed, or revoked. Do this in Sourcegraph.
 - Patches and execution logs over 1 MiB cannot be read. Open the agent's page.
 - Agents cannot be renamed, deleted, or handed over, and the list searches titles only.
@@ -436,4 +440,5 @@ Other codes, such as `AGENT_BUSY`, `ALREADY_DECIDED`, `STALE_SPEC`, or `INVALID_
 
 - The agent and the tools act as you. Repository names, workspaces, patches, and logs from repositories you cannot see, or that [context filters](/context-filters) exclude, are left out.
 - Other stored text is returned as written, as the web UI shows it: the agent's answers, the transcript, the batch spec, execution logs, your original request, and failure messages. It can name a repository a filter excludes.
+- Agents keep running after you revoke the OAuth application that started them, and standing approvals stay in place. Stop the agents and revoke standing approvals separately.
 - Answers, questions, transcripts, batch specs, logs, failure messages, and patches come from a model or a code host. Your client should treat them as data, not as instructions.
