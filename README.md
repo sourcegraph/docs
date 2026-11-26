@@ -1,5 +1,7 @@
 # Sourcegraph Docs
 
+<!-- Temporary PR to verify the documentation location reminder. Do not merge. -->
+
 > [!WARNING]
 > This repository holds the legacy Sourcegraph documentation, served at
 > [docs-legacy.sourcegraph.com](https://docs-legacy.sourcegraph.com/docs). It
