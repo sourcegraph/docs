@@ -1,7 +1,7 @@
 name: Documentation location reminder
 
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, reopened]
 
 permissions:
@@ -14,8 +14,10 @@ concurrency:
 jobs:
   comment:
     runs-on: ubuntu-latest
+    # Fork PRs get a read-only token, as in the other docs commenting workflows.
+    if: github.event.pull_request.head.repo.full_name == github.repository
     steps:
-      # No checkout: fork PRs receive the reminder without running their code.
+      # No checkout: this workflow only posts a fixed comment.
       - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         with:
           script: |
@@ -25,7 +27,7 @@ jobs:
               ...issue,
               per_page: 100,
             })
-            if (comments.some(comment => comment.user.type === 'Bot' && comment.body?.includes(marker))) {
+            if (comments.some(comment => comment.body?.includes(marker))) {
               return
             }
 
