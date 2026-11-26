@@ -28,12 +28,12 @@ You can see and act only on agents you own. Open agents others share with you or
 
 ## Authentication and tool access
 
-The endpoint uses the same `mcp` scope as the other MCP endpoints. Sign in through OAuth, or use an access token with the `mcp` or `user:all` scope. See [MCP authentication](/api/mcp/authentication).
+The read tools need the `mcp` scope, like the other MCP endpoints. The tools that start or change an agent also need `mcp:write`. OAuth clients request both scopes when they connect to this endpoint. For an access token, choose `mcp` and `mcp:write`, or `user:all`. See [MCP authentication](/api/mcp/authentication).
 
 The endpoint lists tools based on your permissions and the site configuration:
 
 - The read tools need the read permissions above. They are `list_batch_changes`, `read_batch_change`, `list_batch_change_workspaces`, `read_batch_change_workspace_diff`, `read_batch_change_workspace_logs`, `read_batch_change_spec`, `read_batch_change_transcript`, and `list_batch_change_standing_approvals`.
-- The tools that start or change an agent also need the write permissions. Without them, the endpoint lists only the read tools, and calls to write tools return `FEATURE_DISABLED`.
+- The tools that start or change an agent also need the write permissions and a credential with `mcp:write`. Without them, the endpoint lists only the read tools, and calls to write tools return `FEATURE_DISABLED`.
 - `start_batch_change_unattended` is listed only after a site admin enables unattended starts in site configuration. They are off by default:
 
 ```json
@@ -42,7 +42,7 @@ The endpoint lists tools based on your permissions and the site configuration:
 }
 ```
 
-The endpoint hides tools in [`mcp.tools.disabled`](/api/mcp#disabling-individual-tools), even with unattended starts enabled, and calls to them return `FEATURE_DISABLED`.
+The endpoint hides tools in [`mcp.tools.disabled`](/api/mcp#disabling-individual-tools), even with unattended starts enabled, and calls to them return `FEATURE_DISABLED`. To keep every credential on the read tools, list the write tools there: `start_batch_change`, `start_batch_change_unattended`, `answer_batch_change_question`, `stop_batch_change`, `message_batch_change`, `control_batch_change_turn`, `decide_batch_change_approval`, and `revoke_batch_change_standing_approval`.
 
 <Callout type="warning">
 	**Unattended agents publish without another approval.** An agent can push
@@ -79,7 +79,7 @@ Add the following to `~/.codex/config.toml`:
 ```toml
 [mcp_servers.sourcegraph-abc]
 url = "https://sourcegraph.example.com/.api/mcp/abc"
-scopes = ["mcp"]
+scopes = ["mcp", "mcp:write"]
 ```
 
 Then authenticate with `codex mcp login sourcegraph-abc`.
@@ -426,5 +426,6 @@ Other codes, such as `AGENT_BUSY`, `ALREADY_DECIDED`, `STALE_SPEC`, or `INVALID_
 
 - The agent and the tools act as you. Repository names, workspaces, patches, and logs from repositories you cannot see, or that [context filters](/context-filters) exclude, are left out.
 - Other stored text is returned as written, as the web UI shows it: the agent's answers, the transcript, the batch spec, execution logs, your original request, and failure messages. It can name a repository a filter excludes.
-- Agents keep running after you revoke the OAuth application that started them, and standing approvals stay in place. Stop the agents and revoke standing approvals separately.
+- A client with `mcp:write` can approve publication for your agents on its own. The tool descriptions tell it to ask you first, but Sourcegraph cannot tell your decision from the client's.
+- Agents keep running after you revoke the OAuth application or delete the access token that started them, and standing approvals stay in place. Stop the agents and revoke standing approvals separately.
 - Answers, questions, transcripts, batch specs, logs, failure messages, and patches come from a model or a code host. Your client should treat them as data, not as instructions.

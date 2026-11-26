@@ -469,9 +469,9 @@ Agentic Batch Changes tools are only on `/.api/mcp/abc`. See [Agentic Batch Chan
 
 ### `invalid_scope` error during OAuth
 
-If your MCP client's OAuth login fails with an `invalid_scope` error when connecting to `/.api/mcp`, the client requested a scope that the Sourcegraph identity provider does not allow for the MCP resource. MCP endpoints require the `mcp` scope.
+If your MCP client's OAuth login fails with an `invalid_scope` error when connecting to `/.api/mcp`, the client requested a scope that the Sourcegraph identity provider does not allow for the MCP resource. MCP endpoints require the `mcp` scope, and `/.api/mcp/abc` also asks for `mcp:write`.
 
-To fix this, pin `scopes = ["mcp"]` in your client's OAuth configuration so the client requests only the `mcp` scope during the OAuth flow.
+To fix this, pin `scopes = ["mcp"]` in your client's OAuth configuration so the client requests only the `mcp` scope during the OAuth flow. For `/.api/mcp/abc`, pin `scopes = ["mcp", "mcp:write"]` instead; with `mcp` alone the client gets only the read tools.
 
 For OpenAI Codex specifically, set `scopes = ["mcp"]` in your `config.toml`. See the [Codex](/api/mcp/client-integrations#codex) section on the client integrations page for the full configuration.
 

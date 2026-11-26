@@ -20,7 +20,7 @@ The Sourcegraph MCP server supports OAuth 2.0 and access token authentication.
 
 Sourcegraph implements Dynamic Client Registration (DCR) as defined by [RFC 7591](https://datatracker.ietf.org/doc/html/rfc7591). Compatible MCP clients can register automatically and authenticate through a browser without a pre-configured client ID.
 
-DCR is enabled by default. Applications created through DCR are restricted to the `mcp` scope, which limits access to MCP endpoints.
+DCR is enabled by default. Applications created through DCR are restricted to the `mcp` and `mcp:write` scopes, which limit access to MCP endpoints.
 
 ## OAuth with a Pre-registered Client
 
@@ -35,7 +35,7 @@ Configure and test pre-registered clients before disabling DCR to avoid interrup
     - A descriptive name and optional description.
     - The redirect URI required by your MCP client. For `mcp-remote`, use `http://localhost:3334/oauth/callback`.
     - **Public** as the client type.
-    - The `mcp` scope.
+    - The `mcp` scope. For Agentic Batch Changes, also `mcp:write`.
 3. Create the client and copy its client ID.
 
 See [OAuth Apps](/admin/oauth-apps#creating-an-oauth-app) for more information about creating and managing OAuth clients.
@@ -92,20 +92,34 @@ For clients that do not support OAuth, include a [Sourcegraph access token](/cli
 Authorization: token YOUR_ACCESS_TOKEN
 ```
 
-Access tokens can use the `mcp` scope to restrict access to MCP endpoints only.
+Access tokens can use the `mcp` scope to restrict access to MCP endpoints only. Add `mcp:write` for the Agentic Batch Changes tools that start or change an agent.
 
 ## Agentic Batch Changes
 
-The `mcp` scope also covers the [Agentic Batch Changes MCP server](/agentic-batch-changes/mcp) at `/.api/mcp/abc`. A credential your client got for `/.api/mcp` works there too. Users with the Batch Changes and Agent write permissions can start agents and approve their publications through it. For unattended starts and what revoking access leaves running, see [Authentication and tool access](/agentic-batch-changes/mcp#authentication-and-tool-access) and [Security](/agentic-batch-changes/mcp#security).
+The [Agentic Batch Changes MCP server](/agentic-batch-changes/mcp) at `/.api/mcp/abc` lists its read tools with the `mcp` scope. Starting agents and approving their publications also needs `mcp:write`, plus the Batch Changes and Agent write permissions. OAuth clients request `mcp` and `mcp:write` when they connect to `/.api/mcp/abc`; the other MCP endpoints request only `mcp`. For unattended starts and what revoking access leaves running, see [Authentication and tool access](/agentic-batch-changes/mcp#authentication-and-tool-access) and [Security](/agentic-batch-changes/mcp#security).
 
 ## Troubleshooting
 
 Most MCP connection issues come from OAuth or access-control configuration rather than the MCP endpoint itself.
 
-| If you see                                                                      | Likely cause                                                            | What to check                                                                                                                                                                                                                                                             |
-| ------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `invalid_scope` during OAuth sign-in                                            | The OAuth client requested a scope it is not configured to use          | For MCP-only connections, request the `mcp` scope. DCR clients cannot request general API scopes such as `user:all`. For an integration that also needs GraphQL access, create a pre-registered [OAuth App](/admin/oauth-apps) configured with both `mcp` and `user:all`. |
-| `redirect_uri_mismatch` or a token exchange failure after browser authorization | The OAuth client is missing the callback URL expected by the MCP client | Register the exact redirect URI your client uses. For the `mcp-remote` configuration above, add `http://localhost:3334/oauth/callback` to the OAuth App.                                                                                                                  |
-| `/.auth/idp/oauth/register` returns `404 not found`                             | Dynamic Client Registration is disabled                                 | Confirm `mcp.enabled` and `auth.idpDynamicClientRegistrationEnabled` are both `true`. To keep MCP available without DCR, use a pre-registered OAuth client instead.                                                                                                       |
-| Users must sign in again frequently after the integration previously worked     | The client is not refreshing tokens correctly                           | OAuth access tokens expire after one hour. Store the newest `refresh_token` returned by each refresh because refresh tokens are one-time use. M2M flows do not return refresh tokens; request a new access token when the current one expires.                            |
-| `403 forbidden` from `/.api/mcp`                                                | The token lacks the `mcp` scope or the user lacks MCP access            | Confirm the OAuth client is configured with `mcp` and the user has the `MCP#ACCESS` permission. If MCP is disabled, the endpoint returns `404` instead.                                                                                                                   |
+| If you see                                                                      | Likely cause                                                            | What to check                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `invalid_scope` during OAuth sign-in                                            | The OAuth client requested a scope it is not configured to use          | For Agentic Batch Changes, see [Agentic Batch Changes sign-in fails with `invalid_scope`](#agentic-batch-changes-sign-in-fails-with-invalid_scope). For other MCP connections, request the `mcp` scope. DCR clients cannot request general API scopes such as `user:all`. For an integration that also needs GraphQL access, create a pre-registered [OAuth App](/admin/oauth-apps) configured with both `mcp` and `user:all`. |
+| `redirect_uri_mismatch` or a token exchange failure after browser authorization | The OAuth client is missing the callback URL expected by the MCP client | Register the exact redirect URI your client uses. For the `mcp-remote` configuration above, add `http://localhost:3334/oauth/callback` to the OAuth App.                                                                                                                                                                                                                                                                       |
+| `/.auth/idp/oauth/register` returns `404 not found`                             | Dynamic Client Registration is disabled                                 | Confirm `mcp.enabled` and `auth.idpDynamicClientRegistrationEnabled` are both `true`. To keep MCP available without DCR, use a pre-registered OAuth client instead.                                                                                                                                                                                                                                                            |
+| Users must sign in again frequently after the integration previously worked     | The client is not refreshing tokens correctly                           | OAuth access tokens expire after one hour. Store the newest `refresh_token` returned by each refresh because refresh tokens are one-time use. M2M flows do not return refresh tokens; request a new access token when the current one expires.                                                                                                                                                                                 |
+| `403 forbidden` from `/.api/mcp`                                                | The token lacks the `mcp` scope or the user lacks MCP access            | Confirm the OAuth client is configured with `mcp` and the user has the `MCP#ACCESS` permission. If MCP is disabled, the endpoint returns `404` instead.                                                                                                                                                                                                                                                                        |
+
+### Agentic Batch Changes sign-in fails with `invalid_scope`
+
+An OAuth client registered with only `mcp` fails when it asks for `mcp:write`. Until it signs in again, its cached `mcp` credential lists only the read tools.
+
+For Claude Code, log out before logging in again so it registers with both scopes:
+
+```shell
+claude mcp logout <name> && claude mcp login <name>
+```
+
+A plain `claude mcp login <name>` can fail once with `invalid_scope`; run it again.
+
+For a pre-registered OAuth app, a site admin adds `mcp:write` to its scopes in **Administration > OAuth clients > Edit**. Users still approve write access on the consent screen.
