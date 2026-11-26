@@ -1,0 +1,39 @@
+name: Documentation location reminder
+
+on:
+  pull_request:
+    types: [opened, reopened]
+
+permissions:
+  pull-requests: write
+
+# Serialize runs for a PR so reopening it cannot create duplicate comments.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    # Fork PRs get a read-only token, as in the other docs commenting workflows.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      # No checkout: this workflow only posts a fixed comment.
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        with:
+          script: |
+            const marker = '<!-- docs-location-reminder -->'
+            const issue = { ...context.repo, issue_number: context.issue.number }
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              ...issue,
+              per_page: 100,
+            })
+            if (comments.some(comment => comment.body?.includes(marker))) {
+              return
+            }
+
+            await github.rest.issues.createComment({
+              ...issue,
+              body: `${marker}
+            > [!IMPORTANT]
+            > Updating product documentation? Please open your PR in [\`sourcegraph/sourcegraph/docs/\`](https://github.com/sourcegraph/sourcegraph/tree/main/docs). This repository only accepts urgent fixes for the legacy docs site.`,
+            })
