@@ -35,12 +35,21 @@ chmod +x /usr/local/bin/src
 You can install using PowerShell as follows:
 
 ```powershell
-New-Item -ItemType Directory 'C:\Program Files\Sourcegraph'
+$SrcInstallDir = "$env:ProgramFiles\Sourcegraph"
+New-Item -ItemType Directory -Path $SrcInstallDir -Force | Out-Null
 
-Invoke-WebRequest https://sourcegraph.com/.api/src-cli/src_windows_amd64.exe -OutFile 'C:\Program Files\Sourcegraph\src.exe'
+Invoke-WebRequest https://sourcegraph.com/.api/src-cli/src_windows_amd64.exe -OutFile "$SrcInstallDir\src.exe"
 
-[Environment]::SetEnvironmentVariable('Path', [Environment]::GetEnvironmentVariable('Path', [EnvironmentVariableTarget]::Machine) + ';C:\Program Files\Sourcegraph', [EnvironmentVariableTarget]::Machine)
-$env:Path += ';C:\Program Files\Sourcegraph'
+$MachineEnvironment = Get-Item 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
+$MachinePath = $MachineEnvironment.GetValue('Path', '', 'DoNotExpandEnvironmentNames')
+$InstallPathPattern = [regex]::Escape('%ProgramFiles%\Sourcegraph')
+$MachinePathEntries = @($MachinePath -split ';' | Where-Object { $_ -notMatch "^$InstallPathPattern\\?$" })
+$MachinePathEntries += '%ProgramFiles%\Sourcegraph'
+Set-ItemProperty -LiteralPath $MachineEnvironment.PSPath -Name Path -Value ($MachinePathEntries -join ';') -Type ExpandString -ErrorAction Stop
+
+if (($env:Path -split ';') -notContains $SrcInstallDir) {
+    $env:Path += ";$SrcInstallDir"
+}
 ```
 
 For other options, please refer to [the Windows specific `src` documentation](/cli/explanations/windows).
