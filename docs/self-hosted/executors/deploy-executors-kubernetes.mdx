@@ -12,7 +12,7 @@ The native Kubernetes Executors have a master Executor pod that schedules worker
 
 ## How it works
 
-The executor runs as a pod and polls Sourcegraph for work. After dequeuing a job, it clones the target repository into a shared workspace and asks the Kubernetes API to create a job pod. Each step runs sequentially as an init container in that pod and shares the workspace through a volume. The executor streams the step logs and final job status back to Sourcegraph.
+The executor runs as a pod and polls Sourcegraph for work. After dequeuing a job, it asks the Kubernetes API to create a job pod with its own workspace volume. The pod's first init container clones the target repository into the workspace, then each step runs sequentially as an init container in that pod. The executor streams the step logs and final job status back to Sourcegraph, then deletes the job pod.
 
 **On this page**
 
@@ -30,6 +30,7 @@ Executors interact with the Kubernetes API to manage the lifecycle of individual
 | ---------- | ------------------ | ---------------------- | ----------------------------------------------------------------------------------------- |
 | `batch`    | `jobs`             | `create`, `delete`     | Executors create Job pods to run processes. Once Jobs are completed, they are cleaned up. |
 |            | `pods`, `pods/log` | `get`, `list`, `watch` | Executors need to look up and stream logs from the Job Pods.                               |
+|            | `secrets`          | `create`, `delete`     | Each job gets a Secret holding its access token and workspace files.                       |
 
 Here's an example Role YAML to demonstrate the RBAC requirements for native Kubernetes Executors:
 
@@ -150,9 +151,11 @@ or [installing the binary](/self-hosted/executors/deploy-executors-binary) direc
 
 ### Scale and schedule jobs
 
-Run one native Kubernetes executor controller for each deployment. Do not scale the controller Deployment by adding replicas. To increase the number of jobs that the controller can run concurrently, set the Helm value `executor.maximumNumJobs` or the equivalent `EXECUTOR_MAXIMUM_NUM_JOBS` environment variable. The default Helm value is 10.
+Each executor pod runs up to `EXECUTOR_MAXIMUM_NUM_JOBS` jobs at once (Helm value `executor.maximumNumJobs`, default 10). To run more jobs at once, raise that value, run more executor pods, or both. Executor pods can serve the same queues: each pod dequeues its own jobs, and no two pods get the same job. With Helm, set `executor.replicas`; with Kustomize, scale the executor Deployment. The most jobs that run at once is the number of executor pods times `EXECUTOR_MAXIMUM_NUM_JOBS`.
 
-Each job runs in its own pod and has its own workspace volume. By default, the workspace uses an `emptyDir` volume, so job pods do not need to run on the same node as the executor controller. If `KUBERNETES_JOB_VOLUME_TYPE` is set to `pvc`, the executor creates a separate PVC for each job.
+Several pods with fewer jobs each scale better than one pod with many jobs. Each executor pod dequeues one job at a time and has its own limit on requests to the Kubernetes API, `EXECUTOR_KUBERNETES_CLIENT_QPS` and `EXECUTOR_KUBERNETES_CLIENT_BURST` (Helm values `executor.kubernetesClient.qps` and `burst`, defaults 50 and 100), shared by all of the pod's jobs. Each job makes about 10 API calls.
+
+Each job runs in its own pod and has its own workspace volume. By default, the workspace uses an `emptyDir` volume, so job pods do not need to run on the same node as the executor pod. If `KUBERNETES_JOB_VOLUME_TYPE` is set to `pvc`, the executor creates a separate PVC for each job.
 
 Without additional scheduling configuration, the Kubernetes scheduler can place job pods on any suitable node. Use the following optional environment variables to constrain their placement:
 
@@ -162,6 +165,58 @@ Without additional scheduling configuration, the Kubernetes scheduler can place 
 -   `EXECUTOR_KUBERNETES_NODE_REQUIRED_AFFINITY_MATCH_FIELDS`
 
 For example, use `EXECUTOR_KUBERNETES_NODE_SELECTOR` to restrict Jobs to a dedicated node pool.
+
+With the Helm chart, set these under `executor.kubernetesJob` as plain YAML; the chart encodes lists and maps as the JSON the executor expects. For example, to run 40 jobs at once on a tainted node pool in a `restricted` namespace:
+
+```yaml
+executor:
+  replicas: 4
+  maximumNumJobs: 10
+  kubernetesClient:
+    qps: 50
+    burst: 100
+  kubernetesJob:
+    resources:
+      requests:
+        cpu: "1"
+        memory: 2Gi
+        ephemeralStorage: 5Gi
+      limits:
+        memory: 4Gi
+        ephemeralStorage: 10Gi
+    node:
+      selector: node-pool=executor-jobs
+      tolerations:
+        - key: dedicated
+          operator: Equal
+          value: executor-jobs
+          effect: NoSchedule
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+      seccompProfile:
+        type: RuntimeDefault
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: [ALL]
+```
+
+Quote YAML values such as `"y"`, `"n"`, `"on"`, and `"off"` in these lists, or YAML reads them as booleans and the executor rejects the value.
+
+When many jobs run at once, check these Kubernetes settings on the nodes that run job pods:
+
+-   **Pods per node:** the kubelet runs at most `maxPods` pods per node, 110 by default. Job pods over the limit stay `Pending` with the event `Too many pods` until a node frees up or the cluster autoscaler adds one. GKE and AKS set the limit when the node pool is created.
+-   **Pod IP addresses:** every job pod needs an IP address from the cluster network. On Amazon EKS with the VPC CNI, a node has a limited number of IP addresses per network interface, and the CNI assigns more as pods start. When many job pods start at once, some fail with the event `FailedCreatePodSandBox ... failed to assign an IP address to container`, and the kubelet retries them, which delays the job. Enable prefix delegation (`ENABLE_PREFIX_DELEGATION=true` on the `aws-node` DaemonSet), or raise `WARM_IP_TARGET` or `MINIMUM_IP_TARGET`, and check that the node subnets have enough free addresses. Other network plugins have similar per-node address ranges.
+-   **Requests:** the scheduler places job pods by their requests. Job pods that do not fit stay `Pending` with the event `Insufficient memory` or `Insufficient cpu`. Set `EXECUTOR_KUBERNETES_RESOURCE_REQUEST_MEMORY` and `EXECUTOR_KUBERNETES_RESOURCE_REQUEST_CPU` to what a job needs. With the default `emptyDir` workspace, set `EXECUTOR_KUBERNETES_RESOURCE_REQUEST_EPHEMERAL_STORAGE` to at least `KUBERNETES_JOB_VOLUME_SIZE` (default `5Gi`), so the scheduler does not place more jobs on a node than its disk holds.
+-   **Image pulls:** by default the kubelet pulls one image at a time (`serializeImagePulls`; the Amazon EKS optimized AMIs turn it off), so many new job pods on one node wait for each other's pulls. Pre-pull or mirror the step images if job pods start slowly.
+-   **API server limits:** the Kubernetes API server's API Priority and Fairness can throttle a busy executor's service account. Check for HTTP 429 responses in the executor logs.
+-   **Quotas:** a `ResourceQuota` in the job namespace can cap pods, Secrets, Jobs, CPU, or memory. When a job pod would go over it, Kubernetes does not create the pod (event `exceeded quota`), and the Job controller retries with a growing delay while the job holds an executor slot. Keep the job pods' requests, times `EXECUTOR_MAXIMUM_NUM_JOBS`, times the number of executor pods, within the quota.
+-   **Pod Security:** in a namespace that enforces the `restricted` Pod Security Standard, the API server rejects the executor pod and job pods without a restricted security context (event `violates PodSecurity "restricted:latest"`). Set the executor pod's with the Helm values `executor.podSecurityContext` and `executor.containerSecurityContext`. Set the job pods' with the Helm values `executor.kubernetesJob.podSecurityContext` and `containerSecurityContext`, as in the example above, or the JSON environment variables `KUBERNETES_EXECUTOR_POD_SECURITY_CONTEXT` and `KUBERNETES_EXECUTOR_CONTAINER_SECURITY_CONTEXT`. Steps then run as that user, so steps that need root fail.
+
+Jobs left behind when an executor pod stops, such as during an upgrade, are deleted by Kubernetes one hour after they finish.
 
 ### Firewall Rules
 
