@@ -1,23 +1,28 @@
-# Sourcegraph Docs
+# Sourcegraph Docs (legacy)
 
-> [!WARNING]
-> This repository holds the legacy Sourcegraph documentation, served at
-> [docs-legacy.sourcegraph.com](https://docs-legacy.sourcegraph.com/docs). It
-> only takes urgent fixes. The current docs at
-> [sourcegraph.com/docs](https://sourcegraph.com/docs) are written in
-> [`docs/`](https://github.com/sourcegraph/sourcegraph/tree/main/docs) in the
-> private sourcegraph/sourcegraph repository; to contribute, see its
-> [README](https://github.com/sourcegraph/sourcegraph/blob/main/docs/README.md).
-> Without access, use the feedback link on any docs page.
+This repository contains the legacy Sourcegraph documentation, served at
+[docs-legacy.sourcegraph.com](https://docs-legacy.sourcegraph.com/docs).
+Routine documentation updates belong in the maintained docs, not this repository.
 
-> [!IMPORTANT]
-> For support, please reach out to your account team or contact
-> [support@sourcegraph.com](mailto:support@sourcegraph.com)
+## Maintained documentation
 
-Welcome to the Sourcegraph documentation! We're excited to have you contribute
-to our docs. Our docs tech stack is powered by Next.js, TailwindCSS and deployed
-on Vercel. This guide will walk you through the process of contributing to our
-documentation.
+Read the current docs at [sourcegraph.com/docs](https://sourcegraph.com/docs).
+To propose changes, use
+[`sourcegraph/sourcegraph/docs/`](https://github.com/sourcegraph/sourcegraph/tree/main/docs)
+and follow its
+[README](https://github.com/sourcegraph/sourcegraph/blob/main/docs/README.md).
+The monorepo is private; without access, use the feedback link on a maintained
+docs page.
+
+## Legacy reference and urgent fixes
+
+The source, history, pull requests and diffs are retained for reference.
+Archiving this repository does not shut down the legacy site.
+After archival, an administrator can temporarily unarchive it for an approved
+urgent legacy-site fix.
+
+For support, contact your account team or
+[support@sourcegraph.com](mailto:support@sourcegraph.com).
 
 ## Get started
 
