@@ -127,7 +127,9 @@ The HTTP POST request sent to the receiver will have a JSON-encoded body with th
 -   `monitorDescription`: The description of the monitor as configured in the UI
 -   `monitorURL`: A link to the monitor configuration page
 -   `query`: The query that generated `results`
--   `results`: The list of results that triggered this notification. Contains the following sub-fields
+-   `resultCount`: The exact number of matches that triggered the notification. A single result entry can contain multiple matches, so this can be greater than the length of `results`.
+-   `resultsTruncated`: Whether Sourcegraph omitted result details after reaching its payload storage limit.
+-   `results`: An ordered prefix of the results that triggered this notification, when including result contents is enabled. When `resultsTruncated` is `true`, use `resultCount` to determine the complete match count. Contains the following sub-fields:
     -   `repository`: The name of the repository the commit belongs to
     -   `commit`: The commit hash for the matched commit.
     -   `diff`: The matching diff in unified diff format. Only set if the result is a diff match.
@@ -142,6 +144,8 @@ The HTTP POST request sent to the receiver will have a JSON-encoded body with th
 	"monitorDescription": "My test monitor",
 	"monitorURL": "https://sourcegraph.com/code-monitoring/Q29kZU1vbml0b3I6NDI=?utm_source=",
 	"query": "repo:camdentest -file:id_rsa.pub BEGIN",
+	"resultCount": 3,
+	"resultsTruncated": false,
 	"results": [
 		{
 			"repository": "github.com/test/test",
