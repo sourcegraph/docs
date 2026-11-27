@@ -553,6 +553,10 @@ export const navigation: NavigationItem[] = [
 					},
 					{title: 'OAuth apps', href: '/admin/oauth-apps'},
 					{
+						title: 'Setting up Sourcegraph securely',
+						href: '/admin/security'
+					},
+					{
 						title: 'Executors',
 						href: '/admin/executors',
 						subsections: [
