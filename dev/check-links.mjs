@@ -15,7 +15,9 @@
  * - With --check-self-links, absolute links to this site (https://sourcegraph.com/docs/...,
  *   the legacy https://docs.sourcegraph.com/... host, http://, //, www.), which
  *   should be relative links; the finding proposes one, following src/data/redirects.ts
- * - With --check-external, external links on added lines that return 404 or 410
+ * - With --check-external, external links that return 404 or 410, and
+ *   sourcegraph.com links to a search whose repo: filters match no repository,
+ *   or to a repository, revision, or path that it does not have
  *
  * The pull request workflow (.github/workflows/check-links.yml) runs this with
  * the flags below; `pnpm run build` does not run it, so findings never fail a deploy.
@@ -33,9 +35,17 @@
  *                          `git diff -U0 origin/main`. Markdown output splits
  *                          findings into outbound (in a file the diff touches) and
  *                          inbound (elsewhere); the added lines scope the two flags below
- *   --check-external       Request every external link on an added line and report
- *                          404s and 410s. Follows redirects; ignores #anchors, other
- *                          statuses, and network errors. Requires --diff
+ *   --check-external       Request every external link, or with --diff only those on
+ *                          an added line, and report 404s and 410s. Follows redirects
+ *                          and ignores #anchors. sourcegraph.com search,
+ *                          repository, directory, and file links are looked up
+ *                          through its GraphQL API instead. Other statuses, searches
+ *                          without matches, and network errors are not findings;
+ *                          stderr counts them, by host. A 429
+ *                          with a Retry-After header is retried after that wait,
+ *                          for up to 5 minutes per host.
+ *                          SRC_ACCESS_TOKEN, when set, authenticates requests to
+ *                          SRC_ENDPOINT (default https://sourcegraph.com)
  *   --review <file>        Write a GitHub pull request review (JSON body for
  *                          POST /repos/{owner}/{repo}/pulls/{n}/reviews) with one
  *                          suggested-change comment per added line that has a fix
@@ -46,6 +56,7 @@
 import fs from 'fs';
 import path from 'path';
 import GithubSlugger from 'github-slugger';
+import { setTimeout as sleep } from 'timers/promises';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { fileUrl, flagValue, groupByFile, linkTo, listFiles, parseDiff, report, withoutBaseline } from './check-shared.mjs';
 
@@ -61,10 +72,6 @@ const FORMAT = flagValue('--format') ?? 'text';
 const BASELINE_FILE = flagValue('--baseline');
 const DIFF = parseDiff(flagValue('--diff'));
 const CHECK_EXTERNAL = args.includes('--check-external');
-
-if (CHECK_EXTERNAL && !DIFF) {
-	throw new Error('--check-external needs --diff, to know which lines were added');
-}
 
 const DOCS_DIR = path.join(ROOT_DIR, 'docs');
 // Files whose links are checked. Only .mdx files become site routes; see
@@ -413,7 +420,7 @@ async function findBrokenLinks() {
 			const problem = validateLink(link, fullPath, maps);
 			if (problem) {
 				findings.push({ ...location, ...(typeof problem === 'string' ? { error: problem } : problem) });
-			} else if (CHECK_EXTERNAL && isExternalLink(link.url) && isAddedLine(location.file, location.line)) {
+			} else if (CHECK_EXTERNAL && isExternalLink(link.url) && (!DIFF || isAddedLine(location.file, location.line))) {
 				externalLinks.push(location);
 			}
 		}
@@ -436,45 +443,199 @@ function isExternalLink(url) {
 	}
 }
 
-// HTTP status of url after redirects, or undefined on a network error or timeout.
-// HEAD first; some servers refuse or misreport HEAD, so an error status is
-// confirmed with a GET whose body is not read.
-async function probeUrl(url) {
-	const request = method =>
-		fetch(url, {
-			method,
-			redirect: 'follow',
-			signal: AbortSignal.timeout(15_000),
-			headers: { 'user-agent': 'sourcegraph-docs-check-links (+https://github.com/sourcegraph/docs)' }
-		});
-	try {
-		let response = await request('HEAD');
-		if (response.status >= 400) {
-			response = await request('GET');
-			await response.body?.cancel();
+// The Sourcegraph instance and access token that src-cli reads from the environment.
+// The token is sent to that instance only; fetch drops it on a redirect to another origin.
+const SOURCEGRAPH_ORIGIN = (process.env.SRC_ENDPOINT || 'https://sourcegraph.com').replace(/\/+$/, '');
+const SOURCEGRAPH_ACCESS_TOKEN = process.env.SRC_ACCESS_TOKEN;
+
+function requestHeaders(url) {
+	const headers = { 'user-agent': 'sourcegraph-docs-check-links (+https://github.com/sourcegraph/docs)' };
+	if (SOURCEGRAPH_ACCESS_TOKEN && new URL(url).origin === SOURCEGRAPH_ORIGIN) {
+		headers.authorization = `token ${SOURCEGRAPH_ACCESS_TOKEN}`;
+	}
+	return headers;
+}
+
+// Milliseconds a response's Retry-After header asks to wait, given as seconds or
+// as an HTTP date; undefined without a usable header
+function retryAfterMilliseconds(response) {
+	const value = response.headers.get('retry-after')?.trim();
+	if (!value) return undefined;
+	const milliseconds = /^\d+$/.test(value) ? Number(value) * 1000 : Date.parse(value) - Date.now();
+	return Number.isNaN(milliseconds) ? undefined : Math.max(milliseconds, 0);
+}
+
+// How long the scan keeps honoring a host's Retry-After headers, from its first
+// wait on that host. Later 429s from the host are left unverified, so a host that
+// never lets up cannot stall the scan.
+const RETRY_WINDOW_MILLISECONDS = 5 * 60_000;
+// Per host that answered 429: { retryAt, giveUpAt }, both in epoch milliseconds
+const rateLimitByHost = new Map();
+
+// Requests url once its host allows it, and again after each 429 that says how
+// long to wait. Every request to a rate-limited host waits, not only the one that
+// was refused.
+async function request(url, options, timeoutMilliseconds = 15_000) {
+	const { host } = new URL(url);
+	for (;;) {
+		while (rateLimitByHost.get(host)?.retryAt > Date.now()) {
+			await sleep(rateLimitByHost.get(host).retryAt - Date.now());
 		}
-		return response.status;
-	} catch {
-		return undefined;
+		const response = await fetch(url, {
+			redirect: 'follow',
+			signal: AbortSignal.timeout(timeoutMilliseconds),
+			...options,
+			headers: { ...requestHeaders(url), ...options.headers }
+		});
+		const wait = response.status === 429 ? retryAfterMilliseconds(response) : undefined;
+		if (wait === undefined) return response;
+
+		const now = Date.now();
+		const limit = rateLimitByHost.get(host) ?? { retryAt: 0, giveUpAt: now + RETRY_WINDOW_MILLISECONDS };
+		if (now + wait > limit.giveUpAt) return response;
+		await response.body?.cancel();
+		if (limit.retryAt <= now) {
+			console.error(`⏳ ${host} returned HTTP 429; retrying in ${Math.ceil(wait / 1000)} s`);
+		}
+		rateLimitByHost.set(host, { ...limit, retryAt: Math.max(limit.retryAt, now + wait) });
 	}
 }
 
-// Findings for external links whose target is gone. Only 404 and 410 count: rate
-// limits, bot blocks, server errors, and network failures are not the PR's fault.
+// sourcegraph.com puts a Cloudflare challenge (HTTP 429 without Retry-After) in
+// front of a burst of page requests, and its search page answers 200 whatever the
+// query. So links to its search, repository, directory, and file pages are checked
+// through its GraphQL API, which is not behind the challenge and needs no access token.
+const DOTCOM_ORIGIN = 'https://sourcegraph.com';
+
+// { data } of a GraphQL query, or { unverified } with the reason there is none
+async function queryDotcom(query, variables) {
+	const response = await request(
+		`${DOTCOM_ORIGIN}/.api/graphql`,
+		{ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ query, variables }) },
+		30_000
+	);
+	if (!response.ok) {
+		await response.body?.cancel();
+		return { unverified: `GraphQL API returns HTTP ${response.status}` };
+	}
+	const { data, errors } = await response.json();
+	return errors ? { unverified: `GraphQL API error: ${errors[0].message.split('\n')[0]}` } : { data };
+}
+
+const SEARCH_QUERY = `query ($query: String!, $patternType: SearchPatternType) {
+	search(version: V3, patternType: $patternType, query: $query) {
+		results { matchCount alert { title } }
+	}
+}`;
+
+// Outcome of running a search link's query, in the shape probeUrl returns. Only a
+// search that no repository matches is dead: a search without matches can be
+// right, such as one for last week's commits.
+async function probeSearchLink(searchParams) {
+	const { data, unverified } = await queryDotcom(SEARCH_QUERY, {
+		query: searchParams.get('q'),
+		// The search page defaults to keyword search
+		patternType: searchParams.get('patternType') ?? 'keyword'
+	});
+	if (unverified) return { unverified };
+	const { matchCount, alert } = data.search.results;
+	if (matchCount > 0) return {};
+	if (alert?.title.startsWith('No repositories found')) return { error: `Search link returns "${alert.title}"` };
+	return { unverified: alert ? `search alert: ${alert.title}` : 'search has no matches' };
+}
+
+// The repository, revision, and path that a repository, directory, or file page
+// shows (/github.com/gorilla/mux@v1.8.0/-/blob/mux.go); undefined for other pages
+function repositoryPage(pathname) {
+	const [repository, ...routes] = decodeURIComponent(pathname.slice(1)).split('/-/');
+	const route = routes.join('/-/');
+	const filePath = route.match(/^(?:blob|tree)\/(.*)/)?.[1];
+	// A repository name starts with its code host
+	if (!/^[\w-]+(\.[\w-]+)+\/./.test(repository) || (route && filePath === undefined)) return undefined;
+	const [name, revision = 'HEAD'] = repository.replace(/\/+$/, '').split('@');
+	return { name, revision, path: filePath ?? '' };
+}
+
+const REPOSITORY_PAGE_QUERY = `query ($name: String!, $revision: String!, $path: String!) {
+	repository(name: $name) { commit(rev: $revision) { path(path: $path) { __typename } } }
+}`;
+
+// Outcome of looking up what a repository page shows, in the shape probeUrl returns
+async function probeRepositoryPage({ name, revision, path }) {
+	const { data, unverified } = await queryDotcom(REPOSITORY_PAGE_QUERY, { name, revision, path });
+	if (unverified) return { unverified };
+	if (!data.repository) return { error: `sourcegraph.com has no repository ${name}` };
+	if (!data.repository.commit) return { error: `${name} has no revision ${revision}` };
+	if (!data.repository.commit.path) return { error: `${name} has no path ${path} at ${revision}` };
+	return {};
+}
+
+// HTTP status of url after redirects. HEAD first; some servers refuse or misreport
+// HEAD, so an error status is confirmed with a GET whose body is not read.
+async function httpStatus(url) {
+	let response = await request(url, { method: 'HEAD' });
+	if (response.status >= 400) {
+		response = await request(url, { method: 'GET' });
+		await response.body?.cancel();
+	}
+	return response.status;
+}
+
+// What became of url: { error } when its target is gone, { unverified } with the
+// reason when that could not be told (an HTTP status, or Node's code for a network
+// error or timeout), {} when it is live
+async function probeUrl(url) {
+	try {
+		const { origin, pathname, searchParams } = new URL(url);
+		if (origin === DOTCOM_ORIGIN) {
+			if (pathname === '/search' && searchParams.get('q')) return await probeSearchLink(searchParams);
+			const page = repositoryPage(pathname);
+			if (page) return await probeRepositoryPage(page);
+		}
+		const status = await httpStatus(url);
+		if (status === 404 || status === 410) return { error: `External link returns HTTP ${status}` };
+		return status >= 400 ? { unverified: `HTTP ${status}` } : {};
+	} catch (error) {
+		return { unverified: error.cause?.code ?? error.name };
+	}
+}
+
+// Counts on stderr, by host and reason, the URLs that could be confirmed neither
+// live nor dead, so a scan shows what it did not verify
+function warnAboutUnverifiedUrls(outcomeByUrl) {
+	const countByReason = new Map();
+	for (const [url, { unverified }] of outcomeByUrl) {
+		if (!unverified) continue;
+		const reason = `${new URL(url).host}: ${unverified}`;
+		countByReason.set(reason, (countByReason.get(reason) ?? 0) + 1);
+	}
+	if (countByReason.size === 0) return;
+	const unverified = [...countByReason.values()].reduce((sum, count) => sum + count);
+	console.error(`⚠️ ${unverified} of ${outcomeByUrl.size} external URL(s) could not be verified, and are not reported as dead:`);
+	for (const [reason, count] of countByReason) {
+		console.error(`   ${count} × ${reason}`);
+	}
+}
+
+// Findings for external links whose target is gone: a 404 or 410, or on
+// sourcegraph.com a search that no repository matches or a missing repository,
+// revision, or path. Rate limits, bot blocks, server errors, and network
+// failures are not the PR's fault.
 async function findDeadExternalLinks(links) {
 	const urls = [...new Set(links.map(link => link.url.split('#')[0]))];
-	const statusByUrl = new Map();
+	const outcomeByUrl = new Map();
 	const queue = [...urls];
 	const worker = async () => {
 		for (let url = queue.shift(); url !== undefined; url = queue.shift()) {
-			statusByUrl.set(url, await probeUrl(url));
+			outcomeByUrl.set(url, await probeUrl(url));
 		}
 	};
 	await Promise.all(Array.from({ length: 8 }, worker));
+	warnAboutUnverifiedUrls(outcomeByUrl);
 
 	return links.flatMap(link => {
-		const status = statusByUrl.get(link.url.split('#')[0]);
-		return status === 404 || status === 410 ? [{ ...link, error: `External link returns HTTP ${status}` }] : [];
+		const { error } = outcomeByUrl.get(link.url.split('#')[0]);
+		return error ? [{ ...link, error }] : [];
 	});
 }
 
