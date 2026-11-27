@@ -98,7 +98,7 @@ docker exec codeinsights-db \
 
 These instructions apply to both a new deployment and an existing one. You don't need to delete the database volumes: the restore drops and recreates each database.
 
-If you started Sourcegraph with more Compose files, such as `jaeger/docker-compose.yaml` or `executors/executor.docker-compose.yaml`, pass the same `-f` options to `docker compose down` and `docker compose up -d`. Otherwise those containers keep running during the restore, and Sourcegraph restarts without their settings.
+If you started Sourcegraph with more Compose files, such as `jaeger/docker-compose.yaml` or `executors/executor.docker-compose.yaml`, pass the same `-f` options to `docker compose down` and `docker compose up -d --remove-orphans`. Otherwise those containers keep running during the restore, and Sourcegraph restarts without their settings.
 
 1. Copy the database dump files into the `deploy-sourcegraph-docker/docker-compose` directory, and `cd` to it.
 
@@ -111,7 +111,7 @@ docker compose down
 3. Start the database services
 
 ```bash
-docker compose -f db-only-migrate.docker-compose.yaml up -d
+docker compose -f db-only-migrate.docker-compose.yaml up -d --remove-orphans
 ```
 
 4. Copy the database files into the containers
